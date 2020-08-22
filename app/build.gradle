@@ -14,9 +14,23 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
+
+    compileOptions {
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
+        //freeCompilerArgs += "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
+        //freeCompilerArgs += "-Xopt-in=kotlin.time.ExperimentalTime"
+    }
 }
 
 dependencies {
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$versions_desugaring"
+
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$versions_coroutines"
     implementation "androidx.core:core-ktx:$versions_ktx"
@@ -27,13 +41,13 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp-bom:$versions_okhttp"
     implementation "com.squareup.okhttp3:okhttp"
     implementation "com.squareup.okhttp3:logging-interceptor"
-
     // If using Java8, use the following instead of lifecycle-compiler
     implementation "androidx.lifecycle:lifecycle-common-java8:$versions_lifecycle"
     // ViewModel
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$versions_lifecycle"
     // LifecycleScope
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$versions_lifecycle"
+    implementation "androidx.recyclerview:recyclerview:$versions_recyclerview"
 
     testImplementation "junit:junit:$versions_junit"
 

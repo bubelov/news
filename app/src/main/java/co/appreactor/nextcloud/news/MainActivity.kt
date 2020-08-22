@@ -1,10 +1,15 @@
 package co.appreactor.nextcloud.news
 
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Base64
-import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.whenCreated
+import androidx.recyclerview.widget.LinearLayoutManager
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -44,17 +49,39 @@ class MainActivity : AppCompatActivity() {
         val api = retrofit.create(NewsApi::class.java)
 
         lifecycleScope.launch {
-            val emailAndPasswordInBase64 = Base64.encodeToString(
-                "xxx:xxx".toByteArray(),
-                Base64.NO_WRAP
-            )
+            whenCreated {
+                progress.isVisible = true
 
-            val response = api.getUnreadItems(
-                authorization = "Basic $emailAndPasswordInBase64"
-            )
+                val emailAndPasswordInBase64 = Base64.encodeToString(
+                    "xxx:xxx".toByteArray(),
+                    Base64.NO_WRAP
+                )
 
-            response.items.forEach {
-                Log.d("MainActivity", "Item id: ${it.id}")
+                val feedsResponse = api.getFeeds(
+                    authorization = "Basic $emailAndPasswordInBase64"
+                )
+
+                val itemsResponse = api.getUnreadItems(
+                    authorization = "Basic $emailAndPasswordInBase64"
+                )
+
+                val itemsAdapter = ItemsAdapter(
+                    itemsResponse.items,
+                    feedsResponse.feeds,
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW)
+                        intent.data = Uri.parse(it.url)
+                        startActivity(intent)
+                    }
+                )
+
+                itemsView.apply {
+                    setHasFixedSize(true)
+                    layoutManager = LinearLayoutManager(this@MainActivity)
+                    adapter = itemsAdapter
+                }
+
+                progress.isVisible = false
             }
         }
     }
