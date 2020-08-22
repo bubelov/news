@@ -1,0 +1,29 @@
+apply plugin: "com.android.application"
+apply plugin: "kotlin-android"
+apply plugin: "kotlin-android-extensions"
+
+android {
+    compileSdkVersion 29
+
+    defaultConfig {
+        applicationId "co.appreactor.nextcloud.news"
+        minSdkVersion 21
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+    implementation "androidx.core:core-ktx:$versions_ktx"
+    implementation "androidx.appcompat:appcompat:$versions_appcompat"
+    implementation "androidx.constraintlayout:constraintlayout:$versions_constrained_layout"
+
+    testImplementation "junit:junit:$versions_junit"
+
+    androidTestImplementation "androidx.test.ext:junit:$versions_junit_ext"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$versions_espresso"
+}
