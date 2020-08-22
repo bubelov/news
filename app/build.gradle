@@ -18,9 +18,22 @@ android {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$versions_coroutines"
     implementation "androidx.core:core-ktx:$versions_ktx"
     implementation "androidx.appcompat:appcompat:$versions_appcompat"
     implementation "androidx.constraintlayout:constraintlayout:$versions_constrained_layout"
+    implementation "com.squareup.retrofit2:retrofit:$versions_retrofit"
+    implementation "com.squareup.retrofit2:converter-gson:$versions_retrofit"
+    implementation "com.squareup.okhttp3:okhttp-bom:$versions_okhttp"
+    implementation "com.squareup.okhttp3:okhttp"
+    implementation "com.squareup.okhttp3:logging-interceptor"
+
+    // If using Java8, use the following instead of lifecycle-compiler
+    implementation "androidx.lifecycle:lifecycle-common-java8:$versions_lifecycle"
+    // ViewModel
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$versions_lifecycle"
+    // LifecycleScope
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$versions_lifecycle"
 
     testImplementation "junit:junit:$versions_junit"
 
