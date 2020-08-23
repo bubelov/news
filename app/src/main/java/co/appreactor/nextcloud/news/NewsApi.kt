@@ -1,20 +1,15 @@
 package co.appreactor.nextcloud.news
 
 import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.Headers
 
 interface NewsApi {
 
     @GET("feeds")
-    @Headers("Accept: application/json")
-    suspend fun getFeeds(
-        @Header("Authorization") authorization: String
-    ): FeedsPayload
+    fun getFeeds(): FeedsPayload
 
     @GET("items?type=3&getRead=false&batchSize=-1")
-    @Headers("Accept: application/json")
-    suspend fun getUnreadItems(
-        @Header("Authorization") authorization: String
-    ): ItemsPayload
+    fun getUnreadItems(): ItemsPayload
+
+    @GET("items?type=2&getRead=true&batchSize=-1")
+    fun getStarredItems(): ItemsPayload
 }

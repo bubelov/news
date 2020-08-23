@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Nextcloud News</string>
+    <string name="login_with_nextcloud">Login with Nextcloud app</string>
 </resources>

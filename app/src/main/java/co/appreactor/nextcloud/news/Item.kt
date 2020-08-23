@@ -6,5 +6,6 @@ data class Item (
     val url: String,
     val author: String,
     val pubDate: Long,
-    val feedId: Long
+    val feedId: Long,
+    val starred: Boolean
 )

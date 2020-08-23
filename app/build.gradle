@@ -48,6 +48,7 @@ dependencies {
     // LifecycleScope
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$versions_lifecycle"
     implementation "androidx.recyclerview:recyclerview:$versions_recyclerview"
+    implementation "com.github.nextcloud:Android-SingleSignOn:$versions_nextcloud_sso"
 
     testImplementation "junit:junit:$versions_junit"
 
