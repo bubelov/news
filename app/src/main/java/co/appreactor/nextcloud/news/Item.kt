@@ -7,5 +7,7 @@ data class Item (
     val author: String,
     val pubDate: Long,
     val feedId: Long,
-    val starred: Boolean
+    val starred: Boolean,
+    val body: String,
+    val mediaThumbnail: String
 )

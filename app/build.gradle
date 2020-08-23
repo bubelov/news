@@ -49,6 +49,8 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$versions_lifecycle"
     implementation "androidx.recyclerview:recyclerview:$versions_recyclerview"
     implementation "com.github.nextcloud:Android-SingleSignOn:$versions_nextcloud_sso"
+    implementation "com.google.android.material:material:$versions_material"
+    implementation "com.squareup.picasso:picasso:$versions_picasso"
 
     testImplementation "junit:junit:$versions_junit"
 

@@ -1,11 +1,13 @@
 package co.appreactor.nextcloud.news
 
+import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.row_item.view.*
+import java.lang.Integer.min
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -18,16 +20,31 @@ class ItemsAdapter(
 ) : RecyclerView.Adapter<ItemsAdapter.ViewHolder>() {
 
     class ViewHolder(private val view: View, private val onClick: (Item) -> Unit) : RecyclerView.ViewHolder(view) {
-        fun bind(item: Item, feed: Feed, isFirst: Boolean, isLast: Boolean) {
+        fun bind(item: Item, feed: Feed, isFirst: Boolean) {
             view.apply {
                 topOffset.isVisible = isFirst
+
+                image.isVisible = false
+                //image.isVisible = feed.faviconLink.isNotEmpty()
+
+                //if (feed.faviconLink.isNotEmpty()) {
+                //    Picasso.get().load(feed.faviconLink).into(image)
+                //}
+
                 primaryText.text = item.title
                 val date = LocalDateTime.ofEpochSecond(item.pubDate, 0, ZoneOffset.UTC)
                 val dateString = date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
                 secondaryText.text = "${feed.title} · $dateString"
-                bottomOffset.isVisible = isLast
+                val body = Html.fromHtml(item.body).toString()
+                supportingText.text = body.substring(0, min(body.length - 1, 150)) + "..."
 
-                clickableArea.setOnClickListener { onClick(item) }
+                if (item.starred) {
+                    starred.setImageResource(R.drawable.ic_baseline_star_24)
+                } else {
+                    starred.setImageResource(R.drawable.ic_baseline_star_border_24)
+                }
+
+                card.setOnClickListener { onClick(item) }
             }
         }
     }
@@ -50,8 +67,7 @@ class ItemsAdapter(
         holder.bind(
             item = items[position],
             feed = feeds.find { it.id == items[position].feedId }!!,
-            isFirst = position == 0,
-            isLast = position == itemCount - 1
+            isFirst = position == 0
         )
     }
 }
