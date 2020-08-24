@@ -9,5 +9,6 @@ data class Item (
     val feedId: Long,
     val starred: Boolean,
     val body: String,
-    val mediaThumbnail: String
+    val mediaThumbnail: String?,
+    val unread: Boolean
 )

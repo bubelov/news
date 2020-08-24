@@ -1,6 +1,9 @@
 package co.appreactor.nextcloud.news
 
+import okhttp3.ResponseBody
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.PUT
 
 interface NewsApi {
 
@@ -12,4 +15,7 @@ interface NewsApi {
 
     @GET("items?type=2&getRead=true&batchSize=-1")
     fun getStarredItems(): ItemsPayload
+
+    @PUT("items/read/multiple")
+    fun markAsRead(@Body args: MarkAsReadArgs): ResponseBody
 }

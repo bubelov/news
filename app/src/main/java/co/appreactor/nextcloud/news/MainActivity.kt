@@ -25,6 +25,12 @@ import retrofit2.NextcloudRetrofitApiBuilder
 
 
 class MainActivity : AppCompatActivity() {
+
+    private val itemsAdapter = ItemsAdapter(
+        items = mutableListOf(),
+        feeds = mutableListOf()
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -120,15 +126,27 @@ class MainActivity : AppCompatActivity() {
                     api.getStarredItems()
                 }
 
-                val itemsAdapter = ItemsAdapter(
-                    unreadItemsResponse.items + starredItemsResponse.items,
-                    feedsResponse.feeds,
-                    onClick = {
+                val onItemClick: (Item) -> Unit = {
+                    lifecycleScope.launch {
+                        withContext(Dispatchers.IO) {
+                            api.markAsRead(MarkAsReadArgs(listOf(it.id)))
+                        }
+
                         val intent = Intent(Intent.ACTION_VIEW)
                         intent.data = Uri.parse(it.url)
                         startActivity(intent)
+
+                        itemsAdapter.updateItem(it.copy(unread = false))
                     }
-                )
+                }
+
+                val allItems = mutableListOf<Item>()
+                allItems += unreadItemsResponse.items
+                allItems += starredItemsResponse.items
+
+                itemsAdapter.onClick = onItemClick
+
+                itemsAdapter.swapItems(allItems, feedsResponse.feeds.toMutableList())
 
                 itemsView.apply {
                     setHasFixedSize(true)
