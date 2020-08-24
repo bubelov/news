@@ -58,6 +58,9 @@ dependencies {
     implementation "com.squareup.picasso:picasso:$versions_picasso"
     implementation "androidx.navigation:navigation-fragment-ktx:$versions_nav"
     implementation "androidx.navigation:navigation-ui-ktx:$versions_nav"
+    implementation "org.koin:koin-android:$versions_koin"
+    implementation "org.koin:koin-android-ext:$versions_koin"
+    implementation "org.koin:koin-android-viewmodel:$versions_koin"
 
     testImplementation "junit:junit:$versions_junit"
 
