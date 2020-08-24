@@ -3,4 +3,8 @@
     <string name="login_with_nextcloud">Login with Nextcloud app</string>
     <string name="s_s_s">%1$s %2$s %3$s</string>
     <string name="post_image">Post image</string>
+    <string name="settings">Settings</string>
+    <string name="news">News</string>
+    <string name="starred_news">Starred News</string>
+    <string name="starred">Starred</string>
 </resources>

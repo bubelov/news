@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/newsFragment"
+        android:icon="@drawable/ic_baseline_list_alt_24"
+        android:title="@string/news"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/starredNewsFragment"
+        android:icon="@drawable/ic_baseline_star_24"
+        android:title="@string/starred"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/settingsFragment"
+        android:icon="@drawable/ic_baseline_settings_24"
+        android:title="@string/settings"
+        app:showAsAction="ifRoom" />
+
+</menu>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/authFragment">
+
+    <fragment
+        android:id="@+id/authFragment"
+        android:name="co.appreactor.nextcloud.news.AuthFragment"
+        android:label="AuthFragment">
+        <action
+            android:id="@+id/action_authFragment_to_newsFragment"
+            app:destination="@id/newsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/newsFragment"
+        android:name="co.appreactor.nextcloud.news.NewsFragment"
+        android:label="NewsFragment" />
+
+    <fragment
+        android:id="@+id/starredNewsFragment"
+        android:name="co.appreactor.nextcloud.news.StarredNewsFragment"
+        android:label="StarredNewsFragment" />
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="co.appreactor.nextcloud.news.SettingsFragment"
+        android:label="SettingsFragment" />
+
+</navigation>

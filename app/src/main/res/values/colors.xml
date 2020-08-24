@@ -4,7 +4,9 @@
     <color name="colorPrimaryDark">#1cafff</color>
     <color name="colorAccent">#1cafff</color>
 
-    <color name="toolbar_bg_color">@color/colorPrimary</color>
+    <color name="top_panel_bg">@color/colorPrimary</color>
+    <color name="bottom_panel_bg">#ffffff</color>
+
     <color name="toolbar_text_color">#ffffff</color>
 
     <color name="below_card_bg_overlay">#fafafa</color>

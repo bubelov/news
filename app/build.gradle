@@ -1,6 +1,7 @@
 apply plugin: "com.android.application"
 apply plugin: "kotlin-android"
 apply plugin: "kotlin-android-extensions"
+apply plugin: "androidx.navigation.safeargs.kotlin"
 
 android {
     compileSdkVersion 29
@@ -25,6 +26,10 @@ android {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
         //freeCompilerArgs += "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
         //freeCompilerArgs += "-Xopt-in=kotlin.time.ExperimentalTime"
+    }
+
+    lintOptions {
+        disable 'VectorRaster', 'VectorPath'
     }
 }
 
@@ -51,6 +56,8 @@ dependencies {
     implementation "com.github.nextcloud:Android-SingleSignOn:$versions_nextcloud_sso"
     implementation "com.google.android.material:material:$versions_material"
     implementation "com.squareup.picasso:picasso:$versions_picasso"
+    implementation "androidx.navigation:navigation-fragment-ktx:$versions_nav"
+    implementation "androidx.navigation:navigation-ui-ktx:$versions_nav"
 
     testImplementation "junit:junit:$versions_junit"
 

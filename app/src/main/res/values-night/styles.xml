@@ -8,19 +8,13 @@
         <item name="colorAccent">@color/colorAccent</item>
 
         <item name="android:navigationBarColor">@color/bottom_panel_bg</item>
-        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
-    </style>
-
-    <style name="Card">
-
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">false</item>
     </style>
 
     <style name="BottomPanelDivider">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">1dp</item>
-        <item name="android:background">?attr/colorOnSurface</item>
-        <item name="android:alpha">0.12</item>
-        <item name="android:elevation">4dp</item>
+        <item name="android:visibility">gone</item>
     </style>
 
 </resources>

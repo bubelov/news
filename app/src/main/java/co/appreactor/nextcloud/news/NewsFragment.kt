@@ -3,103 +3,81 @@ package co.appreactor.nextcloud.news
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenCreated
+import androidx.lifecycle.whenResumed
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.GsonBuilder
-import com.nextcloud.android.sso.AccountImporter
 import com.nextcloud.android.sso.api.NextcloudAPI
-import com.nextcloud.android.sso.api.NextcloudAPI.ApiConnectedListener
 import com.nextcloud.android.sso.exceptions.SSOException
 import com.nextcloud.android.sso.helper.SingleAccountHelper
 import com.nextcloud.android.sso.model.SingleSignOnAccount
-import com.nextcloud.android.sso.ui.UiExceptionManager
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.fragment_news.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.NextcloudRetrofitApiBuilder
 
-
-class MainActivity : AppCompatActivity() {
+class NewsFragment : Fragment() {
 
     private val itemsAdapter = ItemsAdapter(
         items = mutableListOf(),
         feeds = mutableListOf()
     )
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        showAuthOrShowData()
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        val onAccessGranted = AccountImporter.IAccountAccessGranted { account ->
-            SingleAccountHelper.setCurrentAccount(applicationContext, account.name)
-            showData(account)
-        }
-
-        when(resultCode) {
-            RESULT_CANCELED -> {
-                login.isVisible = true
-            }
-
-            else -> {
-                AccountImporter.onActivityResult(
-                    requestCode,
-                    resultCode,
-                    data,
-                    this,
-                    onAccessGranted
-                )
+    init {
+        lifecycleScope.launch {
+            whenResumed {
+                showAuthOrShowData()
             }
         }
     }
 
-    private fun showAccountPicker() {
-        try {
-            AccountImporter.pickNewAccount(this)
-        } catch (e: SSOException) {
-            UiExceptionManager.showDialogForException(this, e)
-        }
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(
+            R.layout.fragment_news,
+            container,
+            false
+        )
     }
 
     private fun showAuthOrShowData() {
         val ssoAccount: SingleSignOnAccount
 
         try {
-            ssoAccount = SingleAccountHelper.getCurrentSingleSignOnAccount(applicationContext)
+            ssoAccount = SingleAccountHelper.getCurrentSingleSignOnAccount(context)
             showData(ssoAccount)
         } catch (e: SSOException) {
-            login.isVisible = true
-
-            login.setOnClickListener {
-                it.isVisible = false
-                showAccountPicker()
-            }
+            Toast.makeText(context, "Unauthorized!", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun showData(account: SingleSignOnAccount) {
-        val callback: ApiConnectedListener = object : ApiConnectedListener {
+        val callback: NextcloudAPI.ApiConnectedListener = object :
+            NextcloudAPI.ApiConnectedListener {
             override fun onConnected() {}
 
             override fun onError(e: Exception) {
                 // TODO
-                AlertDialog.Builder(this@MainActivity)
+                AlertDialog.Builder(requireContext())
                     .setMessage("callback.onError: ${e.message}")
                     .show()
             }
         }
 
         val nextcloudApi = NextcloudAPI(
-            applicationContext,
+            requireContext(),
             account,
             GsonBuilder().create(),
             callback
@@ -150,7 +128,7 @@ class MainActivity : AppCompatActivity() {
 
                 itemsView.apply {
                     setHasFixedSize(true)
-                    layoutManager = LinearLayoutManager(this@MainActivity)
+                    layoutManager = LinearLayoutManager(context)
                     adapter = itemsAdapter
                 }
 
