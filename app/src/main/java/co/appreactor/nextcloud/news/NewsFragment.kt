@@ -15,6 +15,7 @@ import com.nextcloud.android.sso.exceptions.SSOException
 import com.nextcloud.android.sso.helper.SingleAccountHelper
 import com.nextcloud.android.sso.ui.UiExceptionManager
 import kotlinx.android.synthetic.main.fragment_news.*
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
 
@@ -57,39 +58,7 @@ class NewsFragment : Fragment() {
     }
 
     private suspend fun showData() {
-        if (itemsAdapter.itemCount != 0) {
-            itemsView.apply {
-                setHasFixedSize(true)
-                layoutManager = LinearLayoutManager(context)
-                adapter = itemsAdapter
-            }
-
-            return
-        }
-
         progress.isVisible = true
-
-        val newsAndFeeds = model.getNewsAndFeeds()
-
-        val onItemClick: (NewsItem) -> Unit = {
-            lifecycleScope.launch {
-                //model.markAsRead(it)
-
-                //val intent = Intent(Intent.ACTION_VIEW)
-                //intent.data = Uri.parse(it.url)
-                //startActivity(intent)
-
-                //itemsAdapter.updateItem(it.copy(unread = false))
-
-                val action =
-                    NewsFragmentDirections.actionNewsFragmentToNewsItemFragment(it.id)
-                findNavController().navigate(action)
-            }
-        }
-
-        itemsAdapter.onClick = onItemClick
-
-        itemsAdapter.swapItems(newsAndFeeds.first, newsAndFeeds.second)
 
         itemsView.apply {
             setHasFixedSize(true)
@@ -97,6 +66,30 @@ class NewsFragment : Fragment() {
             adapter = itemsAdapter
         }
 
-        progress.isVisible = false
+        model.getNewsAndFeeds().collect {
+            if (it.first.isNotEmpty()) {
+                progress.isVisible = false
+            }
+
+            val onItemClick: (NewsItem) -> Unit = {
+                lifecycleScope.launch {
+                    //model.markAsRead(it)
+
+                    //val intent = Intent(Intent.ACTION_VIEW)
+                    //intent.data = Uri.parse(it.url)
+                    //startActivity(intent)
+
+                    //itemsAdapter.updateItem(it.copy(unread = false))
+
+                    val action =
+                        NewsFragmentDirections.actionNewsFragmentToNewsItemFragment(it.id)
+                    findNavController().navigate(action)
+                }
+            }
+
+            itemsAdapter.onClick = onItemClick
+
+            itemsAdapter.swapItems(it.first, it.second)
+        }
     }
 }

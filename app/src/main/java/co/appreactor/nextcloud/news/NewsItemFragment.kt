@@ -1,11 +1,10 @@
 package co.appreactor.nextcloud.news
 
-import android.os.Build
 import android.os.Bundle
-import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenResumed
@@ -26,6 +25,10 @@ class NewsItemFragment : Fragment() {
             whenResumed {
                 val item = model.getNewsItem(args.newsItemId)
 
+                if (item.unread) {
+                    model.markAsRead(item.id)
+                }
+
                 toolbar.apply {
                     setNavigationOnClickListener {
                         findNavController().popBackStack()
@@ -35,12 +38,12 @@ class NewsItemFragment : Fragment() {
                 }
 
                 val imageGetter = PicassoImageGetter(textView)
-
-                val body = if (Build.VERSION.SDK_INT >= 24) {
-                    Html.fromHtml(item.body, Html.FROM_HTML_MODE_COMPACT, imageGetter, null)
-                } else {
-                    Html.fromHtml(item.body, imageGetter, null)
-                }
+                val body = HtmlCompat.fromHtml(
+                    item.body,
+                    HtmlCompat.FROM_HTML_MODE_LEGACY,
+                    imageGetter,
+                    null
+                )
 
                 textView.text = body
             }

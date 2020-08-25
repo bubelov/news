@@ -1,10 +1,9 @@
 package co.appreactor.nextcloud.news
 
-import android.os.Build
-import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.text.HtmlCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.nextcloud.news.db.NewsFeed
@@ -34,11 +33,7 @@ class ItemsAdapter(
                 val dateString = date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
                 secondaryText.text = resources.getString(R.string.s_s_s, feed.title, "·", dateString)
 
-                val body: String = if (Build.VERSION.SDK_INT >= 24) {
-                    Html.fromHtml(item.body, Html.FROM_HTML_MODE_COMPACT).toString()
-                } else {
-                    Html.fromHtml(item.body).toString()
-                }
+                val body = HtmlCompat.fromHtml(item.body, HtmlCompat.FROM_HTML_MODE_COMPACT)
 
                 val shortBody = body.substring(0, min(body.length - 1, 150)) + "..."
                 supportingText.text = shortBody.trimStart { !it.isLetterOrDigit() }
@@ -84,11 +79,5 @@ class ItemsAdapter(
         this.feeds += feeds
 
         notifyDataSetChanged()
-    }
-
-    fun updateItem(item: NewsItem) {
-        val index = items.indexOfFirst { it.id == item.id }
-        items[index] = item
-        notifyItemChanged(index)
     }
 }

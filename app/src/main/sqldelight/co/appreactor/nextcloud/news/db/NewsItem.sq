@@ -21,3 +21,8 @@ findAll:
 SELECT *
 FROM NewsItem
 ORDER BY pubDate DESC;
+
+updateUnread:
+UPDATE NewsItem
+SET unread = ?, unreadSynced = 0
+WHERE id = ?;

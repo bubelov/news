@@ -1,7 +1,9 @@
 package co.appreactor.nextcloud.news
 
 import co.appreactor.nextcloud.news.db.NewsItemQueries
+import com.squareup.sqldelight.runtime.coroutines.asFlow
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 class NewsItemsRepository(
@@ -21,6 +23,13 @@ class NewsItemsRepository(
             }
         }
 
-        cache.findAll().executeAsList()
+        cache.findAll().asFlow().map { it.executeAsList() }
+    }
+
+    suspend fun updateUnread(id: Long, unread: Boolean) = withContext(Dispatchers.IO) {
+        cache.updateUnread(
+            unread = unread,
+            id = id
+        )
     }
 }
