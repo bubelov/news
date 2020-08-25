@@ -17,7 +17,21 @@
     <fragment
         android:id="@+id/newsFragment"
         android:name="co.appreactor.nextcloud.news.NewsFragment"
-        android:label="NewsFragment" />
+        android:label="NewsFragment">
+        <action
+            android:id="@+id/action_newsFragment_to_newsItemFragment"
+            app:destination="@id/newsItemFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/newsItemFragment"
+        android:name="co.appreactor.nextcloud.news.NewsItemFragment"
+        android:label="NewsItemFragment">
+        <argument
+            android:name="item"
+            android:defaultValue='""'
+            app:argType="string" />
+    </fragment>
 
     <fragment
         android:id="@+id/starredNewsFragment"

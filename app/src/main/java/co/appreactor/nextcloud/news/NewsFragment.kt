@@ -1,7 +1,5 @@
 package co.appreactor.nextcloud.news
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,9 +7,10 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.whenCreated
 import androidx.lifecycle.whenResumed
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.gson.Gson
 import com.nextcloud.android.sso.exceptions.SSOException
 import com.nextcloud.android.sso.helper.SingleAccountHelper
 import com.nextcloud.android.sso.ui.UiExceptionManager
@@ -28,14 +27,6 @@ class NewsFragment : Fragment() {
         feeds = mutableListOf()
     )
 
-    init {
-        lifecycleScope.launch {
-            whenResumed {
-                showAuthOrShowData()
-            }
-        }
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -48,7 +39,15 @@ class NewsFragment : Fragment() {
         )
     }
 
-    private fun showAuthOrShowData() {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        lifecycleScope.launch {
+            whenResumed {
+                showAuthOrShowData()
+            }
+        }
+    }
+
+    private suspend fun showAuthOrShowData() {
         try {
             SingleAccountHelper.getCurrentSingleSignOnAccount(context)
             showData()
@@ -57,37 +56,47 @@ class NewsFragment : Fragment() {
         }
     }
 
-    private fun showData() {
-        lifecycleScope.launch {
-            whenCreated {
-                progress.isVisible = true
+    private suspend fun showData() {
+        if (itemsAdapter.itemCount != 0) {
+            itemsView.apply {
+                setHasFixedSize(true)
+                layoutManager = LinearLayoutManager(context)
+                adapter = itemsAdapter
+            }
 
-                val newsAndFeeds = model.getNewsAndFeeds()
+            return
+        }
 
-                val onItemClick: (Item) -> Unit = {
-                    lifecycleScope.launch {
-                        model.markAsRead(it)
+        progress.isVisible = true
 
-                        val intent = Intent(Intent.ACTION_VIEW)
-                        intent.data = Uri.parse(it.url)
-                        startActivity(intent)
+        val newsAndFeeds = model.getNewsAndFeeds()
 
-                        itemsAdapter.updateItem(it.copy(unread = false))
-                    }
-                }
+        val onItemClick: (Item) -> Unit = {
+            lifecycleScope.launch {
+                //model.markAsRead(it)
 
-                itemsAdapter.onClick = onItemClick
+                //val intent = Intent(Intent.ACTION_VIEW)
+                //intent.data = Uri.parse(it.url)
+                //startActivity(intent)
 
-                itemsAdapter.swapItems(newsAndFeeds.first, newsAndFeeds.second)
+                //itemsAdapter.updateItem(it.copy(unread = false))
 
-                itemsView.apply {
-                    setHasFixedSize(true)
-                    layoutManager = LinearLayoutManager(context)
-                    adapter = itemsAdapter
-                }
-
-                progress.isVisible = false
+                val action =
+                    NewsFragmentDirections.actionNewsFragmentToNewsItemFragment(Gson().toJson(it))
+                findNavController().navigate(action)
             }
         }
+
+        itemsAdapter.onClick = onItemClick
+
+        itemsAdapter.swapItems(newsAndFeeds.first, newsAndFeeds.second)
+
+        itemsView.apply {
+            setHasFixedSize(true)
+            layoutManager = LinearLayoutManager(context)
+            adapter = itemsAdapter
+        }
+
+        progress.isVisible = false
     }
 }
