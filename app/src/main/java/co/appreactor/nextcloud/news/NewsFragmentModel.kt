@@ -1,25 +1,15 @@
 package co.appreactor.nextcloud.news
 
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import co.appreactor.nextcloud.news.db.NewsFeed
+import co.appreactor.nextcloud.news.db.NewsItem
 
 class NewsFragmentModel(
-    private val api: NewsApi
+    private val newsItemsRepository: NewsItemsRepository,
+    private val newsFeedsRepository: NewsFeedsRepository
 ) : ViewModel() {
 
-    suspend fun getNewsAndFeeds(): Pair<List<Item>, List<Feed>> {
-        return withContext(Dispatchers.IO) {
-            val feeds = api.getFeeds()
-            val unread = api.getUnreadItems()
-            val starred = api.getStarredItems()
-            Pair(unread.items + starred.items, feeds.feeds)
-        }
-    }
-
-    suspend fun markAsRead(item: Item) {
-        withContext(Dispatchers.IO) {
-            api.markAsRead(MarkAsReadArgs(listOf(item.id)))
-        }
+    suspend fun getNewsAndFeeds(): Pair<List<NewsItem>, List<NewsFeed>> {
+        return Pair(newsItemsRepository.all(), newsFeedsRepository.all())
     }
 }

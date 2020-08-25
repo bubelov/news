@@ -1,5 +1,5 @@
 package co.appreactor.nextcloud.news
 
-data class MarkAsReadArgs (
+data class NewsItemsIdsArgs (
     val items: List<Long>
 )

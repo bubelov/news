@@ -17,5 +17,8 @@ interface NewsApi {
     fun getStarredItems(): ItemsPayload
 
     @PUT("items/read/multiple")
-    fun markAsRead(@Body args: MarkAsReadArgs): ResponseBody
+    fun markAsRead(@Body args: NewsItemsIdsArgs): ResponseBody
+
+    @PUT("items/unread/multiple")
+    fun markAsUnread(@Body args: NewsItemsIdsArgs): ResponseBody
 }

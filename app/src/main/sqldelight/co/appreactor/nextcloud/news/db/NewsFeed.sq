@@ -1,0 +1,14 @@
+CREATE TABLE NewsFeed (
+  id INTEGER PRIMARY KEY,
+  title TEXT NOT NULL,
+  faviconLink TEXT NOT NULL
+);
+
+insertOrReplace:
+INSERT OR REPLACE
+INTO NewsFeed
+VALUES ?;
+
+findAll:
+SELECT *
+FROM NewsFeed;

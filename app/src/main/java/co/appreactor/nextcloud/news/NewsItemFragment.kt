@@ -11,18 +11,20 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenResumed
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.google.gson.Gson
 import kotlinx.android.synthetic.main.fragment_news_item.*
 import kotlinx.coroutines.launch
+import org.koin.android.viewmodel.ext.android.viewModel
 
 class NewsItemFragment : Fragment() {
 
     private val args: NewsItemFragmentArgs by navArgs()
 
+    private val model: NewsItemFragmentModel by viewModel()
+
     init {
         lifecycleScope.launch {
             whenResumed {
-                val item = Gson().fromJson(args.item, Item::class.java)
+                val item = model.getNewsItem(args.newsItemId)
 
                 toolbar.apply {
                     setNavigationOnClickListener {

@@ -7,6 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
+import co.appreactor.nextcloud.news.db.NewsFeed
+import co.appreactor.nextcloud.news.db.NewsItem
 import kotlinx.android.synthetic.main.row_item.view.*
 import java.lang.Integer.min
 import java.time.LocalDateTime
@@ -15,13 +17,13 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 class ItemsAdapter(
-    private val items: MutableList<Item>,
-    private val feeds: MutableList<Feed>,
-    var onClick: ((Item) -> Unit)? = null
+    private val items: MutableList<NewsItem>,
+    private val feeds: MutableList<NewsFeed>,
+    var onClick: ((NewsItem) -> Unit)? = null
 ) : RecyclerView.Adapter<ItemsAdapter.ViewHolder>() {
 
-    class ViewHolder(private val view: View, private val onClick: ((Item) -> Unit)?) : RecyclerView.ViewHolder(view) {
-        fun bind(item: Item, feed: Feed, isFirst: Boolean) {
+    class ViewHolder(private val view: View, private val onClick: ((NewsItem) -> Unit)?) : RecyclerView.ViewHolder(view) {
+        fun bind(item: NewsItem, feed: NewsFeed, isFirst: Boolean) {
             view.apply {
                 topOffset.isVisible = isFirst
 
@@ -41,11 +43,9 @@ class ItemsAdapter(
                 val shortBody = body.substring(0, min(body.length - 1, 150)) + "..."
                 supportingText.text = shortBody.trimStart { !it.isLetterOrDigit() }
 
-                if (!item.unread) {
-                    primaryText.isEnabled = false
-                    secondaryText.isEnabled = false
-                    supportingText.isEnabled = false
-                }
+                primaryText.isEnabled = item.unread
+                secondaryText.isEnabled = item.unread
+                supportingText.isEnabled = item.unread
 
                 card.setOnClickListener {
                     onClick?.invoke(item)
@@ -76,7 +76,7 @@ class ItemsAdapter(
         )
     }
 
-    fun swapItems(items: List<Item>, feeds: List<Feed>) {
+    fun swapItems(items: List<NewsItem>, feeds: List<NewsFeed>) {
         this.items.clear()
         this.items += items
 
@@ -86,7 +86,7 @@ class ItemsAdapter(
         notifyDataSetChanged()
     }
 
-    fun updateItem(item: Item) {
+    fun updateItem(item: NewsItem) {
         val index = items.indexOfFirst { it.id == item.id }
         items[index] = item
         notifyItemChanged(index)

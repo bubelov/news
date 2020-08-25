@@ -10,7 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenResumed
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.gson.Gson
+import co.appreactor.nextcloud.news.db.NewsItem
 import com.nextcloud.android.sso.exceptions.SSOException
 import com.nextcloud.android.sso.helper.SingleAccountHelper
 import com.nextcloud.android.sso.ui.UiExceptionManager
@@ -71,7 +71,7 @@ class NewsFragment : Fragment() {
 
         val newsAndFeeds = model.getNewsAndFeeds()
 
-        val onItemClick: (Item) -> Unit = {
+        val onItemClick: (NewsItem) -> Unit = {
             lifecycleScope.launch {
                 //model.markAsRead(it)
 
@@ -82,7 +82,7 @@ class NewsFragment : Fragment() {
                 //itemsAdapter.updateItem(it.copy(unread = false))
 
                 val action =
-                    NewsFragmentDirections.actionNewsFragmentToNewsItemFragment(Gson().toJson(it))
+                    NewsFragmentDirections.actionNewsFragmentToNewsItemFragment(it.id)
                 findNavController().navigate(action)
             }
         }

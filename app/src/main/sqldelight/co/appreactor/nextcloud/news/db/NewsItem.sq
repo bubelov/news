@@ -1,0 +1,23 @@
+CREATE TABLE NewsItem (
+  id INTEGER PRIMARY KEY,
+  title TEXT NOT NULL,
+  url TEXT NOT NULL,
+  author TEXT NOT NULL,
+  pubDate INTEGER NOT NULL,
+  feedId INTEGER NOT NULL,
+  starred INTEGER AS Boolean NOT NULL,
+  body TEXT NOT NULL,
+  mediaThumbnail TEXT,
+  unread INTEGER AS Boolean NOT NULL,
+  unreadSynced INTEGER AS Boolean NOT NULL
+);
+
+insertOrReplace:
+INSERT OR REPLACE
+INTO NewsItem
+VALUES ?;
+
+findAll:
+SELECT *
+FROM NewsItem
+ORDER BY pubDate DESC;

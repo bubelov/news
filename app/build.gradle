@@ -2,6 +2,7 @@ apply plugin: "com.android.application"
 apply plugin: "kotlin-android"
 apply plugin: "kotlin-android-extensions"
 apply plugin: "androidx.navigation.safeargs.kotlin"
+apply plugin: "com.squareup.sqldelight"
 
 android {
     compileSdkVersion 29
@@ -61,6 +62,8 @@ dependencies {
     implementation "org.koin:koin-android:$versions_koin"
     implementation "org.koin:koin-android-ext:$versions_koin"
     implementation "org.koin:koin-android-viewmodel:$versions_koin"
+    implementation "com.squareup.sqldelight:android-driver:$versions_sqldelight"
+    implementation "com.squareup.sqldelight:coroutines-extensions:$versions_sqldelight"
 
     testImplementation "junit:junit:$versions_junit"
 

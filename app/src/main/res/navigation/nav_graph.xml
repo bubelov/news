@@ -28,9 +28,8 @@
         android:name="co.appreactor.nextcloud.news.NewsItemFragment"
         android:label="NewsItemFragment">
         <argument
-            android:name="item"
-            android:defaultValue='""'
-            app:argType="string" />
+            android:name="newsItemId"
+            app:argType="long" />
     </fragment>
 
     <fragment

@@ -4,8 +4,11 @@ import androidx.appcompat.app.AlertDialog
 import com.google.gson.GsonBuilder
 import com.nextcloud.android.sso.api.NextcloudAPI
 import com.nextcloud.android.sso.helper.SingleAccountHelper
+import com.squareup.sqldelight.android.AndroidSqliteDriver
+import com.squareup.sqldelight.db.SqlDriver
 import org.koin.android.experimental.dsl.viewModel
 import org.koin.dsl.module
+import org.koin.experimental.builder.single
 import retrofit2.NextcloudRetrofitApiBuilder
 
 val appModule = module {
@@ -44,5 +47,21 @@ val appModule = module {
         ).create(NewsApi::class.java)
     }
 
+    single<SqlDriver> {
+        AndroidSqliteDriver(
+            schema = Database.Schema,
+            context = get(),
+            name = "nextcloud-news-android.db"
+        )
+    }
+
+    single<NewsItemsRepository>()
+    single<NewsFeedsRepository>()
+
+    single { Database(get()) }
+    single { get<Database>().newsItemQueries }
+    single { get<Database>().newsFeedQueries }
+
     viewModel<NewsFragmentModel>()
+    viewModel<NewsItemFragmentModel>()
 }
