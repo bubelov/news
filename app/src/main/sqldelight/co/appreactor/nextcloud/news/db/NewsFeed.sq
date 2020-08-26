@@ -12,3 +12,7 @@ VALUES ?;
 findAll:
 SELECT *
 FROM NewsFeed;
+
+deleteAll:
+DELETE
+FROM NewsFeed;

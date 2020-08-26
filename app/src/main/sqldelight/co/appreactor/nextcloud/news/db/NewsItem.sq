@@ -26,3 +26,8 @@ updateUnread:
 UPDATE NewsItem
 SET unread = ?, unreadSynced = 0
 WHERE id = ?;
+
+updateUnreadSynced:
+UPDATE NewsItem
+SET unreadSynced = ?
+WHERE id = ?;

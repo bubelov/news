@@ -64,6 +64,7 @@ dependencies {
     implementation "org.koin:koin-android-viewmodel:$versions_koin"
     implementation "com.squareup.sqldelight:android-driver:$versions_sqldelight"
     implementation "com.squareup.sqldelight:coroutines-extensions:$versions_sqldelight"
+    implementation "com.jakewharton.timber:timber:$versions_timber"
 
     testImplementation "junit:junit:$versions_junit"
 

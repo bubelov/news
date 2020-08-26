@@ -55,6 +55,8 @@ val appModule = module {
         )
     }
 
+    single<Sync>()
+
     single<NewsItemsRepository>()
     single<NewsFeedsRepository>()
 
