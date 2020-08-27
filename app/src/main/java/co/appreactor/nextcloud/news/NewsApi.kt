@@ -4,6 +4,7 @@ import okhttp3.ResponseBody
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.PUT
+import retrofit2.http.Query
 
 interface NewsApi {
 
@@ -15,6 +16,11 @@ interface NewsApi {
 
     @GET("items?type=2&getRead=true&batchSize=-1")
     fun getStarredItems(): ItemsPayload
+
+    @GET("items/updated?type=3")
+    fun getNewAndUpdatedItems(
+        @Query("lastModified") lastModified: Long
+    ): ItemsPayload
 
     @PUT("items/read/multiple")
     fun markAsRead(@Body args: NewsItemsIdsArgs): ResponseBody

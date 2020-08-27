@@ -9,7 +9,8 @@ CREATE TABLE NewsItem (
   body TEXT NOT NULL,
   mediaThumbnail TEXT,
   unread INTEGER AS Boolean NOT NULL,
-  unreadSynced INTEGER AS Boolean NOT NULL
+  unreadSynced INTEGER AS Boolean NOT NULL,
+  lastModified INTEGER NOT NULL
 );
 
 insertOrReplace:

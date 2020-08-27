@@ -38,14 +38,13 @@ class Sync(
         }
 
         if (syncFeeds) {
-            // Step 6 - Get new feeds
+            Timber.d("Syncing feeds")
             newsFeedsRepository.reloadFromApi()
         }
 
         if (fetchNewAndUpdatedNews) {
-            // Step 7
-            // Get new items and modified items: GET /items/updated?lastModified=12123123123&type=3
-            // TODO
+            Timber.d("Syncing new and updated news items")
+            newsItemsRepository.fetchNewAndUpdatedItems()
         }
 
         Timber.d("Finished sync")

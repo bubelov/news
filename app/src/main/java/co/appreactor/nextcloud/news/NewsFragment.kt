@@ -51,6 +51,7 @@ class NewsFragment : Fragment() {
     private suspend fun showAuthOrShowData() {
         try {
             SingleAccountHelper.getCurrentSingleSignOnAccount(context)
+            model.sync()
             showData()
         } catch (e: SSOException) {
             UiExceptionManager.showDialogForException(context, e)

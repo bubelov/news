@@ -73,4 +73,25 @@ class NewsItemsRepository(
 
         Timber.d("Finished syncing unread flags")
     }
+
+    suspend fun fetchNewAndUpdatedItems() = withContext(Dispatchers.IO) {
+        Timber.d("Syncing new and updated items")
+        val mostRecentItem = all().first().maxByOrNull { it.lastModified }
+
+        if (mostRecentItem == null) {
+            Timber.d("Cache is empty, cancelling")
+            return@withContext
+        }
+
+        val items = api.getNewAndUpdatedItems(mostRecentItem.lastModified + 1)
+        Timber.d("New and updated items: ${items.items.size}")
+
+        cache.transaction {
+            items.items.forEach {
+                cache.insertOrReplace(it.copy(unreadSynced = true))
+            }
+        }
+
+        Timber.d("Finished syncing new and updated items")
+    }
 }
