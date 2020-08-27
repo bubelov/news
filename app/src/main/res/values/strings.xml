@@ -7,4 +7,6 @@
     <string name="news">News</string>
     <string name="starred_news">Starred News</string>
     <string name="starred">Starred</string>
+    <string name="show_read_news">Show read news</string>
+    <string name="hide_read_news">Hide read news</string>
 </resources>

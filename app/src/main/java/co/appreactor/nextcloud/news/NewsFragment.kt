@@ -41,6 +41,33 @@ class NewsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        toolbar.apply {
+            inflateMenu(R.menu.menu_news)
+
+            lifecycleScope.launchWhenResumed {
+                model.showReadNews.collect { show ->
+                    val item = menu.findItem(R.id.showReadNews)
+
+                    if (show) {
+                        item.setIcon(R.drawable.ic_baseline_visibility_24)
+                        item.setTitle(R.string.hide_read_news)
+                    } else {
+                        item.setIcon(R.drawable.ic_baseline_visibility_off_24)
+                        item.setTitle(R.string.show_read_news)
+                    }
+                }
+            }
+
+            setOnMenuItemClickListener {
+                if (it.itemId == R.id.showReadNews) {
+                    model.showReadNews.value = !model.showReadNews.value
+                    return@setOnMenuItemClickListener true
+                }
+
+                false
+            }
+        }
+
         lifecycleScope.launch {
             whenResumed {
                 showAuthOrShowData()
@@ -74,13 +101,9 @@ class NewsFragment : Fragment() {
 
             val onItemClick: (NewsItem) -> Unit = {
                 lifecycleScope.launch {
-                    //model.markAsRead(it)
-
                     //val intent = Intent(Intent.ACTION_VIEW)
                     //intent.data = Uri.parse(it.url)
                     //startActivity(intent)
-
-                    //itemsAdapter.updateItem(it.copy(unread = false))
 
                     val action =
                         NewsFragmentDirections.actionNewsFragmentToNewsItemFragment(it.id)
