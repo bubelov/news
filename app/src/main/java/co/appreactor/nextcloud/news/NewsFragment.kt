@@ -101,10 +101,6 @@ class NewsFragment : Fragment() {
 
             val onItemClick: (NewsItem) -> Unit = {
                 lifecycleScope.launch {
-                    //val intent = Intent(Intent.ACTION_VIEW)
-                    //intent.data = Uri.parse(it.url)
-                    //startActivity(intent)
-
                     val action =
                         NewsFragmentDirections.actionNewsFragmentToNewsItemFragment(it.id)
                     findNavController().navigate(action)

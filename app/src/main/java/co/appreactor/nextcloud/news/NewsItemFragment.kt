@@ -1,5 +1,7 @@
 package co.appreactor.nextcloud.news
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -46,6 +48,12 @@ class NewsItemFragment : Fragment() {
                 )
 
                 textView.text = body
+
+                fab.setOnClickListener {
+                    val intent = Intent(Intent.ACTION_VIEW)
+                    intent.data = Uri.parse(item.url)
+                    startActivity(intent)
+                }
             }
         }
     }
