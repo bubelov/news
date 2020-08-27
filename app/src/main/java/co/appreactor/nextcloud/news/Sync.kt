@@ -26,9 +26,8 @@ class Sync(
             Timber.d("Notifying the News app of read and unread articles")
             newsItemsRepository.syncUnreadFlags()
 
-            // Step 3 - Notify the News app of starred articles: PUT /items/starred/multiple {"items": [{"feedId": 3, "guidHash": "adadafasdasd1231"}, ...]}
-            // Step 4 - Notify the News app of un-starred articles: PUT /items/unstarred/multiple {"items": [{"feedId": 3, "guidHash": "adadafasdasd1231"}, ...]}
-            // TODO
+            Timber.d("Notifying the News app of starred and unstarred articles")
+            newsItemsRepository.syncStarredFlags()
         }
 
         if (syncFolders) {

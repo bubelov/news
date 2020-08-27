@@ -13,6 +13,8 @@ import androidx.lifecycle.whenResumed
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import kotlinx.android.synthetic.main.fragment_news_item.*
+import kotlinx.android.synthetic.main.fragment_news_item.toolbar
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
 
@@ -37,6 +39,56 @@ class NewsItemFragment : Fragment() {
                     }
 
                     title = item.title
+
+                    inflateMenu(R.menu.menu_news_item)
+
+                    lifecycleScope.launchWhenResumed {
+                        model.getReadFlag(item.id).collect { read ->
+                            val menuItem = menu.findItem(R.id.toggleRead)
+
+                            if (read) {
+                                menuItem.setIcon(R.drawable.ic_baseline_visibility_24)
+                                menuItem.setTitle(R.string.mark_as_unread)
+                            } else {
+                                menuItem.setIcon(R.drawable.ic_baseline_visibility_off_24)
+                                menuItem.setTitle(R.string.mark_as_read)
+                            }
+                        }
+                    }
+
+                    lifecycleScope.launchWhenResumed {
+                        model.getStarredFlag(item.id).collect { starred ->
+                            val menuItem = menu.findItem(R.id.toggleStarred)
+
+                            if (starred) {
+                                menuItem.setIcon(R.drawable.ic_baseline_star_24)
+                                menuItem.setTitle(R.string.unstar)
+                            } else {
+                                menuItem.setIcon(R.drawable.ic_baseline_star_border_24)
+                                menuItem.setTitle(R.string.star)
+                            }
+                        }
+                    }
+
+                    setOnMenuItemClickListener {
+                        if (it.itemId == R.id.toggleRead) {
+                            lifecycleScope.launch {
+                                model.toggleReadFlag(args.newsItemId)
+                            }
+
+                            return@setOnMenuItemClickListener true
+                        }
+
+                        if (it.itemId == R.id.toggleStarred) {
+                            lifecycleScope.launch {
+                                model.toggleStarredFlag(args.newsItemId)
+                            }
+
+                            return@setOnMenuItemClickListener true
+                        }
+
+                        false
+                    }
                 }
 
                 val imageGetter = PicassoImageGetter(textView)

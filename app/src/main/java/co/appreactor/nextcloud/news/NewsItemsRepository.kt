@@ -4,6 +4,7 @@ import co.appreactor.nextcloud.news.db.NewsItemQueries
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -20,7 +21,12 @@ class NewsItemsRepository(
 
             cache.transaction {
                 (unread.items + starred.items).forEach {
-                    cache.insertOrReplace(it.copy(unreadSynced = true))
+                    cache.insertOrReplace(
+                        it.copy(
+                            unreadSynced = true,
+                            starredSynced = true
+                        )
+                    )
                 }
             }
         }
@@ -28,9 +34,20 @@ class NewsItemsRepository(
         cache.findAll().asFlow().map { it.executeAsList() }
     }
 
+    suspend fun byId(id: Long) = withContext(Dispatchers.IO) {
+        cache.findById(id).asFlow().map { it.executeAsOneOrNull() }
+    }
+
     suspend fun updateUnread(id: Long, unread: Boolean) = withContext(Dispatchers.IO) {
         cache.updateUnread(
             unread = unread,
+            id = id
+        )
+    }
+
+    suspend fun updateStarred(id: Long, starred: Boolean) = withContext(Dispatchers.IO) {
+        cache.updateStarred(
+            starred = starred,
             id = id
         )
     }
@@ -49,7 +66,7 @@ class NewsItemsRepository(
         Timber.d("Of them, read: ${unsyncedReadItems.size}")
         Timber.d("Of them, unread: ${unsyncedUnreadItems.size}")
 
-        api.markAsRead(NewsItemsIdsArgs(
+        api.markAsRead(PutReadArgs(
             unsyncedReadItems.map { it.id }
         ))
 
@@ -60,7 +77,7 @@ class NewsItemsRepository(
         }
 
         api.markAsUnread(
-            NewsItemsIdsArgs(
+            PutReadArgs(
                 unsyncedUnreadItems.map { it.id }
             )
         )
@@ -74,9 +91,53 @@ class NewsItemsRepository(
         Timber.d("Finished syncing unread flags")
     }
 
+    suspend fun syncStarredFlags() = withContext(Dispatchers.IO) {
+        Timber.d("Syncing starred flags")
+
+        val unsyncedItems = all().first().filter {
+            !it.starredSynced
+        }
+
+        Timber.d("Unsynced items: ${unsyncedItems.size}")
+
+        val unsyncedStarredItems = unsyncedItems.filter { it.starred }
+        val unsyncedUnstarredItems = unsyncedItems.filter { !it.starred }
+        Timber.d("Of them, starred: ${unsyncedStarredItems.size}")
+        Timber.d("Of them, unread: ${unsyncedUnstarredItems.size}")
+
+        api.markAsStarred(PutStarredArgs(unsyncedStarredItems.map {
+            PutStarredArgsItem(
+                it.feedId,
+                it.guidHash
+            )
+        }))
+
+        cache.transaction {
+            unsyncedStarredItems.forEach {
+                cache.updateStarredSynced(true, it.id)
+            }
+        }
+
+        api.markAsUnstarred(PutStarredArgs(unsyncedUnstarredItems.map {
+            PutStarredArgsItem(
+                it.feedId,
+                it.guidHash
+            )
+        }))
+
+        cache.transaction {
+            unsyncedUnstarredItems.forEach {
+                cache.updateStarredSynced(true, it.id)
+            }
+        }
+
+        Timber.d("Finished syncing starred flags")
+    }
+
     suspend fun fetchNewAndUpdatedItems() = withContext(Dispatchers.IO) {
         Timber.d("Syncing new and updated items")
-        val mostRecentItem = all().first().maxByOrNull { it.lastModified }
+
+        val mostRecentItem = all().firstOrNull()?.maxByOrNull { it.lastModified }
 
         if (mostRecentItem == null) {
             Timber.d("Cache is empty, cancelling")

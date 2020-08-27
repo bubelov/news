@@ -1,11 +1,14 @@
 CREATE TABLE NewsItem (
   id INTEGER PRIMARY KEY,
+  guid TEXT NOT NULL,
+  guidHash TEXT NOT NULL,
   title TEXT NOT NULL,
   url TEXT NOT NULL,
   author TEXT NOT NULL,
   pubDate INTEGER NOT NULL,
   feedId INTEGER NOT NULL,
   starred INTEGER AS Boolean NOT NULL,
+  starredSynced INTEGER AS Boolean NOT NULL,
   body TEXT NOT NULL,
   mediaThumbnail TEXT,
   unread INTEGER AS Boolean NOT NULL,
@@ -23,6 +26,11 @@ SELECT *
 FROM NewsItem
 ORDER BY pubDate DESC;
 
+findById:
+SELECT *
+FROM NewsItem
+WHERE id = :id;
+
 updateUnread:
 UPDATE NewsItem
 SET unread = ?, unreadSynced = 0
@@ -31,4 +39,14 @@ WHERE id = ?;
 updateUnreadSynced:
 UPDATE NewsItem
 SET unreadSynced = ?
+WHERE id = ?;
+
+updateStarred:
+UPDATE NewsItem
+SET starred = ?, starredSynced = 0
+WHERE id = ?;
+
+updateStarredSynced:
+UPDATE NewsItem
+SET starredSynced = ?
 WHERE id = ?;

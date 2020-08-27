@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Nextcloud News</string>
+    <string name="app_name">News</string>
     <string name="login_with_nextcloud">Login with Nextcloud app</string>
     <string name="s_s_s">%1$s %2$s %3$s</string>
     <string name="post_image">Post image</string>
@@ -9,4 +9,8 @@
     <string name="starred">Starred</string>
     <string name="show_read_news">Show read news</string>
     <string name="hide_read_news">Hide read news</string>
+    <string name="mark_as_read">Mark as read</string>
+    <string name="mark_as_unread">Mark as unread</string>
+    <string name="star">Star</string>
+    <string name="unstar">Unstar</string>
 </resources>
