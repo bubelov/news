@@ -35,7 +35,11 @@
     <fragment
         android:id="@+id/starredNewsFragment"
         android:name="co.appreactor.nextcloud.news.StarredNewsFragment"
-        android:label="StarredNewsFragment" />
+        android:label="StarredNewsFragment">
+        <action
+            android:id="@+id/action_starredNewsFragment_to_newsItemFragment"
+            app:destination="@id/newsItemFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/settingsFragment"
