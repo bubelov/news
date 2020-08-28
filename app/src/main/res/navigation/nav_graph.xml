@@ -11,7 +11,9 @@
         android:label="AuthFragment">
         <action
             android:id="@+id/action_authFragment_to_newsFragment"
-            app:destination="@id/newsFragment" />
+            app:destination="@id/newsFragment"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
     </fragment>
 
     <fragment
@@ -20,7 +22,9 @@
         android:label="NewsFragment">
         <action
             android:id="@+id/action_newsFragment_to_newsItemFragment"
-            app:destination="@id/newsItemFragment" />
+            app:destination="@id/newsItemFragment"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
     </fragment>
 
     <fragment
@@ -38,7 +42,9 @@
         android:label="StarredNewsFragment">
         <action
             android:id="@+id/action_starredNewsFragment_to_newsItemFragment"
-            app:destination="@id/newsItemFragment" />
+            app:destination="@id/newsItemFragment"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
     </fragment>
 
     <fragment
