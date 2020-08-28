@@ -1,7 +1,6 @@
 package co.appreactor.nextcloud.news
 
 import android.os.Bundle
-import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.navigation.NavController
@@ -25,21 +24,6 @@ class AppActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_app)
-
-        onBackPressedDispatcher.addCallback(
-            this,
-            object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
-                    if (navController.currentDestination?.id == R.id.authFragment) {
-                        finish()
-                        return
-                    }
-
-                    if (!navController.popBackStack()) {
-                        finish()
-                    }
-                }
-            })
     }
 
     override fun onStart() {

@@ -27,7 +27,11 @@ class AuthFragment : Fragment() {
             whenStarted {
                 try {
                     SingleAccountHelper.getCurrentSingleSignOnAccount(context)
-                    findNavController().navigate(R.id.action_authFragment_to_newsFragment)
+
+                    findNavController().apply {
+                        popBackStack()
+                        navigate(R.id.newsFragment)
+                    }
                 } catch (e: SSOException) {
                     login.setOnClickListener {
                         it.isVisible = false
@@ -55,10 +59,14 @@ class AuthFragment : Fragment() {
 
         val onAccessGranted = IAccountAccessGranted { account ->
             SingleAccountHelper.setCurrentAccount(context, account.name)
-            findNavController().navigate(R.id.action_authFragment_to_newsFragment)
+
+            findNavController().apply {
+                popBackStack()
+                navigate(R.id.newsFragment)
+            }
         }
 
-        when(resultCode) {
+        when (resultCode) {
             AppCompatActivity.RESULT_CANCELED -> {
                 login.isVisible = true
             }
