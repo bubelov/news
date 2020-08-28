@@ -31,6 +31,10 @@ SELECT *
 FROM NewsItem
 WHERE id = :id;
 
+count:
+SELECT COUNT(*)
+FROM NewsItem;
+
 updateUnread:
 UPDATE NewsItem
 SET unread = ?, unreadSynced = 0

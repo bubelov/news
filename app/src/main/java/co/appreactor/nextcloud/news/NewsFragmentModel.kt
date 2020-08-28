@@ -1,11 +1,8 @@
 package co.appreactor.nextcloud.news
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import co.appreactor.nextcloud.news.db.NewsFeed
 import co.appreactor.nextcloud.news.db.NewsItem
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 
 class NewsFragmentModel(
     private val newsItemsRepository: NewsItemsRepository,
@@ -15,25 +12,22 @@ class NewsFragmentModel(
 
     val showReadNews = MutableStateFlow(true)
 
-    suspend fun getNewsAndFeeds(): Flow<Pair<List<NewsItem>, List<NewsFeed>>> = flow {
-        newsItemsRepository.all().collect { allNews ->
-            showReadNews.collect { showReadNews ->
-                val news = if (showReadNews) {
-                    allNews
-                } else {
-                    allNews.filter { it.unread }
-                }
-
-                val feeds = newsFeedsRepository.all()
-
-                emit(Pair(news, feeds))
+    suspend fun getNewsItems(): Flow<List<NewsItem>> =
+        newsItemsRepository.all().combine(showReadNews) { items, showRead ->
+            if (showRead) {
+                return@combine items
+            } else {
+                return@combine items.filter { it.unread }
             }
         }
+
+    suspend fun getFeeds() = newsFeedsRepository.all()
+
+    suspend fun performInitialSyncIfNoData() {
+        sync.performInitialSyncIfNoData()
     }
 
-    fun sync() {
-        viewModelScope.launch {
-            sync.sync()
-        }
+    suspend fun sync() {
+        sync.sync()
     }
 }

@@ -18,6 +18,7 @@ import kotlinx.android.synthetic.main.fragment_news.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
+import timber.log.Timber
 
 class NewsFragment : Fragment() {
 
@@ -73,12 +74,18 @@ class NewsFragment : Fragment() {
                 showAuthOrShowData()
             }
         }
+
+        swipeRefresh.setOnRefreshListener {
+            lifecycleScope.launch {
+                model.sync()
+                swipeRefresh.isRefreshing = false
+            }
+        }
     }
 
     private suspend fun showAuthOrShowData() {
         try {
             SingleAccountHelper.getCurrentSingleSignOnAccount(context)
-            model.sync()
             showData()
         } catch (e: SSOException) {
             UiExceptionManager.showDialogForException(context, e)
@@ -88,14 +95,20 @@ class NewsFragment : Fragment() {
     private suspend fun showData() {
         progress.isVisible = true
 
+        Timber.d("Performing initial sync")
+        model.performInitialSyncIfNoData()
+        Timber.d("Performed initial sync")
+
         itemsView.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(context)
             adapter = itemsAdapter
         }
 
-        model.getNewsAndFeeds().collect {
-            if (it.first.isNotEmpty()) {
+        model.getNewsItems().collect { news ->
+            Timber.d("Got ${news.size} news!")
+
+            if (news.isNotEmpty()) {
                 progress.isVisible = false
             }
 
@@ -109,7 +122,7 @@ class NewsFragment : Fragment() {
 
             itemsAdapter.onClick = onItemClick
 
-            itemsAdapter.swapItems(it.first, it.second)
+            itemsAdapter.swapItems(news, model.getFeeds())
         }
     }
 }

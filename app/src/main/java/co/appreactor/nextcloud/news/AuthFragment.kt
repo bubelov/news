@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenStarted
@@ -34,7 +33,7 @@ class AuthFragment : Fragment() {
                     }
                 } catch (e: SSOException) {
                     login.setOnClickListener {
-                        it.isVisible = false
+                        it.isEnabled = false
                         showAccountPicker()
                     }
                 }
@@ -68,7 +67,7 @@ class AuthFragment : Fragment() {
 
         when (resultCode) {
             AppCompatActivity.RESULT_CANCELED -> {
-                login.isVisible = true
+                login.isEnabled = true
             }
 
             else -> {

@@ -29,6 +29,13 @@ android {
         //freeCompilerArgs += "-Xopt-in=kotlin.time.ExperimentalTime"
     }
 
+    buildTypes {
+        debug {
+            applicationIdSuffix ".dev"
+            debuggable true
+        }
+    }
+
     lintOptions {
         disable 'VectorRaster', 'VectorPath'
     }
@@ -65,6 +72,7 @@ dependencies {
     implementation "com.squareup.sqldelight:android-driver:$versions_sqldelight"
     implementation "com.squareup.sqldelight:coroutines-extensions:$versions_sqldelight"
     implementation "com.jakewharton.timber:timber:$versions_timber"
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:$versions_swipe_refresh"
 
     testImplementation "junit:junit:$versions_junit"
 

@@ -7,6 +7,11 @@ class Sync(
     private val newsFeedsRepository: NewsFeedsRepository
 ) {
 
+    suspend fun performInitialSyncIfNoData() {
+        newsItemsRepository.performInitialSyncIfNoData()
+        newsFeedsRepository.reloadFromApiIfNoData()
+    }
+
     suspend fun syncNewsFlagsOnly() = sync(
         syncNewsFlags = true,
         syncFolders = false,

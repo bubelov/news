@@ -13,6 +13,10 @@ findAll:
 SELECT *
 FROM NewsFeed;
 
+count:
+SELECT COUNT(*)
+FROM NewsFeed;
+
 deleteAll:
 DELETE
 FROM NewsFeed;

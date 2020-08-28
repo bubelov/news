@@ -11,17 +11,13 @@ class NewsFeedsRepository(
 ) {
 
     suspend fun all() = withContext(Dispatchers.IO) {
-        if (cache.findAll().executeAsList().isEmpty()) {
-            val feeds = api.getFeeds()
-
-            cache.transaction {
-                feeds.feeds.forEach {
-                    cache.insertOrReplace(it)
-                }
-            }
-        }
-
         cache.findAll().executeAsList()
+    }
+
+    suspend fun reloadFromApiIfNoData() = withContext(Dispatchers.IO) {
+        if (cache.count().executeAsOne() == 0L) {
+            reloadFromApi()
+        }
     }
 
     suspend fun reloadFromApi() = withContext(Dispatchers.IO) {

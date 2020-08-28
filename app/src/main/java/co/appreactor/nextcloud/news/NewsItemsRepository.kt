@@ -15,22 +15,6 @@ class NewsItemsRepository(
 ) {
 
     suspend fun all() = withContext(Dispatchers.IO) {
-        if (cache.findAll().executeAsList().isEmpty()) {
-            val unread = api.getUnreadItems()
-            val starred = api.getStarredItems()
-
-            cache.transaction {
-                (unread.items + starred.items).forEach {
-                    cache.insertOrReplace(
-                        it.copy(
-                            unreadSynced = true,
-                            starredSynced = true
-                        )
-                    )
-                }
-            }
-        }
-
         cache.findAll().asFlow().map { it.executeAsList() }
     }
 
@@ -50,6 +34,30 @@ class NewsItemsRepository(
             starred = starred,
             id = id
         )
+    }
+
+    suspend fun performInitialSyncIfNoData() = withContext(Dispatchers.IO) {
+        Timber.d("Performing initial sync (if no data)")
+        val count = cache.count().executeAsOne()
+        Timber.d("Records: $count")
+
+        if (count > 0) {
+            return@withContext
+        }
+
+        val unread = api.getUnreadItems()
+        val starred = api.getStarredItems()
+
+        cache.transaction {
+            (unread.items + starred.items).forEach {
+                cache.insertOrReplace(
+                    it.copy(
+                        unreadSynced = true,
+                        starredSynced = true
+                    )
+                )
+            }
+        }
     }
 
     suspend fun syncUnreadFlags() = withContext(Dispatchers.IO) {
