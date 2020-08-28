@@ -4,6 +4,8 @@ apply plugin: "kotlin-android-extensions"
 apply plugin: "androidx.navigation.safeargs.kotlin"
 apply plugin: "com.squareup.sqldelight"
 
+apply from: ".env.gradle"
+
 android {
     compileSdkVersion 29
 
@@ -29,7 +31,20 @@ android {
         //freeCompilerArgs += "-Xopt-in=kotlin.time.ExperimentalTime"
     }
 
+    signingConfigs {
+        release {
+            storeFile file(keystore_path.toString())
+            storePassword keystore_password.toString()
+            keyAlias = "app"
+            keyPassword keystore_password.toString()
+        }
+    }
+
     buildTypes {
+        release {
+            signingConfig signingConfigs.release
+        }
+
         debug {
             applicationIdSuffix ".dev"
             debuggable true
