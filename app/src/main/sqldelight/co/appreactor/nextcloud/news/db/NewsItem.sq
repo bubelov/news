@@ -54,3 +54,7 @@ updateStarredSynced:
 UPDATE NewsItem
 SET starredSynced = ?
 WHERE id = ?;
+
+deleteAll:
+DELETE
+FROM NewsItem;

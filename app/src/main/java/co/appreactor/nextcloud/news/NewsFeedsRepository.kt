@@ -14,6 +14,10 @@ class NewsFeedsRepository(
         cache.findAll().executeAsList()
     }
 
+    suspend fun clear() = withContext(Dispatchers.IO) {
+        cache.deleteAll()
+    }
+
     suspend fun reloadFromApiIfNoData() = withContext(Dispatchers.IO) {
         if (cache.count().executeAsOne() == 0L) {
             reloadFromApi()

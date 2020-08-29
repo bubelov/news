@@ -67,4 +67,5 @@ val appModule = module {
     viewModel<NewsFragmentModel>()
     viewModel<NewsItemFragmentModel>()
     viewModel<StarredNewsFragmentModel>()
+    viewModel<SettingsFragmentModel>()
 }

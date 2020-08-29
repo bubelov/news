@@ -36,6 +36,10 @@ class NewsItemsRepository(
         )
     }
 
+    suspend fun clear() = withContext(Dispatchers.IO) {
+        cache.deleteAll()
+    }
+
     suspend fun performInitialSyncIfNoData() = withContext(Dispatchers.IO) {
         Timber.d("Performing initial sync (if no data)")
         val count = cache.count().executeAsOne()
