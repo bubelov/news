@@ -5,49 +5,68 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ImageView
+    <LinearLayout
         android:id="@+id/logo"
-        android:layout_width="128dp"
-        android:layout_height="128dp"
-        android:layout_marginTop="40dp"
-        android:src="@drawable/ic_baseline_list_alt_24"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/colorPrimary" />
-
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="News"
-        android:textAppearance="?attr/textAppearanceHeadline3"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/logo" />
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@id/buttons"
+        app:layout_constraintTop_toTopOf="parent">
 
-    <TextView
-        android:id="@+id/subtitle"
-        android:layout_width="wrap_content"
+        <ImageView
+            android:layout_width="128dp"
+            android:layout_height="128dp"
+            android:src="@drawable/ic_baseline_list_alt_24"
+            app:tint="@color/colorPrimary"
+            android:contentDescription="@string/logo" />
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/news"
+            android:textAppearance="?attr/textAppearanceHeadline3"
+            android:textColor="?colorOnBackground" />
+
+        <TextView
+            android:id="@+id/subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/for_nextcloud"
+            android:textAppearance="?attr/textAppearanceHeadline5"
+            android:textColor="?android:attr/textColorSecondary" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/buttons"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="for Nextcloud"
-        android:textAppearance="?attr/textAppearanceHeadline5"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/title" />
-
-    <Button
-        android:id="@+id/login"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="40dp"
-        android:layout_marginEnd="40dp"
-        android:text="@string/login_with_nextcloud"
+        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/subtitle" />
+        app:layout_constraintTop_toBottomOf="@id/logo">
+
+        <Button
+            android:id="@+id/loginViaApp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="40dp"
+            android:layout_marginEnd="40dp"
+            android:text="@string/login_with_nextcloud" />
+
+        <Button
+            android:id="@+id/directLogin"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="40dp"
+            android:layout_marginEnd="40dp"
+            android:text="@string/direct_login" />
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
