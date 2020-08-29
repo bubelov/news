@@ -14,7 +14,6 @@
     <string name="star">Star</string>
     <string name="unstar">Unstar</string>
     <string name="logo">Logo</string>
-    <string name="news">News</string>
     <string name="for_nextcloud">for Nextcloud</string>
     <string name="direct_login">Direct login</string>
 </resources>

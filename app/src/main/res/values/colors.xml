@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <resources>
-    <color name="colorPrimary">#1cafff</color>
-    <color name="colorPrimaryDark">#1cafff</color>
-    <color name="colorAccent">#1cafff</color>
-
-    <color name="top_panel_bg">@color/colorPrimary</color>
-    <color name="bottom_panel_bg">#ffffff</color>
-
-    <color name="toolbar_text_color">#ffffff</color>
-
-    <color name="below_card_bg_overlay">#fafafa</color>
+    <color name="color_primary">#1cafff</color>
+    <color name="color_primary_dark">@color/color_primary</color>
+    <color name="color_accent">@color/color_primary</color>
+    <color name="color_background_variant">#fafafa</color>
+    <color name="color_surface">#ffffff</color>
 </resources>

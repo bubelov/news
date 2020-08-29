@@ -112,7 +112,7 @@ class AuthFragment : Fragment() {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     requireActivity().window.statusBarColor = ContextCompat.getColor(
                         requireContext(),
-                        R.color.colorPrimaryDark
+                        R.color.color_primary_dark
                     )
                 }
             }

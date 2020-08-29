@@ -18,7 +18,7 @@
             android:layout_width="128dp"
             android:layout_height="128dp"
             android:src="@drawable/ic_baseline_list_alt_24"
-            app:tint="@color/colorPrimary"
+            app:tint="@color/color_primary"
             android:contentDescription="@string/logo" />
 
         <TextView
