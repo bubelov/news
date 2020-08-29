@@ -38,7 +38,6 @@ class AuthFragment : Fragment() {
                     }
                 } catch (e: SSOException) {
                     loginViaApp.setOnClickListener {
-                        it.isEnabled = false
                         showAccountPicker()
                     }
                 }
@@ -88,10 +87,13 @@ class AuthFragment : Fragment() {
     }
 
     private fun showAccountPicker() {
+        loginViaApp.isEnabled = false
+
         try {
             AccountImporter.pickNewAccount(this)
         } catch (e: SSOException) {
             UiExceptionManager.showDialogForException(context, e)
+            loginViaApp.isEnabled = true
         }
     }
 

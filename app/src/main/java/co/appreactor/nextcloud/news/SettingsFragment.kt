@@ -12,6 +12,7 @@ import com.nextcloud.android.sso.exceptions.SSOException
 import com.nextcloud.android.sso.helper.SingleAccountHelper
 import com.nextcloud.android.sso.ui.UiExceptionManager
 import kotlinx.android.synthetic.main.fragment_settings.*
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
 
@@ -37,6 +38,16 @@ class SettingsFragment : Fragment() {
             username.text = account.name
         } catch (e: SSOException) {
             UiExceptionManager.showDialogForException(context, e)
+        }
+
+        lifecycleScope.launch {
+            showReadNews.isChecked = model.getShowReadNews().first()
+
+            showReadNews.setOnCheckedChangeListener { _, isChecked ->
+                lifecycleScope.launch {
+                    model.setShowReadNews(isChecked)
+                }
+            }
         }
 
         logOut.setOnClickListener {

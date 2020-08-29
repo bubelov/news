@@ -59,10 +59,12 @@ val appModule = module {
 
     single<NewsItemsRepository>()
     single<NewsFeedsRepository>()
+    single<PreferencesRepository>()
 
     single { Database(get()) }
     single { get<Database>().newsItemQueries }
     single { get<Database>().newsFeedQueries }
+    single { get<Database>().preferenceQueries }
 
     viewModel<NewsFragmentModel>()
     viewModel<NewsItemFragmentModel>()

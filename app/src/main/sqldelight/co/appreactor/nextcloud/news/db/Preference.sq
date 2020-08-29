@@ -1,0 +1,26 @@
+CREATE TABLE Preference (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
+
+insertOrReplace:
+INSERT OR REPLACE
+INTO Preference
+VALUES ?;
+
+findAll:
+SELECT *
+FROM Preference;
+
+findByKey:
+SELECT *
+FROM Preference
+WHERE key = :key;
+
+count:
+SELECT COUNT(*)
+FROM Preference;
+
+deleteAll:
+DELETE
+FROM Preference;
