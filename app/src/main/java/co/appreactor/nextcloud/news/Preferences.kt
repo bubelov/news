@@ -42,5 +42,7 @@ class Preferences(
         const val SERVER_URL = "server_url"
         const val SERVER_USERNAME = "server_username"
         const val SERVER_PASSWORD = "server_password"
+
+        const val INITIAL_SYNC_COMPLETED = "initial_sync_completed"
     }
 }

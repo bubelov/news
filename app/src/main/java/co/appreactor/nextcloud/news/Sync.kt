@@ -4,12 +4,14 @@ import timber.log.Timber
 
 class Sync(
     private val newsItemsRepository: NewsItemsRepository,
-    private val newsFeedsRepository: NewsFeedsRepository
+    private val newsFeedsRepository: NewsFeedsRepository,
+    private val prefs: Preferences
 ) {
 
     suspend fun performInitialSyncIfNoData() {
         newsItemsRepository.performInitialSyncIfNoData()
         newsFeedsRepository.reloadFromApiIfNoData()
+        prefs.putBoolean(Preferences.INITIAL_SYNC_COMPLETED, true)
     }
 
     suspend fun syncNewsFlagsOnly() = sync(

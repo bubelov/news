@@ -41,4 +41,7 @@ class NewsFragmentModel(
     suspend fun sync() {
         sync.sync()
     }
+
+    suspend fun isInitialSyncCompleted() =
+        prefs.getBoolean(Preferences.INITIAL_SYNC_COMPLETED, false)
 }

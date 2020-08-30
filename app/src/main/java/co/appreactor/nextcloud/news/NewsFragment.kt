@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import co.appreactor.nextcloud.news.db.NewsItem
 import kotlinx.android.synthetic.main.fragment_news.*
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
 import timber.log.Timber
@@ -96,9 +97,11 @@ class NewsFragment : Fragment() {
         model.getNewsItems().collect { news ->
             Timber.d("Got ${news.size} news!")
 
-            if (news.isNotEmpty()) {
+            if (model.isInitialSyncCompleted().first()) {
                 progress.isVisible = false
             }
+
+            empty.isVisible = news.isEmpty() && model.isInitialSyncCompleted().first()
 
             val onItemClick: (NewsItem) -> Unit = {
                 lifecycleScope.launch {
