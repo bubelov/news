@@ -5,7 +5,7 @@
     <string name="post_image">Post image</string>
     <string name="settings">Settings</string>
     <string name="news">News</string>
-    <string name="starred_news">Starred News</string>
+    <string name="starred_news">Starred news</string>
     <string name="starred">Starred</string>
     <string name="show_read_news">Show read news</string>
     <string name="hide_read_news">Hide read news</string>
@@ -25,4 +25,5 @@
     <string name="username">Username</string>
     <string name="password">Password</string>
     <string name="news_list_is_empty">News list is empty</string>
+    <string name="you_have_no_starred_news">You have no starred news</string>
 </resources>

@@ -10,7 +10,8 @@ import kotlinx.coroutines.launch
 class StarredNewsFragmentModel(
     private val newsItemsRepository: NewsItemsRepository,
     private val newsFeedsRepository: NewsFeedsRepository,
-    private val sync: Sync
+    private val sync: Sync,
+    private val prefs: Preferences
 ) : ViewModel() {
 
     suspend fun getNewsAndFeeds(): Flow<Pair<List<NewsItem>, List<NewsFeed>>> = flow {
@@ -25,4 +26,7 @@ class StarredNewsFragmentModel(
             sync.sync()
         }
     }
+
+    suspend fun isInitialSyncCompleted() =
+        prefs.getBoolean(Preferences.INITIAL_SYNC_COMPLETED, false)
 }

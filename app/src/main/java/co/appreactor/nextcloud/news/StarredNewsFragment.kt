@@ -11,8 +11,11 @@ import androidx.lifecycle.whenResumed
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import co.appreactor.nextcloud.news.db.NewsItem
-import kotlinx.android.synthetic.main.fragment_starred_news.*
+import kotlinx.android.synthetic.main.fragment_starred_news.empty
+import kotlinx.android.synthetic.main.fragment_starred_news.itemsView
+import kotlinx.android.synthetic.main.fragment_starred_news.progress
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
 
@@ -55,9 +58,11 @@ class StarredNewsFragment : Fragment() {
         }
 
         model.getNewsAndFeeds().collect { data ->
-            if (data.first.isNotEmpty()) {
+            if (model.isInitialSyncCompleted().first()) {
                 progress.isVisible = false
             }
+
+            empty.isVisible = data.first.isEmpty() && model.isInitialSyncCompleted().first()
 
             val onItemClick: (NewsItem) -> Unit = {
                 lifecycleScope.launch {
