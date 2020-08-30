@@ -49,8 +49,8 @@ class NewsItemsRepository(
             return@withContext
         }
 
-        val unread = api.getUnreadItems()
-        val starred = api.getStarredItems()
+        val unread = api.getUnreadItems().execute().body()!!
+        val starred = api.getStarredItems().execute().body()!!
 
         cache.transaction {
             (unread.items + starred.items).forEach {
@@ -80,7 +80,7 @@ class NewsItemsRepository(
 
         api.markAsRead(PutReadArgs(
             unsyncedReadItems.map { it.id }
-        ))
+        )).execute()
 
         cache.transaction {
             unsyncedReadItems.forEach {
@@ -92,7 +92,7 @@ class NewsItemsRepository(
             PutReadArgs(
                 unsyncedUnreadItems.map { it.id }
             )
-        )
+        ).execute()
 
         cache.transaction {
             unsyncedUnreadItems.forEach {
@@ -122,7 +122,7 @@ class NewsItemsRepository(
                 it.feedId,
                 it.guidHash
             )
-        }))
+        })).execute()
 
         cache.transaction {
             unsyncedStarredItems.forEach {
@@ -135,7 +135,7 @@ class NewsItemsRepository(
                 it.feedId,
                 it.guidHash
             )
-        }))
+        })).execute()
 
         cache.transaction {
             unsyncedUnstarredItems.forEach {
@@ -156,11 +156,12 @@ class NewsItemsRepository(
             return@withContext
         }
 
-        val items = api.getNewAndUpdatedItems(mostRecentItem.lastModified + 1)
-        Timber.d("New and updated items: ${items.items.size}")
+        val items =
+            api.getNewAndUpdatedItems(mostRecentItem.lastModified + 1).execute().body()!!.items
+        Timber.d("New and updated items: ${items.size}")
 
         cache.transaction {
-            items.items.forEach {
+            items.forEach {
                 cache.insertOrReplace(it.copy(unreadSynced = true))
             }
         }

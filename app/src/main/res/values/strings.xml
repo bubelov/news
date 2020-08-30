@@ -19,4 +19,9 @@
     <string name="log_out">Log out</string>
     <string name="log_out_warning">Do you really want to log out?</string>
     <string name="cancel">Cancel</string>
+    <string name="login">Login</string>
+    <string name="direct_login_failed">Could not connect to server. Please make sure your login info is correct.</string>
+    <string name="server_url_hint">Nextcloud URL (https://mycloud.com)</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
 </resources>

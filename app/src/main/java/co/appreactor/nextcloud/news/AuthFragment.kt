@@ -18,43 +18,47 @@ import com.nextcloud.android.sso.exceptions.SSOException
 import com.nextcloud.android.sso.helper.SingleAccountHelper
 import com.nextcloud.android.sso.ui.UiExceptionManager
 import kotlinx.android.synthetic.main.fragment_auth.*
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.viewmodel.ext.android.viewModel
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
 
 
 class AuthFragment : Fragment() {
 
-    init {
-        hideStatusBarBackground()
-        invertStatusBarTextColorInLightMode()
-
-        lifecycleScope.launch {
-            whenStarted {
-                try {
-                    SingleAccountHelper.getCurrentSingleSignOnAccount(context)
-
-                    findNavController().apply {
-                        popBackStack()
-                        navigate(R.id.newsFragment)
-                    }
-                } catch (e: SSOException) {
-                    loginViaApp.setOnClickListener {
-                        showAccountPicker()
-                    }
-                }
-            }
-        }
-    }
+    private val model: AuthFragmentModel by viewModel()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(
-            R.layout.fragment_auth,
-            container,
-            false
-        )
+        return runBlocking {
+            if (!model.isLoggedIn()) {
+                inflater.inflate(
+                    R.layout.fragment_auth,
+                    container,
+                    false
+                )
+            } else {
+                showNews()
+                null
+            }
+        }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        hideStatusBarBackground()
+        invertStatusBarTextColorInLightMode()
+
+        loginViaApp.setOnClickListener {
+            showAccountPicker()
+        }
+
+        directLogin.setOnClickListener {
+            findNavController().navigate(AuthFragmentDirections.actionAuthFragmentToDirectAuthFragment())
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -62,11 +66,7 @@ class AuthFragment : Fragment() {
 
         val onAccessGranted = IAccountAccessGranted { account ->
             SingleAccountHelper.setCurrentAccount(context, account.name)
-
-            findNavController().apply {
-                popBackStack()
-                navigate(R.id.newsFragment)
-            }
+            showNews()
         }
 
         when (resultCode) {
@@ -94,6 +94,20 @@ class AuthFragment : Fragment() {
         } catch (e: SSOException) {
             UiExceptionManager.showDialogForException(context, e)
             loginViaApp.isEnabled = true
+        }
+    }
+
+    private fun showNews() {
+        stopKoin()
+
+        startKoin {
+            androidContext(requireContext())
+            modules(listOf(appModule, apiModule))
+        }
+
+        findNavController().apply {
+            popBackStack()
+            navigate(R.id.newsFragment)
         }
     }
 

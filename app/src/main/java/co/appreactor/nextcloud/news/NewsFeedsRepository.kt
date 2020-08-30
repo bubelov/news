@@ -26,13 +26,13 @@ class NewsFeedsRepository(
 
     suspend fun reloadFromApi() = withContext(Dispatchers.IO) {
         Timber.d("Reloading from API")
-        val feeds = api.getFeeds()
-        Timber.d("Got ${feeds.feeds.size} feeds")
+        val feeds = api.getFeeds().execute().body()!!.feeds
+        Timber.d("Got ${feeds.size} feeds")
 
         cache.transaction {
             cache.deleteAll()
 
-            feeds.feeds.forEach {
+            feeds.forEach {
                 cache.insertOrReplace(it)
             }
         }

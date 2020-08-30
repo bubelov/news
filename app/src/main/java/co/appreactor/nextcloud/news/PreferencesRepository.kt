@@ -25,5 +25,9 @@ class PreferencesRepository(
 
     companion object {
         const val SHOW_READ_NEWS = "show_read_news"
+
+        const val SERVER_URL = "server_url"
+        const val SERVER_USERNAME = "server_username"
+        const val SERVER_PASSWORD = "server_password"
     }
 }

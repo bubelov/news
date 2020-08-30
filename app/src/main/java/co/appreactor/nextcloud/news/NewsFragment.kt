@@ -11,9 +11,6 @@ import androidx.lifecycle.whenResumed
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import co.appreactor.nextcloud.news.db.NewsItem
-import com.nextcloud.android.sso.exceptions.SSOException
-import com.nextcloud.android.sso.helper.SingleAccountHelper
-import com.nextcloud.android.sso.ui.UiExceptionManager
 import kotlinx.android.synthetic.main.fragment_news.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -71,7 +68,7 @@ class NewsFragment : Fragment() {
 
         lifecycleScope.launch {
             whenResumed {
-                showAuthOrShowData()
+                showData()
             }
         }
 
@@ -80,15 +77,6 @@ class NewsFragment : Fragment() {
                 model.sync()
                 swipeRefresh.isRefreshing = false
             }
-        }
-    }
-
-    private suspend fun showAuthOrShowData() {
-        try {
-            SingleAccountHelper.getCurrentSingleSignOnAccount(context)
-            showData()
-        } catch (e: SSOException) {
-            UiExceptionManager.showDialogForException(context, e)
         }
     }
 

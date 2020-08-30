@@ -2,6 +2,7 @@
 
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     app:startDestination="@id/authFragment">
 
@@ -16,9 +17,27 @@
     <fragment
         android:id="@+id/authFragment"
         android:name="co.appreactor.nextcloud.news.AuthFragment"
-        android:label="AuthFragment">
+        android:label="AuthFragment"
+        tools:layout="@layout/fragment_auth">
         <action
             android:id="@+id/action_authFragment_to_newsFragment"
+            app:destination="@id/newsFragment"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_authFragment_to_directAuthFragment"
+            app:destination="@id/directAuthFragment"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/directAuthFragment"
+        android:name="co.appreactor.nextcloud.news.DirectAuthFragment"
+        android:label="DirectAuthFragment"
+        tools:layout="@layout/fragment_direct_auth">
+        <action
+            android:id="@+id/action_directAuthFragment_to_newsFragment"
             app:destination="@id/newsFragment"
             app:popEnterAnim="@anim/fade_in"
             app:popExitAnim="@anim/fade_out" />
@@ -27,7 +46,8 @@
     <fragment
         android:id="@+id/newsFragment"
         android:name="co.appreactor.nextcloud.news.NewsFragment"
-        android:label="NewsFragment">
+        android:label="NewsFragment"
+        tools:layout="@layout/fragment_news">
         <action
             android:id="@+id/action_newsFragment_to_newsItemFragment"
             app:destination="@id/newsItemFragment"
@@ -38,7 +58,8 @@
     <fragment
         android:id="@+id/newsItemFragment"
         android:name="co.appreactor.nextcloud.news.NewsItemFragment"
-        android:label="NewsItemFragment">
+        android:label="NewsItemFragment"
+        tools:layout="@layout/fragment_news_item">
         <argument
             android:name="newsItemId"
             app:argType="long" />
@@ -47,7 +68,8 @@
     <fragment
         android:id="@+id/starredNewsFragment"
         android:name="co.appreactor.nextcloud.news.StarredNewsFragment"
-        android:label="StarredNewsFragment">
+        android:label="StarredNewsFragment"
+        tools:layout="@layout/fragment_starred_news">
         <action
             android:id="@+id/action_starredNewsFragment_to_newsItemFragment"
             app:destination="@id/newsItemFragment"
@@ -58,6 +80,7 @@
     <fragment
         android:id="@+id/settingsFragment"
         android:name="co.appreactor.nextcloud.news.SettingsFragment"
-        android:label="SettingsFragment" />
+        android:label="SettingsFragment"
+        tools:layout="@layout/fragment_settings" />
 
 </navigation>

@@ -8,9 +8,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.nextcloud.android.sso.exceptions.SSOException
-import com.nextcloud.android.sso.helper.SingleAccountHelper
-import com.nextcloud.android.sso.ui.UiExceptionManager
 import kotlinx.android.synthetic.main.fragment_settings.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -33,13 +30,6 @@ class SettingsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        try {
-            val account = SingleAccountHelper.getCurrentSingleSignOnAccount(context)
-            username.text = account.name
-        } catch (e: SSOException) {
-            UiExceptionManager.showDialogForException(context, e)
-        }
-
         lifecycleScope.launch {
             showReadNews.isChecked = model.getShowReadNews().first()
 
@@ -48,6 +38,8 @@ class SettingsFragment : Fragment() {
                     model.setShowReadNews(isChecked)
                 }
             }
+
+            username.text = model.getAccountName()
         }
 
         logOut.setOnClickListener {

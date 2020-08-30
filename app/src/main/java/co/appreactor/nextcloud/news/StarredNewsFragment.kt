@@ -11,9 +11,6 @@ import androidx.lifecycle.whenResumed
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import co.appreactor.nextcloud.news.db.NewsItem
-import com.nextcloud.android.sso.exceptions.SSOException
-import com.nextcloud.android.sso.helper.SingleAccountHelper
-import com.nextcloud.android.sso.ui.UiExceptionManager
 import kotlinx.android.synthetic.main.fragment_starred_news.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -43,18 +40,8 @@ class StarredNewsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         lifecycleScope.launch {
             whenResumed {
-                showAuthOrShowData()
+                showData()
             }
-        }
-    }
-
-    private suspend fun showAuthOrShowData() {
-        try {
-            SingleAccountHelper.getCurrentSingleSignOnAccount(context)
-            model.sync()
-            showData()
-        } catch (e: SSOException) {
-            UiExceptionManager.showDialogForException(context, e)
         }
     }
 
