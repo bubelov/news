@@ -20,7 +20,7 @@ val appModule = module {
 
     single<NewsItemsRepository>()
     single<NewsFeedsRepository>()
-    single<PreferencesRepository>()
+    single<Preferences>()
 
     single { Database(get()) }
     single { get<Database>().newsItemQueries }

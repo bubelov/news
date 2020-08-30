@@ -12,12 +12,12 @@ import retrofit2.NextcloudRetrofitApiBuilder
 val apiModule = module {
 
     single<NewsApi> {
-        val prefs = get<PreferencesRepository>()
-        val serverUrl = runBlocking { prefs.get(PreferencesRepository.SERVER_URL).first() }
+        val prefs = get<Preferences>()
+        val serverUrl = runBlocking { prefs.getString(Preferences.SERVER_URL).first() }
 
         if (serverUrl.isNotBlank()) {
-            val username = runBlocking { prefs.get(PreferencesRepository.SERVER_USERNAME).first() }
-            val password = runBlocking { prefs.get(PreferencesRepository.SERVER_PASSWORD).first() }
+            val username = runBlocking { prefs.getString(Preferences.SERVER_USERNAME).first() }
+            val password = runBlocking { prefs.getString(Preferences.SERVER_PASSWORD).first() }
 
             DirectApiBuilder().build(
                 serverUrl,

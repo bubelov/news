@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 class NewsFragmentModel(
     private val newsItemsRepository: NewsItemsRepository,
     private val newsFeedsRepository: NewsFeedsRepository,
-    private val preferencesRepository: PreferencesRepository,
+    private val prefs: Preferences,
     private val sync: Sync
 ) : ViewModel() {
 
@@ -17,8 +17,8 @@ class NewsFragmentModel(
 
     init {
         viewModelScope.launch {
-            preferencesRepository.get(PreferencesRepository.SHOW_READ_NEWS).collect {
-                showReadNews.value = it.isEmpty() || it == "true"
+            prefs.getBoolean(Preferences.SHOW_READ_NEWS, true).collect {
+                showReadNews.value = it
             }
         }
     }

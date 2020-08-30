@@ -7,16 +7,29 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
-class PreferencesRepository(
+class Preferences(
     private val cache: PreferenceQueries
 ) {
 
-    suspend fun get(key: String) = withContext(Dispatchers.IO) {
+    suspend fun getString(key: String) = withContext(Dispatchers.IO) {
         cache.findByKey(key).asFlow().map { it.executeAsOneOrNull()?.value ?: "" }
     }
 
-    suspend fun put(key: String, value: String) = withContext(Dispatchers.IO) {
+    suspend fun putString(key: String, value: String) = withContext(Dispatchers.IO) {
         cache.insertOrReplace(Preference(key, value))
+    }
+
+    suspend fun getBoolean(key: String, default: Boolean) = getString(key).map {
+        when (it) {
+            "" -> default
+            "true" -> true
+            "false" -> false
+            else -> throw Exception("Unsupported value: $it")
+        }
+    }
+
+    suspend fun putBoolean(key: String, value: Boolean) {
+        putString(key, if (value) "true" else "false")
     }
 
     suspend fun clear() = withContext(Dispatchers.IO) {

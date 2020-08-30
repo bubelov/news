@@ -6,7 +6,7 @@ import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 class DirectAuthFragmentModel(
-    private val prefs: PreferencesRepository,
+    private val prefs: Preferences,
 ) : ViewModel() {
 
     suspend fun isApiAvailable(
@@ -38,8 +38,8 @@ class DirectAuthFragmentModel(
         username: String,
         password: String
     ) {
-        prefs.put(PreferencesRepository.SERVER_URL, serverUrl)
-        prefs.put(PreferencesRepository.SERVER_USERNAME, username)
-        prefs.put(PreferencesRepository.SERVER_PASSWORD, password)
+        prefs.putString(Preferences.SERVER_URL, serverUrl)
+        prefs.putString(Preferences.SERVER_USERNAME, username)
+        prefs.putString(Preferences.SERVER_PASSWORD, password)
     }
 }
