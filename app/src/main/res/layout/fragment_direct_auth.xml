@@ -44,6 +44,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:hint="@string/username"
+        app:errorEnabled="true"
         app:layout_constraintTop_toBottomOf="@id/serverUrlLayout"
         app:startIconDrawable="@drawable/ic_baseline_person_24">
 
@@ -62,6 +63,7 @@
         android:layout_margin="16dp"
         android:hint="@string/password"
         app:endIconMode="password_toggle"
+        app:errorEnabled="true"
         app:layout_constraintTop_toBottomOf="@id/usernameLayout"
         app:startIconDrawable="@drawable/ic_baseline_vpn_key_24">
 
@@ -82,5 +84,24 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <FrameLayout
+        android:id="@+id/progress"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="?android:colorBackground"
+        android:elevation="10dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
+
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

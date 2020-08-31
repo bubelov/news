@@ -14,13 +14,13 @@ class DirectAuthFragmentModel(
         username: String,
         password: String
     ): Boolean {
-        val api = DirectApiBuilder().build(
-            serverUrl,
-            username,
-            password
-        )
-
         return try {
+            val api = DirectApiBuilder().build(
+                serverUrl,
+                username,
+                password
+            )
+
             withContext(Dispatchers.IO) {
                 api.getFeeds().execute().body()!!
             }
@@ -30,7 +30,6 @@ class DirectAuthFragmentModel(
             Timber.e(e)
             false
         }
-
     }
 
     suspend fun setServer(

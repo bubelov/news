@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -36,8 +37,30 @@ class DirectAuthFragment : Fragment() {
         }
 
         login.setOnClickListener {
+            if (serverUrl.text.isNullOrEmpty()) {
+                serverUrlLayout.error = getString(R.string.field_is_empty)
+            } else {
+                serverUrlLayout.error = null
+            }
+
+            if (username.text.isNullOrEmpty()) {
+                usernameLayout.error = getString(R.string.field_is_empty)
+            } else {
+                usernameLayout.error = null
+            }
+
+            if (password.text.isNullOrEmpty()) {
+                passwordLayout.error = getString(R.string.field_is_empty)
+            } else {
+                passwordLayout.error = null
+            }
+
+            if (serverUrlLayout.error != null || usernameLayout.error != null || passwordLayout.error != null) {
+                return@setOnClickListener
+            }
+
             lifecycleScope.launchWhenResumed {
-                login.isEnabled = false
+                progress.isVisible = true
 
                 val success = model.isApiAvailable(
                     serverUrl.text.toString(),
@@ -64,7 +87,7 @@ class DirectAuthFragment : Fragment() {
                         navigate(R.id.newsFragment)
                     }
                 } else {
-                    login.isEnabled = true
+                    progress.isVisible = false
 
                     MaterialAlertDialogBuilder(requireContext())
                         .setMessage(getString(R.string.direct_login_failed))
