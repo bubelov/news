@@ -3,16 +3,18 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         style="@style/Widget.MaterialComponents.Toolbar.PrimarySurface"
         android:layout_width="match_parent"
+        app:menu="@menu/menu_news_item"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
-        app:title="Item" />
+        tools:title="Item" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -20,15 +22,42 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar">
 
-        <TextView
-            android:id="@+id/textView"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:lineSpacingMultiplier="1.2"
-            android:padding="16dp"
-            android:textAppearance="?attr/textAppearanceBody1" />
+            android:orientation="vertical"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="match_parent"
+                android:paddingBottom="8dp"
+                android:textColor="?colorOnBackground"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceHeadline4" />
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lineSpacingMultiplier="1.2"
+                android:textAppearance="?attr/textAppearanceBody1" />
+
+        </LinearLayout>
 
     </ScrollView>
+
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_width="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_height="wrap_content" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"

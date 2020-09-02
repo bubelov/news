@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <dimen name="bullet_radius">3dp</dimen>
+    <dimen name="bullet_gap">8dp</dimen>
+</resources>

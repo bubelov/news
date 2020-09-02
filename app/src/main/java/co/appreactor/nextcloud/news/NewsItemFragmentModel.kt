@@ -2,8 +2,10 @@ package co.appreactor.nextcloud.news
 
 import androidx.lifecycle.ViewModel
 import co.appreactor.nextcloud.news.db.NewsItem
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 class NewsItemFragmentModel(
     private val newsItemsRepository: NewsItemsRepository,
@@ -32,6 +34,9 @@ class NewsItemFragmentModel(
 
     suspend fun markAsRead(id: Long) {
         newsItemsRepository.updateUnread(id, false)
-        sync.syncNewsFlagsOnly()
+
+        GlobalScope.launch {
+            sync.syncNewsFlagsOnly()
+        }
     }
 }

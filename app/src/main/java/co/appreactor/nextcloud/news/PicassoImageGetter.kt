@@ -12,7 +12,7 @@ class PicassoImageGetter(private val textView: TextView) : Html.ImageGetter {
 
         Picasso.get()
             .load(source)
-            .placeholder(R.drawable.ic_baseline_star_24)
+            .resize(textView.width, 0)
             .into(drawable)
 
         return drawable
