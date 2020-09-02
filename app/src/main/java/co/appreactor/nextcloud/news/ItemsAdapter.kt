@@ -9,11 +9,10 @@ import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.nextcloud.news.db.NewsFeed
 import co.appreactor.nextcloud.news.db.NewsItem
 import kotlinx.android.synthetic.main.row_item.view.*
+import kotlinx.datetime.*
 import java.lang.Integer.min
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
+import java.text.DateFormat
+import java.util.*
 import java.util.regex.Pattern
 
 class ItemsAdapter(
@@ -35,14 +34,15 @@ class ItemsAdapter(
                 image.isVisible = false // TODO
 
                 primaryText.text = item.title
-                val date = LocalDateTime.ofEpochSecond(item.pubDate, 0, ZoneOffset.UTC)
-                val dateString = date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
-                secondaryText.text =
-                    resources.getString(R.string.s_s_s, feed.title, "·", dateString)
+
+                val instant = Instant.fromEpochSeconds(item.pubDate)
+                val dateString = DateFormat.getDateInstance().format(Date.from(instant.toJavaInstant()))
+                secondaryText.text = resources.getString(R.string.s_s_s, feed.title, "·", dateString)
 
                 val replaceImgPattern = Pattern.compile("<img([\\w\\W]+?)>", Pattern.DOTALL)
                 val body = item.body.replace(replaceImgPattern.toRegex(), "")
-                val parsedBody = HtmlCompat.fromHtml(body, HtmlCompat.FROM_HTML_MODE_COMPACT).toString().replace("\n", " ")
+                val parsedBody =
+                    HtmlCompat.fromHtml(body, HtmlCompat.FROM_HTML_MODE_COMPACT).toString().replace("\n", " ")
 
                 val summary = buildString {
                     append(parsedBody.substring(0, min(parsedBody.length - 1, SUMMARY_MAX_LENGTH)))

@@ -20,7 +20,6 @@ android {
     }
 
     compileOptions {
-        coreLibraryDesugaringEnabled true
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
@@ -28,7 +27,6 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
         freeCompilerArgs += "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
-        //freeCompilerArgs += "-Xopt-in=kotlin.time.ExperimentalTime"
     }
 
     signingConfigs {
@@ -57,8 +55,6 @@ android {
 }
 
 dependencies {
-    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$versions_desugaring"
-
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$versions_coroutines"
     implementation "androidx.core:core-ktx:$versions_ktx"
@@ -88,6 +84,7 @@ dependencies {
     implementation "com.squareup.sqldelight:coroutines-extensions:$versions_sqldelight"
     implementation "com.jakewharton.timber:timber:$versions_timber"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:$versions_swipe_refresh"
+    implementation "org.jetbrains.kotlinx:kotlinx-datetime:$versions_datetime"
 
     testImplementation "junit:junit:$versions_junit"
 
