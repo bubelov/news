@@ -14,6 +14,7 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import java.util.regex.Pattern
 
 class ItemsAdapter(
     private val items: MutableList<NewsItem>,
@@ -21,7 +22,12 @@ class ItemsAdapter(
     var onClick: ((NewsItem) -> Unit)? = null
 ) : RecyclerView.Adapter<ItemsAdapter.ViewHolder>() {
 
-    class ViewHolder(private val view: View, private val onClick: ((NewsItem) -> Unit)?) : RecyclerView.ViewHolder(view) {
+    companion object {
+        private const val SUMMARY_MAX_LENGTH = 150
+    }
+
+    class ViewHolder(private val view: View, private val onClick: ((NewsItem) -> Unit)?) :
+        RecyclerView.ViewHolder(view) {
         fun bind(item: NewsItem, feed: NewsFeed, isFirst: Boolean) {
             view.apply {
                 topOffset.isVisible = isFirst
@@ -31,12 +37,22 @@ class ItemsAdapter(
                 primaryText.text = item.title
                 val date = LocalDateTime.ofEpochSecond(item.pubDate, 0, ZoneOffset.UTC)
                 val dateString = date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
-                secondaryText.text = resources.getString(R.string.s_s_s, feed.title, "·", dateString)
+                secondaryText.text =
+                    resources.getString(R.string.s_s_s, feed.title, "·", dateString)
 
-                val body = HtmlCompat.fromHtml(item.body, HtmlCompat.FROM_HTML_MODE_COMPACT)
+                val replaceImgPattern = Pattern.compile("<img([\\w\\W]+?)>", Pattern.DOTALL)
+                val body = item.body.replace(replaceImgPattern.toRegex(), "")
+                val parsedBody = HtmlCompat.fromHtml(body, HtmlCompat.FROM_HTML_MODE_COMPACT).toString().replace("\n", " ")
 
-                val shortBody = body.substring(0, min(body.length - 1, 150)) + "..."
-                supportingText.text = shortBody.trimStart { !it.isLetterOrDigit() }
+                val summary = buildString {
+                    append(parsedBody.substring(0, min(parsedBody.length - 1, SUMMARY_MAX_LENGTH)))
+
+                    if (length == SUMMARY_MAX_LENGTH) {
+                        append("…")
+                    }
+                }
+
+                supportingText.text = summary
 
                 primaryText.isEnabled = item.unread
                 secondaryText.isEnabled = item.unread

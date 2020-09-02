@@ -2,18 +2,26 @@ CREATE TABLE NewsItem (
   id INTEGER PRIMARY KEY,
   guid TEXT NOT NULL,
   guidHash TEXT NOT NULL,
-  title TEXT NOT NULL,
   url TEXT NOT NULL,
+  title TEXT NOT NULL,
   author TEXT NOT NULL,
   pubDate INTEGER NOT NULL,
-  feedId INTEGER NOT NULL,
-  starred INTEGER AS Boolean NOT NULL,
-  starredSynced INTEGER AS Boolean NOT NULL,
+  updatedDate INTEGER,
   body TEXT NOT NULL,
+  summary TEXT NOT NULL,
+  enclosureMime TEXT,
+  enclosureLink TEXT,
   mediaThumbnail TEXT,
+  mediaDescription TEXT,
+  feedId INTEGER NOT NULL,
   unread INTEGER AS Boolean NOT NULL,
   unreadSynced INTEGER AS Boolean NOT NULL,
-  lastModified INTEGER NOT NULL
+  starred INTEGER AS Boolean NOT NULL,
+  starredSynced INTEGER AS Boolean NOT NULL,
+  lastModified INTEGER NOT NULL,
+  rtl INTEGER AS Boolean NOT NULL,
+  fingerprint TEXT NOT NULL,
+  contentHash TEXT NOT NULL
 );
 
 insertOrReplace:

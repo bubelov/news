@@ -57,7 +57,8 @@ class NewsItemsRepository(
                 cache.insertOrReplace(
                     it.copy(
                         unreadSynced = true,
-                        starredSynced = true
+                        starredSynced = true,
+                        summary = getSummary(it.body)
                     )
                 )
             }
@@ -162,10 +163,20 @@ class NewsItemsRepository(
 
         cache.transaction {
             items.forEach {
-                cache.insertOrReplace(it.copy(unreadSynced = true))
+                cache.insertOrReplace(
+                    it.copy(
+                        unreadSynced = true,
+                        starredSynced = true,
+                        summary = getSummary(it.body)
+                    )
+                )
             }
         }
 
         Timber.d("Finished syncing new and updated items")
+    }
+
+    private fun getSummary(body: String): String {
+        return "" // TODO
     }
 }
