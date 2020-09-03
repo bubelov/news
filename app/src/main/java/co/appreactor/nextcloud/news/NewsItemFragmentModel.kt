@@ -37,20 +37,18 @@ class NewsItemFragmentModel(
     suspend fun toggleReadFlag(id: Long) {
         val item = getNewsItem(id)
         newsItemsRepository.updateUnread(id, !item.unread)
-        sync.syncNewsFlagsOnly()
     }
 
     suspend fun toggleStarredFlag(id: Long) {
         val item = getNewsItem(id)
         newsItemsRepository.updateStarred(id, !item.starred)
-        sync.syncNewsFlagsOnly()
     }
 
-    suspend fun markAsRead(id: Long) {
-        newsItemsRepository.updateUnread(id, false)
-
+    fun syncNewsFlags() {
         GlobalScope.launch {
-            sync.syncNewsFlagsOnly()
+            runCatching {
+                sync.syncNewsFlagsOnly()
+            }
         }
     }
 }

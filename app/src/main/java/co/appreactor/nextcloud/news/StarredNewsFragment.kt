@@ -15,7 +15,6 @@ import kotlinx.android.synthetic.main.fragment_starred_news.empty
 import kotlinx.android.synthetic.main.fragment_starred_news.itemsView
 import kotlinx.android.synthetic.main.fragment_starred_news.progress
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
 
@@ -57,12 +56,10 @@ class StarredNewsFragment : Fragment() {
             adapter = itemsAdapter
         }
 
-        model.getNewsAndFeeds().collect { data ->
-            if (model.isInitialSyncCompleted().first()) {
-                progress.isVisible = false
-            }
+        model.getNewsItems().collect { news ->
+            progress.isVisible = false
 
-            empty.isVisible = data.first.isEmpty() && model.isInitialSyncCompleted().first()
+            empty.isVisible = news.isEmpty()
 
             val onItemClick: (NewsItem) -> Unit = {
                 lifecycleScope.launch {
@@ -74,7 +71,7 @@ class StarredNewsFragment : Fragment() {
 
             itemsAdapter.onClick = onItemClick
 
-            itemsAdapter.swapItems(data.first.map { it.copy(unread = true) }, data.second)
+            itemsAdapter.swapItems(news.map { it.copy(unread = true) }, model.getFeeds())
         }
     }
 }

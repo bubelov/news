@@ -50,7 +50,8 @@ class NewsItemFragment : Fragment() {
             val item = model.getNewsItem(args.newsItemId)
 
             if (item.unread) {
-                model.markAsRead(item.id)
+                model.toggleReadFlag(item.id)
+                model.syncNewsFlags()
             }
 
             toolbar.title = model.getFeed(item.feedId).title
@@ -142,6 +143,7 @@ class NewsItemFragment : Fragment() {
             if (it.itemId == R.id.toggleRead) {
                 lifecycleScope.launch {
                     model.toggleReadFlag(args.newsItemId)
+                    model.syncNewsFlags()
                 }
 
                 return@setOnMenuItemClickListener true
@@ -150,6 +152,7 @@ class NewsItemFragment : Fragment() {
             if (it.itemId == R.id.toggleStarred) {
                 lifecycleScope.launch {
                     model.toggleStarredFlag(args.newsItemId)
+                    model.syncNewsFlags()
                 }
 
                 return@setOnMenuItemClickListener true

@@ -86,26 +86,32 @@ class NewsItemsRepository(
         Timber.d("Of them, read: ${unsyncedReadItems.size}")
         Timber.d("Of them, unread: ${unsyncedUnreadItems.size}")
 
-        api.markAsRead(PutReadArgs(
+        val markAsReadResponse = api.markAsRead(PutReadArgs(
             unsyncedReadItems.map { it.id }
         )).execute()
 
-        cache.transaction {
-            unsyncedReadItems.forEach {
-                cache.updateUnreadSynced(true, it.id)
+        if (markAsReadResponse.isSuccessful) {
+            cache.transaction {
+                unsyncedReadItems.forEach {
+                    cache.updateUnreadSynced(true, it.id)
+                }
             }
+        } else {
+            throw Exception(markAsReadResponse.message())
         }
 
-        api.markAsUnread(
-            PutReadArgs(
-                unsyncedUnreadItems.map { it.id }
-            )
-        ).execute()
+        val markAsUnreadResponse = api.markAsUnread(PutReadArgs(
+            unsyncedUnreadItems.map { it.id }
+        )).execute()
 
-        cache.transaction {
-            unsyncedUnreadItems.forEach {
-                cache.updateUnreadSynced(true, it.id)
+        if (markAsUnreadResponse.isSuccessful) {
+            cache.transaction {
+                unsyncedUnreadItems.forEach {
+                    cache.updateUnreadSynced(true, it.id)
+                }
             }
+        } else {
+            throw Exception(markAsUnreadResponse.message())
         }
 
         Timber.d("Finished syncing unread flags")

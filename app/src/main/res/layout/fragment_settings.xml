@@ -35,7 +35,10 @@
             android:clickable="true"
             android:focusable="true"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:paddingStart="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:paddingEnd="16dp">
 
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/showReadNews"

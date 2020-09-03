@@ -1,7 +1,16 @@
 CREATE TABLE NewsFeed (
   id INTEGER PRIMARY KEY,
+  url TEXT NOT NULL,
   title TEXT NOT NULL,
-  faviconLink TEXT NOT NULL
+  faviconLink TEXT NOT NULL,
+  added INTEGER NOT NULL,
+  folderId INTEGER NOT NULL,
+  unreadCount INTEGER NOT NULL,
+  ordering INTEGER NOT NULL,
+  link TEXT NOT NULL,
+  pinned INTEGER AS Boolean NOT NULL,
+  updateErrorCount INTEGER NOT NULL,
+  lastUpdateError TEXT NOT NULL
 );
 
 insertOrReplace:

@@ -11,6 +11,7 @@ import androidx.lifecycle.whenResumed
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import co.appreactor.nextcloud.news.db.NewsItem
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.fragment_news.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
@@ -75,7 +76,18 @@ class NewsFragment : Fragment() {
 
         swipeRefresh.setOnRefreshListener {
             lifecycleScope.launch {
-                model.sync()
+                runCatching {
+                    model.sync()
+                }.apply {
+                    if (isFailure) {
+                        MaterialAlertDialogBuilder(requireContext())
+                            .setTitle(getString(R.string.error))
+                            .setMessage(exceptionOrNull()?.message)
+                            .setPositiveButton(android.R.string.ok, null)
+                            .show()
+                    }
+                }
+
                 swipeRefresh.isRefreshing = false
             }
         }
@@ -84,9 +96,19 @@ class NewsFragment : Fragment() {
     private suspend fun showData() {
         progress.isVisible = true
 
-        Timber.d("Performing initial sync")
-        model.performInitialSyncIfNoData()
-        Timber.d("Performed initial sync")
+        runCatching {
+            model.performInitialSyncIfNoData()
+        }.apply {
+            if (isFailure) {
+                progress.isVisible = false
+
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(getString(R.string.error))
+                    .setMessage(exceptionOrNull()?.message)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show()
+            }
+        }
 
         itemsView.apply {
             setHasFixedSize(true)
