@@ -3,27 +3,20 @@ package co.appreactor.nextcloud.news
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.text.HtmlCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.nextcloud.news.db.NewsFeed
 import co.appreactor.nextcloud.news.db.NewsItem
 import kotlinx.android.synthetic.main.row_item.view.*
 import kotlinx.datetime.*
-import java.lang.Integer.min
 import java.text.DateFormat
 import java.util.*
-import java.util.regex.Pattern
 
 class ItemsAdapter(
     private val items: MutableList<NewsItem>,
     private val feeds: MutableList<NewsFeed>,
     var onClick: ((NewsItem) -> Unit)? = null
 ) : RecyclerView.Adapter<ItemsAdapter.ViewHolder>() {
-
-    companion object {
-        private const val SUMMARY_MAX_LENGTH = 150
-    }
 
     class ViewHolder(private val view: View, private val onClick: ((NewsItem) -> Unit)?) :
         RecyclerView.ViewHolder(view) {
@@ -39,20 +32,7 @@ class ItemsAdapter(
                 val dateString = DateFormat.getDateInstance().format(Date(instant.toEpochMilliseconds()))
                 secondaryText.text = resources.getString(R.string.s_s_s, feed.title, "·", dateString)
 
-                val replaceImgPattern = Pattern.compile("<img([\\w\\W]+?)>", Pattern.DOTALL)
-                val body = item.body.replace(replaceImgPattern.toRegex(), "")
-                val parsedBody =
-                    HtmlCompat.fromHtml(body, HtmlCompat.FROM_HTML_MODE_COMPACT).toString().replace("\n", " ")
-
-                val summary = buildString {
-                    append(parsedBody.substring(0, min(parsedBody.length - 1, SUMMARY_MAX_LENGTH)))
-
-                    if (length == SUMMARY_MAX_LENGTH) {
-                        append("…")
-                    }
-                }
-
-                supportingText.text = summary
+                supportingText.text = item.summary
 
                 primaryText.isEnabled = item.unread
                 secondaryText.isEnabled = item.unread

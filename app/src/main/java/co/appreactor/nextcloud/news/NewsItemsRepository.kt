@@ -1,5 +1,6 @@
 package co.appreactor.nextcloud.news
 
+import androidx.core.text.HtmlCompat
 import co.appreactor.nextcloud.news.db.NewsItemQueries
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import kotlinx.coroutines.Dispatchers
@@ -8,11 +9,17 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import java.util.regex.Pattern
+import kotlin.math.min
 
 class NewsItemsRepository(
     private val cache: NewsItemQueries,
     private val api: NewsApi
 ) {
+
+    companion object {
+        private const val SUMMARY_MAX_LENGTH = 150
+    }
 
     suspend fun all() = withContext(Dispatchers.IO) {
         cache.findAll().asFlow().map { it.executeAsList() }
@@ -177,6 +184,17 @@ class NewsItemsRepository(
     }
 
     private fun getSummary(body: String): String {
-        return "" // TODO
+        val replaceImgPattern = Pattern.compile("<img([\\w\\W]+?)>", Pattern.DOTALL)
+        val bodyWithoutImg = body.replace(replaceImgPattern.toRegex(), "")
+        val parsedBody =
+            HtmlCompat.fromHtml(bodyWithoutImg, HtmlCompat.FROM_HTML_MODE_COMPACT).toString().replace("\n", " ")
+
+        return buildString {
+            append(parsedBody.substring(0, min(parsedBody.length - 1, SUMMARY_MAX_LENGTH)))
+
+            if (length == SUMMARY_MAX_LENGTH) {
+                append("…")
+            }
+        }
     }
 }
