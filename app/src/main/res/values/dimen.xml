@@ -3,4 +3,7 @@
 <resources>
     <dimen name="bullet_radius">3dp</dimen>
     <dimen name="bullet_gap">8dp</dimen>
+
+    <dimen name="quote_stripe_width">2dp</dimen>
+    <dimen name="quote_gap">8dp</dimen>
 </resources>

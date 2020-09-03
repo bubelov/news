@@ -7,6 +7,7 @@ import android.text.SpannableStringBuilder
 import android.text.method.LinkMovementMethod
 import android.text.style.BulletSpan
 import android.text.style.ImageSpan
+import android.text.style.QuoteSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -55,9 +56,7 @@ class NewsItemFragment : Fragment() {
             }
 
             toolbar.title = model.getFeed(item.feedId).title
-
             title.text = item.title
-
             date.text = model.getDate(item)
 
             val imageGetter = PicassoImageGetter(textView)
@@ -79,6 +78,21 @@ class NewsItemFragment : Fragment() {
 
                         body.setSpan(
                             BulletSpan(gap, textView.currentTextColor, radius),
+                            body.getSpanStart(it),
+                            body.getSpanEnd(it),
+                            0
+                        )
+
+                        body.removeSpan(it)
+                    }
+
+                    is QuoteSpan -> {
+                        val color = date.currentTextColor
+                        val stripe = resources.getDimension(R.dimen.quote_stripe_width).toInt()
+                        val gap = resources.getDimension(R.dimen.quote_gap).toInt()
+
+                        body.setSpan(
+                            QuoteSpan(color, stripe, gap),
                             body.getSpanStart(it),
                             body.getSpanEnd(it),
                             0
