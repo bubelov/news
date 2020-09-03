@@ -37,7 +37,7 @@
                 android:layout_width="match_parent"
                 android:textColor="?colorOnBackground"
                 android:layout_height="wrap_content"
-                android:textAppearance="?attr/textAppearanceHeadline4" />
+                android:textAppearance="?attr/textAppearanceHeadline5" />
 
             <TextView
                 android:id="@+id/date"

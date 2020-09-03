@@ -2,6 +2,7 @@ package co.appreactor.nextcloud.news
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
+import co.appreactor.nextcloud.news.news.NewsItemsRepository
 import com.nextcloud.android.sso.AccountImporter
 import com.nextcloud.android.sso.exceptions.SSOException
 import com.nextcloud.android.sso.helper.SingleAccountHelper

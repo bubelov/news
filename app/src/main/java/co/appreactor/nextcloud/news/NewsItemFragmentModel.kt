@@ -3,6 +3,7 @@ package co.appreactor.nextcloud.news
 import androidx.lifecycle.ViewModel
 import co.appreactor.nextcloud.news.db.NewsFeed
 import co.appreactor.nextcloud.news.db.NewsItem
+import co.appreactor.nextcloud.news.news.NewsItemsRepository
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map

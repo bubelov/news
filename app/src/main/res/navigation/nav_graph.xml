@@ -45,7 +45,7 @@
 
     <fragment
         android:id="@+id/newsFragment"
-        android:name="co.appreactor.nextcloud.news.NewsFragment"
+        android:name="co.appreactor.nextcloud.news.news.NewsFragment"
         android:label="NewsFragment"
         tools:layout="@layout/fragment_news">
         <action
@@ -67,7 +67,7 @@
 
     <fragment
         android:id="@+id/starredNewsFragment"
-        android:name="co.appreactor.nextcloud.news.StarredNewsFragment"
+        android:name="co.appreactor.nextcloud.news.starred.StarredNewsFragment"
         android:label="StarredNewsFragment"
         tools:layout="@layout/fragment_starred_news">
         <action

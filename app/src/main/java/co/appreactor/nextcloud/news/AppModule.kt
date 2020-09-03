@@ -1,5 +1,8 @@
 package co.appreactor.nextcloud.news
 
+import co.appreactor.nextcloud.news.news.NewsFragmentModel
+import co.appreactor.nextcloud.news.news.NewsItemsRepository
+import co.appreactor.nextcloud.news.starred.StarredNewsFragmentModel
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
 import org.koin.android.experimental.dsl.viewModel

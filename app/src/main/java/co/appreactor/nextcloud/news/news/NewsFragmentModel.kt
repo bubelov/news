@@ -1,7 +1,12 @@
-package co.appreactor.nextcloud.news
+package co.appreactor.nextcloud.news.news
 
 import androidx.lifecycle.ViewModel
+import co.appreactor.nextcloud.news.NewsFeedsRepository
+import co.appreactor.nextcloud.news.Preferences
+import co.appreactor.nextcloud.news.Sync
 import kotlinx.coroutines.flow.*
+import java.text.DateFormat
+import java.util.*
 
 class NewsFragmentModel(
     private val newsItemsRepository: NewsItemsRepository,
@@ -10,11 +15,26 @@ class NewsFragmentModel(
     private val sync: Sync
 ) : ViewModel() {
 
-    suspend fun getNews() = newsItemsRepository.all().combine(getShowReadNews()) { items, showRead ->
-        if (showRead) {
-            return@combine items
+    suspend fun getNews() = newsItemsRepository.all().combine(getShowReadNews()) { unfilteredItems, showRead ->
+        val items = if (showRead) {
+            unfilteredItems
         } else {
-            return@combine items.filter { it.unread }
+            unfilteredItems.filter { it.unread }
+        }
+
+        val feeds = newsFeedsRepository.all()
+
+        return@combine items.map {
+            val dateString = DateFormat.getDateInstance().format(Date(it.pubDate * 1000))
+            val feed = feeds.single { feed -> feed.id == it.feedId }
+
+            NewsAdapterRow(
+                it.id,
+                it.title,
+                feed.title + " · " + dateString,
+                it.summary,
+                it.unread
+            )
         }
     }
 

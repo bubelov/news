@@ -1,4 +1,4 @@
-package co.appreactor.nextcloud.news
+package co.appreactor.nextcloud.news.starred
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,25 +7,24 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.whenResumed
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import co.appreactor.nextcloud.news.db.NewsItem
+import co.appreactor.nextcloud.news.R
+import co.appreactor.nextcloud.news.news.NewsAdapter
 import kotlinx.android.synthetic.main.fragment_starred_news.empty
 import kotlinx.android.synthetic.main.fragment_starred_news.itemsView
 import kotlinx.android.synthetic.main.fragment_starred_news.progress
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
 
 class StarredNewsFragment : Fragment() {
 
     private val model: StarredNewsFragmentModel by viewModel()
 
-    private val itemsAdapter = ItemsAdapter(
-        items = mutableListOf(),
-        feeds = mutableListOf()
-    )
+    private val adapter = NewsAdapter {
+        val action = StarredNewsFragmentDirections.actionStarredNewsFragmentToNewsItemFragment(it.id)
+        findNavController().navigate(action)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,38 +39,25 @@ class StarredNewsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        lifecycleScope.launch {
-            whenResumed {
-                showData()
-            }
+        lifecycleScope.launchWhenResumed {
+            initNewsList()
         }
     }
 
-    private suspend fun showData() {
+    private suspend fun initNewsList() {
         progress.isVisible = true
 
         itemsView.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(context)
-            adapter = itemsAdapter
         }
 
-        model.getNewsItems().collect { news ->
+        itemsView.adapter = adapter
+
+        model.getNewsItems().collect { rows ->
             progress.isVisible = false
-
-            empty.isVisible = news.isEmpty()
-
-            val onItemClick: (NewsItem) -> Unit = {
-                lifecycleScope.launch {
-                    val action =
-                        StarredNewsFragmentDirections.actionStarredNewsFragmentToNewsItemFragment(it.id)
-                    findNavController().navigate(action)
-                }
-            }
-
-            itemsAdapter.onClick = onItemClick
-
-            itemsAdapter.swapItems(news.map { it.copy(unread = true) }, model.getFeeds())
+            empty.isVisible = rows.isEmpty()
+            adapter.swapRows(rows)
         }
     }
 }

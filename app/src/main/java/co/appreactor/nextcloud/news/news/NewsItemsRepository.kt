@@ -1,6 +1,10 @@
-package co.appreactor.nextcloud.news
+package co.appreactor.nextcloud.news.news
 
 import androidx.core.text.HtmlCompat
+import co.appreactor.nextcloud.news.NewsApi
+import co.appreactor.nextcloud.news.PutReadArgs
+import co.appreactor.nextcloud.news.PutStarredArgs
+import co.appreactor.nextcloud.news.PutStarredArgsItem
 import co.appreactor.nextcloud.news.db.NewsItemQueries
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import kotlinx.coroutines.Dispatchers

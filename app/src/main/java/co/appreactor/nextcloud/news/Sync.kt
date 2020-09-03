@@ -1,5 +1,6 @@
 package co.appreactor.nextcloud.news
 
+import co.appreactor.nextcloud.news.news.NewsItemsRepository
 import timber.log.Timber
 
 class Sync(
