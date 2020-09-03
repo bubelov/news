@@ -13,6 +13,11 @@ findAll:
 SELECT *
 FROM NewsFeed;
 
+findById:
+SELECT *
+FROM NewsFeed
+WHERE id = :id;
+
 count:
 SELECT COUNT(*)
 FROM NewsFeed;

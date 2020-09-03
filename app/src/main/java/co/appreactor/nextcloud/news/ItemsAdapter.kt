@@ -36,7 +36,7 @@ class ItemsAdapter(
                 primaryText.text = item.title
 
                 val instant = Instant.fromEpochSeconds(item.pubDate)
-                val dateString = DateFormat.getDateInstance().format(Date.from(instant.toJavaInstant()))
+                val dateString = DateFormat.getDateInstance().format(Date(instant.toEpochMilliseconds()))
                 secondaryText.text = resources.getString(R.string.s_s_s, feed.title, "·", dateString)
 
                 val replaceImgPattern = Pattern.compile("<img([\\w\\W]+?)>", Pattern.DOTALL)

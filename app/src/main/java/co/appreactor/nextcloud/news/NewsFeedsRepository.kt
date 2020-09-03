@@ -1,7 +1,9 @@
 package co.appreactor.nextcloud.news
 
 import co.appreactor.nextcloud.news.db.NewsFeedQueries
+import com.squareup.sqldelight.runtime.coroutines.asFlow
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
@@ -12,6 +14,10 @@ class NewsFeedsRepository(
 
     suspend fun all() = withContext(Dispatchers.IO) {
         cache.findAll().executeAsList()
+    }
+
+    suspend fun byId(id: Long) = withContext(Dispatchers.IO) {
+        cache.findById(id).asFlow().map { it.executeAsOneOrNull() }
     }
 
     suspend fun clear() = withContext(Dispatchers.IO) {

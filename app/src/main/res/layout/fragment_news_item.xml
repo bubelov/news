@@ -33,11 +33,19 @@
 
             <TextView
                 android:id="@+id/title"
-                android:layout_width="match_parent"
                 android:paddingBottom="8dp"
+                android:layout_width="match_parent"
                 android:textColor="?colorOnBackground"
                 android:layout_height="wrap_content"
                 android:textAppearance="?attr/textAppearanceHeadline4" />
+
+            <TextView
+                android:id="@+id/date"
+                android:layout_width="match_parent"
+                android:paddingBottom="12dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceBody1"
+                android:textColor="?android:attr/textColorSecondary" />
 
             <TextView
                 android:id="@+id/textView"
@@ -64,6 +72,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
+        app:tint="?colorSurface"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/ic_baseline_open_in_browser_24" />

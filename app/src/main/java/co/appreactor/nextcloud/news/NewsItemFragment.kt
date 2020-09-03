@@ -53,7 +53,11 @@ class NewsItemFragment : Fragment() {
                 model.markAsRead(item.id)
             }
 
-            toolbar.title = item.author
+            toolbar.title = model.getFeed(item.feedId).title
+
+            title.text = item.title
+
+            date.text = model.getDate(item)
 
             val imageGetter = PicassoImageGetter(textView)
 
@@ -63,8 +67,6 @@ class NewsItemFragment : Fragment() {
                 imageGetter,
                 null
             ) as SpannableStringBuilder
-
-            title.text = item.title
 
             val spans = body.getSpans(0, body.length - 1, Any::class.java)
 
