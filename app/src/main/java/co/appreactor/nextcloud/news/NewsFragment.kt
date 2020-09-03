@@ -45,7 +45,7 @@ class NewsFragment : Fragment() {
             inflateMenu(R.menu.menu_news)
 
             lifecycleScope.launchWhenResumed {
-                model.showReadNews.collect { show ->
+                model.getShowReadNews().collect { show ->
                     val item = menu.findItem(R.id.showReadNews)
 
                     if (show) {
@@ -60,7 +60,10 @@ class NewsFragment : Fragment() {
 
             setOnMenuItemClickListener {
                 if (it.itemId == R.id.showReadNews) {
-                    model.showReadNews.value = !model.showReadNews.value
+                    lifecycleScope.launch {
+                        model.setShowReadNews(!model.getShowReadNews().first())
+                    }
+
                     return@setOnMenuItemClickListener true
                 }
 
@@ -77,7 +80,7 @@ class NewsFragment : Fragment() {
         swipeRefresh.setOnRefreshListener {
             lifecycleScope.launch {
                 runCatching {
-                    model.sync()
+                    model.performFullSync()
                 }.apply {
                     if (isFailure) {
                         MaterialAlertDialogBuilder(requireContext())
@@ -116,7 +119,7 @@ class NewsFragment : Fragment() {
             adapter = itemsAdapter
         }
 
-        model.getNewsItems().collect { news ->
+        model.getNews().collect { news ->
             Timber.d("Got ${news.size} news!")
 
             if (model.isInitialSyncCompleted().first()) {

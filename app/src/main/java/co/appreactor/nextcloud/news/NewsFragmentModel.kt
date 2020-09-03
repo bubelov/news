@@ -1,10 +1,7 @@
 package co.appreactor.nextcloud.news
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import co.appreactor.nextcloud.news.db.NewsItem
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 
 class NewsFragmentModel(
     private val newsItemsRepository: NewsItemsRepository,
@@ -13,24 +10,25 @@ class NewsFragmentModel(
     private val sync: Sync
 ) : ViewModel() {
 
-    val showReadNews = MutableStateFlow(true)
-
-    init {
-        viewModelScope.launch {
-            prefs.getBoolean(Preferences.SHOW_READ_NEWS, true).collect {
-                showReadNews.value = it
-            }
+    suspend fun getNews() = newsItemsRepository.all().combine(getShowReadNews()) { items, showRead ->
+        if (showRead) {
+            return@combine items
+        } else {
+            return@combine items.filter { it.unread }
         }
     }
 
-    suspend fun getNewsItems(): Flow<List<NewsItem>> =
-        newsItemsRepository.all().combine(showReadNews) { items, showRead ->
-            if (showRead) {
-                return@combine items
-            } else {
-                return@combine items.filter { it.unread }
-            }
-        }
+    suspend fun getShowReadNews() = prefs.getBoolean(
+        key = Preferences.SHOW_READ_NEWS,
+        default = true
+    )
+
+    suspend fun setShowReadNews(show: Boolean) {
+        prefs.putBoolean(
+            key = Preferences.SHOW_READ_NEWS,
+            value = show
+        )
+    }
 
     suspend fun getFeeds() = newsFeedsRepository.all()
 
@@ -38,10 +36,12 @@ class NewsFragmentModel(
         sync.performInitialSyncIfNoData()
     }
 
-    suspend fun sync() {
+    suspend fun performFullSync() {
         sync.sync()
     }
 
-    suspend fun isInitialSyncCompleted() =
-        prefs.getBoolean(Preferences.INITIAL_SYNC_COMPLETED, false)
+    suspend fun isInitialSyncCompleted() = prefs.getBoolean(
+        key = Preferences.INITIAL_SYNC_COMPLETED,
+        default = false
+    )
 }

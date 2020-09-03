@@ -55,6 +55,7 @@ class Sync(
             Timber.d("Finished sync")
         }.apply {
             if (isFailure) {
+                Timber.e(exceptionOrNull())
                 throw Exception("Cannot fetch data from Nextcloud")
             }
         }
