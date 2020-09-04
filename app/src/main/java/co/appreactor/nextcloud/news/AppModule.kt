@@ -2,6 +2,7 @@ package co.appreactor.nextcloud.news
 
 import co.appreactor.nextcloud.news.news.NewsFragmentModel
 import co.appreactor.nextcloud.news.news.NewsItemsRepository
+import co.appreactor.nextcloud.news.opengraph.OpenGraphImagesSync
 import co.appreactor.nextcloud.news.starred.StarredNewsFragmentModel
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
@@ -20,6 +21,7 @@ val appModule = module {
     }
 
     single<Sync>()
+    single<OpenGraphImagesSync>()
 
     single<NewsItemsRepository>()
     single<NewsFeedsRepository>()

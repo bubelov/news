@@ -5,5 +5,6 @@ data class NewsAdapterRow(
     val title: String,
     val subtitle: String,
     val summary: String,
-    val unread: Boolean
+    val unread: Boolean,
+    val imageUrl: String
 )

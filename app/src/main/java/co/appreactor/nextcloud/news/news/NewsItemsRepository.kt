@@ -47,6 +47,20 @@ class NewsItemsRepository(
         )
     }
 
+    suspend fun updateOpenGraphImageUrl(id: Long, url: String) = withContext(Dispatchers.IO) {
+        cache.updateOpenGraphImageUrl(
+            openGraphImageUrl = url,
+            id = id
+        )
+    }
+
+    suspend fun updateOpenGraphImageParsingFailed(id: Long, failed: Boolean) = withContext(Dispatchers.IO) {
+        cache.updateOpenGraphImageParsingFailed(
+            openGraphImageParsingFailed = failed,
+            id = id
+        )
+    }
+
     suspend fun clear() = withContext(Dispatchers.IO) {
         cache.deleteAll()
     }
@@ -69,7 +83,9 @@ class NewsItemsRepository(
                     it.copy(
                         unreadSynced = true,
                         starredSynced = true,
-                        summary = getSummary(it.body)
+                        summary = getSummary(it.body),
+                        openGraphImageUrl = "",
+                        openGraphImageParsingFailed = false
                     )
                 )
             }
@@ -184,7 +200,9 @@ class NewsItemsRepository(
                     it.copy(
                         unreadSynced = true,
                         starredSynced = true,
-                        summary = getSummary(it.body)
+                        summary = getSummary(it.body),
+                        openGraphImageUrl = "",
+                        openGraphImageParsingFailed = false
                     )
                 )
             }

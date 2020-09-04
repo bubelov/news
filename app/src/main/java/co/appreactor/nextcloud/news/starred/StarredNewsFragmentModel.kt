@@ -28,7 +28,8 @@ class StarredNewsFragmentModel(
                 it.title,
                 feed.title + " · " + dateString,
                 it.summary,
-                true
+                true,
+                it.openGraphImageUrl
             )
         }
     }

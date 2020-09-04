@@ -6,7 +6,10 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.nextcloud.news.R
+import com.squareup.picasso.Callback
+import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.row_item.view.*
+
 
 class NewsAdapter(
     private val rows: MutableList<NewsAdapterRow> = mutableListOf(),
@@ -22,7 +25,22 @@ class NewsAdapter(
             view.apply {
                 topOffset.isVisible = isFirst
 
-                image.isVisible = false // TODO
+                image.isVisible = false
+
+                if (row.imageUrl.isNotBlank()) {
+                    Picasso.get()
+                        .load(row.imageUrl)
+                        .resize(1080, 0)
+                        .into(image, object : Callback {
+                            override fun onSuccess() {
+                                image.isVisible = true
+                            }
+
+                            override fun onError(e: Exception) {
+                                image.isVisible = false
+                            }
+                        })
+                }
 
                 primaryText.text = row.title
                 secondaryText.text = row.subtitle

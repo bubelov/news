@@ -85,6 +85,7 @@ dependencies {
     implementation "com.jakewharton.timber:timber:$versions_timber"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:$versions_swipe_refresh"
     implementation "org.jetbrains.kotlinx:kotlinx-datetime:$versions_datetime"
+    implementation "org.jsoup:jsoup:$versions_jsoup"
 
     testImplementation "junit:junit:$versions_junit"
 

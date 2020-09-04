@@ -21,7 +21,9 @@ CREATE TABLE NewsItem (
   lastModified INTEGER NOT NULL,
   rtl INTEGER AS Boolean NOT NULL,
   fingerprint TEXT NOT NULL,
-  contentHash TEXT NOT NULL
+  contentHash TEXT NOT NULL,
+  openGraphImageUrl TEXT NOT NULL,
+  openGraphImageParsingFailed INTEGER AS Boolean NOT NULL
 );
 
 insertOrReplace:
@@ -61,6 +63,16 @@ WHERE id = ?;
 updateStarredSynced:
 UPDATE NewsItem
 SET starredSynced = ?
+WHERE id = ?;
+
+updateOpenGraphImageUrl:
+UPDATE NewsItem
+SET openGraphImageUrl = ?
+WHERE id = ?;
+
+updateOpenGraphImageParsingFailed:
+UPDATE NewsItem
+SET openGraphImageParsingFailed = ?
 WHERE id = ?;
 
 deleteAll:

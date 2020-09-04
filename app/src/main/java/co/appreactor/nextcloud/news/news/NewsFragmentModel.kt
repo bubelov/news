@@ -1,10 +1,13 @@
 package co.appreactor.nextcloud.news.news
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import co.appreactor.nextcloud.news.NewsFeedsRepository
 import co.appreactor.nextcloud.news.Preferences
 import co.appreactor.nextcloud.news.Sync
+import co.appreactor.nextcloud.news.opengraph.OpenGraphImagesSync
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.*
 
@@ -12,8 +15,15 @@ class NewsFragmentModel(
     private val newsItemsRepository: NewsItemsRepository,
     private val newsFeedsRepository: NewsFeedsRepository,
     private val prefs: Preferences,
-    private val sync: Sync
+    private val sync: Sync,
+    private val imagesSync: OpenGraphImagesSync
 ) : ViewModel() {
+
+    init {
+        viewModelScope.launch {
+            imagesSync.start()
+        }
+    }
 
     suspend fun getNews() = newsItemsRepository.all().combine(getShowReadNews()) { unfilteredItems, showRead ->
         val items = if (showRead) {
@@ -33,7 +43,8 @@ class NewsFragmentModel(
                 it.title,
                 feed.title + " · " + dateString,
                 it.summary,
-                it.unread
+                it.unread,
+                it.openGraphImageUrl
             )
         }
     }
