@@ -1,8 +1,11 @@
 package co.appreactor.nextcloud.news.opengraph
 
+import co.appreactor.nextcloud.news.db.NewsItem
 import co.appreactor.nextcloud.news.news.NewsItemsRepository
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -19,78 +22,86 @@ class OpenGraphImagesSync(
     suspend fun start() = withContext(Dispatchers.IO) {
         newsItemsRepository.all().collect { news ->
             Timber.d("Got ${news.size} news")
+            val chunks = news.sortedByDescending { it.pubDate }.chunked(10)
+            Timber.d("Chunks: ${chunks.size}")
 
-            news.sortedByDescending { it.pubDate }.forEach { newsItem ->
-                if (newsItem.openGraphImageUrl.isNotBlank()
-                    || newsItem.openGraphImageParsingFailed
-                    || newsItem.url.startsWith("http://")) {
-                    return@forEach
-                }
+            chunks.forEach {
+                it.map { async { fetchOpenGraphImage(it) } }.awaitAll()
+            }
+        }
+    }
 
-                Timber.d("Processing item ${newsItem.id} (${newsItem.title})")
-                Timber.d("URL: ${newsItem.url}")
+    suspend fun fetchOpenGraphImage(newsItem: NewsItem) = withContext(Dispatchers.IO) {
+        if (newsItem.openGraphImageUrl.isNotBlank()
+            || newsItem.openGraphImageParsingFailed
+            || newsItem.url.startsWith("http://")
+        ) {
+            return@withContext
+        }
 
-                runCatching {
-                    val request = Request.Builder().url(newsItem.url).build()
-                    val response = client.newCall(request).execute()
-                    Timber.d("Response code: ${response.code}")
+        Timber.d("Processing item ${newsItem.id} (${newsItem.title})")
+        Timber.d("URL: ${newsItem.url}")
 
-                    if (response.isSuccessful) {
-                        val html = response.body!!.string()
-                        val document = Jsoup.parse(html)
+        runCatching {
+            val request = Request.Builder().url(newsItem.url).build()
+            val response = client.newCall(request).execute()
+            Timber.d("Response code: ${response.code}")
 
-                        val metas = document.select("meta[property=\"og:image\"]")
+            if (response.isSuccessful) {
+                val html = response.body!!.string()
+                val document = Jsoup.parse(html)
 
-                        if (metas.isNotEmpty()) {
-                            val imageUrl = metas.first().attr("content")
+                val metas = document.select("meta[property=\"og:image\"]")
 
-                            if (imageUrl.isNotBlank()) {
-                                Timber.d("Image URL: $imageUrl")
-                                val image = Picasso.get().load(imageUrl).get()!!
+                if (metas.isNotEmpty()) {
+                    val imageUrl = metas.first().attr("content")
 
-                                Timber.d("Downloaded image. Resolution: ${image.width} x ${image.height}")
+                    if (imageUrl.isNotBlank()) {
+                        Timber.d("Image URL: $imageUrl")
+                        val image = Picasso.get().load(imageUrl).get()!!
 
-                                if (image.width > 480 && image.height.toDouble() > image.width.toDouble() / 2.5) {
-                                    newsItemsRepository.updateOpenGraphImageUrl(
-                                        id = newsItem.id,
-                                        url = imageUrl
-                                    )
-                                } else {
-                                    Timber.d("Invalid image. Size: ${image.width} x ${image.height}")
+                        Timber.d("Downloaded image. Resolution: ${image.width} x ${image.height}")
 
-                                    newsItemsRepository.updateOpenGraphImageParsingFailed(
-                                        id = newsItem.id,
-                                        failed = true
-                                    )
-                                }
-                            } else {
-                                Timber.w("Open Graph tag seems to be corrupted")
-
-                                newsItemsRepository.updateOpenGraphImageParsingFailed(
-                                    id = newsItem.id,
-                                    failed = true
-                                )
-                            }
+                        if (image.width > 480 && image.height.toDouble() > image.width.toDouble() / 2.5) {
+                            newsItemsRepository.updateOpenGraphImageUrl(
+                                id = newsItem.id,
+                                url = imageUrl
+                            )
                         } else {
-                            Timber.d("This page has no Open Graph images")
+                            Timber.d("Invalid image. Size: ${image.width} x ${image.height}")
 
                             newsItemsRepository.updateOpenGraphImageParsingFailed(
                                 id = newsItem.id,
                                 failed = true
                             )
                         }
-                    }
-                }.apply {
-                    if (!isSuccess) {
+                    } else {
+                        Timber.w("Open Graph tag seems to be corrupted")
+
                         newsItemsRepository.updateOpenGraphImageParsingFailed(
                             id = newsItem.id,
                             failed = true
                         )
-
-                        Timber.e(exceptionOrNull())
                     }
+                } else {
+                    Timber.d("This page has no Open Graph images")
+
+                    newsItemsRepository.updateOpenGraphImageParsingFailed(
+                        id = newsItem.id,
+                        failed = true
+                    )
                 }
+            }
+        }.apply {
+            if (!isSuccess) {
+                newsItemsRepository.updateOpenGraphImageParsingFailed(
+                    id = newsItem.id,
+                    failed = true
+                )
+
+                Timber.e(exceptionOrNull())
             }
         }
     }
+
 }

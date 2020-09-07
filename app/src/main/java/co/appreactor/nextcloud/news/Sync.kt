@@ -1,7 +1,11 @@
 package co.appreactor.nextcloud.news
 
 import co.appreactor.nextcloud.news.news.NewsItemsRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.withContext
 import timber.log.Timber
+import kotlin.system.measureTimeMillis
 
 class Sync(
     private val newsItemsRepository: NewsItemsRepository,
@@ -11,8 +15,17 @@ class Sync(
 
     suspend fun performInitialSyncIfNoData() {
         runCatching {
-            newsItemsRepository.performInitialSyncIfNoData()
-            newsFeedsRepository.reloadFromApiIfNoData()
+            val syncTime = measureTimeMillis {
+                withContext(Dispatchers.IO) {
+                    val newsSync = async { newsItemsRepository.performInitialSyncIfNoData() }
+                    val feedsSync = async { newsFeedsRepository.reloadFromApiIfNoData() }
+
+                    newsSync.await()
+                    feedsSync.await()
+                }
+            }
+
+            Timber.d("Initial sync time: $syncTime")
             prefs.putBoolean(Preferences.INITIAL_SYNC_COMPLETED, true)
         }.apply {
             if (isFailure) {

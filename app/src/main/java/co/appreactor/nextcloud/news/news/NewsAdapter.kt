@@ -10,7 +10,6 @@ import co.appreactor.nextcloud.news.R
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.row_item.view.*
-import timber.log.Timber
 
 class NewsAdapter(
     private val rows: MutableList<NewsAdapterRow> = mutableListOf(),
@@ -36,34 +35,41 @@ class NewsAdapter(
                 topOffset.isVisible = isFirst
 
                 imageView.isVisible = false
+                imageProgress.isVisible = false
 
                 if (row.imageUrl.isNotBlank()) {
+                    imageView.isVisible = true
+                    imageProgress.isVisible = true
+
                     Picasso.get()
                         .load(row.imageUrl)
                         .resize(1080, 0)
                         .into(imageView, object : Callback {
                             override fun onSuccess() {
                                 imageView.isVisible = true
-
-                                val drawable = imageView.drawable
-                                Timber.d("Drawable dimensions: ${drawable.intrinsicWidth} x ${drawable.intrinsicHeight}")
-
-                                imageView.post {
-                                    if (imageViewWidth != 0) {
-                                        val targetHeight =
-                                            (imageView.width.toDouble() * (drawable.intrinsicHeight.toDouble() / drawable.intrinsicWidth.toDouble()))
-                                        Timber.d("Target height: $targetHeight")
-
-                                        if (imageView.height != targetHeight.toInt()) {
-                                            imageView.layoutParams.height = targetHeight.toInt()
-                                            imageView.requestLayout()
-                                        }
-                                    }
-                                }
+                                imageProgress.isVisible = false
+//                                imageView.layoutParams.height = 0
+//
+//                                val drawable = imageView.drawable
+//                                Timber.d("Drawable dimensions: ${drawable.intrinsicWidth} x ${drawable.intrinsicHeight}")
+//
+//                                imageView.post {
+//                                    if (imageViewWidth != 0) {
+//                                        val targetHeight =
+//                                            (imageView.width.toDouble() * (drawable.intrinsicHeight.toDouble() / drawable.intrinsicWidth.toDouble()))
+//                                        Timber.d("Target height: $targetHeight")
+//
+//                                        if (imageView.height != targetHeight.toInt()) {
+//                                            imageView.layoutParams.height = targetHeight.toInt()
+//                                            imageView.requestLayout()
+//                                        }
+//                                    }
+//                                }
                             }
 
                             override fun onError(e: Exception) {
                                 imageView.isVisible = false
+                                imageProgress.isVisible = false
                             }
                         })
                 }
