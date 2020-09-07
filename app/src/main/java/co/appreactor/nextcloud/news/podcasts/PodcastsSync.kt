@@ -30,13 +30,15 @@ class PodcastsSync(
 
                 newsItemsRepository.updateEnclosureDownloadProgress(
                     id = it.id,
-                    progress = null)
+                    progress = null
+                )
             }
 
             if (!file.exists() && it.enclosureDownloadProgress != null) {
                 newsItemsRepository.updateEnclosureDownloadProgress(
                     id = it.id,
-                    progress = null)
+                    progress = null
+                )
             }
         }
     }
@@ -81,9 +83,9 @@ class PodcastsSync(
                 val data = ByteArray(1024)
                 val total = response.body!!.contentLength()
                 var downloaded = 0L
-                var progressPercent = 0L
+                var progressPercent: Long
                 var lastReportedProgressPercent = 0L
-                var count = 0
+                var count: Int
 
                 while (true) {
                     count = input.read(data)

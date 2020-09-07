@@ -3,12 +3,14 @@ package co.appreactor.nextcloud.news.news
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.nextcloud.news.R
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.row_item.view.*
+import timber.log.Timber
 
 class NewsAdapter(
     private val rows: MutableList<NewsAdapterRow> = mutableListOf(),
@@ -20,23 +22,48 @@ class NewsAdapter(
         private val callback: NewsAdapterCallback
     ) :
         RecyclerView.ViewHolder(view) {
+
+        private var imageViewWidth = 0
+
+        init {
+            view.imageView.doOnNextLayout {
+                imageViewWidth = it.width
+            }
+        }
+
         fun bind(row: NewsAdapterRow, isFirst: Boolean) {
             view.apply {
                 topOffset.isVisible = isFirst
 
-                image.isVisible = false
+                imageView.isVisible = false
 
                 if (row.imageUrl.isNotBlank()) {
                     Picasso.get()
                         .load(row.imageUrl)
                         .resize(1080, 0)
-                        .into(image, object : Callback {
+                        .into(imageView, object : Callback {
                             override fun onSuccess() {
-                                image.isVisible = true
+                                imageView.isVisible = true
+
+                                val drawable = imageView.drawable
+                                Timber.d("Drawable dimensions: ${drawable.intrinsicWidth} x ${drawable.intrinsicHeight}")
+
+                                imageView.post {
+                                    if (imageViewWidth != 0) {
+                                        val targetHeight =
+                                            (imageView.width.toDouble() * (drawable.intrinsicHeight.toDouble() / drawable.intrinsicWidth.toDouble()))
+                                        Timber.d("Target height: $targetHeight")
+
+                                        if (imageView.height != targetHeight.toInt()) {
+                                            imageView.layoutParams.height = targetHeight.toInt()
+                                            imageView.requestLayout()
+                                        }
+                                    }
+                                }
                             }
 
                             override fun onError(e: Exception) {
-                                image.isVisible = false
+                                imageView.isVisible = false
                             }
                         })
                 }

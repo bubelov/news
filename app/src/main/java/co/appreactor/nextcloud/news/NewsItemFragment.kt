@@ -1,5 +1,6 @@
 package co.appreactor.nextcloud.news
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -40,6 +41,7 @@ class NewsItemFragment : Fragment() {
         )
     }
 
+    @SuppressLint("NewApi")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
@@ -76,8 +78,14 @@ class NewsItemFragment : Fragment() {
                         val radius = resources.getDimension(R.dimen.bullet_radius).toInt()
                         val gap = resources.getDimension(R.dimen.bullet_gap).toInt()
 
+                        val span = if (BuildConfig.VERSION_CODE >= 28) {
+                            BulletSpan(gap, textView.currentTextColor, radius)
+                        } else {
+                            BulletSpan(gap, textView.currentTextColor)
+                        }
+
                         body.setSpan(
-                            BulletSpan(gap, textView.currentTextColor, radius),
+                            span,
                             body.getSpanStart(it),
                             body.getSpanEnd(it),
                             0
@@ -91,8 +99,14 @@ class NewsItemFragment : Fragment() {
                         val stripe = resources.getDimension(R.dimen.quote_stripe_width).toInt()
                         val gap = resources.getDimension(R.dimen.quote_gap).toInt()
 
+                        val span = if (BuildConfig.VERSION_CODE >= 28) {
+                            QuoteSpan(color, stripe, gap)
+                        } else {
+                            QuoteSpan(color)
+                        }
+
                         body.setSpan(
-                            QuoteSpan(color, stripe, gap),
+                            span,
                             body.getSpanStart(it),
                             body.getSpanEnd(it),
                             0
