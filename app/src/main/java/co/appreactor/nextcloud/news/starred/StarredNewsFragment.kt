@@ -1,9 +1,11 @@
 package co.appreactor.nextcloud.news.starred
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -11,20 +13,54 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import co.appreactor.nextcloud.news.R
 import co.appreactor.nextcloud.news.news.NewsAdapter
+import co.appreactor.nextcloud.news.news.NewsAdapterCallback
+import co.appreactor.nextcloud.news.news.NewsAdapterRow
+import co.appreactor.nextcloud.news.podcasts.getPodcastFile
 import kotlinx.android.synthetic.main.fragment_starred_news.empty
 import kotlinx.android.synthetic.main.fragment_starred_news.itemsView
 import kotlinx.android.synthetic.main.fragment_starred_news.progress
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
 
 class StarredNewsFragment : Fragment() {
 
     private val model: StarredNewsFragmentModel by viewModel()
 
-    private val adapter = NewsAdapter {
-        val action = StarredNewsFragmentDirections.actionStarredNewsFragmentToNewsItemFragment(it.id)
-        findNavController().navigate(action)
-    }
+    private val adapter = NewsAdapter(
+        callback = object : NewsAdapterCallback {
+            override fun onRowClick(row: NewsAdapterRow) {
+                val action = StarredNewsFragmentDirections.actionStarredNewsFragmentToNewsItemFragment(row.id)
+                findNavController().navigate(action)
+            }
+
+            override fun onDownloadPodcastClick(row: NewsAdapterRow) {
+                model.downloadPodcast(row.id)
+            }
+
+            override fun onPlayPodcastClick(row: NewsAdapterRow) {
+                lifecycleScope.launch {
+                    val podcast = model.getNewsItem(row.id).first()!!
+
+                    val fileUri = FileProvider.getUriForFile(
+                        requireContext(),
+                        "${requireContext().packageName}.fileprovider",
+                        podcast.getPodcastFile(requireContext())
+                    )
+
+                    val intent = Intent().apply {
+                        action = Intent.ACTION_VIEW
+                        setDataAndType(fileUri, podcast.enclosureMime)
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    }
+
+                    val chooser = Intent.createChooser(intent, getString(R.string.listen_with))
+                    startActivity(chooser)
+                }
+            }
+        }
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater,

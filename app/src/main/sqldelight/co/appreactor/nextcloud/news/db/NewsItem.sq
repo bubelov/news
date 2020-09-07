@@ -11,6 +11,7 @@ CREATE TABLE NewsItem (
   summary TEXT NOT NULL,
   enclosureMime TEXT,
   enclosureLink TEXT,
+  enclosureDownloadProgress INTEGER,
   mediaThumbnail TEXT,
   mediaDescription TEXT,
   feedId INTEGER NOT NULL,
@@ -73,6 +74,11 @@ WHERE id = ?;
 updateOpenGraphImageParsingFailed:
 UPDATE NewsItem
 SET openGraphImageParsingFailed = ?
+WHERE id = ?;
+
+updateEnclosureDownloadProgress:
+UPDATE NewsItem
+SET enclosureDownloadProgress = ?
 WHERE id = ?;
 
 deleteAll:

@@ -1,18 +1,23 @@
 package co.appreactor.nextcloud.news.starred
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import co.appreactor.nextcloud.news.NewsFeedsRepository
 import co.appreactor.nextcloud.news.Preferences
 import co.appreactor.nextcloud.news.news.NewsAdapterRow
 import co.appreactor.nextcloud.news.news.NewsItemsRepository
+import co.appreactor.nextcloud.news.podcasts.PodcastsSync
+import co.appreactor.nextcloud.news.podcasts.isPodcast
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.*
 
 class StarredNewsFragmentModel(
     private val newsItemsRepository: NewsItemsRepository,
     private val newsFeedsRepository: NewsFeedsRepository,
-    private val prefs: Preferences
+    private val prefs: Preferences,
+    private val podcastsSync: PodcastsSync
 ) : ViewModel() {
 
     suspend fun getNewsItems() = newsItemsRepository.all().map { unfilteredItems ->
@@ -29,11 +34,21 @@ class StarredNewsFragmentModel(
                 feed.title + " · " + dateString,
                 it.summary,
                 true,
-                it.openGraphImageUrl
+                it.openGraphImageUrl,
+                it.isPodcast(),
+                it.enclosureDownloadProgress
             )
         }
     }
 
     suspend fun isInitialSyncCompleted() =
         prefs.getBoolean(Preferences.INITIAL_SYNC_COMPLETED, false)
+
+    fun downloadPodcast(id: Long) {
+        viewModelScope.launch {
+            podcastsSync.downloadPodcast(id)
+        }
+    }
+
+    suspend fun getNewsItem(id: Long) = newsItemsRepository.byId(id)
 }

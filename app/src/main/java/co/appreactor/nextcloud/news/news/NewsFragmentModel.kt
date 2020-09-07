@@ -6,6 +6,8 @@ import co.appreactor.nextcloud.news.NewsFeedsRepository
 import co.appreactor.nextcloud.news.Preferences
 import co.appreactor.nextcloud.news.Sync
 import co.appreactor.nextcloud.news.opengraph.OpenGraphImagesSync
+import co.appreactor.nextcloud.news.podcasts.PodcastsSync
+import co.appreactor.nextcloud.news.podcasts.isPodcast
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.text.DateFormat
@@ -16,12 +18,17 @@ class NewsFragmentModel(
     private val newsFeedsRepository: NewsFeedsRepository,
     private val prefs: Preferences,
     private val sync: Sync,
-    private val imagesSync: OpenGraphImagesSync
+    private val imagesSync: OpenGraphImagesSync,
+    private val podcastsSync: PodcastsSync
 ) : ViewModel() {
 
     init {
         viewModelScope.launch {
             imagesSync.start()
+        }
+
+        viewModelScope.launch {
+            podcastsSync.verifyCache()
         }
     }
 
@@ -44,7 +51,9 @@ class NewsFragmentModel(
                 feed.title + " · " + dateString,
                 it.summary,
                 it.unread,
-                it.openGraphImageUrl
+                it.openGraphImageUrl,
+                it.isPodcast(),
+                it.enclosureDownloadProgress
             )
         }
     }
@@ -75,4 +84,12 @@ class NewsFragmentModel(
         key = Preferences.INITIAL_SYNC_COMPLETED,
         default = false
     )
+
+    fun downloadPodcast(id: Long) {
+        viewModelScope.launch {
+            podcastsSync.downloadPodcast(id)
+        }
+    }
+
+    suspend fun getNewsItem(id: Long) = newsItemsRepository.byId(id)
 }

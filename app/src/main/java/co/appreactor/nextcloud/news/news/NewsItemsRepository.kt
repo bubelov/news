@@ -61,6 +61,13 @@ class NewsItemsRepository(
         )
     }
 
+    suspend fun updateEnclosureDownloadProgress(id: Long, progress: Long?) = withContext(Dispatchers.IO) {
+        cache.updateEnclosureDownloadProgress(
+            enclosureDownloadProgress = progress,
+            id = id
+        )
+    }
+
     suspend fun clear() = withContext(Dispatchers.IO) {
         cache.deleteAll()
     }
@@ -85,7 +92,8 @@ class NewsItemsRepository(
                         starredSynced = true,
                         summary = getSummary(it.body),
                         openGraphImageUrl = "",
-                        openGraphImageParsingFailed = false
+                        openGraphImageParsingFailed = false,
+                        enclosureDownloadProgress = null,
                     )
                 )
             }
@@ -202,7 +210,8 @@ class NewsItemsRepository(
                         starredSynced = true,
                         summary = getSummary(it.body),
                         openGraphImageUrl = "",
-                        openGraphImageParsingFailed = false
+                        openGraphImageParsingFailed = false,
+                        enclosureDownloadProgress = null
                     )
                 )
             }

@@ -28,4 +28,10 @@
     <string name="you_have_no_starred_news">You have no starred news</string>
     <string name="field_is_empty">Field is empty</string>
     <string name="error">Error</string>
+    <string name="download">Download</string>
+    <string name="downloading">Downloading</string>
+    <string name="listen">Listen</string>
+    <string name="listen_with">Listen with</string>
+    <string name="download_podcast">Download podcast</string>
+    <string name="play_podcast">Play podcast</string>
 </resources>

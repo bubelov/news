@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    tools:background="#000000"
     android:orientation="vertical">
 
     <View
@@ -41,7 +42,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:paddingTop="16dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="4dp">
 
                 <TextView
                     android:id="@+id/primaryText"
@@ -67,6 +71,56 @@
                     android:textAppearance="?attr/textAppearanceBody2"
                     android:textColor="?android:attr/textColorSecondary"
                     tools:text="Bla bla bla" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/podcastPanel"
+                android:layout_width="match_parent"
+                android:gravity="center_vertical"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:layout_width="wrap_content"
+                    android:id="@+id/downloadPodcast"
+                    android:layout_marginStart="8dp"
+                    app:icon="@drawable/ic_baseline_save_alt_24"
+                    android:visibility="gone"
+                    android:layout_height="wrap_content"
+                    android:text="@string/download"
+                    style="?attr/borderlessButtonStyle" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:layout_width="wrap_content"
+                    android:id="@+id/downloadingPodcast"
+                    android:layout_marginStart="8dp"
+                    android:visibility="gone"
+                    android:enabled="false"
+                    android:layout_height="wrap_content"
+                    android:text="@string/downloading"
+                    style="?attr/borderlessButtonStyle" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:layout_width="wrap_content"
+                    android:id="@+id/playPodcast"
+                    android:layout_marginStart="8dp"
+                    android:visibility="visible"
+                    app:icon="@drawable/ic_baseline_headset_24"
+                    android:layout_height="wrap_content"
+                    android:text="@string/listen"
+                    style="?attr/borderlessButtonStyle" />
+
+                <ProgressBar
+                    android:layout_width="0dp"
+                    android:id="@+id/downloadPodcastProgress"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginStart="8dp"
+                    android:progress="25"
+                    style="@android:style/Widget.ProgressBar.Horizontal"
+                    android:layout_height="wrap_content" />
 
             </LinearLayout>
 
