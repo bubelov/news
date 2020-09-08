@@ -121,14 +121,13 @@
                     android:text="@string/listen"
                     style="?attr/borderlessButtonStyle" />
 
-                <ProgressBar
+                <com.google.android.material.progressindicator.ProgressIndicator
                     android:layout_width="0dp"
                     android:id="@+id/downloadPodcastProgress"
                     android:layout_weight="1"
                     android:layout_marginEnd="16dp"
                     android:layout_marginStart="8dp"
                     android:progress="25"
-                    style="@android:style/Widget.ProgressBar.Horizontal"
                     android:layout_height="wrap_content" />
 
             </LinearLayout>
