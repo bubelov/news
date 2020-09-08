@@ -39,7 +39,7 @@ class NewsFragmentModel(
             unfilteredItems.filter { it.unread }
         }
 
-        val feeds = newsFeedsRepository.all()
+        val feeds = newsFeedsRepository.all().first()
 
         getCropFeedImages().collect { crop ->
             val result = items.map {

@@ -14,7 +14,8 @@ import co.appreactor.nextcloud.news.newsitem.NewsItemFragmentModel
 import co.appreactor.nextcloud.news.opengraph.OpenGraphImagesSync
 import co.appreactor.nextcloud.news.podcasts.PodcastsSync
 import co.appreactor.nextcloud.news.settings.SettingsFragmentModel
-import co.appreactor.nextcloud.news.starred.StarredNewsFragmentModel
+import co.appreactor.nextcloud.news.bookmarks.BookmarksFragmentModel
+import co.appreactor.nextcloud.news.feeds.NewsFeedsFragmentModel
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
 import org.koin.android.experimental.dsl.viewModel
@@ -49,8 +50,9 @@ val appModule = module {
     viewModel<AuthFragmentModel>()
     viewModel<NewsFragmentModel>()
     viewModel<NewsItemFragmentModel>()
-    viewModel<StarredNewsFragmentModel>()
+    viewModel<BookmarksFragmentModel>()
     viewModel<SettingsFragmentModel>()
     viewModel<DirectAuthFragmentModel>()
     viewModel<ExceptionsFragmentModel>()
+    viewModel<NewsFeedsFragmentModel>()
 }

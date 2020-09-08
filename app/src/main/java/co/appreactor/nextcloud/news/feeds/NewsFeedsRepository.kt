@@ -14,7 +14,7 @@ class NewsFeedsRepository(
 ) {
 
     suspend fun all() = withContext(Dispatchers.IO) {
-        cache.findAll().executeAsList()
+        cache.findAll().asFlow().map { it.executeAsList() }
     }
 
     suspend fun byId(id: Long) = withContext(Dispatchers.IO) {

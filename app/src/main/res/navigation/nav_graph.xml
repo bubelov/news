@@ -66,10 +66,16 @@
     </fragment>
 
     <fragment
-        android:id="@+id/starredNewsFragment"
-        android:name="co.appreactor.nextcloud.news.starred.StarredNewsFragment"
-        android:label="StarredNewsFragment"
-        tools:layout="@layout/fragment_starred_news">
+        android:id="@+id/newsFeedsFragment"
+        android:name="co.appreactor.nextcloud.news.feeds.NewsFeedsFragment"
+        android:label="NewsFeedsFragment"
+        tools:layout="@layout/fragment_news_feeds" />
+
+    <fragment
+        android:id="@+id/bookmarksFragment"
+        android:name="co.appreactor.nextcloud.news.bookmarks.BookmarksFragment"
+        android:label="BookmarksFragment"
+        tools:layout="@layout/fragment_bookmarks">
         <action
             android:id="@+id/action_starredNewsFragment_to_newsItemFragment"
             app:destination="@id/newsItemFragment"

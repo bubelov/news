@@ -38,4 +38,6 @@
     <string name="exceptions_logged_s">Exceptions logged: %1$s</string>
     <string name="exceptions">Exceptions</string>
     <string name="you_have_no_logged_exceptions">You have no logged exceptions</string>
+    <string name="feeds">Feeds</string>
+    <string name="bookmarks">Bookmarks</string>
 </resources>

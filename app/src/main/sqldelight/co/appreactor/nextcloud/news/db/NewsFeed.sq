@@ -20,7 +20,8 @@ VALUES ?;
 
 findAll:
 SELECT *
-FROM NewsFeed;
+FROM NewsFeed
+ORDER BY title;
 
 findById:
 SELECT *

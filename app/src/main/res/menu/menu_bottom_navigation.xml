@@ -10,9 +10,15 @@
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/starredNewsFragment"
-        android:icon="@drawable/ic_baseline_star_24"
-        android:title="@string/starred"
+        android:id="@+id/newsFeedsFragment"
+        android:icon="@drawable/ic_baseline_rss_feed_24"
+        android:title="@string/feeds"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/bookmarksFragment"
+        android:icon="@drawable/ic_baseline_bookmark_24"
+        android:title="@string/bookmarks"
         app:showAsAction="ifRoom" />
 
     <item

@@ -10,10 +10,9 @@
         style="@style/Widget.MaterialComponents.Toolbar.PrimarySurface"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
+        app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
         app:layout_constraintTop_toTopOf="parent"
-        app:title="@string/starred_news" />
+        app:title="@string/feeds" />
 
     <View
         android:id="@+id/divider"
@@ -23,14 +22,11 @@
         app:layout_constraintTop_toBottomOf="@id/toolbar" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/itemsView"
-        android:layout_width="0dp"
+        android:id="@+id/listView"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="@color/color_background_variant"
         android:scrollbars="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/divider" />
 
     <ProgressBar
@@ -47,7 +43,7 @@
         android:id="@+id/empty"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/you_have_no_starred_news"
+        android:text="@string/you_have_no_logged_exceptions"
         android:textAppearance="?textAppearanceBody1"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"

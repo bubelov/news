@@ -1,4 +1,4 @@
-package co.appreactor.nextcloud.news.starred
+package co.appreactor.nextcloud.news.bookmarks
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -14,22 +14,22 @@ import co.appreactor.nextcloud.news.news.NewsAdapter
 import co.appreactor.nextcloud.news.news.NewsAdapterCallback
 import co.appreactor.nextcloud.news.news.NewsAdapterRow
 import co.appreactor.nextcloud.news.podcasts.playPodcast
-import kotlinx.android.synthetic.main.fragment_starred_news.empty
-import kotlinx.android.synthetic.main.fragment_starred_news.itemsView
-import kotlinx.android.synthetic.main.fragment_starred_news.progress
+import kotlinx.android.synthetic.main.fragment_bookmarks.empty
+import kotlinx.android.synthetic.main.fragment_bookmarks.itemsView
+import kotlinx.android.synthetic.main.fragment_bookmarks.progress
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
 
-class StarredNewsFragment : Fragment() {
+class BookmarksFragment : Fragment() {
 
-    private val model: StarredNewsFragmentModel by viewModel()
+    private val model: BookmarksFragmentModel by viewModel()
 
     private val adapter = NewsAdapter(
         callback = object : NewsAdapterCallback {
             override fun onRowClick(row: NewsAdapterRow) {
-                val action = StarredNewsFragmentDirections.actionStarredNewsFragmentToNewsItemFragment(row.id)
+                val action = BookmarksFragmentDirections.actionStarredNewsFragmentToNewsItemFragment(row.id)
                 findNavController().navigate(action)
             }
 
@@ -52,7 +52,7 @@ class StarredNewsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(
-            R.layout.fragment_starred_news,
+            R.layout.fragment_bookmarks,
             container,
             false
         )

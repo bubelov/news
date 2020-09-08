@@ -18,7 +18,8 @@ class AppActivity : AppCompatActivity() {
 
     private val navListener = NavController.OnDestinationChangedListener { _, destination, _ ->
         bottomNavigation.isVisible = destination.id == R.id.newsFragment
-                || destination.id == R.id.starredNewsFragment
+                || destination.id == R.id.newsFeedsFragment
+                || destination.id == R.id.bookmarksFragment
                 || destination.id == R.id.settingsFragment
     }
 

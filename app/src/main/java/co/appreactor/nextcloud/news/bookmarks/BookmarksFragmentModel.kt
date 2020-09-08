@@ -1,4 +1,4 @@
-package co.appreactor.nextcloud.news.starred
+package co.appreactor.nextcloud.news.bookmarks
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.*
 
-class StarredNewsFragmentModel(
+class BookmarksFragmentModel(
     private val newsItemsRepository: NewsItemsRepository,
     private val newsFeedsRepository: NewsFeedsRepository,
     private val prefs: Preferences,
@@ -22,7 +22,7 @@ class StarredNewsFragmentModel(
 
     suspend fun getNewsItems() = newsItemsRepository.all().combine(getCropFeedImages()) { unfilteredItems, cropImages ->
         val items = unfilteredItems.filter { it.starred }
-        val feeds = newsFeedsRepository.all()
+        val feeds = newsFeedsRepository.all().first()
 
         items.map {
             val dateString = DateFormat.getDateInstance().format(Date(it.pubDate * 1000))
