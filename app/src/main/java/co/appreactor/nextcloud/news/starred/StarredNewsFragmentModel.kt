@@ -2,8 +2,8 @@ package co.appreactor.nextcloud.news.starred
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import co.appreactor.nextcloud.news.NewsFeedsRepository
-import co.appreactor.nextcloud.news.Preferences
+import co.appreactor.nextcloud.news.feeds.NewsFeedsRepository
+import co.appreactor.nextcloud.news.common.Preferences
 import co.appreactor.nextcloud.news.news.NewsAdapterRow
 import co.appreactor.nextcloud.news.news.NewsItemsRepository
 import co.appreactor.nextcloud.news.podcasts.PodcastsSync

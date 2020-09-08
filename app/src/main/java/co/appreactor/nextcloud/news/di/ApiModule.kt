@@ -1,6 +1,9 @@
-package co.appreactor.nextcloud.news
+package co.appreactor.nextcloud.news.di
 
 import androidx.appcompat.app.AlertDialog
+import co.appreactor.nextcloud.news.api.DirectApiBuilder
+import co.appreactor.nextcloud.news.api.NewsApi
+import co.appreactor.nextcloud.news.common.Preferences
 import com.google.gson.GsonBuilder
 import com.nextcloud.android.sso.api.NextcloudAPI
 import com.nextcloud.android.sso.helper.SingleAccountHelper

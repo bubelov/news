@@ -1,4 +1,4 @@
-package co.appreactor.nextcloud.news
+package co.appreactor.nextcloud.news.newsitem
 
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable

@@ -1,4 +1,4 @@
-package co.appreactor.nextcloud.news
+package co.appreactor.nextcloud.news.api
 
 import co.appreactor.nextcloud.news.db.NewsFeed
 

@@ -1,6 +1,8 @@
-package co.appreactor.nextcloud.news
+package co.appreactor.nextcloud.news.newsitem
 
 import androidx.lifecycle.ViewModel
+import co.appreactor.nextcloud.news.feeds.NewsFeedsRepository
+import co.appreactor.nextcloud.news.common.Sync
 import co.appreactor.nextcloud.news.db.NewsFeed
 import co.appreactor.nextcloud.news.db.NewsItem
 import co.appreactor.nextcloud.news.news.NewsItemsRepository

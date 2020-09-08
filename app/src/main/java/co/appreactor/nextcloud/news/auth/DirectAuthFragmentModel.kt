@@ -1,6 +1,8 @@
-package co.appreactor.nextcloud.news
+package co.appreactor.nextcloud.news.auth
 
 import androidx.lifecycle.ViewModel
+import co.appreactor.nextcloud.news.api.DirectApiBuilder
+import co.appreactor.nextcloud.news.common.Preferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber

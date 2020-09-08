@@ -1,4 +1,4 @@
-package co.appreactor.nextcloud.news
+package co.appreactor.nextcloud.news.settings
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import co.appreactor.nextcloud.news.NavGraphDirections
+import co.appreactor.nextcloud.news.R
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.fragment_settings.*
 import kotlinx.coroutines.flow.first

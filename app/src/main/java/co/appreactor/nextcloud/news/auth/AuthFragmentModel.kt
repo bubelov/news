@@ -1,7 +1,8 @@
-package co.appreactor.nextcloud.news
+package co.appreactor.nextcloud.news.auth
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
+import co.appreactor.nextcloud.news.common.Preferences
 import com.nextcloud.android.sso.exceptions.SSOException
 import com.nextcloud.android.sso.helper.SingleAccountHelper
 import kotlinx.coroutines.flow.first

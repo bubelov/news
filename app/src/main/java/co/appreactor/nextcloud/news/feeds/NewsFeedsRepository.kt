@@ -1,5 +1,6 @@
-package co.appreactor.nextcloud.news
+package co.appreactor.nextcloud.news.feeds
 
+import co.appreactor.nextcloud.news.api.NewsApi
 import co.appreactor.nextcloud.news.db.NewsFeedQueries
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import kotlinx.coroutines.Dispatchers

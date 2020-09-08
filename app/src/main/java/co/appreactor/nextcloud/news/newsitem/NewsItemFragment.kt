@@ -1,4 +1,4 @@
-package co.appreactor.nextcloud.news
+package co.appreactor.nextcloud.news.newsitem
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import co.appreactor.nextcloud.news.*
 import kotlinx.android.synthetic.main.fragment_news_item.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch

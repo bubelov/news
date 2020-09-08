@@ -1,8 +1,9 @@
-package co.appreactor.nextcloud.news
+package co.appreactor.nextcloud.news.newsitem
 
 import android.graphics.drawable.Drawable
 import android.text.Html
 import android.widget.TextView
+import co.appreactor.nextcloud.news.newsitem.LazyTextViewDrawable
 import com.squareup.picasso.Picasso
 
 class PicassoImageGetter(private val textView: TextView) : Html.ImageGetter {

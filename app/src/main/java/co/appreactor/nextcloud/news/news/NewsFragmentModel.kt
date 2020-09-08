@@ -2,9 +2,9 @@ package co.appreactor.nextcloud.news.news
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import co.appreactor.nextcloud.news.NewsFeedsRepository
-import co.appreactor.nextcloud.news.Preferences
-import co.appreactor.nextcloud.news.Sync
+import co.appreactor.nextcloud.news.feeds.NewsFeedsRepository
+import co.appreactor.nextcloud.news.common.Preferences
+import co.appreactor.nextcloud.news.common.Sync
 import co.appreactor.nextcloud.news.opengraph.OpenGraphImagesSync
 import co.appreactor.nextcloud.news.podcasts.PodcastsSync
 import co.appreactor.nextcloud.news.podcasts.isPodcast

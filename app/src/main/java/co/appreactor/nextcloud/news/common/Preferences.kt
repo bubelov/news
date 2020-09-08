@@ -1,4 +1,4 @@
-package co.appreactor.nextcloud.news
+package co.appreactor.nextcloud.news.common
 
 import co.appreactor.nextcloud.news.db.Preference
 import co.appreactor.nextcloud.news.db.PreferenceQueries

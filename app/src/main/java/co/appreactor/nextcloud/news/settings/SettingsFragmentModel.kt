@@ -1,7 +1,9 @@
-package co.appreactor.nextcloud.news
+package co.appreactor.nextcloud.news.settings
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
+import co.appreactor.nextcloud.news.feeds.NewsFeedsRepository
+import co.appreactor.nextcloud.news.common.Preferences
 import co.appreactor.nextcloud.news.news.NewsItemsRepository
 import com.nextcloud.android.sso.AccountImporter
 import com.nextcloud.android.sso.exceptions.SSOException

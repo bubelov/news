@@ -16,7 +16,7 @@
 
     <fragment
         android:id="@+id/authFragment"
-        android:name="co.appreactor.nextcloud.news.AuthFragment"
+        android:name="co.appreactor.nextcloud.news.auth.AuthFragment"
         android:label="AuthFragment"
         tools:layout="@layout/fragment_auth">
         <action
@@ -33,7 +33,7 @@
 
     <fragment
         android:id="@+id/directAuthFragment"
-        android:name="co.appreactor.nextcloud.news.DirectAuthFragment"
+        android:name="co.appreactor.nextcloud.news.auth.DirectAuthFragment"
         android:label="DirectAuthFragment"
         tools:layout="@layout/fragment_direct_auth">
         <action
@@ -57,7 +57,7 @@
 
     <fragment
         android:id="@+id/newsItemFragment"
-        android:name="co.appreactor.nextcloud.news.NewsItemFragment"
+        android:name="co.appreactor.nextcloud.news.newsitem.NewsItemFragment"
         android:label="NewsItemFragment"
         tools:layout="@layout/fragment_news_item">
         <argument
@@ -79,7 +79,7 @@
 
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="co.appreactor.nextcloud.news.SettingsFragment"
+        android:name="co.appreactor.nextcloud.news.settings.SettingsFragment"
         android:label="SettingsFragment"
         tools:layout="@layout/fragment_settings" />
 

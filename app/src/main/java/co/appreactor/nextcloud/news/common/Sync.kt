@@ -1,5 +1,6 @@
-package co.appreactor.nextcloud.news
+package co.appreactor.nextcloud.news.common
 
+import co.appreactor.nextcloud.news.feeds.NewsFeedsRepository
 import co.appreactor.nextcloud.news.news.NewsItemsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async

@@ -1,5 +1,6 @@
-package co.appreactor.nextcloud.news
+package co.appreactor.nextcloud.news.api
 
+import co.appreactor.nextcloud.news.BuildConfig
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit

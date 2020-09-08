@@ -1,9 +1,17 @@
-package co.appreactor.nextcloud.news
+package co.appreactor.nextcloud.news.di
 
+import co.appreactor.nextcloud.news.Database
+import co.appreactor.nextcloud.news.auth.AuthFragmentModel
+import co.appreactor.nextcloud.news.auth.DirectAuthFragmentModel
+import co.appreactor.nextcloud.news.common.Preferences
+import co.appreactor.nextcloud.news.common.Sync
+import co.appreactor.nextcloud.news.feeds.NewsFeedsRepository
 import co.appreactor.nextcloud.news.news.NewsFragmentModel
 import co.appreactor.nextcloud.news.news.NewsItemsRepository
+import co.appreactor.nextcloud.news.newsitem.NewsItemFragmentModel
 import co.appreactor.nextcloud.news.opengraph.OpenGraphImagesSync
 import co.appreactor.nextcloud.news.podcasts.PodcastsSync
+import co.appreactor.nextcloud.news.settings.SettingsFragmentModel
 import co.appreactor.nextcloud.news.starred.StarredNewsFragmentModel
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver

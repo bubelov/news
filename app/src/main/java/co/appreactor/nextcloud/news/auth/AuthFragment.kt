@@ -1,4 +1,4 @@
-package co.appreactor.nextcloud.news
+package co.appreactor.nextcloud.news.auth
 
 import android.content.Intent
 import android.content.res.Configuration
@@ -12,6 +12,9 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
 import androidx.navigation.fragment.findNavController
+import co.appreactor.nextcloud.news.R
+import co.appreactor.nextcloud.news.di.apiModule
+import co.appreactor.nextcloud.news.di.appModule
 import com.nextcloud.android.sso.AccountImporter
 import com.nextcloud.android.sso.AccountImporter.IAccountAccessGranted
 import com.nextcloud.android.sso.exceptions.SSOException
@@ -23,7 +26,6 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.android.viewmodel.ext.android.viewModel
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
-
 
 class AuthFragment : Fragment() {
 
