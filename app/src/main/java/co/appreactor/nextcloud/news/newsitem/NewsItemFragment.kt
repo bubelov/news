@@ -3,6 +3,7 @@ package co.appreactor.nextcloud.news.newsitem
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.text.SpannableStringBuilder
 import android.text.method.LinkMovementMethod
@@ -79,7 +80,7 @@ class NewsItemFragment : Fragment() {
                         val radius = resources.getDimension(R.dimen.bullet_radius).toInt()
                         val gap = resources.getDimension(R.dimen.bullet_gap).toInt()
 
-                        val span = if (BuildConfig.VERSION_CODE >= 28) {
+                        val span = if (Build.VERSION.SDK_INT >= 28) {
                             BulletSpan(gap, textView.currentTextColor, radius)
                         } else {
                             BulletSpan(gap, textView.currentTextColor)
@@ -100,7 +101,7 @@ class NewsItemFragment : Fragment() {
                         val stripe = resources.getDimension(R.dimen.quote_stripe_width).toInt()
                         val gap = resources.getDimension(R.dimen.quote_gap).toInt()
 
-                        val span = if (BuildConfig.VERSION_CODE >= 28) {
+                        val span = if (Build.VERSION.SDK_INT >= 28) {
                             QuoteSpan(color, stripe, gap)
                         } else {
                             QuoteSpan(color)
