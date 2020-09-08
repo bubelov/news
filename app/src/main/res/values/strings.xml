@@ -34,4 +34,5 @@
     <string name="listen_with">Listen with</string>
     <string name="download_podcast">Download podcast</string>
     <string name="play_podcast">Play podcast</string>
+    <string name="crop_feed_images">Crop feed images</string>
 </resources>

@@ -20,7 +20,7 @@ class StarredNewsFragmentModel(
     private val podcastsSync: PodcastsSync
 ) : ViewModel() {
 
-    suspend fun getNewsItems() = newsItemsRepository.all().map { unfilteredItems ->
+    suspend fun getNewsItems() = newsItemsRepository.all().combine(getCropFeedImages()) { unfilteredItems, cropImages ->
         val items = unfilteredItems.filter { it.starred }
         val feeds = newsFeedsRepository.all()
 
@@ -35,6 +35,7 @@ class StarredNewsFragmentModel(
                 it.summary,
                 true,
                 it.openGraphImageUrl,
+                cropImages,
                 it.isPodcast(),
                 it.enclosureDownloadProgress
             )
@@ -51,4 +52,9 @@ class StarredNewsFragmentModel(
     }
 
     suspend fun getNewsItem(id: Long) = newsItemsRepository.byId(id)
+
+    private suspend fun getCropFeedImages() = prefs.getBoolean(
+        key = Preferences.CROP_FEED_IMAGES,
+        default = true
+    )
 }

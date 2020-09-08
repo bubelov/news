@@ -38,6 +38,7 @@ class Preferences(
 
     companion object {
         const val SHOW_READ_NEWS = "show_read_news"
+        const val CROP_FEED_IMAGES = "crop_feed_images"
 
         const val SERVER_URL = "server_url"
         const val SERVER_USERNAME = "server_username"

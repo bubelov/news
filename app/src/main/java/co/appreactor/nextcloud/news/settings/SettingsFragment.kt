@@ -41,6 +41,14 @@ class SettingsFragment : Fragment() {
                 }
             }
 
+            cropFeedImages.isChecked = model.getCropFeedImages().first()
+
+            cropFeedImages.setOnCheckedChangeListener { _, isChecked ->
+                lifecycleScope.launch {
+                    model.setCropFeedImages(isChecked)
+                }
+            }
+
             username.text = model.getAccountName()
         }
 

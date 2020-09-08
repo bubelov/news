@@ -32,7 +32,7 @@ class NewsFragmentModel(
         }
     }
 
-    suspend fun getNews() = newsItemsRepository.all().combine(getShowReadNews()) { unfilteredItems, showRead ->
+    suspend fun getNews() = newsItemsRepository.all().combineTransform(getShowReadNews()) { unfilteredItems, showRead ->
         val items = if (showRead) {
             unfilteredItems
         } else {
@@ -41,20 +41,25 @@ class NewsFragmentModel(
 
         val feeds = newsFeedsRepository.all()
 
-        return@combine items.map {
-            val dateString = DateFormat.getDateInstance().format(Date(it.pubDate * 1000))
-            val feed = feeds.single { feed -> feed.id == it.feedId }
+        getCropFeedImages().collect { crop ->
+            val result = items.map {
+                val dateString = DateFormat.getDateInstance().format(Date(it.pubDate * 1000))
+                val feed = feeds.single { feed -> feed.id == it.feedId }
 
-            NewsAdapterRow(
-                it.id,
-                it.title,
-                feed.title + " · " + dateString,
-                it.summary,
-                it.unread,
-                it.openGraphImageUrl,
-                it.isPodcast(),
-                it.enclosureDownloadProgress
-            )
+                NewsAdapterRow(
+                    it.id,
+                    it.title,
+                    feed.title + " · " + dateString,
+                    it.summary,
+                    it.unread,
+                    it.openGraphImageUrl,
+                    crop,
+                    it.isPodcast(),
+                    it.enclosureDownloadProgress
+                )
+            }
+
+            emit(result)
         }
     }
 
@@ -69,8 +74,6 @@ class NewsFragmentModel(
             value = show
         )
     }
-
-    suspend fun getFeeds() = newsFeedsRepository.all()
 
     suspend fun performInitialSyncIfNoData() {
         sync.performInitialSyncIfNoData()
@@ -92,4 +95,9 @@ class NewsFragmentModel(
     }
 
     suspend fun getNewsItem(id: Long) = newsItemsRepository.byId(id)
+
+    private suspend fun getCropFeedImages() = prefs.getBoolean(
+        key = Preferences.CROP_FEED_IMAGES,
+        default = true
+    )
 }

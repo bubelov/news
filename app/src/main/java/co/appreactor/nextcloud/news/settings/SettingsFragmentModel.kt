@@ -29,6 +29,18 @@ class SettingsFragmentModel(
         )
     }
 
+    suspend fun getCropFeedImages() = prefs.getBoolean(
+        key = Preferences.CROP_FEED_IMAGES,
+        default = true
+    )
+
+    suspend fun setCropFeedImages(crop: Boolean) {
+        prefs.putBoolean(
+            key = Preferences.CROP_FEED_IMAGES,
+            value = crop
+        )
+    }
+
     suspend fun getAccountName(): String {
         val serverUrl = prefs.getString(Preferences.SERVER_URL).first()
 

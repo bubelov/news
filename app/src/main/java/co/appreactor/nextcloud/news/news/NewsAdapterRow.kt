@@ -7,6 +7,7 @@ data class NewsAdapterRow(
     val summary: String,
     val unread: Boolean,
     val imageUrl: String,
+    val cropImage: Boolean,
     val podcast: Boolean,
     val podcastDownloadPercent: Long?
 )
