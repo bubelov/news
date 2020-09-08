@@ -14,7 +14,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.fragment_news_feeds.*
 import kotlinx.coroutines.flow.collect
 import org.koin.android.viewmodel.ext.android.viewModel
-import timber.log.Timber
 
 class NewsFeedsFragment : Fragment() {
 
@@ -51,10 +50,10 @@ class NewsFeedsFragment : Fragment() {
         lifecycleScope.launchWhenResumed {
             progress.isVisible = true
 
-            model.getNewsFeeds().collect { exceptions ->
+            model.getFeeds().collect { feeds ->
                 progress.isVisible = false
-                empty.isVisible = exceptions.isEmpty()
-                adapter.swapItems(exceptions)
+                empty.isVisible = feeds.isEmpty()
+                adapter.swapItems(feeds)
             }
         }
     }

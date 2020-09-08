@@ -10,6 +10,7 @@
         style="@style/Widget.MaterialComponents.Toolbar.PrimarySurface"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:menu="@menu/menu_logged_exceptions"
         app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
         app:layout_constraintTop_toTopOf="parent"
         app:title="@string/exceptions" />

@@ -97,8 +97,8 @@
 
     <fragment
         android:id="@+id/exceptionsFragment"
-        android:name="co.appreactor.nextcloud.news.logging.ExceptionsFragment"
+        android:name="co.appreactor.nextcloud.news.logging.LoggedExceptionsFragment"
         android:label="ExceptionsFragment"
-        tools:layout="@layout/fragment_exceptions" />
+        tools:layout="@layout/fragment_logged_exceptions" />
 
 </navigation>

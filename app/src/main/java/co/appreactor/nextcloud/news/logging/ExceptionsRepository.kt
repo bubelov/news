@@ -22,4 +22,8 @@ class ExceptionsRepository(
     suspend fun count() = withContext(Dispatchers.IO) {
         cache.count().asFlow().map { it.executeAsOne() }
     }
+
+    suspend fun deleteAll() = withContext(Dispatchers.IO) {
+        cache.deleteAll()
+    }
 }

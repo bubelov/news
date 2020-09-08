@@ -7,4 +7,6 @@ class ExceptionsFragmentModel(
 ) : ViewModel() {
 
     suspend fun getExceptions() = exceptionsRepository.all()
+
+    suspend fun deleteAll() = exceptionsRepository.deleteAll()
 }

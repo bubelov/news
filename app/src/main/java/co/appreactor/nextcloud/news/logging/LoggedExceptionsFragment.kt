@@ -11,12 +11,12 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import co.appreactor.nextcloud.news.R
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.android.synthetic.main.fragment_exceptions.*
+import kotlinx.android.synthetic.main.fragment_logged_exceptions.*
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
-import timber.log.Timber
 
-class ExceptionsFragment : Fragment() {
+class LoggedExceptionsFragment : Fragment() {
 
     private val model: ExceptionsFragmentModel by viewModel()
 
@@ -33,15 +33,29 @@ class ExceptionsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(
-            R.layout.fragment_exceptions,
+            R.layout.fragment_logged_exceptions,
             container,
             false
         )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        toolbar.setNavigationOnClickListener {
-            findNavController().popBackStack()
+        toolbar.apply {
+            setNavigationOnClickListener {
+                findNavController().popBackStack()
+            }
+
+            setOnMenuItemClickListener {
+                if (it.itemId == R.id.delete) {
+                    lifecycleScope.launch {
+                        model.deleteAll()
+                    }
+
+                    true
+                } else {
+                    false
+                }
+            }
         }
 
         listView.setHasFixedSize(true)
@@ -52,7 +66,6 @@ class ExceptionsFragment : Fragment() {
             progress.isVisible = true
 
             model.getExceptions().collect { exceptions ->
-                Timber.d("Collected ${exceptions.size} exceptions")
                 progress.isVisible = false
                 empty.isVisible = exceptions.isEmpty()
                 adapter.swapItems(exceptions)

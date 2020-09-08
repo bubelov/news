@@ -6,5 +6,5 @@ class NewsFeedsFragmentModel(
     private val newsFeedsRepository: NewsFeedsRepository
 ) : ViewModel() {
 
-    suspend fun getNewsFeeds() = newsFeedsRepository.all()
+    suspend fun getFeeds() = newsFeedsRepository.all()
 }
