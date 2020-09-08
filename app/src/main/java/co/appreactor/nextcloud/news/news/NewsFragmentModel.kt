@@ -88,10 +88,8 @@ class NewsFragmentModel(
         default = false
     )
 
-    fun downloadPodcast(id: Long) {
-        viewModelScope.launch {
-            podcastsSync.downloadPodcast(id)
-        }
+    suspend fun downloadPodcast(id: Long) {
+        podcastsSync.downloadPodcast(id)
     }
 
     suspend fun getNewsItem(id: Long) = newsItemsRepository.byId(id)

@@ -31,7 +31,21 @@ class NewsFragment : Fragment() {
             }
 
             override fun onDownloadPodcastClick(row: NewsAdapterRow) {
-                model.downloadPodcast(row.id)
+                lifecycleScope.launchWhenResumed {
+                    runCatching {
+                        model.downloadPodcast(row.id)
+                    }.apply {
+                        if (isFailure) {
+                            Timber.e(exceptionOrNull())
+
+                            MaterialAlertDialogBuilder(requireContext())
+                                .setTitle(getString(R.string.error))
+                                .setMessage(exceptionOrNull()?.message)
+                                .setPositiveButton(android.R.string.ok, null)
+                                .show()
+                        }
+                    }
+                }
             }
 
             override fun onPlayPodcastClick(row: NewsAdapterRow) {
@@ -64,6 +78,8 @@ class NewsFragment : Fragment() {
                     model.performFullSync()
                 }.apply {
                     if (isFailure) {
+                        Timber.e(exceptionOrNull())
+
                         MaterialAlertDialogBuilder(requireContext())
                             .setTitle(getString(R.string.error))
                             .setMessage(exceptionOrNull()?.message)
@@ -116,6 +132,8 @@ class NewsFragment : Fragment() {
             model.performInitialSyncIfNoData()
         }.apply {
             if (isFailure) {
+                Timber.e(exceptionOrNull())
+
                 progress.isVisible = false
 
                 MaterialAlertDialogBuilder(requireContext())

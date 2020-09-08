@@ -13,7 +13,8 @@ VALUES ?;
 
 findAll:
 SELECT *
-FROM LoggedException;
+FROM LoggedException
+ORDER BY date DESC;
 
 findById:
 SELECT *
