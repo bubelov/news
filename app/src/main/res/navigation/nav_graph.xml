@@ -81,6 +81,18 @@
         android:id="@+id/settingsFragment"
         android:name="co.appreactor.nextcloud.news.settings.SettingsFragment"
         android:label="SettingsFragment"
-        tools:layout="@layout/fragment_settings" />
+        tools:layout="@layout/fragment_settings">
+        <action
+            android:id="@+id/action_settingsFragment_to_exceptionsFragment"
+            app:destination="@id/exceptionsFragment"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/exceptionsFragment"
+        android:name="co.appreactor.nextcloud.news.logging.ExceptionsFragment"
+        android:label="ExceptionsFragment"
+        tools:layout="@layout/fragment_exceptions" />
 
 </navigation>

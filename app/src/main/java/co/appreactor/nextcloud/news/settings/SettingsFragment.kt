@@ -11,6 +11,7 @@ import co.appreactor.nextcloud.news.NavGraphDirections
 import co.appreactor.nextcloud.news.R
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.fragment_settings.*
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -50,6 +51,16 @@ class SettingsFragment : Fragment() {
             }
 
             username.text = model.getAccountName()
+        }
+
+        viewExceptions.setOnClickListener {
+            findNavController().navigate(SettingsFragmentDirections.actionSettingsFragmentToExceptionsFragment())
+        }
+
+        lifecycleScope.launchWhenResumed {
+            model.getExceptionsCount().collect {
+                viewExceptionsSubtitle.text = getString(R.string.exceptions_logged_s, it)
+            }
         }
 
         logOut.setOnClickListener {

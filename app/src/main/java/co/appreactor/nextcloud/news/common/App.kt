@@ -4,6 +4,8 @@ import android.app.Application
 import co.appreactor.nextcloud.news.BuildConfig
 import co.appreactor.nextcloud.news.di.apiModule
 import co.appreactor.nextcloud.news.di.appModule
+import co.appreactor.nextcloud.news.logging.PersistentLogTree
+import org.koin.android.ext.android.get
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import timber.log.Timber
@@ -20,8 +22,8 @@ class App : Application() {
 
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
-        } else {
-            Timber.plant(ReleaseTree())
         }
+
+        Timber.plant(PersistentLogTree(get()))
     }
 }

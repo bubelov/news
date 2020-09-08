@@ -1,6 +1,5 @@
 package co.appreactor.nextcloud.news.di
 
-import androidx.appcompat.app.AlertDialog
 import co.appreactor.nextcloud.news.api.DirectApiBuilder
 import co.appreactor.nextcloud.news.api.NewsApi
 import co.appreactor.nextcloud.news.common.Preferences
@@ -11,6 +10,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.koin.dsl.module
 import retrofit2.NextcloudRetrofitApiBuilder
+import timber.log.Timber
 
 val apiModule = module {
 
@@ -52,10 +52,7 @@ val apiModule = module {
             override fun onConnected() {}
 
             override fun onError(e: Exception) {
-                // TODO
-                AlertDialog.Builder(get())
-                    .setMessage("callback.onError: ${e.message}")
-                    .show()
+                Timber.e(e)
             }
         }
 

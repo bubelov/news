@@ -35,4 +35,7 @@
     <string name="download_podcast">Download podcast</string>
     <string name="play_podcast">Play podcast</string>
     <string name="crop_feed_images">Crop feed images</string>
+    <string name="exceptions_logged_s">Exceptions logged: %1$s</string>
+    <string name="exceptions">Exceptions</string>
+    <string name="you_have_no_logged_exceptions">You have no logged exceptions</string>
 </resources>

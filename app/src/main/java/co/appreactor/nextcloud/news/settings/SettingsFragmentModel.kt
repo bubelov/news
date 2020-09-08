@@ -4,17 +4,20 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import co.appreactor.nextcloud.news.feeds.NewsFeedsRepository
 import co.appreactor.nextcloud.news.common.Preferences
+import co.appreactor.nextcloud.news.logging.ExceptionsRepository
 import co.appreactor.nextcloud.news.news.NewsItemsRepository
 import com.nextcloud.android.sso.AccountImporter
 import com.nextcloud.android.sso.exceptions.SSOException
 import com.nextcloud.android.sso.helper.SingleAccountHelper
 import kotlinx.coroutines.flow.first
+import timber.log.Timber
 
 class SettingsFragmentModel(
     private val newsItemsRepository: NewsItemsRepository,
     private val newsFeedsRepository: NewsFeedsRepository,
     private val prefs: Preferences,
-    private val context: Context
+    private val context: Context,
+    private val exceptionsRepository: ExceptionsRepository
 ) : ViewModel() {
 
     suspend fun getShowReadNews() = prefs.getBoolean(
@@ -41,6 +44,8 @@ class SettingsFragmentModel(
         )
     }
 
+    suspend fun getExceptionsCount() = exceptionsRepository.count()
+
     suspend fun getAccountName(): String {
         val serverUrl = prefs.getString(Preferences.SERVER_URL).first()
 
@@ -52,6 +57,7 @@ class SettingsFragmentModel(
                 val account = SingleAccountHelper.getCurrentSingleSignOnAccount(context)
                 account.name
             } catch (e: SSOException) {
+                Timber.e(e)
                 "unknown"
             }
         }

@@ -1,0 +1,29 @@
+CREATE TABLE LoggedException (
+  id TEXT PRIMARY KEY,
+  date TEXT NOT NULL,
+  exceptionClass TEXT NOT NULL,
+  message TEXT NOT NULL,
+  stackTrace TEXT NOT NULL
+);
+
+insertOrReplace:
+INSERT OR REPLACE
+INTO LoggedException
+VALUES ?;
+
+findAll:
+SELECT *
+FROM LoggedException;
+
+findById:
+SELECT *
+FROM LoggedException
+WHERE id = :id;
+
+count:
+SELECT COUNT(*)
+FROM LoggedException;
+
+deleteAll:
+DELETE
+FROM LoggedException;

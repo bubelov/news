@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <View
+        android:id="@+id/topOffset"
+        android:layout_width="match_parent"
+        android:layout_height="8dp" />
+
+    <LinearLayout android:id="@+id/clickableArea"
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_height="wrap_content"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:background="?attr/selectableItemBackground">
+
+        <TextView
+            android:id="@+id/primaryText"
+            android:layout_width="match_parent"
+            tools:text="Primary text"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:textAppearance="?attr/textAppearanceSubtitle1" />
+
+        <TextView
+            android:id="@+id/secondaryText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="Secondary text"
+            android:textAppearance="?attr/textAppearanceCaption" />
+
+    </LinearLayout>
+
+</LinearLayout>

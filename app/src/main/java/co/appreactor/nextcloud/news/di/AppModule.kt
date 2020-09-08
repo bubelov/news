@@ -6,6 +6,8 @@ import co.appreactor.nextcloud.news.auth.DirectAuthFragmentModel
 import co.appreactor.nextcloud.news.common.Preferences
 import co.appreactor.nextcloud.news.common.Sync
 import co.appreactor.nextcloud.news.feeds.NewsFeedsRepository
+import co.appreactor.nextcloud.news.logging.ExceptionsFragmentModel
+import co.appreactor.nextcloud.news.logging.ExceptionsRepository
 import co.appreactor.nextcloud.news.news.NewsFragmentModel
 import co.appreactor.nextcloud.news.news.NewsItemsRepository
 import co.appreactor.nextcloud.news.newsitem.NewsItemFragmentModel
@@ -35,12 +37,14 @@ val appModule = module {
 
     single<NewsItemsRepository>()
     single<NewsFeedsRepository>()
+    single<ExceptionsRepository>()
     single<Preferences>()
 
     single { Database(get()) }
     single { get<Database>().newsItemQueries }
     single { get<Database>().newsFeedQueries }
     single { get<Database>().preferenceQueries }
+    single { get<Database>().loggedExceptionQueries }
 
     viewModel<AuthFragmentModel>()
     viewModel<NewsFragmentModel>()
@@ -48,4 +52,5 @@ val appModule = module {
     viewModel<StarredNewsFragmentModel>()
     viewModel<SettingsFragmentModel>()
     viewModel<DirectAuthFragmentModel>()
+    viewModel<ExceptionsFragmentModel>()
 }
