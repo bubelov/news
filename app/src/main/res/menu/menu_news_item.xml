@@ -4,15 +4,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/toggleRead"
-        android:icon="@drawable/ic_baseline_visibility_24"
-        android:title="@string/mark_as_unread"
-        app:showAsAction="ifRoom" />
-
-    <item
         android:id="@+id/toggleStarred"
-        android:icon="@drawable/ic_baseline_star_border_24"
-        android:title="@string/star"
+        android:icon="@drawable/ic_baseline_bookmark_border_24"
+        android:title="@string/bookmark"
         app:showAsAction="ifRoom" />
 
 </menu>

@@ -13,6 +13,7 @@ import android.text.style.QuoteSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.text.HtmlCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -21,9 +22,11 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import co.appreactor.nextcloud.news.*
 import kotlinx.android.synthetic.main.fragment_feed_item.*
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
+import timber.log.Timber
 
 class FeedItemFragment : Fragment() {
 
@@ -56,7 +59,21 @@ class FeedItemFragment : Fragment() {
 
             if (item.unread) {
                 model.toggleReadFlag(item.id)
-                model.syncNewsFlags()
+
+                launch {
+                    runCatching {
+                        delay(5000)
+                        model.syncFeedItemsFlags()
+                    }.getOrElse {
+                        Timber.e(it)
+
+                        Toast.makeText(
+                            requireContext(),
+                            R.string.cannot_sync_bookmarks,
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
             }
 
             toolbar.title = model.getFeed(item.feedId)!!.title
@@ -142,47 +159,35 @@ class FeedItemFragment : Fragment() {
         }
 
         lifecycleScope.launchWhenResumed {
-            model.getReadFlag(args.newsItemId).collect { read ->
-                val menuItem = toolbar.menu.findItem(R.id.toggleRead)
-
-                if (read) {
-                    menuItem.setIcon(R.drawable.ic_baseline_visibility_24)
-                    menuItem.setTitle(R.string.mark_as_unread)
-                } else {
-                    menuItem.setIcon(R.drawable.ic_baseline_visibility_off_24)
-                    menuItem.setTitle(R.string.mark_as_read)
-                }
-            }
-        }
-
-        lifecycleScope.launchWhenResumed {
             model.getStarredFlag(args.newsItemId).collect { starred ->
                 val menuItem = toolbar.menu.findItem(R.id.toggleStarred)
 
                 if (starred) {
-                    menuItem.setIcon(R.drawable.ic_baseline_star_24)
-                    menuItem.setTitle(R.string.unstar)
+                    menuItem.setIcon(R.drawable.ic_baseline_bookmark_24)
+                    menuItem.setTitle(R.string.remove_bookmark)
                 } else {
-                    menuItem.setIcon(R.drawable.ic_baseline_star_border_24)
-                    menuItem.setTitle(R.string.star)
+                    menuItem.setIcon(R.drawable.ic_baseline_bookmark_border_24)
+                    menuItem.setTitle(R.string.bookmark)
                 }
             }
         }
 
-        toolbar.setOnMenuItemClickListener {
-            if (it.itemId == R.id.toggleRead) {
-                lifecycleScope.launch {
-                    model.toggleReadFlag(args.newsItemId)
-                    model.syncNewsFlags()
-                }
-
-                return@setOnMenuItemClickListener true
-            }
-
-            if (it.itemId == R.id.toggleStarred) {
+        toolbar.setOnMenuItemClickListener { menuItem ->
+            if (menuItem.itemId == R.id.toggleStarred) {
                 lifecycleScope.launch {
                     model.toggleStarredFlag(args.newsItemId)
-                    model.syncNewsFlags()
+
+                    runCatching {
+                        model.syncFeedItemsFlags()
+                    }.getOrElse {
+                        Timber.e(it)
+
+                        Toast.makeText(
+                            requireContext(),
+                            R.string.cannot_sync_bookmarks,
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 }
 
                 return@setOnMenuItemClickListener true

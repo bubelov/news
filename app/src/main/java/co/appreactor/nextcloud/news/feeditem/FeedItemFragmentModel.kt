@@ -31,8 +31,6 @@ class FeedItemFragmentModel(
         return DateFormat.getDateInstance(DateFormat.LONG).format(Date(instant.toEpochMilliseconds()))
     }
 
-    suspend fun getReadFlag(id: Long) = feedItemsRepository.byId(id).map { it?.unread == false }
-
     suspend fun getStarredFlag(id: Long) = feedItemsRepository.byId(id).map { it?.starred == true }
 
     suspend fun toggleReadFlag(id: Long) {
@@ -45,7 +43,7 @@ class FeedItemFragmentModel(
         feedItemsRepository.updateStarred(id, !item.starred)
     }
 
-    suspend fun syncNewsFlags() {
+    suspend fun syncFeedItemsFlags() {
         databaseSyncManager.syncNewsFlagsOnly()
     }
 }

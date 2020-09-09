@@ -11,8 +11,8 @@
     <string name="hide_read_news">Hide read news</string>
     <string name="mark_as_read">Mark as read</string>
     <string name="mark_as_unread">Mark as unread</string>
-    <string name="star">Star</string>
-    <string name="unstar">Unstar</string>
+    <string name="bookmark">Bookmark</string>
+    <string name="remove_bookmark">Remove bookmark</string>
     <string name="logo">Logo</string>
     <string name="for_nextcloud">for Nextcloud</string>
     <string name="direct_login">Direct login</string>
@@ -41,4 +41,5 @@
     <string name="feeds">Feeds</string>
     <string name="bookmarks">Bookmarks</string>
     <string name="delete_all">Delete all</string>
+    <string name="cannot_sync_bookmarks">Cannot sync bookmarks</string>
 </resources>
