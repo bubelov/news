@@ -1,8 +1,10 @@
 package co.appreactor.nextcloud.news.feeds
 
 import android.view.LayoutInflater
+import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -30,8 +32,32 @@ class FeedsAdapter(
                 primaryText.text = item.title
                 secondaryText.text = item.link
 
-                clickableArea.setOnClickListener {
-                    callback.onClick(item)
+                if (!item.lastUpdateError.isNullOrBlank()) {
+                    errorText.isVisible = true
+                    errorText.text = item.lastUpdateError
+                } else {
+                    errorText.isVisible = false
+                }
+
+                actions.setOnClickListener {
+                    val popup = PopupMenu(context, actions)
+                    val inflater: MenuInflater = popup.menuInflater
+                    inflater.inflate(R.menu.menu_feed_actions, popup.menu)
+                    popup.show()
+
+                    popup.setOnMenuItemClickListener {
+                        when (it.itemId) {
+                            R.id.openWebsite -> {
+                                callback.onOpenWebsiteClick(item)
+                            }
+
+                            R.id.openRssFeed -> {
+                                callback.onOpenRssFeedClick(item)
+                            }
+                        }
+
+                        true
+                    }
                 }
             }
         }

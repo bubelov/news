@@ -1,5 +1,7 @@
 package co.appreactor.nextcloud.news.feeds
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,7 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import co.appreactor.nextcloud.news.R
-import co.appreactor.nextcloud.news.common.showDialog
+import co.appreactor.nextcloud.news.db.Feed
 import kotlinx.android.synthetic.main.fragment_feeds.*
 import kotlinx.coroutines.flow.collect
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -19,9 +21,19 @@ class FeedsFragment : Fragment() {
 
     private val model: FeedsFragmentModel by viewModel()
 
-    private val adapter = FeedsAdapter {
-        showDialog(it.title, it.toString())
-    }
+    private val adapter = FeedsAdapter(callback = object : FeedsAdapterCallback {
+        override fun onOpenWebsiteClick(feed: Feed) {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.data = Uri.parse(feed.link)
+            startActivity(intent)
+        }
+
+        override fun onOpenRssFeedClick(feed: Feed) {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.data = Uri.parse(feed.url)
+            startActivity(intent)
+        }
+    })
 
     override fun onCreateView(
         inflater: LayoutInflater,

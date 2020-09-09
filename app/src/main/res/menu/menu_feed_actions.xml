@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/openWebsite"
+        android:title="@string/open_website"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/openRssFeed"
+        android:title="@string/open_rss_feed"
+        app:showAsAction="ifRoom" />
+
+</menu>
