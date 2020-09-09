@@ -1,4 +1,4 @@
-CREATE TABLE NewsFeed (
+CREATE TABLE Feed (
   id INTEGER PRIMARY KEY,
   url TEXT NOT NULL,
   title TEXT NOT NULL,
@@ -15,23 +15,23 @@ CREATE TABLE NewsFeed (
 
 insertOrReplace:
 INSERT OR REPLACE
-INTO NewsFeed
+INTO Feed
 VALUES ?;
 
 findAll:
 SELECT *
-FROM NewsFeed
+FROM Feed
 ORDER BY title;
 
 findById:
 SELECT *
-FROM NewsFeed
+FROM Feed
 WHERE id = :id;
 
 count:
 SELECT COUNT(*)
-FROM NewsFeed;
+FROM Feed;
 
 deleteAll:
 DELETE
-FROM NewsFeed;
+FROM Feed;

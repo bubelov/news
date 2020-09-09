@@ -1,4 +1,4 @@
-package co.appreactor.nextcloud.news.newsitem
+package co.appreactor.nextcloud.news.feeditem
 
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
@@ -7,7 +7,7 @@ import android.widget.TextView
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
 
-class LazyTextViewDrawable(private val textView: TextView) : Drawable(), Target {
+class TextViewImage(private val textView: TextView) : Drawable(), Target {
 
     private var drawable: Drawable? = null
 

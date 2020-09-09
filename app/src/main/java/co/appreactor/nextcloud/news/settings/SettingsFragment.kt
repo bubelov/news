@@ -50,7 +50,7 @@ class SettingsFragment : Fragment() {
                 }
             }
 
-            username.text = model.getAccountName()
+            username.text = model.getAccountName(requireContext())
         }
 
         viewExceptions.setOnClickListener {
@@ -70,7 +70,7 @@ class SettingsFragment : Fragment() {
                     R.string.log_out
                 ) { _, _ ->
                     lifecycleScope.launch {
-                        model.clearData()
+                        model.clearData(requireContext())
                         findNavController().popBackStack(R.id.newsFragment, true)
                         findNavController().navigate(NavGraphDirections.actionGlobalToAuthFragment())
                     }

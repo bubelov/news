@@ -2,10 +2,10 @@ package co.appreactor.nextcloud.news.settings
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
-import co.appreactor.nextcloud.news.feeds.NewsFeedsRepository
+import co.appreactor.nextcloud.news.feeds.FeedsRepository
 import co.appreactor.nextcloud.news.common.Preferences
-import co.appreactor.nextcloud.news.logging.ExceptionsRepository
-import co.appreactor.nextcloud.news.news.NewsItemsRepository
+import co.appreactor.nextcloud.news.logging.LoggedExceptionsRepository
+import co.appreactor.nextcloud.news.feeditems.FeedItemsRepository
 import com.nextcloud.android.sso.AccountImporter
 import com.nextcloud.android.sso.exceptions.SSOException
 import com.nextcloud.android.sso.helper.SingleAccountHelper
@@ -13,11 +13,10 @@ import kotlinx.coroutines.flow.first
 import timber.log.Timber
 
 class SettingsFragmentModel(
-    private val newsItemsRepository: NewsItemsRepository,
-    private val newsFeedsRepository: NewsFeedsRepository,
+    private val feedsRepository: FeedsRepository,
+    private val feedItemsRepository: FeedItemsRepository,
+    private val loggedExceptionsRepository: LoggedExceptionsRepository,
     private val prefs: Preferences,
-    private val context: Context,
-    private val exceptionsRepository: ExceptionsRepository
 ) : ViewModel() {
 
     suspend fun getShowReadNews() = prefs.getBoolean(
@@ -44,9 +43,9 @@ class SettingsFragmentModel(
         )
     }
 
-    suspend fun getExceptionsCount() = exceptionsRepository.count()
+    suspend fun getExceptionsCount() = loggedExceptionsRepository.count()
 
-    suspend fun getAccountName(): String {
+    suspend fun getAccountName(context: Context): String {
         val serverUrl = prefs.getString(Preferences.SERVER_URL).first()
 
         return if (serverUrl.isNotBlank()) {
@@ -63,11 +62,11 @@ class SettingsFragmentModel(
         }
     }
 
-    suspend fun clearData() {
+    suspend fun clearData(context: Context) {
         AccountImporter.clearAllAuthTokens(context)
 
-        newsItemsRepository.clear()
-        newsFeedsRepository.clear()
+        feedsRepository.clear()
+        feedItemsRepository.clear()
 
         prefs.clear()
     }

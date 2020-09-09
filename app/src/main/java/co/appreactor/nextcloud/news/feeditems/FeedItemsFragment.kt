@@ -1,4 +1,4 @@
-package co.appreactor.nextcloud.news.news
+package co.appreactor.nextcloud.news.feeditems
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,48 +10,46 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import co.appreactor.nextcloud.news.R
+import co.appreactor.nextcloud.news.common.showDialog
 import co.appreactor.nextcloud.news.podcasts.playPodcast
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.android.synthetic.main.fragment_news.*
+import kotlinx.android.synthetic.main.fragment_feed_items.*
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
 import timber.log.Timber
 
-class NewsFragment : Fragment() {
+class FeedItemsFragment : Fragment() {
 
-    private val model: NewsFragmentModel by viewModel()
+    private val model: FeedItemsFragmentModel by viewModel()
 
-    private val adapter = NewsAdapter(
-        callback = object : NewsAdapterCallback {
-            override fun onRowClick(row: NewsAdapterRow) {
-                val action = NewsFragmentDirections.actionNewsFragmentToNewsItemFragment(row.id)
+    private val adapter = FeedItemsAdapter(
+        callback = object : FeedItemsAdapterCallback {
+            override fun onItemClick(item: FeedItemsAdapterRow) {
+                val action = FeedItemsFragmentDirections.actionNewsFragmentToNewsItemFragment(item.id)
                 findNavController().navigate(action)
             }
 
-            override fun onDownloadPodcastClick(row: NewsAdapterRow) {
+            override fun onDownloadPodcastClick(item: FeedItemsAdapterRow) {
                 lifecycleScope.launchWhenResumed {
                     runCatching {
-                        model.downloadPodcast(row.id)
-                    }.apply {
-                        if (isFailure) {
-                            Timber.e(exceptionOrNull())
-
-                            MaterialAlertDialogBuilder(requireContext())
-                                .setTitle(getString(R.string.error))
-                                .setMessage(exceptionOrNull()?.message)
-                                .setPositiveButton(android.R.string.ok, null)
-                                .show()
-                        }
+                        model.downloadPodcast(item.id)
+                    }.getOrElse {
+                        Timber.e(it)
+                        showDialog(R.string.error, it.message ?: "")
                     }
                 }
             }
 
-            override fun onPlayPodcastClick(row: NewsAdapterRow) {
+            override fun onPlayPodcastClick(item: FeedItemsAdapterRow) {
                 lifecycleScope.launch {
-                    val podcast = model.getNewsItem(row.id).first()!!
-                    playPodcast(podcast)
+                    runCatching {
+                        playPodcast(model.getFeedItem(item.id)!!)
+                    }.getOrElse {
+                        Timber.e(it)
+                        showDialog(R.string.error, it.message ?: "")
+                    }
                 }
             }
         }
@@ -63,7 +61,7 @@ class NewsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(
-            R.layout.fragment_news,
+            R.layout.fragment_feed_items,
             container,
             false
         )
@@ -76,16 +74,9 @@ class NewsFragment : Fragment() {
             lifecycleScope.launch {
                 runCatching {
                     model.performFullSync()
-                }.apply {
-                    if (isFailure) {
-                        Timber.e(exceptionOrNull())
-
-                        MaterialAlertDialogBuilder(requireContext())
-                            .setTitle(getString(R.string.error))
-                            .setMessage(exceptionOrNull()?.message)
-                            .setPositiveButton(android.R.string.ok, null)
-                            .show()
-                    }
+                }.getOrElse {
+                    Timber.e(it)
+                    showDialog(R.string.error, it.message ?: "")
                 }
 
                 swipeRefresh.isRefreshing = false
@@ -93,7 +84,7 @@ class NewsFragment : Fragment() {
         }
 
         lifecycleScope.launchWhenResumed {
-            initNewsList()
+            showFeedItems()
         }
     }
 
@@ -125,42 +116,30 @@ class NewsFragment : Fragment() {
         }
     }
 
-    private suspend fun initNewsList() {
+    private suspend fun showFeedItems() {
         progress.isVisible = true
 
         runCatching {
             model.performInitialSyncIfNoData()
-        }.apply {
-            if (isFailure) {
-                Timber.e(exceptionOrNull())
-
-                progress.isVisible = false
-
-                MaterialAlertDialogBuilder(requireContext())
-                    .setTitle(getString(R.string.error))
-                    .setMessage(exceptionOrNull()?.message)
-                    .setPositiveButton(android.R.string.ok, null)
-                    .show()
-            }
+        }.getOrElse {
+            Timber.e(it)
+            progress.isVisible = false
+            showDialog(R.string.error, it.message ?: "")
         }
 
-        itemsView.apply {
-            setHasFixedSize(true)
-            layoutManager = LinearLayoutManager(context)
-        }
-
+        itemsView.setHasFixedSize(true)
+        itemsView.layoutManager = LinearLayoutManager(context)
         itemsView.adapter = adapter
+        adapter.screenWidth = itemsView.width
 
-        model.getNews().collect { rows ->
-            Timber.d("Got ${rows.size} news!")
-
-            if (model.isInitialSyncCompleted().first()) {
+        model.getFeedItems().conflate().collect { rows ->
+            if (model.isInitialSyncCompleted()) {
                 progress.isVisible = false
             }
 
-            empty.isVisible = rows.isEmpty() && model.isInitialSyncCompleted().first()
+            empty.isVisible = rows.isEmpty() && model.isInitialSyncCompleted()
 
-            adapter.swapRows(rows)
+            adapter.swapItems(rows)
         }
     }
 }

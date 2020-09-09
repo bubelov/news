@@ -1,34 +1,32 @@
 package co.appreactor.nextcloud.news.bookmarks
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import co.appreactor.nextcloud.news.feeds.NewsFeedsRepository
+import co.appreactor.nextcloud.news.feeds.FeedsRepository
 import co.appreactor.nextcloud.news.common.Preferences
-import co.appreactor.nextcloud.news.news.NewsAdapterRow
-import co.appreactor.nextcloud.news.news.NewsItemsRepository
-import co.appreactor.nextcloud.news.podcasts.PodcastsSync
+import co.appreactor.nextcloud.news.feeditems.FeedItemsAdapterRow
+import co.appreactor.nextcloud.news.feeditems.FeedItemsRepository
+import co.appreactor.nextcloud.news.podcasts.PodcastsManager
 import co.appreactor.nextcloud.news.podcasts.isPodcast
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.*
 
 class BookmarksFragmentModel(
-    private val newsItemsRepository: NewsItemsRepository,
-    private val newsFeedsRepository: NewsFeedsRepository,
+    private val feedsRepository: FeedsRepository,
+    private val feedItemsRepository: FeedItemsRepository,
+    private val podcastsManager: PodcastsManager,
     private val prefs: Preferences,
-    private val podcastsSync: PodcastsSync
 ) : ViewModel() {
 
-    suspend fun getNewsItems() = newsItemsRepository.all().combine(getCropFeedImages()) { unfilteredItems, cropImages ->
+    suspend fun getNewsItems() = feedItemsRepository.all().combine(getCropFeedImages()) { unfilteredItems, cropImages ->
         val items = unfilteredItems.filter { it.starred }
-        val feeds = newsFeedsRepository.all().first()
+        val feeds = feedsRepository.all().first()
 
         items.map {
             val dateString = DateFormat.getDateInstance().format(Date(it.pubDate * 1000))
             val feed = feeds.single { feed -> feed.id == it.feedId }
 
-            NewsAdapterRow(
+            FeedItemsAdapterRow(
                 it.id,
                 it.title,
                 feed.title + " · " + dateString,
@@ -42,16 +40,11 @@ class BookmarksFragmentModel(
         }
     }
 
-    suspend fun isInitialSyncCompleted() =
-        prefs.getBoolean(Preferences.INITIAL_SYNC_COMPLETED, false)
-
-    fun downloadPodcast(id: Long) {
-        viewModelScope.launch {
-            podcastsSync.downloadPodcast(id)
-        }
+    suspend fun downloadPodcast(id: Long) {
+        podcastsManager.downloadPodcast(id)
     }
 
-    suspend fun getNewsItem(id: Long) = newsItemsRepository.byId(id)
+    suspend fun getFeedItem(id: Long) = feedItemsRepository.byId(id).first()
 
     private suspend fun getCropFeedImages() = prefs.getBoolean(
         key = Preferences.CROP_FEED_IMAGES,

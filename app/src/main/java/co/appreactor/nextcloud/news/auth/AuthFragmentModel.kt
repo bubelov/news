@@ -3,16 +3,15 @@ package co.appreactor.nextcloud.news.auth
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import co.appreactor.nextcloud.news.common.Preferences
-import com.nextcloud.android.sso.exceptions.SSOException
 import com.nextcloud.android.sso.helper.SingleAccountHelper
 import kotlinx.coroutines.flow.first
+import timber.log.Timber
 
 class AuthFragmentModel(
-    private val prefs: Preferences,
-    private val context: Context
+    private val prefs: Preferences
 ) : ViewModel() {
 
-    suspend fun isLoggedIn(): Boolean {
+    suspend fun isLoggedIn(context: Context): Boolean {
         if (prefs.getString(Preferences.SERVER_URL).first().isNotBlank()) {
             return true
         }
@@ -20,7 +19,8 @@ class AuthFragmentModel(
         return try {
             SingleAccountHelper.getCurrentSingleSignOnAccount(context)
             true
-        } catch (e: SSOException) {
+        } catch (e: Exception) {
+            Timber.e(e)
             false
         }
     }

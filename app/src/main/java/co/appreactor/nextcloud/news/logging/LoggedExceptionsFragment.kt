@@ -10,7 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import co.appreactor.nextcloud.news.R
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import co.appreactor.nextcloud.news.common.showDialog
 import kotlinx.android.synthetic.main.fragment_logged_exceptions.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -18,13 +18,10 @@ import org.koin.android.viewmodel.ext.android.viewModel
 
 class LoggedExceptionsFragment : Fragment() {
 
-    private val model: ExceptionsFragmentModel by viewModel()
+    private val model: LoggedExceptionsFragmentModel by viewModel()
 
-    private val adapter = ExceptionsAdapter {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(it.exceptionClass)
-            .setMessage(it.stackTrace)
-            .show()
+    private val adapter = LoggedExceptionsAdapter {
+        showDialog(it.exceptionClass, it.stackTrace)
     }
 
     override fun onCreateView(

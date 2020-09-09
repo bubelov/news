@@ -8,15 +8,15 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 class Preferences(
-    private val cache: PreferenceQueries
+    private val db: PreferenceQueries
 ) {
 
     suspend fun getString(key: String) = withContext(Dispatchers.IO) {
-        cache.findByKey(key).asFlow().map { it.executeAsOneOrNull()?.value ?: "" }
+        db.findByKey(key).asFlow().map { it.executeAsOneOrNull()?.value ?: "" }
     }
 
     suspend fun putString(key: String, value: String) = withContext(Dispatchers.IO) {
-        cache.insertOrReplace(Preference(key, value))
+        db.insertOrReplace(Preference(key, value))
     }
 
     suspend fun getBoolean(key: String, default: Boolean) = getString(key).map {
@@ -33,7 +33,7 @@ class Preferences(
     }
 
     suspend fun clear() = withContext(Dispatchers.IO) {
-        cache.deleteAll()
+        db.deleteAll()
     }
 
     companion object {

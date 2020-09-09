@@ -10,37 +10,47 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import co.appreactor.nextcloud.news.R
-import co.appreactor.nextcloud.news.news.NewsAdapter
-import co.appreactor.nextcloud.news.news.NewsAdapterCallback
-import co.appreactor.nextcloud.news.news.NewsAdapterRow
+import co.appreactor.nextcloud.news.common.showDialog
+import co.appreactor.nextcloud.news.feeditems.FeedItemsAdapter
+import co.appreactor.nextcloud.news.feeditems.FeedItemsAdapterCallback
+import co.appreactor.nextcloud.news.feeditems.FeedItemsAdapterRow
 import co.appreactor.nextcloud.news.podcasts.playPodcast
-import kotlinx.android.synthetic.main.fragment_bookmarks.empty
-import kotlinx.android.synthetic.main.fragment_bookmarks.itemsView
-import kotlinx.android.synthetic.main.fragment_bookmarks.progress
+import kotlinx.android.synthetic.main.fragment_bookmarks.*
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
+import timber.log.Timber
 
 class BookmarksFragment : Fragment() {
 
     private val model: BookmarksFragmentModel by viewModel()
 
-    private val adapter = NewsAdapter(
-        callback = object : NewsAdapterCallback {
-            override fun onRowClick(row: NewsAdapterRow) {
-                val action = BookmarksFragmentDirections.actionStarredNewsFragmentToNewsItemFragment(row.id)
+    private val adapter = FeedItemsAdapter(
+        callback = object : FeedItemsAdapterCallback {
+            override fun onItemClick(item: FeedItemsAdapterRow) {
+                val action = BookmarksFragmentDirections.actionStarredNewsFragmentToNewsItemFragment(item.id)
                 findNavController().navigate(action)
             }
 
-            override fun onDownloadPodcastClick(row: NewsAdapterRow) {
-                model.downloadPodcast(row.id)
+            override fun onDownloadPodcastClick(item: FeedItemsAdapterRow) {
+                lifecycleScope.launchWhenResumed {
+                    runCatching {
+                        model.downloadPodcast(item.id)
+                    }.getOrElse {
+                        Timber.e(it)
+                        showDialog(R.string.error, it.message ?: "")
+                    }
+                }
             }
 
-            override fun onPlayPodcastClick(row: NewsAdapterRow) {
+            override fun onPlayPodcastClick(item: FeedItemsAdapterRow) {
                 lifecycleScope.launch {
-                    val podcast = model.getNewsItem(row.id).first()!!
-                    playPodcast(podcast)
+                    runCatching {
+                        playPodcast(model.getFeedItem(item.id)!!)
+                    }.getOrElse {
+                        Timber.e(it)
+                        showDialog(R.string.error, it.message ?: "")
+                    }
                 }
             }
         }
@@ -60,24 +70,22 @@ class BookmarksFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         lifecycleScope.launchWhenResumed {
-            initNewsList()
+            showBookmarks()
         }
     }
 
-    private suspend fun initNewsList() {
+    private suspend fun showBookmarks() {
         progress.isVisible = true
 
-        itemsView.apply {
-            setHasFixedSize(true)
-            layoutManager = LinearLayoutManager(context)
-        }
-
-        itemsView.adapter = adapter
+        listView.setHasFixedSize(true)
+        listView.layoutManager = LinearLayoutManager(context)
+        listView.adapter = adapter
+        adapter.screenWidth = listView.width
 
         model.getNewsItems().collect { rows ->
             progress.isVisible = false
             empty.isVisible = rows.isEmpty()
-            adapter.swapRows(rows)
+            adapter.swapItems(rows)
         }
     }
 }

@@ -11,7 +11,7 @@ import java.io.StringWriter
 import java.util.*
 
 class PersistentLogTree(
-    private val exceptionsRepository: ExceptionsRepository
+    private val exceptionsRepository: LoggedExceptionsRepository
 ) : Timber.Tree() {
 
     override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {

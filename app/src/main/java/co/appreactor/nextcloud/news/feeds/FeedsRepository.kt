@@ -1,32 +1,32 @@
 package co.appreactor.nextcloud.news.feeds
 
 import co.appreactor.nextcloud.news.api.NewsApi
-import co.appreactor.nextcloud.news.db.NewsFeedQueries
+import co.appreactor.nextcloud.news.db.FeedQueries
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
-class NewsFeedsRepository(
-    private val cache: NewsFeedQueries,
+class FeedsRepository(
+    private val db: FeedQueries,
     private val api: NewsApi
 ) {
 
     suspend fun all() = withContext(Dispatchers.IO) {
-        cache.findAll().asFlow().map { it.executeAsList() }
+        db.findAll().asFlow().map { it.executeAsList() }
     }
 
     suspend fun byId(id: Long) = withContext(Dispatchers.IO) {
-        cache.findById(id).asFlow().map { it.executeAsOneOrNull() }
+        db.findById(id).asFlow().map { it.executeAsOneOrNull() }
     }
 
     suspend fun clear() = withContext(Dispatchers.IO) {
-        cache.deleteAll()
+        db.deleteAll()
     }
 
     suspend fun reloadFromApiIfNoData() = withContext(Dispatchers.IO) {
-        if (cache.count().executeAsOne() == 0L) {
+        if (db.count().executeAsOne() == 0L) {
             reloadFromApi()
         }
     }
@@ -36,11 +36,11 @@ class NewsFeedsRepository(
         val feeds = api.getFeeds().execute().body()!!.feeds
         Timber.d("Got ${feeds.size} feeds")
 
-        cache.transaction {
-            cache.deleteAll()
+        db.transaction {
+            db.deleteAll()
 
             feeds.forEach {
-                cache.insertOrReplace(it)
+                db.insertOrReplace(it)
             }
         }
 

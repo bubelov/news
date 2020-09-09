@@ -1,7 +1,7 @@
 package co.appreactor.nextcloud.news.podcasts
 
 import android.content.Context
-import co.appreactor.nextcloud.news.news.NewsItemsRepository
+import co.appreactor.nextcloud.news.feeditems.FeedItemsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -11,15 +11,15 @@ import timber.log.Timber
 import java.io.BufferedInputStream
 import java.io.FileOutputStream
 
-class PodcastsSync(
-    private val newsItemsRepository: NewsItemsRepository,
+class PodcastsManager(
+    private val feedItemsRepository: FeedItemsRepository,
     private val context: Context
 ) {
 
-    private val client = OkHttpClient()
+    private val httpClient = OkHttpClient()
 
     suspend fun verifyCache() = withContext(Dispatchers.IO) {
-        val news = newsItemsRepository.all().first()
+        val news = feedItemsRepository.all().first()
         val podcasts = news.filter { it.isPodcast() }
 
         podcasts.forEach {
@@ -28,14 +28,14 @@ class PodcastsSync(
             if (file.exists() && it.enclosureDownloadProgress != null && it.enclosureDownloadProgress != 100L) {
                 file.delete()
 
-                newsItemsRepository.updateEnclosureDownloadProgress(
+                feedItemsRepository.updateEnclosureDownloadProgress(
                     id = it.id,
                     progress = null
                 )
             }
 
             if (!file.exists() && it.enclosureDownloadProgress != null) {
-                newsItemsRepository.updateEnclosureDownloadProgress(
+                feedItemsRepository.updateEnclosureDownloadProgress(
                     id = it.id,
                     progress = null
                 )
@@ -45,7 +45,7 @@ class PodcastsSync(
 
     suspend fun downloadPodcast(id: Long) = withContext(Dispatchers.IO) {
         Timber.d("Downloading podcast $id")
-        val podcast = newsItemsRepository.byId(id).first()!!
+        val podcast = feedItemsRepository.byId(id).first()!!
         Timber.d("Podcast title: ${podcast.title}")
 
         if (podcast.enclosureLink.isNullOrBlank()) {
@@ -60,7 +60,7 @@ class PodcastsSync(
             return@withContext
         }
 
-        newsItemsRepository.updateEnclosureDownloadProgress(
+        feedItemsRepository.updateEnclosureDownloadProgress(
             id = podcast.id,
             progress = 0L
         )
@@ -71,7 +71,7 @@ class PodcastsSync(
             .url(podcast.enclosureLink)
             .build()
 
-        val response = client.newCall(request).execute()
+        val response = httpClient.newCall(request).execute()
 
         if (response.isSuccessful) {
             Timber.d("Connected")
@@ -103,7 +103,7 @@ class PodcastsSync(
                         if (progressPercent > lastReportedProgressPercent) {
                             Timber.d("Progress: $progressPercent%")
 
-                            newsItemsRepository.updateEnclosureDownloadProgress(
+                            feedItemsRepository.updateEnclosureDownloadProgress(
                                 id = podcast.id,
                                 progress = progressPercent
                             )
@@ -115,14 +115,14 @@ class PodcastsSync(
 
                 Timber.d("Downloaded")
 
-                newsItemsRepository.updateEnclosureDownloadProgress(
+                feedItemsRepository.updateEnclosureDownloadProgress(
                     id = podcast.id,
                     progress = 100
                 )
             } catch (e: Exception) {
                 Timber.e(e)
 
-                newsItemsRepository.updateEnclosureDownloadProgress(
+                feedItemsRepository.updateEnclosureDownloadProgress(
                     id = podcast.id,
                     -1L
                 )

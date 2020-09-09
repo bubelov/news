@@ -13,25 +13,25 @@ interface NewsApi {
     fun getFeeds(): Call<FeedsPayload>
 
     @GET("items?type=3&getRead=false&batchSize=-1")
-    fun getUnreadItems(): Call<ItemsPayload>
+    fun getUnreadItems(): Call<FeedItemsPayload>
 
     @GET("items?type=2&getRead=true&batchSize=-1")
-    fun getStarredItems(): Call<ItemsPayload>
+    fun getStarredItems(): Call<FeedItemsPayload>
 
     @GET("items/updated?type=3")
     fun getNewAndUpdatedItems(
         @Query("lastModified") lastModified: Long
-    ): Call<ItemsPayload>
+    ): Call<FeedItemsPayload>
 
     @PUT("items/read/multiple")
-    fun markAsRead(@Body args: PutReadArgs): Call<ResponseBody>
+    fun putRead(@Body args: PutReadArgs): Call<ResponseBody>
 
     @PUT("items/unread/multiple")
-    fun markAsUnread(@Body args: PutReadArgs): Call<ResponseBody>
+    fun putUnread(@Body args: PutReadArgs): Call<ResponseBody>
 
     @PUT("items/star/multiple")
-    fun markAsStarred(@Body args: PutStarredArgs): Call<ResponseBody>
+    fun putStarred(@Body args: PutStarredArgs): Call<ResponseBody>
 
     @PUT("items/unstar/multiple")
-    fun markAsUnstarred(@Body args: PutStarredArgs): Call<ResponseBody>
+    fun putUnstarred(@Body args: PutStarredArgs): Call<ResponseBody>
 }

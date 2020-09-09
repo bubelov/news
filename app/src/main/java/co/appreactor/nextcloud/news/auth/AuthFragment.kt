@@ -37,7 +37,7 @@ class AuthFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         return runBlocking {
-            if (!model.isLoggedIn()) {
+            if (!model.isLoggedIn(requireContext())) {
                 inflater.inflate(
                     R.layout.fragment_auth,
                     container,
@@ -93,8 +93,11 @@ class AuthFragment : Fragment() {
 
         try {
             AccountImporter.pickNewAccount(this)
-        } catch (e: SSOException) {
-            UiExceptionManager.showDialogForException(context, e)
+        } catch (e: Exception) {
+            if (e is SSOException) {
+                UiExceptionManager.showDialogForException(context, e)
+            }
+
             loginViaApp.isEnabled = true
         }
     }

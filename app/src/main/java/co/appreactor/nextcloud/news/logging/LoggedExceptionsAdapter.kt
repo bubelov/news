@@ -4,37 +4,42 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.nextcloud.news.R
 import co.appreactor.nextcloud.news.db.LoggedException
-import kotlinx.android.synthetic.main.row_exception.view.*
+import kotlinx.android.synthetic.main.list_item_logged_exception.view.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
-class ExceptionsAdapter(
+class LoggedExceptionsAdapter(
     private val items: MutableList<LoggedException> = mutableListOf(),
-    private val callback: ExceptionsAdapterCallback
-) : RecyclerView.Adapter<ExceptionsAdapter.ViewHolder>() {
+    private val callback: LoggedExceptionsAdapterCallback
+) : RecyclerView.Adapter<LoggedExceptionsAdapter.ViewHolder>() {
 
     class ViewHolder(
         private val view: View,
-        private val callback: ExceptionsAdapterCallback
+        private val callback: LoggedExceptionsAdapterCallback
     ) :
         RecyclerView.ViewHolder(view) {
 
         fun bind(item: LoggedException, isFirst: Boolean) {
-            view.topOffset.isVisible = isFirst
+            view.apply {
+                topOffset.isVisible = isFirst
 
-            view.primaryText.text = item.exceptionClass
-            view.secondaryText.text = item.date
+                primaryText.text = item.exceptionClass
+                secondaryText.text = item.date
 
-            view.clickableArea.setOnClickListener {
-                callback.onClick(item)
+                clickableArea.setOnClickListener {
+                    callback.onClick(item)
+                }
             }
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(
-            R.layout.row_exception,
+            R.layout.list_item_logged_exception,
             parent, false
         )
 
@@ -53,9 +58,13 @@ class ExceptionsAdapter(
         )
     }
 
-    fun swapItems(items: List<LoggedException>) {
+    suspend fun swapItems(newItems: List<LoggedException>) {
+        val diff = withContext(Dispatchers.IO) {
+            DiffUtil.calculateDiff(LoggedExceptionsAdapterDiffCallback(items, newItems))
+        }
+
+        diff.dispatchUpdatesTo(this)
         this.items.clear()
-        this.items += items
-        notifyDataSetChanged()
+        this.items += newItems
     }
 }

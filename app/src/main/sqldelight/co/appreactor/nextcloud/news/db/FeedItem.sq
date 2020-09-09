@@ -1,4 +1,4 @@
-CREATE TABLE NewsItem (
+CREATE TABLE FeedItem (
   id INTEGER PRIMARY KEY,
   guid TEXT NOT NULL,
   guidHash TEXT NOT NULL,
@@ -29,58 +29,64 @@ CREATE TABLE NewsItem (
 
 insertOrReplace:
 INSERT OR REPLACE
-INTO NewsItem
+INTO FeedItem
 VALUES ?;
 
 findAll:
 SELECT *
-FROM NewsItem
+FROM FeedItem
+ORDER BY pubDate DESC;
+
+findUnread:
+SELECT *
+FROM FeedItem
+WHERE unread = 1
 ORDER BY pubDate DESC;
 
 findById:
 SELECT *
-FROM NewsItem
+FROM FeedItem
 WHERE id = :id;
 
 count:
 SELECT COUNT(*)
-FROM NewsItem;
+FROM FeedItem;
 
 updateUnread:
-UPDATE NewsItem
+UPDATE FeedItem
 SET unread = ?, unreadSynced = 0
 WHERE id = ?;
 
 updateUnreadSynced:
-UPDATE NewsItem
+UPDATE FeedItem
 SET unreadSynced = ?
 WHERE id = ?;
 
 updateStarred:
-UPDATE NewsItem
+UPDATE FeedItem
 SET starred = ?, starredSynced = 0
 WHERE id = ?;
 
 updateStarredSynced:
-UPDATE NewsItem
+UPDATE FeedItem
 SET starredSynced = ?
 WHERE id = ?;
 
 updateOpenGraphImageUrl:
-UPDATE NewsItem
+UPDATE FeedItem
 SET openGraphImageUrl = ?
 WHERE id = ?;
 
 updateOpenGraphImageParsingFailed:
-UPDATE NewsItem
+UPDATE FeedItem
 SET openGraphImageParsingFailed = ?
 WHERE id = ?;
 
 updateEnclosureDownloadProgress:
-UPDATE NewsItem
+UPDATE FeedItem
 SET enclosureDownloadProgress = ?
 WHERE id = ?;
 
 deleteAll:
 DELETE
-FROM NewsItem;
+FROM FeedItem;

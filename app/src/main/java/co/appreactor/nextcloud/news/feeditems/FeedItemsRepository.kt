@@ -1,11 +1,11 @@
-package co.appreactor.nextcloud.news.news
+package co.appreactor.nextcloud.news.feeditems
 
 import androidx.core.text.HtmlCompat
 import co.appreactor.nextcloud.news.api.NewsApi
 import co.appreactor.nextcloud.news.api.PutReadArgs
 import co.appreactor.nextcloud.news.api.PutStarredArgs
 import co.appreactor.nextcloud.news.api.PutStarredArgsItem
-import co.appreactor.nextcloud.news.db.NewsItemQueries
+import co.appreactor.nextcloud.news.db.FeedItemQueries
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -16,8 +16,8 @@ import timber.log.Timber
 import java.util.regex.Pattern
 import kotlin.math.min
 
-class NewsItemsRepository(
-    private val cache: NewsItemQueries,
+class FeedItemsRepository(
+    private val db: FeedItemQueries,
     private val api: NewsApi
 ) {
 
@@ -26,55 +26,59 @@ class NewsItemsRepository(
     }
 
     suspend fun all() = withContext(Dispatchers.IO) {
-        cache.findAll().asFlow().map { it.executeAsList() }
+        db.findAll().asFlow().map { it.executeAsList() }
+    }
+
+    suspend fun unread() = withContext(Dispatchers.IO) {
+        db.findUnread().asFlow().map { it.executeAsList() }
     }
 
     suspend fun byId(id: Long) = withContext(Dispatchers.IO) {
-        cache.findById(id).asFlow().map { it.executeAsOneOrNull() }
+        db.findById(id).asFlow().map { it.executeAsOneOrNull() }
     }
 
     suspend fun updateUnread(id: Long, unread: Boolean) = withContext(Dispatchers.IO) {
-        cache.updateUnread(
+        db.updateUnread(
             unread = unread,
             id = id
         )
     }
 
     suspend fun updateStarred(id: Long, starred: Boolean) = withContext(Dispatchers.IO) {
-        cache.updateStarred(
+        db.updateStarred(
             starred = starred,
             id = id
         )
     }
 
     suspend fun updateOpenGraphImageUrl(id: Long, url: String) = withContext(Dispatchers.IO) {
-        cache.updateOpenGraphImageUrl(
+        db.updateOpenGraphImageUrl(
             openGraphImageUrl = url,
             id = id
         )
     }
 
     suspend fun updateOpenGraphImageParsingFailed(id: Long, failed: Boolean) = withContext(Dispatchers.IO) {
-        cache.updateOpenGraphImageParsingFailed(
+        db.updateOpenGraphImageParsingFailed(
             openGraphImageParsingFailed = failed,
             id = id
         )
     }
 
     suspend fun updateEnclosureDownloadProgress(id: Long, progress: Long?) = withContext(Dispatchers.IO) {
-        cache.updateEnclosureDownloadProgress(
+        db.updateEnclosureDownloadProgress(
             enclosureDownloadProgress = progress,
             id = id
         )
     }
 
     suspend fun clear() = withContext(Dispatchers.IO) {
-        cache.deleteAll()
+        db.deleteAll()
     }
 
     suspend fun performInitialSyncIfNoData() = withContext(Dispatchers.IO) {
         Timber.d("Performing initial sync (if no data)")
-        val count = cache.count().executeAsOne()
+        val count = db.count().executeAsOne()
         Timber.d("Records: $count")
 
         if (count > 0) {
@@ -84,9 +88,9 @@ class NewsItemsRepository(
         val unread = api.getUnreadItems().execute().body()!!
         val starred = api.getStarredItems().execute().body()!!
 
-        cache.transaction {
+        db.transaction {
             (unread.items + starred.items).forEach {
-                cache.insertOrReplace(
+                db.insertOrReplace(
                     it.copy(
                         unreadSynced = true,
                         starredSynced = true,
@@ -114,28 +118,28 @@ class NewsItemsRepository(
         Timber.d("Of them, read: ${unsyncedReadItems.size}")
         Timber.d("Of them, unread: ${unsyncedUnreadItems.size}")
 
-        val markAsReadResponse = api.markAsRead(PutReadArgs(
+        val markAsReadResponse = api.putRead(PutReadArgs(
             unsyncedReadItems.map { it.id }
         )).execute()
 
         if (markAsReadResponse.isSuccessful) {
-            cache.transaction {
+            db.transaction {
                 unsyncedReadItems.forEach {
-                    cache.updateUnreadSynced(true, it.id)
+                    db.updateUnreadSynced(true, it.id)
                 }
             }
         } else {
             throw Exception(markAsReadResponse.message())
         }
 
-        val markAsUnreadResponse = api.markAsUnread(PutReadArgs(
+        val markAsUnreadResponse = api.putUnread(PutReadArgs(
             unsyncedUnreadItems.map { it.id }
         )).execute()
 
         if (markAsUnreadResponse.isSuccessful) {
-            cache.transaction {
+            db.transaction {
                 unsyncedUnreadItems.forEach {
-                    cache.updateUnreadSynced(true, it.id)
+                    db.updateUnreadSynced(true, it.id)
                 }
             }
         } else {
@@ -159,29 +163,29 @@ class NewsItemsRepository(
         Timber.d("Of them, starred: ${unsyncedStarredItems.size}")
         Timber.d("Of them, unread: ${unsyncedUnstarredItems.size}")
 
-        api.markAsStarred(PutStarredArgs(unsyncedStarredItems.map {
+        api.putStarred(PutStarredArgs(unsyncedStarredItems.map {
             PutStarredArgsItem(
                 it.feedId,
                 it.guidHash
             )
         })).execute()
 
-        cache.transaction {
+        db.transaction {
             unsyncedStarredItems.forEach {
-                cache.updateStarredSynced(true, it.id)
+                db.updateStarredSynced(true, it.id)
             }
         }
 
-        api.markAsUnstarred(PutStarredArgs(unsyncedUnstarredItems.map {
+        api.putUnstarred(PutStarredArgs(unsyncedUnstarredItems.map {
             PutStarredArgsItem(
                 it.feedId,
                 it.guidHash
             )
         })).execute()
 
-        cache.transaction {
+        db.transaction {
             unsyncedUnstarredItems.forEach {
-                cache.updateStarredSynced(true, it.id)
+                db.updateStarredSynced(true, it.id)
             }
         }
 
@@ -198,13 +202,12 @@ class NewsItemsRepository(
             return@withContext
         }
 
-        val items =
-            api.getNewAndUpdatedItems(mostRecentItem.lastModified + 1).execute().body()!!.items
+        val items = api.getNewAndUpdatedItems(mostRecentItem.lastModified + 1).execute().body()!!.items
         Timber.d("New and updated items: ${items.size}")
 
-        cache.transaction {
+        db.transaction {
             items.forEach {
-                cache.insertOrReplace(
+                db.insertOrReplace(
                     it.copy(
                         unreadSynced = true,
                         starredSynced = true,

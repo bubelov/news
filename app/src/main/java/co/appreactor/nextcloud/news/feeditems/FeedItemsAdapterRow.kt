@@ -1,6 +1,6 @@
-package co.appreactor.nextcloud.news.news
+package co.appreactor.nextcloud.news.feeditems
 
-data class NewsAdapterRow(
+data class FeedItemsAdapterRow(
     val id: Long,
     val title: String,
     val subtitle: String,

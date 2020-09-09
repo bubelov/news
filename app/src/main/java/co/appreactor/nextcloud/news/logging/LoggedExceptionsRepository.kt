@@ -7,23 +7,23 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
-class ExceptionsRepository(
-    private val cache: LoggedExceptionQueries
+class LoggedExceptionsRepository(
+    private val db: LoggedExceptionQueries
 ) {
 
     suspend fun add(exception: LoggedException) = withContext(Dispatchers.IO) {
-        cache.insertOrReplace(exception)
+        db.insertOrReplace(exception)
     }
 
     suspend fun all() = withContext(Dispatchers.IO) {
-        cache.findAll().asFlow().map { it.executeAsList() }
+        db.findAll().asFlow().map { it.executeAsList() }
     }
 
     suspend fun count() = withContext(Dispatchers.IO) {
-        cache.count().asFlow().map { it.executeAsOne() }
+        db.count().asFlow().map { it.executeAsOne() }
     }
 
     suspend fun deleteAll() = withContext(Dispatchers.IO) {
-        cache.deleteAll()
+        db.deleteAll()
     }
 }

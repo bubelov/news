@@ -9,9 +9,9 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.appreactor.nextcloud.news.R
+import co.appreactor.nextcloud.news.common.showDialog
 import co.appreactor.nextcloud.news.di.apiModule
 import co.appreactor.nextcloud.news.di.appModule
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.fragment_direct_auth.*
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -91,11 +91,7 @@ class DirectAuthFragment : Fragment() {
                     }
                 } else {
                     progress.isVisible = false
-
-                    MaterialAlertDialogBuilder(requireContext())
-                        .setMessage(getString(R.string.direct_login_failed))
-                        .setPositiveButton(android.R.string.ok, null)
-                        .show()
+                    showDialog(R.string.error, R.string.direct_login_failed)
                 }
             }
         }

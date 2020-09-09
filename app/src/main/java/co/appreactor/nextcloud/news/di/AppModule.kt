@@ -4,18 +4,18 @@ import co.appreactor.nextcloud.news.Database
 import co.appreactor.nextcloud.news.auth.AuthFragmentModel
 import co.appreactor.nextcloud.news.auth.DirectAuthFragmentModel
 import co.appreactor.nextcloud.news.common.Preferences
-import co.appreactor.nextcloud.news.common.Sync
-import co.appreactor.nextcloud.news.feeds.NewsFeedsRepository
-import co.appreactor.nextcloud.news.logging.ExceptionsFragmentModel
-import co.appreactor.nextcloud.news.logging.ExceptionsRepository
-import co.appreactor.nextcloud.news.news.NewsFragmentModel
-import co.appreactor.nextcloud.news.news.NewsItemsRepository
-import co.appreactor.nextcloud.news.newsitem.NewsItemFragmentModel
-import co.appreactor.nextcloud.news.opengraph.OpenGraphImagesSync
-import co.appreactor.nextcloud.news.podcasts.PodcastsSync
+import co.appreactor.nextcloud.news.common.DatabaseSyncManager
+import co.appreactor.nextcloud.news.feeds.FeedsRepository
+import co.appreactor.nextcloud.news.logging.LoggedExceptionsFragmentModel
+import co.appreactor.nextcloud.news.logging.LoggedExceptionsRepository
+import co.appreactor.nextcloud.news.feeditems.FeedItemsFragmentModel
+import co.appreactor.nextcloud.news.feeditems.FeedItemsRepository
+import co.appreactor.nextcloud.news.feeditem.FeedItemFragmentModel
+import co.appreactor.nextcloud.news.opengraph.OpenGraphImagesManager
+import co.appreactor.nextcloud.news.podcasts.PodcastsManager
 import co.appreactor.nextcloud.news.settings.SettingsFragmentModel
 import co.appreactor.nextcloud.news.bookmarks.BookmarksFragmentModel
-import co.appreactor.nextcloud.news.feeds.NewsFeedsFragmentModel
+import co.appreactor.nextcloud.news.feeds.FeedsFragmentModel
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
 import org.koin.android.experimental.dsl.viewModel
@@ -32,27 +32,27 @@ val appModule = module {
         )
     }
 
-    single<Sync>()
-    single<OpenGraphImagesSync>()
-    single<PodcastsSync>()
+    single<DatabaseSyncManager>()
+    single<OpenGraphImagesManager>()
+    single<PodcastsManager>()
 
-    single<NewsItemsRepository>()
-    single<NewsFeedsRepository>()
-    single<ExceptionsRepository>()
+    single<FeedItemsRepository>()
+    single<FeedsRepository>()
+    single<LoggedExceptionsRepository>()
     single<Preferences>()
 
     single { Database(get()) }
-    single { get<Database>().newsItemQueries }
-    single { get<Database>().newsFeedQueries }
+    single { get<Database>().feedQueries }
+    single { get<Database>().feedItemQueries }
     single { get<Database>().preferenceQueries }
     single { get<Database>().loggedExceptionQueries }
 
     viewModel<AuthFragmentModel>()
-    viewModel<NewsFragmentModel>()
-    viewModel<NewsItemFragmentModel>()
+    viewModel<FeedItemsFragmentModel>()
+    viewModel<FeedItemFragmentModel>()
     viewModel<BookmarksFragmentModel>()
     viewModel<SettingsFragmentModel>()
     viewModel<DirectAuthFragmentModel>()
-    viewModel<ExceptionsFragmentModel>()
-    viewModel<NewsFeedsFragmentModel>()
+    viewModel<LoggedExceptionsFragmentModel>()
+    viewModel<FeedsFragmentModel>()
 }

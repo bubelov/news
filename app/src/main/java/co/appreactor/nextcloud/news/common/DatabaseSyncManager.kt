@@ -1,16 +1,16 @@
 package co.appreactor.nextcloud.news.common
 
-import co.appreactor.nextcloud.news.feeds.NewsFeedsRepository
-import co.appreactor.nextcloud.news.news.NewsItemsRepository
+import co.appreactor.nextcloud.news.feeds.FeedsRepository
+import co.appreactor.nextcloud.news.feeditems.FeedItemsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import kotlin.system.measureTimeMillis
 
-class Sync(
-    private val newsItemsRepository: NewsItemsRepository,
-    private val newsFeedsRepository: NewsFeedsRepository,
+class DatabaseSyncManager(
+    private val feedItemsRepository: FeedItemsRepository,
+    private val feedsRepository: FeedsRepository,
     private val prefs: Preferences
 ) {
 
@@ -18,11 +18,11 @@ class Sync(
         runCatching {
             val syncTime = measureTimeMillis {
                 withContext(Dispatchers.IO) {
-                    val newsSync = async { newsItemsRepository.performInitialSyncIfNoData() }
-                    val feedsSync = async { newsFeedsRepository.reloadFromApiIfNoData() }
+                    val feedsSync = async { feedsRepository.reloadFromApiIfNoData() }
+                    val feedItemsSync = async { feedItemsRepository.performInitialSyncIfNoData() }
 
-                    newsSync.await()
                     feedsSync.await()
+                    feedItemsSync.await()
                 }
             }
 
@@ -51,28 +51,26 @@ class Sync(
 
             if (syncNewsFlags) {
                 Timber.d("Notifying the News app of read and unread articles")
-                newsItemsRepository.syncUnreadFlags()
+                feedItemsRepository.syncUnreadFlags()
 
                 Timber.d("Notifying the News app of starred and unstarred articles")
-                newsItemsRepository.syncStarredFlags()
+                feedItemsRepository.syncStarredFlags()
             }
 
             if (syncFeeds) {
                 Timber.d("Syncing feeds")
-                newsFeedsRepository.reloadFromApi()
+                feedsRepository.reloadFromApi()
             }
 
             if (fetchNewAndUpdatedNews) {
                 Timber.d("Syncing new and updated news items")
-                newsItemsRepository.fetchNewAndUpdatedItems()
+                feedItemsRepository.fetchNewAndUpdatedItems()
             }
 
             Timber.d("Finished sync")
-        }.apply {
-            if (isFailure) {
-                Timber.e(exceptionOrNull())
-                throw Exception("Cannot fetch data from Nextcloud")
-            }
+        }.getOrElse {
+            Timber.e(it)
+            throw it
         }
     }
 }

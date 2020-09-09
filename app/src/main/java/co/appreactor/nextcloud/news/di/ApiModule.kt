@@ -16,7 +16,10 @@ val apiModule = module {
 
     single<NewsApi> {
         val prefs = get<Preferences>()
-        val serverUrl = runBlocking { prefs.getString(Preferences.SERVER_URL).first() }
+
+        val serverUrl = runBlocking {
+            prefs.getString(Preferences.SERVER_URL).first()
+        }
 
         if (serverUrl.isNotBlank()) {
             val username = runBlocking { prefs.getString(Preferences.SERVER_USERNAME).first() }

@@ -1,7 +1,7 @@
 package co.appreactor.nextcloud.news.opengraph
 
-import co.appreactor.nextcloud.news.db.NewsItem
-import co.appreactor.nextcloud.news.news.NewsItemsRepository
+import co.appreactor.nextcloud.news.db.FeedItem
+import co.appreactor.nextcloud.news.feeditems.FeedItemsRepository
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -13,14 +13,14 @@ import okhttp3.Request
 import org.jsoup.Jsoup
 import timber.log.Timber
 
-class OpenGraphImagesSync(
-    private val newsItemsRepository: NewsItemsRepository
+class OpenGraphImagesManager(
+    private val feedItemsRepository: FeedItemsRepository
 ) {
 
-    private val client = OkHttpClient()
+    private val httpClient = OkHttpClient()
 
     suspend fun start() = withContext(Dispatchers.IO) {
-        newsItemsRepository.all().collect { news ->
+        feedItemsRepository.all().collect { news ->
             Timber.d("Got ${news.size} news")
             val chunks = news.sortedByDescending { it.pubDate }.chunked(10)
             Timber.d("Chunks: ${chunks.size}")
@@ -31,7 +31,7 @@ class OpenGraphImagesSync(
         }
     }
 
-    suspend fun fetchOpenGraphImage(newsItem: NewsItem) = withContext(Dispatchers.IO) {
+    private suspend fun fetchOpenGraphImage(newsItem: FeedItem) = withContext(Dispatchers.IO) {
         if (newsItem.openGraphImageUrl.isNotBlank()
             || newsItem.openGraphImageParsingFailed
             || newsItem.url.startsWith("http://")
@@ -44,7 +44,7 @@ class OpenGraphImagesSync(
 
         runCatching {
             val request = Request.Builder().url(newsItem.url).build()
-            val response = client.newCall(request).execute()
+            val response = httpClient.newCall(request).execute()
             Timber.d("Response code: ${response.code}")
 
             if (response.isSuccessful) {
@@ -63,14 +63,14 @@ class OpenGraphImagesSync(
                         Timber.d("Downloaded image. Resolution: ${image.width} x ${image.height}")
 
                         if (image.width > 480 && image.height.toDouble() > image.width.toDouble() / 2.5) {
-                            newsItemsRepository.updateOpenGraphImageUrl(
+                            feedItemsRepository.updateOpenGraphImageUrl(
                                 id = newsItem.id,
                                 url = imageUrl
                             )
                         } else {
                             Timber.d("Invalid image. Size: ${image.width} x ${image.height}")
 
-                            newsItemsRepository.updateOpenGraphImageParsingFailed(
+                            feedItemsRepository.updateOpenGraphImageParsingFailed(
                                 id = newsItem.id,
                                 failed = true
                             )
@@ -78,7 +78,7 @@ class OpenGraphImagesSync(
                     } else {
                         Timber.w("Open Graph tag seems to be corrupted")
 
-                        newsItemsRepository.updateOpenGraphImageParsingFailed(
+                        feedItemsRepository.updateOpenGraphImageParsingFailed(
                             id = newsItem.id,
                             failed = true
                         )
@@ -86,21 +86,19 @@ class OpenGraphImagesSync(
                 } else {
                     Timber.d("This page has no Open Graph images")
 
-                    newsItemsRepository.updateOpenGraphImageParsingFailed(
+                    feedItemsRepository.updateOpenGraphImageParsingFailed(
                         id = newsItem.id,
                         failed = true
                     )
                 }
             }
-        }.apply {
-            if (!isSuccess) {
-                newsItemsRepository.updateOpenGraphImageParsingFailed(
-                    id = newsItem.id,
-                    failed = true
-                )
+        }.getOrElse {
+            Timber.e(it)
 
-                Timber.e(exceptionOrNull())
-            }
+            feedItemsRepository.updateOpenGraphImageParsingFailed(
+                id = newsItem.id,
+                failed = true
+            )
         }
     }
 

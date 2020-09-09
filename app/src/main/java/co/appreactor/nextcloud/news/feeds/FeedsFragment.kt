@@ -10,20 +10,17 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import co.appreactor.nextcloud.news.R
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.android.synthetic.main.fragment_news_feeds.*
+import co.appreactor.nextcloud.news.common.showDialog
+import kotlinx.android.synthetic.main.fragment_feeds.*
 import kotlinx.coroutines.flow.collect
 import org.koin.android.viewmodel.ext.android.viewModel
 
-class NewsFeedsFragment : Fragment() {
+class FeedsFragment : Fragment() {
 
-    private val model: NewsFeedsFragmentModel by viewModel()
+    private val model: FeedsFragmentModel by viewModel()
 
-    private val adapter = NewsFeedsAdapter {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(it.title)
-            .setMessage(it.toString())
-            .show()
+    private val adapter = FeedsAdapter {
+        showDialog(it.title, it.toString())
     }
 
     override fun onCreateView(
@@ -32,7 +29,7 @@ class NewsFeedsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(
-            R.layout.fragment_news_feeds,
+            R.layout.fragment_feeds,
             container,
             false
         )

@@ -9,7 +9,6 @@ import androidx.navigation.ui.setupWithNavController
 import co.appreactor.nextcloud.news.R
 import kotlinx.android.synthetic.main.activity_app.*
 
-
 class AppActivity : AppCompatActivity() {
 
     private val navController by lazy {

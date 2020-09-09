@@ -1,37 +1,32 @@
-package co.appreactor.nextcloud.news.news
+package co.appreactor.nextcloud.news.feeditems
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.nextcloud.news.R
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.row_item.view.*
-import timber.log.Timber
+import kotlinx.android.synthetic.main.list_item_feed_item.view.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
-class NewsAdapter(
-    private val rows: MutableList<NewsAdapterRow> = mutableListOf(),
-    private val callback: NewsAdapterCallback
-) : RecyclerView.Adapter<NewsAdapter.ViewHolder>() {
+class FeedItemsAdapter(
+    private val items: MutableList<FeedItemsAdapterRow> = mutableListOf(),
+    var screenWidth: Int = 0,
+    private val callback: FeedItemsAdapterCallback,
+) : RecyclerView.Adapter<FeedItemsAdapter.ViewHolder>() {
 
     class ViewHolder(
         private val view: View,
-        private val callback: NewsAdapterCallback
+        private val screenWidth: Int,
+        private val callback: FeedItemsAdapterCallback
     ) :
         RecyclerView.ViewHolder(view) {
 
-        private var imageViewWidth = 0
-
-        init {
-            view.imageView.doOnNextLayout {
-                imageViewWidth = it.width
-            }
-        }
-
-        fun bind(row: NewsAdapterRow, isFirst: Boolean) {
+        fun bind(row: FeedItemsAdapterRow, isFirst: Boolean) {
             view.apply {
                 topOffset.isVisible = isFirst
 
@@ -42,31 +37,23 @@ class NewsAdapter(
                     imageView.isVisible = true
                     imageProgress.isVisible = true
 
+                    val cardMargin = resources.getDimensionPixelSize(R.dimen.card_horizontal_margin)
+
                     Picasso.get()
                         .load(row.imageUrl)
-                        .resize(1080, 0)
+                        .resize(screenWidth - cardMargin, 0)
                         .into(imageView, object : Callback {
                             override fun onSuccess() {
                                 imageView.isVisible = true
                                 imageProgress.isVisible = false
 
                                 if (!row.cropImage) {
-                                    imageView.layoutParams.height = 0
-
                                     val drawable = imageView.drawable
-                                    Timber.d("Drawable dimensions: ${drawable.intrinsicWidth} x ${drawable.intrinsicHeight}")
+                                    val targetHeight =
+                                        ((screenWidth - cardMargin) * (drawable.intrinsicHeight.toDouble() / drawable.intrinsicWidth.toDouble()))
 
-                                    imageView.post {
-                                        if (imageViewWidth != 0) {
-                                            val targetHeight =
-                                                (imageView.width.toDouble() * (drawable.intrinsicHeight.toDouble() / drawable.intrinsicWidth.toDouble()))
-                                            Timber.d("Target height: $targetHeight")
-
-                                            if (imageView.height != targetHeight.toInt()) {
-                                                imageView.layoutParams.height = targetHeight.toInt()
-                                                imageView.requestLayout()
-                                            }
-                                        }
+                                    if (imageView.height != targetHeight.toInt()) {
+                                        imageView.layoutParams.height = targetHeight.toInt()
                                     }
                                 }
                             }
@@ -112,7 +99,7 @@ class NewsAdapter(
                 }
 
                 card.setOnClickListener {
-                    callback.onRowClick(row)
+                    callback.onItemClick(row)
                 }
             }
         }
@@ -120,28 +107,32 @@ class NewsAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(
-            R.layout.row_item,
+            R.layout.list_item_feed_item,
             parent, false
         )
 
-        return ViewHolder(view, callback)
+        return ViewHolder(view, screenWidth, callback)
 
     }
 
     override fun getItemCount(): Int {
-        return rows.size
+        return items.size
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(
-            row = rows[position],
+            row = items[position],
             isFirst = position == 0
         )
     }
 
-    fun swapRows(rows: List<NewsAdapterRow>) {
-        this.rows.clear()
-        this.rows += rows
-        notifyDataSetChanged()
+    suspend fun swapItems(newItems: List<FeedItemsAdapterRow>) {
+        val diff = withContext(Dispatchers.IO) {
+            DiffUtil.calculateDiff(FeedItemsAdapterDiffCallback(items, newItems))
+        }
+
+        diff.dispatchUpdatesTo(this)
+        this.items.clear()
+        this.items += newItems
     }
 }

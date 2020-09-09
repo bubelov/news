@@ -1,4 +1,4 @@
-package co.appreactor.nextcloud.news.newsitem
+package co.appreactor.nextcloud.news.feeditem
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -20,16 +20,16 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import co.appreactor.nextcloud.news.*
-import kotlinx.android.synthetic.main.fragment_news_item.*
+import kotlinx.android.synthetic.main.fragment_feed_item.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
 
-class NewsItemFragment : Fragment() {
+class FeedItemFragment : Fragment() {
 
-    private val args: NewsItemFragmentArgs by navArgs()
+    private val args: FeedItemFragmentArgs by navArgs()
 
-    private val model: NewsItemFragmentModel by viewModel()
+    private val model: FeedItemFragmentModel by viewModel()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -37,7 +37,7 @@ class NewsItemFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(
-            R.layout.fragment_news_item,
+            R.layout.fragment_feed_item,
             container,
             false
         )
@@ -52,18 +52,18 @@ class NewsItemFragment : Fragment() {
         progress.isVisible = true
 
         lifecycleScope.launch {
-            val item = model.getNewsItem(args.newsItemId)
+            val item = model.getFeedItem(args.newsItemId)!!
 
             if (item.unread) {
                 model.toggleReadFlag(item.id)
                 model.syncNewsFlags()
             }
 
-            toolbar.title = model.getFeed(item.feedId).title
+            toolbar.title = model.getFeed(item.feedId)!!.title
             title.text = item.title
             date.text = model.getDate(item)
 
-            val imageGetter = PicassoImageGetter(textView)
+            val imageGetter = TextViewImageGetter(textView)
 
             val body = HtmlCompat.fromHtml(
                 item.body,
@@ -193,7 +193,7 @@ class NewsItemFragment : Fragment() {
 
         fab.setOnClickListener {
             lifecycleScope.launch {
-                val item = model.getNewsItem(args.newsItemId)
+                val item = model.getFeedItem(args.newsItemId)!!
                 val intent = Intent(Intent.ACTION_VIEW)
                 intent.data = Uri.parse(item.url)
                 startActivity(intent)
