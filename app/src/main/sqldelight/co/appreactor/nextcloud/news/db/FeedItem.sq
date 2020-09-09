@@ -43,6 +43,12 @@ FROM FeedItem
 WHERE unread = 1
 ORDER BY pubDate DESC;
 
+findStarred:
+SELECT *
+FROM FeedItem
+WHERE starred = 1
+ORDER BY pubDate DESC;
+
 findById:
 SELECT *
 FROM FeedItem

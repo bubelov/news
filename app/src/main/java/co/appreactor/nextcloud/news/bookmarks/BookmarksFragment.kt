@@ -1,6 +1,7 @@
 package co.appreactor.nextcloud.news.bookmarks
 
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -80,9 +81,12 @@ class BookmarksFragment : Fragment() {
         listView.setHasFixedSize(true)
         listView.layoutManager = LinearLayoutManager(context)
         listView.adapter = adapter
-        adapter.screenWidth = listView.width
 
-        model.getNewsItems().collect { rows ->
+        val displayMetrics = DisplayMetrics()
+        requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
+        adapter.screenWidth = displayMetrics.widthPixels
+
+        model.getBookmarks().collect { rows ->
             progress.isVisible = false
             empty.isVisible = rows.isEmpty()
             adapter.swapItems(rows)

@@ -1,6 +1,7 @@
 package co.appreactor.nextcloud.news.feeditems
 
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -130,7 +131,10 @@ class FeedItemsFragment : Fragment() {
         itemsView.setHasFixedSize(true)
         itemsView.layoutManager = LinearLayoutManager(context)
         itemsView.adapter = adapter
-        adapter.screenWidth = itemsView.width
+
+        val displayMetrics = DisplayMetrics()
+        requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
+        adapter.screenWidth = displayMetrics.widthPixels
 
         model.getFeedItems().conflate().collect { rows ->
             if (model.isInitialSyncCompleted()) {

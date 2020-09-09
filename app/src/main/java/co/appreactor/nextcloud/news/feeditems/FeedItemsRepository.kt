@@ -33,6 +33,10 @@ class FeedItemsRepository(
         db.findUnread().asFlow().map { it.executeAsList() }
     }
 
+    suspend fun starred() = withContext(Dispatchers.IO) {
+        db.findStarred().asFlow().map { it.executeAsList() }
+    }
+
     suspend fun byId(id: Long) = withContext(Dispatchers.IO) {
         db.findById(id).asFlow().map { it.executeAsOneOrNull() }
     }

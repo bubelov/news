@@ -3,6 +3,8 @@ package co.appreactor.nextcloud.news.bookmarks
 import androidx.lifecycle.ViewModel
 import co.appreactor.nextcloud.news.feeds.FeedsRepository
 import co.appreactor.nextcloud.news.common.Preferences
+import co.appreactor.nextcloud.news.db.Feed
+import co.appreactor.nextcloud.news.db.FeedItem
 import co.appreactor.nextcloud.news.feeditems.FeedItemsAdapterRow
 import co.appreactor.nextcloud.news.feeditems.FeedItemsRepository
 import co.appreactor.nextcloud.news.podcasts.PodcastsManager
@@ -18,25 +20,14 @@ class BookmarksFragmentModel(
     private val prefs: Preferences,
 ) : ViewModel() {
 
-    suspend fun getNewsItems() = feedItemsRepository.all().combine(getCropFeedImages()) { unfilteredItems, cropImages ->
-        val items = unfilteredItems.filter { it.starred }
-        val feeds = feedsRepository.all().first()
-
-        items.map {
-            val dateString = DateFormat.getDateInstance().format(Date(it.pubDate * 1000))
+    suspend fun getBookmarks() = combine(
+        feedsRepository.all(),
+        feedItemsRepository.starred(),
+        getCropFeedImages()
+    ) { feeds, feedItems, cropFeedImages ->
+        feedItems.map {
             val feed = feeds.single { feed -> feed.id == it.feedId }
-
-            FeedItemsAdapterRow(
-                it.id,
-                it.title,
-                feed.title + " · " + dateString,
-                it.summary,
-                true,
-                it.openGraphImageUrl,
-                cropImages,
-                it.isPodcast(),
-                it.enclosureDownloadProgress
-            )
+            it.toRow(feed, cropFeedImages)
         }
     }
 
@@ -50,4 +41,20 @@ class BookmarksFragmentModel(
         key = Preferences.CROP_FEED_IMAGES,
         default = true
     )
+
+    private fun FeedItem.toRow(feed: Feed, cropFeedImages: Boolean): FeedItemsAdapterRow {
+        val dateString = DateFormat.getDateInstance().format(Date(pubDate * 1000))
+
+        return FeedItemsAdapterRow(
+            id,
+            title,
+            feed.title + " · " + dateString,
+            summary,
+            true,
+            openGraphImageUrl,
+            cropFeedImages,
+            isPodcast(),
+            enclosureDownloadProgress
+        )
+    }
 }
