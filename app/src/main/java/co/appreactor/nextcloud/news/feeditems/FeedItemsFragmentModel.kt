@@ -26,7 +26,7 @@ class FeedItemsFragmentModel(
 
     init {
         viewModelScope.launch {
-            imagesSync.start()
+            imagesSync.fetchImages()
         }
 
         viewModelScope.launch {
