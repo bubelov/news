@@ -4,9 +4,9 @@ import co.appreactor.nextcloud.news.api.NewsApi
 import co.appreactor.nextcloud.news.db.FeedQueries
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 
 class FeedsRepository(
     private val db: FeedQueries,
@@ -32,18 +32,17 @@ class FeedsRepository(
     }
 
     suspend fun reloadFromApi() = withContext(Dispatchers.IO) {
-        Timber.d("Reloading from API")
-        val feeds = api.getFeeds().execute().body()!!.feeds
-        Timber.d("Got ${feeds.size} feeds")
+        val cachedFeeds = all().first().sortedBy { it.id }
+        val newFeeds = api.getFeeds().execute().body()!!.feeds.sortedBy { it.id }
 
-        db.transaction {
-            db.deleteAll()
+        if (newFeeds != cachedFeeds) {
+            db.transaction {
+                db.deleteAll()
 
-            feeds.forEach {
-                db.insertOrReplace(it)
+                newFeeds.forEach {
+                    db.insertOrReplace(it)
+                }
             }
         }
-
-        Timber.d("Finished reloading from API")
     }
 }

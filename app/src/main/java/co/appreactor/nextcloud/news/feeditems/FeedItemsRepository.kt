@@ -109,108 +109,110 @@ class FeedItemsRepository(
     }
 
     suspend fun syncUnreadFlags() = withContext(Dispatchers.IO) {
-        Timber.d("Syncing unread flags")
-
         val unsyncedItems = all().first().filter {
             !it.unreadSynced
         }
 
-        Timber.d("Unsynced items: ${unsyncedItems.size}")
+        if (unsyncedItems.isEmpty()) {
+            return@withContext
+        }
 
         val unsyncedReadItems = unsyncedItems.filterNot { it.unread }
+
+        if (unsyncedReadItems.isNotEmpty()) {
+            val response = api.putRead(PutReadArgs(
+                unsyncedReadItems.map { it.id }
+            )).execute()
+
+            if (response.isSuccessful) {
+                db.transaction {
+                    unsyncedReadItems.forEach {
+                        db.updateUnreadSynced(true, it.id)
+                    }
+                }
+            } else {
+                throw Exception(response.errorBody()?.string() ?: "Unknown error")
+            }
+        }
+
         val unsyncedUnreadItems = unsyncedItems.filter { it.unread }
-        Timber.d("Of them, read: ${unsyncedReadItems.size}")
-        Timber.d("Of them, unread: ${unsyncedUnreadItems.size}")
 
-        val markAsReadResponse = api.putRead(PutReadArgs(
-            unsyncedReadItems.map { it.id }
-        )).execute()
+        if (unsyncedUnreadItems.isNotEmpty()) {
+            val response = api.putUnread(PutReadArgs(
+                unsyncedUnreadItems.map { it.id }
+            )).execute()
 
-        if (markAsReadResponse.isSuccessful) {
-            db.transaction {
-                unsyncedReadItems.forEach {
-                    db.updateUnreadSynced(true, it.id)
+            if (response.isSuccessful) {
+                db.transaction {
+                    unsyncedUnreadItems.forEach {
+                        db.updateUnreadSynced(true, it.id)
+                    }
                 }
+            } else {
+                throw Exception(response.errorBody()?.string() ?: "Unknown error")
             }
-        } else {
-            throw Exception(markAsReadResponse.message())
         }
-
-        val markAsUnreadResponse = api.putUnread(PutReadArgs(
-            unsyncedUnreadItems.map { it.id }
-        )).execute()
-
-        if (markAsUnreadResponse.isSuccessful) {
-            db.transaction {
-                unsyncedUnreadItems.forEach {
-                    db.updateUnreadSynced(true, it.id)
-                }
-            }
-        } else {
-            throw Exception(markAsUnreadResponse.message())
-        }
-
-        Timber.d("Finished syncing unread flags")
     }
 
     suspend fun syncStarredFlags() = withContext(Dispatchers.IO) {
-        Timber.d("Syncing starred flags")
-
         val unsyncedItems = all().first().filter {
             !it.starredSynced
         }
 
-        Timber.d("Unsynced items: ${unsyncedItems.size}")
-
-        val unsyncedStarredItems = unsyncedItems.filter { it.starred }
-        val unsyncedUnstarredItems = unsyncedItems.filter { !it.starred }
-        Timber.d("Of them, starred: ${unsyncedStarredItems.size}")
-        Timber.d("Of them, unread: ${unsyncedUnstarredItems.size}")
-
-        api.putStarred(PutStarredArgs(unsyncedStarredItems.map {
-            PutStarredArgsItem(
-                it.feedId,
-                it.guidHash
-            )
-        })).execute()
-
-        db.transaction {
-            unsyncedStarredItems.forEach {
-                db.updateStarredSynced(true, it.id)
-            }
-        }
-
-        api.putUnstarred(PutStarredArgs(unsyncedUnstarredItems.map {
-            PutStarredArgsItem(
-                it.feedId,
-                it.guidHash
-            )
-        })).execute()
-
-        db.transaction {
-            unsyncedUnstarredItems.forEach {
-                db.updateStarredSynced(true, it.id)
-            }
-        }
-
-        Timber.d("Finished syncing starred flags")
-    }
-
-    suspend fun fetchNewAndUpdatedItems() = withContext(Dispatchers.IO) {
-        Timber.d("Syncing new and updated items")
-
-        val mostRecentItem = all().firstOrNull()?.maxByOrNull { it.lastModified }
-
-        if (mostRecentItem == null) {
-            Timber.d("Cache is empty, cancelling")
+        if (unsyncedItems.isEmpty()) {
             return@withContext
         }
 
-        val items = api.getNewAndUpdatedItems(mostRecentItem.lastModified + 1).execute().body()!!.items
-        Timber.d("New and updated items: ${items.size}")
+        val unsyncedStarredItems = unsyncedItems.filter { it.starred }
+
+        if (unsyncedStarredItems.isNotEmpty()) {
+            val response = api.putStarred(PutStarredArgs(unsyncedStarredItems.map {
+                PutStarredArgsItem(
+                    it.feedId,
+                    it.guidHash
+                )
+            })).execute()
+
+            if (response.isSuccessful) {
+                db.transaction {
+                    unsyncedStarredItems.forEach {
+                        db.updateStarredSynced(true, it.id)
+                    }
+                }
+            } else {
+                throw Exception(response.errorBody()?.string() ?: "Unknown error")
+            }
+        }
+
+        val unsyncedUnstarredItems = unsyncedItems.filter { !it.starred }
+
+        if (unsyncedUnstarredItems.isNotEmpty()) {
+            val response = api.putUnstarred(PutStarredArgs(unsyncedUnstarredItems.map {
+                PutStarredArgsItem(
+                    it.feedId,
+                    it.guidHash
+                )
+            })).execute()
+
+            if (response.isSuccessful) {
+                db.transaction {
+                    unsyncedUnstarredItems.forEach {
+                        db.updateStarredSynced(true, it.id)
+                    }
+                }
+            } else {
+                throw Exception(response.errorBody()?.string() ?: "Unknown error")
+            }
+        }
+    }
+
+    suspend fun fetchNewAndUpdatedItems() = withContext(Dispatchers.IO) {
+        val mostRecentItem = all().firstOrNull()?.maxByOrNull { it.lastModified } ?: return@withContext
+
+        val newAndUpdatedItems = api.getNewAndUpdatedItems(mostRecentItem.lastModified + 1).execute().body()!!.items
 
         db.transaction {
-            items.forEach {
+            newAndUpdatedItems.forEach {
                 db.insertOrReplace(
                     it.copy(
                         unreadSynced = true,
@@ -223,8 +225,6 @@ class FeedItemsRepository(
                 )
             }
         }
-
-        Timber.d("Finished syncing new and updated items")
     }
 
     private fun getSummary(body: String): String {

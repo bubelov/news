@@ -136,14 +136,14 @@ class FeedItemsFragment : Fragment() {
         requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
         adapter.screenWidth = displayMetrics.widthPixels
 
-        model.getFeedItems().conflate().collect { rows ->
+        model.getFeedItems().conflate().collect { feedItems ->
             if (model.isInitialSyncCompleted()) {
                 progress.isVisible = false
             }
 
-            empty.isVisible = rows.isEmpty() && model.isInitialSyncCompleted()
+            empty.isVisible = feedItems.isEmpty() && model.isInitialSyncCompleted()
 
-            adapter.submitList(rows)
+            adapter.submitList(feedItems)
         }
     }
 }
