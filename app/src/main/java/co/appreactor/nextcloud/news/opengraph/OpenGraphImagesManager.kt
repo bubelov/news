@@ -88,7 +88,7 @@ class OpenGraphImagesManager(
             }
 
             val meta = Jsoup.parse(html).select("meta[property=\"og:image\"]").singleOrNull()
-            val imageUrl = meta?.attr("content")
+            val imageUrl = meta?.attr("content")?.replace("http://", "https://")
 
             if (imageUrl.isNullOrBlank()) {
                 feedItemsRepository.updateOpenGraphImageParsingFailed(
