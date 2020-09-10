@@ -3,6 +3,7 @@ package co.appreactor.nextcloud.news.auth
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import co.appreactor.nextcloud.news.common.Preferences
+import com.nextcloud.android.sso.exceptions.NoCurrentAccountSelectedException
 import com.nextcloud.android.sso.helper.SingleAccountHelper
 import kotlinx.coroutines.flow.first
 import timber.log.Timber
@@ -20,7 +21,10 @@ class AuthFragmentModel(
             SingleAccountHelper.getCurrentSingleSignOnAccount(context)
             true
         } catch (e: Exception) {
-            Timber.e(e)
+            if (e !is NoCurrentAccountSelectedException) {
+                Timber.e(e)
+            }
+
             false
         }
     }
