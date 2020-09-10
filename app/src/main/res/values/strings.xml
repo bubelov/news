@@ -44,4 +44,6 @@
     <string name="cannot_sync_bookmarks">Cannot sync bookmarks</string>
     <string name="open_rss_feed">Open feed</string>
     <string name="open_website">Open website</string>
+    <string name="actions">Actions</string>
+    <string name="delete">Delete</string>
 </resources>

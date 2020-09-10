@@ -2,15 +2,15 @@ package co.appreactor.nextcloud.news.api
 
 import okhttp3.ResponseBody
 import retrofit2.Call
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.PUT
-import retrofit2.http.Query
+import retrofit2.http.*
 
 interface NewsApi {
 
     @GET("feeds")
     fun getFeeds(): Call<FeedsPayload>
+
+    @DELETE("feeds/{id}")
+    fun deleteFeed(@Path("id") id: Long): Call<ResponseBody>
 
     @GET("items?type=3&getRead=false&batchSize=-1")
     fun getUnreadItems(): Call<FeedItemsPayload>

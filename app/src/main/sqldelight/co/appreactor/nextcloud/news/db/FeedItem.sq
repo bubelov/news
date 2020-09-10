@@ -96,3 +96,8 @@ WHERE id = ?;
 deleteAll:
 DELETE
 FROM FeedItem;
+
+deleteByFeedId:
+DELETE
+FROM FeedItem
+WHERE feedId = ?;

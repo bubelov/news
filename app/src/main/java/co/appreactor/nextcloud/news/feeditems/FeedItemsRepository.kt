@@ -80,6 +80,10 @@ class FeedItemsRepository(
         db.deleteAll()
     }
 
+    fun deleteByFeedId(feedId: Long) {
+        db.deleteByFeedId(feedId)
+    }
+
     suspend fun performInitialSyncIfNoData() = withContext(Dispatchers.IO) {
         Timber.d("Performing initial sync (if no data)")
         val count = db.count().executeAsOne()

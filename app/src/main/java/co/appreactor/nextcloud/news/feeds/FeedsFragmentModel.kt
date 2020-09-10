@@ -7,4 +7,8 @@ class FeedsFragmentModel(
 ) : ViewModel() {
 
     suspend fun getFeeds() = feedsRepository.all()
+
+    suspend fun deleteFeed(id: Long) {
+        feedsRepository.deleteById(id)
+    }
 }

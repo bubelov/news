@@ -35,3 +35,8 @@ FROM Feed;
 deleteAll:
 DELETE
 FROM Feed;
+
+deleteById:
+DELETE
+FROM Feed
+WHERE id = :id;

@@ -2,6 +2,7 @@ package co.appreactor.nextcloud.news.feeds
 
 import co.appreactor.nextcloud.news.api.NewsApi
 import co.appreactor.nextcloud.news.db.FeedQueries
+import co.appreactor.nextcloud.news.feeditems.FeedItemsRepository
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -10,7 +11,8 @@ import kotlinx.coroutines.withContext
 
 class FeedsRepository(
     private val db: FeedQueries,
-    private val api: NewsApi
+    private val api: NewsApi,
+    private val feedItemsRepository: FeedItemsRepository
 ) {
 
     suspend fun all() = withContext(Dispatchers.IO) {
@@ -19,6 +21,19 @@ class FeedsRepository(
 
     suspend fun byId(id: Long) = withContext(Dispatchers.IO) {
         db.findById(id).asFlow().map { it.executeAsOneOrNull() }
+    }
+
+    suspend fun deleteById(id: Long) = withContext(Dispatchers.IO) {
+        val response = api.deleteFeed(id).execute()
+
+        if (response.isSuccessful || response.code() == 520) {
+            db.transaction {
+                db.deleteById(id)
+                feedItemsRepository.deleteByFeedId(id)
+            }
+        } else {
+            throw Exception("HTTPS request failed with error code ${response.code()}")
+        }
     }
 
     suspend fun clear() = withContext(Dispatchers.IO) {

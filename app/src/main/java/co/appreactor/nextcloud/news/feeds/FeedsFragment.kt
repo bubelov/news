@@ -12,10 +12,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import co.appreactor.nextcloud.news.R
+import co.appreactor.nextcloud.news.common.showDialog
 import co.appreactor.nextcloud.news.db.Feed
 import kotlinx.android.synthetic.main.fragment_feeds.*
 import kotlinx.coroutines.flow.collect
 import org.koin.android.viewmodel.ext.android.viewModel
+import timber.log.Timber
 
 class FeedsFragment : Fragment() {
 
@@ -32,6 +34,23 @@ class FeedsFragment : Fragment() {
             val intent = Intent(Intent.ACTION_VIEW)
             intent.data = Uri.parse(feed.url)
             startActivity(intent)
+        }
+
+        override fun onDeleteClick(feed: Feed) {
+            lifecycleScope.launchWhenResumed {
+                listView.isVisible = false
+                progress.isVisible = true
+
+                runCatching {
+                    model.deleteFeed(feed.id)
+                }.onFailure {
+                    Timber.e(it)
+                    showDialog(R.string.error, it.message ?: "")
+                }
+
+                listView.isVisible = true
+                progress.isVisible = false
+            }
         }
     })
 

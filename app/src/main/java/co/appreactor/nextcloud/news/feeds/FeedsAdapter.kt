@@ -54,6 +54,10 @@ class FeedsAdapter(
                             R.id.openRssFeed -> {
                                 callback.onOpenRssFeedClick(item)
                             }
+
+                            R.id.delete -> {
+                                callback.onDeleteClick(item)
+                            }
                         }
 
                         true
