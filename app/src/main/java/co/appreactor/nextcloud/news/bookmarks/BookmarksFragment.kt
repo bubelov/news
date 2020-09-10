@@ -89,7 +89,7 @@ class BookmarksFragment : Fragment() {
         model.getBookmarks().collect { rows ->
             progress.isVisible = false
             empty.isVisible = rows.isEmpty()
-            adapter.swapItems(rows)
+            adapter.submitList(rows)
         }
     }
 }

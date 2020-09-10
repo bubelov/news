@@ -143,7 +143,7 @@ class FeedItemsFragment : Fragment() {
 
             empty.isVisible = rows.isEmpty() && model.isInitialSyncCompleted()
 
-            adapter.swapItems(rows)
+            adapter.submitList(rows)
         }
     }
 }

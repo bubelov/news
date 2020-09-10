@@ -4,20 +4,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.nextcloud.news.R
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.list_item_feed_item.view.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 class FeedItemsAdapter(
-    private val items: MutableList<FeedItemsAdapterRow> = mutableListOf(),
     var screenWidth: Int = 0,
     private val callback: FeedItemsAdapterCallback,
-) : RecyclerView.Adapter<FeedItemsAdapter.ViewHolder>() {
+) : ListAdapter<FeedItemsAdapterRow, FeedItemsAdapter.ViewHolder>(FeedItemsAdapterDiffCallback()) {
 
     class ViewHolder(
         private val view: View,
@@ -115,24 +112,10 @@ class FeedItemsAdapter(
 
     }
 
-    override fun getItemCount(): Int {
-        return items.size
-    }
-
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(
-            row = items[position],
+            row = getItem(position),
             isFirst = position == 0
         )
-    }
-
-    suspend fun swapItems(newItems: List<FeedItemsAdapterRow>) {
-        val diff = withContext(Dispatchers.IO) {
-            DiffUtil.calculateDiff(FeedItemsAdapterDiffCallback(items, newItems))
-        }
-
-        diff.dispatchUpdatesTo(this)
-        this.items.clear()
-        this.items += newItems
     }
 }
