@@ -81,7 +81,7 @@ class FeedsFragment : Fragment() {
             model.getFeeds().collect { feeds ->
                 progress.isVisible = false
                 empty.isVisible = feeds.isEmpty()
-                adapter.swapItems(feeds)
+                adapter.submitList(feeds)
             }
         }
     }
