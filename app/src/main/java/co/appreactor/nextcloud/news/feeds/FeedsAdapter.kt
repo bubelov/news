@@ -17,13 +17,13 @@ class FeedsAdapter(
         )
 
         return FeedsAdapterViewHolder(view, callback)
-
     }
 
     override fun onBindViewHolder(holder: FeedsAdapterViewHolder, position: Int) {
         holder.bind(
             item = getItem(position),
-            isFirst = position == 0
+            isFirst = position == 0,
+            isLast = position == itemCount - 1
         )
     }
 }

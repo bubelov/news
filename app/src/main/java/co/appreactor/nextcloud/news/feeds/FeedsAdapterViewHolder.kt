@@ -14,9 +14,10 @@ class FeedsAdapterViewHolder(
     private val callback: FeedsAdapterCallback
 ) : RecyclerView.ViewHolder(view) {
 
-    fun bind(item: Feed, isFirst: Boolean) {
+    fun bind(item: Feed, isFirst: Boolean, isLast: Boolean) {
         view.apply {
             topOffset.isVisible = isFirst
+            bottomOffset.isVisible = isLast
 
             primaryText.text = item.title
             secondaryText.text = item.link
