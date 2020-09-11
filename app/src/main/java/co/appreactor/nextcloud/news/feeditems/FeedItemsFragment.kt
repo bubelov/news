@@ -14,6 +14,7 @@ import co.appreactor.nextcloud.news.R
 import co.appreactor.nextcloud.news.common.showDialog
 import co.appreactor.nextcloud.news.podcasts.playPodcast
 import kotlinx.android.synthetic.main.fragment_feed_items.*
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.first
@@ -136,14 +137,22 @@ class FeedItemsFragment : Fragment() {
         requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
         adapter.screenWidth = displayMetrics.widthPixels
 
-        model.getFeedItems().conflate().collect { feedItems ->
-            if (model.isInitialSyncCompleted()) {
+        model
+            .getFeedItems()
+            .catch {
+                Timber.e(it)
                 progress.isVisible = false
+                showDialog(R.string.error, it.message ?: "")
             }
+            .conflate()
+            .collect { feedItems ->
+                if (model.isInitialSyncCompleted()) {
+                    progress.isVisible = false
+                }
 
-            empty.isVisible = feedItems.isEmpty() && model.isInitialSyncCompleted()
+                empty.isVisible = feedItems.isEmpty() && model.isInitialSyncCompleted()
 
-            adapter.submitList(feedItems)
-        }
+                adapter.submitList(feedItems)
+            }
     }
 }

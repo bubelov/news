@@ -46,4 +46,5 @@
     <string name="open_website">Open website</string>
     <string name="actions">Actions</string>
     <string name="delete">Delete</string>
+    <string name="unknown_feed">Unknown feed</string>
 </resources>

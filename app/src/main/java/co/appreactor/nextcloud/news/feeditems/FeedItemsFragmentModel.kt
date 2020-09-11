@@ -43,7 +43,7 @@ class FeedItemsFragmentModel(
         feedItems.filter {
             showReadNews || it.unread
         }.map {
-            val feed = feeds.single { feed -> feed.id == it.feedId }
+            val feed = feeds.singleOrNull { feed -> feed.id == it.feedId }
             it.toRow(feed, cropFeedImages)
         }
     }
@@ -84,13 +84,13 @@ class FeedItemsFragmentModel(
         default = true
     )
 
-    private fun FeedItem.toRow(feed: Feed, cropFeedImages: Boolean): FeedItemsAdapterRow {
+    private fun FeedItem.toRow(feed: Feed?, cropFeedImages: Boolean): FeedItemsAdapterRow {
         val dateString = DateFormat.getDateInstance().format(Date(pubDate * 1000))
 
         return FeedItemsAdapterRow(
             id,
             title,
-            feed.title + " · " + dateString,
+            (feed?.title ?: "Unknown feed") + " · " + dateString,
             summary,
             unread,
             openGraphImageUrl,

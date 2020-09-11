@@ -22,7 +22,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import co.appreactor.nextcloud.news.*
 import kotlinx.android.synthetic.main.fragment_feed_item.*
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -62,7 +61,6 @@ class FeedItemFragment : Fragment() {
 
                 launch {
                     runCatching {
-                        delay(5000)
                         model.syncFeedItemsFlags()
                     }.getOrElse {
                         Timber.e(it)
@@ -76,7 +74,7 @@ class FeedItemFragment : Fragment() {
                 }
             }
 
-            toolbar.title = model.getFeed(item.feedId)!!.title
+            toolbar.title = model.getFeed(item.feedId)?.title ?: getString(R.string.unknown_feed)
             title.text = item.title
             date.text = model.getDate(item)
 
