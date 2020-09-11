@@ -64,6 +64,7 @@ class FeedItemsAdapter(
 
                 primaryText.text = row.title
                 secondaryText.text = row.subtitle
+                supportingText.isVisible = row.summary.isNotBlank()
                 supportingText.text = row.summary
 
                 primaryText.isEnabled = row.unread

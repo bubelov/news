@@ -232,17 +232,25 @@ class FeedItemsRepository(
     }
 
     private fun getSummary(body: String): String {
-        val replaceImgPattern = Pattern.compile("<img([\\w\\W]+?)>", Pattern.DOTALL)
-        val bodyWithoutImg = body.replace(replaceImgPattern.toRegex(), "")
-        val parsedBody =
-            HtmlCompat.fromHtml(bodyWithoutImg, HtmlCompat.FROM_HTML_MODE_COMPACT).toString().replace("\n", " ")
-
-        return buildString {
-            append(parsedBody.substring(0, min(parsedBody.length - 1, SUMMARY_MAX_LENGTH)))
-
-            if (length == SUMMARY_MAX_LENGTH) {
-                append("…")
-            }
+        if (body.isBlank()) {
+            return ""
         }
+        
+        return runCatching {
+            val replaceImgPattern = Pattern.compile("<img([\\w\\W]+?)>", Pattern.DOTALL)
+            val bodyWithoutImg = body.replace(replaceImgPattern.toRegex(), "")
+            val parsedBody =
+                HtmlCompat.fromHtml(bodyWithoutImg, HtmlCompat.FROM_HTML_MODE_COMPACT).toString().replace("\n", " ")
+
+            buildString {
+                append(parsedBody.substring(0, min(parsedBody.length - 1, SUMMARY_MAX_LENGTH)))
+
+                if (length == SUMMARY_MAX_LENGTH) {
+                    append("…")
+                }
+            }
+        }.onFailure {
+            Timber.e(it)
+        }.getOrNull() ?: ""
     }
 }
