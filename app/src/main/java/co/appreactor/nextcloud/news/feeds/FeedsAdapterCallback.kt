@@ -6,7 +6,7 @@ interface FeedsAdapterCallback {
 
     fun onOpenWebsiteClick(feed: Feed)
 
-    fun onOpenRssFeedClick(feed: Feed)
+    fun onOpenFeedClick(feed: Feed)
 
     fun onDeleteClick(feed: Feed)
 }

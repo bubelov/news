@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -14,6 +15,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import co.appreactor.nextcloud.news.R
 import co.appreactor.nextcloud.news.common.showDialog
 import co.appreactor.nextcloud.news.db.Feed
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.android.synthetic.main.dialog_add_feed.*
 import kotlinx.android.synthetic.main.fragment_feeds.*
 import kotlinx.coroutines.flow.collect
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -30,7 +33,7 @@ class FeedsFragment : Fragment() {
             startActivity(intent)
         }
 
-        override fun onOpenRssFeedClick(feed: Feed) {
+        override fun onOpenFeedClick(feed: Feed) {
             val intent = Intent(Intent.ACTION_VIEW)
             intent.data = Uri.parse(feed.url)
             startActivity(intent)
@@ -38,8 +41,8 @@ class FeedsFragment : Fragment() {
 
         override fun onDeleteClick(feed: Feed) {
             lifecycleScope.launchWhenResumed {
-                listView.isVisible = false
-                progress.isVisible = true
+                actionProgress.isVisible = true
+                fab.isVisible = false
 
                 runCatching {
                     model.deleteFeed(feed.id)
@@ -48,8 +51,8 @@ class FeedsFragment : Fragment() {
                     showDialog(R.string.error, it.message ?: "")
                 }
 
-                listView.isVisible = true
-                progress.isVisible = false
+                actionProgress.isVisible = false
+                fab.isVisible = true
             }
         }
     })
@@ -76,13 +79,39 @@ class FeedsFragment : Fragment() {
         listView.adapter = adapter
 
         lifecycleScope.launchWhenResumed {
-            progress.isVisible = true
+            listViewProgress.isVisible = true
 
             model.getFeeds().collect { feeds ->
-                progress.isVisible = false
+                listViewProgress.isVisible = false
                 empty.isVisible = feeds.isEmpty()
                 adapter.submitList(feeds)
             }
+        }
+
+        fab.setOnClickListener {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(getString(R.string.add_feed))
+                .setView(R.layout.dialog_add_feed)
+                .setPositiveButton(R.string.add) { dialogInterface, _ ->
+                    val dialog = dialogInterface as AlertDialog
+
+                    lifecycleScope.launchWhenResumed {
+                        actionProgress.isVisible = true
+                        fab.isVisible = false
+
+                        runCatching {
+                            model.createFeed(dialog.urlView.text.toString())
+                        }.onFailure {
+                            Timber.e(it)
+                            showDialog(R.string.error, it.message ?: "")
+                        }
+
+                        actionProgress.isVisible = false
+                        fab.isVisible = true
+                    }
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
         }
     }
 }

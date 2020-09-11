@@ -1,6 +1,7 @@
 package co.appreactor.nextcloud.news.feeds
 
 import co.appreactor.nextcloud.news.api.NewsApi
+import co.appreactor.nextcloud.news.api.PostFeedArgs
 import co.appreactor.nextcloud.news.db.FeedQueries
 import co.appreactor.nextcloud.news.feeditems.FeedItemsRepository
 import com.squareup.sqldelight.runtime.coroutines.asFlow
@@ -15,6 +16,14 @@ class FeedsRepository(
     private val feedItemsRepository: FeedItemsRepository
 ) {
 
+    suspend fun create(url: String) = withContext(Dispatchers.IO) {
+        val response = kotlin.runCatching {
+            api.postFeed(PostFeedArgs(url, 0)).execute().body()!!
+        }.getOrThrow()
+
+        db.insertOrReplace(response.feeds.single())
+    }
+
     suspend fun all() = withContext(Dispatchers.IO) {
         db.findAll().asFlow().map { it.executeAsList() }
     }
@@ -26,7 +35,7 @@ class FeedsRepository(
     suspend fun deleteById(id: Long) = withContext(Dispatchers.IO) {
         val response = api.deleteFeed(id).execute()
 
-        if (response.isSuccessful || response.code() == 520) {
+        if (response.isSuccessful) {
             db.transaction {
                 db.deleteById(id)
                 feedItemsRepository.deleteByFeedId(id)

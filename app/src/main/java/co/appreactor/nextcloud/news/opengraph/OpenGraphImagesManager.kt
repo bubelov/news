@@ -19,10 +19,6 @@ class OpenGraphImagesManager(
     private val feedItemsRepository: FeedItemsRepository
 ) {
 
-    companion object {
-        const val MIN_IMAGE_WIDTH = 480
-    }
-
     private val httpClient = OkHttpClient.Builder()
         .callTimeout(10, TimeUnit.SECONDS)
         .build()
@@ -99,9 +95,9 @@ class OpenGraphImagesManager(
                 return@withContext
             }
 
-            val image = runCatching {
+            runCatching {
                 Picasso.get().load(imageUrl).get()!!
-            }.getOrElse {
+            }.onFailure {
                 Timber.e(
                     OpenGraphException(
                         message = "Cannot fetch Open Graph image for feed item ${feedItem.id} (${feedItem.title}). Image url: $imageUrl",
@@ -117,17 +113,10 @@ class OpenGraphImagesManager(
                 return@withContext
             }
 
-            if (image.width >= MIN_IMAGE_WIDTH && image.height.toDouble() > image.width.toDouble() / 2.5) {
-                feedItemsRepository.updateOpenGraphImageUrl(
-                    id = feedItem.id,
-                    url = imageUrl
-                )
-            } else {
-                feedItemsRepository.updateOpenGraphImageParsingFailed(
-                    id = feedItem.id,
-                    failed = true
-                )
-            }
+            feedItemsRepository.updateOpenGraphImageUrl(
+                id = feedItem.id,
+                url = imageUrl
+            )
         }
     }
 }

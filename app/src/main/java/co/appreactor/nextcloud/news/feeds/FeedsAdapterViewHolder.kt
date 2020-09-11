@@ -41,8 +41,8 @@ class FeedsAdapterViewHolder(
                             callback.onOpenWebsiteClick(item)
                         }
 
-                        R.id.openRssFeed -> {
-                            callback.onOpenRssFeedClick(item)
+                        R.id.openFeed -> {
+                            callback.onOpenFeedClick(item)
                         }
 
                         R.id.delete -> {

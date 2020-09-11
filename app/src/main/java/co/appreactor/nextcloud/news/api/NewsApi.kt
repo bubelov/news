@@ -6,11 +6,14 @@ import retrofit2.http.*
 
 interface NewsApi {
 
+    @POST("feeds")
+    fun postFeed(@Body args: PostFeedArgs): Call<FeedsPayload>
+
     @GET("feeds")
     fun getFeeds(): Call<FeedsPayload>
 
     @DELETE("feeds/{id}")
-    fun deleteFeed(@Path("id") id: Long): Call<ResponseBody>
+    fun deleteFeed(@Path("id") id: Long): Call<List<Long>>
 
     @GET("items?type=3&getRead=false&batchSize=-1")
     fun getUnreadItems(): Call<FeedItemsPayload>

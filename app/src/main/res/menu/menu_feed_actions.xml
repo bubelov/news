@@ -9,8 +9,8 @@
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/openRssFeed"
-        android:title="@string/open_rss_feed"
+        android:id="@+id/openFeed"
+        android:title="@string/open_feed"
         app:showAsAction="ifRoom" />
 
     <item
