@@ -33,34 +33,34 @@ class FeedItemsAdapter(
                 if (row.imageUrl.isNotBlank()) {
                     imageView.isVisible = true
                     imageProgress.isVisible = true
+                }
 
-                    val cardMargin = resources.getDimensionPixelSize(R.dimen.card_horizontal_margin)
+                val cardMargin = resources.getDimensionPixelSize(R.dimen.card_horizontal_margin)
 
-                    Picasso.get()
-                        .load(row.imageUrl)
-                        .resize(screenWidth - cardMargin, 0)
-                        .into(imageView, object : Callback {
-                            override fun onSuccess() {
-                                imageView.isVisible = true
-                                imageProgress.isVisible = false
+                Picasso.get()
+                    .load(if (row.imageUrl.isBlank()) null else row.imageUrl)
+                    .resize(screenWidth - cardMargin, 0)
+                    .into(imageView, object : Callback {
+                        override fun onSuccess() {
+                            imageView.isVisible = true
+                            imageProgress.isVisible = false
 
-                                if (!row.cropImage) {
-                                    val drawable = imageView.drawable
-                                    val targetHeight =
-                                        ((screenWidth - cardMargin) * (drawable.intrinsicHeight.toDouble() / drawable.intrinsicWidth.toDouble()))
+                            if (!row.cropImage) {
+                                val drawable = imageView.drawable
+                                val targetHeight =
+                                    ((screenWidth - cardMargin) * (drawable.intrinsicHeight.toDouble() / drawable.intrinsicWidth.toDouble()))
 
-                                    if (imageView.height != targetHeight.toInt()) {
-                                        imageView.layoutParams.height = targetHeight.toInt()
-                                    }
+                                if (imageView.height != targetHeight.toInt()) {
+                                    imageView.layoutParams.height = targetHeight.toInt()
                                 }
                             }
+                        }
 
-                            override fun onError(e: Exception) {
-                                imageView.isVisible = false
-                                imageProgress.isVisible = false
-                            }
-                        })
-                }
+                        override fun onError(e: Exception) {
+                            imageView.isVisible = false
+                            imageProgress.isVisible = false
+                        }
+                    })
 
                 primaryText.text = row.title
                 secondaryText.text = row.subtitle
