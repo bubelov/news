@@ -2,7 +2,7 @@ CREATE TABLE FeedItem (
   id INTEGER PRIMARY KEY,
   guid TEXT NOT NULL,
   guidHash TEXT NOT NULL,
-  url TEXT NOT NULL,
+  url TEXT,
   title TEXT NOT NULL,
   author TEXT NOT NULL,
   pubDate INTEGER NOT NULL,

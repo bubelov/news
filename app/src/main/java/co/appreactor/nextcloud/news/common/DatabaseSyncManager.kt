@@ -28,10 +28,9 @@ class DatabaseSyncManager(
 
             Timber.d("Initial sync time: $syncTime")
             prefs.putBoolean(Preferences.INITIAL_SYNC_COMPLETED, true)
-        }.apply {
-            if (isFailure) {
-                throw Exception("Cannot fetch data from Nextcloud")
-            }
+        }.onFailure {
+            Timber.e(it)
+            throw Exception("Cannot fetch data from Nextcloud")
         }
     }
 

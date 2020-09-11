@@ -37,6 +37,7 @@ class OpenGraphImagesManager(
     private suspend fun fetchOpenGraphImage(feedItem: FeedItem) = withContext(Dispatchers.IO) {
         if (feedItem.openGraphImageUrl.isNotBlank()
             || feedItem.openGraphImageParsingFailed
+            || feedItem.url.isNullOrBlank()
             || feedItem.url.startsWith("http://")
         ) {
             return@withContext
