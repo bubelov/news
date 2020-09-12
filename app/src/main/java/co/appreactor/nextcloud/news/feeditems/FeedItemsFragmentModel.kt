@@ -10,8 +10,10 @@ import co.appreactor.nextcloud.news.db.FeedItem
 import co.appreactor.nextcloud.news.opengraph.OpenGraphImagesManager
 import co.appreactor.nextcloud.news.podcasts.PodcastsManager
 import co.appreactor.nextcloud.news.podcasts.isPodcast
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.DateFormat
 import java.util.*
 
@@ -79,6 +81,12 @@ class FeedItemsFragmentModel(
 
     suspend fun getFeedItem(id: Long) = feedItemsRepository.byId(id).first()
 
+    suspend fun generateSummary(feedItemId: Long): String  {
+        return withContext(Dispatchers.IO) {
+            feedItemsRepository.byId(feedItemId).first()?.getSummary() ?: ""
+        }
+    }
+
     private suspend fun getCropFeedImages() = prefs.getBoolean(
         key = Preferences.CROP_FEED_IMAGES,
         default = true
@@ -91,7 +99,6 @@ class FeedItemsFragmentModel(
             id,
             title,
             (feed?.title ?: "Unknown feed") + " · " + dateString,
-            summary,
             unread,
             openGraphImageUrl,
             cropFeedImages,

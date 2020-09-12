@@ -4,21 +4,25 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.nextcloud.news.R
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.list_item_feed_item.view.*
+import kotlinx.coroutines.Job
 
 class FeedItemsAdapter(
     var screenWidth: Int = 0,
+    private val scope: LifecycleCoroutineScope,
     private val callback: FeedItemsAdapterCallback,
 ) : ListAdapter<FeedItemsAdapterRow, FeedItemsAdapter.ViewHolder>(FeedItemsAdapterDiffCallback()) {
 
     class ViewHolder(
         private val view: View,
         private val screenWidth: Int,
+        private val scope: LifecycleCoroutineScope,
         private val callback: FeedItemsAdapterCallback
     ) :
         RecyclerView.ViewHolder(view) {
@@ -64,8 +68,24 @@ class FeedItemsAdapter(
 
                 primaryText.text = row.title
                 secondaryText.text = row.subtitle
-                supportingText.isVisible = row.summary.isNotBlank()
-                supportingText.text = row.summary
+
+                supportingText.tag.apply {
+                    if (this is Job) {
+                        this.cancel()
+                    }
+                }
+
+                supportingText.tag = null
+                supportingText.isVisible = false
+
+                supportingText.tag = scope.launchWhenResumed {
+                    val summary = callback.generateSummary(row.id)
+
+                    if (summary.isNotBlank()) {
+                        supportingText.isVisible = true
+                        supportingText.text = summary
+                    }
+                }
 
                 primaryText.isEnabled = row.unread
                 secondaryText.isEnabled = row.unread
@@ -109,7 +129,7 @@ class FeedItemsAdapter(
             parent, false
         )
 
-        return ViewHolder(view, screenWidth, callback)
+        return ViewHolder(view, screenWidth, scope, callback)
 
     }
 

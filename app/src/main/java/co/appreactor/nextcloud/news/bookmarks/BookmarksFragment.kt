@@ -27,6 +27,7 @@ class BookmarksFragment : Fragment() {
     private val model: BookmarksFragmentModel by viewModel()
 
     private val adapter = FeedItemsAdapter(
+        scope = lifecycleScope,
         callback = object : FeedItemsAdapterCallback {
             override fun onItemClick(item: FeedItemsAdapterRow) {
                 val action = BookmarksFragmentDirections.actionStarredNewsFragmentToNewsItemFragment(item.id)
@@ -53,6 +54,10 @@ class BookmarksFragment : Fragment() {
                         showDialog(R.string.error, it.message ?: "")
                     }
                 }
+            }
+
+            override suspend fun generateSummary(feedItemId: Long): String {
+                return model.generateSummary(feedItemId)
             }
         }
     )

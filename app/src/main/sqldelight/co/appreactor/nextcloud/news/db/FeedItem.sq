@@ -8,7 +8,6 @@ CREATE TABLE FeedItem (
   pubDate INTEGER NOT NULL,
   updatedDate INTEGER,
   body TEXT NOT NULL,
-  summary TEXT NOT NULL,
   enclosureMime TEXT,
   enclosureLink TEXT,
   enclosureDownloadProgress INTEGER,

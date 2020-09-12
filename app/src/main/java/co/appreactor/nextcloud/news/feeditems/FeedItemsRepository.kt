@@ -1,10 +1,10 @@
 package co.appreactor.nextcloud.news.feeditems
 
-import androidx.core.text.HtmlCompat
 import co.appreactor.nextcloud.news.api.NewsApi
 import co.appreactor.nextcloud.news.api.PutReadArgs
 import co.appreactor.nextcloud.news.api.PutStarredArgs
 import co.appreactor.nextcloud.news.api.PutStarredArgsItem
+import co.appreactor.nextcloud.news.db.FeedItem
 import co.appreactor.nextcloud.news.db.FeedItemQueries
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import kotlinx.coroutines.Dispatchers
@@ -13,16 +13,14 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import java.util.regex.Pattern
-import kotlin.math.min
 
 class FeedItemsRepository(
     private val db: FeedItemQueries,
     private val api: NewsApi
 ) {
 
-    companion object {
-        private const val SUMMARY_MAX_LENGTH = 150
+    suspend fun create(feedItem: FeedItem) = withContext(Dispatchers.IO) {
+        db.insertOrReplace(feedItem)
     }
 
     suspend fun all() = withContext(Dispatchers.IO) {
@@ -102,7 +100,6 @@ class FeedItemsRepository(
                     it.copy(
                         unreadSynced = true,
                         starredSynced = true,
-                        summary = getSummary(it.body),
                         openGraphImageUrl = "",
                         openGraphImageParsingFailed = false,
                         enclosureDownloadProgress = null,
@@ -221,7 +218,6 @@ class FeedItemsRepository(
                     it.copy(
                         unreadSynced = true,
                         starredSynced = true,
-                        summary = getSummary(it.body),
                         openGraphImageUrl = "",
                         openGraphImageParsingFailed = false,
                         enclosureDownloadProgress = null
@@ -229,28 +225,5 @@ class FeedItemsRepository(
                 )
             }
         }
-    }
-
-    private fun getSummary(body: String): String {
-        if (body.isBlank()) {
-            return ""
-        }
-        
-        return runCatching {
-            val replaceImgPattern = Pattern.compile("<img([\\w\\W]+?)>", Pattern.DOTALL)
-            val bodyWithoutImg = body.replace(replaceImgPattern.toRegex(), "")
-            val parsedBody =
-                HtmlCompat.fromHtml(bodyWithoutImg, HtmlCompat.FROM_HTML_MODE_COMPACT).toString().replace("\n", " ")
-
-            buildString {
-                append(parsedBody.substring(0, min(parsedBody.length - 1, SUMMARY_MAX_LENGTH)))
-
-                if (length == SUMMARY_MAX_LENGTH) {
-                    append("…")
-                }
-            }
-        }.onFailure {
-            Timber.e(it)
-        }.getOrNull() ?: ""
     }
 }

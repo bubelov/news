@@ -27,6 +27,7 @@ class FeedItemsFragment : Fragment() {
     private val model: FeedItemsFragmentModel by viewModel()
 
     private val adapter = FeedItemsAdapter(
+        scope = lifecycleScope,
         callback = object : FeedItemsAdapterCallback {
             override fun onItemClick(item: FeedItemsAdapterRow) {
                 val action = FeedItemsFragmentDirections.actionNewsFragmentToNewsItemFragment(item.id)
@@ -53,6 +54,10 @@ class FeedItemsFragment : Fragment() {
                         showDialog(R.string.error, it.message ?: "")
                     }
                 }
+            }
+
+            override suspend fun generateSummary(feedItemId: Long): String {
+                return model.generateSummary(feedItemId)
             }
         }
     )
