@@ -1,5 +1,6 @@
 package co.appreactor.nextcloud.news.feeditems
 
+import android.graphics.drawable.BitmapDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -61,10 +62,17 @@ class FeedItemsAdapter(
                                 .resize(screenWidth - cardMargin, 0)
                                 .into(imageView, object : Callback {
                                     override fun onSuccess() {
-                                        imageView.isVisible = true
                                         imageProgress.isVisible = false
 
-                                        val drawable = imageView.drawable
+                                        val drawable = imageView.drawable as BitmapDrawable
+                                        val bitmap = drawable.bitmap
+
+                                        if (bitmap.hasTransparentAngles() || bitmap.looksLikeSingleColor()) {
+                                            imageView.isVisible = false
+                                            return
+                                        }
+
+                                        imageProgress.isVisible = false
 
                                         val targetHeight =
                                             ((screenWidth - cardMargin) * (drawable.intrinsicHeight.toDouble() / drawable.intrinsicWidth.toDouble()))
