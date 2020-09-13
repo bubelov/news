@@ -2,17 +2,19 @@ package co.appreactor.nextcloud.news.feeditems
 
 import androidx.core.text.HtmlCompat
 import co.appreactor.nextcloud.news.db.FeedItem
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.util.regex.Pattern
 
 private const val SUMMARY_MAX_LENGTH = 150
 
-fun FeedItem.getSummary(): String {
+suspend fun FeedItem.getSummary(): String = withContext(Dispatchers.IO) {
     if (body.isBlank()) {
-        return ""
+        return@withContext ""
     }
 
-    return runCatching {
+    runCatching {
         val replaceImgPattern = Pattern.compile("<img([\\w\\W]+?)>", Pattern.DOTALL)
         val bodyWithoutImg = body.replace(replaceImgPattern.toRegex(), "")
         val parsedBody =
