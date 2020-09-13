@@ -11,7 +11,7 @@ import co.appreactor.nextcloud.news.R
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.list_item_feed_item.view.*
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
 
 class FeedItemsAdapter(
     var screenWidth: Int = 0,
@@ -69,21 +69,15 @@ class FeedItemsAdapter(
                 primaryText.text = row.title
                 secondaryText.text = row.subtitle
 
-                supportingText.tag.apply {
-                    if (this is Job) {
-                        this.cancel()
-                    }
-                }
-
-                supportingText.tag = null
                 supportingText.isVisible = false
+                supportingText.tag = row
 
-                supportingText.tag = scope.launchWhenResumed {
-                    val summary = callback.generateSummary(row.id)
-
-                    if (summary.isNotBlank()) {
-                        supportingText.isVisible = true
-                        supportingText.text = summary
+                scope.launchWhenResumed {
+                    row.summary.collect { summary ->
+                        if (supportingText.tag == row && summary.isNotBlank()) {
+                            supportingText.isVisible = true
+                            supportingText.text = summary
+                        }
                     }
                 }
 

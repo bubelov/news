@@ -7,6 +7,4 @@ interface FeedItemsAdapterCallback {
     fun onDownloadPodcastClick(item: FeedItemsAdapterRow)
 
     fun onPlayPodcastClick(item: FeedItemsAdapterRow)
-
-    suspend fun generateSummary(feedItemId: Long): String
 }

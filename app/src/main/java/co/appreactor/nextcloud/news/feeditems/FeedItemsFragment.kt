@@ -55,10 +55,6 @@ class FeedItemsFragment : Fragment() {
                     }
                 }
             }
-
-            override suspend fun generateSummary(feedItemId: Long): String {
-                return model.generateSummary(feedItemId)
-            }
         }
     )
 
