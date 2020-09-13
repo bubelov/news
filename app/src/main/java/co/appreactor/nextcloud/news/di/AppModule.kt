@@ -4,15 +4,15 @@ import co.appreactor.nextcloud.news.Database
 import co.appreactor.nextcloud.news.auth.AuthFragmentModel
 import co.appreactor.nextcloud.news.auth.DirectAuthFragmentModel
 import co.appreactor.nextcloud.news.common.Preferences
-import co.appreactor.nextcloud.news.common.DatabaseSyncManager
+import co.appreactor.nextcloud.news.common.NewsApiSync
 import co.appreactor.nextcloud.news.feeds.FeedsRepository
 import co.appreactor.nextcloud.news.logging.LoggedExceptionsFragmentModel
 import co.appreactor.nextcloud.news.logging.LoggedExceptionsRepository
 import co.appreactor.nextcloud.news.feeditems.FeedItemsFragmentModel
 import co.appreactor.nextcloud.news.feeditems.FeedItemsRepository
 import co.appreactor.nextcloud.news.feeditem.FeedItemFragmentModel
-import co.appreactor.nextcloud.news.opengraph.OpenGraphImagesManager
-import co.appreactor.nextcloud.news.podcasts.PodcastsManager
+import co.appreactor.nextcloud.news.opengraph.OpenGraphImagesRepository
+import co.appreactor.nextcloud.news.podcasts.PodcastsRepository
 import co.appreactor.nextcloud.news.settings.SettingsFragmentModel
 import co.appreactor.nextcloud.news.bookmarks.BookmarksFragmentModel
 import co.appreactor.nextcloud.news.feeds.FeedsFragmentModel
@@ -32,9 +32,9 @@ val appModule = module {
         )
     }
 
-    single<DatabaseSyncManager>()
-    single<OpenGraphImagesManager>()
-    single<PodcastsManager>()
+    single<NewsApiSync>()
+    single<OpenGraphImagesRepository>()
+    single<PodcastsRepository>()
 
     single<FeedItemsRepository>()
     single<FeedsRepository>()

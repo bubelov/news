@@ -2,7 +2,7 @@ package co.appreactor.nextcloud.news.feeditem
 
 import androidx.lifecycle.ViewModel
 import co.appreactor.nextcloud.news.feeds.FeedsRepository
-import co.appreactor.nextcloud.news.common.DatabaseSyncManager
+import co.appreactor.nextcloud.news.common.NewsApiSync
 import co.appreactor.nextcloud.news.db.Feed
 import co.appreactor.nextcloud.news.db.FeedItem
 import co.appreactor.nextcloud.news.feeditems.FeedItemsRepository
@@ -15,7 +15,7 @@ import java.util.*
 class FeedItemFragmentModel(
     private val feedsRepository: FeedsRepository,
     private val feedItemsRepository: FeedItemsRepository,
-    private val databaseSyncManager: DatabaseSyncManager
+    private val databaseSyncManager: NewsApiSync,
 ) : ViewModel() {
 
     suspend fun getFeedItem(id: Long): FeedItem? {

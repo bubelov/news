@@ -8,10 +8,10 @@ import kotlinx.coroutines.withContext
 import timber.log.Timber
 import kotlin.system.measureTimeMillis
 
-class DatabaseSyncManager(
+class NewsApiSync(
     private val feedItemsRepository: FeedItemsRepository,
     private val feedsRepository: FeedsRepository,
-    private val prefs: Preferences
+    private val prefs: Preferences,
 ) {
 
     suspend fun performInitialSyncIfNoData() {
@@ -26,11 +26,9 @@ class DatabaseSyncManager(
                 }
             }
 
-            Timber.d("Initial sync time: $syncTime")
             prefs.putBoolean(Preferences.INITIAL_SYNC_COMPLETED, true)
         }.onFailure {
             Timber.e(it)
-            throw Exception("Cannot fetch data from Nextcloud")
         }
     }
 
@@ -46,28 +44,19 @@ class DatabaseSyncManager(
         fetchNewAndUpdatedNews: Boolean = true
     ) {
         runCatching {
-            Timber.d("Started sync")
-
             if (syncNewsFlags) {
-                Timber.d("Notifying the News app of read and unread articles")
                 feedItemsRepository.syncUnreadFlags()
-
-                Timber.d("Notifying the News app of starred and unstarred articles")
                 feedItemsRepository.syncStarredFlags()
             }
 
             if (syncFeeds) {
-                Timber.d("Syncing feeds")
                 feedsRepository.reloadFromApi()
             }
 
             if (fetchNewAndUpdatedNews) {
-                Timber.d("Syncing new and updated news items")
                 feedItemsRepository.fetchNewAndUpdatedItems()
             }
-
-            Timber.d("Finished sync")
-        }.getOrElse {
+        }.onFailure {
             Timber.e(it)
             throw it
         }

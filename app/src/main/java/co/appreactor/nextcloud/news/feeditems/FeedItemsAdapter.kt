@@ -23,48 +23,63 @@ class FeedItemsAdapter(
         private val view: View,
         private val screenWidth: Int,
         private val scope: LifecycleCoroutineScope,
-        private val callback: FeedItemsAdapterCallback
+        private val callback: FeedItemsAdapterCallback,
     ) :
         RecyclerView.ViewHolder(view) {
 
         fun bind(row: FeedItemsAdapterRow, isFirst: Boolean) {
             view.apply {
+                val cardMargin = resources.getDimensionPixelSize(R.dimen.card_horizontal_margin)
+
                 topOffset.isVisible = isFirst
 
                 imageView.isVisible = false
                 imageProgress.isVisible = false
 
-                if (row.imageUrl.isNotBlank()) {
-                    imageView.isVisible = true
-                    imageProgress.isVisible = true
-                }
+                Picasso.get().load(null as String?).into(imageView)
+                imageView.isVisible = false
+                imageView.tag = row
 
-                val cardMargin = resources.getDimensionPixelSize(R.dimen.card_horizontal_margin)
+                scope.launchWhenResumed {
+                    row.imageUrl.collect { imageUrl ->
+                        if (imageView.tag != row) {
+                            return@collect
+                        }
 
-                Picasso.get()
-                    .load(if (row.imageUrl.isBlank()) null else row.imageUrl)
-                    .resize(screenWidth - cardMargin, 0)
-                    .into(imageView, object : Callback {
-                        override fun onSuccess() {
+                        Picasso.get().load(null as String?).into(imageView)
+                        imageView.isVisible = false
+
+                        if (imageUrl.isNotBlank()) {
                             imageView.isVisible = true
-                            imageProgress.isVisible = false
+                            imageProgress.isVisible = true
+                        }
 
-                            if (!row.cropImage) {
-                                val drawable = imageView.drawable
-                                val targetHeight =
-                                    ((screenWidth - cardMargin) * (drawable.intrinsicHeight.toDouble() / drawable.intrinsicWidth.toDouble()))
+                        Picasso.get()
+                            .load(if (imageUrl.isBlank()) null else imageUrl)
+                            .resize(screenWidth - cardMargin, 0)
+                            .into(imageView, object : Callback {
+                                override fun onSuccess() {
+                                    imageView.isVisible = true
+                                    imageProgress.isVisible = false
 
-                                if (imageView.height != targetHeight.toInt()) {
-                                    imageView.layoutParams.height = targetHeight.toInt()
+                                    if (!row.cropImage) {
+                                        val drawable = imageView.drawable
+                                        val targetHeight =
+                                            ((screenWidth - cardMargin) * (drawable.intrinsicHeight.toDouble() / drawable.intrinsicWidth.toDouble()))
+
+                                        if (imageView.height != targetHeight.toInt()) {
+                                            imageView.layoutParams.height = targetHeight.toInt()
+                                        }
+                                    }
                                 }
-                            }
-                        }
 
-                        override fun onError(e: Exception) {
-                            imageView.isVisible = false
-                            imageProgress.isVisible = false
-                        }
-                    })
+                                override fun onError(e: Exception) {
+                                    imageView.isVisible = false
+                                    imageProgress.isVisible = false
+                                }
+                            })
+                    }
+                }
 
                 primaryText.text = row.title
                 secondaryText.text = row.subtitle

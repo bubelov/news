@@ -4,10 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.appreactor.nextcloud.news.feeds.FeedsRepository
 import co.appreactor.nextcloud.news.common.Preferences
-import co.appreactor.nextcloud.news.common.DatabaseSyncManager
+import co.appreactor.nextcloud.news.common.NewsApiSync
 import co.appreactor.nextcloud.news.db.Feed
 import co.appreactor.nextcloud.news.db.FeedItem
-import co.appreactor.nextcloud.news.podcasts.PodcastsManager
+import co.appreactor.nextcloud.news.opengraph.OpenGraphImagesRepository
+import co.appreactor.nextcloud.news.podcasts.PodcastsRepository
 import co.appreactor.nextcloud.news.podcasts.isPodcast
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -17,14 +18,15 @@ import java.util.*
 class FeedItemsFragmentModel(
     private val feedsRepository: FeedsRepository,
     private val feedItemsRepository: FeedItemsRepository,
+    private val openGraphImagesRepository: OpenGraphImagesRepository,
+    private val podcastsRepository: PodcastsRepository,
+    private val newsApiSync: NewsApiSync,
     private val prefs: Preferences,
-    private val databaseSyncManager: DatabaseSyncManager,
-    private val podcastsManager: PodcastsManager,
 ) : ViewModel() {
 
     init {
         viewModelScope.launch {
-            podcastsManager.verifyCache()
+            podcastsRepository.verifyCache()
         }
     }
 
@@ -55,11 +57,11 @@ class FeedItemsFragmentModel(
     }
 
     suspend fun performInitialSyncIfNoData() {
-        databaseSyncManager.performInitialSyncIfNoData()
+        newsApiSync.performInitialSyncIfNoData()
     }
 
     suspend fun performFullSync() {
-        databaseSyncManager.sync()
+        newsApiSync.sync()
     }
 
     suspend fun isInitialSyncCompleted() = prefs.getBoolean(
@@ -68,7 +70,7 @@ class FeedItemsFragmentModel(
     ).first()
 
     suspend fun downloadPodcast(id: Long) {
-        podcastsManager.downloadPodcast(id)
+        podcastsRepository.downloadPodcast(id)
     }
 
     suspend fun getFeedItem(id: Long) = feedItemsRepository.byId(id).first()
@@ -86,11 +88,11 @@ class FeedItemsFragmentModel(
             title,
             (feed?.title ?: "Unknown feed") + " · " + dateString,
             unread,
-            openGraphImageUrl,
             cropFeedImages,
             isPodcast(),
             enclosureDownloadProgress,
-            summary = flow { emit(getSummary()) }
+            summary = flow { emit(getSummary()) },
+            imageUrl = flow { emit(openGraphImagesRepository.getImageUrl(this@toRow)) },
         )
     }
 }

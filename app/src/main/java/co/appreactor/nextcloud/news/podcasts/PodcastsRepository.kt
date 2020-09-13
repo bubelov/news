@@ -11,9 +11,9 @@ import timber.log.Timber
 import java.io.BufferedInputStream
 import java.io.FileOutputStream
 
-class PodcastsManager(
+class PodcastsRepository(
     private val feedItemsRepository: FeedItemsRepository,
-    private val context: Context
+    private val context: Context,
 ) {
 
     private val httpClient = OkHttpClient()

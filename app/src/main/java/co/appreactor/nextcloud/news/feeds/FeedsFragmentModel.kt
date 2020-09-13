@@ -1,17 +1,17 @@
 package co.appreactor.nextcloud.news.feeds
 
 import androidx.lifecycle.ViewModel
-import co.appreactor.nextcloud.news.common.DatabaseSyncManager
+import co.appreactor.nextcloud.news.common.NewsApiSync
 
 class FeedsFragmentModel(
     private val feedsRepository: FeedsRepository,
-    private val databaseSyncManager: DatabaseSyncManager
+    private val newsApiSync: NewsApiSync,
 ) : ViewModel() {
 
     suspend fun createFeed(url: String) {
         feedsRepository.create(url)
 
-        databaseSyncManager.sync(
+        newsApiSync.sync(
             syncNewsFlags = false,
             syncFeeds = true,
             fetchNewAndUpdatedNews = true

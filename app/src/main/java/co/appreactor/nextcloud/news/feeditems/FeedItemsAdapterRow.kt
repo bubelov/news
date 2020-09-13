@@ -7,9 +7,9 @@ data class FeedItemsAdapterRow(
     val title: String,
     val subtitle: String,
     val unread: Boolean,
-    val imageUrl: String,
     val cropImage: Boolean,
     val podcast: Boolean,
     val podcastDownloadPercent: Long?,
-    val summary: Flow<String>
+    val imageUrl: Flow<String>,
+    val summary: Flow<String>,
 )
