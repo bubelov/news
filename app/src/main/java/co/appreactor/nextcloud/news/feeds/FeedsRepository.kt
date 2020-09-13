@@ -1,7 +1,9 @@
 package co.appreactor.nextcloud.news.feeds
 
+import co.appreactor.nextcloud.news.api.FeedJson
 import co.appreactor.nextcloud.news.api.NewsApi
 import co.appreactor.nextcloud.news.api.PostFeedArgs
+import co.appreactor.nextcloud.news.db.Feed
 import co.appreactor.nextcloud.news.db.FeedQueries
 import co.appreactor.nextcloud.news.feeditems.FeedItemsRepository
 import com.squareup.sqldelight.runtime.coroutines.asFlow
@@ -21,7 +23,11 @@ class FeedsRepository(
             api.postFeed(PostFeedArgs(url, 0)).execute().body()!!
         }.getOrThrow()
 
-        db.insertOrReplace(response.feeds.single())
+        val feed = response.feeds.single().toFeed()
+
+        if (feed != null) {
+            db.insertOrReplace(feed)
+        }
     }
 
     suspend fun all() = withContext(Dispatchers.IO) {
@@ -63,10 +69,22 @@ class FeedsRepository(
             db.transaction {
                 db.deleteAll()
 
-                newFeeds.forEach {
+                newFeeds.mapNotNull { it.toFeed() }.forEach {
                     db.insertOrReplace(it)
                 }
             }
         }
+    }
+
+    private fun FeedJson.toFeed(): Feed? {
+        return Feed(
+            id = id ?: return null,
+            url = url ?: "",
+            title = title ?: "Untitled",
+            faviconLink = faviconLink ?: "",
+            link = link ?: "",
+            updateErrorCount = updateErrorCount ?: 0,
+            lastUpdateError = lastUpdateError ?: ""
+        )
     }
 }

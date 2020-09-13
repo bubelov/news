@@ -12,7 +12,7 @@ import co.appreactor.nextcloud.news.feeditems.FeedItemsFragmentModel
 import co.appreactor.nextcloud.news.feeditems.FeedItemsRepository
 import co.appreactor.nextcloud.news.feeditem.FeedItemFragmentModel
 import co.appreactor.nextcloud.news.opengraph.OpenGraphImagesRepository
-import co.appreactor.nextcloud.news.podcasts.PodcastsRepository
+import co.appreactor.nextcloud.news.podcasts.PodcastDownloadsRepository
 import co.appreactor.nextcloud.news.settings.SettingsFragmentModel
 import co.appreactor.nextcloud.news.bookmarks.BookmarksFragmentModel
 import co.appreactor.nextcloud.news.feeds.FeedsFragmentModel
@@ -37,7 +37,7 @@ val appModule = module {
     single<FeedItemsRepository>()
     single<FeedsRepository>()
     single<OpenGraphImagesRepository>()
-    single<PodcastsRepository>()
+    single<PodcastDownloadsRepository>()
     single<Preferences>()
     single<LoggedExceptionsRepository>()
 
@@ -45,6 +45,7 @@ val appModule = module {
     single { get<Database>().feedQueries }
     single { get<Database>().feedItemQueries }
     single { get<Database>().openGraphImageQueries }
+    single { get<Database>().podcastDownloadQueries }
     single { get<Database>().preferenceQueries }
     single { get<Database>().loggedExceptionQueries }
 

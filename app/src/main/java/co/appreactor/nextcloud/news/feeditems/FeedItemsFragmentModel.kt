@@ -8,7 +8,7 @@ import co.appreactor.nextcloud.news.common.NewsApiSync
 import co.appreactor.nextcloud.news.db.Feed
 import co.appreactor.nextcloud.news.db.FeedItem
 import co.appreactor.nextcloud.news.opengraph.OpenGraphImagesRepository
-import co.appreactor.nextcloud.news.podcasts.PodcastsRepository
+import co.appreactor.nextcloud.news.podcasts.PodcastDownloadsRepository
 import co.appreactor.nextcloud.news.podcasts.isPodcast
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -19,14 +19,15 @@ class FeedItemsFragmentModel(
     private val feedsRepository: FeedsRepository,
     private val feedItemsRepository: FeedItemsRepository,
     private val openGraphImagesRepository: OpenGraphImagesRepository,
-    private val podcastsRepository: PodcastsRepository,
+    private val podcastsRepository: PodcastDownloadsRepository,
     private val newsApiSync: NewsApiSync,
     private val prefs: Preferences,
 ) : ViewModel() {
 
     init {
         viewModelScope.launch {
-            podcastsRepository.verifyCache()
+            podcastsRepository.deleteCompletedDownloadsWithoutFiles()
+            podcastsRepository.deletePartialDownloads()
         }
     }
 
@@ -95,7 +96,11 @@ class FeedItemsFragmentModel(
             (feed?.title ?: "Unknown feed") + " · " + dateString,
             unread,
             isPodcast(),
-            enclosureDownloadProgress,
+            podcastDownloadPercent = flow {
+                podcastsRepository.getDownloadProgress(this@toRow.id).collect {
+                    emit(it)
+                }
+            },
             imageUrl = flow {
                 openGraphImagesRepository.getImageUrl(this@toRow).collect {
                     emit(it)

@@ -9,7 +9,7 @@ import co.appreactor.nextcloud.news.feeditems.FeedItemsAdapterRow
 import co.appreactor.nextcloud.news.feeditems.FeedItemsRepository
 import co.appreactor.nextcloud.news.feeditems.getSummary
 import co.appreactor.nextcloud.news.opengraph.OpenGraphImagesRepository
-import co.appreactor.nextcloud.news.podcasts.PodcastsRepository
+import co.appreactor.nextcloud.news.podcasts.PodcastDownloadsRepository
 import co.appreactor.nextcloud.news.podcasts.isPodcast
 import kotlinx.coroutines.flow.*
 import java.text.DateFormat
@@ -19,7 +19,7 @@ class BookmarksFragmentModel(
     private val feedsRepository: FeedsRepository,
     private val feedItemsRepository: FeedItemsRepository,
     private val openGraphImagesRepository: OpenGraphImagesRepository,
-    private val podcastsRepository: PodcastsRepository,
+    private val podcastsRepository: PodcastDownloadsRepository,
     private val prefs: Preferences,
 ) : ViewModel() {
 
@@ -60,7 +60,11 @@ class BookmarksFragmentModel(
             feed.title + " · " + dateString,
             true,
             isPodcast(),
-            enclosureDownloadProgress,
+            podcastDownloadPercent = flow {
+                podcastsRepository.getDownloadProgress(this@toRow.id).collect {
+                    emit(it)
+                }
+            },
             imageUrl = flow {
                 openGraphImagesRepository.getImageUrl(this@toRow).collect {
                     emit(it)

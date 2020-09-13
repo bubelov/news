@@ -1,9 +1,6 @@
 package co.appreactor.nextcloud.news.feeditems
 
-import co.appreactor.nextcloud.news.api.NewsApi
-import co.appreactor.nextcloud.news.api.PutReadArgs
-import co.appreactor.nextcloud.news.api.PutStarredArgs
-import co.appreactor.nextcloud.news.api.PutStarredArgsItem
+import co.appreactor.nextcloud.news.api.*
 import co.appreactor.nextcloud.news.db.FeedItem
 import co.appreactor.nextcloud.news.db.FeedItemQueries
 import com.squareup.sqldelight.runtime.coroutines.asFlow
@@ -12,11 +9,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 
 class FeedItemsRepository(
     private val db: FeedItemQueries,
-    private val api: NewsApi
+    private val api: NewsApi,
 ) {
 
     suspend fun create(feedItem: FeedItem) = withContext(Dispatchers.IO) {
@@ -53,13 +49,6 @@ class FeedItemsRepository(
         )
     }
 
-    suspend fun updateEnclosureDownloadProgress(id: Long, progress: Long?) = withContext(Dispatchers.IO) {
-        db.updateEnclosureDownloadProgress(
-            enclosureDownloadProgress = progress,
-            id = id
-        )
-    }
-
     suspend fun clear() = withContext(Dispatchers.IO) {
         db.deleteAll()
     }
@@ -69,9 +58,7 @@ class FeedItemsRepository(
     }
 
     suspend fun performInitialSyncIfNoData() = withContext(Dispatchers.IO) {
-        Timber.d("Performing initial sync (if no data)")
         val count = db.count().executeAsOne()
-        Timber.d("Records: $count")
 
         if (count > 0) {
             return@withContext
@@ -81,14 +68,8 @@ class FeedItemsRepository(
         val starred = api.getStarredItems().execute().body()!!
 
         db.transaction {
-            (unread.items + starred.items).forEach {
-                db.insertOrReplace(
-                    it.copy(
-                        unreadSynced = true,
-                        starredSynced = true,
-                        enclosureDownloadProgress = null,
-                    )
-                )
+            (unread.items + starred.items).mapNotNull { it.toFeedItem() }.forEach {
+                db.insertOrReplace(it)
             }
         }
     }
@@ -197,15 +178,29 @@ class FeedItemsRepository(
         val newAndUpdatedItems = api.getNewAndUpdatedItems(mostRecentItem.lastModified + 1).execute().body()!!.items
 
         db.transaction {
-            newAndUpdatedItems.forEach {
-                db.insertOrReplace(
-                    it.copy(
-                        unreadSynced = true,
-                        starredSynced = true,
-                        enclosureDownloadProgress = null
-                    )
-                )
+            newAndUpdatedItems.mapNotNull { it.toFeedItem() }.forEach {
+                db.insertOrReplace(it)
             }
         }
+    }
+
+    private fun FeedItemJson.toFeedItem(): FeedItem? {
+        return FeedItem(
+            id = id ?: return null,
+            guidHash = guidHash ?: return null,
+            url = url ?: "",
+            title = title ?: "Untitled",
+            author = author ?: "",
+            pubDate = pubDate ?: 0,
+            body = body ?: "No content",
+            enclosureMime = enclosureMime ?: "",
+            enclosureLink = enclosureLink ?: "",
+            feedId = feedId ?: 0,
+            unread = unread ?: return null,
+            unreadSynced = true,
+            starred = starred ?: return null,
+            starredSynced = true,
+            lastModified = lastModified ?: 0
+        )
     }
 }

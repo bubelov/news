@@ -126,20 +126,31 @@ class FeedItemsAdapter(
                 secondaryText.isEnabled = row.unread
                 supportingText.isEnabled = row.unread
 
-                podcastPanel.isVisible = row.podcast
+                podcastPanel.isVisible = false
+                podcastPanel.tag = row
 
                 if (row.podcast) {
-                    if (row.podcastDownloadPercent == null) {
-                        downloadPodcast.isVisible = true
-                        downloadingPodcast.isVisible = false
-                        downloadPodcastProgress.isVisible = false
-                        playPodcast.isVisible = false
-                    } else {
-                        downloadPodcast.isVisible = false
-                        downloadingPodcast.isVisible = row.podcastDownloadPercent != 100L
-                        downloadPodcastProgress.isVisible = row.podcastDownloadPercent != 100L
-                        downloadPodcastProgress.progress = row.podcastDownloadPercent.toInt()
-                        playPodcast.isVisible = row.podcastDownloadPercent == 100L
+                    scope.launchWhenResumed {
+                        row.podcastDownloadPercent.collect { progress ->
+                            if (podcastPanel.tag != row) {
+                                return@collect
+                            }
+
+                            podcastPanel.isVisible = true
+
+                            if (progress == null) {
+                                downloadPodcast.isVisible = true
+                                downloadingPodcast.isVisible = false
+                                downloadPodcastProgress.isVisible = false
+                                playPodcast.isVisible = false
+                            } else {
+                                downloadPodcast.isVisible = false
+                                downloadingPodcast.isVisible = progress != 100L
+                                downloadPodcastProgress.isVisible = progress != 100L
+                                downloadPodcastProgress.progress = progress.toInt()
+                                playPodcast.isVisible = progress == 100L
+                            }
+                        }
                     }
 
                     downloadPodcast.setOnClickListener {

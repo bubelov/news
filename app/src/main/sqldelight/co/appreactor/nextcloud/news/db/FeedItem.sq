@@ -1,27 +1,19 @@
 CREATE TABLE FeedItem (
   id INTEGER PRIMARY KEY,
-  guid TEXT NOT NULL,
   guidHash TEXT NOT NULL,
-  url TEXT,
+  url TEXT NOT NULL,
   title TEXT NOT NULL,
   author TEXT NOT NULL,
   pubDate INTEGER NOT NULL,
-  updatedDate INTEGER,
   body TEXT NOT NULL,
-  enclosureMime TEXT,
-  enclosureLink TEXT,
-  enclosureDownloadProgress INTEGER,
-  mediaThumbnail TEXT,
-  mediaDescription TEXT,
+  enclosureMime TEXT NOT NULL,
+  enclosureLink TEXT NOT NULL,
   feedId INTEGER NOT NULL,
   unread INTEGER AS Boolean NOT NULL,
   unreadSynced INTEGER AS Boolean NOT NULL,
   starred INTEGER AS Boolean NOT NULL,
   starredSynced INTEGER AS Boolean NOT NULL,
-  lastModified INTEGER NOT NULL,
-  rtl INTEGER AS Boolean NOT NULL,
-  fingerprint TEXT NOT NULL,
-  contentHash TEXT NOT NULL
+  lastModified INTEGER NOT NULL
 );
 
 insertOrReplace:
@@ -73,11 +65,6 @@ WHERE id = ?;
 updateStarredSynced:
 UPDATE FeedItem
 SET starredSynced = ?
-WHERE id = ?;
-
-updateEnclosureDownloadProgress:
-UPDATE FeedItem
-SET enclosureDownloadProgress = ?
 WHERE id = ?;
 
 deleteAll:

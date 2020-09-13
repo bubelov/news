@@ -1,0 +1,23 @@
+CREATE TABLE PodcastDownload (
+  feedItemId INTEGER PRIMARY KEY,
+  downloadPercent INTEGER
+);
+
+insertOrReplace:
+INSERT OR REPLACE
+INTO PodcastDownload
+VALUES ?;
+
+selectAll:
+SELECT *
+FROM PodcastDownload;
+
+selectByFeedItemId:
+SELECT *
+FROM PodcastDownload
+WHERE feedItemId = ?;
+
+deleteByFeedItemId:
+DELETE
+FROM PodcastDownload
+WHERE feedItemId = ?;
