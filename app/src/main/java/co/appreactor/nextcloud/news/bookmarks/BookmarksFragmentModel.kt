@@ -57,7 +57,11 @@ class BookmarksFragmentModel(
             isPodcast(),
             enclosureDownloadProgress,
             summary = flow { emit(getSummary()) },
-            imageUrl = flow { emit(openGraphImagesRepository.getImageUrl(this@toRow)) },
+            imageUrl = flow {
+                openGraphImagesRepository.getImageUrl(this@toRow).collect {
+                    emit(it)
+                }
+            },
         )
     }
 }

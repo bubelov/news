@@ -33,17 +33,18 @@ val appModule = module {
     }
 
     single<NewsApiSync>()
-    single<OpenGraphImagesRepository>()
-    single<PodcastsRepository>()
 
     single<FeedItemsRepository>()
     single<FeedsRepository>()
-    single<LoggedExceptionsRepository>()
+    single<OpenGraphImagesRepository>()
+    single<PodcastsRepository>()
     single<Preferences>()
+    single<LoggedExceptionsRepository>()
 
     single { Database(get()) }
     single { get<Database>().feedQueries }
     single { get<Database>().feedItemQueries }
+    single { get<Database>().openGraphImageQueries }
     single { get<Database>().preferenceQueries }
     single { get<Database>().loggedExceptionQueries }
 

@@ -53,20 +53,6 @@ class FeedItemsRepository(
         )
     }
 
-    suspend fun updateOpenGraphImageUrl(id: Long, url: String) = withContext(Dispatchers.IO) {
-        db.updateOpenGraphImageUrl(
-            openGraphImageUrl = url,
-            id = id
-        )
-    }
-
-    suspend fun updateOpenGraphImageParsingFailed(id: Long, failed: Boolean) = withContext(Dispatchers.IO) {
-        db.updateOpenGraphImageParsingFailed(
-            openGraphImageParsingFailed = failed,
-            id = id
-        )
-    }
-
     suspend fun updateEnclosureDownloadProgress(id: Long, progress: Long?) = withContext(Dispatchers.IO) {
         db.updateEnclosureDownloadProgress(
             enclosureDownloadProgress = progress,
@@ -100,8 +86,6 @@ class FeedItemsRepository(
                     it.copy(
                         unreadSynced = true,
                         starredSynced = true,
-                        openGraphImageUrl = "",
-                        openGraphImageParsingFailed = false,
                         enclosureDownloadProgress = null,
                     )
                 )
@@ -218,8 +202,6 @@ class FeedItemsRepository(
                     it.copy(
                         unreadSynced = true,
                         starredSynced = true,
-                        openGraphImageUrl = "",
-                        openGraphImageParsingFailed = false,
                         enclosureDownloadProgress = null
                     )
                 )

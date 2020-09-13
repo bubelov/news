@@ -21,9 +21,7 @@ CREATE TABLE FeedItem (
   lastModified INTEGER NOT NULL,
   rtl INTEGER AS Boolean NOT NULL,
   fingerprint TEXT NOT NULL,
-  contentHash TEXT NOT NULL,
-  openGraphImageUrl TEXT NOT NULL,
-  openGraphImageParsingFailed INTEGER AS Boolean NOT NULL
+  contentHash TEXT NOT NULL
 );
 
 insertOrReplace:
@@ -75,16 +73,6 @@ WHERE id = ?;
 updateStarredSynced:
 UPDATE FeedItem
 SET starredSynced = ?
-WHERE id = ?;
-
-updateOpenGraphImageUrl:
-UPDATE FeedItem
-SET openGraphImageUrl = ?
-WHERE id = ?;
-
-updateOpenGraphImageParsingFailed:
-UPDATE FeedItem
-SET openGraphImageParsingFailed = ?
 WHERE id = ?;
 
 updateEnclosureDownloadProgress:
