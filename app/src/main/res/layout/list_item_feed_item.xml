@@ -37,7 +37,7 @@
                 <ImageView
                     android:id="@+id/imageView"
                     android:layout_width="match_parent"
-                    android:layout_height="194dp"
+                    android:layout_height="@dimen/card_height_optimal"
                     android:contentDescription="@string/post_image"
                     android:scaleType="centerCrop"
                     app:srcCompat="@mipmap/ic_launcher" />

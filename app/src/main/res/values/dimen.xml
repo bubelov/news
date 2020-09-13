@@ -8,4 +8,8 @@
     <dimen name="quote_gap">8dp</dimen>
 
     <dimen name="card_horizontal_margin">16dp</dimen>
+
+    <dimen name="card_height_optimal">194dp</dimen>
+    <dimen name="card_height_min">130dp</dimen>
+    <dimen name="card_height_max">258dp</dimen>
 </resources>

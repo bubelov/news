@@ -31,6 +31,9 @@ class FeedItemsAdapter(
             view.apply {
                 val cardMargin = resources.getDimensionPixelSize(R.dimen.card_horizontal_margin)
 
+                val cardHeightMin = resources.getDimensionPixelSize(R.dimen.card_height_min)
+                val cardHeightMax = resources.getDimensionPixelSize(R.dimen.card_height_max)
+
                 topOffset.isVisible = isFirst
 
                 Picasso.get().load(null as String?).into(imageView)
@@ -61,11 +64,26 @@ class FeedItemsAdapter(
                                         imageView.isVisible = true
                                         imageProgress.isVisible = false
 
-                                        if (!row.cropImage) {
-                                            val drawable = imageView.drawable
-                                            val targetHeight =
-                                                ((screenWidth - cardMargin) * (drawable.intrinsicHeight.toDouble() / drawable.intrinsicWidth.toDouble()))
+                                        val drawable = imageView.drawable
 
+                                        val targetHeight =
+                                            ((screenWidth - cardMargin) * (drawable.intrinsicHeight.toDouble() / drawable.intrinsicWidth.toDouble()))
+
+                                        if (row.cropImage) {
+                                            var croppedHeight = targetHeight.toInt()
+
+                                            if (croppedHeight < cardHeightMin) {
+                                                croppedHeight = cardHeightMin
+                                            }
+
+                                            if (croppedHeight > cardHeightMax) {
+                                                croppedHeight = cardHeightMax
+                                            }
+
+                                            if (imageView.height != croppedHeight) {
+                                                imageView.layoutParams.height = croppedHeight
+                                            }
+                                        } else {
                                             if (imageView.height != targetHeight.toInt()) {
                                                 imageView.layoutParams.height = targetHeight.toInt()
                                             }
