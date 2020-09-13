@@ -42,6 +42,14 @@ class SettingsFragment : Fragment() {
                 }
             }
 
+            showFeedImages.isChecked = model.getShowFeedImages().first()
+
+            showFeedImages.setOnCheckedChangeListener { _, isChecked ->
+                lifecycleScope.launch {
+                    model.setShowFeedImages(isChecked)
+                }
+            }
+
             cropFeedImages.isChecked = model.getCropFeedImages().first()
 
             cropFeedImages.setOnCheckedChangeListener { _, isChecked ->
@@ -60,6 +68,12 @@ class SettingsFragment : Fragment() {
         lifecycleScope.launchWhenResumed {
             model.getExceptionsCount().collect {
                 viewExceptionsSubtitle.text = getString(R.string.exceptions_logged_s, it)
+            }
+        }
+
+        lifecycleScope.launchWhenResumed {
+            model.getShowFeedImages().collect {
+                cropFeedImages.isEnabled = it
             }
         }
 

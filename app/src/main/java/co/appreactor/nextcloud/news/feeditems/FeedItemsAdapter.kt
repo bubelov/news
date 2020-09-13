@@ -33,51 +33,51 @@ class FeedItemsAdapter(
 
                 topOffset.isVisible = isFirst
 
-                imageView.isVisible = false
-                imageProgress.isVisible = false
-
                 Picasso.get().load(null as String?).into(imageView)
                 imageView.isVisible = false
+                imageProgress.isVisible = false
                 imageView.tag = row
 
-                scope.launchWhenResumed {
-                    row.imageUrl.collect { imageUrl ->
-                        if (imageView.tag != row) {
-                            return@collect
-                        }
+                if (row.showImage) {
+                    scope.launchWhenResumed {
+                        row.imageUrl.collect { imageUrl ->
+                            if (imageView.tag != row) {
+                                return@collect
+                            }
 
-                        Picasso.get().load(null as String?).into(imageView)
-                        imageView.isVisible = false
+                            Picasso.get().load(null as String?).into(imageView)
+                            imageView.isVisible = false
 
-                        if (imageUrl.isNotBlank()) {
-                            imageView.isVisible = true
-                            imageProgress.isVisible = true
-                        }
+                            if (imageUrl.isNotBlank()) {
+                                imageView.isVisible = true
+                                imageProgress.isVisible = true
+                            }
 
-                        Picasso.get()
-                            .load(if (imageUrl.isBlank()) null else imageUrl)
-                            .resize(screenWidth - cardMargin, 0)
-                            .into(imageView, object : Callback {
-                                override fun onSuccess() {
-                                    imageView.isVisible = true
-                                    imageProgress.isVisible = false
+                            Picasso.get()
+                                .load(if (imageUrl.isBlank()) null else imageUrl)
+                                .resize(screenWidth - cardMargin, 0)
+                                .into(imageView, object : Callback {
+                                    override fun onSuccess() {
+                                        imageView.isVisible = true
+                                        imageProgress.isVisible = false
 
-                                    if (!row.cropImage) {
-                                        val drawable = imageView.drawable
-                                        val targetHeight =
-                                            ((screenWidth - cardMargin) * (drawable.intrinsicHeight.toDouble() / drawable.intrinsicWidth.toDouble()))
+                                        if (!row.cropImage) {
+                                            val drawable = imageView.drawable
+                                            val targetHeight =
+                                                ((screenWidth - cardMargin) * (drawable.intrinsicHeight.toDouble() / drawable.intrinsicWidth.toDouble()))
 
-                                        if (imageView.height != targetHeight.toInt()) {
-                                            imageView.layoutParams.height = targetHeight.toInt()
+                                            if (imageView.height != targetHeight.toInt()) {
+                                                imageView.layoutParams.height = targetHeight.toInt()
+                                            }
                                         }
                                     }
-                                }
 
-                                override fun onError(e: Exception) {
-                                    imageView.isVisible = false
-                                    imageProgress.isVisible = false
-                                }
-                            })
+                                    override fun onError(e: Exception) {
+                                        imageView.isVisible = false
+                                        imageProgress.isVisible = false
+                                    }
+                                })
+                        }
                     }
                 }
 

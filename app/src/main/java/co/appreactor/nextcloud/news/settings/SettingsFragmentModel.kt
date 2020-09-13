@@ -31,6 +31,18 @@ class SettingsFragmentModel(
         )
     }
 
+    suspend fun getShowFeedImages() = prefs.getBoolean(
+        key = Preferences.SHOW_FEED_IMAGES,
+        default = true
+    )
+
+    suspend fun setShowFeedImages(crop: Boolean) {
+        prefs.putBoolean(
+            key = Preferences.SHOW_FEED_IMAGES,
+            value = crop
+        )
+    }
+
     suspend fun getCropFeedImages() = prefs.getBoolean(
         key = Preferences.CROP_FEED_IMAGES,
         default = true

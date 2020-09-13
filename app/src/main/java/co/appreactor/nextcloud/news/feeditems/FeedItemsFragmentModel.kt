@@ -34,13 +34,14 @@ class FeedItemsFragmentModel(
         feedsRepository.all(),
         feedItemsRepository.all(),
         getShowReadNews(),
+        getShowFeedImages(),
         getCropFeedImages()
-    ) { feeds, feedItems, showReadNews, cropFeedImages ->
+    ) { feeds, feedItems, showReadNews, showFeedImages, cropFeedImages ->
         feedItems.filter {
             showReadNews || it.unread
         }.map {
             val feed = feeds.singleOrNull { feed -> feed.id == it.feedId }
-            it.toRow(feed, cropFeedImages)
+            it.toRow(feed, showFeedImages, cropFeedImages)
         }
     }
 
@@ -75,12 +76,17 @@ class FeedItemsFragmentModel(
 
     suspend fun getFeedItem(id: Long) = feedItemsRepository.byId(id).first()
 
+    private suspend fun getShowFeedImages() = prefs.getBoolean(
+        key = Preferences.SHOW_FEED_IMAGES,
+        default = true
+    )
+
     private suspend fun getCropFeedImages() = prefs.getBoolean(
         key = Preferences.CROP_FEED_IMAGES,
         default = true
     )
 
-    private fun FeedItem.toRow(feed: Feed?, cropFeedImages: Boolean): FeedItemsAdapterRow {
+    private fun FeedItem.toRow(feed: Feed?, showFeedImages: Boolean, cropFeedImages: Boolean): FeedItemsAdapterRow {
         val dateString = DateFormat.getDateInstance().format(Date(pubDate * 1000))
 
         return FeedItemsAdapterRow(
@@ -88,15 +94,16 @@ class FeedItemsFragmentModel(
             title,
             (feed?.title ?: "Unknown feed") + " · " + dateString,
             unread,
-            cropFeedImages,
             isPodcast(),
             enclosureDownloadProgress,
-            summary = flow { emit(getSummary()) },
             imageUrl = flow {
                 openGraphImagesRepository.getImageUrl(this@toRow).collect {
                     emit(it)
                 }
             },
+            showImage = showFeedImages,
+            cropImage = cropFeedImages,
+            summary = flow { emit(getSummary()) },
         )
     }
 }

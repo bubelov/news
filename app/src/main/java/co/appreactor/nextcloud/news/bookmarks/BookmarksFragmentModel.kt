@@ -26,11 +26,12 @@ class BookmarksFragmentModel(
     suspend fun getBookmarks() = combine(
         feedsRepository.all(),
         feedItemsRepository.starred(),
-        getCropFeedImages()
-    ) { feeds, feedItems, cropFeedImages ->
+        getShowFeedImages(),
+        getCropFeedImages(),
+    ) { feeds, feedItems, showFeedImages, cropFeedImages ->
         feedItems.map {
             val feed = feeds.single { feed -> feed.id == it.feedId }
-            it.toRow(feed, cropFeedImages)
+            it.toRow(feed, showFeedImages, cropFeedImages)
         }
     }
 
@@ -40,12 +41,17 @@ class BookmarksFragmentModel(
 
     suspend fun getFeedItem(id: Long) = feedItemsRepository.byId(id).first()
 
+    private suspend fun getShowFeedImages() = prefs.getBoolean(
+        key = Preferences.SHOW_FEED_IMAGES,
+        default = true
+    )
+
     private suspend fun getCropFeedImages() = prefs.getBoolean(
         key = Preferences.CROP_FEED_IMAGES,
         default = true
     )
 
-    private fun FeedItem.toRow(feed: Feed, cropFeedImages: Boolean): FeedItemsAdapterRow {
+    private fun FeedItem.toRow(feed: Feed, showFeedImages: Boolean, cropFeedImages: Boolean): FeedItemsAdapterRow {
         val dateString = DateFormat.getDateInstance().format(Date(pubDate * 1000))
 
         return FeedItemsAdapterRow(
@@ -53,15 +59,16 @@ class BookmarksFragmentModel(
             title,
             feed.title + " · " + dateString,
             true,
-            cropFeedImages,
             isPodcast(),
             enclosureDownloadProgress,
-            summary = flow { emit(getSummary()) },
             imageUrl = flow {
                 openGraphImagesRepository.getImageUrl(this@toRow).collect {
                     emit(it)
                 }
             },
+            showImage = showFeedImages,
+            cropImage = cropFeedImages,
+            summary = flow { emit(getSummary()) },
         )
     }
 }
