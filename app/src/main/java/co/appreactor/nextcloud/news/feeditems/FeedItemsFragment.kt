@@ -10,6 +10,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearSmoothScroller
+import androidx.recyclerview.widget.RecyclerView.SmoothScroller
 import co.appreactor.nextcloud.news.R
 import co.appreactor.nextcloud.news.common.showDialog
 import co.appreactor.nextcloud.news.podcasts.playPodcast
@@ -58,6 +60,8 @@ class FeedItemsFragment : Fragment() {
         }
     )
 
+    private var forceScrollToTop = false
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -76,8 +80,10 @@ class FeedItemsFragment : Fragment() {
         swipeRefresh.setOnRefreshListener {
             lifecycleScope.launch {
                 runCatching {
+                    forceScrollToTop = true
                     model.performFullSync()
-                }.getOrElse {
+                }.onFailure {
+                    forceScrollToTop = false
                     Timber.e(it)
                     showDialog(R.string.error, it.message ?: "")
                 }
@@ -130,10 +136,10 @@ class FeedItemsFragment : Fragment() {
             showDialog(R.string.error, it.message ?: "")
         }
 
-        itemsView.setHasFixedSize(true)
-        itemsView.layoutManager = LinearLayoutManager(context)
-        itemsView.adapter = adapter
-        itemsView.addItemDecoration(FeedItemsAdapterDecoration(resources.getDimensionPixelSize(R.dimen.feed_items_cards_gap)))
+        listView.setHasFixedSize(true)
+        listView.layoutManager = LinearLayoutManager(context)
+        listView.adapter = adapter
+        listView.addItemDecoration(FeedItemsAdapterDecoration(resources.getDimensionPixelSize(R.dimen.feed_items_cards_gap)))
 
         val displayMetrics = DisplayMetrics()
         requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
@@ -154,7 +160,20 @@ class FeedItemsFragment : Fragment() {
 
                 empty.isVisible = feedItems.isEmpty() && model.isInitialSyncCompleted()
 
-                adapter.submitList(feedItems)
+                adapter.submitList(feedItems) {
+                    if (forceScrollToTop) {
+                        forceScrollToTop = false
+
+                        val smoothScroller: SmoothScroller = object : LinearSmoothScroller(context) {
+                            override fun getVerticalSnapPreference(): Int {
+                                return SNAP_TO_START
+                            }
+                        }
+
+                        smoothScroller.targetPosition = 0
+                        listView.layoutManager?.startSmoothScroll(smoothScroller)
+                    }
+                }
             }
     }
 }
