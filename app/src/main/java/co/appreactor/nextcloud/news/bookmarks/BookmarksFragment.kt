@@ -14,9 +14,12 @@ import co.appreactor.nextcloud.news.R
 import co.appreactor.nextcloud.news.common.showDialog
 import co.appreactor.nextcloud.news.feeditems.FeedItemsAdapter
 import co.appreactor.nextcloud.news.feeditems.FeedItemsAdapterCallback
+import co.appreactor.nextcloud.news.feeditems.FeedItemsAdapterDecoration
 import co.appreactor.nextcloud.news.feeditems.FeedItemsAdapterItem
 import co.appreactor.nextcloud.news.podcasts.playPodcast
-import kotlinx.android.synthetic.main.fragment_bookmarks.*
+import kotlinx.android.synthetic.main.fragment_bookmarks.empty
+import kotlinx.android.synthetic.main.fragment_bookmarks.listView
+import kotlinx.android.synthetic.main.fragment_bookmarks.progress
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -82,6 +85,7 @@ class BookmarksFragment : Fragment() {
         listView.setHasFixedSize(true)
         listView.layoutManager = LinearLayoutManager(context)
         listView.adapter = adapter
+        listView.addItemDecoration(FeedItemsAdapterDecoration(resources.getDimensionPixelSize(R.dimen.feed_items_cards_gap)))
 
         val displayMetrics = DisplayMetrics()
         requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
