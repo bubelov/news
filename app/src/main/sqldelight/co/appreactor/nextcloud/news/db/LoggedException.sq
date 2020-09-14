@@ -11,17 +11,17 @@ INSERT OR REPLACE
 INTO LoggedException
 VALUES ?;
 
-findAll:
+selectAll:
 SELECT *
 FROM LoggedException
 ORDER BY date DESC;
 
-findById:
+selectById:
 SELECT *
 FROM LoggedException
-WHERE id = :id;
+WHERE id = ?;
 
-count:
+selectCount:
 SELECT COUNT(*)
 FROM LoggedException;
 

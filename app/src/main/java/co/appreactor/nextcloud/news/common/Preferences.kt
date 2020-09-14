@@ -12,7 +12,7 @@ class Preferences(
 ) {
 
     suspend fun getString(key: String) = withContext(Dispatchers.IO) {
-        db.findByKey(key).asFlow().map { it.executeAsOneOrNull()?.value ?: "" }
+        db.selectByKey(key).asFlow().map { it.executeAsOneOrNull()?.value ?: "" }
     }
 
     suspend fun putString(key: String, value: String) = withContext(Dispatchers.IO) {

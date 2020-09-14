@@ -4,10 +4,11 @@ import co.appreactor.nextcloud.news.api.*
 import co.appreactor.nextcloud.news.db.FeedItem
 import co.appreactor.nextcloud.news.db.FeedItemQueries
 import com.squareup.sqldelight.runtime.coroutines.asFlow
+import com.squareup.sqldelight.runtime.coroutines.mapToList
+import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 class FeedItemsRepository(
@@ -20,19 +21,19 @@ class FeedItemsRepository(
     }
 
     suspend fun all() = withContext(Dispatchers.IO) {
-        db.findAll().asFlow().map { it.executeAsList() }
+        db.selectAll().asFlow().mapToList()
     }
 
     suspend fun unread() = withContext(Dispatchers.IO) {
-        db.findUnread().asFlow().map { it.executeAsList() }
+        db.selectUnread().asFlow().mapToList()
     }
 
     suspend fun starred() = withContext(Dispatchers.IO) {
-        db.findStarred().asFlow().map { it.executeAsList() }
+        db.selectStarred().asFlow().mapToList()
     }
 
     suspend fun byId(id: Long) = withContext(Dispatchers.IO) {
-        db.findById(id).asFlow().map { it.executeAsOneOrNull() }
+        db.selectById(id).asFlow().mapToOneOrNull()
     }
 
     suspend fun updateUnread(id: Long, unread: Boolean) = withContext(Dispatchers.IO) {
@@ -58,7 +59,7 @@ class FeedItemsRepository(
     }
 
     suspend fun performInitialSyncIfNoData() = withContext(Dispatchers.IO) {
-        val count = db.count().executeAsOne()
+        val count = db.selectCount().executeAsOne()
 
         if (count > 0) {
             return@withContext

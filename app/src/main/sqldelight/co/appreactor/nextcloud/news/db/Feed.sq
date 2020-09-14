@@ -13,17 +13,17 @@ INSERT OR REPLACE
 INTO Feed
 VALUES ?;
 
-findAll:
+selectAll:
 SELECT *
 FROM Feed
 ORDER BY title;
 
-findById:
+selectById:
 SELECT *
 FROM Feed
-WHERE id = :id;
+WHERE id = ?;
 
-count:
+selectCount:
 SELECT COUNT(*)
 FROM Feed;
 
@@ -34,4 +34,4 @@ FROM Feed;
 deleteById:
 DELETE
 FROM Feed
-WHERE id = :id;
+WHERE id = ?;

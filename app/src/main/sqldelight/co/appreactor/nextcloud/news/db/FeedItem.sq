@@ -21,29 +21,29 @@ INSERT OR REPLACE
 INTO FeedItem
 VALUES ?;
 
-findAll:
+selectAll:
 SELECT *
 FROM FeedItem
 ORDER BY pubDate DESC;
 
-findUnread:
+selectById:
+SELECT *
+FROM FeedItem
+WHERE id = ?;
+
+selectUnread:
 SELECT *
 FROM FeedItem
 WHERE unread = 1
 ORDER BY pubDate DESC;
 
-findStarred:
+selectStarred:
 SELECT *
 FROM FeedItem
 WHERE starred = 1
 ORDER BY pubDate DESC;
 
-findById:
-SELECT *
-FROM FeedItem
-WHERE id = :id;
-
-count:
+selectCount:
 SELECT COUNT(*)
 FROM FeedItem;
 

@@ -3,8 +3,9 @@ package co.appreactor.nextcloud.news.logging
 import co.appreactor.nextcloud.news.db.LoggedException
 import co.appreactor.nextcloud.news.db.LoggedExceptionQueries
 import com.squareup.sqldelight.runtime.coroutines.asFlow
+import com.squareup.sqldelight.runtime.coroutines.mapToList
+import com.squareup.sqldelight.runtime.coroutines.mapToOne
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 class LoggedExceptionsRepository(
@@ -16,11 +17,11 @@ class LoggedExceptionsRepository(
     }
 
     suspend fun all() = withContext(Dispatchers.IO) {
-        db.findAll().asFlow().map { it.executeAsList() }
+        db.selectAll().asFlow().mapToList()
     }
 
     suspend fun count() = withContext(Dispatchers.IO) {
-        db.count().asFlow().map { it.executeAsOne() }
+        db.selectCount().asFlow().mapToOne()
     }
 
     suspend fun deleteAll() = withContext(Dispatchers.IO) {

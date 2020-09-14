@@ -7,9 +7,10 @@ import co.appreactor.nextcloud.news.db.Feed
 import co.appreactor.nextcloud.news.db.FeedQueries
 import co.appreactor.nextcloud.news.feeditems.FeedItemsRepository
 import com.squareup.sqldelight.runtime.coroutines.asFlow
+import com.squareup.sqldelight.runtime.coroutines.mapToList
+import com.squareup.sqldelight.runtime.coroutines.mapToOneNotNull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 class FeedsRepository(
@@ -31,11 +32,11 @@ class FeedsRepository(
     }
 
     suspend fun all() = withContext(Dispatchers.IO) {
-        db.findAll().asFlow().map { it.executeAsList() }
+        db.selectAll().asFlow().mapToList()
     }
 
     suspend fun byId(id: Long) = withContext(Dispatchers.IO) {
-        db.findById(id).asFlow().map { it.executeAsOneOrNull() }
+        db.selectById(id).asFlow().mapToOneNotNull()
     }
 
     suspend fun deleteById(id: Long) = withContext(Dispatchers.IO) {
@@ -56,7 +57,7 @@ class FeedsRepository(
     }
 
     suspend fun reloadFromApiIfNoData() = withContext(Dispatchers.IO) {
-        if (db.count().executeAsOne() == 0L) {
+        if (db.selectCount().executeAsOne() == 0L) {
             reloadFromApi()
         }
     }

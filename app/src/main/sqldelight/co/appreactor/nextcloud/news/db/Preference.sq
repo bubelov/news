@@ -8,16 +8,16 @@ INSERT OR REPLACE
 INTO Preference
 VALUES ?;
 
-findAll:
+selectAll:
 SELECT *
 FROM Preference;
 
-findByKey:
+selectByKey:
 SELECT *
 FROM Preference
 WHERE key = :key;
 
-count:
+selectCount:
 SELECT COUNT(*)
 FROM Preference;
 

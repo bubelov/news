@@ -40,7 +40,7 @@ class FeedItemsFragment : Fragment() {
                 lifecycleScope.launchWhenResumed {
                     runCatching {
                         model.downloadPodcast(item.id)
-                    }.getOrElse {
+                    }.onFailure {
                         Timber.e(it)
                         showDialog(R.string.error, it.message ?: "")
                     }
@@ -51,7 +51,7 @@ class FeedItemsFragment : Fragment() {
                 lifecycleScope.launch {
                     runCatching {
                         playPodcast(model.getFeedItem(item.id)!!)
-                    }.getOrElse {
+                    }.onFailure {
                         Timber.e(it)
                         showDialog(R.string.error, it.message ?: "")
                     }
@@ -130,7 +130,7 @@ class FeedItemsFragment : Fragment() {
 
         runCatching {
             model.performInitialSyncIfNoData()
-        }.getOrElse {
+        }.onFailure {
             Timber.e(it)
             progress.isVisible = false
             showDialog(R.string.error, it.message ?: "")
