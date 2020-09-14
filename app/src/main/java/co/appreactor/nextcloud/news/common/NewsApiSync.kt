@@ -6,7 +6,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import kotlin.system.measureTimeMillis
 
 class NewsApiSync(
     private val feedItemsRepository: FeedItemsRepository,
@@ -16,14 +15,12 @@ class NewsApiSync(
 
     suspend fun performInitialSyncIfNoData() {
         runCatching {
-            val syncTime = measureTimeMillis {
-                withContext(Dispatchers.IO) {
-                    val feedsSync = async { feedsRepository.reloadFromApiIfNoData() }
-                    val feedItemsSync = async { feedItemsRepository.performInitialSyncIfNoData() }
+            withContext(Dispatchers.IO) {
+                val feedsSync = async { feedsRepository.reloadFromApiIfNoData() }
+                val feedItemsSync = async { feedItemsRepository.performInitialSyncIfNoData() }
 
-                    feedsSync.await()
-                    feedItemsSync.await()
-                }
+                feedsSync.await()
+                feedItemsSync.await()
             }
 
             prefs.putBoolean(Preferences.INITIAL_SYNC_COMPLETED, true)

@@ -133,7 +133,7 @@ class FeedItemsFragment : Fragment() {
         itemsView.setHasFixedSize(true)
         itemsView.layoutManager = LinearLayoutManager(context)
         itemsView.adapter = adapter
-        itemsView.addItemDecoration(FeedAdapterItemDecoration(resources.getDimensionPixelSize(R.dimen.feed_items_cards_gap)))
+        itemsView.addItemDecoration(FeedItemsAdapterDecoration(resources.getDimensionPixelSize(R.dimen.feed_items_cards_gap)))
 
         val displayMetrics = DisplayMetrics()
         requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)

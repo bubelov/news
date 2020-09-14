@@ -8,14 +8,14 @@ import co.appreactor.nextcloud.news.db.FeedItem
 import java.io.File
 
 fun FeedItem.isPodcast(): Boolean {
-    return enclosureMime?.startsWith("audio") ?: false
+    return enclosureMime.startsWith("audio")
 }
 
 fun FeedItem.getPodcastFile(context: Context): File {
     val podcasts = File(context.externalCacheDir, "podcasts")
     podcasts.mkdir()
 
-    val fileName = "$id-${enclosureLink!!.split("/").last()}"
+    val fileName = "$id-${enclosureLink.split("/").last()}"
     return File(podcasts, fileName)
 }
 

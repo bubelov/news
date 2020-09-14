@@ -77,6 +77,7 @@ class FeedsFragment : Fragment() {
         listView.setHasFixedSize(true)
         listView.layoutManager = LinearLayoutManager(requireContext())
         listView.adapter = adapter
+        listView.addItemDecoration(FeedsAdapterDecoration(resources.getDimensionPixelSize(R.dimen.dp_8)))
 
         lifecycleScope.launchWhenResumed {
             listViewProgress.isVisible = true
@@ -110,7 +111,7 @@ class FeedsFragment : Fragment() {
                         fab.isVisible = true
                     }
                 }
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton(R.string.cancel, null)
                 .show()
         }
     }
