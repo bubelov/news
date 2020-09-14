@@ -12,4 +12,6 @@
     <dimen name="card_height_optimal">194dp</dimen>
     <dimen name="card_height_min">130dp</dimen>
     <dimen name="card_height_max">258dp</dimen>
+
+    <dimen name="feed_items_cards_gap">8dp</dimen>
 </resources>

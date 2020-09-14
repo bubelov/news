@@ -5,7 +5,7 @@ import co.appreactor.nextcloud.news.feeds.FeedsRepository
 import co.appreactor.nextcloud.news.common.Preferences
 import co.appreactor.nextcloud.news.db.Feed
 import co.appreactor.nextcloud.news.db.FeedItem
-import co.appreactor.nextcloud.news.feeditems.FeedItemsAdapterRow
+import co.appreactor.nextcloud.news.feeditems.FeedItemsAdapterItem
 import co.appreactor.nextcloud.news.feeditems.FeedItemsRepository
 import co.appreactor.nextcloud.news.feeditems.getSummary
 import co.appreactor.nextcloud.news.opengraph.OpenGraphImagesRepository
@@ -30,7 +30,7 @@ class BookmarksFragmentModel(
         getCropFeedImages(),
     ) { feeds, feedItems, showFeedImages, cropFeedImages ->
         feedItems.map {
-            val feed = feeds.single { feed -> feed.id == it.feedId }
+            val feed = feeds.singleOrNull { feed -> feed.id == it.feedId }
             it.toRow(feed, showFeedImages, cropFeedImages)
         }
     }
@@ -51,15 +51,15 @@ class BookmarksFragmentModel(
         default = true
     )
 
-    private fun FeedItem.toRow(feed: Feed, showFeedImages: Boolean, cropFeedImages: Boolean): FeedItemsAdapterRow {
+    private fun FeedItem.toRow(feed: Feed?, showFeedImages: Boolean, cropFeedImages: Boolean): FeedItemsAdapterItem {
         val dateString = DateFormat.getDateInstance().format(Date(pubDate * 1000))
 
-        return FeedItemsAdapterRow(
-            id,
-            title,
-            feed.title + " · " + dateString,
-            true,
-            isPodcast(),
+        return FeedItemsAdapterItem(
+            id = id,
+            title = title,
+            (feed?.title ?: "Unknown feed") + " · " + dateString,
+            unread = true,
+            podcast = isPodcast(),
             podcastDownloadPercent = flow {
                 podcastsRepository.getDownloadProgress(this@toRow.id).collect {
                     emit(it)

@@ -29,12 +29,12 @@ class FeedItemsFragment : Fragment() {
     private val adapter = FeedItemsAdapter(
         scope = lifecycleScope,
         callback = object : FeedItemsAdapterCallback {
-            override fun onItemClick(item: FeedItemsAdapterRow) {
+            override fun onItemClick(item: FeedItemsAdapterItem) {
                 val action = FeedItemsFragmentDirections.actionNewsFragmentToNewsItemFragment(item.id)
                 findNavController().navigate(action)
             }
 
-            override fun onDownloadPodcastClick(item: FeedItemsAdapterRow) {
+            override fun onDownloadPodcastClick(item: FeedItemsAdapterItem) {
                 lifecycleScope.launchWhenResumed {
                     runCatching {
                         model.downloadPodcast(item.id)
@@ -45,7 +45,7 @@ class FeedItemsFragment : Fragment() {
                 }
             }
 
-            override fun onPlayPodcastClick(item: FeedItemsAdapterRow) {
+            override fun onPlayPodcastClick(item: FeedItemsAdapterItem) {
                 lifecycleScope.launch {
                     runCatching {
                         playPodcast(model.getFeedItem(item.id)!!)
@@ -133,6 +133,7 @@ class FeedItemsFragment : Fragment() {
         itemsView.setHasFixedSize(true)
         itemsView.layoutManager = LinearLayoutManager(context)
         itemsView.adapter = adapter
+        itemsView.addItemDecoration(FeedAdapterItemDecoration(resources.getDimensionPixelSize(R.dimen.feed_items_cards_gap)))
 
         val displayMetrics = DisplayMetrics()
         requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)

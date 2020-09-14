@@ -87,15 +87,15 @@ class FeedItemsFragmentModel(
         default = true
     )
 
-    private fun FeedItem.toRow(feed: Feed?, showFeedImages: Boolean, cropFeedImages: Boolean): FeedItemsAdapterRow {
+    private fun FeedItem.toRow(feed: Feed?, showFeedImages: Boolean, cropFeedImages: Boolean): FeedItemsAdapterItem {
         val dateString = DateFormat.getDateInstance().format(Date(pubDate * 1000))
 
-        return FeedItemsAdapterRow(
-            id,
-            title,
+        return FeedItemsAdapterItem(
+            id = id,
+            title = title,
             (feed?.title ?: "Unknown feed") + " · " + dateString,
-            unread,
-            isPodcast(),
+            unread = unread,
+            podcast = isPodcast(),
             podcastDownloadPercent = flow {
                 podcastsRepository.getDownloadProgress(this@toRow.id).collect {
                     emit(it)

@@ -14,7 +14,7 @@ import co.appreactor.nextcloud.news.R
 import co.appreactor.nextcloud.news.common.showDialog
 import co.appreactor.nextcloud.news.feeditems.FeedItemsAdapter
 import co.appreactor.nextcloud.news.feeditems.FeedItemsAdapterCallback
-import co.appreactor.nextcloud.news.feeditems.FeedItemsAdapterRow
+import co.appreactor.nextcloud.news.feeditems.FeedItemsAdapterItem
 import co.appreactor.nextcloud.news.podcasts.playPodcast
 import kotlinx.android.synthetic.main.fragment_bookmarks.*
 import kotlinx.coroutines.flow.collect
@@ -29,12 +29,12 @@ class BookmarksFragment : Fragment() {
     private val adapter = FeedItemsAdapter(
         scope = lifecycleScope,
         callback = object : FeedItemsAdapterCallback {
-            override fun onItemClick(item: FeedItemsAdapterRow) {
+            override fun onItemClick(item: FeedItemsAdapterItem) {
                 val action = BookmarksFragmentDirections.actionStarredNewsFragmentToNewsItemFragment(item.id)
                 findNavController().navigate(action)
             }
 
-            override fun onDownloadPodcastClick(item: FeedItemsAdapterRow) {
+            override fun onDownloadPodcastClick(item: FeedItemsAdapterItem) {
                 lifecycleScope.launchWhenResumed {
                     runCatching {
                         model.downloadPodcast(item.id)
@@ -45,7 +45,7 @@ class BookmarksFragment : Fragment() {
                 }
             }
 
-            override fun onPlayPodcastClick(item: FeedItemsAdapterRow) {
+            override fun onPlayPodcastClick(item: FeedItemsAdapterItem) {
                 lifecycleScope.launch {
                     runCatching {
                         playPodcast(model.getFeedItem(item.id)!!)

@@ -2,9 +2,9 @@ package co.appreactor.nextcloud.news.feeditems
 
 interface FeedItemsAdapterCallback {
 
-    fun onItemClick(item: FeedItemsAdapterRow)
+    fun onItemClick(item: FeedItemsAdapterItem)
 
-    fun onDownloadPodcastClick(item: FeedItemsAdapterRow)
+    fun onDownloadPodcastClick(item: FeedItemsAdapterItem)
 
-    fun onPlayPodcastClick(item: FeedItemsAdapterRow)
+    fun onPlayPodcastClick(item: FeedItemsAdapterItem)
 }

@@ -2,7 +2,7 @@ package co.appreactor.nextcloud.news.feeditems
 
 import kotlinx.coroutines.flow.Flow
 
-data class FeedItemsAdapterRow(
+data class FeedItemsAdapterItem(
     val id: Long,
     val title: String,
     val subtitle: String,

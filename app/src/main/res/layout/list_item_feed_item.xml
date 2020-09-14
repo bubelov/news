@@ -1,139 +1,120 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    style="@style/Card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:background="#000000"
-    android:orientation="vertical">
+    app:cardElevation="0dp">
 
-    <View
-        android:id="@+id/topOffset"
-        android:layout_width="match_parent"
-        android:layout_height="8dp" />
-
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/card"
-        style="@style/Card"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardElevation="0dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:clickable="true"
-        android:focusable="true">
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/card_height_optimal"
+                android:contentDescription="@string/post_image"
+                android:scaleType="centerCrop"
+                app:srcCompat="@mipmap/ic_launcher" />
+
+            <ProgressBar
+                android:id="@+id/imageProgress"
+                android:layout_width="wrap_content"
+                android:layout_gravity="center"
+                android:layout_height="wrap_content" />
+
+        </FrameLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <ImageView
-                    android:id="@+id/imageView"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/card_height_optimal"
-                    android:contentDescription="@string/post_image"
-                    android:scaleType="centerCrop"
-                    app:srcCompat="@mipmap/ic_launcher" />
-
-                <ProgressBar
-                    android:id="@+id/imageProgress"
-                    android:layout_width="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_height="wrap_content" />
-
-            </FrameLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/primaryText"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:textAppearance="?attr/textAppearanceHeadline6"
+                tools:text="Bla" />
 
-                <TextView
-                    android:id="@+id/primaryText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?attr/textAppearanceHeadline6"
-                    tools:text="Bla" />
-
-                <TextView
-                    android:id="@+id/secondaryText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:textAppearance="?attr/textAppearanceBody2"
-                    android:textColor="?android:attr/textColorSecondary"
-                    tools:text="Bla bla" />
-
-                <TextView
-                    android:id="@+id/supportingText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:textAppearance="?attr/textAppearanceBody2"
-                    android:textColor="?android:attr/textColorSecondary"
-                    tools:text="Bla bla bla" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/podcastPanel"
-                android:layout_width="match_parent"
-                android:gravity="center_vertical"
+            <TextView
+                android:id="@+id/secondaryText"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:orientation="horizontal">
+                android:layout_marginTop="8dp"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?android:attr/textColorSecondary"
+                tools:text="Bla bla" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:layout_width="wrap_content"
-                    android:id="@+id/downloadPodcast"
-                    android:layout_marginStart="8dp"
-                    app:icon="@drawable/ic_baseline_save_alt_24"
-                    android:visibility="gone"
-                    android:layout_height="wrap_content"
-                    android:text="@string/download"
-                    style="?attr/borderlessButtonStyle" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:layout_width="wrap_content"
-                    android:id="@+id/downloadingPodcast"
-                    android:layout_marginStart="8dp"
-                    android:visibility="gone"
-                    android:enabled="false"
-                    android:layout_height="wrap_content"
-                    android:text="@string/downloading"
-                    style="?attr/borderlessButtonStyle" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:layout_width="wrap_content"
-                    android:id="@+id/playPodcast"
-                    android:layout_marginStart="8dp"
-                    android:visibility="visible"
-                    app:icon="@drawable/ic_baseline_headset_24"
-                    android:layout_height="wrap_content"
-                    android:text="@string/listen"
-                    style="?attr/borderlessButtonStyle" />
-
-                <com.google.android.material.progressindicator.ProgressIndicator
-                    android:layout_width="0dp"
-                    android:id="@+id/downloadPodcastProgress"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginStart="8dp"
-                    android:progress="25"
-                    android:layout_height="wrap_content" />
-
-            </LinearLayout>
+            <TextView
+                android:id="@+id/supportingText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?android:attr/textColorSecondary"
+                tools:text="Bla bla bla" />
 
         </LinearLayout>
 
-    </com.google.android.material.card.MaterialCardView>
+        <LinearLayout
+            android:id="@+id/podcastPanel"
+            android:layout_width="match_parent"
+            android:gravity="center_vertical"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:orientation="horizontal">
 
-</LinearLayout>
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="wrap_content"
+                android:id="@+id/downloadPodcast"
+                android:layout_marginStart="8dp"
+                app:icon="@drawable/ic_baseline_save_alt_24"
+                android:visibility="gone"
+                android:layout_height="wrap_content"
+                android:text="@string/download"
+                style="?attr/borderlessButtonStyle" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="wrap_content"
+                android:id="@+id/downloadingPodcast"
+                android:layout_marginStart="8dp"
+                android:visibility="gone"
+                android:enabled="false"
+                android:layout_height="wrap_content"
+                android:text="@string/downloading"
+                style="?attr/borderlessButtonStyle" />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="wrap_content"
+                android:id="@+id/playPodcast"
+                android:layout_marginStart="8dp"
+                android:visibility="visible"
+                app:icon="@drawable/ic_baseline_headset_24"
+                android:layout_height="wrap_content"
+                android:text="@string/listen"
+                style="?attr/borderlessButtonStyle" />
+
+            <com.google.android.material.progressindicator.ProgressIndicator
+                android:layout_width="0dp"
+                android:id="@+id/downloadPodcastProgress"
+                android:layout_weight="1"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="8dp"
+                android:progress="25"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>
