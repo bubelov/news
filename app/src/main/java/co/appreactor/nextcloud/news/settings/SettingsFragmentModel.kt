@@ -2,8 +2,8 @@ package co.appreactor.nextcloud.news.settings
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
+import co.appreactor.nextcloud.news.common.*
 import co.appreactor.nextcloud.news.feeds.FeedsRepository
-import co.appreactor.nextcloud.news.common.Preferences
 import co.appreactor.nextcloud.news.logging.LoggedExceptionsRepository
 import co.appreactor.nextcloud.news.feeditems.FeedItemsRepository
 import com.nextcloud.android.sso.AccountImporter
@@ -19,49 +19,25 @@ class SettingsFragmentModel(
     private val prefs: Preferences,
 ) : ViewModel() {
 
-    suspend fun getShowReadNews() = prefs.getBoolean(
-        key = Preferences.SHOW_READ_NEWS,
-        default = false
-    )
+    suspend fun getShowReadNews() = prefs.showReadNews()
 
-    suspend fun setShowReadNews(show: Boolean) {
-        prefs.putBoolean(
-            key = Preferences.SHOW_READ_NEWS,
-            value = show
-        )
-    }
+    suspend fun setShowReadNews(show: Boolean) = prefs.setShowReadNews(show)
 
-    suspend fun getShowFeedImages() = prefs.getBoolean(
-        key = Preferences.SHOW_FEED_IMAGES,
-        default = false
-    )
+    suspend fun getShowFeedImages() = prefs.showFeedImages()
 
-    suspend fun setShowFeedImages(crop: Boolean) {
-        prefs.putBoolean(
-            key = Preferences.SHOW_FEED_IMAGES,
-            value = crop
-        )
-    }
+    suspend fun setShowFeedImages(show: Boolean) = prefs.setShowFeedImages(show)
 
-    suspend fun getCropFeedImages() = prefs.getBoolean(
-        key = Preferences.CROP_FEED_IMAGES,
-        default = true
-    )
+    suspend fun getCropFeedImages() = prefs.cropFeedImages()
 
-    suspend fun setCropFeedImages(crop: Boolean) {
-        prefs.putBoolean(
-            key = Preferences.CROP_FEED_IMAGES,
-            value = crop
-        )
-    }
+    suspend fun setCropFeedImages(crop: Boolean) = prefs.setCropFeedImages(crop)
 
     suspend fun getExceptionsCount() = loggedExceptionsRepository.count()
 
     suspend fun getAccountName(context: Context): String {
-        val serverUrl = prefs.getString(Preferences.SERVER_URL).first()
+        val serverUrl = prefs.getServerUrl().first()
 
         return if (serverUrl.isNotBlank()) {
-            val username = prefs.getString(Preferences.SERVER_USERNAME).first()
+            val username = prefs.getServerUsername().first()
             "$username@${serverUrl.replace("https://", "")}"
         } else {
             try {

@@ -2,9 +2,8 @@ package co.appreactor.nextcloud.news.feeditems
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.appreactor.nextcloud.news.common.*
 import co.appreactor.nextcloud.news.feeds.FeedsRepository
-import co.appreactor.nextcloud.news.common.Preferences
-import co.appreactor.nextcloud.news.common.NewsApiSync
 import co.appreactor.nextcloud.news.db.Feed
 import co.appreactor.nextcloud.news.db.FeedItem
 import co.appreactor.nextcloud.news.opengraph.OpenGraphImagesRepository
@@ -59,10 +58,7 @@ class FeedItemsFragmentModel(
         newsApiSync.sync()
     }
 
-    suspend fun isInitialSyncCompleted() = prefs.getBoolean(
-        key = Preferences.INITIAL_SYNC_COMPLETED,
-        default = false
-    ).first()
+    suspend fun isInitialSyncCompleted() = prefs.initialSyncCompleted().first()
 
     suspend fun downloadPodcast(id: Long) {
         podcastsRepository.downloadPodcast(id)
@@ -70,20 +66,11 @@ class FeedItemsFragmentModel(
 
     suspend fun getFeedItem(id: Long) = feedItemsRepository.byId(id).first()
 
-    private suspend fun getShowReadNews() = prefs.getBoolean(
-        key = Preferences.SHOW_READ_NEWS,
-        default = false
-    )
+    private suspend fun getShowReadNews() = prefs.showReadNews()
 
-    private suspend fun getShowFeedImages() = prefs.getBoolean(
-        key = Preferences.SHOW_FEED_IMAGES,
-        default = false
-    )
+    private suspend fun getShowFeedImages() = prefs.showFeedImages()
 
-    private suspend fun getCropFeedImages() = prefs.getBoolean(
-        key = Preferences.CROP_FEED_IMAGES,
-        default = true
-    )
+    private suspend fun getCropFeedImages() = prefs.cropFeedImages()
 
     private fun FeedItem.toRow(feed: Feed?, showFeedImages: Boolean, cropFeedImages: Boolean): FeedItemsAdapterItem {
         val dateString = DateFormat.getDateInstance().format(Date(pubDate * 1000))

@@ -3,6 +3,9 @@ package co.appreactor.nextcloud.news.di
 import co.appreactor.nextcloud.news.api.DirectApiBuilder
 import co.appreactor.nextcloud.news.api.NewsApi
 import co.appreactor.nextcloud.news.common.Preferences
+import co.appreactor.nextcloud.news.common.getServerPassword
+import co.appreactor.nextcloud.news.common.getServerUrl
+import co.appreactor.nextcloud.news.common.getServerUsername
 import com.google.gson.GsonBuilder
 import com.nextcloud.android.sso.api.NextcloudAPI
 import com.nextcloud.android.sso.helper.SingleAccountHelper
@@ -18,12 +21,12 @@ val apiModule = module {
         val prefs = get<Preferences>()
 
         val serverUrl = runBlocking {
-            prefs.getString(Preferences.SERVER_URL).first()
+            prefs.getServerUrl().first()
         }
 
         if (serverUrl.isNotBlank()) {
-            val username = runBlocking { prefs.getString(Preferences.SERVER_USERNAME).first() }
-            val password = runBlocking { prefs.getString(Preferences.SERVER_PASSWORD).first() }
+            val username = runBlocking { prefs.getServerUsername().first() }
+            val password = runBlocking { prefs.getServerPassword().first() }
 
             DirectApiBuilder().build(
                 serverUrl,

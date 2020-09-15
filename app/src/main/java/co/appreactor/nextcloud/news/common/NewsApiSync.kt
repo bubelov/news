@@ -20,9 +20,7 @@ class NewsApiSync(
     suspend fun performInitialSyncIfNotDone() {
         withContext(Dispatchers.IO) {
             mutex.withLock {
-                val initialSyncCompleted = prefs.getBoolean(Preferences.INITIAL_SYNC_COMPLETED, false).first()
-
-                if (initialSyncCompleted) {
+                if (prefs.initialSyncCompleted().first()) {
                     return@withLock
                 }
 
@@ -32,7 +30,7 @@ class NewsApiSync(
                 feedsSync.await()
                 feedItemsSync.await()
 
-                prefs.putBoolean(Preferences.INITIAL_SYNC_COMPLETED, true)
+                prefs.setInitialSyncCompleted(true)
             }
         }
     }

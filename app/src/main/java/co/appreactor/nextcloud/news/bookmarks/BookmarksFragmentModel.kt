@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.appreactor.nextcloud.news.feeds.FeedsRepository
 import co.appreactor.nextcloud.news.common.Preferences
+import co.appreactor.nextcloud.news.common.cropFeedImages
+import co.appreactor.nextcloud.news.common.showFeedImages
 import co.appreactor.nextcloud.news.db.Feed
 import co.appreactor.nextcloud.news.db.FeedItem
 import co.appreactor.nextcloud.news.feeditems.*
@@ -48,15 +50,9 @@ class BookmarksFragmentModel(
 
     suspend fun getFeedItem(id: Long) = feedItemsRepository.byId(id).first()
 
-    private suspend fun getShowFeedImages() = prefs.getBoolean(
-        key = Preferences.SHOW_FEED_IMAGES,
-        default = true
-    )
+    private suspend fun getShowFeedImages() = prefs.showFeedImages()
 
-    private suspend fun getCropFeedImages() = prefs.getBoolean(
-        key = Preferences.CROP_FEED_IMAGES,
-        default = true
-    )
+    private suspend fun getCropFeedImages() = prefs.cropFeedImages()
 
     private fun FeedItem.toRow(feed: Feed?, showFeedImages: Boolean, cropFeedImages: Boolean): FeedItemsAdapterItem {
         val dateString = DateFormat.getDateInstance().format(Date(pubDate * 1000))

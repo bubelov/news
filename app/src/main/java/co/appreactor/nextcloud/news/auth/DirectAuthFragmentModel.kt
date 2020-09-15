@@ -3,6 +3,9 @@ package co.appreactor.nextcloud.news.auth
 import androidx.lifecycle.ViewModel
 import co.appreactor.nextcloud.news.api.DirectApiBuilder
 import co.appreactor.nextcloud.news.common.Preferences
+import co.appreactor.nextcloud.news.common.setServerPassword
+import co.appreactor.nextcloud.news.common.setServerUrl
+import co.appreactor.nextcloud.news.common.setServerUsername
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -39,8 +42,8 @@ class DirectAuthFragmentModel(
         username: String,
         password: String
     ) {
-        prefs.putString(Preferences.SERVER_URL, serverUrl)
-        prefs.putString(Preferences.SERVER_USERNAME, username)
-        prefs.putString(Preferences.SERVER_PASSWORD, password)
+        prefs.setServerUrl(serverUrl)
+        prefs.setServerUsername(username)
+        prefs.setServerPassword(password)
     }
 }
