@@ -10,8 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.LinearSmoothScroller
-import androidx.recyclerview.widget.RecyclerView.SmoothScroller
+import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.nextcloud.news.R
 import co.appreactor.nextcloud.news.common.showDialog
 import co.appreactor.nextcloud.news.podcasts.playPodcast
@@ -58,9 +57,15 @@ class FeedItemsFragment : Fragment() {
                 }
             }
         }
-    )
-
-    private var forceScrollToTop = false
+    ).apply {
+        registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                if (positionStart == 0) {
+                    (listView.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(0, 0)
+                }
+            }
+        })
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -80,10 +85,8 @@ class FeedItemsFragment : Fragment() {
         swipeRefresh.setOnRefreshListener {
             lifecycleScope.launch {
                 runCatching {
-                    forceScrollToTop = true
                     model.performFullSync()
                 }.onFailure {
-                    forceScrollToTop = false
                     Timber.e(it)
                     showDialog(R.string.error, it.message ?: "")
                 }
@@ -160,20 +163,7 @@ class FeedItemsFragment : Fragment() {
 
                 empty.isVisible = feedItems.isEmpty() && model.isInitialSyncCompleted()
 
-                adapter.submitList(feedItems) {
-                    if (forceScrollToTop) {
-                        forceScrollToTop = false
-
-                        val smoothScroller: SmoothScroller = object : LinearSmoothScroller(context) {
-                            override fun getVerticalSnapPreference(): Int {
-                                return SNAP_TO_START
-                            }
-                        }
-
-                        smoothScroller.targetPosition = 0
-                        listView.layoutManager?.startSmoothScroll(smoothScroller)
-                    }
-                }
+                adapter.submitList(feedItems)
             }
     }
 }
