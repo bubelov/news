@@ -12,9 +12,9 @@ class FeedsFragmentModel(
         feedsRepository.create(url)
 
         newsApiSync.sync(
-            syncNewsFlags = false,
+            syncFeedItemsFlags = false,
             syncFeeds = true,
-            fetchNewAndUpdatedNews = true
+            fetchNewAndUpdatedFeedItems = true
         )
     }
 

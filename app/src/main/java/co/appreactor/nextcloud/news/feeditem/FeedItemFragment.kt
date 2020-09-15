@@ -62,7 +62,7 @@ class FeedItemFragment : Fragment() {
                 launch {
                     runCatching {
                         model.syncFeedItemsFlags()
-                    }.getOrElse {
+                    }.onFailure {
                         Timber.e(it)
 
                         Toast.makeText(

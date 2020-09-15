@@ -58,7 +58,7 @@ class FeedItemsRepository(
         db.deleteByFeedId(feedId)
     }
 
-    suspend fun performInitialSyncIfNoData() = withContext(Dispatchers.IO) {
+    suspend fun syncUnreadAndStarredFeedItems() = withContext(Dispatchers.IO) {
         val count = db.selectCount().executeAsOne()
 
         if (count > 0) {

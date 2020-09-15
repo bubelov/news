@@ -43,7 +43,5 @@ class FeedItemFragmentModel(
         feedItemsRepository.updateStarred(id, !item.starred)
     }
 
-    suspend fun syncFeedItemsFlags() {
-        databaseSyncManager.syncNewsFlagsOnly()
-    }
+    suspend fun syncFeedItemsFlags() = databaseSyncManager.syncFeedItemsFlags()
 }

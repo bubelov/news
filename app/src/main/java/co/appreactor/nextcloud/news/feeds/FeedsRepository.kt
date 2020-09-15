@@ -56,13 +56,7 @@ class FeedsRepository(
         db.deleteAll()
     }
 
-    suspend fun reloadFromApiIfNoData() = withContext(Dispatchers.IO) {
-        if (db.selectCount().executeAsOne() == 0L) {
-            reloadFromApi()
-        }
-    }
-
-    suspend fun reloadFromApi() = withContext(Dispatchers.IO) {
+    suspend fun syncFeeds() = withContext(Dispatchers.IO) {
         val cachedFeeds = all().first().sortedBy { it.id }
         val newFeeds = api.getFeeds().execute().body()!!.feeds.sortedBy { it.id }
 

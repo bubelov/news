@@ -4,8 +4,10 @@ import co.appreactor.nextcloud.news.feeds.FeedsRepository
 import co.appreactor.nextcloud.news.feeditems.FeedItemsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 
 class NewsApiSync(
     private val feedItemsRepository: FeedItemsRepository,
@@ -13,49 +15,52 @@ class NewsApiSync(
     private val prefs: Preferences,
 ) {
 
-    suspend fun performInitialSyncIfNoData() {
-        runCatching {
-            withContext(Dispatchers.IO) {
-                val feedsSync = async { feedsRepository.reloadFromApiIfNoData() }
-                val feedItemsSync = async { feedItemsRepository.performInitialSyncIfNoData() }
+    private val mutex = Mutex()
+
+    suspend fun performInitialSyncIfNotDone() {
+        withContext(Dispatchers.IO) {
+            mutex.withLock {
+                val initialSyncCompleted = prefs.getBoolean(Preferences.INITIAL_SYNC_COMPLETED, false).first()
+
+                if (initialSyncCompleted) {
+                    return@withLock
+                }
+
+                val feedsSync = async { feedsRepository.syncFeeds() }
+                val feedItemsSync = async { feedItemsRepository.syncUnreadAndStarredFeedItems() }
 
                 feedsSync.await()
                 feedItemsSync.await()
-            }
 
-            prefs.putBoolean(Preferences.INITIAL_SYNC_COMPLETED, true)
-        }.onFailure {
-            Timber.e(it)
+                prefs.putBoolean(Preferences.INITIAL_SYNC_COMPLETED, true)
+            }
         }
     }
 
-    suspend fun syncNewsFlagsOnly() = sync(
-        syncNewsFlags = true,
+    suspend fun syncFeedItemsFlags() = sync(
         syncFeeds = false,
-        fetchNewAndUpdatedNews = false
+        syncFeedItemsFlags = true,
+        fetchNewAndUpdatedFeedItems = false,
     )
 
     suspend fun sync(
-        syncNewsFlags: Boolean = true,
         syncFeeds: Boolean = true,
-        fetchNewAndUpdatedNews: Boolean = true
+        syncFeedItemsFlags: Boolean = true,
+        fetchNewAndUpdatedFeedItems: Boolean = true,
     ) {
-        runCatching {
-            if (syncNewsFlags) {
+        mutex.withLock {
+            if (syncFeedItemsFlags) {
                 feedItemsRepository.syncUnreadFlags()
                 feedItemsRepository.syncStarredFlags()
             }
 
             if (syncFeeds) {
-                feedsRepository.reloadFromApi()
+                feedsRepository.syncFeeds()
             }
 
-            if (fetchNewAndUpdatedNews) {
+            if (fetchNewAndUpdatedFeedItems) {
                 feedItemsRepository.fetchNewAndUpdatedItems()
             }
-        }.onFailure {
-            Timber.e(it)
-            throw it
         }
     }
 }

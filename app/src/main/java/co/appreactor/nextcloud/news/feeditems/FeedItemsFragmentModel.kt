@@ -52,7 +52,7 @@ class FeedItemsFragmentModel(
     }
 
     suspend fun performInitialSyncIfNoData() {
-        newsApiSync.performInitialSyncIfNoData()
+        newsApiSync.performInitialSyncIfNotDone()
     }
 
     suspend fun performFullSync() {
