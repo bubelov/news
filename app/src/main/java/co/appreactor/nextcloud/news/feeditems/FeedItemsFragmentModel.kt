@@ -70,11 +70,13 @@ class FeedItemsFragmentModel(
 
     suspend fun markAsRead(feedItemId: Long) {
         feedItemsRepository.updateUnread(feedItemId, false)
+        newsApiSync.syncFeedItemsFlags()
     }
 
     suspend fun markAsReadAndStarred(feedItemId: Long) = withContext(Dispatchers.IO) {
         feedItemsRepository.updateUnread(feedItemId, false)
         feedItemsRepository.updateStarred(feedItemId, true)
+        newsApiSync.syncFeedItemsFlags()
     }
 
     private suspend fun getShowReadNews() = prefs.showReadNews()

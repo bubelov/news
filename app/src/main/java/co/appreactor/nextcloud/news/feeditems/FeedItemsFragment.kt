@@ -132,13 +132,23 @@ class FeedItemsFragment : Fragment() {
 
                 if (direction == ItemTouchHelper.LEFT) {
                     lifecycleScope.launchWhenResumed {
-                        model.markAsRead(feedItem.id)
+                        runCatching {
+                            model.markAsRead(feedItem.id)
+                        }.onFailure {
+                            Timber.e(it)
+                        }
+
                     }
                 }
 
                 if (direction == ItemTouchHelper.RIGHT) {
                     lifecycleScope.launchWhenResumed {
-                        model.markAsReadAndStarred(feedItem.id)
+                        runCatching {
+                            model.markAsReadAndStarred(feedItem.id)
+                        }.onFailure {
+                            Timber.e(it)
+                        }
+
                     }
                 }
             }
