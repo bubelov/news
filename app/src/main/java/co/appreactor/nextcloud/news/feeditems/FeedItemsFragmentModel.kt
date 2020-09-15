@@ -9,8 +9,10 @@ import co.appreactor.nextcloud.news.db.FeedItem
 import co.appreactor.nextcloud.news.opengraph.OpenGraphImagesRepository
 import co.appreactor.nextcloud.news.podcasts.PodcastDownloadsRepository
 import co.appreactor.nextcloud.news.podcasts.isPodcast
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.DateFormat
 import java.util.*
 
@@ -65,6 +67,15 @@ class FeedItemsFragmentModel(
     }
 
     suspend fun getFeedItem(id: Long) = feedItemsRepository.byId(id).first()
+
+    suspend fun markAsRead(feedItemId: Long) {
+        feedItemsRepository.updateUnread(feedItemId, false)
+    }
+
+    suspend fun markAsReadAndStarred(feedItemId: Long) = withContext(Dispatchers.IO) {
+        feedItemsRepository.updateUnread(feedItemId, false)
+        feedItemsRepository.updateStarred(feedItemId, true)
+    }
 
     private suspend fun getShowReadNews() = prefs.showReadNews()
 

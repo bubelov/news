@@ -9,6 +9,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.nextcloud.news.R
@@ -112,6 +113,38 @@ class FeedItemsFragment : Fragment() {
         listView.layoutManager = LinearLayoutManager(context)
         listView.adapter = adapter
         listView.addItemDecoration(FeedItemsAdapterDecoration(resources.getDimensionPixelSize(R.dimen.feed_items_cards_gap)))
+
+        val touchHelper = ItemTouchHelper(object : ItemTouchHelper.Callback() {
+            override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
+                return makeMovementFlags(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT)
+            }
+
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                return false
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val feedItem = adapter.currentList[viewHolder.bindingAdapterPosition]
+
+                if (direction == ItemTouchHelper.LEFT) {
+                    lifecycleScope.launchWhenResumed {
+                        model.markAsRead(feedItem.id)
+                    }
+                }
+
+                if (direction == ItemTouchHelper.RIGHT) {
+                    lifecycleScope.launchWhenResumed {
+                        model.markAsReadAndStarred(feedItem.id)
+                    }
+                }
+            }
+        })
+
+        touchHelper.attachToRecyclerView(listView)
 
         val displayMetrics = DisplayMetrics()
         requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
