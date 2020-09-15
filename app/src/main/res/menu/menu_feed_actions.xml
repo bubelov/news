@@ -9,12 +9,17 @@
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/openFeed"
+        android:id="@+id/openFeedXml"
         android:title="@string/open_feed"
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/delete"
+        android:id="@+id/renameFeed"
+        android:title="@string/rename"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/deleteFeed"
         android:title="@string/delete"
         app:showAsAction="ifRoom" />
 

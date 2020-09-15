@@ -53,7 +53,7 @@ class FeedItemFragment : Fragment() {
 
         progress.isVisible = true
 
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenResumed {
             val item = model.getFeedItem(args.newsItemId)!!
 
             if (item.unread) {

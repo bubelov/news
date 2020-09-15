@@ -3,12 +3,13 @@ package co.appreactor.nextcloud.news.feeds
 import co.appreactor.nextcloud.news.api.FeedJson
 import co.appreactor.nextcloud.news.api.NewsApi
 import co.appreactor.nextcloud.news.api.PostFeedArgs
+import co.appreactor.nextcloud.news.api.PutFeedRenameArgs
 import co.appreactor.nextcloud.news.db.Feed
 import co.appreactor.nextcloud.news.db.FeedQueries
 import co.appreactor.nextcloud.news.feeditems.FeedItemsRepository
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
-import com.squareup.sqldelight.runtime.coroutines.mapToOneNotNull
+import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -36,7 +37,21 @@ class FeedsRepository(
     }
 
     suspend fun byId(id: Long) = withContext(Dispatchers.IO) {
-        db.selectById(id).asFlow().mapToOneNotNull()
+        db.selectById(id).asFlow().mapToOneOrNull()
+    }
+
+    suspend fun renameFeed(feedId: Long, newTitle: String) = withContext(Dispatchers.IO) {
+        val response = api.putFeedRename(feedId, PutFeedRenameArgs(newTitle)).execute()
+
+        if (response.isSuccessful) {
+            val feed = byId(feedId).first()
+
+            if (feed != null) {
+                db.insertOrReplace(feed.copy(title = newTitle))
+            }
+        } else {
+            throw Exception("HTTPS request failed with error code ${response.code()}")
+        }
     }
 
     suspend fun deleteById(id: Long) = withContext(Dispatchers.IO) {

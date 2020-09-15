@@ -42,7 +42,7 @@
     <string name="bookmarks">Bookmarks</string>
     <string name="delete_all">Delete all</string>
     <string name="cannot_sync_bookmarks">Cannot sync bookmarks</string>
-    <string name="open_feed">Open feed</string>
+    <string name="open_feed">Open XML</string>
     <string name="open_website">Open website</string>
     <string name="actions">Actions</string>
     <string name="delete">Delete</string>
@@ -52,4 +52,6 @@
     <string name="add">Add</string>
     <string name="show_feed_images">Show preview images</string>
     <string name="view_exceptions">View exceptions</string>
+    <string name="rename">Rename</string>
+    <string name="feed_title">Feed title</string>
 </resources>

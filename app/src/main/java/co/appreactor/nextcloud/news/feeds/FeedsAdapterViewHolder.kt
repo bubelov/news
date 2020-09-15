@@ -35,15 +35,19 @@ class FeedsAdapterViewHolder(
                 popup.setOnMenuItemClickListener {
                     when (it.itemId) {
                         R.id.openWebsite -> {
-                            callback.onOpenWebsiteClick(item)
+                            callback.onOpenFeedWebsiteClick(item)
                         }
 
-                        R.id.openFeed -> {
-                            callback.onOpenFeedClick(item)
+                        R.id.openFeedXml -> {
+                            callback.onOpenFeedXmlClick(item)
                         }
 
-                        R.id.delete -> {
-                            callback.onDeleteClick(item)
+                        R.id.renameFeed -> {
+                            callback.onRenameFeedClick(item)
+                        }
+
+                        R.id.deleteFeed -> {
+                            callback.onDeleteFeedClick(item)
                         }
                     }
 

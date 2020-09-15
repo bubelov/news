@@ -1,6 +1,7 @@
 package co.appreactor.nextcloud.news.logging
 
 import co.appreactor.nextcloud.news.db.LoggedException
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
@@ -15,7 +16,7 @@ class PersistentLogTree(
 ) : Timber.Tree() {
 
     override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-        if (t != null) {
+        if (t != null && t !is CancellationException) {
             val sw = StringWriter()
             val pw = PrintWriter(sw)
             t.printStackTrace(pw)

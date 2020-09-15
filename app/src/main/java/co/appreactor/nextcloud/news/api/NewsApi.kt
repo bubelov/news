@@ -12,6 +12,12 @@ interface NewsApi {
     @GET("feeds")
     fun getFeeds(): Call<FeedsPayload>
 
+    @PUT("feeds/{id}/rename")
+    fun putFeedRename(
+        @Path("id") id: Long,
+        @Body args: PutFeedRenameArgs
+    ): Call<List<Long>>
+
     @DELETE("feeds/{id}")
     fun deleteFeed(@Path("id") id: Long): Call<List<Long>>
 
