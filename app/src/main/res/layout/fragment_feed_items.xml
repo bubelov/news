@@ -11,7 +11,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingStart="20dp"
-        app:menu="@menu/menu_news"
         android:paddingEnd="20dp"
         app:layout_constraintTop_toTopOf="parent"
         app:title="@string/news" />

@@ -46,18 +46,6 @@ class FeedItemsFragmentModel(
         }
     }
 
-    suspend fun getShowReadNews() = prefs.getBoolean(
-        key = Preferences.SHOW_READ_NEWS,
-        default = true
-    )
-
-    suspend fun setShowReadNews(show: Boolean) {
-        prefs.putBoolean(
-            key = Preferences.SHOW_READ_NEWS,
-            value = show
-        )
-    }
-
     suspend fun performInitialSyncIfNoData() {
         newsApiSync.performInitialSyncIfNoData()
     }
@@ -76,6 +64,11 @@ class FeedItemsFragmentModel(
     }
 
     suspend fun getFeedItem(id: Long) = feedItemsRepository.byId(id).first()
+
+    private suspend fun getShowReadNews() = prefs.getBoolean(
+        key = Preferences.SHOW_READ_NEWS,
+        default = true
+    )
 
     private suspend fun getShowFeedImages() = prefs.getBoolean(
         key = Preferences.SHOW_FEED_IMAGES,

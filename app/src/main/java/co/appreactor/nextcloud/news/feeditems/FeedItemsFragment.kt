@@ -18,7 +18,6 @@ import kotlinx.android.synthetic.main.fragment_feed_items.*
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.conflate
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
 import timber.log.Timber
@@ -80,8 +79,6 @@ class FeedItemsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        initToolbar()
-
         swipeRefresh.setOnRefreshListener {
             lifecycleScope.launch {
                 runCatching {
@@ -97,34 +94,6 @@ class FeedItemsFragment : Fragment() {
 
         lifecycleScope.launchWhenResumed {
             showFeedItems()
-        }
-    }
-
-    private fun initToolbar() {
-        toolbar.setOnMenuItemClickListener {
-            if (it.itemId == R.id.showReadNews) {
-                lifecycleScope.launch {
-                    model.setShowReadNews(!model.getShowReadNews().first())
-                }
-
-                return@setOnMenuItemClickListener true
-            }
-
-            false
-        }
-
-        lifecycleScope.launchWhenResumed {
-            model.getShowReadNews().collect { show ->
-                val item = toolbar.menu.findItem(R.id.showReadNews)
-
-                if (show) {
-                    item.setIcon(R.drawable.ic_baseline_visibility_24)
-                    item.setTitle(R.string.hide_read_news)
-                } else {
-                    item.setIcon(R.drawable.ic_baseline_visibility_off_24)
-                    item.setTitle(R.string.show_read_news)
-                }
-            }
         }
     }
 
