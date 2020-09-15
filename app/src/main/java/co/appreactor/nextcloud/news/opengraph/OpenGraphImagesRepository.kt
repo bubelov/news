@@ -3,9 +3,12 @@ package co.appreactor.nextcloud.news.opengraph
 import co.appreactor.nextcloud.news.db.FeedItem
 import co.appreactor.nextcloud.news.db.OpenGraphImage
 import co.appreactor.nextcloud.news.db.OpenGraphImageQueries
+import com.squareup.picasso.Picasso
 import com.squareup.sqldelight.runtime.coroutines.asFlow
+import com.squareup.sqldelight.runtime.coroutines.mapToList
+import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -26,9 +29,19 @@ class OpenGraphImagesRepository(
         .callTimeout(10, TimeUnit.SECONDS)
         .build()
 
-    suspend fun getImageUrl(feedItem: FeedItem) = withContext(Dispatchers.IO) {
+    suspend fun warmUpMemoryCache() = withContext(Dispatchers.IO) {
+        db.selectAll().asFlow().mapToList().collect { images ->
+            images.forEach {
+                if (it.url.isNotBlank()) {
+                    Picasso.get().load(it.url).resize(1080, 0).onlyScaleDown().fetch()
+                }
+            }
+        }
+    }
+
+    suspend fun getImage(feedItem: FeedItem) = withContext(Dispatchers.IO) {
         parse(feedItem)
-        db.selectByFeedItemId(feedItem.id).asFlow().map { it.executeAsOneOrNull()?.url ?: "" }
+        db.selectByFeedItemId(feedItem.id).asFlow().mapToOneOrNull()
     }
 
     private suspend fun parse(feedItem: FeedItem) {
@@ -42,12 +55,14 @@ class OpenGraphImagesRepository(
             val image = OpenGraphImage(
                 feedItemId = feedItem.id,
                 status = STATUS_PROCESSING,
-                url = ""
+                url = "",
+                width = 0,
+                height = 0
             )
 
             db.insertOrReplace(image)
 
-            if (feedItem.url.isNullOrBlank() || feedItem.url.startsWith("http://")) {
+            if (feedItem.url.isBlank() || feedItem.url.startsWith("http://")) {
                 db.insertOrReplace(image.copy(status = STATUS_PROCESSED))
                 return@withContext
             }
@@ -84,10 +99,20 @@ class OpenGraphImagesRepository(
                 return@withContext
             }
 
+            val bitmap = kotlin.runCatching {
+                Picasso.get().load(imageUrl).resize(1080, 0).onlyScaleDown().get()
+            }.getOrElse { e ->
+                e.log("Cannot download image by url $image")
+                db.insertOrReplace(image.copy(status = STATUS_PROCESSED))
+                return@withContext
+            }
+
             db.insertOrReplace(
                 image.copy(
                     status = STATUS_PROCESSED,
                     url = imageUrl,
+                    width = bitmap.width.toLong(),
+                    height = bitmap.height.toLong()
                 )
             )
         }

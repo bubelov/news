@@ -1,5 +1,6 @@
 package co.appreactor.nextcloud.news.feeditems
 
+import co.appreactor.nextcloud.news.db.OpenGraphImage
 import kotlinx.coroutines.flow.Flow
 
 data class FeedItemsAdapterItem(
@@ -9,7 +10,7 @@ data class FeedItemsAdapterItem(
     val unread: Boolean,
     val podcast: Boolean,
     val podcastDownloadPercent: Flow<Long?>,
-    val imageUrl: Flow<String>,
+    val image: Flow<OpenGraphImage?>,
     val showImage: Boolean,
     val cropImage: Boolean,
     val summary: Flow<String>,

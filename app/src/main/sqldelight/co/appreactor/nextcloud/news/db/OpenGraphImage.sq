@@ -1,13 +1,19 @@
 CREATE TABLE OpenGraphImage (
   feedItemId INTEGER PRIMARY KEY,
   status TEXT NOT NULL,
-  url TEXT NOT NULL
+  url TEXT NOT NULL,
+  width INTEGER NOT NULL,
+  height INTEGER NOT NULL
 );
 
 insertOrReplace:
 INSERT OR REPLACE
 INTO OpenGraphImage
 VALUES ?;
+
+selectAll:
+SELECT *
+FROM OpenGraphImage;
 
 selectByFeedItemId:
 SELECT *

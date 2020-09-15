@@ -1,6 +1,7 @@
 package co.appreactor.nextcloud.news.bookmarks
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import co.appreactor.nextcloud.news.feeds.FeedsRepository
 import co.appreactor.nextcloud.news.common.Preferences
 import co.appreactor.nextcloud.news.db.Feed
@@ -10,6 +11,7 @@ import co.appreactor.nextcloud.news.opengraph.OpenGraphImagesRepository
 import co.appreactor.nextcloud.news.podcasts.PodcastDownloadsRepository
 import co.appreactor.nextcloud.news.podcasts.isPodcast
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.*
 
@@ -21,6 +23,12 @@ class BookmarksFragmentModel(
     private val podcastsRepository: PodcastDownloadsRepository,
     private val prefs: Preferences,
 ) : ViewModel() {
+
+    init {
+        viewModelScope.launch {
+            openGraphImagesRepository.warmUpMemoryCache()
+        }
+    }
 
     suspend fun getBookmarks() = combine(
         feedsRepository.all(),
@@ -64,8 +72,8 @@ class BookmarksFragmentModel(
                     emit(it)
                 }
             },
-            imageUrl = flow {
-                openGraphImagesRepository.getImageUrl(this@toRow).collect {
+            image = flow {
+                openGraphImagesRepository.getImage(this@toRow).collect {
                     emit(it)
                 }
             },

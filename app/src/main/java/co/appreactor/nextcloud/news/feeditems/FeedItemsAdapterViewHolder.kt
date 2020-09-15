@@ -7,6 +7,7 @@ import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.nextcloud.news.R
 import com.squareup.picasso.Callback
+import com.squareup.picasso.NetworkPolicy
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.list_item_feed_item.view.*
 import kotlinx.coroutines.flow.collect
@@ -32,22 +33,48 @@ class FeedItemsAdapterViewHolder(
 
             if (item.showImage) {
                 scope.launchWhenResumed {
-                    item.imageUrl.collect { imageUrl ->
-                        if (imageView.tag != item) {
+                    item.image.collect { image ->
+
+                        if (image == null || imageView.tag != item) {
                             return@collect
                         }
 
                         Picasso.get().load(null as String?).into(imageView)
                         imageView.isVisible = false
 
-                        if (imageUrl.isNotBlank()) {
+                        if (image.url.isNotBlank() && image.width != 0L && image.height != 0L) {
                             imageView.isVisible = true
                             imageProgress.isVisible = true
+
+                            val targetHeight =
+                                ((screenWidth - cardMargin) * (image.height.toDouble() / image.width.toDouble()))
+
+                            if (item.cropImage) {
+                                var croppedHeight = targetHeight.toInt()
+
+                                if (croppedHeight < cardHeightMin) {
+                                    croppedHeight = cardHeightMin
+                                }
+
+                                if (croppedHeight > cardHeightMax) {
+                                    croppedHeight = cardHeightMax
+                                }
+
+                                if (imageView.height != croppedHeight) {
+                                    imageView.layoutParams.height = croppedHeight
+                                }
+                            } else {
+                                if (imageView.height != targetHeight.toInt()) {
+                                    imageView.layoutParams.height = targetHeight.toInt()
+                                }
+                            }
                         }
 
                         Picasso.get()
-                            .load(if (imageUrl.isBlank()) null else imageUrl)
+                            .load(if (image.url.isBlank()) null else image.url)
+                            .networkPolicy(NetworkPolicy.OFFLINE)
                             .resize(screenWidth - cardMargin, 0)
+                            .onlyScaleDown()
                             .into(imageView, object : Callback {
                                 override fun onSuccess() {
                                     imageProgress.isVisible = false
@@ -61,29 +88,6 @@ class FeedItemsAdapterViewHolder(
                                     }
 
                                     imageProgress.isVisible = false
-
-                                    val targetHeight =
-                                        ((screenWidth - cardMargin) * (drawable.intrinsicHeight.toDouble() / drawable.intrinsicWidth.toDouble()))
-
-                                    if (item.cropImage) {
-                                        var croppedHeight = targetHeight.toInt()
-
-                                        if (croppedHeight < cardHeightMin) {
-                                            croppedHeight = cardHeightMin
-                                        }
-
-                                        if (croppedHeight > cardHeightMax) {
-                                            croppedHeight = cardHeightMax
-                                        }
-
-                                        if (imageView.height != croppedHeight) {
-                                            imageView.layoutParams.height = croppedHeight
-                                        }
-                                    } else {
-                                        if (imageView.height != targetHeight.toInt()) {
-                                            imageView.layoutParams.height = targetHeight.toInt()
-                                        }
-                                    }
                                 }
 
                                 override fun onError(e: Exception) {

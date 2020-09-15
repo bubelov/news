@@ -30,6 +30,10 @@ class FeedItemsFragmentModel(
             podcastsRepository.deleteCompletedDownloadsWithoutFiles()
             podcastsRepository.deletePartialDownloads()
         }
+
+        viewModelScope.launch {
+            openGraphImagesRepository.warmUpMemoryCache()
+        }
     }
 
     suspend fun getFeedItems() = combine(
@@ -95,8 +99,8 @@ class FeedItemsFragmentModel(
                     emit(it)
                 }
             },
-            imageUrl = flow {
-                openGraphImagesRepository.getImageUrl(this@toRow).collect {
+            image = flow {
+                openGraphImagesRepository.getImage(this@toRow).collect {
                     emit(it)
                 }
             },
