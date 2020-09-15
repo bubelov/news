@@ -33,7 +33,7 @@ class SettingsFragmentModel(
 
     suspend fun getShowFeedImages() = prefs.getBoolean(
         key = Preferences.SHOW_FEED_IMAGES,
-        default = true
+        default = false
     )
 
     suspend fun setShowFeedImages(crop: Boolean) {
