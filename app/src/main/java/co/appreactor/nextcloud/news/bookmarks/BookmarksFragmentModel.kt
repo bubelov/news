@@ -5,9 +5,7 @@ import co.appreactor.nextcloud.news.feeds.FeedsRepository
 import co.appreactor.nextcloud.news.common.Preferences
 import co.appreactor.nextcloud.news.db.Feed
 import co.appreactor.nextcloud.news.db.FeedItem
-import co.appreactor.nextcloud.news.feeditems.FeedItemsAdapterItem
-import co.appreactor.nextcloud.news.feeditems.FeedItemsRepository
-import co.appreactor.nextcloud.news.feeditems.getSummary
+import co.appreactor.nextcloud.news.feeditems.*
 import co.appreactor.nextcloud.news.opengraph.OpenGraphImagesRepository
 import co.appreactor.nextcloud.news.podcasts.PodcastDownloadsRepository
 import co.appreactor.nextcloud.news.podcasts.isPodcast
@@ -18,6 +16,7 @@ import java.util.*
 class BookmarksFragmentModel(
     private val feedsRepository: FeedsRepository,
     private val feedItemsRepository: FeedItemsRepository,
+    private val feedItemsSummariesRepository: FeedItemsSummariesRepository,
     private val openGraphImagesRepository: OpenGraphImagesRepository,
     private val podcastsRepository: PodcastDownloadsRepository,
     private val prefs: Preferences,
@@ -72,7 +71,8 @@ class BookmarksFragmentModel(
             },
             showImage = showFeedImages,
             cropImage = cropFeedImages,
-            summary = flow { emit(getSummary()) },
+            summary = flow { emit(feedItemsSummariesRepository.getSummary(this@toRow)) },
+            cachedSummary = feedItemsSummariesRepository.getCachedSummary(this.id)
         )
     }
 }

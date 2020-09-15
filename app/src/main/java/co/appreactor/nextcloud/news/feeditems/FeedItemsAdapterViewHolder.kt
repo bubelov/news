@@ -98,14 +98,20 @@ class FeedItemsAdapterViewHolder(
             primaryText.text = item.title
             secondaryText.text = item.subtitle
 
-            supportingText.isVisible = false
             supportingText.tag = item
 
-            scope.launchWhenResumed {
-                item.summary.collect { summary ->
-                    if (supportingText.tag == item && summary.isNotBlank()) {
-                        supportingText.isVisible = true
-                        supportingText.text = summary
+            if (item.cachedSummary != null) {
+                supportingText.isVisible = true
+                supportingText.text = item.cachedSummary
+            } else {
+                supportingText.isVisible = false
+
+                scope.launchWhenResumed {
+                    item.summary.collect { summary ->
+                        if (supportingText.tag == item && summary.isNotBlank()) {
+                            supportingText.isVisible = true
+                            supportingText.text = summary
+                        }
                     }
                 }
             }

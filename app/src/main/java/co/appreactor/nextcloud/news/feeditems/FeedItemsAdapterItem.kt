@@ -13,4 +13,5 @@ data class FeedItemsAdapterItem(
     val showImage: Boolean,
     val cropImage: Boolean,
     val summary: Flow<String>,
+    val cachedSummary: String?
 )

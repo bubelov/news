@@ -18,6 +18,7 @@ import java.util.*
 class FeedItemsFragmentModel(
     private val feedsRepository: FeedsRepository,
     private val feedItemsRepository: FeedItemsRepository,
+    private val feedItemsSummariesRepository: FeedItemsSummariesRepository,
     private val openGraphImagesRepository: OpenGraphImagesRepository,
     private val podcastsRepository: PodcastDownloadsRepository,
     private val newsApiSync: NewsApiSync,
@@ -101,7 +102,8 @@ class FeedItemsFragmentModel(
             },
             showImage = showFeedImages,
             cropImage = cropFeedImages,
-            summary = flow { emit(getSummary()) },
+            summary = flow { emit(feedItemsSummariesRepository.getSummary(this@toRow)) },
+            cachedSummary = feedItemsSummariesRepository.getCachedSummary(this.id)
         )
     }
 }

@@ -15,6 +15,7 @@ import co.appreactor.nextcloud.news.opengraph.OpenGraphImagesRepository
 import co.appreactor.nextcloud.news.podcasts.PodcastDownloadsRepository
 import co.appreactor.nextcloud.news.settings.SettingsFragmentModel
 import co.appreactor.nextcloud.news.bookmarks.BookmarksFragmentModel
+import co.appreactor.nextcloud.news.feeditems.FeedItemsSummariesRepository
 import co.appreactor.nextcloud.news.feeds.FeedsFragmentModel
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
@@ -34,8 +35,9 @@ val appModule = module {
 
     single<NewsApiSync>()
 
-    single<FeedItemsRepository>()
     single<FeedsRepository>()
+    single<FeedItemsRepository>()
+    single<FeedItemsSummariesRepository>()
     single<OpenGraphImagesRepository>()
     single<PodcastDownloadsRepository>()
     single<Preferences>()
