@@ -21,7 +21,7 @@ class SettingsFragmentModel(
 
     suspend fun getShowReadNews() = prefs.getBoolean(
         key = Preferences.SHOW_READ_NEWS,
-        default = true
+        default = false
     )
 
     suspend fun setShowReadNews(show: Boolean) {

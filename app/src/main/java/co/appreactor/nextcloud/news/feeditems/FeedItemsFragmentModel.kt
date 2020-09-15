@@ -67,12 +67,12 @@ class FeedItemsFragmentModel(
 
     private suspend fun getShowReadNews() = prefs.getBoolean(
         key = Preferences.SHOW_READ_NEWS,
-        default = true
+        default = false
     )
 
     private suspend fun getShowFeedImages() = prefs.getBoolean(
         key = Preferences.SHOW_FEED_IMAGES,
-        default = true
+        default = false
     )
 
     private suspend fun getCropFeedImages() = prefs.getBoolean(
