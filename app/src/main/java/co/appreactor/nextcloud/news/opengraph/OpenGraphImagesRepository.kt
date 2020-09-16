@@ -21,8 +21,8 @@ class OpenGraphImagesRepository(
 ) {
 
     companion object {
-        private const val STATUS_PROCESSING = "processing"
-        private const val STATUS_PROCESSED = "processed"
+        const val STATUS_PROCESSING = "processing"
+        const val STATUS_PROCESSED = "processed"
     }
 
     private val httpClient = OkHttpClient.Builder()
@@ -40,11 +40,10 @@ class OpenGraphImagesRepository(
     }
 
     suspend fun getImage(feedItem: FeedItem) = withContext(Dispatchers.IO) {
-        parse(feedItem)
         db.selectByFeedItemId(feedItem.id).asFlow().mapToOneOrNull()
     }
 
-    private suspend fun parse(feedItem: FeedItem) {
+    suspend fun parse(feedItem: FeedItem) {
         return withContext(Dispatchers.IO) {
             val existingImage = db.selectByFeedItemId(feedItem.id).executeAsOneOrNull()
 

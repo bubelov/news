@@ -85,7 +85,11 @@ class FeedItemsFragmentModel(
 
     private suspend fun getCropFeedImages() = prefs.cropFeedImages()
 
-    private fun FeedItem.toRow(feed: Feed?, showFeedImages: Boolean, cropFeedImages: Boolean): FeedItemsAdapterItem {
+    private suspend fun FeedItem.toRow(
+        feed: Feed?,
+        showFeedImages: Boolean,
+        cropFeedImages: Boolean,
+    ): FeedItemsAdapterItem {
         val dateString = DateFormat.getDateInstance().format(Date(pubDate * 1000))
 
         return FeedItemsAdapterItem(
@@ -104,6 +108,7 @@ class FeedItemsFragmentModel(
                     emit(it)
                 }
             },
+            cachedImage = openGraphImagesRepository.getImage(this).first(),
             showImage = showFeedImages,
             cropImage = cropFeedImages,
             summary = flow { emit(feedItemsSummariesRepository.getSummary(this@toRow)) },

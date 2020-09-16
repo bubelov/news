@@ -54,7 +54,11 @@ class BookmarksFragmentModel(
 
     private suspend fun getCropFeedImages() = prefs.cropFeedImages()
 
-    private fun FeedItem.toRow(feed: Feed?, showFeedImages: Boolean, cropFeedImages: Boolean): FeedItemsAdapterItem {
+    private suspend fun FeedItem.toRow(
+        feed: Feed?,
+        showFeedImages: Boolean,
+        cropFeedImages: Boolean,
+    ): FeedItemsAdapterItem {
         val dateString = DateFormat.getDateInstance().format(Date(pubDate * 1000))
 
         return FeedItemsAdapterItem(
@@ -69,10 +73,13 @@ class BookmarksFragmentModel(
                 }
             },
             image = flow {
+                openGraphImagesRepository.parse(this@toRow)
+
                 openGraphImagesRepository.getImage(this@toRow).collect {
                     emit(it)
                 }
             },
+            cachedImage = openGraphImagesRepository.getImage(this).first(),
             showImage = showFeedImages,
             cropImage = cropFeedImages,
             summary = flow { emit(feedItemsSummariesRepository.getSummary(this@toRow)) },

@@ -11,6 +11,7 @@ data class FeedItemsAdapterItem(
     val podcast: Boolean,
     val podcastDownloadPercent: Flow<Long?>,
     val image: Flow<OpenGraphImage?>,
+    val cachedImage: OpenGraphImage?,
     val showImage: Boolean,
     val cropImage: Boolean,
     val summary: Flow<String>,

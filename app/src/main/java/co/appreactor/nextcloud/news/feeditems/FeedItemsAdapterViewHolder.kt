@@ -5,8 +5,9 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.nextcloud.news.R
+import co.appreactor.nextcloud.news.db.OpenGraphImage
+import co.appreactor.nextcloud.news.opengraph.OpenGraphImagesRepository
 import com.squareup.picasso.Callback
-import com.squareup.picasso.NetworkPolicy
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.list_item_feed_item.view.*
 import kotlinx.coroutines.flow.collect
@@ -31,60 +32,65 @@ class FeedItemsAdapterViewHolder(
             imageView.tag = item
 
             if (item.showImage) {
-                scope.launchWhenResumed {
-                    item.image.collect { image ->
+                val handleImage = fun(image: OpenGraphImage?) {
+                    if (
+                        imageView.tag != item
+                        || image == null
+                        || image.url.isBlank()
+                        || image.width == 0L
+                        || image.height == 0L
+                    ) {
+                        return
+                    }
 
-                        if (image == null || imageView.tag != item) {
-                            return@collect
+                    imageView.isVisible = true
+                    imageProgress.isVisible = true
+
+                    val targetHeight =
+                        ((screenWidth - cardMargin) * (image.height.toDouble() / image.width.toDouble()))
+
+                    if (item.cropImage) {
+                        var croppedHeight = targetHeight.toInt()
+
+                        if (croppedHeight < cardHeightMin) {
+                            croppedHeight = cardHeightMin
                         }
 
-                        Picasso.get().load(null as String?).into(imageView)
-                        imageView.isVisible = false
+                        if (croppedHeight > cardHeightMax) {
+                            croppedHeight = cardHeightMax
+                        }
 
-                        if (image.url.isNotBlank() && image.width != 0L && image.height != 0L) {
-                            imageView.isVisible = true
-                            imageProgress.isVisible = true
+                        if (imageView.height != croppedHeight) {
+                            imageView.layoutParams.height = croppedHeight
+                        }
+                    } else {
+                        if (imageView.height != targetHeight.toInt()) {
+                            imageView.layoutParams.height = targetHeight.toInt()
+                        }
+                    }
 
-                            val targetHeight =
-                                ((screenWidth - cardMargin) * (image.height.toDouble() / image.width.toDouble()))
-
-                            if (item.cropImage) {
-                                var croppedHeight = targetHeight.toInt()
-
-                                if (croppedHeight < cardHeightMin) {
-                                    croppedHeight = cardHeightMin
-                                }
-
-                                if (croppedHeight > cardHeightMax) {
-                                    croppedHeight = cardHeightMax
-                                }
-
-                                if (imageView.height != croppedHeight) {
-                                    imageView.layoutParams.height = croppedHeight
-                                }
-                            } else {
-                                if (imageView.height != targetHeight.toInt()) {
-                                    imageView.layoutParams.height = targetHeight.toInt()
-                                }
+                    Picasso.get()
+                        .load(if (image.url.isBlank()) null else image.url)
+                        .into(imageView, object : Callback {
+                            override fun onSuccess() {
+                                imageProgress.isVisible = false
+                                imageProgress.isVisible = false
                             }
+
+                            override fun onError(e: Exception) {
+                                imageView.isVisible = false
+                                imageProgress.isVisible = false
+                            }
+                        })
+                }
+
+                if (item.cachedImage != null && item.cachedImage.status == OpenGraphImagesRepository.STATUS_PROCESSED) {
+                    handleImage(item.cachedImage)
+                } else {
+                    scope.launchWhenResumed {
+                        item.image.collect {
+                            handleImage(it)
                         }
-
-                        Picasso.get()
-                            .load(if (image.url.isBlank()) null else image.url)
-                            .networkPolicy(NetworkPolicy.OFFLINE)
-                            .resize(screenWidth - cardMargin, 0)
-                            .onlyScaleDown()
-                            .into(imageView, object : Callback {
-                                override fun onSuccess() {
-                                    imageProgress.isVisible = false
-                                    imageProgress.isVisible = false
-                                }
-
-                                override fun onError(e: Exception) {
-                                    imageView.isVisible = false
-                                    imageProgress.isVisible = false
-                                }
-                            })
                     }
                 }
             }
