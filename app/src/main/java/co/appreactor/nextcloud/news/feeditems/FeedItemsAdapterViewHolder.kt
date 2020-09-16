@@ -1,6 +1,5 @@
 package co.appreactor.nextcloud.news.feeditems
 
-import android.graphics.drawable.BitmapDrawable
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleCoroutineScope
@@ -78,15 +77,6 @@ class FeedItemsAdapterViewHolder(
                             .into(imageView, object : Callback {
                                 override fun onSuccess() {
                                     imageProgress.isVisible = false
-
-                                    val drawable = imageView.drawable as BitmapDrawable
-                                    val bitmap = drawable.bitmap
-
-                                    if (bitmap.hasTransparentAngles() || bitmap.looksLikeSingleColor()) {
-                                        imageView.isVisible = false
-                                        return
-                                    }
-
                                     imageProgress.isVisible = false
                                 }
 

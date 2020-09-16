@@ -1,4 +1,4 @@
-package co.appreactor.nextcloud.news.feeditems
+package co.appreactor.nextcloud.news.opengraph
 
 import android.graphics.Bitmap
 import android.graphics.Color

@@ -107,6 +107,11 @@ class OpenGraphImagesRepository(
                 return@withContext
             }
 
+            if (bitmap.hasTransparentAngles() || bitmap.looksLikeSingleColor()) {
+                db.insertOrReplace(image.copy(status = STATUS_PROCESSED))
+                return@withContext
+            }
+
             db.insertOrReplace(
                 image.copy(
                     status = STATUS_PROCESSED,
