@@ -42,7 +42,7 @@ class FeedItemsSummariesRepository {
                     min(parsedBody.length - 1, SUMMARY_MAX_LENGTH)
                 )
 
-                append(untrimmedBeginning.trim())
+                append(untrimmedBeginning.replace("\uFFFC", "").trim())
 
                 if (untrimmedBeginning.length == SUMMARY_MAX_LENGTH) {
                     append("…")
