@@ -11,9 +11,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import timber.log.Timber
-import java.io.BufferedInputStream
-import java.io.FileOutputStream
+import okio.buffer
+import okio.sink
 
 class PodcastDownloadsRepository(
     private val db: PodcastDownloadQueries,
@@ -24,9 +23,12 @@ class PodcastDownloadsRepository(
     private val httpClient = OkHttpClient()
 
     suspend fun getDownloadProgress(feedItemId: Long) = withContext(Dispatchers.IO) {
-        db.selectByFeedItemId(feedItemId).asFlow().map { it.executeAsOneOrNull()?.downloadPercent }
+        db.selectByFeedItemId(feedItemId).asFlow().map {
+            it.executeAsOneOrNull()?.downloadPercent
+        }
     }
 
+    @Suppress("BlockingMethodInNonBlockingContext")
     suspend fun downloadPodcast(feedItemId: Long) = withContext(Dispatchers.IO) {
         val feedItem = feedItemsRepository.byId(feedItemId).first()
 
@@ -66,48 +68,53 @@ class PodcastDownloadsRepository(
 
         val response = httpClient.newCall(request).execute()
 
-        if (response.isSuccessful) {
-            val input = BufferedInputStream(response.body!!.byteStream())
-            val output = FileOutputStream(file)
+        if (!response.isSuccessful) {
+            db.deleteByFeedItemId(feedItemId)
+            return@withContext
+        }
 
-            try {
-                val data = ByteArray(1024)
-                val total = response.body!!.contentLength()
-                var downloaded = 0L
-                var progressPercent: Long
-                var lastReportedProgressPercent = 0L
-                var count: Int
+        val responseBody = response.body
 
-                while (true) {
-                    count = input.read(data)
+        if (responseBody == null) {
+            db.deleteByFeedItemId(feedItemId)
+            return@withContext
+        }
 
-                    if (count == -1) {
-                        break
-                    }
+        runCatching {
+            val bytesInBody = responseBody.contentLength()
 
-                    downloaded += count
-                    output.write(data, 0, count)
+            responseBody.source().use { bufferedSource ->
+                file.sink().buffer().use { bufferedSink ->
+                    var downloadedBytes = 0L
+                    var downloadedPercent: Long
+                    var lastReportedDownloadedPercent = 0L
 
-                    if (downloaded > 0) {
-                        progressPercent = (downloaded.toDouble() / total.toDouble() * 100.0).toLong()
+                    while (true) {
+                        val buffer = bufferedSource.read(bufferedSink.buffer, 1024 * 16)
 
-                        if (progressPercent > lastReportedProgressPercent) {
-                            db.insertOrReplace(podcast.copy(downloadPercent = progressPercent))
-                            lastReportedProgressPercent = progressPercent
+                        if (buffer == -1L) {
+                            break
+                        }
+
+                        downloadedBytes += buffer
+
+                        if (downloadedBytes > 0) {
+                            downloadedPercent = (downloadedBytes.toDouble() / bytesInBody.toDouble() * 100.0).toLong()
+
+                            if (downloadedPercent > lastReportedDownloadedPercent) {
+                                db.insertOrReplace(podcast.copy(downloadPercent = downloadedPercent))
+                                lastReportedDownloadedPercent = downloadedPercent
+                            }
                         }
                     }
                 }
-
-                db.insertOrReplace(podcast.copy(downloadPercent = 100))
-            } catch (e: Exception) {
-                Timber.e(e)
-            } finally {
-                output.flush()
-                output.close()
-                input.close()
             }
-        } else {
+        }.onSuccess {
+            db.insertOrReplace(podcast.copy(downloadPercent = 100))
+        }.onFailure {
             db.deleteByFeedItemId(feedItemId)
+            file.delete()
+            throw it
         }
     }
 
@@ -122,7 +129,7 @@ class PodcastDownloadsRepository(
 
             val file = feedItem.getPodcastFile(context)
 
-            if (file.exists() && podcastDownload.downloadPercent != null) {
+            if (file.exists() && podcastDownload.downloadPercent != null && podcastDownload.downloadPercent != 100L) {
                 file.delete()
                 db.deleteByFeedItemId(podcastDownload.feedItemId)
             }
