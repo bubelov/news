@@ -9,22 +9,22 @@ class FeedsFragmentModel(
 ) : ViewModel() {
 
     suspend fun createFeed(url: String) {
-        feedsRepository.create(url)
+        feedsRepository.add(url)
 
         newsApiSync.sync(
-            syncFeedItemsFlags = false,
+            syncEntriesFlags = false,
             syncFeeds = true,
-            fetchNewAndUpdatedFeedItems = true
+            syncNewAndUpdatedEntries = false
         )
     }
 
-    suspend fun getFeeds() = feedsRepository.all()
+    suspend fun getFeeds() = feedsRepository.getAll()
 
     suspend fun renameFeed(feedId: String, newTitle: String) {
-        feedsRepository.renameFeed(feedId, newTitle)
+        feedsRepository.rename(feedId, newTitle)
     }
 
     suspend fun deleteFeed(id: String) {
-        feedsRepository.deleteById(id)
+        feedsRepository.delete(id)
     }
 }

@@ -12,10 +12,10 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import co.appreactor.nextcloud.news.R
 import co.appreactor.nextcloud.news.common.showDialog
-import co.appreactor.nextcloud.news.feeditems.FeedItemsAdapter
-import co.appreactor.nextcloud.news.feeditems.FeedItemsAdapterCallback
-import co.appreactor.nextcloud.news.feeditems.FeedItemsAdapterDecoration
-import co.appreactor.nextcloud.news.feeditems.FeedItemsAdapterItem
+import co.appreactor.nextcloud.news.entries.EntriesAdapter
+import co.appreactor.nextcloud.news.entries.EntriesAdapterCallback
+import co.appreactor.nextcloud.news.entries.EntriesAdapterDecoration
+import co.appreactor.nextcloud.news.entries.EntriesAdapterItem
 import co.appreactor.nextcloud.news.podcasts.playPodcast
 import kotlinx.android.synthetic.main.fragment_bookmarks.empty
 import kotlinx.android.synthetic.main.fragment_bookmarks.listView
@@ -29,15 +29,15 @@ class BookmarksFragment : Fragment() {
 
     private val model: BookmarksFragmentModel by viewModel()
 
-    private val adapter = FeedItemsAdapter(
+    private val adapter = EntriesAdapter(
         scope = lifecycleScope,
-        callback = object : FeedItemsAdapterCallback {
-            override fun onItemClick(item: FeedItemsAdapterItem) {
+        callback = object : EntriesAdapterCallback {
+            override fun onItemClick(item: EntriesAdapterItem) {
                 val action = BookmarksFragmentDirections.actionStarredNewsFragmentToNewsItemFragment(item.id)
                 findNavController().navigate(action)
             }
 
-            override fun onDownloadPodcastClick(item: FeedItemsAdapterItem) {
+            override fun onDownloadPodcastClick(item: EntriesAdapterItem) {
                 lifecycleScope.launchWhenResumed {
                     runCatching {
                         model.downloadPodcast(item.id)
@@ -48,10 +48,10 @@ class BookmarksFragment : Fragment() {
                 }
             }
 
-            override fun onPlayPodcastClick(item: FeedItemsAdapterItem) {
+            override fun onPlayPodcastClick(item: EntriesAdapterItem) {
                 lifecycleScope.launch {
                     runCatching {
-                        playPodcast(model.getFeedItem(item.id)!!)
+                        playPodcast(model.getEntry(item.id)!!)
                     }.getOrElse {
                         Timber.e(it)
                         showDialog(R.string.error, it.message ?: "")
@@ -85,7 +85,7 @@ class BookmarksFragment : Fragment() {
         listView.setHasFixedSize(true)
         listView.layoutManager = LinearLayoutManager(context)
         listView.adapter = adapter
-        listView.addItemDecoration(FeedItemsAdapterDecoration(resources.getDimensionPixelSize(R.dimen.feed_items_cards_gap)))
+        listView.addItemDecoration(EntriesAdapterDecoration(resources.getDimensionPixelSize(R.dimen.entries_cards_gap)))
 
         val displayMetrics = DisplayMetrics()
         requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)

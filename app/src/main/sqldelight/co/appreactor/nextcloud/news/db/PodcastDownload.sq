@@ -1,5 +1,5 @@
 CREATE TABLE PodcastDownload (
-  feedItemId INTEGER PRIMARY KEY,
+  entryId INTEGER PRIMARY KEY,
   downloadPercent INTEGER
 );
 
@@ -12,12 +12,12 @@ selectAll:
 SELECT *
 FROM PodcastDownload;
 
-selectByFeedItemId:
+selectByEntryId:
 SELECT *
 FROM PodcastDownload
-WHERE feedItemId = ?;
+WHERE entryId = ?;
 
-deleteByFeedItemId:
+deleteByEntryId:
 DELETE
 FROM PodcastDownload
-WHERE feedItemId = ?;
+WHERE entryId = ?;

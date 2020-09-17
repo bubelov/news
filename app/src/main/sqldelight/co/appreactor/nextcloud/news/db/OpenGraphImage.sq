@@ -1,5 +1,5 @@
 CREATE TABLE OpenGraphImage (
-  feedItemId INTEGER PRIMARY KEY,
+  entryId INTEGER PRIMARY KEY,
   status TEXT NOT NULL,
   url TEXT NOT NULL,
   width INTEGER NOT NULL,
@@ -15,7 +15,7 @@ selectAll:
 SELECT *
 FROM OpenGraphImage;
 
-selectByFeedItemId:
+selectByEntryId:
 SELECT *
 FROM OpenGraphImage
-WHERE feedItemId = ?;
+WHERE entryId = ?;

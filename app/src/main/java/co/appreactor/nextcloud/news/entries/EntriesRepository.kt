@@ -1,8 +1,8 @@
-package co.appreactor.nextcloud.news.feeditems
+package co.appreactor.nextcloud.news.entries
 
 import co.appreactor.nextcloud.news.api.*
-import co.appreactor.nextcloud.news.db.FeedItem
-import co.appreactor.nextcloud.news.db.FeedItemQueries
+import co.appreactor.nextcloud.news.db.Entry
+import co.appreactor.nextcloud.news.db.EntryQueries
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
@@ -12,39 +12,35 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
 
 @Suppress("BlockingMethodInNonBlockingContext")
-class FeedItemsRepository(
-    private val db: FeedItemQueries,
+class EntriesRepository(
+    private val db: EntryQueries,
     private val api: NewsApi,
 ) {
 
-    suspend fun create(feedItem: FeedItem) = withContext(Dispatchers.IO) {
-        db.insertOrReplace(feedItem)
-    }
-
-    suspend fun all() = withContext(Dispatchers.IO) {
+    suspend fun getAll() = withContext(Dispatchers.IO) {
         db.selectAll().asFlow().mapToList()
     }
 
-    suspend fun unread() = withContext(Dispatchers.IO) {
+    suspend fun getUnread() = withContext(Dispatchers.IO) {
         db.selectUnread().asFlow().mapToList()
     }
 
-    suspend fun starred() = withContext(Dispatchers.IO) {
+    suspend fun getStarred() = withContext(Dispatchers.IO) {
         db.selectStarred().asFlow().mapToList()
     }
 
-    suspend fun byId(id: Long) = withContext(Dispatchers.IO) {
+    suspend fun get(id: Long) = withContext(Dispatchers.IO) {
         db.selectById(id).asFlow().mapToOneOrNull()
     }
 
-    suspend fun updateUnread(id: Long, unread: Boolean) = withContext(Dispatchers.IO) {
+    suspend fun setUnread(id: Long, unread: Boolean) = withContext(Dispatchers.IO) {
         db.updateUnread(
             unread = unread,
             id = id
         )
     }
 
-    suspend fun updateStarred(id: Long, starred: Boolean) = withContext(Dispatchers.IO) {
+    suspend fun setStarred(id: Long, starred: Boolean) = withContext(Dispatchers.IO) {
         db.updateStarred(
             starred = starred,
             id = id
@@ -59,7 +55,7 @@ class FeedItemsRepository(
         db.deleteByFeedId(feedId)
     }
 
-    suspend fun syncUnreadAndStarredFeedItems() = withContext(Dispatchers.IO) {
+    suspend fun syncUnreadAndStarred() = withContext(Dispatchers.IO) {
         val count = db.selectCount().executeAsOne()
 
         if (count > 0) {
@@ -70,14 +66,14 @@ class FeedItemsRepository(
         val starred = api.getStarredItems().execute().body()!!
 
         db.transaction {
-            (unread.items + starred.items).mapNotNull { it.toFeedItem() }.forEach {
+            (unread.items + starred.items).mapNotNull { it.toEntry() }.forEach {
                 db.insertOrReplace(it)
             }
         }
     }
 
     suspend fun syncUnreadFlags() = withContext(Dispatchers.IO) {
-        val unsyncedItems = all().first().filter {
+        val unsyncedItems = getAll().first().filter {
             !it.unreadSynced
         }
 
@@ -123,7 +119,7 @@ class FeedItemsRepository(
     }
 
     suspend fun syncStarredFlags() = withContext(Dispatchers.IO) {
-        val unsyncedItems = all().first().filter {
+        val unsyncedItems = getAll().first().filter {
             !it.starredSynced
         }
 
@@ -174,20 +170,20 @@ class FeedItemsRepository(
         }
     }
 
-    suspend fun fetchNewAndUpdatedItems() = withContext(Dispatchers.IO) {
-        val mostRecentItem = all().firstOrNull()?.maxByOrNull { it.lastModified } ?: return@withContext
+    suspend fun syncNewAndUpdated() = withContext(Dispatchers.IO) {
+        val mostRecentItem = getAll().firstOrNull()?.maxByOrNull { it.lastModified } ?: return@withContext
 
         val newAndUpdatedItems = api.getNewAndUpdatedItems(mostRecentItem.lastModified + 1).execute().body()!!.items
 
         db.transaction {
-            newAndUpdatedItems.mapNotNull { it.toFeedItem() }.forEach {
+            newAndUpdatedItems.mapNotNull { it.toEntry() }.forEach {
                 db.insertOrReplace(it)
             }
         }
     }
 
-    private fun FeedItemJson.toFeedItem(): FeedItem? {
-        return FeedItem(
+    private fun ItemJson.toEntry(): Entry? {
+        return Entry(
             id = id ?: return null,
             guidHash = guidHash ?: return null,
             url = url?.replace("http://", "https://") ?: "",

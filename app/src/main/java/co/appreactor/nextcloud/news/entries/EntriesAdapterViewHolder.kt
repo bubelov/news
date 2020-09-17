@@ -1,4 +1,4 @@
-package co.appreactor.nextcloud.news.feeditems
+package co.appreactor.nextcloud.news.entries
 
 import android.view.View
 import androidx.core.view.isVisible
@@ -6,20 +6,20 @@ import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.nextcloud.news.R
 import co.appreactor.nextcloud.news.db.OpenGraphImage
-import co.appreactor.nextcloud.news.opengraph.OpenGraphImagesRepository
+import co.appreactor.nextcloud.news.opengraph.EntriesImagesRepository
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.list_item_feed_item.view.*
+import kotlinx.android.synthetic.main.list_item_entry.view.*
 import kotlinx.coroutines.flow.collect
 
-class FeedItemsAdapterViewHolder(
+class EntriesAdapterViewHolder(
     private val view: View,
     private val screenWidth: Int,
     private val scope: LifecycleCoroutineScope,
-    private val callback: FeedItemsAdapterCallback,
+    private val callback: EntriesAdapterCallback,
 ) : RecyclerView.ViewHolder(view) {
 
-    fun bind(item: FeedItemsAdapterItem) {
+    fun bind(item: EntriesAdapterItem) {
         view.apply {
             val cardMargin = resources.getDimensionPixelSize(R.dimen.card_horizontal_margin)
 
@@ -84,7 +84,7 @@ class FeedItemsAdapterViewHolder(
                         })
                 }
 
-                if (item.cachedImage != null && item.cachedImage.status == OpenGraphImagesRepository.STATUS_PROCESSED) {
+                if (item.cachedImage != null && item.cachedImage.status == EntriesImagesRepository.STATUS_PROCESSED) {
                     handleImage(item.cachedImage)
                 } else {
                     scope.launchWhenResumed {

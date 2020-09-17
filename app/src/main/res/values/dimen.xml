@@ -13,7 +13,7 @@
     <dimen name="card_height_min">130dp</dimen>
     <dimen name="card_height_max">258dp</dimen>
 
-    <dimen name="feed_items_cards_gap">8dp</dimen>
+    <dimen name="entries_cards_gap">8dp</dimen>
 
     <dimen name="dp_8">8dp</dimen>
 </resources>

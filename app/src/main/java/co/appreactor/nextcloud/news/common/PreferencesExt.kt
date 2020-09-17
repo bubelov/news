@@ -15,14 +15,14 @@ suspend fun Preferences.initialSyncCompleted() = getBoolean(Preferences.INITIAL_
 suspend fun Preferences.setInitialSyncCompleted(initialSyncCompleted: Boolean) =
     putBoolean(Preferences.INITIAL_SYNC_COMPLETED, initialSyncCompleted)
 
-suspend fun Preferences.showReadNews() = getBoolean(Preferences.SHOW_READ_NEWS, false)
-suspend fun Preferences.setShowReadNews(showReadNews: Boolean) =
-    putBoolean(Preferences.SHOW_READ_NEWS, showReadNews)
+suspend fun Preferences.showReadEntries() = getBoolean(Preferences.SHOW_READ_ENTRIES, false)
+suspend fun Preferences.setShowReadEntries(showReadNews: Boolean) =
+    putBoolean(Preferences.SHOW_READ_ENTRIES, showReadNews)
 
-suspend fun Preferences.showFeedImages() = getBoolean(Preferences.SHOW_FEED_IMAGES, false)
-suspend fun Preferences.setShowFeedImages(showFeedImages: Boolean) =
-    putBoolean(Preferences.SHOW_FEED_IMAGES, showFeedImages)
+suspend fun Preferences.showPreviewImages() = getBoolean(Preferences.SHOW_PREVIEW_IMAGES, false)
+suspend fun Preferences.setShowPreviewImages(showPreviewImages: Boolean) =
+    putBoolean(Preferences.SHOW_PREVIEW_IMAGES, showPreviewImages)
 
-suspend fun Preferences.cropFeedImages() = getBoolean(Preferences.CROP_FEED_IMAGES, true)
-suspend fun Preferences.setCropFeedImages(cropFeedImages: Boolean) =
-    putBoolean(Preferences.CROP_FEED_IMAGES, cropFeedImages)
+suspend fun Preferences.cropPreviewImages() = getBoolean(Preferences.CROP_PREVIEW_IMAGES, true)
+suspend fun Preferences.setCropPreviewImages(cropPreviewImages: Boolean) =
+    putBoolean(Preferences.CROP_PREVIEW_IMAGES, cropPreviewImages)

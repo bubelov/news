@@ -1,4 +1,4 @@
-CREATE TABLE FeedItem (
+CREATE TABLE Entry (
   id INTEGER PRIMARY KEY,
   guidHash TEXT NOT NULL,
   url TEXT NOT NULL,
@@ -18,60 +18,60 @@ CREATE TABLE FeedItem (
 
 insertOrReplace:
 INSERT OR REPLACE
-INTO FeedItem
+INTO Entry
 VALUES ?;
 
 selectAll:
 SELECT *
-FROM FeedItem
+FROM Entry
 ORDER BY pubDate DESC;
 
 selectById:
 SELECT *
-FROM FeedItem
+FROM Entry
 WHERE id = ?;
 
 selectUnread:
 SELECT *
-FROM FeedItem
+FROM Entry
 WHERE unread = 1
 ORDER BY pubDate DESC;
 
 selectStarred:
 SELECT *
-FROM FeedItem
+FROM Entry
 WHERE starred = 1
 ORDER BY pubDate DESC;
 
 selectCount:
 SELECT COUNT(*)
-FROM FeedItem;
+FROM Entry;
 
 updateUnread:
-UPDATE FeedItem
+UPDATE Entry
 SET unread = ?, unreadSynced = 0
 WHERE id = ?;
 
 updateUnreadSynced:
-UPDATE FeedItem
+UPDATE Entry
 SET unreadSynced = ?
 WHERE id = ?;
 
 updateStarred:
-UPDATE FeedItem
+UPDATE Entry
 SET starred = ?, starredSynced = 0
 WHERE id = ?;
 
 updateStarredSynced:
-UPDATE FeedItem
+UPDATE Entry
 SET starredSynced = ?
 WHERE id = ?;
 
 deleteAll:
 DELETE
-FROM FeedItem;
+FROM Entry;
 
 deleteByFeedId:
 DELETE
-FROM FeedItem
+FROM Entry
 WHERE feedId = ?;

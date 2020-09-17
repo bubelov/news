@@ -6,7 +6,7 @@ import co.appreactor.nextcloud.news.api.PostFeedArgs
 import co.appreactor.nextcloud.news.api.PutFeedRenameArgs
 import co.appreactor.nextcloud.news.db.Feed
 import co.appreactor.nextcloud.news.db.FeedQueries
-import co.appreactor.nextcloud.news.feeditems.FeedItemsRepository
+import co.appreactor.nextcloud.news.entries.EntriesRepository
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
@@ -18,10 +18,10 @@ import kotlinx.coroutines.withContext
 class FeedsRepository(
     private val db: FeedQueries,
     private val api: NewsApi,
-    private val feedItemsRepository: FeedItemsRepository
+    private val entriesRepository: EntriesRepository
 ) {
 
-    suspend fun create(url: String) = withContext(Dispatchers.IO) {
+    suspend fun add(url: String) = withContext(Dispatchers.IO) {
         val response = kotlin.runCatching {
             api.postFeed(PostFeedArgs(url, 0)).execute().body()!!
         }.getOrThrow()
@@ -33,19 +33,19 @@ class FeedsRepository(
         }
     }
 
-    suspend fun all() = withContext(Dispatchers.IO) {
+    suspend fun getAll() = withContext(Dispatchers.IO) {
         db.selectAll().asFlow().mapToList()
     }
 
-    suspend fun byId(id: String) = withContext(Dispatchers.IO) {
+    suspend fun get(id: String) = withContext(Dispatchers.IO) {
         db.selectById(id).asFlow().mapToOneOrNull()
     }
 
-    suspend fun renameFeed(feedId: String, newTitle: String) = withContext(Dispatchers.IO) {
+    suspend fun rename(feedId: String, newTitle: String) = withContext(Dispatchers.IO) {
         val response = api.putFeedRename(feedId.toLong(), PutFeedRenameArgs(newTitle)).execute()
 
         if (response.isSuccessful) {
-            val feed = byId(feedId).first()
+            val feed = get(feedId).first()
 
             if (feed != null) {
                 db.insertOrReplace(feed.copy(title = newTitle))
@@ -55,13 +55,13 @@ class FeedsRepository(
         }
     }
 
-    suspend fun deleteById(id: String) = withContext(Dispatchers.IO) {
+    suspend fun delete(id: String) = withContext(Dispatchers.IO) {
         val response = api.deleteFeed(id.toLong()).execute()
 
         if (response.isSuccessful) {
             db.transaction {
                 db.deleteById(id)
-                feedItemsRepository.deleteByFeedId(id.toLong())
+                entriesRepository.deleteByFeedId(id.toLong())
             }
         } else {
             throw Exception("HTTPS request failed with error code ${response.code()}")
@@ -72,8 +72,8 @@ class FeedsRepository(
         db.deleteAll()
     }
 
-    suspend fun syncFeeds() = withContext(Dispatchers.IO) {
-        val cachedFeeds = all().first().sortedBy { it.id }
+    suspend fun sync() = withContext(Dispatchers.IO) {
+        val cachedFeeds = getAll().first().sortedBy { it.id }
         val newFeeds = api.getFeeds().execute().body()!!.feeds.sortedBy { it.id }
 
         if (newFeeds != cachedFeeds) {

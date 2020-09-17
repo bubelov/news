@@ -1,9 +1,9 @@
-package co.appreactor.nextcloud.news.feeditems
+package co.appreactor.nextcloud.news.entries
 
 import co.appreactor.nextcloud.news.db.OpenGraphImage
 import kotlinx.coroutines.flow.Flow
 
-data class FeedItemsAdapterItem(
+data class EntriesAdapterItem(
     val id: Long,
     val title: String,
     val subtitle: String,

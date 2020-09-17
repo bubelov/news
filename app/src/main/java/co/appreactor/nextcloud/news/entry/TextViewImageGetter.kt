@@ -1,4 +1,4 @@
-package co.appreactor.nextcloud.news.feeditem
+package co.appreactor.nextcloud.news.entry
 
 import android.graphics.drawable.Drawable
 import android.text.Html

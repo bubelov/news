@@ -1,15 +1,15 @@
-package co.appreactor.nextcloud.news.feeditems
+package co.appreactor.nextcloud.news.entries
 
 import android.text.SpannableStringBuilder
 import androidx.core.text.HtmlCompat
-import co.appreactor.nextcloud.news.db.FeedItem
+import co.appreactor.nextcloud.news.db.Entry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.util.*
 import kotlin.math.min
 
-class FeedItemsSummariesRepository {
+class EntriesSummariesRepository {
 
     companion object {
         private const val SUMMARY_MAX_LENGTH = 150
@@ -17,20 +17,20 @@ class FeedItemsSummariesRepository {
 
     private val cache = Collections.synchronizedMap(mutableMapOf<Long, String>())
 
-    suspend fun getSummary(feedItem: FeedItem): String = withContext(Dispatchers.IO) {
-        val cachedSummary = cache[feedItem.id]
+    suspend fun getSummary(entry: Entry): String = withContext(Dispatchers.IO) {
+        val cachedSummary = cache[entry.id]
 
         if (cachedSummary != null) {
             return@withContext cachedSummary
         }
 
-        if (feedItem.body.isBlank()) {
-            cache[feedItem.id] = ""
+        if (entry.body.isBlank()) {
+            cache[entry.id] = ""
             return@withContext ""
         }
 
         val summary = runCatching {
-            val parsedBody = HtmlCompat.fromHtml(feedItem.body, HtmlCompat.FROM_HTML_MODE_COMPACT)
+            val parsedBody = HtmlCompat.fromHtml(entry.body, HtmlCompat.FROM_HTML_MODE_COMPACT)
 
             if (parsedBody is SpannableStringBuilder) {
                 parsedBody.clearSpans()
@@ -52,9 +52,9 @@ class FeedItemsSummariesRepository {
             Timber.e(it)
         }.getOrDefault("")
 
-        cache[feedItem.id] = summary
+        cache[entry.id] = summary
         summary
     }
 
-    fun getCachedSummary(feedItemId: Long) = cache[feedItemId]
+    fun getCachedSummary(entryId: Long) = cache[entryId]
 }

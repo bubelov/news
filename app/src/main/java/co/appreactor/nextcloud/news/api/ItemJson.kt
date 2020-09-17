@@ -1,6 +1,6 @@
 package co.appreactor.nextcloud.news.api
 
-data class FeedItemJson(
+data class ItemJson(
     val id: Long? = null,
     val guid: String? = null,
     val guidHash: String? = null,

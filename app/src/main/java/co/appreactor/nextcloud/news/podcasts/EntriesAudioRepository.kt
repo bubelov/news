@@ -3,7 +3,7 @@ package co.appreactor.nextcloud.news.podcasts
 import android.content.Context
 import co.appreactor.nextcloud.news.db.PodcastDownload
 import co.appreactor.nextcloud.news.db.PodcastDownloadQueries
-import co.appreactor.nextcloud.news.feeditems.FeedItemsRepository
+import co.appreactor.nextcloud.news.entries.EntriesRepository
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -14,47 +14,47 @@ import okhttp3.Request
 import okio.buffer
 import okio.sink
 
-class PodcastDownloadsRepository(
+class EntriesAudioRepository(
     private val db: PodcastDownloadQueries,
-    private val feedItemsRepository: FeedItemsRepository,
+    private val entriesRepository: EntriesRepository,
     private val context: Context,
 ) {
 
     private val httpClient = OkHttpClient()
 
-    suspend fun getDownloadProgress(feedItemId: Long) = withContext(Dispatchers.IO) {
-        db.selectByFeedItemId(feedItemId).asFlow().map {
+    suspend fun getDownloadProgress(entryId: Long) = withContext(Dispatchers.IO) {
+        db.selectByEntryId(entryId).asFlow().map {
             it.executeAsOneOrNull()?.downloadPercent
         }
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")
-    suspend fun downloadPodcast(feedItemId: Long) = withContext(Dispatchers.IO) {
-        val feedItem = feedItemsRepository.byId(feedItemId).first()
+    suspend fun downloadPodcast(entryId: Long) = withContext(Dispatchers.IO) {
+        val entry = entriesRepository.get(entryId).first()
 
-        if (feedItem == null) {
-            db.deleteByFeedItemId(feedItemId)
+        if (entry == null) {
+            db.deleteByEntryId(entryId)
             return@withContext
         }
 
-        if (feedItem.enclosureLink.isBlank()) {
+        if (entry.enclosureLink.isBlank()) {
             return@withContext
         }
 
-        val existingPodcast = db.selectByFeedItemId(feedItemId).executeAsOneOrNull()
+        val existingPodcast = db.selectByEntryId(entryId).executeAsOneOrNull()
 
         if (existingPodcast != null) {
             return@withContext
         }
 
         val podcast = PodcastDownload(
-            feedItemId = feedItemId,
+            entryId = entryId,
             downloadPercent = null,
         )
 
         db.insertOrReplace(podcast)
 
-        val file = feedItem.getPodcastFile(context)
+        val file = entry.getPodcastFile(context)
 
         if (file.exists()) {
             file.delete()
@@ -63,20 +63,20 @@ class PodcastDownloadsRepository(
         db.insertOrReplace(podcast.copy(downloadPercent = 0))
 
         val request = Request.Builder()
-            .url(feedItem.enclosureLink)
+            .url(entry.enclosureLink)
             .build()
 
         val response = httpClient.newCall(request).execute()
 
         if (!response.isSuccessful) {
-            db.deleteByFeedItemId(feedItemId)
+            db.deleteByEntryId(entryId)
             return@withContext
         }
 
         val responseBody = response.body
 
         if (responseBody == null) {
-            db.deleteByFeedItemId(feedItemId)
+            db.deleteByEntryId(entryId)
             return@withContext
         }
 
@@ -112,7 +112,7 @@ class PodcastDownloadsRepository(
         }.onSuccess {
             db.insertOrReplace(podcast.copy(downloadPercent = 100))
         }.onFailure {
-            db.deleteByFeedItemId(feedItemId)
+            db.deleteByEntryId(entryId)
             file.delete()
             throw it
         }
@@ -120,18 +120,18 @@ class PodcastDownloadsRepository(
 
     suspend fun deletePartialDownloads() = withContext(Dispatchers.IO) {
         db.selectAll().executeAsList().forEach { podcastDownload ->
-            val feedItem = feedItemsRepository.byId(podcastDownload.feedItemId).first()
+            val entry = entriesRepository.get(podcastDownload.entryId).first()
 
-            if (feedItem == null) {
-                db.deleteByFeedItemId(podcastDownload.feedItemId)
+            if (entry == null) {
+                db.deleteByEntryId(podcastDownload.entryId)
                 return@forEach
             }
 
-            val file = feedItem.getPodcastFile(context)
+            val file = entry.getPodcastFile(context)
 
             if (file.exists() && podcastDownload.downloadPercent != null && podcastDownload.downloadPercent != 100L) {
                 file.delete()
-                db.deleteByFeedItemId(podcastDownload.feedItemId)
+                db.deleteByEntryId(podcastDownload.entryId)
             }
         }
     }
@@ -139,17 +139,17 @@ class PodcastDownloadsRepository(
     suspend fun deleteCompletedDownloadsWithoutFiles() {
         db.selectAll().executeAsList().forEach {
             if (it.downloadPercent == 100L) {
-                val feedItem = feedItemsRepository.byId(it.feedItemId).first()
+                val entry = entriesRepository.get(it.entryId).first()
 
-                if (feedItem == null) {
-                    db.deleteByFeedItemId(it.feedItemId)
+                if (entry == null) {
+                    db.deleteByEntryId(it.entryId)
                     return@forEach
                 }
 
-                val file = feedItem.getPodcastFile(context)
+                val file = entry.getPodcastFile(context)
 
                 if (!file.exists()) {
-                    db.deleteByFeedItemId(it.feedItemId)
+                    db.deleteByEntryId(it.entryId)
                 }
             }
         }

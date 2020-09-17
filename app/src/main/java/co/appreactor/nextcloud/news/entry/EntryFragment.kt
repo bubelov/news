@@ -1,4 +1,4 @@
-package co.appreactor.nextcloud.news.feeditem
+package co.appreactor.nextcloud.news.entry
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -21,17 +21,17 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import co.appreactor.nextcloud.news.*
-import kotlinx.android.synthetic.main.fragment_feed_item.*
+import kotlinx.android.synthetic.main.fragment_entry.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
 import timber.log.Timber
 
-class FeedItemFragment : Fragment() {
+class EntryFragment : Fragment() {
 
-    private val args: FeedItemFragmentArgs by navArgs()
+    private val args: EntryFragmentArgs by navArgs()
 
-    private val model: FeedItemFragmentModel by viewModel()
+    private val model: EntryFragmentModel by viewModel()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -39,7 +39,7 @@ class FeedItemFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(
-            R.layout.fragment_feed_item,
+            R.layout.fragment_entry,
             container,
             false
         )
@@ -54,14 +54,14 @@ class FeedItemFragment : Fragment() {
         progress.isVisible = true
 
         lifecycleScope.launchWhenResumed {
-            val item = model.getFeedItem(args.newsItemId)!!
+            val entry = model.getEntry(args.newsItemId)!!
 
-            if (item.unread) {
-                model.toggleReadFlag(item.id)
+            if (entry.unread) {
+                model.toggleReadFlag(entry.id)
 
                 launch {
                     runCatching {
-                        model.syncFeedItemsFlags()
+                        model.syncEntriesFlags()
                     }.onFailure {
                         Timber.e(it)
 
@@ -74,14 +74,14 @@ class FeedItemFragment : Fragment() {
                 }
             }
 
-            toolbar.title = model.getFeed(item.feedId.toString())?.title ?: getString(R.string.unknown_feed)
-            title.text = item.title
-            date.text = model.getDate(item)
+            toolbar.title = model.getFeed(entry.feedId.toString())?.title ?: getString(R.string.unknown_feed)
+            title.text = entry.title
+            date.text = model.getDate(entry)
 
             val imageGetter = TextViewImageGetter(textView)
 
             val body = HtmlCompat.fromHtml(
-                item.body,
+                entry.body,
                 HtmlCompat.FROM_HTML_MODE_LEGACY,
                 imageGetter,
                 null
@@ -176,7 +176,7 @@ class FeedItemFragment : Fragment() {
                     model.toggleStarredFlag(args.newsItemId)
 
                     runCatching {
-                        model.syncFeedItemsFlags()
+                        model.syncEntriesFlags()
                     }.getOrElse {
                         Timber.e(it)
 
@@ -196,7 +196,7 @@ class FeedItemFragment : Fragment() {
 
         fab.setOnClickListener {
             lifecycleScope.launch {
-                val item = model.getFeedItem(args.newsItemId)!!
+                val item = model.getEntry(args.newsItemId)!!
                 val intent = Intent(Intent.ACTION_VIEW)
                 intent.data = Uri.parse(item.url)
                 startActivity(intent)

@@ -1,7 +1,7 @@
 package co.appreactor.nextcloud.news.common
 
 import co.appreactor.nextcloud.news.feeds.FeedsRepository
-import co.appreactor.nextcloud.news.feeditems.FeedItemsRepository
+import co.appreactor.nextcloud.news.entries.EntriesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
@@ -10,8 +10,8 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 class NewsApiSync(
-    private val feedItemsRepository: FeedItemsRepository,
     private val feedsRepository: FeedsRepository,
+    private val entriesRepository: EntriesRepository,
     private val prefs: Preferences,
 ) {
 
@@ -24,40 +24,40 @@ class NewsApiSync(
                     return@withLock
                 }
 
-                val feedsSync = async { feedsRepository.syncFeeds() }
-                val feedItemsSync = async { feedItemsRepository.syncUnreadAndStarredFeedItems() }
+                val feedsSync = async { feedsRepository.sync() }
+                val entriesSync = async { entriesRepository.syncUnreadAndStarred() }
 
                 feedsSync.await()
-                feedItemsSync.await()
+                entriesSync.await()
 
                 prefs.setInitialSyncCompleted(true)
             }
         }
     }
 
-    suspend fun syncFeedItemsFlags() = sync(
+    suspend fun syncEntriesFlags() = sync(
         syncFeeds = false,
-        syncFeedItemsFlags = true,
-        fetchNewAndUpdatedFeedItems = false,
+        syncEntriesFlags = true,
+        syncNewAndUpdatedEntries = false,
     )
 
     suspend fun sync(
         syncFeeds: Boolean = true,
-        syncFeedItemsFlags: Boolean = true,
-        fetchNewAndUpdatedFeedItems: Boolean = true,
+        syncEntriesFlags: Boolean = true,
+        syncNewAndUpdatedEntries: Boolean = true,
     ) {
         mutex.withLock {
-            if (syncFeedItemsFlags) {
-                feedItemsRepository.syncUnreadFlags()
-                feedItemsRepository.syncStarredFlags()
+            if (syncEntriesFlags) {
+                entriesRepository.syncUnreadFlags()
+                entriesRepository.syncStarredFlags()
             }
 
             if (syncFeeds) {
-                feedsRepository.syncFeeds()
+                feedsRepository.sync()
             }
 
-            if (fetchNewAndUpdatedFeedItems) {
-                feedItemsRepository.fetchNewAndUpdatedItems()
+            if (syncNewAndUpdatedEntries) {
+                entriesRepository.syncNewAndUpdated()
             }
         }
     }

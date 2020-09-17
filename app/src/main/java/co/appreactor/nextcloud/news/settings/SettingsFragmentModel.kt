@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import co.appreactor.nextcloud.news.common.*
 import co.appreactor.nextcloud.news.feeds.FeedsRepository
 import co.appreactor.nextcloud.news.logging.LoggedExceptionsRepository
-import co.appreactor.nextcloud.news.feeditems.FeedItemsRepository
+import co.appreactor.nextcloud.news.entries.EntriesRepository
 import com.nextcloud.android.sso.AccountImporter
 import com.nextcloud.android.sso.exceptions.SSOException
 import com.nextcloud.android.sso.helper.SingleAccountHelper
@@ -14,22 +14,22 @@ import timber.log.Timber
 
 class SettingsFragmentModel(
     private val feedsRepository: FeedsRepository,
-    private val feedItemsRepository: FeedItemsRepository,
+    private val entriesRepository: EntriesRepository,
     private val loggedExceptionsRepository: LoggedExceptionsRepository,
     private val prefs: Preferences,
 ) : ViewModel() {
 
-    suspend fun getShowReadNews() = prefs.showReadNews()
+    suspend fun getShowReadEntries() = prefs.showReadEntries()
 
-    suspend fun setShowReadNews(show: Boolean) = prefs.setShowReadNews(show)
+    suspend fun setShowReadEntries(show: Boolean) = prefs.setShowReadEntries(show)
 
-    suspend fun getShowFeedImages() = prefs.showFeedImages()
+    suspend fun getShowPreviewImages() = prefs.showPreviewImages()
 
-    suspend fun setShowFeedImages(show: Boolean) = prefs.setShowFeedImages(show)
+    suspend fun setShowPreviewImages(show: Boolean) = prefs.setShowPreviewImages(show)
 
-    suspend fun getCropFeedImages() = prefs.cropFeedImages()
+    suspend fun getCropPreviewImages() = prefs.cropPreviewImages()
 
-    suspend fun setCropFeedImages(crop: Boolean) = prefs.setCropFeedImages(crop)
+    suspend fun setCropPreviewImages(crop: Boolean) = prefs.setCropPreviewImages(crop)
 
     suspend fun getExceptionsCount() = loggedExceptionsRepository.count()
 
@@ -54,7 +54,7 @@ class SettingsFragmentModel(
         AccountImporter.clearAllAuthTokens(context)
 
         feedsRepository.clear()
-        feedItemsRepository.clear()
+        entriesRepository.clear()
 
         prefs.clear()
     }

@@ -45,9 +45,9 @@
 
     <fragment
         android:id="@+id/newsFragment"
-        android:name="co.appreactor.nextcloud.news.feeditems.FeedItemsFragment"
+        android:name="co.appreactor.nextcloud.news.entries.EntriesFragment"
         android:label="NewsFragment"
-        tools:layout="@layout/fragment_feed_items">
+        tools:layout="@layout/fragment_entries">
         <action
             android:id="@+id/action_newsFragment_to_newsItemFragment"
             app:destination="@id/newsItemFragment"
@@ -57,9 +57,9 @@
 
     <fragment
         android:id="@+id/newsItemFragment"
-        android:name="co.appreactor.nextcloud.news.feeditem.FeedItemFragment"
+        android:name="co.appreactor.nextcloud.news.entry.EntryFragment"
         android:label="NewsItemFragment"
-        tools:layout="@layout/fragment_feed_item">
+        tools:layout="@layout/fragment_entry">
         <argument
             android:name="newsItemId"
             app:argType="long" />

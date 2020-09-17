@@ -1,6 +1,6 @@
 package co.appreactor.nextcloud.news.opengraph
 
-import co.appreactor.nextcloud.news.db.FeedItem
+import co.appreactor.nextcloud.news.db.Entry
 import co.appreactor.nextcloud.news.db.OpenGraphImage
 import co.appreactor.nextcloud.news.db.OpenGraphImageQueries
 import com.squareup.picasso.Picasso
@@ -16,7 +16,7 @@ import org.jsoup.Jsoup
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
-class OpenGraphImagesRepository(
+class EntriesImagesRepository(
     private val db: OpenGraphImageQueries
 ) {
 
@@ -39,20 +39,20 @@ class OpenGraphImagesRepository(
         }
     }
 
-    suspend fun getImage(feedItem: FeedItem) = withContext(Dispatchers.IO) {
-        db.selectByFeedItemId(feedItem.id).asFlow().mapToOneOrNull()
+    suspend fun getImage(entry: Entry) = withContext(Dispatchers.IO) {
+        db.selectByEntryId(entry.id).asFlow().mapToOneOrNull()
     }
 
-    suspend fun parse(feedItem: FeedItem) {
+    suspend fun parse(entry: Entry) {
         return withContext(Dispatchers.IO) {
-            val existingImage = db.selectByFeedItemId(feedItem.id).executeAsOneOrNull()
+            val existingImage = db.selectByEntryId(entry.id).executeAsOneOrNull()
 
             if (existingImage != null) {
                 return@withContext
             }
 
             val image = OpenGraphImage(
-                feedItemId = feedItem.id,
+                entryId = entry.id,
                 status = STATUS_PROCESSING,
                 url = "",
                 width = 0,
@@ -61,32 +61,32 @@ class OpenGraphImagesRepository(
 
             db.insertOrReplace(image)
 
-            if (feedItem.url.isBlank()) {
+            if (entry.url.isBlank()) {
                 db.insertOrReplace(image.copy(status = STATUS_PROCESSED))
                 return@withContext
             }
 
-            Timber.d("Processing ${feedItem.url}")
+            Timber.d("Processing ${entry.url}")
 
-            val request = httpClient.newCall(Request.Builder().url(feedItem.url).build())
+            val request = httpClient.newCall(Request.Builder().url(entry.url).build())
 
             val response = runCatching {
                 request.execute()
             }.getOrElse {
-                it.log("Cannot fetch url for feed item ${feedItem.id} (${feedItem.title})")
+                it.log("Cannot fetch url for feed item ${entry.id} (${entry.title})")
                 db.insertOrReplace(image.copy(status = STATUS_PROCESSED))
                 return@withContext
             }
 
             if (!response.isSuccessful) {
-                Timber.d("Invalid response code ${response.code} for item ${feedItem.id} (${feedItem.title}")
+                Timber.d("Invalid response code ${response.code} for item ${entry.id} (${entry.title}")
                 return@withContext
             }
 
             val html = runCatching {
                 response.body!!.string()
             }.getOrElse {
-                it.log("Cannot fetch response body for feed item ${feedItem.id} (${feedItem.title})")
+                it.log("Cannot fetch response body for feed item ${entry.id} (${entry.title})")
                 db.insertOrReplace(image.copy(status = STATUS_PROCESSED))
                 return@withContext
             }

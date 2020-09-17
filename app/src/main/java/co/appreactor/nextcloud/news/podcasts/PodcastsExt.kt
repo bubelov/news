@@ -4,14 +4,14 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
-import co.appreactor.nextcloud.news.db.FeedItem
+import co.appreactor.nextcloud.news.db.Entry
 import java.io.File
 
-fun FeedItem.isPodcast(): Boolean {
+fun Entry.isPodcast(): Boolean {
     return enclosureMime.startsWith("audio")
 }
 
-fun FeedItem.getPodcastFile(context: Context): File {
+fun Entry.getPodcastFile(context: Context): File {
     val podcasts = File(context.externalCacheDir, "podcasts")
     podcasts.mkdir()
 
@@ -19,7 +19,7 @@ fun FeedItem.getPodcastFile(context: Context): File {
     return File(podcasts, fileName)
 }
 
-fun Fragment.playPodcast(podcast: FeedItem) {
+fun Fragment.playPodcast(podcast: Entry) {
     val fileUri = FileProvider.getUriForFile(
         requireContext(),
         "${requireContext().packageName}.fileprovider",

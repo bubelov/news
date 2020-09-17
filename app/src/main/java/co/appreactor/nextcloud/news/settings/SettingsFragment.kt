@@ -34,27 +34,27 @@ class SettingsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         lifecycleScope.launch {
-            showReadNews.isChecked = model.getShowReadNews().first()
+            showReadEntries.isChecked = model.getShowReadEntries().first()
 
-            showReadNews.setOnCheckedChangeListener { _, isChecked ->
+            showReadEntries.setOnCheckedChangeListener { _, isChecked ->
                 lifecycleScope.launch {
-                    model.setShowReadNews(isChecked)
+                    model.setShowReadEntries(isChecked)
                 }
             }
 
-            showFeedImages.isChecked = model.getShowFeedImages().first()
+            showPreviewImages.isChecked = model.getShowPreviewImages().first()
 
-            showFeedImages.setOnCheckedChangeListener { _, isChecked ->
+            showPreviewImages.setOnCheckedChangeListener { _, isChecked ->
                 lifecycleScope.launch {
-                    model.setShowFeedImages(isChecked)
+                    model.setShowPreviewImages(isChecked)
                 }
             }
 
-            cropFeedImages.isChecked = model.getCropFeedImages().first()
+            cropPreviewImages.isChecked = model.getCropPreviewImages().first()
 
-            cropFeedImages.setOnCheckedChangeListener { _, isChecked ->
+            cropPreviewImages.setOnCheckedChangeListener { _, isChecked ->
                 lifecycleScope.launch {
-                    model.setCropFeedImages(isChecked)
+                    model.setCropPreviewImages(isChecked)
                 }
             }
 
@@ -72,8 +72,8 @@ class SettingsFragment : Fragment() {
         }
 
         lifecycleScope.launchWhenResumed {
-            model.getShowFeedImages().collect {
-                cropFeedImages.isEnabled = it
+            model.getShowPreviewImages().collect {
+                cropPreviewImages.isEnabled = it
             }
         }
 

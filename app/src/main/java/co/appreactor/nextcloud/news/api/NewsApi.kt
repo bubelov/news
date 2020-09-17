@@ -22,15 +22,15 @@ interface NewsApi {
     fun deleteFeed(@Path("id") id: Long): Call<List<Long>>
 
     @GET("items?type=3&getRead=false&batchSize=-1")
-    fun getUnreadItems(): Call<FeedItemsPayload>
+    fun getUnreadItems(): Call<ItemsPayload>
 
     @GET("items?type=2&getRead=true&batchSize=-1")
-    fun getStarredItems(): Call<FeedItemsPayload>
+    fun getStarredItems(): Call<ItemsPayload>
 
     @GET("items/updated?type=3")
     fun getNewAndUpdatedItems(
         @Query("lastModified") lastModified: Long
-    ): Call<FeedItemsPayload>
+    ): Call<ItemsPayload>
 
     @PUT("items/read/multiple")
     fun putRead(@Body args: PutReadArgs): Call<ResponseBody>

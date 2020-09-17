@@ -43,9 +43,9 @@ class Preferences(
 
         const val INITIAL_SYNC_COMPLETED = "initial_sync_completed"
 
-        const val SHOW_READ_NEWS = "show_read_news"
+        const val SHOW_READ_ENTRIES = "show_read_entries"
 
-        const val SHOW_FEED_IMAGES = "show_feed_images"
-        const val CROP_FEED_IMAGES = "crop_feed_images"
+        const val SHOW_PREVIEW_IMAGES = "show_preview_images"
+        const val CROP_PREVIEW_IMAGES = "crop_preview_images"
     }
 }

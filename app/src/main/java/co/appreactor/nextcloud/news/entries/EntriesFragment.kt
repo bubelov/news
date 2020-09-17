@@ -1,4 +1,4 @@
-package co.appreactor.nextcloud.news.feeditems
+package co.appreactor.nextcloud.news.entries
 
 import android.os.Bundle
 import android.util.DisplayMetrics
@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.nextcloud.news.R
 import co.appreactor.nextcloud.news.common.showDialog
 import co.appreactor.nextcloud.news.podcasts.playPodcast
-import kotlinx.android.synthetic.main.fragment_feed_items.*
+import kotlinx.android.synthetic.main.fragment_entries.*
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.conflate
@@ -23,19 +23,19 @@ import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
 import timber.log.Timber
 
-class FeedItemsFragment : Fragment() {
+class EntriesFragment : Fragment() {
 
-    private val model: FeedItemsFragmentModel by viewModel()
+    private val model: EntriesFragmentModel by viewModel()
 
-    private val adapter = FeedItemsAdapter(
+    private val adapter = EntriesAdapter(
         scope = lifecycleScope,
-        callback = object : FeedItemsAdapterCallback {
-            override fun onItemClick(item: FeedItemsAdapterItem) {
-                val action = FeedItemsFragmentDirections.actionNewsFragmentToNewsItemFragment(item.id)
+        callback = object : EntriesAdapterCallback {
+            override fun onItemClick(item: EntriesAdapterItem) {
+                val action = EntriesFragmentDirections.actionNewsFragmentToNewsItemFragment(item.id)
                 findNavController().navigate(action)
             }
 
-            override fun onDownloadPodcastClick(item: FeedItemsAdapterItem) {
+            override fun onDownloadPodcastClick(item: EntriesAdapterItem) {
                 lifecycleScope.launchWhenResumed {
                     runCatching {
                         model.downloadPodcast(item.id)
@@ -46,10 +46,10 @@ class FeedItemsFragment : Fragment() {
                 }
             }
 
-            override fun onPlayPodcastClick(item: FeedItemsAdapterItem) {
+            override fun onPlayPodcastClick(item: EntriesAdapterItem) {
                 lifecycleScope.launch {
                     runCatching {
-                        playPodcast(model.getFeedItem(item.id)!!)
+                        playPodcast(model.getEntry(item.id)!!)
                     }.onFailure {
                         Timber.e(it)
                         showDialog(R.string.error, it.message ?: "")
@@ -73,7 +73,7 @@ class FeedItemsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(
-            R.layout.fragment_feed_items,
+            R.layout.fragment_entries,
             container,
             false
         )
@@ -94,11 +94,11 @@ class FeedItemsFragment : Fragment() {
         }
 
         lifecycleScope.launchWhenResumed {
-            showFeedItems()
+            showEntries()
         }
     }
 
-    private suspend fun showFeedItems() {
+    private suspend fun showEntries() {
         progress.isVisible = true
 
         runCatching {
@@ -112,7 +112,7 @@ class FeedItemsFragment : Fragment() {
         listView.setHasFixedSize(true)
         listView.layoutManager = LinearLayoutManager(context)
         listView.adapter = adapter
-        listView.addItemDecoration(FeedItemsAdapterDecoration(resources.getDimensionPixelSize(R.dimen.feed_items_cards_gap)))
+        listView.addItemDecoration(EntriesAdapterDecoration(resources.getDimensionPixelSize(R.dimen.entries_cards_gap)))
 
         val touchHelper = ItemTouchHelper(object : ItemTouchHelper.Callback() {
             override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
@@ -128,12 +128,12 @@ class FeedItemsFragment : Fragment() {
             }
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val feedItem = adapter.currentList[viewHolder.bindingAdapterPosition]
+                val entry = adapter.currentList[viewHolder.bindingAdapterPosition]
 
                 if (direction == ItemTouchHelper.LEFT) {
                     lifecycleScope.launchWhenResumed {
                         runCatching {
-                            model.markAsRead(feedItem.id)
+                            model.markAsRead(entry.id)
                         }.onFailure {
                             Timber.e(it)
                         }
@@ -144,7 +144,7 @@ class FeedItemsFragment : Fragment() {
                 if (direction == ItemTouchHelper.RIGHT) {
                     lifecycleScope.launchWhenResumed {
                         runCatching {
-                            model.markAsReadAndStarred(feedItem.id)
+                            model.markAsReadAndStarred(entry.id)
                         }.onFailure {
                             Timber.e(it)
                         }
@@ -161,21 +161,21 @@ class FeedItemsFragment : Fragment() {
         adapter.screenWidth = displayMetrics.widthPixels
 
         model
-            .getFeedItems()
+            .getEntries()
             .catch {
                 Timber.e(it)
                 progress.isVisible = false
                 showDialog(R.string.error, it.message ?: "")
             }
             .conflate()
-            .collect { feedItems ->
+            .collect { entries ->
                 if (model.isInitialSyncCompleted()) {
                     progress.isVisible = false
                 }
 
-                empty.isVisible = feedItems.isEmpty() && model.isInitialSyncCompleted()
+                empty.isVisible = entries.isEmpty() && model.isInitialSyncCompleted()
 
-                adapter.submitList(feedItems)
+                adapter.submitList(entries)
             }
     }
 }
