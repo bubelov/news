@@ -74,7 +74,7 @@ class FeedItemFragment : Fragment() {
                 }
             }
 
-            toolbar.title = model.getFeed(item.feedId)?.title ?: getString(R.string.unknown_feed)
+            toolbar.title = model.getFeed(item.feedId.toString())?.title ?: getString(R.string.unknown_feed)
             title.text = item.title
             date.text = model.getDate(item)
 

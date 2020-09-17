@@ -14,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
+@Suppress("BlockingMethodInNonBlockingContext")
 class FeedsRepository(
     private val db: FeedQueries,
     private val api: NewsApi,
@@ -36,12 +37,12 @@ class FeedsRepository(
         db.selectAll().asFlow().mapToList()
     }
 
-    suspend fun byId(id: Long) = withContext(Dispatchers.IO) {
+    suspend fun byId(id: String) = withContext(Dispatchers.IO) {
         db.selectById(id).asFlow().mapToOneOrNull()
     }
 
-    suspend fun renameFeed(feedId: Long, newTitle: String) = withContext(Dispatchers.IO) {
-        val response = api.putFeedRename(feedId, PutFeedRenameArgs(newTitle)).execute()
+    suspend fun renameFeed(feedId: String, newTitle: String) = withContext(Dispatchers.IO) {
+        val response = api.putFeedRename(feedId.toLong(), PutFeedRenameArgs(newTitle)).execute()
 
         if (response.isSuccessful) {
             val feed = byId(feedId).first()
@@ -54,13 +55,13 @@ class FeedsRepository(
         }
     }
 
-    suspend fun deleteById(id: Long) = withContext(Dispatchers.IO) {
-        val response = api.deleteFeed(id).execute()
+    suspend fun deleteById(id: String) = withContext(Dispatchers.IO) {
+        val response = api.deleteFeed(id.toLong()).execute()
 
         if (response.isSuccessful) {
             db.transaction {
                 db.deleteById(id)
-                feedItemsRepository.deleteByFeedId(id)
+                feedItemsRepository.deleteByFeedId(id.toLong())
             }
         } else {
             throw Exception("HTTPS request failed with error code ${response.code()}")
@@ -88,13 +89,11 @@ class FeedsRepository(
 
     private fun FeedJson.toFeed(): Feed? {
         return Feed(
-            id = id ?: return null,
-            url = url ?: "",
+            id = id?.toString() ?: return null,
             title = title ?: "Untitled",
-            faviconLink = faviconLink ?: "",
-            link = link ?: "",
-            updateErrorCount = updateErrorCount ?: 0,
-            lastUpdateError = lastUpdateError ?: ""
+            link = url ?: "",
+            alternateLink = link ?: "",
+            alternateLinkType = "text/html",
         )
     }
 }

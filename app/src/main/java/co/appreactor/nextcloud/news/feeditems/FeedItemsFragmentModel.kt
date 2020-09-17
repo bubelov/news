@@ -47,7 +47,7 @@ class FeedItemsFragmentModel(
         feedItems.filter {
             showReadNews || it.unread
         }.map {
-            val feed = feeds.singleOrNull { feed -> feed.id == it.feedId }
+            val feed = feeds.singleOrNull { feed -> feed.id == it.feedId.toString() }
             it.toRow(feed, showFeedImages, cropFeedImages)
         }
     }

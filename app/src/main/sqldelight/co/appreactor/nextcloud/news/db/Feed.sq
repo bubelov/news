@@ -1,11 +1,9 @@
 CREATE TABLE Feed (
-  id INTEGER PRIMARY KEY,
-  url TEXT NOT NULL,
+  id TEXT PRIMARY KEY NOT NULL,
   title TEXT NOT NULL,
-  faviconLink TEXT NOT NULL,
   link TEXT NOT NULL,
-  updateErrorCount INTEGER NOT NULL,
-  lastUpdateError TEXT NOT NULL
+  alternateLink TEXT NOT NULL,
+  alternateLinkType TEXT NOT NULL
 );
 
 insertOrReplace:

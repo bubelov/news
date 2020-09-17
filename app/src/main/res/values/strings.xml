@@ -42,8 +42,8 @@
     <string name="bookmarks">Bookmarks</string>
     <string name="delete_all">Delete all</string>
     <string name="cannot_sync_bookmarks">Cannot sync bookmarks</string>
-    <string name="open_feed">Open XML</string>
-    <string name="open_website">Open website</string>
+    <string name="open_xml_link">Open feed</string>
+    <string name="open_html_link">Open website</string>
     <string name="actions">Actions</string>
     <string name="delete">Delete</string>
     <string name="unknown_feed">Unknown feed</string>

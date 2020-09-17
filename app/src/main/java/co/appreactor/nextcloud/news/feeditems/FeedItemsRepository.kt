@@ -1,5 +1,3 @@
-@file:Suppress("BlockingMethodInNonBlockingContext")
-
 package co.appreactor.nextcloud.news.feeditems
 
 import co.appreactor.nextcloud.news.api.*
@@ -13,6 +11,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
 
+@Suppress("BlockingMethodInNonBlockingContext")
 class FeedItemsRepository(
     private val db: FeedItemQueries,
     private val api: NewsApi,

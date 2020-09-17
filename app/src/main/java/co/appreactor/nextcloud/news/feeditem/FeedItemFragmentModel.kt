@@ -22,7 +22,7 @@ class FeedItemFragmentModel(
         return feedItemsRepository.byId(id).first()
     }
 
-    suspend fun getFeed(id: Long): Feed? {
+    suspend fun getFeed(id: String): Feed? {
         return feedsRepository.byId(id).first()
     }
 

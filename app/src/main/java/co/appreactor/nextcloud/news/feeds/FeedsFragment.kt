@@ -28,19 +28,19 @@ class FeedsFragment : Fragment() {
     private val model: FeedsFragmentModel by viewModel()
 
     private val adapter = FeedsAdapter(callback = object : FeedsAdapterCallback {
-        override fun onOpenFeedWebsiteClick(feed: Feed) {
+        override fun onOpenHtmlLinkClick(feed: Feed) {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.data = Uri.parse(feed.alternateLink)
+            startActivity(intent)
+        }
+
+        override fun openLinkClick(feed: Feed) {
             val intent = Intent(Intent.ACTION_VIEW)
             intent.data = Uri.parse(feed.link)
             startActivity(intent)
         }
 
-        override fun onOpenFeedXmlClick(feed: Feed) {
-            val intent = Intent(Intent.ACTION_VIEW)
-            intent.data = Uri.parse(feed.url)
-            startActivity(intent)
-        }
-
-        override fun onRenameFeedClick(feed: Feed) {
+        override fun onRenameClick(feed: Feed) {
             val dialog = MaterialAlertDialogBuilder(requireContext())
                 .setTitle(getString(R.string.rename))
                 .setView(R.layout.dialog_rename_feed)
@@ -68,7 +68,7 @@ class FeedsFragment : Fragment() {
             dialog.titleView.setText(feed.title)
         }
 
-        override fun onDeleteFeedClick(feed: Feed) {
+        override fun onDeleteClick(feed: Feed) {
             lifecycleScope.launchWhenResumed {
                 actionProgress.isVisible = true
                 fab.isVisible = false

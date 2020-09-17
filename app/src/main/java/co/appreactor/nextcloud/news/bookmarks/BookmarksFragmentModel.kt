@@ -39,7 +39,7 @@ class BookmarksFragmentModel(
         getCropFeedImages(),
     ) { feeds, feedItems, showFeedImages, cropFeedImages ->
         feedItems.map {
-            val feed = feeds.singleOrNull { feed -> feed.id == it.feedId }
+            val feed = feeds.singleOrNull { feed -> feed.id == it.feedId.toString() }
             it.toRow(feed, showFeedImages, cropFeedImages)
         }
     }

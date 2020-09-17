@@ -17,14 +17,16 @@ class FeedsAdapterViewHolder(
     fun bind(item: Feed) {
         view.apply {
             primaryText.text = item.title
-            secondaryText.text = item.link
+            secondaryText.text = item.alternateLink
 
-            if (!item.lastUpdateError.isBlank()) {
-                errorText.isVisible = true
-                errorText.text = item.lastUpdateError
-            } else {
-                errorText.isVisible = false
-            }
+            errorText.isVisible = false // TODO
+
+//            if (!item.lastUpdateError.isBlank()) {
+//                errorText.isVisible = true
+//                errorText.text = item.lastUpdateError
+//            } else {
+//                errorText.isVisible = false
+//            }
 
             actions.setOnClickListener {
                 val popup = PopupMenu(context, actions)
@@ -34,20 +36,20 @@ class FeedsAdapterViewHolder(
 
                 popup.setOnMenuItemClickListener {
                     when (it.itemId) {
-                        R.id.openWebsite -> {
-                            callback.onOpenFeedWebsiteClick(item)
+                        R.id.openHtmlLink -> {
+                            callback.onOpenHtmlLinkClick(item)
                         }
 
-                        R.id.openFeedXml -> {
-                            callback.onOpenFeedXmlClick(item)
+                        R.id.openLink -> {
+                            callback.openLinkClick(item)
                         }
 
                         R.id.renameFeed -> {
-                            callback.onRenameFeedClick(item)
+                            callback.onRenameClick(item)
                         }
 
                         R.id.deleteFeed -> {
-                            callback.onDeleteFeedClick(item)
+                            callback.onDeleteClick(item)
                         }
                     }
 

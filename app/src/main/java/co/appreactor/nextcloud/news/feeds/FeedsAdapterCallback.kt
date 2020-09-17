@@ -4,11 +4,11 @@ import co.appreactor.nextcloud.news.db.Feed
 
 interface FeedsAdapterCallback {
 
-    fun onOpenFeedWebsiteClick(feed: Feed)
+    fun onOpenHtmlLinkClick(feed: Feed)
 
-    fun onOpenFeedXmlClick(feed: Feed)
+    fun openLinkClick(feed: Feed)
 
-    fun onRenameFeedClick(feed: Feed)
+    fun onRenameClick(feed: Feed)
 
-    fun onDeleteFeedClick(feed: Feed)
+    fun onDeleteClick(feed: Feed)
 }
