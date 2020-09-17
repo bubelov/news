@@ -14,6 +14,9 @@ import co.appreactor.nextcloud.news.podcasts.EntriesAudioRepository
 import co.appreactor.nextcloud.news.podcasts.isPodcast
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import java.text.DateFormat
 import java.util.*
 
@@ -59,13 +62,15 @@ class BookmarksFragmentModel(
         showPreviewImages: Boolean,
         cropPreviewImages: Boolean,
     ): EntriesAdapterItem {
-        val dateString = DateFormat.getDateInstance().format(Date(pubDate * 1000))
+        val publishedDateTime = LocalDateTime.parse(published)
+        val publishedDateString = DateFormat.getDateInstance()
+            .format(Date(publishedDateTime.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()))
 
         return EntriesAdapterItem(
             id = id,
             title = title,
-            (feed?.title ?: "Unknown feed") + " · " + dateString,
-            unread = true,
+            (feed?.title ?: "Unknown feed") + " · " + publishedDateString,
+            viewed = false,
             podcast = isPodcast(),
             podcastDownloadPercent = flow {
                 entriesAudioRepository.getDownloadProgress(this@toRow.id).collect {

@@ -56,8 +56,8 @@ class EntryFragment : Fragment() {
         lifecycleScope.launchWhenResumed {
             val entry = model.getEntry(args.entryId)!!
 
-            if (entry.unread) {
-                model.toggleReadFlag(entry.id)
+            if (!entry.viewed) {
+                model.toggleViewedFlag(entry.id)
 
                 launch {
                     runCatching {
@@ -81,7 +81,7 @@ class EntryFragment : Fragment() {
             val imageGetter = TextViewImageGetter(textView)
 
             val body = HtmlCompat.fromHtml(
-                entry.body,
+                entry.summary,
                 HtmlCompat.FROM_HTML_MODE_LEGACY,
                 imageGetter,
                 null
@@ -196,9 +196,9 @@ class EntryFragment : Fragment() {
 
         fab.setOnClickListener {
             lifecycleScope.launch {
-                val item = model.getEntry(args.entryId)!!
+                val entry = model.getEntry(args.entryId)!!
                 val intent = Intent(Intent.ACTION_VIEW)
-                intent.data = Uri.parse(item.url)
+                intent.data = Uri.parse(entry.link)
                 startActivity(intent)
             }
         }

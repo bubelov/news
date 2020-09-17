@@ -24,13 +24,13 @@ class EntriesSummariesRepository {
             return@withContext cachedSummary
         }
 
-        if (entry.body.isBlank()) {
+        if (entry.summary.isBlank()) {
             cache[entry.id] = ""
             return@withContext ""
         }
 
         val summary = runCatching {
-            val parsedBody = HtmlCompat.fromHtml(entry.body, HtmlCompat.FROM_HTML_MODE_COMPACT)
+            val parsedBody = HtmlCompat.fromHtml(entry.summary, HtmlCompat.FROM_HTML_MODE_COMPACT)
 
             if (parsedBody is SpannableStringBuilder) {
                 parsedBody.clearSpans()

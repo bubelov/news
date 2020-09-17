@@ -61,14 +61,14 @@ class EntriesImagesRepository(
 
             db.insertOrReplace(image)
 
-            if (entry.url.isBlank()) {
+            if (entry.link.isBlank()) {
                 db.insertOrReplace(image.copy(status = STATUS_PROCESSED))
                 return@withContext
             }
 
-            Timber.d("Processing ${entry.url}")
+            Timber.d("Processing ${entry.link}")
 
-            val request = httpClient.newCall(Request.Builder().url(entry.url).build())
+            val request = httpClient.newCall(Request.Builder().url(entry.link).build())
 
             val response = runCatching {
                 request.execute()

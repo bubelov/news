@@ -8,7 +8,7 @@ import co.appreactor.nextcloud.news.db.Entry
 import java.io.File
 
 fun Entry.isPodcast(): Boolean {
-    return enclosureMime.startsWith("audio")
+    return enclosureLinkType.startsWith("audio")
 }
 
 fun Entry.getPodcastFile(context: Context): File {

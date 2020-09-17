@@ -61,7 +61,7 @@ class FeedsRepository(
         if (response.isSuccessful) {
             db.transaction {
                 db.deleteById(id)
-                entriesRepository.deleteByFeedId(id.toLong())
+                entriesRepository.deleteByFeedId(id)
             }
         } else {
             throw Exception("HTTPS request failed with error code ${response.code()}")

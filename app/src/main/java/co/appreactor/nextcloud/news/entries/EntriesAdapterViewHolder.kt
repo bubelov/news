@@ -116,9 +116,9 @@ class EntriesAdapterViewHolder(
                 }
             }
 
-            primaryText.isEnabled = item.unread
-            secondaryText.isEnabled = item.unread
-            supportingText.isEnabled = item.unread
+            primaryText.isEnabled = !item.viewed
+            secondaryText.isEnabled = !item.viewed
+            supportingText.isEnabled = !item.viewed
 
             podcastPanel.isVisible = false
             podcastPanel.tag = item

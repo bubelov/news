@@ -13,6 +13,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import java.text.DateFormat
 import java.util.*
 
@@ -42,12 +45,12 @@ class EntriesFragmentModel(
         entriesRepository.getAll(),
         getShowReadEntries(),
         getShowPreviewImages(),
-        getCropPreviewImages()
-    ) { feeds, entries, showReadEntries, showPreviewImages, cropPreviewImages ->
+        getCropPreviewImages(),
+    ) { feeds, entries, showViewedEntries, showPreviewImages, cropPreviewImages ->
         entries.filter {
-            showReadEntries || it.unread
+            showViewedEntries || !it.viewed
         }.map {
-            val feed = feeds.singleOrNull { feed -> feed.id == it.feedId.toString() }
+            val feed = feeds.singleOrNull { feed -> feed.id == it.feedId }
             it.toRow(feed, showPreviewImages, cropPreviewImages)
         }
     }
@@ -68,14 +71,14 @@ class EntriesFragmentModel(
 
     suspend fun getEntry(id: String) = entriesRepository.get(id).first()
 
-    suspend fun markAsRead(entryId: String) {
-        entriesRepository.setUnread(entryId, false)
+    suspend fun markAsViewed(entryId: String) {
+        entriesRepository.setViewed(entryId, true)
         newsApiSync.syncEntriesFlags()
     }
 
-    suspend fun markAsReadAndStarred(entryId: String) = withContext(Dispatchers.IO) {
-        entriesRepository.setUnread(entryId, false)
-        entriesRepository.setStarred(entryId, true)
+    suspend fun markAsViewedAndBookmarked(entryId: String) = withContext(Dispatchers.IO) {
+        entriesRepository.setViewed(entryId, true)
+        entriesRepository.setBookmarked(entryId, true)
         newsApiSync.syncEntriesFlags()
     }
 
@@ -90,13 +93,15 @@ class EntriesFragmentModel(
         showFeedImages: Boolean,
         cropFeedImages: Boolean,
     ): EntriesAdapterItem {
-        val dateString = DateFormat.getDateInstance().format(Date(pubDate * 1000))
+        val publishedDateTime = LocalDateTime.parse(published)
+        val publishedDateString = DateFormat.getDateInstance()
+            .format(Date(publishedDateTime.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()))
 
         return EntriesAdapterItem(
             id = id,
             title = title,
-            (feed?.title ?: "Unknown feed") + " · " + dateString,
-            unread = unread,
+            (feed?.title ?: "Unknown feed") + " · " + publishedDateString,
+            viewed = viewed,
             podcast = isPodcast(),
             podcastDownloadPercent = flow {
                 entriesAudioRepository.getDownloadProgress(this@toRow.id).collect {

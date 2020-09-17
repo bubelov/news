@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.*
 
 @Suppress("BlockingMethodInNonBlockingContext")
 class EntriesRepository(
@@ -33,16 +34,16 @@ class EntriesRepository(
         db.selectById(id).asFlow().mapToOneOrNull()
     }
 
-    suspend fun setUnread(id: String, unread: Boolean) = withContext(Dispatchers.IO) {
-        db.updateUnread(
-            unread = unread,
+    suspend fun setViewed(id: String, viewed: Boolean) = withContext(Dispatchers.IO) {
+        db.updateViewed(
+            viewed = viewed,
             id = id
         )
     }
 
-    suspend fun setStarred(id: String, starred: Boolean) = withContext(Dispatchers.IO) {
-        db.updateStarred(
-            starred = starred,
+    suspend fun setBookmarked(id: String, bookmarked: Boolean) = withContext(Dispatchers.IO) {
+        db.updateBookmarked(
+            bookmarked = bookmarked,
             id = id
         )
     }
@@ -51,7 +52,7 @@ class EntriesRepository(
         db.deleteAll()
     }
 
-    fun deleteByFeedId(feedId: Long) {
+    fun deleteByFeedId(feedId: String) {
         db.deleteByFeedId(feedId)
     }
 
@@ -74,24 +75,24 @@ class EntriesRepository(
 
     suspend fun syncUnreadFlags() = withContext(Dispatchers.IO) {
         val unsyncedItems = getAll().first().filter {
-            !it.unreadSynced
+            !it.viewedSynced
         }
 
         if (unsyncedItems.isEmpty()) {
             return@withContext
         }
 
-        val unsyncedReadItems = unsyncedItems.filterNot { it.unread }
+        val unsyncedViewedItems = unsyncedItems.filter { it.viewed }
 
-        if (unsyncedReadItems.isNotEmpty()) {
+        if (unsyncedViewedItems.isNotEmpty()) {
             val response = api.putRead(PutReadArgs(
-                unsyncedReadItems.map { it.id.toLong() }
+                unsyncedViewedItems.map { it.id.toLong() }
             )).execute()
 
             if (response.isSuccessful) {
                 db.transaction {
-                    unsyncedReadItems.forEach {
-                        db.updateUnreadSynced(true, it.id)
+                    unsyncedViewedItems.forEach {
+                        db.updateViewedSynced(true, it.id)
                     }
                 }
             } else {
@@ -99,17 +100,17 @@ class EntriesRepository(
             }
         }
 
-        val unsyncedUnreadItems = unsyncedItems.filter { it.unread }
+        val unsyncedNotViewedItems = unsyncedItems.filterNot { it.viewed }
 
-        if (unsyncedUnreadItems.isNotEmpty()) {
+        if (unsyncedNotViewedItems.isNotEmpty()) {
             val response = api.putUnread(PutReadArgs(
-                unsyncedUnreadItems.map { it.id.toLong() }
+                unsyncedNotViewedItems.map { it.id.toLong() }
             )).execute()
 
             if (response.isSuccessful) {
                 db.transaction {
-                    unsyncedUnreadItems.forEach {
-                        db.updateUnreadSynced(true, it.id)
+                    unsyncedNotViewedItems.forEach {
+                        db.updateViewedSynced(true, it.id)
                     }
                 }
             } else {
@@ -120,27 +121,27 @@ class EntriesRepository(
 
     suspend fun syncStarredFlags() = withContext(Dispatchers.IO) {
         val unsyncedItems = getAll().first().filter {
-            !it.starredSynced
+            !it.bookmarkedSynced
         }
 
         if (unsyncedItems.isEmpty()) {
             return@withContext
         }
 
-        val unsyncedStarredItems = unsyncedItems.filter { it.starred }
+        val unsyncedBookmarkedItems = unsyncedItems.filter { it.bookmarked }
 
-        if (unsyncedStarredItems.isNotEmpty()) {
-            val response = api.putStarred(PutStarredArgs(unsyncedStarredItems.map {
+        if (unsyncedBookmarkedItems.isNotEmpty()) {
+            val response = api.putStarred(PutStarredArgs(unsyncedBookmarkedItems.map {
                 PutStarredArgsItem(
-                    it.feedId,
+                    it.feedId.toLong(),
                     it.guidHash
                 )
             })).execute()
 
             if (response.isSuccessful) {
                 db.transaction {
-                    unsyncedStarredItems.forEach {
-                        db.updateStarredSynced(true, it.id)
+                    unsyncedBookmarkedItems.forEach {
+                        db.updateBookmarkedSynced(true, it.id)
                     }
                 }
             } else {
@@ -148,20 +149,20 @@ class EntriesRepository(
             }
         }
 
-        val unsyncedUnstarredItems = unsyncedItems.filter { !it.starred }
+        val unsyncedNotBookmarkedItems = unsyncedItems.filterNot { it.bookmarked }
 
-        if (unsyncedUnstarredItems.isNotEmpty()) {
-            val response = api.putUnstarred(PutStarredArgs(unsyncedUnstarredItems.map {
+        if (unsyncedNotBookmarkedItems.isNotEmpty()) {
+            val response = api.putUnstarred(PutStarredArgs(unsyncedNotBookmarkedItems.map {
                 PutStarredArgsItem(
-                    it.feedId,
+                    it.feedId.toLong(),
                     it.guidHash
                 )
             })).execute()
 
             if (response.isSuccessful) {
                 db.transaction {
-                    unsyncedUnstarredItems.forEach {
-                        db.updateStarredSynced(true, it.id)
+                    unsyncedNotBookmarkedItems.forEach {
+                        db.updateBookmarkedSynced(true, it.id)
                     }
                 }
             } else {
@@ -171,9 +172,10 @@ class EntriesRepository(
     }
 
     suspend fun syncNewAndUpdated() = withContext(Dispatchers.IO) {
-        val mostRecentItem = getAll().firstOrNull()?.maxByOrNull { it.lastModified } ?: return@withContext
+        val mostRecentItem = getAll().firstOrNull()?.maxByOrNull { it.updated } ?: return@withContext
+        val epochSeconds = LocalDateTime.parse(mostRecentItem.updated).toInstant(TimeZone.UTC).epochSeconds
 
-        val newAndUpdatedItems = api.getNewAndUpdatedItems(mostRecentItem.lastModified + 1).execute().body()!!.items
+        val newAndUpdatedItems = api.getNewAndUpdatedItems(epochSeconds + 1).execute().body()!!.items
 
         db.transaction {
             newAndUpdatedItems.mapNotNull { it.toEntry() }.forEach {
@@ -183,22 +185,34 @@ class EntriesRepository(
     }
 
     private fun ItemJson.toEntry(): Entry? {
+        if (id == null) return null
+        if (pubDate == null) return null
+        if (lastModified == null) return null
+        if (unread == null) return null
+        if (starred == null) return null
+
+        val published = Instant.fromEpochSeconds(pubDate).toLocalDateTime(TimeZone.currentSystemDefault())
+        val updated = Instant.fromEpochSeconds(pubDate).toLocalDateTime(TimeZone.currentSystemDefault())
+
         return Entry(
-            id = id?.toString() ?: return null,
-            guidHash = guidHash ?: return null,
-            url = url?.replace("http://", "https://") ?: "",
+            id = id.toString(),
+            feedId = feedId?.toString() ?: "",
             title = title ?: "Untitled",
-            author = author ?: "",
-            pubDate = pubDate ?: 0,
-            body = body ?: "No content",
-            enclosureMime = enclosureMime ?: "",
+            link = url?.replace("http://", "https://") ?: "",
+            published = published.toString(),
+            updated = updated.toString(),
+            authorName = author ?: "",
+            summary = body ?: "No content",
             enclosureLink = enclosureLink?.replace("http://", "https://") ?: "",
-            feedId = feedId ?: 0,
-            unread = unread ?: return null,
-            unreadSynced = true,
-            starred = starred ?: return null,
-            starredSynced = true,
-            lastModified = lastModified ?: 0
+            enclosureLinkType = enclosureMime ?: "",
+
+            viewed = unread == false,
+            viewedSynced = true,
+
+            bookmarked = starred,
+            bookmarkedSynced = true,
+
+            guidHash = guidHash ?: return null,
         )
     }
 }

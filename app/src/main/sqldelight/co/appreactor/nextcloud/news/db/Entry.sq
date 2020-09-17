@@ -1,19 +1,22 @@
 CREATE TABLE Entry (
   id TEXT PRIMARY KEY NOT NULL,
-  guidHash TEXT NOT NULL,
-  url TEXT NOT NULL,
+  feedId TEXT NOT NULL,
   title TEXT NOT NULL,
-  author TEXT NOT NULL,
-  pubDate INTEGER NOT NULL,
-  body TEXT NOT NULL,
-  enclosureMime TEXT NOT NULL,
+  link TEXT NOT NULL,
+  published TEXT NOT NULL,
+  updated TEXT NOT NULL,
+  authorName TEXT NOT NULL,
+  summary TEXT NOT NULL,
   enclosureLink TEXT NOT NULL,
-  feedId INTEGER NOT NULL,
-  unread INTEGER AS Boolean NOT NULL,
-  unreadSynced INTEGER AS Boolean NOT NULL,
-  starred INTEGER AS Boolean NOT NULL,
-  starredSynced INTEGER AS Boolean NOT NULL,
-  lastModified INTEGER NOT NULL
+  enclosureLinkType TEXT NOT NULL,
+
+  viewed INTEGER AS Boolean NOT NULL,
+  viewedSynced INTEGER AS Boolean NOT NULL,
+
+  bookmarked INTEGER AS Boolean NOT NULL,
+  bookmarkedSynced INTEGER AS Boolean NOT NULL,
+
+  guidHash TEXT NOT NULL
 );
 
 insertOrReplace:
@@ -24,7 +27,7 @@ VALUES ?;
 selectAll:
 SELECT *
 FROM Entry
-ORDER BY pubDate DESC;
+ORDER BY published DESC;
 
 selectById:
 SELECT *
@@ -34,37 +37,37 @@ WHERE id = ?;
 selectUnread:
 SELECT *
 FROM Entry
-WHERE unread = 1
-ORDER BY pubDate DESC;
+WHERE viewed = 0
+ORDER BY published DESC;
 
 selectStarred:
 SELECT *
 FROM Entry
-WHERE starred = 1
-ORDER BY pubDate DESC;
+WHERE bookmarked = 1
+ORDER BY published DESC;
 
 selectCount:
 SELECT COUNT(*)
 FROM Entry;
 
-updateUnread:
+updateViewed:
 UPDATE Entry
-SET unread = ?, unreadSynced = 0
+SET viewed = ?, viewedSynced = 0
 WHERE id = ?;
 
-updateUnreadSynced:
+updateViewedSynced:
 UPDATE Entry
-SET unreadSynced = ?
+SET viewedSynced = ?
 WHERE id = ?;
 
-updateStarred:
+updateBookmarked:
 UPDATE Entry
-SET starred = ?, starredSynced = 0
+SET bookmarked = ?, bookmarkedSynced = 0
 WHERE id = ?;
 
-updateStarredSynced:
+updateBookmarkedSynced:
 UPDATE Entry
-SET starredSynced = ?
+SET bookmarkedSynced = ?
 WHERE id = ?;
 
 deleteAll:
