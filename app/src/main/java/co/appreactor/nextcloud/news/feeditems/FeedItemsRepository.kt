@@ -1,3 +1,5 @@
+@file:Suppress("BlockingMethodInNonBlockingContext")
+
 package co.appreactor.nextcloud.news.feeditems
 
 import co.appreactor.nextcloud.news.api.*
@@ -189,13 +191,13 @@ class FeedItemsRepository(
         return FeedItem(
             id = id ?: return null,
             guidHash = guidHash ?: return null,
-            url = url ?: "",
+            url = url?.replace("http://", "https://") ?: "",
             title = title ?: "Untitled",
             author = author ?: "",
             pubDate = pubDate ?: 0,
             body = body ?: "No content",
             enclosureMime = enclosureMime ?: "",
-            enclosureLink = enclosureLink ?: "",
+            enclosureLink = enclosureLink?.replace("http://", "https://") ?: "",
             feedId = feedId ?: 0,
             unread = unread ?: return null,
             unreadSynced = true,

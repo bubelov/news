@@ -104,6 +104,8 @@ class FeedItemsFragmentModel(
                 }
             },
             image = flow {
+                openGraphImagesRepository.parse(this@toRow)
+
                 openGraphImagesRepository.getImage(this@toRow).collect {
                     emit(it)
                 }

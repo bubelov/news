@@ -61,7 +61,7 @@ class OpenGraphImagesRepository(
 
             db.insertOrReplace(image)
 
-            if (feedItem.url.isBlank() || feedItem.url.startsWith("http://")) {
+            if (feedItem.url.isBlank()) {
                 db.insertOrReplace(image.copy(status = STATUS_PROCESSED))
                 return@withContext
             }
@@ -72,20 +72,21 @@ class OpenGraphImagesRepository(
 
             val response = runCatching {
                 request.execute()
-            }.getOrElse { e ->
-                e.log("Cannot fetch url for feed item ${feedItem.id} (${feedItem.title})")
+            }.getOrElse {
+                it.log("Cannot fetch url for feed item ${feedItem.id} (${feedItem.title})")
                 db.insertOrReplace(image.copy(status = STATUS_PROCESSED))
                 return@withContext
             }
 
             if (!response.isSuccessful) {
+                Timber.d("Invalid response code ${response.code} for item ${feedItem.id} (${feedItem.title}")
                 return@withContext
             }
 
             val html = runCatching {
                 response.body!!.string()
-            }.getOrElse { e ->
-                e.log("Cannot fetch response body for feed item ${feedItem.id} (${feedItem.title})")
+            }.getOrElse {
+                it.log("Cannot fetch response body for feed item ${feedItem.id} (${feedItem.title})")
                 db.insertOrReplace(image.copy(status = STATUS_PROCESSED))
                 return@withContext
             }
@@ -100,8 +101,8 @@ class OpenGraphImagesRepository(
 
             val bitmap = kotlin.runCatching {
                 Picasso.get().load(imageUrl).resize(1080, 0).onlyScaleDown().get()
-            }.getOrElse { e ->
-                e.log("Cannot download image by url $image")
+            }.getOrElse {
+                it.log("Cannot download image by url $image")
                 db.insertOrReplace(image.copy(status = STATUS_PROCESSED))
                 return@withContext
             }
