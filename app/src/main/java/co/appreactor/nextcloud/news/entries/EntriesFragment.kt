@@ -31,7 +31,7 @@ class EntriesFragment : Fragment() {
         scope = lifecycleScope,
         callback = object : EntriesAdapterCallback {
             override fun onItemClick(item: EntriesAdapterItem) {
-                val action = EntriesFragmentDirections.actionNewsFragmentToNewsItemFragment(item.id)
+                val action = EntriesFragmentDirections.actionEntriesFragmentToEntryFragment(item.id)
                 findNavController().navigate(action)
             }
 

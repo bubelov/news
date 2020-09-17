@@ -1,5 +1,5 @@
 CREATE TABLE OpenGraphImage (
-  entryId INTEGER PRIMARY KEY,
+  entryId TEXT PRIMARY KEY NOT NULL,
   status TEXT NOT NULL,
   url TEXT NOT NULL,
   width INTEGER NOT NULL,

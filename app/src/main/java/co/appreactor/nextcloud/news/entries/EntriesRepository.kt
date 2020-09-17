@@ -29,18 +29,18 @@ class EntriesRepository(
         db.selectStarred().asFlow().mapToList()
     }
 
-    suspend fun get(id: Long) = withContext(Dispatchers.IO) {
+    suspend fun get(id: String) = withContext(Dispatchers.IO) {
         db.selectById(id).asFlow().mapToOneOrNull()
     }
 
-    suspend fun setUnread(id: Long, unread: Boolean) = withContext(Dispatchers.IO) {
+    suspend fun setUnread(id: String, unread: Boolean) = withContext(Dispatchers.IO) {
         db.updateUnread(
             unread = unread,
             id = id
         )
     }
 
-    suspend fun setStarred(id: Long, starred: Boolean) = withContext(Dispatchers.IO) {
+    suspend fun setStarred(id: String, starred: Boolean) = withContext(Dispatchers.IO) {
         db.updateStarred(
             starred = starred,
             id = id
@@ -85,7 +85,7 @@ class EntriesRepository(
 
         if (unsyncedReadItems.isNotEmpty()) {
             val response = api.putRead(PutReadArgs(
-                unsyncedReadItems.map { it.id }
+                unsyncedReadItems.map { it.id.toLong() }
             )).execute()
 
             if (response.isSuccessful) {
@@ -103,7 +103,7 @@ class EntriesRepository(
 
         if (unsyncedUnreadItems.isNotEmpty()) {
             val response = api.putUnread(PutReadArgs(
-                unsyncedUnreadItems.map { it.id }
+                unsyncedUnreadItems.map { it.id.toLong() }
             )).execute()
 
             if (response.isSuccessful) {
@@ -184,7 +184,7 @@ class EntriesRepository(
 
     private fun ItemJson.toEntry(): Entry? {
         return Entry(
-            id = id ?: return null,
+            id = id?.toString() ?: return null,
             guidHash = guidHash ?: return null,
             url = url?.replace("http://", "https://") ?: "",
             title = title ?: "Untitled",

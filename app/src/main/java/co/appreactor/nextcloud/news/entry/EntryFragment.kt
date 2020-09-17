@@ -54,7 +54,7 @@ class EntryFragment : Fragment() {
         progress.isVisible = true
 
         lifecycleScope.launchWhenResumed {
-            val entry = model.getEntry(args.newsItemId)!!
+            val entry = model.getEntry(args.entryId)!!
 
             if (entry.unread) {
                 model.toggleReadFlag(entry.id)
@@ -157,7 +157,7 @@ class EntryFragment : Fragment() {
         }
 
         lifecycleScope.launchWhenResumed {
-            model.getStarredFlag(args.newsItemId).collect { starred ->
+            model.getStarredFlag(args.entryId).collect { starred ->
                 val menuItem = toolbar.menu.findItem(R.id.toggleStarred)
 
                 if (starred) {
@@ -173,7 +173,7 @@ class EntryFragment : Fragment() {
         toolbar.setOnMenuItemClickListener { menuItem ->
             if (menuItem.itemId == R.id.toggleStarred) {
                 lifecycleScope.launch {
-                    model.toggleStarredFlag(args.newsItemId)
+                    model.toggleStarredFlag(args.entryId)
 
                     runCatching {
                         model.syncEntriesFlags()
@@ -196,7 +196,7 @@ class EntryFragment : Fragment() {
 
         fab.setOnClickListener {
             lifecycleScope.launch {
-                val item = model.getEntry(args.newsItemId)!!
+                val item = model.getEntry(args.entryId)!!
                 val intent = Intent(Intent.ACTION_VIEW)
                 intent.data = Uri.parse(item.url)
                 startActivity(intent)

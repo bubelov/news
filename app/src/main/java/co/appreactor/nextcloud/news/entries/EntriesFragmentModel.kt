@@ -62,18 +62,18 @@ class EntriesFragmentModel(
 
     suspend fun isInitialSyncCompleted() = prefs.initialSyncCompleted().first()
 
-    suspend fun downloadPodcast(id: Long) {
+    suspend fun downloadPodcast(id: String) {
         entriesAudioRepository.downloadPodcast(id)
     }
 
-    suspend fun getEntry(id: Long) = entriesRepository.get(id).first()
+    suspend fun getEntry(id: String) = entriesRepository.get(id).first()
 
-    suspend fun markAsRead(entryId: Long) {
+    suspend fun markAsRead(entryId: String) {
         entriesRepository.setUnread(entryId, false)
         newsApiSync.syncEntriesFlags()
     }
 
-    suspend fun markAsReadAndStarred(entryId: Long) = withContext(Dispatchers.IO) {
+    suspend fun markAsReadAndStarred(entryId: String) = withContext(Dispatchers.IO) {
         entriesRepository.setUnread(entryId, false)
         entriesRepository.setStarred(entryId, true)
         newsApiSync.syncEntriesFlags()

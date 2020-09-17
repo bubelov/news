@@ -18,7 +18,7 @@ class EntryFragmentModel(
     private val newsApiSync: NewsApiSync,
 ) : ViewModel() {
 
-    suspend fun getEntry(id: Long): Entry? {
+    suspend fun getEntry(id: String): Entry? {
         return entriesRepository.get(id).first()
     }
 
@@ -31,14 +31,14 @@ class EntryFragmentModel(
         return DateFormat.getDateInstance(DateFormat.LONG).format(Date(instant.toEpochMilliseconds()))
     }
 
-    suspend fun getStarredFlag(id: Long) = entriesRepository.get(id).map { it?.starred == true }
+    suspend fun getStarredFlag(id: String) = entriesRepository.get(id).map { it?.starred == true }
 
-    suspend fun toggleReadFlag(id: Long) {
+    suspend fun toggleReadFlag(id: String) {
         val item = getEntry(id)!!
         entriesRepository.setUnread(id, !item.unread)
     }
 
-    suspend fun toggleStarredFlag(id: Long) {
+    suspend fun toggleStarredFlag(id: String) {
         val item = getEntry(id)!!
         entriesRepository.setUnread(id, !item.starred)
     }

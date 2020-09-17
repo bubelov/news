@@ -87,7 +87,7 @@ class DirectAuthFragment : Fragment() {
 
                     findNavController().apply {
                         popBackStack()
-                        navigate(R.id.newsFragment)
+                        navigate(R.id.entriesFragment)
                     }
                 } else {
                     progress.isVisible = false

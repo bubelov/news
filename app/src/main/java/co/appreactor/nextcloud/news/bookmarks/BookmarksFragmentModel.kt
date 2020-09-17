@@ -34,7 +34,7 @@ class BookmarksFragmentModel(
 
     suspend fun getBookmarks() = combine(
         feedsRepository.getAll(),
-        entriesRepository.getAll(),
+        entriesRepository.getStarred(),
         getShowPreviewImages(),
         getCropPreviewImages(),
     ) { feeds, entries, showPreviewImages, cropPreviewImages ->
@@ -44,11 +44,11 @@ class BookmarksFragmentModel(
         }
     }
 
-    suspend fun downloadPodcast(id: Long) {
+    suspend fun downloadPodcast(id: String) {
         entriesAudioRepository.downloadPodcast(id)
     }
 
-    suspend fun getEntry(id: Long) = entriesRepository.get(id).first()
+    suspend fun getEntry(id: String) = entriesRepository.get(id).first()
 
     private suspend fun getShowPreviewImages() = prefs.showPreviewImages()
 

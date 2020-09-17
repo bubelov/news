@@ -15,7 +15,7 @@ class EntriesSummariesRepository {
         private const val SUMMARY_MAX_LENGTH = 150
     }
 
-    private val cache = Collections.synchronizedMap(mutableMapOf<Long, String>())
+    private val cache = Collections.synchronizedMap(mutableMapOf<String, String>())
 
     suspend fun getSummary(entry: Entry): String = withContext(Dispatchers.IO) {
         val cachedSummary = cache[entry.id]
@@ -56,5 +56,5 @@ class EntriesSummariesRepository {
         summary
     }
 
-    fun getCachedSummary(entryId: Long) = cache[entryId]
+    fun getCachedSummary(entryId: String) = cache[entryId]
 }

@@ -22,14 +22,14 @@ class EntriesAudioRepository(
 
     private val httpClient = OkHttpClient()
 
-    suspend fun getDownloadProgress(entryId: Long) = withContext(Dispatchers.IO) {
+    suspend fun getDownloadProgress(entryId: String) = withContext(Dispatchers.IO) {
         db.selectByEntryId(entryId).asFlow().map {
             it.executeAsOneOrNull()?.downloadPercent
         }
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")
-    suspend fun downloadPodcast(entryId: Long) = withContext(Dispatchers.IO) {
+    suspend fun downloadPodcast(entryId: String) = withContext(Dispatchers.IO) {
         val entry = entriesRepository.get(entryId).first()
 
         if (entry == null) {

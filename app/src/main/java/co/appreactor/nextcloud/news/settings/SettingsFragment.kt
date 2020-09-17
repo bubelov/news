@@ -85,7 +85,7 @@ class SettingsFragment : Fragment() {
                 ) { _, _ ->
                     lifecycleScope.launch {
                         model.clearData(requireContext())
-                        findNavController().popBackStack(R.id.newsFragment, true)
+                        findNavController().popBackStack(R.id.entriesFragment, true)
                         findNavController().navigate(NavGraphDirections.actionGlobalToAuthFragment())
                     }
                 }.setNegativeButton(

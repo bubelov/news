@@ -33,7 +33,7 @@ class BookmarksFragment : Fragment() {
         scope = lifecycleScope,
         callback = object : EntriesAdapterCallback {
             override fun onItemClick(item: EntriesAdapterItem) {
-                val action = BookmarksFragmentDirections.actionStarredNewsFragmentToNewsItemFragment(item.id)
+                val action = BookmarksFragmentDirections.actionBookmarksFragmentToEntryFragment(item.id)
                 findNavController().navigate(action)
             }
 

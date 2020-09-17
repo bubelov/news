@@ -1,5 +1,5 @@
 CREATE TABLE PodcastDownload (
-  entryId INTEGER PRIMARY KEY,
+  entryId TEXT PRIMARY KEY NOT NULL,
   downloadPercent INTEGER
 );
 

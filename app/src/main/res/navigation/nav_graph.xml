@@ -21,7 +21,7 @@
         tools:layout="@layout/fragment_auth">
         <action
             android:id="@+id/action_authFragment_to_newsFragment"
-            app:destination="@id/newsFragment"
+            app:destination="@id/entriesFragment"
             app:popEnterAnim="@anim/fade_in"
             app:popExitAnim="@anim/fade_out" />
         <action
@@ -37,38 +37,38 @@
         android:label="DirectAuthFragment"
         tools:layout="@layout/fragment_direct_auth">
         <action
-            android:id="@+id/action_directAuthFragment_to_newsFragment"
-            app:destination="@id/newsFragment"
+            android:id="@+id/action_directAuthFragment_to_entriesFragment"
+            app:destination="@id/entriesFragment"
             app:popEnterAnim="@anim/fade_in"
             app:popExitAnim="@anim/fade_out" />
     </fragment>
 
     <fragment
-        android:id="@+id/newsFragment"
+        android:id="@+id/entriesFragment"
         android:name="co.appreactor.nextcloud.news.entries.EntriesFragment"
-        android:label="NewsFragment"
+        android:label="EntriesFragment"
         tools:layout="@layout/fragment_entries">
         <action
-            android:id="@+id/action_newsFragment_to_newsItemFragment"
-            app:destination="@id/newsItemFragment"
+            android:id="@+id/action_entriesFragment_to_entryFragment"
+            app:destination="@id/entryFragment"
             app:popEnterAnim="@anim/fade_in"
             app:popExitAnim="@anim/fade_out" />
     </fragment>
 
     <fragment
-        android:id="@+id/newsItemFragment"
+        android:id="@+id/entryFragment"
         android:name="co.appreactor.nextcloud.news.entry.EntryFragment"
-        android:label="NewsItemFragment"
+        android:label="EntryFragment"
         tools:layout="@layout/fragment_entry">
         <argument
-            android:name="newsItemId"
-            app:argType="long" />
+            android:name="entryId"
+            app:argType="string" />
     </fragment>
 
     <fragment
-        android:id="@+id/newsFeedsFragment"
+        android:id="@+id/feedsFragment"
         android:name="co.appreactor.nextcloud.news.feeds.FeedsFragment"
-        android:label="NewsFeedsFragment"
+        android:label="FeedsFragment"
         tools:layout="@layout/fragment_feeds" />
 
     <fragment
@@ -77,8 +77,8 @@
         android:label="BookmarksFragment"
         tools:layout="@layout/fragment_bookmarks">
         <action
-            android:id="@+id/action_starredNewsFragment_to_newsItemFragment"
-            app:destination="@id/newsItemFragment"
+            android:id="@+id/action_bookmarksFragment_to_entryFragment"
+            app:destination="@id/entryFragment"
             app:popEnterAnim="@anim/fade_in"
             app:popExitAnim="@anim/fade_out" />
     </fragment>
