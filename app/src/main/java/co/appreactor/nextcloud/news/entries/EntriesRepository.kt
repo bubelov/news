@@ -192,7 +192,7 @@ class EntriesRepository(
         if (starred == null) return null
 
         val published = Instant.fromEpochSeconds(pubDate).toLocalDateTime(TimeZone.currentSystemDefault())
-        val updated = Instant.fromEpochSeconds(pubDate).toLocalDateTime(TimeZone.currentSystemDefault())
+        val updated = Instant.fromEpochSeconds(lastModified).toLocalDateTime(TimeZone.currentSystemDefault())
 
         return Entry(
             id = id.toString(),
