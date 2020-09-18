@@ -10,7 +10,7 @@
         android:id="@+id/toolbar"
         style="@style/Widget.MaterialComponents.Toolbar.PrimarySurface"
         android:layout_width="match_parent"
-        app:menu="@menu/menu_news_item"
+        app:menu="@menu/menu_entry"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
