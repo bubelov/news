@@ -18,7 +18,6 @@ import co.appreactor.nextcloud.news.podcasts.playPodcast
 import kotlinx.android.synthetic.main.fragment_entries.*
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
 import timber.log.Timber
@@ -167,7 +166,6 @@ class EntriesFragment : Fragment() {
                 progress.isVisible = false
                 showDialog(R.string.error, it.message ?: "")
             }
-            .conflate()
             .collect { entries ->
                 if (model.isInitialSyncCompleted()) {
                     progress.isVisible = false

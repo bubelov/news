@@ -29,18 +29,30 @@ SELECT *
 FROM Entry
 ORDER BY published DESC;
 
+selectAllWithoutSummary:
+SELECT id, feedId, title, link, published, updated, authorName, enclosureLink, enclosureLinkType, viewed, viewedSynced, bookmarked, bookmarkedSynced
+FROM Entry
+ORDER BY published DESC;
+
 selectById:
 SELECT *
 FROM Entry
 WHERE id = ?;
 
-selectUnread:
+selectNotViewedAndBookmarked:
+SELECT *
+FROM Entry
+WHERE viewed = 0
+OR bookmarked = 1
+ORDER BY published DESC;
+
+selectNotViewed:
 SELECT *
 FROM Entry
 WHERE viewed = 0
 ORDER BY published DESC;
 
-selectStarred:
+selectBookmarked:
 SELECT *
 FROM Entry
 WHERE bookmarked = 1

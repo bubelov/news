@@ -1,7 +1,6 @@
 package co.appreactor.nextcloud.news.bookmarks
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import co.appreactor.nextcloud.news.feeds.FeedsRepository
 import co.appreactor.nextcloud.news.common.Preferences
 import co.appreactor.nextcloud.news.common.cropPreviewImages
@@ -13,7 +12,7 @@ import co.appreactor.nextcloud.news.entriesimages.EntriesImagesRepository
 import co.appreactor.nextcloud.news.podcasts.EntriesAudioRepository
 import co.appreactor.nextcloud.news.podcasts.isPodcast
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
@@ -29,15 +28,9 @@ class BookmarksFragmentModel(
     private val prefs: Preferences,
 ) : ViewModel() {
 
-    init {
-        viewModelScope.launch {
-            entriesImagesRepository.warmUpMemoryCache()
-        }
-    }
-
     suspend fun getBookmarks() = combine(
         feedsRepository.getAll(),
-        entriesRepository.getStarred(),
+        entriesRepository.getBookmarked(),
         getShowPreviewImages(),
         getCropPreviewImages(),
     ) { feeds, entries, showPreviewImages, cropPreviewImages ->
@@ -62,14 +55,15 @@ class BookmarksFragmentModel(
         showPreviewImages: Boolean,
         cropPreviewImages: Boolean,
     ): EntriesAdapterItem {
-        val publishedDateTime = LocalDateTime.parse(published)
-        val publishedDateString = DateFormat.getDateInstance()
-            .format(Date(publishedDateTime.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()))
-
         return EntriesAdapterItem(
             id = id,
             title = title,
-            (feed?.title ?: "Unknown feed") + " · " + publishedDateString,
+            subtitle = lazy {
+                val publishedDateTime = LocalDateTime.parse(published)
+                val publishedDateString = DateFormat.getDateTimeInstance()
+                    .format(Date(publishedDateTime.toInstant(TimeZone.UTC).toEpochMilliseconds()))
+                (feed?.title ?: "Unknown feed") + " · " + publishedDateString
+            },
             viewed = false,
             podcast = isPodcast(),
             podcastDownloadPercent = flow {
@@ -82,10 +76,15 @@ class BookmarksFragmentModel(
                     emit(it)
                 }
             },
-            cachedImage = entriesImagesRepository.getPreviewImage(this).first(),
+            cachedImage = lazy {
+                runBlocking {
+                    entriesImagesRepository.getPreviewImage(this@toRow).first()
+                }
+
+            },
             showImage = showPreviewImages,
             cropImage = cropPreviewImages,
-            summary = flow { emit(entriesSummariesRepository.getSummary(this@toRow)) },
+            summary = flow { emit(entriesSummariesRepository.getSummary(this@toRow.id)) },
             cachedSummary = entriesSummariesRepository.getCachedSummary(this.id)
         )
     }

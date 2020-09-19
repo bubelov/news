@@ -34,6 +34,7 @@ class EntriesAdapterViewHolder(
                 val handleImage = fun(image: EntryImage?) {
                     if (
                         imageView.tag != item
+                        || imageView.drawable != null
                         || image == null
                         || image.url.isBlank()
                         || image.width == 0L
@@ -83,8 +84,8 @@ class EntriesAdapterViewHolder(
                         })
                 }
 
-                if (item.cachedImage != null) {
-                    handleImage(item.cachedImage)
+                if (item.cachedImage.value != null) {
+                    handleImage(item.cachedImage.value)
                 } else {
                     scope.launchWhenResumed {
                         item.image.collect {
@@ -95,7 +96,7 @@ class EntriesAdapterViewHolder(
             }
 
             primaryText.text = item.title
-            secondaryText.text = item.subtitle
+            secondaryText.text = item.subtitle.value
 
             supportingText.tag = item
 

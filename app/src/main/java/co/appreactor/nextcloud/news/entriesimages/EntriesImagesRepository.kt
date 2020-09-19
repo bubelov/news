@@ -34,20 +34,8 @@ class EntriesImagesRepository(
         .callTimeout(10, TimeUnit.SECONDS)
         .build()
 
-    suspend fun warmUpMemoryCache() = withContext(Dispatchers.IO) {
-        imageQueries.selectAll().asFlow().mapToList().collect { images ->
-            images.forEach {
-                if (it.url.isNotBlank()) {
-                    Picasso.get().load(it.url).resize(MAX_WIDTH, 0).onlyScaleDown().fetch()
-                }
-            }
-        }
-    }
-
     suspend fun syncPreviews() = withContext(Dispatchers.IO) {
-        entriesRepository.getUnread().collect { unreadEntries ->
-            Timber.d("Got ${unreadEntries.size} unread entries")
-
+        entriesRepository.getNotViewedAndBookmarked().collect { unreadEntries ->
             unreadEntries.forEach { entry ->
                 syncPreview(entry)
             }

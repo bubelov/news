@@ -2,14 +2,16 @@ package co.appreactor.nextcloud.news.entries
 
 import android.text.SpannableStringBuilder
 import androidx.core.text.HtmlCompat
-import co.appreactor.nextcloud.news.db.Entry
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.util.*
 import kotlin.math.min
 
-class EntriesSummariesRepository {
+class EntriesSummariesRepository(
+    private val entriesRepository: EntriesRepository,
+) {
 
     companion object {
         private const val SUMMARY_MAX_LENGTH = 150
@@ -17,15 +19,17 @@ class EntriesSummariesRepository {
 
     private val cache = Collections.synchronizedMap(mutableMapOf<String, String>())
 
-    suspend fun getSummary(entry: Entry): String = withContext(Dispatchers.IO) {
-        val cachedSummary = cache[entry.id]
+    suspend fun getSummary(entryId: String): String = withContext(Dispatchers.IO) {
+        val cachedSummary = cache[entryId]
 
         if (cachedSummary != null) {
             return@withContext cachedSummary
         }
 
-        if (entry.summary.isBlank()) {
-            cache[entry.id] = ""
+        val entry = entriesRepository.get(entryId).first()
+
+        if (entry == null || entry.summary.isBlank()) {
+            cache[entryId] = ""
             return@withContext ""
         }
 
@@ -52,7 +56,7 @@ class EntriesSummariesRepository {
             Timber.e(it)
         }.getOrDefault("")
 
-        cache[entry.id] = summary
+        cache[entryId] = summary
         summary
     }
 
