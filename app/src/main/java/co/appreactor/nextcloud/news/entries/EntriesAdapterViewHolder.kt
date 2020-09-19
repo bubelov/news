@@ -5,8 +5,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.nextcloud.news.R
-import co.appreactor.nextcloud.news.db.OpenGraphImage
-import co.appreactor.nextcloud.news.opengraph.EntriesImagesRepository
+import co.appreactor.nextcloud.news.db.EntryImage
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.list_item_entry.view.*
@@ -32,7 +31,7 @@ class EntriesAdapterViewHolder(
             imageView.tag = item
 
             if (item.showImage) {
-                val handleImage = fun(image: OpenGraphImage?) {
+                val handleImage = fun(image: EntryImage?) {
                     if (
                         imageView.tag != item
                         || image == null
@@ -84,7 +83,7 @@ class EntriesAdapterViewHolder(
                         })
                 }
 
-                if (item.cachedImage != null && item.cachedImage.status == EntriesImagesRepository.STATUS_PROCESSED) {
+                if (item.cachedImage != null) {
                     handleImage(item.cachedImage)
                 } else {
                     scope.launchWhenResumed {

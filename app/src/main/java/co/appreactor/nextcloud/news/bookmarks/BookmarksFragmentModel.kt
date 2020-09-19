@@ -9,7 +9,7 @@ import co.appreactor.nextcloud.news.common.showPreviewImages
 import co.appreactor.nextcloud.news.db.Feed
 import co.appreactor.nextcloud.news.db.Entry
 import co.appreactor.nextcloud.news.entries.*
-import co.appreactor.nextcloud.news.opengraph.EntriesImagesRepository
+import co.appreactor.nextcloud.news.entriesimages.EntriesImagesRepository
 import co.appreactor.nextcloud.news.podcasts.EntriesAudioRepository
 import co.appreactor.nextcloud.news.podcasts.isPodcast
 import kotlinx.coroutines.flow.*
@@ -78,13 +78,11 @@ class BookmarksFragmentModel(
                 }
             },
             image = flow {
-                entriesImagesRepository.parse(this@toRow)
-
-                entriesImagesRepository.getImage(this@toRow).collect {
+                entriesImagesRepository.getPreviewImage(this@toRow).collect {
                     emit(it)
                 }
             },
-            cachedImage = entriesImagesRepository.getImage(this).first(),
+            cachedImage = entriesImagesRepository.getPreviewImage(this).first(),
             showImage = showPreviewImages,
             cropImage = cropPreviewImages,
             summary = flow { emit(entriesSummariesRepository.getSummary(this@toRow)) },

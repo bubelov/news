@@ -1,0 +1,26 @@
+CREATE TABLE EntryImage (
+  id TEXT NOT NULL PRIMARY KEY,
+  entryId TEXT NOT NULL,
+  url TEXT NOT NULL,
+  width INTEGER NOT NULL,
+  height INTEGER NOT NULL
+);
+
+insertOrReplace:
+INSERT OR REPLACE
+INTO EntryImage
+VALUES ?;
+
+selectAll:
+SELECT *
+FROM EntryImage;
+
+select:
+SELECT *
+FROM EntryImage
+WHERE id = ?;
+
+selectByEntryId:
+SELECT *
+FROM EntryImage
+WHERE entryId = ?;

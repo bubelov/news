@@ -6,7 +6,7 @@ import co.appreactor.nextcloud.news.common.*
 import co.appreactor.nextcloud.news.db.Entry
 import co.appreactor.nextcloud.news.feeds.FeedsRepository
 import co.appreactor.nextcloud.news.db.Feed
-import co.appreactor.nextcloud.news.opengraph.EntriesImagesRepository
+import co.appreactor.nextcloud.news.entriesimages.EntriesImagesRepository
 import co.appreactor.nextcloud.news.podcasts.EntriesAudioRepository
 import co.appreactor.nextcloud.news.podcasts.isPodcast
 import kotlinx.coroutines.Dispatchers
@@ -37,6 +37,12 @@ class EntriesFragmentModel(
 
         viewModelScope.launch {
             entriesImagesRepository.warmUpMemoryCache()
+        }
+
+        viewModelScope.launch {
+            if (getShowPreviewImages().first()) {
+                entriesImagesRepository.syncPreviews()
+            }
         }
     }
 
@@ -109,13 +115,11 @@ class EntriesFragmentModel(
                 }
             },
             image = flow {
-                entriesImagesRepository.parse(this@toRow)
-
-                entriesImagesRepository.getImage(this@toRow).collect {
+                entriesImagesRepository.getPreviewImage(this@toRow).collect {
                     emit(it)
                 }
             },
-            cachedImage = entriesImagesRepository.getImage(this).first(),
+            cachedImage = entriesImagesRepository.getPreviewImage(this).first(),
             showImage = showFeedImages,
             cropImage = cropFeedImages,
             summary = flow { emit(entriesSummariesRepository.getSummary(this@toRow)) },

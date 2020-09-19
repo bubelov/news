@@ -1,6 +1,6 @@
 package co.appreactor.nextcloud.news.entries
 
-import co.appreactor.nextcloud.news.db.OpenGraphImage
+import co.appreactor.nextcloud.news.db.EntryImage
 import kotlinx.coroutines.flow.Flow
 
 data class EntriesAdapterItem(
@@ -10,8 +10,8 @@ data class EntriesAdapterItem(
     val viewed: Boolean,
     val podcast: Boolean,
     val podcastDownloadPercent: Flow<Long?>,
-    val image: Flow<OpenGraphImage?>,
-    val cachedImage: OpenGraphImage?,
+    val image: Flow<EntryImage?>,
+    val cachedImage: EntryImage?,
     val showImage: Boolean,
     val cropImage: Boolean,
     val summary: Flow<String>,

@@ -27,7 +27,7 @@ class PersistentLogTree(
                     LoggedException(
                         id = UUID.randomUUID().toString(),
                         date = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).toString(),
-                        exceptionClass = t.javaClass.name,
+                        exceptionClass = t.javaClass.simpleName,
                         message = t.message ?: "",
                         stackTrace = stackTrace
                     )

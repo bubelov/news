@@ -1,4 +1,4 @@
-package co.appreactor.nextcloud.news.opengraph
+package co.appreactor.nextcloud.news.entriesimages
 
 import android.graphics.Bitmap
 import android.graphics.Color
