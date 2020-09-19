@@ -8,7 +8,6 @@ import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.*
 
@@ -32,6 +31,10 @@ class EntriesRepository(
 
     suspend fun get(id: String) = withContext(Dispatchers.IO) {
         db.selectById(id).asFlow().mapToOneOrNull()
+    }
+
+    private suspend fun getMaxUpdated() = withContext(Dispatchers.IO) {
+        db.selectMaxUpdaded().executeAsOneOrNull()?.MAX
     }
 
     suspend fun setViewed(id: String, viewed: Boolean) = withContext(Dispatchers.IO) {
@@ -172,10 +175,15 @@ class EntriesRepository(
     }
 
     suspend fun syncNewAndUpdated() = withContext(Dispatchers.IO) {
-        val mostRecentItem = getAll().firstOrNull()?.maxByOrNull { it.updated } ?: return@withContext
-        val epochSeconds = LocalDateTime.parse(mostRecentItem.updated).toInstant(TimeZone.UTC).epochSeconds
+        val maxUpdated = getMaxUpdated()
 
-        val newAndUpdatedItems = api.getNewAndUpdatedItems(epochSeconds + 1).execute().body()!!.items
+        if (maxUpdated.isNullOrBlank()) {
+            return@withContext
+        }
+
+        val maxUpdatedSeconds = LocalDateTime.parse(maxUpdated).toInstant(TimeZone.UTC).epochSeconds
+
+        val newAndUpdatedItems = api.getNewAndUpdatedItems(maxUpdatedSeconds + 1).execute().body()!!.items
 
         db.transaction {
             newAndUpdatedItems.mapNotNull { it.toEntry() }.forEach {
@@ -191,8 +199,8 @@ class EntriesRepository(
         if (unread == null) return null
         if (starred == null) return null
 
-        val published = Instant.fromEpochSeconds(pubDate).toLocalDateTime(TimeZone.currentSystemDefault())
-        val updated = Instant.fromEpochSeconds(lastModified).toLocalDateTime(TimeZone.currentSystemDefault())
+        val published = Instant.fromEpochSeconds(pubDate).toLocalDateTime(TimeZone.UTC)
+        val updated = Instant.fromEpochSeconds(lastModified).toLocalDateTime(TimeZone.UTC)
 
         return Entry(
             id = id.toString(),

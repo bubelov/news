@@ -50,6 +50,10 @@ selectCount:
 SELECT COUNT(*)
 FROM Entry;
 
+selectMaxUpdaded:
+SELECT MAX(updated)
+FROM Entry;
+
 updateViewed:
 UPDATE Entry
 SET viewed = ?, viewedSynced = 0

@@ -32,8 +32,9 @@ class EntryFragmentModel(
     }
 
     fun getDate(entry: Entry): String {
-        val instant = LocalDateTime.parse(entry.published).toInstant(TimeZone.currentSystemDefault())
-        return DateFormat.getDateInstance(DateFormat.LONG).format(Date(instant.toEpochMilliseconds()))
+        val instant = LocalDateTime.parse(entry.published).toInstant(TimeZone.UTC)
+        return DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT)
+            .format(Date(instant.toEpochMilliseconds()))
     }
 
     suspend fun markAsViewed(entry: Entry) {

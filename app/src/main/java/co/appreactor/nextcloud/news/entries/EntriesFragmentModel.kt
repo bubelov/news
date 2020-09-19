@@ -94,8 +94,8 @@ class EntriesFragmentModel(
         cropFeedImages: Boolean,
     ): EntriesAdapterItem {
         val publishedDateTime = LocalDateTime.parse(published)
-        val publishedDateString = DateFormat.getDateInstance()
-            .format(Date(publishedDateTime.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()))
+        val publishedDateString = DateFormat.getDateTimeInstance()
+            .format(Date(publishedDateTime.toInstant(TimeZone.UTC).toEpochMilliseconds()))
 
         return EntriesAdapterItem(
             id = id,
