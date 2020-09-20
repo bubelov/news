@@ -42,10 +42,10 @@ class EntriesImagesRepository(
         }
     }
 
-    suspend fun getPreviewImage(entry: Entry) = withContext(Dispatchers.IO) {
+    suspend fun getPreviewImage(entryId: String) = withContext(Dispatchers.IO) {
         combine(
-            imagesMetadataQueries.selectByEntryId(entry.id).asFlow().mapToOneOrNull(),
-            imageQueries.selectByEntryId(entry.id).asFlow().mapToList(),
+            imagesMetadataQueries.selectByEntryId(entryId).asFlow().mapToOneOrNull(),
+            imageQueries.selectByEntryId(entryId).asFlow().mapToList(),
         ) { metadata, images ->
             if (metadata == null || metadata.previewImageProcessingStatus != STATUS_PROCESSED) {
                 null

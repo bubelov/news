@@ -5,9 +5,10 @@ import android.content.Intent
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import co.appreactor.nextcloud.news.db.Entry
+import co.appreactor.nextcloud.news.db.EntryWithoutSummary
 import java.io.File
 
-fun Entry.isPodcast(): Boolean {
+fun EntryWithoutSummary.isPodcast(): Boolean {
     return enclosureLinkType.startsWith("audio")
 }
 

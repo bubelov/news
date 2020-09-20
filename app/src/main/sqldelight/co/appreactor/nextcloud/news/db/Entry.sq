@@ -19,6 +19,25 @@ CREATE TABLE Entry (
   guidHash TEXT NOT NULL
 );
 
+CREATE VIEW EntryWithoutSummary
+AS
+SELECT
+  id,
+  feedId,
+  title,
+  link,
+  published,
+  updated,
+  authorName,
+  enclosureLink,
+  enclosureLinkType,
+  viewed,
+  viewedSynced,
+  bookmarked,
+  bookmarkedSynced,
+  guidHash
+FROM Entry;
+
 insertOrReplace:
 INSERT OR REPLACE
 INTO Entry
@@ -26,12 +45,7 @@ VALUES ?;
 
 selectAll:
 SELECT *
-FROM Entry
-ORDER BY published DESC;
-
-selectAllWithoutSummary:
-SELECT id, feedId, title, link, published, updated, authorName, enclosureLink, enclosureLinkType, viewed, viewedSynced, bookmarked, bookmarkedSynced
-FROM Entry
+FROM EntryWithoutSummary
 ORDER BY published DESC;
 
 selectById:
@@ -48,13 +62,13 @@ ORDER BY published DESC;
 
 selectNotViewed:
 SELECT *
-FROM Entry
+FROM EntryWithoutSummary
 WHERE viewed = 0
 ORDER BY published DESC;
 
 selectBookmarked:
 SELECT *
-FROM Entry
+FROM EntryWithoutSummary
 WHERE bookmarked = 1
 ORDER BY published DESC;
 

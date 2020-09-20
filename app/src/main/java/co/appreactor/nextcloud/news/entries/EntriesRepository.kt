@@ -8,7 +8,6 @@ import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.*
 
@@ -20,30 +19,6 @@ class EntriesRepository(
 
     suspend fun getAll() = withContext(Dispatchers.IO) {
         db.selectAll().asFlow().mapToList()
-    }
-
-    suspend fun getAllWithoutSummary() = withContext(Dispatchers.IO) {
-        db.selectAllWithoutSummary().asFlow().mapToList().map { entries ->
-            entries.map {
-                Entry(
-                    id = it.id,
-                    feedId = it.feedId,
-                    title = it.title,
-                    link = it.link,
-                    published = it.published,
-                    updated = it.updated,
-                    authorName = it.authorName,
-                    summary = "",
-                    enclosureLink = it.enclosureLink,
-                    enclosureLinkType = it.enclosureLinkType,
-                    viewed = it.viewed,
-                    viewedSynced = it.viewedSynced,
-                    bookmarked = it.bookmarked,
-                    bookmarkedSynced = it.bookmarkedSynced,
-                    guidHash = "",
-                )
-            }
-        }
     }
 
     suspend fun getNotViewedAndBookmarked() = withContext(Dispatchers.IO) {

@@ -3,7 +3,7 @@ package co.appreactor.nextcloud.news.entries
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.appreactor.nextcloud.news.common.*
-import co.appreactor.nextcloud.news.db.Entry
+import co.appreactor.nextcloud.news.db.EntryWithoutSummary
 import co.appreactor.nextcloud.news.feeds.FeedsRepository
 import co.appreactor.nextcloud.news.db.Feed
 import co.appreactor.nextcloud.news.entriesimages.EntriesImagesRepository
@@ -20,7 +20,6 @@ import kotlinx.datetime.toInstant
 import timber.log.Timber
 import java.text.DateFormat
 import java.util.*
-import kotlin.system.measureTimeMillis
 
 class EntriesFragmentModel(
     private val feedsRepository: FeedsRepository,
@@ -51,12 +50,17 @@ class EntriesFragmentModel(
 
         return combine(
             feedsRepository.getAll(),
-            entriesRepository.getAllWithoutSummary(),
             getShowReadEntries(),
             getShowPreviewImages(),
             getCropPreviewImages(),
-        ) { feeds, entries, showViewedEntries, showPreviewImages, cropPreviewImages ->
-            Timber.d("Got results in ${System.currentTimeMillis() - start} ms")
+        ) { feeds, showViewedEntries, showPreviewImages, cropPreviewImages ->
+            val entries = if (showViewedEntries) {
+                entriesRepository.getAll().first()
+            } else {
+                entriesRepository.getNotViewed().first()
+            }
+
+            Timber.d("Got ${entries.size} results in ${System.currentTimeMillis() - start} ms")
 
             val result = entries.filter {
                 showViewedEntries || !it.viewed
@@ -107,7 +111,7 @@ class EntriesFragmentModel(
 
     private suspend fun getCropPreviewImages() = prefs.cropPreviewImages()
 
-    private suspend fun Entry.toRow(
+    private suspend fun EntryWithoutSummary.toRow(
         feed: Feed?,
         showFeedImages: Boolean,
         cropFeedImages: Boolean,
@@ -129,13 +133,13 @@ class EntriesFragmentModel(
                 }
             },
             image = flow {
-                entriesImagesRepository.getPreviewImage(this@toRow).collect {
+                entriesImagesRepository.getPreviewImage(this@toRow.id).collect {
                     emit(it)
                 }
             },
             cachedImage = lazy {
                 runBlocking {
-                    entriesImagesRepository.getPreviewImage(this@toRow).first()
+                    entriesImagesRepository.getPreviewImage(this@toRow.id).first()
                 }
 
             },
@@ -144,19 +148,5 @@ class EntriesFragmentModel(
             summary = flow { emit(entriesSummariesRepository.getSummary(this@toRow.id)) },
             cachedSummary = entriesSummariesRepository.getCachedSummary(this.id),
         )
-    }
-
-    @Suppress("unused")
-    private fun runBenchmarks() {
-        viewModelScope.launch {
-            val getAllEntriesTime = measureTimeMillis { entriesRepository.getAll().first() }
-            val getAllEntriesWithoutSummaryTime = measureTimeMillis { entriesRepository.getAllWithoutSummary().first() }
-
-            Timber.d("Get all entries: $getAllEntriesTime")
-            Timber.d("Get all entries (excl summary): $getAllEntriesWithoutSummaryTime")
-
-            val getAllFeedsTime = measureTimeMillis { feedsRepository.getAll().first() }
-            Timber.d("Get all feeds: $getAllFeedsTime")
-        }
     }
 }
