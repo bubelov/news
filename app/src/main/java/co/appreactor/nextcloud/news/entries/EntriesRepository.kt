@@ -5,6 +5,7 @@ import co.appreactor.nextcloud.news.db.Entry
 import co.appreactor.nextcloud.news.db.EntryQueries
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
+import com.squareup.sqldelight.runtime.coroutines.mapToOne
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -39,6 +40,10 @@ class EntriesRepository(
 
     private suspend fun getMaxUpdated() = withContext(Dispatchers.IO) {
         db.selectMaxUpdaded().executeAsOneOrNull()?.MAX
+    }
+
+    suspend fun count() = withContext(Dispatchers.IO) {
+        db.selectCount().asFlow().mapToOne()
     }
 
     suspend fun setViewed(id: String, viewed: Boolean) = withContext(Dispatchers.IO) {

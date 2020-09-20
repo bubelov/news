@@ -50,10 +50,11 @@ class EntriesFragmentModel(
 
         return combine(
             feedsRepository.getAll(),
+            entriesRepository.count(),
             getShowReadEntries(),
             getShowPreviewImages(),
             getCropPreviewImages(),
-        ) { feeds, showViewedEntries, showPreviewImages, cropPreviewImages ->
+        ) { feeds, _, showViewedEntries, showPreviewImages, cropPreviewImages ->
             val entries = if (showViewedEntries) {
                 entriesRepository.getAll().first()
             } else {

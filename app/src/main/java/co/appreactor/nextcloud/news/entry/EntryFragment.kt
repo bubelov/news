@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.text.SpannableStringBuilder
+import android.text.method.LinkMovementMethod
 import android.text.style.BulletSpan
 import android.text.style.ImageSpan
 import android.text.style.QuoteSpan
@@ -27,11 +28,13 @@ import co.appreactor.nextcloud.news.R
 import co.appreactor.nextcloud.news.common.showDialog
 import co.appreactor.nextcloud.news.db.Entry
 import com.google.android.material.textview.MaterialTextView
+import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.fragment_entry.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
+import timber.log.Timber
 
 class EntryFragment : Fragment() {
 
@@ -143,7 +146,7 @@ class EntryFragment : Fragment() {
 
         chunks += body.subSequence(lastChunkEnd, body.length - 1) as SpannableStringBuilder
 
-        chunks.forEachIndexed { index, chunk ->
+        chunks.forEachIndexed { chunkIndex, chunk ->
             when (chunk) {
                 is SpannableStringBuilder -> {
                     val textView = MaterialTextView(requireContext())
@@ -175,11 +178,12 @@ class EntryFragment : Fragment() {
                         chunk.delete(chunk.length - 2, chunk.length - 1)
                     }
 
-                    if (index != 0 && chunks[index - 1] is ImageSpan && !chunk.startsWith("\n")) {
+                    if (chunkIndex != 0 && chunks[chunkIndex - 1] is ImageSpan && !chunk.startsWith("\n")) {
                         chunk.insert(0, "\n")
                     }
 
                     textView.text = chunk
+                    textView.movementMethod = LinkMovementMethod.getInstance()
 
                     container.addView(textView)
                 }
@@ -192,15 +196,25 @@ class EntryFragment : Fragment() {
                         LinearLayout.LayoutParams.WRAP_CONTENT
                     )
 
-                    imageView.scaleType = ImageView.ScaleType.CENTER_CROP
+                    imageView.scaleType = ImageView.ScaleType.FIT_XY
 
-                    Picasso.get().load(chunk.source).into(imageView)
+                    Picasso.get().load(chunk.source).into(imageView, object : Callback {
+                        override fun onSuccess() {
+                            val image = imageView.drawable
+                            val targetHeight =
+                                (imageView.width.toDouble() * (image.intrinsicHeight.toDouble() / image.intrinsicWidth.toDouble()))
+                            imageView.layoutParams.height = targetHeight.toInt()
+                        }
+
+                        override fun onError(e: Exception) {
+                            Timber.e(e)
+                            imageView.isVisible = false
+                        }
+                    })
 
                     container.addView(imageView)
                 }
             }
-
-
         }
     }
 
