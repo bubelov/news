@@ -45,20 +45,6 @@ class EntriesFragmentModel(
         }
     }
 
-    @Suppress("unused")
-    private fun runBenchmarks() {
-        viewModelScope.launch {
-            val getAllEntriesTime = measureTimeMillis { entriesRepository.getAll().first() }
-            val getAllEntriesWithoutSummaryTime = measureTimeMillis { entriesRepository.getAllWithoutSummary().first() }
-
-            Timber.d("Get all entries: $getAllEntriesTime")
-            Timber.d("Get all entries (excl summary): $getAllEntriesWithoutSummaryTime")
-
-            val getAllFeedsTime = measureTimeMillis { feedsRepository.getAll().first() }
-            Timber.d("Get all feeds: $getAllFeedsTime")
-        }
-    }
-
     suspend fun getEntries(): Flow<List<EntriesAdapterItem>> {
         val start = System.currentTimeMillis()
         var reported = false
@@ -131,7 +117,7 @@ class EntriesFragmentModel(
             title = title,
             subtitle = lazy {
                 val publishedDateTime = LocalDateTime.parse(published)
-                val publishedDateString = DateFormat.getDateTimeInstance()
+                val publishedDateString = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
                     .format(Date(publishedDateTime.toInstant(TimeZone.UTC).toEpochMilliseconds()))
                 (feed?.title ?: "Unknown feed") + " · " + publishedDateString
             },
@@ -158,5 +144,19 @@ class EntriesFragmentModel(
             summary = flow { emit(entriesSummariesRepository.getSummary(this@toRow.id)) },
             cachedSummary = entriesSummariesRepository.getCachedSummary(this.id),
         )
+    }
+
+    @Suppress("unused")
+    private fun runBenchmarks() {
+        viewModelScope.launch {
+            val getAllEntriesTime = measureTimeMillis { entriesRepository.getAll().first() }
+            val getAllEntriesWithoutSummaryTime = measureTimeMillis { entriesRepository.getAllWithoutSummary().first() }
+
+            Timber.d("Get all entries: $getAllEntriesTime")
+            Timber.d("Get all entries (excl summary): $getAllEntriesWithoutSummaryTime")
+
+            val getAllFeedsTime = measureTimeMillis { feedsRepository.getAll().first() }
+            Timber.d("Get all feeds: $getAllFeedsTime")
+        }
     }
 }

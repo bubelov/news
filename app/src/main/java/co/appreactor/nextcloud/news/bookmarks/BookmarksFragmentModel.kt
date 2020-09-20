@@ -35,7 +35,7 @@ class BookmarksFragmentModel(
         getCropPreviewImages(),
     ) { feeds, entries, showPreviewImages, cropPreviewImages ->
         entries.map {
-            val feed = feeds.singleOrNull { feed -> feed.id == it.feedId.toString() }
+            val feed = feeds.singleOrNull { feed -> feed.id == it.feedId }
             it.toRow(feed, showPreviewImages, cropPreviewImages)
         }
     }
@@ -60,7 +60,7 @@ class BookmarksFragmentModel(
             title = title,
             subtitle = lazy {
                 val publishedDateTime = LocalDateTime.parse(published)
-                val publishedDateString = DateFormat.getDateTimeInstance()
+                val publishedDateString = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
                     .format(Date(publishedDateTime.toInstant(TimeZone.UTC).toEpochMilliseconds()))
                 (feed?.title ?: "Unknown feed") + " · " + publishedDateString
             },
