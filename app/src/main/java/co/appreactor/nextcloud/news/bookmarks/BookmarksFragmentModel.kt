@@ -10,8 +10,8 @@ import co.appreactor.nextcloud.news.db.Feed
 import co.appreactor.nextcloud.news.db.EntryWithoutSummary
 import co.appreactor.nextcloud.news.entries.*
 import co.appreactor.nextcloud.news.entriesimages.EntriesImagesRepository
-import co.appreactor.nextcloud.news.podcasts.EntriesAudioRepository
-import co.appreactor.nextcloud.news.podcasts.isPodcast
+import co.appreactor.nextcloud.news.entriesenclosures.EntriesEnclosuresRepository
+import co.appreactor.nextcloud.news.entriesenclosures.isAudioMime
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
@@ -29,7 +29,7 @@ class BookmarksFragmentModel(
     private val entriesRepository: EntriesRepository,
     private val entriesSupportingTextRepository: EntriesSupportingTextRepository,
     private val entriesImagesRepository: EntriesImagesRepository,
-    private val entriesAudioRepository: EntriesAudioRepository,
+    private val entriesEnclosuresRepository: EntriesEnclosuresRepository,
     private val prefs: Preferences,
 ) : ViewModel() {
 
@@ -57,8 +57,8 @@ class BookmarksFragmentModel(
         }
     }
 
-    suspend fun downloadPodcast(id: String) {
-        entriesAudioRepository.downloadPodcast(id)
+    suspend fun downloadEnclosure(entryId: String) {
+        entriesEnclosuresRepository.downloadEnclosure(entryId)
     }
 
     suspend fun getEntry(id: String) = entriesRepository.get(id).first()
@@ -96,9 +96,9 @@ class BookmarksFragmentModel(
                 (feed?.title ?: "Unknown feed") + " · " + publishedDateString
             },
             viewed = false,
-            podcast = isPodcast(),
+            podcast = enclosureLinkType.isAudioMime(),
             podcastDownloadPercent = flow {
-                entriesAudioRepository.getDownloadProgress(this@toRow.id).collect {
+                entriesEnclosuresRepository.getDownloadProgress(this@toRow.id).collect {
                     emit(it)
                 }
             },

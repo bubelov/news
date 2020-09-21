@@ -3,7 +3,7 @@
 <paths>
 
     <external-cache-path
-        name="podcasts"
-        path="podcasts" />
+        name="enclosures"
+        path="enclosures" />
 
 </paths>

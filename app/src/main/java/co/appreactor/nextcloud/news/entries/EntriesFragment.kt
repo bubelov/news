@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.nextcloud.news.R
 import co.appreactor.nextcloud.news.common.showDialog
-import co.appreactor.nextcloud.news.podcasts.playPodcast
+import co.appreactor.nextcloud.news.entriesenclosures.openCachedEnclosure
 import kotlinx.android.synthetic.main.fragment_entries.*
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
@@ -37,7 +37,7 @@ class EntriesFragment : Fragment() {
             override fun onDownloadPodcastClick(item: EntriesAdapterItem) {
                 lifecycleScope.launchWhenResumed {
                     runCatching {
-                        model.downloadPodcast(item.id)
+                        model.downloadEnclosure(item.id)
                     }.onFailure {
                         Timber.e(it)
                         showDialog(R.string.error, it.message ?: "")
@@ -48,7 +48,7 @@ class EntriesFragment : Fragment() {
             override fun onPlayPodcastClick(item: EntriesAdapterItem) {
                 lifecycleScope.launch {
                     runCatching {
-                        playPodcast(model.getEntry(item.id)!!)
+                        requireContext().openCachedEnclosure(model.getEntry(item.id)!!)
                     }.onFailure {
                         Timber.e(it)
                         showDialog(R.string.error, it.message ?: "")

@@ -1,23 +1,23 @@
-CREATE TABLE PodcastDownload (
+CREATE TABLE EntryEnclosure (
   entryId TEXT PRIMARY KEY NOT NULL,
   downloadPercent INTEGER
 );
 
 insertOrReplace:
 INSERT OR REPLACE
-INTO PodcastDownload
+INTO EntryEnclosure
 VALUES ?;
 
 selectAll:
 SELECT *
-FROM PodcastDownload;
+FROM EntryEnclosure;
 
 selectByEntryId:
 SELECT *
-FROM PodcastDownload
+FROM EntryEnclosure
 WHERE entryId = ?;
 
 deleteByEntryId:
 DELETE
-FROM PodcastDownload
+FROM EntryEnclosure
 WHERE entryId = ?;

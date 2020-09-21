@@ -7,8 +7,8 @@ import co.appreactor.nextcloud.news.db.EntryWithoutSummary
 import co.appreactor.nextcloud.news.feeds.FeedsRepository
 import co.appreactor.nextcloud.news.db.Feed
 import co.appreactor.nextcloud.news.entriesimages.EntriesImagesRepository
-import co.appreactor.nextcloud.news.podcasts.EntriesAudioRepository
-import co.appreactor.nextcloud.news.podcasts.isPodcast
+import co.appreactor.nextcloud.news.entriesenclosures.EntriesEnclosuresRepository
+import co.appreactor.nextcloud.news.entriesenclosures.isAudioMime
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.datetime.LocalDateTime
@@ -23,7 +23,7 @@ class EntriesFragmentModel(
     private val entriesRepository: EntriesRepository,
     private val entriesSupportingTextRepository: EntriesSupportingTextRepository,
     private val entriesImagesRepository: EntriesImagesRepository,
-    private val entriesAudioRepository: EntriesAudioRepository,
+    private val entriesEnclosuresRepository: EntriesEnclosuresRepository,
     private val newsApiSync: NewsApiSync,
     private val prefs: Preferences,
 ) : ViewModel() {
@@ -32,8 +32,8 @@ class EntriesFragmentModel(
 
     init {
         viewModelScope.launch {
-            entriesAudioRepository.deleteCompletedDownloadsWithoutFiles()
-            entriesAudioRepository.deletePartialDownloads()
+            entriesEnclosuresRepository.deleteDownloadedEnclosuresWithoutFiles()
+            entriesEnclosuresRepository.deletePartialDownloads()
         }
 
         viewModelScope.launch {
@@ -108,8 +108,8 @@ class EntriesFragmentModel(
 
     suspend fun isInitialSyncCompleted() = prefs.initialSyncCompleted().first()
 
-    suspend fun downloadPodcast(id: String) {
-        entriesAudioRepository.downloadPodcast(id)
+    suspend fun downloadEnclosure(id: String) {
+        entriesEnclosuresRepository.downloadEnclosure(id)
     }
 
     suspend fun getEntry(id: String) = entriesRepository.get(id).first()
@@ -146,9 +146,9 @@ class EntriesFragmentModel(
                 (feed?.title ?: "Unknown feed") + " · " + publishedDateString
             },
             viewed = viewed,
-            podcast = isPodcast(),
+            podcast = enclosureLinkType.isAudioMime(),
             podcastDownloadPercent = flow {
-                entriesAudioRepository.getDownloadProgress(this@toRow.id).collect {
+                entriesEnclosuresRepository.getDownloadProgress(this@toRow.id).collect {
                     emit(it)
                 }
             },

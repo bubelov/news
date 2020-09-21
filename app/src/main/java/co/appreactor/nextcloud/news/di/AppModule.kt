@@ -12,7 +12,7 @@ import co.appreactor.nextcloud.news.entries.EntriesFragmentModel
 import co.appreactor.nextcloud.news.entries.EntriesRepository
 import co.appreactor.nextcloud.news.entry.EntryFragmentModel
 import co.appreactor.nextcloud.news.entriesimages.EntriesImagesRepository
-import co.appreactor.nextcloud.news.podcasts.EntriesAudioRepository
+import co.appreactor.nextcloud.news.entriesenclosures.EntriesEnclosuresRepository
 import co.appreactor.nextcloud.news.settings.SettingsFragmentModel
 import co.appreactor.nextcloud.news.bookmarks.BookmarksFragmentModel
 import co.appreactor.nextcloud.news.entries.EntriesSupportingTextRepository
@@ -39,7 +39,7 @@ val appModule = module {
     single<EntriesRepository>()
     single<EntriesSupportingTextRepository>()
     single<EntriesImagesRepository>()
-    single<EntriesAudioRepository>()
+    single<EntriesEnclosuresRepository>()
     single<Preferences>()
     single<LoggedExceptionsRepository>()
 
@@ -48,7 +48,7 @@ val appModule = module {
     single { get<Database>().entryQueries }
     single { get<Database>().entryImagesMetadataQueries }
     single { get<Database>().entryImageQueries }
-    single { get<Database>().podcastDownloadQueries }
+    single { get<Database>().entryEnclosureQueries }
     single { get<Database>().preferenceQueries }
     single { get<Database>().loggedExceptionQueries }
 

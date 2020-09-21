@@ -1,8 +1,8 @@
-package co.appreactor.nextcloud.news.podcasts
+package co.appreactor.nextcloud.news.entriesenclosures
 
 import android.content.Context
-import co.appreactor.nextcloud.news.db.PodcastDownload
-import co.appreactor.nextcloud.news.db.PodcastDownloadQueries
+import co.appreactor.nextcloud.news.db.EntryEnclosure
+import co.appreactor.nextcloud.news.db.EntryEnclosureQueries
 import co.appreactor.nextcloud.news.entries.EntriesRepository
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import kotlinx.coroutines.Dispatchers
@@ -14,8 +14,8 @@ import okhttp3.Request
 import okio.buffer
 import okio.sink
 
-class EntriesAudioRepository(
-    private val db: PodcastDownloadQueries,
+class EntriesEnclosuresRepository(
+    private val db: EntryEnclosureQueries,
     private val entriesRepository: EntriesRepository,
     private val context: Context,
 ) {
@@ -29,7 +29,7 @@ class EntriesAudioRepository(
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")
-    suspend fun downloadPodcast(entryId: String) = withContext(Dispatchers.IO) {
+    suspend fun downloadEnclosure(entryId: String) = withContext(Dispatchers.IO) {
         val entry = entriesRepository.get(entryId).first()
 
         if (entry == null) {
@@ -41,26 +41,26 @@ class EntriesAudioRepository(
             return@withContext
         }
 
-        val existingPodcast = db.selectByEntryId(entryId).executeAsOneOrNull()
+        val existingEnclosure = db.selectByEntryId(entryId).executeAsOneOrNull()
 
-        if (existingPodcast != null) {
+        if (existingEnclosure != null) {
             return@withContext
         }
 
-        val podcast = PodcastDownload(
+        val enclosure = EntryEnclosure(
             entryId = entryId,
             downloadPercent = null,
         )
 
-        db.insertOrReplace(podcast)
+        db.insertOrReplace(enclosure)
 
-        val file = entry.getPodcastFile(context)
+        val file = context.getCachedEnclosure(entryId, entry.enclosureLink, entry.enclosureLinkType)
 
         if (file.exists()) {
             file.delete()
         }
 
-        db.insertOrReplace(podcast.copy(downloadPercent = 0))
+        db.insertOrReplace(enclosure.copy(downloadPercent = 0))
 
         val request = Request.Builder()
             .url(entry.enclosureLink)
@@ -102,7 +102,7 @@ class EntriesAudioRepository(
                             downloadedPercent = (downloadedBytes.toDouble() / bytesInBody.toDouble() * 100.0).toLong()
 
                             if (downloadedPercent > lastReportedDownloadedPercent) {
-                                db.insertOrReplace(podcast.copy(downloadPercent = downloadedPercent))
+                                db.insertOrReplace(enclosure.copy(downloadPercent = downloadedPercent))
                                 lastReportedDownloadedPercent = downloadedPercent
                             }
                         }
@@ -110,7 +110,7 @@ class EntriesAudioRepository(
                 }
             }
         }.onSuccess {
-            db.insertOrReplace(podcast.copy(downloadPercent = 100))
+            db.insertOrReplace(enclosure.copy(downloadPercent = 100))
         }.onFailure {
             db.deleteByEntryId(entryId)
             file.delete()
@@ -119,24 +119,24 @@ class EntriesAudioRepository(
     }
 
     suspend fun deletePartialDownloads() = withContext(Dispatchers.IO) {
-        db.selectAll().executeAsList().forEach { podcastDownload ->
-            val entry = entriesRepository.get(podcastDownload.entryId).first()
+        db.selectAll().executeAsList().forEach { download ->
+            val entry = entriesRepository.get(download.entryId).first()
 
             if (entry == null) {
-                db.deleteByEntryId(podcastDownload.entryId)
+                db.deleteByEntryId(download.entryId)
                 return@forEach
             }
 
-            val file = entry.getPodcastFile(context)
+            val file = context.getCachedEnclosure(entry.id, entry.enclosureLink, entry.enclosureLinkType)
 
-            if (file.exists() && podcastDownload.downloadPercent != null && podcastDownload.downloadPercent != 100L) {
+            if (file.exists() && download.downloadPercent != null && download.downloadPercent != 100L) {
                 file.delete()
-                db.deleteByEntryId(podcastDownload.entryId)
+                db.deleteByEntryId(download.entryId)
             }
         }
     }
 
-    suspend fun deleteCompletedDownloadsWithoutFiles() {
+    suspend fun deleteDownloadedEnclosuresWithoutFiles() {
         db.selectAll().executeAsList().forEach {
             if (it.downloadPercent == 100L) {
                 val entry = entriesRepository.get(it.entryId).first()
@@ -146,7 +146,7 @@ class EntriesAudioRepository(
                     return@forEach
                 }
 
-                val file = entry.getPodcastFile(context)
+                val file = context.getCachedEnclosure(entry.id, entry.enclosureLink, entry.enclosureLinkType)
 
                 if (!file.exists()) {
                     db.deleteByEntryId(it.entryId)

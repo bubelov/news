@@ -16,7 +16,7 @@ import co.appreactor.nextcloud.news.entries.EntriesAdapter
 import co.appreactor.nextcloud.news.entries.EntriesAdapterCallback
 import co.appreactor.nextcloud.news.entries.EntriesAdapterDecoration
 import co.appreactor.nextcloud.news.entries.EntriesAdapterItem
-import co.appreactor.nextcloud.news.podcasts.playPodcast
+import co.appreactor.nextcloud.news.entriesenclosures.openCachedEnclosure
 import kotlinx.android.synthetic.main.fragment_bookmarks.empty
 import kotlinx.android.synthetic.main.fragment_bookmarks.listView
 import kotlinx.android.synthetic.main.fragment_bookmarks.progress
@@ -40,7 +40,7 @@ class BookmarksFragment : Fragment() {
             override fun onDownloadPodcastClick(item: EntriesAdapterItem) {
                 lifecycleScope.launchWhenResumed {
                     runCatching {
-                        model.downloadPodcast(item.id)
+                        model.downloadEnclosure(item.id)
                     }.getOrElse {
                         Timber.e(it)
                         showDialog(R.string.error, it.message ?: "")
@@ -51,7 +51,7 @@ class BookmarksFragment : Fragment() {
             override fun onPlayPodcastClick(item: EntriesAdapterItem) {
                 lifecycleScope.launch {
                     runCatching {
-                        playPodcast(model.getEntry(item.id)!!)
+                        requireContext().openCachedEnclosure(model.getEntry(item.id)!!)
                     }.getOrElse {
                         Timber.e(it)
                         showDialog(R.string.error, it.message ?: "")
