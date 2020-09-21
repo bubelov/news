@@ -9,11 +9,8 @@ import co.appreactor.nextcloud.news.db.Feed
 import co.appreactor.nextcloud.news.entriesimages.EntriesImagesRepository
 import co.appreactor.nextcloud.news.podcasts.EntriesAudioRepository
 import co.appreactor.nextcloud.news.podcasts.isPodcast
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
@@ -31,6 +28,8 @@ class EntriesFragmentModel(
     private val prefs: Preferences,
 ) : ViewModel() {
 
+    private var syncPreviewsJob: Job? = null
+
     init {
         viewModelScope.launch {
             entriesAudioRepository.deleteCompletedDownloadsWithoutFiles()
@@ -38,8 +37,10 @@ class EntriesFragmentModel(
         }
 
         viewModelScope.launch {
-            if (getShowPreviewImages().first()) {
-                entriesImagesRepository.syncPreviews()
+            getShowPreviewImages().collect { show ->
+                if (show) {
+                    syncPreviews()
+                }
             }
         }
     }
@@ -58,7 +59,7 @@ class EntriesFragmentModel(
             val entries = if (showViewedEntries) {
                 entriesRepository.getAll().first()
             } else {
-                entriesRepository.getNotViewed().first()
+                entriesRepository.getByViewed(false).first()
             }
 
             Timber.d("Got ${entries.size} results in ${System.currentTimeMillis() - start} ms")
@@ -79,12 +80,30 @@ class EntriesFragmentModel(
         }
     }
 
-    suspend fun performInitialSyncIfNoData() {
-        newsApiSync.performInitialSyncIfNotDone()
+    suspend fun performInitialSyncIfNecessary() {
+        if (!prefs.initialSyncCompleted().first()) {
+            newsApiSync.performInitialSync()
+            syncPreviews()
+        }
     }
 
     suspend fun performFullSync() {
         newsApiSync.sync()
+        syncPreviews()
+    }
+
+    private suspend fun syncPreviews() {
+        syncPreviewsJob?.cancel()
+
+        syncPreviewsJob = viewModelScope.launch {
+            runCatching {
+                entriesImagesRepository.syncPreviews()
+            }.onFailure {
+                if (it is CancellationException) {
+                    Timber.d("Sync previews cancelled")
+                }
+            }
+        }
     }
 
     suspend fun isInitialSyncCompleted() = prefs.initialSyncCompleted().first()

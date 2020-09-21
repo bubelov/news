@@ -17,7 +17,7 @@ class NewsApiSync(
 
     private val mutex = Mutex()
 
-    suspend fun performInitialSyncIfNotDone() {
+    suspend fun performInitialSync() {
         withContext(Dispatchers.IO) {
             mutex.withLock {
                 if (prefs.initialSyncCompleted().first()) {

@@ -101,7 +101,7 @@ class EntriesFragment : Fragment() {
         progress.isVisible = true
 
         runCatching {
-            model.performInitialSyncIfNoData()
+            model.performInitialSyncIfNecessary()
         }.onFailure {
             Timber.e(it)
             progress.isVisible = false

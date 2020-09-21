@@ -1,6 +1,7 @@
 package co.appreactor.nextcloud.news.bookmarks
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import co.appreactor.nextcloud.news.feeds.FeedsRepository
 import co.appreactor.nextcloud.news.common.Preferences
 import co.appreactor.nextcloud.news.common.cropPreviewImages
@@ -11,11 +12,15 @@ import co.appreactor.nextcloud.news.entries.*
 import co.appreactor.nextcloud.news.entriesimages.EntriesImagesRepository
 import co.appreactor.nextcloud.news.podcasts.EntriesAudioRepository
 import co.appreactor.nextcloud.news.podcasts.isPodcast
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
+import timber.log.Timber
 import java.text.DateFormat
 import java.util.*
 
@@ -27,6 +32,18 @@ class BookmarksFragmentModel(
     private val entriesAudioRepository: EntriesAudioRepository,
     private val prefs: Preferences,
 ) : ViewModel() {
+
+    private var syncPreviewsJob: Job? = null
+
+    init {
+        viewModelScope.launch {
+            getShowPreviewImages().collect { show ->
+                if (show) {
+                    syncPreviews()
+                }
+            }
+        }
+    }
 
     suspend fun getBookmarks() = combine(
         feedsRepository.getAll(),
@@ -49,6 +66,20 @@ class BookmarksFragmentModel(
     private suspend fun getShowPreviewImages() = prefs.showPreviewImages()
 
     private suspend fun getCropPreviewImages() = prefs.cropPreviewImages()
+
+    private suspend fun syncPreviews() {
+        syncPreviewsJob?.cancel()
+
+        syncPreviewsJob = viewModelScope.launch {
+            runCatching {
+                entriesImagesRepository.syncPreviews()
+            }.onFailure {
+                if (it is CancellationException) {
+                    Timber.d("Sync previews cancelled")
+                }
+            }
+        }
+    }
 
     private suspend fun EntryWithoutSummary.toRow(
         feed: Feed?,

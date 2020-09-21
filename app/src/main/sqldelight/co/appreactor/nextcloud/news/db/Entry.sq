@@ -55,15 +55,15 @@ WHERE id = ?;
 
 selectNotViewedAndBookmarked:
 SELECT *
-FROM Entry
+FROM EntryWithoutSummary
 WHERE viewed = 0
 OR bookmarked = 1
 ORDER BY published DESC;
 
-selectNotViewed:
+selectByViewed:
 SELECT *
 FROM EntryWithoutSummary
-WHERE viewed = 0
+WHERE viewed = ?
 ORDER BY published DESC;
 
 selectBookmarked:

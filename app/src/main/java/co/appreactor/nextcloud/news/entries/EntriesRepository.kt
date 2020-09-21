@@ -26,8 +26,8 @@ class EntriesRepository(
         db.selectNotViewedAndBookmarked().asFlow().mapToList()
     }
 
-    suspend fun getNotViewed() = withContext(Dispatchers.IO) {
-        db.selectNotViewed().asFlow().mapToList()
+    suspend fun getByViewed(viewed: Boolean) = withContext(Dispatchers.IO) {
+        db.selectByViewed(viewed).asFlow().mapToList()
     }
 
     suspend fun getBookmarked() = withContext(Dispatchers.IO) {

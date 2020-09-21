@@ -7,8 +7,8 @@ import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -35,10 +35,16 @@ class EntriesImagesRepository(
         .build()
 
     suspend fun syncPreviews() = withContext(Dispatchers.IO) {
-        entriesRepository.getNotViewedAndBookmarked().collect { unreadEntries ->
-            unreadEntries.forEach { entry ->
-                syncPreview(entry)
-            }
+        val notViewedAndBookmarkedEntries = entriesRepository.getNotViewedAndBookmarked().first()
+
+        notViewedAndBookmarkedEntries.forEach { entry ->
+            syncPreview(entry)
+        }
+
+        val viewedEntries = entriesRepository.getByViewed(true).first()
+
+        viewedEntries.forEach { entry ->
+            syncPreview(entry)
         }
     }
 
@@ -55,7 +61,7 @@ class EntriesImagesRepository(
         }
     }
 
-    private suspend fun syncPreview(entry: Entry) = withContext(Dispatchers.IO) {
+    private suspend fun syncPreview(entry: EntryWithoutSummary) = withContext(Dispatchers.IO) {
         Timber.d("Syncing preview image for entry ${entry.id} ${entry.title}")
 
         val metadata = imagesMetadataQueries.selectByEntryId(entry.id).executeAsOneOrNull() ?: EntryImagesMetadata(
