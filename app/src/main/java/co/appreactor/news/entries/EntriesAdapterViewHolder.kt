@@ -69,19 +69,23 @@ class EntriesAdapterViewHolder(
                         }
                     }
 
-                    Picasso.get()
-                        .load(if (image.url.isBlank()) null else image.url)
-                        .into(imageView, object : Callback {
-                            override fun onSuccess() {
-                                imageProgress.isVisible = false
-                                imageProgress.isVisible = false
-                            }
+                    val picassoRequestCreator = Picasso.get().load(if (image.url.isBlank()) null else image.url)
 
-                            override fun onError(e: Exception) {
-                                imageView.isVisible = false
-                                imageProgress.isVisible = false
-                            }
-                        })
+                    if (image.width > 0) {
+                        picassoRequestCreator.resize(image.width.toInt(), 0)
+                    }
+
+                    picassoRequestCreator.into(imageView, object : Callback {
+                        override fun onSuccess() {
+                            imageProgress.isVisible = false
+                            imageProgress.isVisible = false
+                        }
+
+                        override fun onError(e: Exception) {
+                            imageView.isVisible = false
+                            imageProgress.isVisible = false
+                        }
+                    })
                 }
 
                 if (item.cachedImage.value != null) {
