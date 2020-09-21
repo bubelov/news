@@ -110,10 +110,10 @@ class EntriesAdapterViewHolder(
                 supportingText.text = item.cachedSupportingText
             } else {
                 scope.launchWhenResumed {
-                    item.supportingText.collect { summary ->
-                        if (supportingText.tag == item && summary.isNotBlank()) {
+                    item.supportingText.collect { text ->
+                        if (supportingText.tag == item && text.isNotBlank()) {
                             supportingText.isVisible = true
-                            supportingText.text = summary
+                            supportingText.text = text
                         }
                     }
                 }

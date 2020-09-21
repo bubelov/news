@@ -115,7 +115,7 @@ class BookmarksFragmentModel(
             },
             showImage = showPreviewImages,
             cropImage = cropPreviewImages,
-            supportingText = flow { emit(entriesSupportingTextRepository.getSupportingText(this@toRow.id)) },
+            supportingText = flow { emit(entriesSupportingTextRepository.getSupportingText(this@toRow.id, feed)) },
             cachedSupportingText = entriesSupportingTextRepository.getCachedSupportingText(this.id)
         )
     }

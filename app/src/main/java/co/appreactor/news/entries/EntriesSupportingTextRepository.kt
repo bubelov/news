@@ -2,6 +2,7 @@ package co.appreactor.news.entries
 
 import android.text.SpannableStringBuilder
 import androidx.core.text.HtmlCompat
+import co.appreactor.news.db.Feed
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -19,7 +20,7 @@ class EntriesSupportingTextRepository(
 
     private val cache = Collections.synchronizedMap(mutableMapOf<String, String>())
 
-    suspend fun getSupportingText(entryId: String): String = withContext(Dispatchers.IO) {
+    suspend fun getSupportingText(entryId: String, feed: Feed?): String = withContext(Dispatchers.IO) {
         val cachedSummary = cache[entryId]
 
         if (cachedSummary != null) {
@@ -34,6 +35,10 @@ class EntriesSupportingTextRepository(
         }
 
         val summary = runCatching {
+            if (feed?.link?.startsWith("https://news.ycombinator.com") == true) {
+                return@runCatching ""
+            }
+
             val parsedBody = HtmlCompat.fromHtml(entry.summary, HtmlCompat.FROM_HTML_MODE_COMPACT)
 
             if (parsedBody is SpannableStringBuilder) {
