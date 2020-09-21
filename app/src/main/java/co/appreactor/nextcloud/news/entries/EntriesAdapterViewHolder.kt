@@ -95,7 +95,7 @@ class EntriesAdapterViewHolder(
                 }
             }
 
-            primaryText.text = item.title
+            primaryText.text = item.title.trim()
             secondaryText.text = item.subtitle.value
 
             supportingText.isVisible = false
