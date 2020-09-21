@@ -54,4 +54,5 @@
     <string name="rename">Rename</string>
     <string name="feed_title">Feed title</string>
     <string name="cannot_find_entry_with_id_s">Can not find entry with id %1$s</string>
+    <string name="cannot_show_content">Can not show content</string>
 </resources>

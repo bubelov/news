@@ -78,15 +78,24 @@ class EntryFragment : Fragment() {
     }
 
     private suspend fun viewEntry(entry: Entry) {
-        model.markAsViewed(entry)
-
         toolbar.title = model.getFeed(entry.feedId)?.title ?: getString(R.string.unknown_feed)
         title.text = entry.title
         date.text = model.getDate(entry)
 
-        fillBody(entry)
+        runCatching {
+            fillSummary(entry)
+            progress.isVisible = false
+        }.onFailure {
+            progress.isVisible = false
 
-        progress.isVisible = false
+            showDialog(R.string.error, R.string.cannot_show_content) {
+                findNavController().popBackStack()
+            }
+
+            return
+        }
+
+        model.markAsViewed(entry)
 
         lifecycleScope.launchWhenResumed {
             model.getBookmarked(entry).collect { bookmarked ->
@@ -121,30 +130,34 @@ class EntryFragment : Fragment() {
         }
     }
 
-    private fun fillBody(entry: Entry) {
-        val body = HtmlCompat.fromHtml(
+    private fun fillSummary(entry: Entry) {
+        val summary = HtmlCompat.fromHtml(
             entry.summary,
             HtmlCompat.FROM_HTML_MODE_LEGACY,
             null,
             null
         ) as SpannableStringBuilder
 
+        if (summary.isBlank()) {
+            return
+        }
+
         val chunks = mutableListOf<Any>()
         var lastChunkEnd = 0
 
-        val spans = body.getSpans(0, body.length - 1, Any::class.java)
+        val spans = summary.getSpans(0, summary.length - 1, Any::class.java)
 
         spans.forEach {
             when (it) {
                 is ImageSpan -> {
-                    chunks += body.subSequence(lastChunkEnd, body.getSpanStart(it)) as SpannableStringBuilder
+                    chunks += summary.subSequence(lastChunkEnd, summary.getSpanStart(it)) as SpannableStringBuilder
                     chunks += it
-                    lastChunkEnd = body.getSpanEnd(it)
+                    lastChunkEnd = summary.getSpanEnd(it)
                 }
             }
         }
 
-        chunks += body.subSequence(lastChunkEnd, body.length - 1) as SpannableStringBuilder
+        chunks += summary.subSequence(lastChunkEnd, summary.length - 1) as SpannableStringBuilder
 
         chunks.forEachIndexed { chunkIndex, chunk ->
             when (chunk) {
