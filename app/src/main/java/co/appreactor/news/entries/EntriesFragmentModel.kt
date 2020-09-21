@@ -51,7 +51,7 @@ class EntriesFragmentModel(
 
         return combine(
             feedsRepository.getAll(),
-            entriesRepository.count(),
+            entriesRepository.getCount(),
             getShowReadEntries(),
             getShowPreviewImages(),
             getCropPreviewImages(),
@@ -59,7 +59,7 @@ class EntriesFragmentModel(
             val entries = if (showViewedEntries) {
                 entriesRepository.getAll().first()
             } else {
-                entriesRepository.getByViewed(false).first()
+                entriesRepository.getNotViewed().first()
             }
 
             Timber.d("Got ${entries.size} results in ${System.currentTimeMillis() - start} ms")

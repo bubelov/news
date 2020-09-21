@@ -66,10 +66,22 @@ FROM EntryWithoutSummary
 WHERE viewed = ?
 ORDER BY published DESC;
 
+selectByViewedSynced:
+SELECT *
+FROM EntryWithoutSummary
+WHERE viewedSynced = ?
+ORDER BY published DESC;
+
 selectBookmarked:
 SELECT *
 FROM EntryWithoutSummary
 WHERE bookmarked = 1
+ORDER BY published DESC;
+
+selectByBookmarkedSynced:
+SELECT *
+FROM EntryWithoutSummary
+WHERE bookmarkedSynced = ?
 ORDER BY published DESC;
 
 selectCount:

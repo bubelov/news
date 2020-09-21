@@ -41,7 +41,7 @@ class EntriesImagesRepository(
             syncPreview(entry)
         }
 
-        val viewedEntries = entriesRepository.getByViewed(true).first()
+        val viewedEntries = entriesRepository.getViewed().first()
 
         viewedEntries.forEach { entry ->
             syncPreview(entry)

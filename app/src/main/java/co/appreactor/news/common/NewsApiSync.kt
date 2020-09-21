@@ -25,7 +25,7 @@ class NewsApiSync(
                 }
 
                 val feedsSync = async { feedsRepository.sync() }
-                val entriesSync = async { entriesRepository.syncUnreadAndStarred() }
+                val entriesSync = async { entriesRepository.syncNotViewedAndBookmarked() }
 
                 feedsSync.await()
                 entriesSync.await()
@@ -48,8 +48,8 @@ class NewsApiSync(
     ) {
         mutex.withLock {
             if (syncEntriesFlags) {
-                entriesRepository.syncUnreadFlags()
-                entriesRepository.syncStarredFlags()
+                entriesRepository.syncViewedFlags()
+                entriesRepository.syncBookmarkedFlags()
             }
 
             if (syncFeeds) {

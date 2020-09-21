@@ -8,7 +8,6 @@ import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOne
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.*
 
@@ -22,28 +21,16 @@ class EntriesRepository(
         db.selectAll().asFlow().mapToList()
     }
 
-    suspend fun getNotViewedAndBookmarked() = withContext(Dispatchers.IO) {
-        db.selectNotViewedAndBookmarked().asFlow().mapToList()
-    }
-
-    suspend fun getByViewed(viewed: Boolean) = withContext(Dispatchers.IO) {
-        db.selectByViewed(viewed).asFlow().mapToList()
-    }
-
-    suspend fun getBookmarked() = withContext(Dispatchers.IO) {
-        db.selectBookmarked().asFlow().mapToList()
-    }
-
     suspend fun get(id: String) = withContext(Dispatchers.IO) {
         db.selectById(id).asFlow().mapToOneOrNull()
     }
 
-    private suspend fun getMaxUpdated() = withContext(Dispatchers.IO) {
-        db.selectMaxUpdaded().executeAsOneOrNull()?.MAX
+    suspend fun getViewed() = withContext(Dispatchers.IO) {
+        db.selectByViewed(viewed = true).asFlow().mapToList()
     }
 
-    suspend fun count() = withContext(Dispatchers.IO) {
-        db.selectCount().asFlow().mapToOne()
+    suspend fun getNotViewed() = withContext(Dispatchers.IO) {
+        db.selectByViewed(viewed = false).asFlow().mapToList()
     }
 
     suspend fun setViewed(id: String, viewed: Boolean) = withContext(Dispatchers.IO) {
@@ -53,11 +40,27 @@ class EntriesRepository(
         )
     }
 
+    suspend fun getBookmarked() = withContext(Dispatchers.IO) {
+        db.selectBookmarked().asFlow().mapToList()
+    }
+
     suspend fun setBookmarked(id: String, bookmarked: Boolean) = withContext(Dispatchers.IO) {
         db.updateBookmarked(
             bookmarked = bookmarked,
             id = id
         )
+    }
+
+    suspend fun getNotViewedAndBookmarked() = withContext(Dispatchers.IO) {
+        db.selectNotViewedAndBookmarked().asFlow().mapToList()
+    }
+
+    suspend fun getCount() = withContext(Dispatchers.IO) {
+        db.selectCount().asFlow().mapToOne()
+    }
+
+    private suspend fun getMaxUpdated() = withContext(Dispatchers.IO) {
+        db.selectMaxUpdaded().executeAsOneOrNull()?.MAX
     }
 
     suspend fun clear() = withContext(Dispatchers.IO) {
@@ -68,42 +71,40 @@ class EntriesRepository(
         db.deleteByFeedId(feedId)
     }
 
-    suspend fun syncUnreadAndStarred() = withContext(Dispatchers.IO) {
+    suspend fun syncNotViewedAndBookmarked() = withContext(Dispatchers.IO) {
         val count = db.selectCount().executeAsOne()
 
         if (count > 0) {
             return@withContext
         }
 
-        val unread = api.getUnreadItems().execute().body()!!
-        val starred = api.getStarredItems().execute().body()!!
+        val notViewed = api.getUnreadItems().execute().body()!!
+        val bookmarked = api.getStarredItems().execute().body()!!
 
         db.transaction {
-            (unread.items + starred.items).mapNotNull { it.toEntry() }.forEach {
+            (notViewed.items + bookmarked.items).mapNotNull { it.toEntry() }.forEach {
                 db.insertOrReplace(it)
             }
         }
     }
 
-    suspend fun syncUnreadFlags() = withContext(Dispatchers.IO) {
-        val unsyncedItems = getAll().first().filter {
-            !it.viewedSynced
-        }
+    suspend fun syncViewedFlags() = withContext(Dispatchers.IO) {
+        val unsyncedItems = db.selectByViewedSynced(false).executeAsList()
 
         if (unsyncedItems.isEmpty()) {
             return@withContext
         }
 
-        val unsyncedViewedItems = unsyncedItems.filter { it.viewed }
+        val unsyncedViewedEntries = unsyncedItems.filter { it.viewed }
 
-        if (unsyncedViewedItems.isNotEmpty()) {
+        if (unsyncedViewedEntries.isNotEmpty()) {
             val response = api.putRead(PutReadArgs(
-                unsyncedViewedItems.map { it.id.toLong() }
+                unsyncedViewedEntries.map { it.id.toLong() }
             )).execute()
 
             if (response.isSuccessful) {
                 db.transaction {
-                    unsyncedViewedItems.forEach {
+                    unsyncedViewedEntries.forEach {
                         db.updateViewedSynced(true, it.id)
                     }
                 }
@@ -112,16 +113,16 @@ class EntriesRepository(
             }
         }
 
-        val unsyncedNotViewedItems = unsyncedItems.filterNot { it.viewed }
+        val unsyncedNotViewedEntries = unsyncedItems.filterNot { it.viewed }
 
-        if (unsyncedNotViewedItems.isNotEmpty()) {
+        if (unsyncedNotViewedEntries.isNotEmpty()) {
             val response = api.putUnread(PutReadArgs(
-                unsyncedNotViewedItems.map { it.id.toLong() }
+                unsyncedNotViewedEntries.map { it.id.toLong() }
             )).execute()
 
             if (response.isSuccessful) {
                 db.transaction {
-                    unsyncedNotViewedItems.forEach {
+                    unsyncedNotViewedEntries.forEach {
                         db.updateViewedSynced(true, it.id)
                     }
                 }
@@ -131,19 +132,17 @@ class EntriesRepository(
         }
     }
 
-    suspend fun syncStarredFlags() = withContext(Dispatchers.IO) {
-        val unsyncedItems = getAll().first().filter {
-            !it.bookmarkedSynced
-        }
+    suspend fun syncBookmarkedFlags() = withContext(Dispatchers.IO) {
+        val unsyncedItems = db.selectByBookmarkedSynced(false).executeAsList()
 
         if (unsyncedItems.isEmpty()) {
             return@withContext
         }
 
-        val unsyncedBookmarkedItems = unsyncedItems.filter { it.bookmarked }
+        val unsyncedBookmarkedEntries = unsyncedItems.filter { it.bookmarked }
 
-        if (unsyncedBookmarkedItems.isNotEmpty()) {
-            val response = api.putStarred(PutStarredArgs(unsyncedBookmarkedItems.map {
+        if (unsyncedBookmarkedEntries.isNotEmpty()) {
+            val response = api.putStarred(PutStarredArgs(unsyncedBookmarkedEntries.map {
                 PutStarredArgsItem(
                     it.feedId.toLong(),
                     it.guidHash
@@ -152,7 +151,7 @@ class EntriesRepository(
 
             if (response.isSuccessful) {
                 db.transaction {
-                    unsyncedBookmarkedItems.forEach {
+                    unsyncedBookmarkedEntries.forEach {
                         db.updateBookmarkedSynced(true, it.id)
                     }
                 }
@@ -161,10 +160,10 @@ class EntriesRepository(
             }
         }
 
-        val unsyncedNotBookmarkedItems = unsyncedItems.filterNot { it.bookmarked }
+        val unsyncedNotBookmarkedEntries = unsyncedItems.filterNot { it.bookmarked }
 
-        if (unsyncedNotBookmarkedItems.isNotEmpty()) {
-            val response = api.putUnstarred(PutStarredArgs(unsyncedNotBookmarkedItems.map {
+        if (unsyncedNotBookmarkedEntries.isNotEmpty()) {
+            val response = api.putUnstarred(PutStarredArgs(unsyncedNotBookmarkedEntries.map {
                 PutStarredArgsItem(
                     it.feedId.toLong(),
                     it.guidHash
@@ -173,7 +172,7 @@ class EntriesRepository(
 
             if (response.isSuccessful) {
                 db.transaction {
-                    unsyncedNotBookmarkedItems.forEach {
+                    unsyncedNotBookmarkedEntries.forEach {
                         db.updateBookmarkedSynced(true, it.id)
                     }
                 }
@@ -192,10 +191,10 @@ class EntriesRepository(
 
         val maxUpdatedSeconds = LocalDateTime.parse(maxUpdated).toInstant(TimeZone.UTC).epochSeconds
 
-        val newAndUpdatedItems = api.getNewAndUpdatedItems(maxUpdatedSeconds + 1).execute().body()!!.items
+        val newAndUpdatedEntries = api.getNewAndUpdatedItems(maxUpdatedSeconds + 1).execute().body()!!.items
 
         db.transaction {
-            newAndUpdatedItems.mapNotNull { it.toEntry() }.forEach {
+            newAndUpdatedEntries.mapNotNull { it.toEntry() }.forEach {
                 db.insertOrReplace(it)
             }
         }
