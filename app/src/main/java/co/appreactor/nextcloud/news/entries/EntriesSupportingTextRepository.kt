@@ -9,7 +9,7 @@ import timber.log.Timber
 import java.util.*
 import kotlin.math.min
 
-class EntriesSummariesRepository(
+class EntriesSupportingTextRepository(
     private val entriesRepository: EntriesRepository,
 ) {
 
@@ -19,7 +19,7 @@ class EntriesSummariesRepository(
 
     private val cache = Collections.synchronizedMap(mutableMapOf<String, String>())
 
-    suspend fun getSummary(entryId: String): String = withContext(Dispatchers.IO) {
+    suspend fun getSupportingText(entryId: String): String = withContext(Dispatchers.IO) {
         val cachedSummary = cache[entryId]
 
         if (cachedSummary != null) {
@@ -60,5 +60,5 @@ class EntriesSummariesRepository(
         summary
     }
 
-    fun getCachedSummary(entryId: String) = cache[entryId]
+    fun getCachedSupportingText(entryId: String) = cache[entryId]
 }

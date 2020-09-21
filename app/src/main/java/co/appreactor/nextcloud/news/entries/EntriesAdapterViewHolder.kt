@@ -98,16 +98,15 @@ class EntriesAdapterViewHolder(
             primaryText.text = item.title
             secondaryText.text = item.subtitle.value
 
+            supportingText.isVisible = false
             supportingText.tag = item
 
-            if (item.cachedSummary != null) {
+            if (!item.cachedSupportingText.isNullOrBlank()) {
                 supportingText.isVisible = true
-                supportingText.text = item.cachedSummary
+                supportingText.text = item.cachedSupportingText
             } else {
-                supportingText.isVisible = false
-
                 scope.launchWhenResumed {
-                    item.summary.collect { summary ->
+                    item.supportingText.collect { summary ->
                         if (supportingText.tag == item && summary.isNotBlank()) {
                             supportingText.isVisible = true
                             supportingText.text = summary

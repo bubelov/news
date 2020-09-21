@@ -27,7 +27,7 @@ import java.util.*
 class BookmarksFragmentModel(
     private val feedsRepository: FeedsRepository,
     private val entriesRepository: EntriesRepository,
-    private val entriesSummariesRepository: EntriesSummariesRepository,
+    private val entriesSupportingTextRepository: EntriesSupportingTextRepository,
     private val entriesImagesRepository: EntriesImagesRepository,
     private val entriesAudioRepository: EntriesAudioRepository,
     private val prefs: Preferences,
@@ -115,8 +115,8 @@ class BookmarksFragmentModel(
             },
             showImage = showPreviewImages,
             cropImage = cropPreviewImages,
-            summary = flow { emit(entriesSummariesRepository.getSummary(this@toRow.id)) },
-            cachedSummary = entriesSummariesRepository.getCachedSummary(this.id)
+            supportingText = flow { emit(entriesSupportingTextRepository.getSupportingText(this@toRow.id)) },
+            cachedSupportingText = entriesSupportingTextRepository.getCachedSupportingText(this.id)
         )
     }
 }

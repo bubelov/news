@@ -14,6 +14,6 @@ data class EntriesAdapterItem(
     val cachedImage: Lazy<EntryImage?>,
     val showImage: Boolean,
     val cropImage: Boolean,
-    val summary: Flow<String>,
-    val cachedSummary: String?
+    val supportingText: Flow<String>,
+    val cachedSupportingText: String?
 )

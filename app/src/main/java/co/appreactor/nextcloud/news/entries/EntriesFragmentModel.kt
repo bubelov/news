@@ -21,7 +21,7 @@ import java.util.*
 class EntriesFragmentModel(
     private val feedsRepository: FeedsRepository,
     private val entriesRepository: EntriesRepository,
-    private val entriesSummariesRepository: EntriesSummariesRepository,
+    private val entriesSupportingTextRepository: EntriesSupportingTextRepository,
     private val entriesImagesRepository: EntriesImagesRepository,
     private val entriesAudioRepository: EntriesAudioRepository,
     private val newsApiSync: NewsApiSync,
@@ -165,8 +165,8 @@ class EntriesFragmentModel(
             },
             showImage = showFeedImages,
             cropImage = cropFeedImages,
-            summary = flow { emit(entriesSummariesRepository.getSummary(this@toRow.id)) },
-            cachedSummary = entriesSummariesRepository.getCachedSummary(this.id),
+            supportingText = flow { emit(entriesSupportingTextRepository.getSupportingText(this@toRow.id)) },
+            cachedSupportingText = entriesSupportingTextRepository.getSupportingText(this.id),
         )
     }
 }

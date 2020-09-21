@@ -15,7 +15,7 @@ import co.appreactor.nextcloud.news.entriesimages.EntriesImagesRepository
 import co.appreactor.nextcloud.news.podcasts.EntriesAudioRepository
 import co.appreactor.nextcloud.news.settings.SettingsFragmentModel
 import co.appreactor.nextcloud.news.bookmarks.BookmarksFragmentModel
-import co.appreactor.nextcloud.news.entries.EntriesSummariesRepository
+import co.appreactor.nextcloud.news.entries.EntriesSupportingTextRepository
 import co.appreactor.nextcloud.news.feeds.FeedsFragmentModel
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
@@ -37,7 +37,7 @@ val appModule = module {
 
     single<FeedsRepository>()
     single<EntriesRepository>()
-    single<EntriesSummariesRepository>()
+    single<EntriesSupportingTextRepository>()
     single<EntriesImagesRepository>()
     single<EntriesAudioRepository>()
     single<Preferences>()
