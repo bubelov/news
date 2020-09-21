@@ -14,7 +14,6 @@
     <string name="bookmark">Bookmark</string>
     <string name="remove_bookmark">Remove bookmark</string>
     <string name="logo">Logo</string>
-    <string name="for_nextcloud">for Nextcloud</string>
     <string name="direct_login">Direct login</string>
     <string name="log_out">Log out</string>
     <string name="log_out_warning">Do you really want to log out?</string>

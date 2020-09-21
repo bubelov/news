@@ -10,7 +10,7 @@ android {
     compileSdkVersion 29
 
     defaultConfig {
-        applicationId "co.appreactor.nextcloud.news"
+        applicationId "co.appreactor.news"
         minSdkVersion 21
         targetSdkVersion 29
         versionCode 1

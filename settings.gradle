@@ -1,2 +1,2 @@
 include ':app'
-rootProject.name = "nextcloud-news"
+rootProject.name = "news"
