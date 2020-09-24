@@ -112,8 +112,19 @@ class EntryFragment : Fragment() {
         }
 
         toolbar.setOnMenuItemClickListener { menuItem ->
-            if (menuItem.itemId == R.id.toggleBookmarked) {
-                lifecycleScope.launchWhenResumed {
+            when (menuItem.itemId) {
+                R.id.share -> {
+                    val intent = Intent().apply {
+                        action = Intent.ACTION_SEND
+                        type = "text/plain"
+                        putExtra(Intent.EXTRA_SUBJECT, entry.title)
+                        putExtra(Intent.EXTRA_TEXT, entry.link)
+                    }
+
+                    startActivity(Intent.createChooser(intent, ""))
+                }
+
+                R.id.toggleBookmarked -> lifecycleScope.launchWhenResumed {
                     model.toggleBookmarked(args.entryId)
                 }
             }
