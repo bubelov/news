@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-    <color name="color_primary_dark">#202020</color>
-    <color name="color_surface">#202020</color>
-    <color name="color_background_variant">#00000000</color>
+    <color name="card_list_background">@android:color/transparent</color>
 </resources>

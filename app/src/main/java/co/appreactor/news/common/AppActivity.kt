@@ -30,6 +30,12 @@ class AppActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         bottomNavigation.setupWithNavController(navController)
+
+        if (inDarkMode()) {
+            window.statusBarColor = getSurfaceColor(bottomNavigation.elevation)
+            window.navigationBarColor = getSurfaceColor(bottomNavigation.elevation)
+        }
+
         navController.addOnDestinationChangedListener(navListener)
     }
 }

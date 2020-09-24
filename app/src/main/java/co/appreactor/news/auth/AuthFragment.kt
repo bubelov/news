@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
+import co.appreactor.news.common.getColorFromAttr
 import co.appreactor.news.di.apiModule
 import co.appreactor.news.di.appModule
 import com.nextcloud.android.sso.AccountImporter
@@ -118,9 +119,13 @@ class AuthFragment : Fragment() {
 
     private fun hideStatusBarBackground() {
         lifecycle.addObserver(object : LifecycleObserver {
+            var oldColor: Int = 0
+
             @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
             fun onResume() {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    oldColor = requireActivity().window.statusBarColor
+
                     requireActivity().window.statusBarColor = ContextCompat.getColor(
                         requireContext(),
                         android.R.color.transparent
@@ -131,10 +136,7 @@ class AuthFragment : Fragment() {
             @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
             fun onPause() {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    requireActivity().window.statusBarColor = ContextCompat.getColor(
-                        requireContext(),
-                        R.color.color_primary_dark
-                    )
+                    requireActivity().window.statusBarColor = oldColor
                 }
             }
         })
@@ -142,6 +144,8 @@ class AuthFragment : Fragment() {
 
     private fun invertStatusBarTextColorInLightMode() {
         lifecycle.addObserver(object : LifecycleObserver {
+            var oldColor: Int = 0
+
             @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
             fun onResume() {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -151,6 +155,9 @@ class AuthFragment : Fragment() {
                     if (uiMode != Configuration.UI_MODE_NIGHT_YES) {
                         view?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
                     }
+
+                    oldColor = requireActivity().window.navigationBarColor
+                    requireActivity().window.navigationBarColor = requireContext().getColorFromAttr(R.attr.colorSurface)
                 }
             }
 
@@ -158,6 +165,7 @@ class AuthFragment : Fragment() {
             fun onPause() {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     view?.systemUiVisibility = 0
+                    requireActivity().window.navigationBarColor = oldColor
                 }
             }
         })

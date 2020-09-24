@@ -3,9 +3,11 @@
     <style name="BaseAppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">@color/color_primary</item>
         <item name="colorPrimaryDark">@color/color_primary_dark</item>
-        <item name="colorSecondary">@color/color_primary</item>
+        <item name="colorSecondary">@color/color_secondary</item>
         <item name="colorAccent">@color/color_accent</item>
-        <item name="colorSurface">@color/color_surface</item>
+
+        <item name="appBarLayoutStyle">@style/Toolbar</item>
+        <item name="floatingActionButtonStyle">@style/FloatingActionButton</item>
     </style>
 
     <style name="AppTheme" parent="BaseAppTheme">
@@ -13,12 +15,13 @@
         <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
     </style>
 
-    <style name="Card">
-
+    <style name="Toolbar" parent="@style/Widget.MaterialComponents.Toolbar.PrimarySurface">
+        <item name="android:elevation">4dp</item>
     </style>
 
-    <style name="ToolbarDivider" parent="Divider">
-        <item name="android:visibility">gone</item>
+    <style name="FloatingActionButton" parent="Widget.MaterialComponents.FloatingActionButton">
+        <item name="backgroundTint">?colorPrimary</item>
+        <item name="tint">?colorOnPrimary</item>
     </style>
 
     <style name="Divider">
@@ -26,6 +29,14 @@
         <item name="android:layout_height">1dp</item>
         <item name="android:background">?attr/colorOnSurface</item>
         <item name="android:alpha">0.12</item>
+    </style>
+
+    <style name="BottomNavigationDivider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:elevation">4dp</item>
+        <item name="android:background">?attr/colorOnSurface</item>
+        <item name="android:alpha">0.16</item>
     </style>
 
 </resources>

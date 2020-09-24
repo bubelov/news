@@ -1,10 +1,20 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <style name="AppTheme" parent="BaseAppTheme">
-        <item name="android:navigationBarColor">@color/color_surface</item>
+        <item name="android:statusBarColor">?colorSurface</item>
+        <item name="android:navigationBarColor">?colorSurface</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">false</item>
     </style>
 
-    <style name="ToolbarDivider" parent="Divider" />
+    <style name="FloatingActionButton" parent="Widget.MaterialComponents.FloatingActionButton">
+        <item name="backgroundTint">?colorSurface</item>
+        <item name="tint">?colorOnSurface</item>
+    </style>
+
+    <style name="BottomNavigationDivider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:visibility">gone</item>
+    </style>
 
 </resources>

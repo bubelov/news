@@ -3,7 +3,8 @@
 <resources>
     <color name="color_primary">#1cafff</color>
     <color name="color_primary_dark">@color/color_primary</color>
+    <color name="color_secondary">@color/color_primary</color>
     <color name="color_accent">@color/color_primary</color>
-    <color name="color_background_variant">#fafafa</color>
-    <color name="color_surface">#ffffff</color>
+
+    <color name="card_list_background">#fafafa</color>
 </resources>
