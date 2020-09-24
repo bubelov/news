@@ -197,6 +197,7 @@ class EntryFragment : Fragment() {
 
                     textView.text = chunk
                     textView.movementMethod = LinkMovementMethod.getInstance()
+                    textView.setTextIsSelectable(true)
 
                     container.addView(textView)
                 }
