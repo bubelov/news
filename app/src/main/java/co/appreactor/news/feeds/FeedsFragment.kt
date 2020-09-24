@@ -13,7 +13,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import co.appreactor.news.R
+import co.appreactor.news.common.hideKeyboard
 import co.appreactor.news.common.showDialog
+import co.appreactor.news.common.showKeyboard
 import co.appreactor.news.db.Feed
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.dialog_add_feed.*
@@ -63,9 +65,12 @@ class FeedsFragment : Fragment() {
                     }
                 }
                 .setNegativeButton(R.string.cancel, null)
+                .setOnDismissListener { requireActivity().hideKeyboard() }
                 .show()
 
-            dialog.titleView.setText(feed.title)
+            dialog.titleView.append(feed.title)
+            dialog.titleView.requestFocus()
+            requireContext().showKeyboard()
         }
 
         override fun onDeleteClick(feed: Feed) {
@@ -119,7 +124,7 @@ class FeedsFragment : Fragment() {
         }
 
         fab.setOnClickListener {
-            MaterialAlertDialogBuilder(requireContext())
+            val alert = MaterialAlertDialogBuilder(requireContext())
                 .setTitle(getString(R.string.add_feed))
                 .setView(R.layout.dialog_add_feed)
                 .setPositiveButton(R.string.add) { dialogInterface, _ ->
@@ -141,7 +146,11 @@ class FeedsFragment : Fragment() {
                     }
                 }
                 .setNegativeButton(R.string.cancel, null)
+                .setOnDismissListener { requireActivity().hideKeyboard() }
                 .show()
+
+            alert.urlLayout.requestFocus()
+            requireContext().showKeyboard()
         }
     }
 }

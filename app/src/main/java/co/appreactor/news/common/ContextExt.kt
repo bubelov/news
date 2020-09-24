@@ -3,6 +3,7 @@ package co.appreactor.news.common
 import android.content.Context
 import android.content.res.Configuration
 import android.util.TypedValue
+import android.view.inputmethod.InputMethodManager
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import co.appreactor.news.R
@@ -21,4 +22,9 @@ fun Context.getColorFromAttr(@AttrRes attrColor: Int): Int {
     val typedValue = TypedValue()
     theme.resolveAttribute(attrColor, typedValue, true)
     return typedValue.data
+}
+
+fun Context.showKeyboard() {
+    val inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    inputManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
 }

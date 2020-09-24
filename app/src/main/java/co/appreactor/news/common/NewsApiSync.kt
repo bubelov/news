@@ -13,6 +13,7 @@ class NewsApiSync(
     private val feedsRepository: FeedsRepository,
     private val entriesRepository: EntriesRepository,
     private val prefs: Preferences,
+    private val connectivityProbe: ConnectivityProbe,
 ) {
 
     private val mutex = Mutex()
@@ -46,6 +47,8 @@ class NewsApiSync(
         syncEntriesFlags: Boolean = true,
         syncNewAndUpdatedEntries: Boolean = true,
     ) {
+        connectivityProbe.throwIfOffline()
+
         mutex.withLock {
             if (syncEntriesFlags) {
                 entriesRepository.syncViewedFlags()

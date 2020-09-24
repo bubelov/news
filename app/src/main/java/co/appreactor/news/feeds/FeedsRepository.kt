@@ -4,6 +4,7 @@ import co.appreactor.news.api.FeedJson
 import co.appreactor.news.api.NewsApi
 import co.appreactor.news.api.PostFeedArgs
 import co.appreactor.news.api.PutFeedRenameArgs
+import co.appreactor.news.common.ConnectivityProbe
 import co.appreactor.news.db.Feed
 import co.appreactor.news.db.FeedQueries
 import co.appreactor.news.entries.EntriesRepository
@@ -13,23 +14,29 @@ import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import retrofit2.Response
 
 @Suppress("BlockingMethodInNonBlockingContext")
 class FeedsRepository(
     private val db: FeedQueries,
     private val api: NewsApi,
-    private val entriesRepository: EntriesRepository
+    private val entriesRepository: EntriesRepository,
+    private val connectivityProbe: ConnectivityProbe,
 ) {
 
     suspend fun add(url: String) = withContext(Dispatchers.IO) {
-        val response = kotlin.runCatching {
-            api.postFeed(PostFeedArgs(url, 0)).execute().body()!!
-        }.getOrThrow()
+        connectivityProbe.throwIfOffline()
 
-        val feed = response.feeds.single().toFeed()
+        val response = api.postFeed(PostFeedArgs(url, 0)).execute()
 
-        if (feed != null) {
-            db.insertOrReplace(feed)
+        if (!response.isSuccessful) {
+            throw response.toException()
+        }
+
+        val feedJson = response.body()?.feeds?.single() ?: throw Exception("Can not parse server response")
+
+        feedJson.toFeed()?.let {
+            db.insertOrReplace(it)
         }
     }
 
@@ -42,6 +49,8 @@ class FeedsRepository(
     }
 
     suspend fun rename(feedId: String, newTitle: String) = withContext(Dispatchers.IO) {
+        connectivityProbe.throwIfOffline()
+
         val response = api.putFeedRename(feedId.toLong(), PutFeedRenameArgs(newTitle)).execute()
 
         if (response.isSuccessful) {
@@ -51,7 +60,7 @@ class FeedsRepository(
                 db.insertOrReplace(feed.copy(title = newTitle))
             }
         } else {
-            throw Exception("HTTPS request failed with error code ${response.code()}")
+            throw response.toException()
         }
     }
 
@@ -64,7 +73,7 @@ class FeedsRepository(
                 entriesRepository.deleteByFeedId(id)
             }
         } else {
-            throw Exception("HTTPS request failed with error code ${response.code()}")
+            throw response.toException()
         }
     }
 
@@ -73,10 +82,16 @@ class FeedsRepository(
     }
 
     suspend fun sync() = withContext(Dispatchers.IO) {
-        val cachedFeeds = getAll().first().sortedBy { it.id }
-        val newFeeds = api.getFeeds().execute().body()!!.feeds.sortedBy { it.id }
+        val response = api.getFeeds().execute()
 
-        if (newFeeds != cachedFeeds) {
+        if (!response.isSuccessful) {
+            throw response.toException()
+        }
+
+        val newFeeds = response.body()?.feeds ?: throw Exception("Can not parse server response")
+        val cachedFeeds = getAll().first()
+
+        if (newFeeds.sortedBy { it.id } != cachedFeeds.sortedBy { it.id }) {
             db.transaction {
                 db.deleteAll()
 
@@ -96,4 +111,6 @@ class FeedsRepository(
             alternateLinkType = "text/html",
         )
     }
+
+    private fun Response<*>.toException() = Exception("HTTPS request failed with error code ${code()}")
 }

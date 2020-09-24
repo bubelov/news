@@ -73,8 +73,8 @@ class EntriesImagesRepository(
             imagesMetadataQueries.insertOrReplace(this)
         }
 
-        if (!metadata.previewImageId.isNullOrBlank() || metadata.previewImageProcessingStatus == STATUS_PROCESSING) {
-            Timber.d("Preview image already processing, nothing to do here")
+        if (metadata.previewImageProcessingStatus.isNotBlank()) {
+            Timber.d("Preview image already processed or processing, nothing to do here")
             return@withContext
         }
 

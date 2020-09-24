@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
 import co.appreactor.news.common.showDialog
+import co.appreactor.news.common.showErrorDialog
 import co.appreactor.news.entriesenclosures.openCachedEnclosure
 import kotlinx.android.synthetic.main.fragment_entries.*
 import kotlinx.coroutines.flow.catch
@@ -84,8 +85,7 @@ class EntriesFragment : Fragment() {
                 runCatching {
                     model.performFullSync()
                 }.onFailure {
-                    Timber.e(it)
-                    showDialog(R.string.error, it.message ?: "")
+                    showErrorDialog(it)
                 }
 
                 swipeRefresh.isRefreshing = false

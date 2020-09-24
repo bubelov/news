@@ -1,5 +1,7 @@
 package co.appreactor.news.di
 
+import android.content.Context
+import android.net.ConnectivityManager
 import co.appreactor.news.Database
 import co.appreactor.news.auth.AuthFragmentModel
 import co.appreactor.news.auth.DirectAuthFragmentModel
@@ -15,6 +17,7 @@ import co.appreactor.news.entriesimages.EntriesImagesRepository
 import co.appreactor.news.entriesenclosures.EntriesEnclosuresRepository
 import co.appreactor.news.settings.SettingsFragmentModel
 import co.appreactor.news.bookmarks.BookmarksFragmentModel
+import co.appreactor.news.common.ConnectivityProbe
 import co.appreactor.news.entries.EntriesSupportingTextRepository
 import co.appreactor.news.feeds.FeedsFragmentModel
 import com.squareup.sqldelight.android.AndroidSqliteDriver
@@ -31,6 +34,12 @@ val appModule = module {
             context = get(),
             name = "news.db"
         )
+    }
+
+    single {
+        val context = get<Context>()
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        ConnectivityProbe(connectivityManager)
     }
 
     single<NewsApiSync>()
