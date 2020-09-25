@@ -7,9 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import android.text.SpannableStringBuilder
 import android.text.method.LinkMovementMethod
-import android.text.style.BulletSpan
-import android.text.style.ImageSpan
-import android.text.style.QuoteSpan
+import android.text.style.*
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -207,8 +205,8 @@ class EntryFragment : Fragment() {
                     }
 
                     textView.text = chunk
-                    textView.movementMethod = LinkMovementMethod.getInstance()
                     textView.setTextIsSelectable(true)
+                    textView.movementMethod = LinkMovementMethod.getInstance()
 
                     container.addView(textView)
                 }
@@ -287,6 +285,12 @@ class EntryFragment : Fragment() {
                     )
 
                     removeSpan(it)
+                }
+
+                is URLSpan -> {
+                    if (it.url.startsWith("#")) {
+                        removeSpan(it)
+                    }
                 }
             }
         }
