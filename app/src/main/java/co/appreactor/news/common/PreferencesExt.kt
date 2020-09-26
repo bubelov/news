@@ -19,7 +19,7 @@ suspend fun Preferences.showReadEntries() = getBoolean(Preferences.SHOW_READ_ENT
 suspend fun Preferences.setShowReadEntries(showReadNews: Boolean) =
     putBoolean(Preferences.SHOW_READ_ENTRIES, showReadNews)
 
-suspend fun Preferences.showPreviewImages() = getBoolean(Preferences.SHOW_PREVIEW_IMAGES, false)
+suspend fun Preferences.showPreviewImages() = getBoolean(Preferences.SHOW_PREVIEW_IMAGES, true)
 suspend fun Preferences.setShowPreviewImages(showPreviewImages: Boolean) =
     putBoolean(Preferences.SHOW_PREVIEW_IMAGES, showPreviewImages)
 
