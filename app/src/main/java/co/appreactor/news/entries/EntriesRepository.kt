@@ -1,6 +1,7 @@
 package co.appreactor.news.entries
 
 import co.appreactor.news.api.*
+import co.appreactor.news.common.Preferences
 import co.appreactor.news.db.Entry
 import co.appreactor.news.db.EntryQueries
 import com.squareup.sqldelight.runtime.coroutines.asFlow
@@ -8,13 +9,16 @@ import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOne
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.*
+import retrofit2.Response
 
 @Suppress("BlockingMethodInNonBlockingContext")
 class EntriesRepository(
     private val db: EntryQueries,
     private val api: NewsApi,
+    private val prefs: Preferences,
 ) {
 
     suspend fun getAll() = withContext(Dispatchers.IO) {
@@ -86,6 +90,11 @@ class EntriesRepository(
                 db.insertOrReplace(it)
             }
         }
+
+        prefs.putString(
+            key = Preferences.LAST_ENTRIES_SYNC_DATE_TIME,
+            value = Clock.System.now().toLocalDateTime(TimeZone.UTC).toString()
+        )
     }
 
     suspend fun syncViewedFlags() = withContext(Dispatchers.IO) {
@@ -183,21 +192,31 @@ class EntriesRepository(
     }
 
     suspend fun syncNewAndUpdated() = withContext(Dispatchers.IO) {
-        val maxUpdated = getMaxUpdated()
+        val threshold = getMaxUpdated() ?: prefs.getString(Preferences.LAST_ENTRIES_SYNC_DATE_TIME).first()
 
-        if (maxUpdated.isNullOrBlank()) {
-            return@withContext
+        if (threshold.isBlank()) {
+            throw Exception("Can not find any reference dates")
         }
 
-        val maxUpdatedSeconds = LocalDateTime.parse(maxUpdated).toInstant(TimeZone.UTC).epochSeconds
+        val thresholdSeconds = LocalDateTime.parse(threshold).toInstant(TimeZone.UTC).epochSeconds
+        val response = api.getNewAndUpdatedItems(thresholdSeconds + 1).execute()
 
-        val newAndUpdatedEntries = api.getNewAndUpdatedItems(maxUpdatedSeconds + 1).execute().body()!!.items
+        if (!response.isSuccessful) {
+            throw response.toException()
+        }
+
+        val items = response.body()?.items ?: throw Exception("Can not parse server response")
 
         db.transaction {
-            newAndUpdatedEntries.mapNotNull { it.toEntry() }.forEach {
+            items.mapNotNull { it.toEntry() }.forEach {
                 db.insertOrReplace(it)
             }
         }
+
+        prefs.putString(
+            key = Preferences.LAST_ENTRIES_SYNC_DATE_TIME,
+            value = Clock.System.now().toLocalDateTime(TimeZone.UTC).toString()
+        )
     }
 
     private fun ItemJson.toEntry(): Entry? {
@@ -231,4 +250,6 @@ class EntriesRepository(
             guidHash = guidHash ?: return null,
         )
     }
+
+    private fun Response<*>.toException() = Exception("HTTPS request failed with error code ${code()}")
 }

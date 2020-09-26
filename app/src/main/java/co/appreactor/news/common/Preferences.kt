@@ -42,6 +42,7 @@ class Preferences(
         const val SERVER_PASSWORD = "server_password"
 
         const val INITIAL_SYNC_COMPLETED = "initial_sync_completed"
+        const val LAST_ENTRIES_SYNC_DATE_TIME = "last_entries_sync_date_time"
 
         const val SHOW_READ_ENTRIES = "show_read_entries"
 
