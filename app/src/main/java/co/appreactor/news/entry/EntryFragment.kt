@@ -11,13 +11,9 @@ import android.text.style.*
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.text.HtmlCompat
 import androidx.core.view.isVisible
-import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -25,14 +21,10 @@ import androidx.navigation.fragment.navArgs
 import co.appreactor.news.R
 import co.appreactor.news.common.showDialog
 import co.appreactor.news.db.Entry
-import com.google.android.material.textview.MaterialTextView
-import com.squareup.picasso.Callback
-import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.fragment_entry.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
-import timber.log.Timber
 
 class EntryFragment : Fragment() {
 
@@ -143,7 +135,7 @@ class EntryFragment : Fragment() {
         val summary = HtmlCompat.fromHtml(
             entry.summary,
             HtmlCompat.FROM_HTML_MODE_LEGACY,
-            null,
+            TextViewImageGetter(summaryView),
             null
         ) as SpannableStringBuilder
 
@@ -151,94 +143,28 @@ class EntryFragment : Fragment() {
             return
         }
 
-        val chunks = mutableListOf<Any>()
-        var lastChunkEnd = 0
+        summary.applyStyle(summaryView)
 
-        val spans = summary.getSpans(0, summary.length - 1, Any::class.java)
-
-        spans.forEach {
-            when (it) {
-                is ImageSpan -> {
-                    chunks += summary.subSequence(lastChunkEnd, summary.getSpanStart(it)) as SpannableStringBuilder
-                    chunks += it
-                    lastChunkEnd = summary.getSpanEnd(it)
-                }
-            }
+        while (summary.contains("\u00A0")) {
+            val index = summary.indexOfFirst { it == '\u00A0' }
+            summary.delete(index, index + 1)
         }
 
-        chunks += summary.subSequence(lastChunkEnd, summary.length - 1) as SpannableStringBuilder
-
-        chunks.forEachIndexed { chunkIndex, chunk ->
-            when (chunk) {
-                is SpannableStringBuilder -> {
-                    val textView = MaterialTextView(requireContext())
-                    TextViewCompat.setTextAppearance(textView, R.style.TextAppearance_MaterialComponents_Body1)
-                    textView.setLineSpacing(0f, 1.2f)
-
-                    textView.layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                    )
-
-                    chunk.applyStyle(textView)
-
-                    while (chunk.contains("\u00A0")) {
-                        val index = chunk.indexOfFirst { it == '\u00A0' }
-                        chunk.delete(index, index + 1)
-                    }
-
-                    while (chunk.contains("\n\n\n")) {
-                        val index = chunk.indexOf("\n\n\n")
-                        chunk.delete(index, index + 1)
-                    }
-
-                    while (chunk.startsWith("\n\n")) {
-                        chunk.delete(0, 1)
-                    }
-
-                    while (chunk.endsWith("\n\n")) {
-                        chunk.delete(chunk.length - 2, chunk.length - 1)
-                    }
-
-                    if (chunkIndex != 0 && chunks[chunkIndex - 1] is ImageSpan && !chunk.startsWith("\n")) {
-                        chunk.insert(0, "\n")
-                    }
-
-                    textView.text = chunk
-                    textView.setTextIsSelectable(true)
-                    textView.movementMethod = LinkMovementMethod.getInstance()
-
-                    container.addView(textView)
-                }
-
-                is ImageSpan -> {
-                    val imageView = AppCompatImageView(requireContext())
-
-                    imageView.layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                    )
-
-                    imageView.scaleType = ImageView.ScaleType.FIT_XY
-
-                    Picasso.get().load(chunk.source).into(imageView, object : Callback {
-                        override fun onSuccess() {
-                            val image = imageView.drawable
-                            val targetHeight =
-                                (imageView.width.toDouble() * (image.intrinsicHeight.toDouble() / image.intrinsicWidth.toDouble()))
-                            imageView.layoutParams.height = targetHeight.toInt()
-                        }
-
-                        override fun onError(e: Exception) {
-                            Timber.e(e)
-                            imageView.isVisible = false
-                        }
-                    })
-
-                    container.addView(imageView)
-                }
-            }
+        while (summary.contains("\n\n\n")) {
+            val index = summary.indexOf("\n\n\n")
+            summary.delete(index, index + 1)
         }
+
+        while (summary.startsWith("\n\n")) {
+            summary.delete(0, 1)
+        }
+
+        while (summary.endsWith("\n\n")) {
+            summary.delete(summary.length - 2, summary.length - 1)
+        }
+
+        summaryView.text = summary
+        summaryView.movementMethod = LinkMovementMethod.getInstance()
     }
 
     private fun SpannableStringBuilder.applyStyle(textView: TextView) {

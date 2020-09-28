@@ -48,6 +48,14 @@
                 android:textAppearance="?attr/textAppearanceBody1"
                 android:textColor="?android:attr/textColorSecondary" />
 
+            <TextView
+                android:id="@+id/summaryView"
+                android:layout_width="match_parent"
+                android:lineSpacingMultiplier="1.2"
+                android:textIsSelectable="true"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceBody1" />
+
         </LinearLayout>
 
     </ScrollView>

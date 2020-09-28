@@ -22,10 +22,12 @@ class TextViewImage(private val textView: TextView) : Drawable(), Target {
     override fun getOpacity() = PixelFormat.OPAQUE
 
     override fun onBitmapLoaded(bitmap: Bitmap, from: Picasso.LoadedFrom) {
-        setBounds(0, 0, bitmap.width, bitmap.height)
+        val verticalCutoff = (bitmap.height * textView.lineSpacingMultiplier - bitmap.height) / textView.lineSpacingMultiplier
+
+        setBounds(0, 0, bitmap.width, (bitmap.height / textView.lineSpacingMultiplier).toInt())
 
         this.drawable = BitmapDrawable(textView.context.resources, bitmap).apply {
-            setBounds(0, 0, bitmap.width, bitmap.height)
+            setBounds(0, -verticalCutoff.toInt(), bitmap.width, -verticalCutoff.toInt() + bitmap.height)
         }
 
         textView.text = textView.text
