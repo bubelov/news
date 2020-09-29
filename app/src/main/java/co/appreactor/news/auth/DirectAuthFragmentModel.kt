@@ -1,7 +1,7 @@
 package co.appreactor.news.auth
 
 import androidx.lifecycle.ViewModel
-import co.appreactor.news.api.DirectApiBuilder
+import co.appreactor.news.api.DirectNextcloudNewsApiBuilder
 import co.appreactor.news.common.Preferences
 import co.appreactor.news.common.setServerPassword
 import co.appreactor.news.common.setServerUrl
@@ -20,7 +20,7 @@ class DirectAuthFragmentModel(
         password: String
     ): Boolean {
         return try {
-            val api = DirectApiBuilder().build(
+            val api = DirectNextcloudNewsApiBuilder().build(
                 serverUrl,
                 username,
                 password

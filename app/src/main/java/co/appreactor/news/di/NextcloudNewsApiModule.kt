@@ -1,7 +1,9 @@
 package co.appreactor.news.di
 
-import co.appreactor.news.api.DirectApiBuilder
+import co.appreactor.news.api.DirectNextcloudNewsApiBuilder
 import co.appreactor.news.api.NewsApi
+import co.appreactor.news.api.NextcloudNewsApi
+import co.appreactor.news.api.NextcloudNewsApiAdapter
 import co.appreactor.news.common.Preferences
 import co.appreactor.news.common.getServerPassword
 import co.appreactor.news.common.getServerUrl
@@ -18,6 +20,10 @@ import timber.log.Timber
 val apiModule = module {
 
     single<NewsApi> {
+        NextcloudNewsApiAdapter(get())
+    }
+
+    single<NextcloudNewsApi> {
         val prefs = get<Preferences>()
 
         val serverUrl = runBlocking {
@@ -28,7 +34,7 @@ val apiModule = module {
             val username = runBlocking { prefs.getServerUsername().first() }
             val password = runBlocking { prefs.getServerPassword().first() }
 
-            DirectApiBuilder().build(
+            DirectNextcloudNewsApiBuilder().build(
                 serverUrl,
                 username,
                 password
@@ -44,7 +50,7 @@ val apiModule = module {
             NextcloudRetrofitApiBuilder(
                 nextcloudApi,
                 "/index.php/apps/news/api/v1-2/"
-            ).create(NewsApi::class.java)
+            ).create(NextcloudNewsApi::class.java)
         }
     }
 

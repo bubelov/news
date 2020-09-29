@@ -7,9 +7,9 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
-class DirectApiBuilder {
+class DirectNextcloudNewsApiBuilder {
 
-    fun build(serverUrl: String, username: String, password: String): NewsApi {
+    fun build(serverUrl: String, username: String, password: String): NextcloudNewsApi {
         val authenticatingInterceptor = Interceptor {
             val request = it.request()
             val credential = Credentials.basic(username, password)
@@ -41,6 +41,6 @@ class DirectApiBuilder {
             .client(client)
             .build()
 
-        return retrofit.create(NewsApi::class.java)
+        return retrofit.create(NextcloudNewsApi::class.java)
     }
 }

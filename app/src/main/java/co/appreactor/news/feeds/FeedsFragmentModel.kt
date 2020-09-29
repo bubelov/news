@@ -2,9 +2,11 @@ package co.appreactor.news.feeds
 
 import androidx.lifecycle.ViewModel
 import co.appreactor.news.common.NewsApiSync
+import co.appreactor.news.entries.EntriesRepository
 
 class FeedsFragmentModel(
     private val feedsRepository: FeedsRepository,
+    private val entriesRepository: EntriesRepository,
     private val newsApiSync: NewsApiSync,
 ) : ViewModel() {
 
@@ -24,7 +26,8 @@ class FeedsFragmentModel(
         feedsRepository.rename(feedId, newTitle)
     }
 
-    suspend fun deleteFeed(id: String) {
-        feedsRepository.delete(id)
+    suspend fun deleteFeed(feedId: String) {
+        feedsRepository.delete(feedId)
+        entriesRepository.deleteByFeedId(feedId)
     }
 }
