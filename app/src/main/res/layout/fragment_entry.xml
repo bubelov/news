@@ -34,7 +34,8 @@
 
             <TextView
                 android:id="@+id/title"
-                android:paddingBottom="8dp"
+                android:paddingBottom="4dp"
+                tools:text="Title"
                 android:layout_width="match_parent"
                 android:textColor="?colorOnBackground"
                 android:layout_height="wrap_content"
@@ -42,8 +43,9 @@
 
             <TextView
                 android:id="@+id/date"
+                tools:text="September, 29, 2020 11:32 AM"
                 android:layout_width="match_parent"
-                android:paddingBottom="12dp"
+                android:paddingBottom="18dp"
                 android:layout_height="wrap_content"
                 android:textAppearance="?attr/textAppearanceBody1"
                 android:textColor="?android:attr/textColorSecondary" />
