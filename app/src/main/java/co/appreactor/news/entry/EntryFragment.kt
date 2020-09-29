@@ -65,6 +65,10 @@ class EntryFragment : Fragment() {
 
             viewEntry(entry)
         }
+
+        scrollView.setOnScrollChangeListener { _, _, _, _, _ ->
+            fab.isVisible = scrollView.canScrollVertically(1)
+        }
     }
 
     private suspend fun viewEntry(entry: Entry) {

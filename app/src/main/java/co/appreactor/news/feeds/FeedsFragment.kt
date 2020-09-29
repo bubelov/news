@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
 import co.appreactor.news.common.hideKeyboard
 import co.appreactor.news.common.showDialog
@@ -112,6 +113,12 @@ class FeedsFragment : Fragment() {
         listView.layoutManager = LinearLayoutManager(requireContext())
         listView.adapter = adapter
         listView.addItemDecoration(FeedsAdapterDecoration(resources.getDimensionPixelSize(R.dimen.dp_8)))
+
+        listView.addOnScrollListener(object: RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                fab.isVisible = listView.canScrollVertically(1)
+            }
+        })
 
         lifecycleScope.launchWhenResumed {
             listViewProgress.isVisible = true
