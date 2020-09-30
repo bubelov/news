@@ -13,6 +13,7 @@ class TextViewImageGetter(private val textView: TextView) : Html.ImageGetter {
         Picasso.get()
             .load(source)
             .resize(textView.width, 0)
+            .onlyScaleDown()
             .into(drawable)
 
         return drawable
