@@ -3,6 +3,9 @@ package co.appreactor.news.entry
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.os.Handler
+import android.text.SpannableStringBuilder
+import android.text.style.ImageSpan
 import android.widget.TextView
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
@@ -23,26 +26,58 @@ class TextViewImage(
 
     override fun getOpacity() = PixelFormat.OPAQUE
 
-    override fun onBitmapLoaded(bitmap: Bitmap, from: Picasso.LoadedFrom) {
-        if (bitmap.width < textView.width / 5) {
-            return
+    override fun onBitmapLoaded(unprocessedBitmap: Bitmap, from: Picasso.LoadedFrom) {
+        val scaleToFullWidth = unprocessedBitmap.width >= textView.width / 5
+
+        val bitmap = if (scaleToFullWidth) {
+            val scaleFactor = textView.width.toFloat() / unprocessedBitmap.width.toFloat()
+            Bitmap.createScaledBitmap(
+                unprocessedBitmap,
+                textView.width,
+                (unprocessedBitmap.height * scaleFactor).toInt(),
+                true
+            )
+        } else {
+            unprocessedBitmap
         }
-
-        val scaleFactor = textView.width.toFloat() / bitmap.width.toFloat()
-
-        val scaledBitmap =
-            Bitmap.createScaledBitmap(bitmap, textView.width, (bitmap.height * scaleFactor).toInt(), true)
 
         val verticalCutoff =
-            (scaledBitmap.height * textView.lineSpacingMultiplier - scaledBitmap.height) / textView.lineSpacingMultiplier
+            (bitmap.height * textView.lineSpacingMultiplier - bitmap.height) / textView.lineSpacingMultiplier
 
-        setBounds(0, 0, scaledBitmap.width, (scaledBitmap.height / textView.lineSpacingMultiplier).toInt())
+        setBounds(0, 0, bitmap.width, (bitmap.height / textView.lineSpacingMultiplier).toInt())
 
-        this.drawable = BitmapDrawable(textView.context.resources, scaledBitmap).apply {
-            setBounds(0, -verticalCutoff.toInt(), scaledBitmap.width, -verticalCutoff.toInt() + scaledBitmap.height)
+        this.drawable = BitmapDrawable(textView.context.resources, bitmap).apply {
+            setBounds(0, -verticalCutoff.toInt(), bitmap.width, -verticalCutoff.toInt() + bitmap.height)
         }
 
-        textView.text = textView.text
+        Handler().post {
+            val text = SpannableStringBuilder(textView.text)
+            val spans = text.getSpans(0, text.length - 1, Any::class.java)
+
+            spans.forEach {
+                when (it) {
+                    is ImageSpan -> {
+                        val spanEnd = text.getSpanEnd(it)
+
+                        if (scaleToFullWidth && spanEnd + 2 <= text.length - 1) {
+                            if (text[spanEnd] != '\n' && text[spanEnd + 1] != '\n') {
+                                text.insert(spanEnd, "\n\n")
+
+                                if (text[spanEnd + 2] == ' ') {
+                                    text.delete(spanEnd + 2, spanEnd + 3)
+                                }
+                            }
+
+                            if (text[spanEnd] == '\n' && text[spanEnd + 1] != '\n') {
+                                text.insert(spanEnd, "\n")
+                            }
+                        }
+                    }
+                }
+            }
+
+            textView.text = text
+        }
     }
 
     override fun onBitmapFailed(e: Exception?, errorDrawable: Drawable?) {
