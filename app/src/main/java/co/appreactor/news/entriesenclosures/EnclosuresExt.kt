@@ -19,7 +19,7 @@ fun Context.getCachedEnclosure(
     val mimeDir = File(enclosures, entryEnclosureLinkType.split("/").first())
     mimeDir.mkdir()
 
-    val fileName = "$entryId-${entryEnclosureLink.split("/").last()}"
+    val fileName = "$entryId-${entryEnclosureLink.split("/").last().split("?").first()}"
     return File(mimeDir, fileName)
 }
 
