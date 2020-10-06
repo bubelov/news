@@ -5,7 +5,9 @@ apply plugin: "androidx.navigation.safeargs.kotlin"
 apply plugin: "com.squareup.sqldelight"
 apply plugin: "com.github.ben-manes.versions"
 
-apply from: ".env.gradle"
+try {
+    apply from: ".env.gradle"
+} catch (ignored) { }
 
 android {
     compileSdkVersion 29
@@ -40,6 +42,10 @@ android {
     }
 
     buildTypes {
+        fdroid {
+
+        }
+
         release {
             signingConfig signingConfigs.release
         }
