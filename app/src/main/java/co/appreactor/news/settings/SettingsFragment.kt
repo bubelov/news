@@ -67,7 +67,7 @@ class SettingsFragment : Fragment() {
 
         lifecycleScope.launchWhenResumed {
             model.getExceptionsCount().collect {
-                viewExceptionsSubtitle.text = getString(R.string.exceptions_logged_s, it)
+                viewExceptionsSubtitle.text = getString(R.string.exceptions_logged_d, it)
             }
         }
 

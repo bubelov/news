@@ -1,16 +1,10 @@
 <resources>
     <string name="app_name">News</string>
     <string name="login_with_nextcloud">Login with Nextcloud app</string>
-    <string name="s_s_s">%1$s %2$s %3$s</string>
     <string name="post_image">Post image</string>
     <string name="settings">Settings</string>
     <string name="news">News</string>
-    <string name="starred_news">Starred news</string>
-    <string name="starred">Starred</string>
     <string name="show_read_news">Show read news</string>
-    <string name="hide_read_news">Hide read news</string>
-    <string name="mark_as_read">Mark as read</string>
-    <string name="mark_as_unread">Mark as unread</string>
     <string name="bookmark">Bookmark</string>
     <string name="remove_bookmark">Remove bookmark</string>
     <string name="logo">Logo</string>
@@ -30,17 +24,13 @@
     <string name="download">Download</string>
     <string name="downloading">Downloading</string>
     <string name="listen">Listen</string>
-    <string name="listen_with">Listen with</string>
-    <string name="download_podcast">Download podcast</string>
-    <string name="play_podcast">Play podcast</string>
     <string name="crop_feed_images">Crop preview images</string>
-    <string name="exceptions_logged_s">Exceptions logged: %1$s</string>
+    <string name="exceptions_logged_d">Exceptions logged: %1$d</string>
     <string name="exceptions">Exceptions</string>
     <string name="you_have_no_logged_exceptions">You have no logged exceptions</string>
     <string name="feeds">Feeds</string>
     <string name="bookmarks">Bookmarks</string>
     <string name="delete_all">Delete all</string>
-    <string name="cannot_sync_bookmarks">Cannot sync bookmarks</string>
     <string name="open_xml_link">Open feed</string>
     <string name="open_html_link">Open website</string>
     <string name="actions">Actions</string>

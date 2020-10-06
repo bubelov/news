@@ -12,6 +12,7 @@ class ConnectivityProbe(
     var online: Boolean = false
     get() {
         if (Build.VERSION.SDK_INT < 24) {
+            @Suppress("DEPRECATION")
             field = connectivityManager.activeNetworkInfo?.isConnected ?: false
         }
 
