@@ -11,9 +11,7 @@ import co.appreactor.news.entriesenclosures.EntriesEnclosuresRepository
 import co.appreactor.news.entriesenclosures.isAudioMime
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toInstant
+import org.joda.time.Instant
 import timber.log.Timber
 import java.text.DateFormat
 import java.util.*
@@ -140,10 +138,9 @@ class EntriesFragmentModel(
             id = id,
             title = title,
             subtitle = lazy {
-                val publishedDateTime = LocalDateTime.parse(published)
-                val publishedDateString = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
-                    .format(Date(publishedDateTime.toInstant(TimeZone.UTC).toEpochMilliseconds()))
-                (feed?.title ?: "Unknown feed") + " · " + publishedDateString
+                val instant = Instant.parse(published)
+                val format = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
+                (feed?.title ?: "Unknown feed") + " · " + format.format(Date(instant.millis))
             },
             viewed = viewed,
             podcast = enclosureLinkType.isAudioMime(),

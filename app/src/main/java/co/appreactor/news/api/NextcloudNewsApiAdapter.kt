@@ -3,7 +3,7 @@ package co.appreactor.news.api
 import co.appreactor.news.db.Entry
 import co.appreactor.news.db.EntryWithoutSummary
 import co.appreactor.news.db.Feed
-import kotlinx.datetime.*
+import org.joda.time.Instant
 import retrofit2.Response
 
 class NextcloudNewsApiAdapter(
@@ -72,7 +72,7 @@ class NextcloudNewsApiAdapter(
     }
 
     override suspend fun getNewAndUpdatedEntries(since: Instant): List<Entry> {
-        val response = api.getNewAndUpdatedItems(since.epochSeconds + 1).execute()
+        val response = api.getNewAndUpdatedItems(since.millis / 1000 + 1).execute()
 
         if (!response.isSuccessful) {
             throw response.toException()
@@ -127,16 +127,16 @@ class NextcloudNewsApiAdapter(
         if (unread == null) return null
         if (starred == null) return null
 
-        val published = Instant.fromEpochSeconds(pubDate).toLocalDateTime(TimeZone.UTC)
-        val updated = Instant.fromEpochSeconds(lastModified).toLocalDateTime(TimeZone.UTC)
+        val published = Instant.ofEpochSecond(pubDate).toString()
+        val updated = Instant.ofEpochSecond(lastModified).toString()
 
         return Entry(
             id = id.toString(),
             feedId = feedId?.toString() ?: "",
             title = title ?: "Untitled",
             link = url?.replace("http://", "https://") ?: "",
-            published = published.toString(),
-            updated = updated.toString(),
+            published = published,
+            updated = updated,
             authorName = author ?: "",
             summary = body ?: "No content",
             enclosureLink = enclosureLink?.replace("http://", "https://") ?: "",

@@ -3,7 +3,7 @@ package co.appreactor.news.api
 import co.appreactor.news.db.Entry
 import co.appreactor.news.db.EntryWithoutSummary
 import co.appreactor.news.db.Feed
-import kotlinx.datetime.Instant
+import org.joda.time.Instant
 
 interface NewsApi {
 

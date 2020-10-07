@@ -10,9 +10,7 @@ import co.appreactor.news.entries.EntriesRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toInstant
+import org.joda.time.Instant
 import timber.log.Timber
 import java.text.DateFormat
 import java.util.*
@@ -32,9 +30,9 @@ class EntryFragmentModel(
     }
 
     fun getDate(entry: Entry): String {
-        val instant = LocalDateTime.parse(entry.published).toInstant(TimeZone.UTC)
+        val instant = Instant.parse(entry.published)
         return DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT)
-            .format(Date(instant.toEpochMilliseconds()))
+            .format(Date(instant.millis))
     }
 
     suspend fun markAsViewed(entry: Entry) {

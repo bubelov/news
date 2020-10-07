@@ -91,8 +91,8 @@ dependencies {
     implementation "com.squareup.sqldelight:coroutines-extensions:$versions_sqldelight"
     implementation "com.jakewharton.timber:timber:$versions_timber"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:$versions_swipe_refresh"
-    implementation "org.jetbrains.kotlinx:kotlinx-datetime:$versions_datetime"
     implementation "org.jsoup:jsoup:$versions_jsoup"
+    implementation "joda-time:joda-time:$versions_joda_time"
 
     testImplementation "junit:junit:$versions_junit"
 

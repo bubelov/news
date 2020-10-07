@@ -10,7 +10,7 @@ import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.*
+import org.joda.time.Instant
 
 class EntriesRepository(
     private val entryQueries: EntryQueries,
@@ -84,7 +84,7 @@ class EntriesRepository(
 
         prefs.putString(
             key = Preferences.LAST_ENTRIES_SYNC_DATE_TIME,
-            value = Clock.System.now().toLocalDateTime(TimeZone.UTC).toString()
+            value = Instant.now().toString()
         )
     }
 
@@ -165,7 +165,7 @@ class EntriesRepository(
             throw Exception("Can not find any reference dates")
         }
 
-        val since = LocalDateTime.parse(threshold).toInstant(TimeZone.UTC)
+        val since = Instant.parse(threshold)
         val entries = newsApi.getNewAndUpdatedEntries(since)
 
         entryQueries.transaction {
@@ -176,7 +176,7 @@ class EntriesRepository(
 
         prefs.putString(
             key = Preferences.LAST_ENTRIES_SYNC_DATE_TIME,
-            value = Clock.System.now().toLocalDateTime(TimeZone.UTC).toString()
+            value = Instant.now().toString()
         )
     }
 }
