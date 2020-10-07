@@ -42,17 +42,29 @@ android {
     }
 
     buildTypes {
-        fdroid {
-
-        }
-
-        release {
-            signingConfig signingConfigs.release
-        }
-
         debug {
             applicationIdSuffix ".dev"
             debuggable true
+        }
+
+        release {
+
+        }
+
+        signedRelease {
+            signingConfig signingConfigs.release
+        }
+    }
+
+    flavorDimensions "default"
+
+    productFlavors {
+        fdroid {
+            dimension "default"
+        }
+
+        play {
+            dimension "default"
         }
     }
 
