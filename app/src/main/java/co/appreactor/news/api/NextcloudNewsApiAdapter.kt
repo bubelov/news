@@ -50,7 +50,17 @@ class NextcloudNewsApiAdapter(
     }
 
     override suspend fun getNotViewedEntries(): List<Entry> {
-        val response = api.getUnreadItems().execute()
+        val response = try {
+            api.getUnreadItems().execute()
+        } catch (e: Exception) {
+            val message = if (e.message == "code < 400: 302") {
+                "Can not load entries. Make sure you have News app installed on your Nextcloud server."
+            } else {
+                e.message
+            }
+            
+            throw Exception(message, e)
+        }
 
         if (!response.isSuccessful) {
             throw response.toException()

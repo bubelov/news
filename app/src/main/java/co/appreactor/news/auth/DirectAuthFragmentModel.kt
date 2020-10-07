@@ -8,32 +8,33 @@ import co.appreactor.news.common.setServerUrl
 import co.appreactor.news.common.setServerUsername
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import timber.log.Timber
+import okhttp3.MediaType.Companion.toMediaType
 
 class DirectAuthFragmentModel(
     private val prefs: Preferences,
 ) : ViewModel() {
 
-    suspend fun isApiAvailable(
+    suspend fun requestFeeds(
         serverUrl: String,
         username: String,
         password: String
-    ): Boolean {
-        return try {
-            val api = DirectNextcloudNewsApiBuilder().build(
-                serverUrl,
-                username,
-                password
-            )
+    ) {
+        val api = DirectNextcloudNewsApiBuilder().build(
+            serverUrl,
+            username,
+            password
+        )
 
-            withContext(Dispatchers.IO) {
-                api.getFeeds().execute().body()!!
+        withContext(Dispatchers.IO) {
+            val response = api.getFeedsRaw().execute()
+
+            if (!response.isSuccessful) {
+                throw Exception(response.message())
+            } else {
+                if (response.body()?.contentType() == "text/html; charset=UTF-8".toMediaType()) {
+                    throw Exception("Can not fetch data. Make sure News app is also installed on your Nextcloud server.")
+                }
             }
-
-            true
-        } catch (e: Exception) {
-            Timber.e(e)
-            false
         }
     }
 

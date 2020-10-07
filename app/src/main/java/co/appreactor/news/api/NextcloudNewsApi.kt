@@ -12,6 +12,9 @@ interface NextcloudNewsApi {
     @GET("feeds")
     fun getFeeds(): Call<FeedsPayload>
 
+    @GET("feeds")
+    fun getFeedsRaw(): Call<ResponseBody>
+
     @PUT("feeds/{id}/rename")
     fun putFeedRename(
         @Path("id") id: Long,

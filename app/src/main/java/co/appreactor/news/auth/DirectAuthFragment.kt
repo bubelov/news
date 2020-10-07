@@ -17,6 +17,7 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.android.viewmodel.ext.android.viewModel
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
+import timber.log.Timber
 
 class DirectAuthFragment : Fragment() {
 
@@ -65,13 +66,13 @@ class DirectAuthFragment : Fragment() {
             lifecycleScope.launchWhenResumed {
                 progress.isVisible = true
 
-                val success = model.isApiAvailable(
-                    serverUrl.text.toString(),
-                    username.text.toString(),
-                    password.text.toString()
-                )
-
-                if (success) {
+                runCatching {
+                    model.requestFeeds(
+                        serverUrl.text.toString(),
+                        username.text.toString(),
+                        password.text.toString()
+                    )
+                }.onSuccess {
                     model.setServer(
                         serverUrl.text.toString(),
                         username.text.toString(),
@@ -89,9 +90,10 @@ class DirectAuthFragment : Fragment() {
                         popBackStack()
                         navigate(R.id.entriesFragment)
                     }
-                } else {
+                }.onFailure {
                     progress.isVisible = false
-                    showDialog(R.string.error, R.string.direct_login_failed)
+                    Timber.e(it)
+                    showDialog(R.string.error, it.message ?: getString(R.string.direct_login_failed))
                 }
             }
         }
