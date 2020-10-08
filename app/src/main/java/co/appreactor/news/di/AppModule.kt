@@ -2,7 +2,6 @@ package co.appreactor.news.di
 
 import android.content.Context
 import android.net.ConnectivityManager
-import co.appreactor.news.Database
 import co.appreactor.news.auth.AuthFragmentModel
 import co.appreactor.news.auth.DirectAuthFragmentModel
 import co.appreactor.news.common.Preferences
@@ -20,21 +19,11 @@ import co.appreactor.news.bookmarks.BookmarksFragmentModel
 import co.appreactor.news.common.ConnectivityProbe
 import co.appreactor.news.entries.EntriesSupportingTextRepository
 import co.appreactor.news.feeds.FeedsFragmentModel
-import com.squareup.sqldelight.android.AndroidSqliteDriver
-import com.squareup.sqldelight.db.SqlDriver
 import org.koin.android.experimental.dsl.viewModel
 import org.koin.dsl.module
 import org.koin.experimental.builder.single
 
 val appModule = module {
-
-    single<SqlDriver> {
-        AndroidSqliteDriver(
-            schema = Database.Schema,
-            context = get(),
-            name = "news.db"
-        )
-    }
 
     single {
         val context = get<Context>()
@@ -51,15 +40,6 @@ val appModule = module {
     single<EntriesEnclosuresRepository>()
     single<Preferences>()
     single<LoggedExceptionsRepository>()
-
-    single { Database(get()) }
-    single { get<Database>().feedQueries }
-    single { get<Database>().entryQueries }
-    single { get<Database>().entryImagesMetadataQueries }
-    single { get<Database>().entryImageQueries }
-    single { get<Database>().entryEnclosureQueries }
-    single { get<Database>().preferenceQueries }
-    single { get<Database>().loggedExceptionQueries }
 
     viewModel<AuthFragmentModel>()
     viewModel<EntriesFragmentModel>()

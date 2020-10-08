@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
+import org.koin.core.context.stopKoin
 
 class SettingsFragment : Fragment() {
 
@@ -84,7 +85,8 @@ class SettingsFragment : Fragment() {
                     R.string.log_out
                 ) { _, _ ->
                     lifecycleScope.launch {
-                        model.clearData(requireContext())
+                        stopKoin()
+                        model.logOut(requireContext())
                         findNavController().popBackStack(R.id.entriesFragment, true)
                         findNavController().navigate(NavGraphDirections.actionGlobalToAuthFragment())
                     }

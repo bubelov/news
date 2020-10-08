@@ -11,13 +11,10 @@ import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.common.Preferences
 import co.appreactor.news.common.showDialog
-import co.appreactor.news.di.appModule
 import co.appreactor.news.di.nextcloudNewsApiModule
 import kotlinx.android.synthetic.main.fragment_direct_auth.*
-import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.android.getKoin
 import org.koin.android.viewmodel.ext.android.viewModel
-import org.koin.core.context.startKoin
-import org.koin.core.context.stopKoin
 import timber.log.Timber
 
 class DirectAuthFragment : Fragment() {
@@ -82,12 +79,7 @@ class DirectAuthFragment : Fragment() {
                         password.text.toString()
                     )
 
-                    stopKoin()
-
-                    startKoin {
-                        androidContext(requireContext())
-                        modules(listOf(appModule, nextcloudNewsApiModule))
-                    }
+                    getKoin().loadModules(listOf(nextcloudNewsApiModule))
 
                     findNavController().apply {
                         popBackStack()

@@ -3,20 +3,18 @@ package co.appreactor.news.settings
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import co.appreactor.news.common.*
-import co.appreactor.news.feeds.FeedsRepository
 import co.appreactor.news.logging.LoggedExceptionsRepository
-import co.appreactor.news.entries.EntriesRepository
 import com.nextcloud.android.sso.AccountImporter
 import com.nextcloud.android.sso.exceptions.SSOException
 import com.nextcloud.android.sso.helper.SingleAccountHelper
+import com.squareup.sqldelight.db.SqlDriver
 import kotlinx.coroutines.flow.first
 import timber.log.Timber
 
 class SettingsFragmentModel(
-    private val feedsRepository: FeedsRepository,
-    private val entriesRepository: EntriesRepository,
     private val loggedExceptionsRepository: LoggedExceptionsRepository,
     private val prefs: Preferences,
+    private val dbDriver: SqlDriver,
 ) : ViewModel() {
 
     suspend fun getShowReadEntries() = prefs.showReadEntries()
@@ -50,12 +48,9 @@ class SettingsFragmentModel(
         }
     }
 
-    suspend fun clearData(context: Context) {
+    fun logOut(context: Context) {
         AccountImporter.clearAllAuthTokens(context)
-
-        feedsRepository.clear()
-        entriesRepository.clear()
-
-        prefs.clear()
+        dbDriver.close()
+        context.deleteDatabase(App.DB_FILE_NAME)
     }
 }
