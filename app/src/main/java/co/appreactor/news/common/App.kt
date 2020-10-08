@@ -2,7 +2,6 @@ package co.appreactor.news.common
 
 import android.app.Application
 import co.appreactor.news.BuildConfig
-import co.appreactor.news.di.apiModule
 import co.appreactor.news.di.appModule
 import co.appreactor.news.logging.PersistentLogTree
 import com.squareup.picasso.OkHttp3Downloader
@@ -20,7 +19,7 @@ class App : Application() {
 
         startKoin {
             androidContext(this@App)
-            modules(listOf(appModule, apiModule))
+            modules(listOf(appModule))
         }
 
         if (BuildConfig.DEBUG) {

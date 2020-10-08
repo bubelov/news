@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">News</string>
-    <string name="login_with_nextcloud">Login with Nextcloud app</string>
+    <string name="login_with_nextcloud_app">Login with Nextcloud app</string>
     <string name="post_image">Post image</string>
     <string name="settings">Settings</string>
     <string name="news">News</string>
@@ -8,7 +8,7 @@
     <string name="bookmark">Bookmark</string>
     <string name="remove_bookmark">Remove bookmark</string>
     <string name="logo">Logo</string>
-    <string name="direct_login">Direct login</string>
+    <string name="direct_nextcloud_login">Direct Nextcloud login</string>
     <string name="log_out">Log out</string>
     <string name="log_out_warning">Do you really want to log out?</string>
     <string name="cancel">Cancel</string>
@@ -46,4 +46,6 @@
     <string name="cannot_find_entry_with_id_s">Can not find entry with id %1$s</string>
     <string name="cannot_show_content">Can not show content</string>
     <string name="share">Share</string>
+    <string name="continue_without_login">Continue without login</string>
+    <string name="nextcloud_login">Nextcloud login</string>
 </resources>

@@ -2,10 +2,7 @@ package co.appreactor.news.auth
 
 import androidx.lifecycle.ViewModel
 import co.appreactor.news.api.DirectNextcloudNewsApiBuilder
-import co.appreactor.news.common.Preferences
-import co.appreactor.news.common.setServerPassword
-import co.appreactor.news.common.setServerUrl
-import co.appreactor.news.common.setServerUsername
+import co.appreactor.news.common.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -43,8 +40,10 @@ class DirectAuthFragmentModel(
         username: String,
         password: String
     ) {
-        prefs.setServerUrl(serverUrl)
-        prefs.setServerUsername(username)
-        prefs.setServerPassword(password)
+        prefs.setNextcloudServerUrl(serverUrl)
+        prefs.setNextcloudServerUsername(username)
+        prefs.setNextcloudServerPassword(password)
     }
+
+    suspend fun setAuthType(authType: String) = prefs.setAuthType(authType)
 }

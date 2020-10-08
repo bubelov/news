@@ -1,15 +1,20 @@
 package co.appreactor.news.common
 
-suspend fun Preferences.getServerUrl() = getString(Preferences.SERVER_URL)
-suspend fun Preferences.setServerUrl(serverUrl: String) = putString(Preferences.SERVER_URL, serverUrl)
+suspend fun Preferences.getAuthType() = getString(Preferences.AUTH_TYPE)
+suspend fun Preferences.setAuthType(authType: String) =
+    putString(Preferences.AUTH_TYPE, authType)
 
-suspend fun Preferences.getServerUsername() = getString(Preferences.SERVER_USERNAME)
-suspend fun Preferences.setServerUsername(serverUsername: String) =
-    putString(Preferences.SERVER_USERNAME, serverUsername)
+suspend fun Preferences.getNextcloudServerUrl() = getString(Preferences.NEXTCLOUD_SERVER_URL)
+suspend fun Preferences.setNextcloudServerUrl(nextcloudServerUrl: String) =
+    putString(Preferences.NEXTCLOUD_SERVER_URL, nextcloudServerUrl)
 
-suspend fun Preferences.getServerPassword() = getString(Preferences.SERVER_PASSWORD)
-suspend fun Preferences.setServerPassword(serverPassword: String) =
-    putString(Preferences.SERVER_PASSWORD, serverPassword)
+suspend fun Preferences.getNextcloudServerUsername() = getString(Preferences.NEXTCLOUD_SERVER_USERNAME)
+suspend fun Preferences.setNextcloudServerUsername(nextcloudServerUsername: String) =
+    putString(Preferences.NEXTCLOUD_SERVER_USERNAME, nextcloudServerUsername)
+
+suspend fun Preferences.getNextcloudServerPassword() = getString(Preferences.NEXTCLOUD_SERVER_PASSWORD)
+suspend fun Preferences.setNextcloudServerPassword(nextcloudServerPassword: String) =
+    putString(Preferences.NEXTCLOUD_SERVER_PASSWORD, nextcloudServerPassword)
 
 suspend fun Preferences.initialSyncCompleted() = getBoolean(Preferences.INITIAL_SYNC_COMPLETED, false)
 suspend fun Preferences.setInitialSyncCompleted(initialSyncCompleted: Boolean) =

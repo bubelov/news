@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
-        app:title="@string/direct_login" />
+        app:title="@string/nextcloud_login" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/serverUrlLayout"

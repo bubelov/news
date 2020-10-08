@@ -37,9 +37,13 @@ class Preferences(
     }
 
     companion object {
-        const val SERVER_URL = "server_url"
-        const val SERVER_USERNAME = "server_username"
-        const val SERVER_PASSWORD = "server_password"
+        const val AUTH_TYPE = "auth_type"
+        const val AUTH_TYPE_STANDALONE = "standalone"
+        const val AUTH_TYPE_NEXTCLOUD_APP = "nextcloud_app"
+        const val AUTH_TYPE_NEXTCLOUD_DIRECT = "nextcloud_direct"
+        const val NEXTCLOUD_SERVER_URL = "nextcloud_server_url"
+        const val NEXTCLOUD_SERVER_USERNAME = "nextcloud_server_username"
+        const val NEXTCLOUD_SERVER_PASSWORD = "nextcloud_server_password"
 
         const val INITIAL_SYNC_COMPLETED = "initial_sync_completed"
         const val LAST_ENTRIES_SYNC_DATE_TIME = "last_entries_sync_date_time"

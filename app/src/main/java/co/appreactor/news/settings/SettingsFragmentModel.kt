@@ -34,10 +34,10 @@ class SettingsFragmentModel(
     suspend fun getExceptionsCount() = loggedExceptionsRepository.count()
 
     suspend fun getAccountName(context: Context): String {
-        val serverUrl = prefs.getServerUrl().first()
+        val serverUrl = prefs.getNextcloudServerUrl().first()
 
         return if (serverUrl.isNotBlank()) {
-            val username = prefs.getServerUsername().first()
+            val username = prefs.getNextcloudServerUsername().first()
             "$username@${serverUrl.replace("https://", "")}"
         } else {
             try {

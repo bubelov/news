@@ -1,32 +1,16 @@
 package co.appreactor.news.auth
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import co.appreactor.news.common.Preferences
-import co.appreactor.news.common.getServerUrl
-import com.nextcloud.android.sso.exceptions.NoCurrentAccountSelectedException
-import com.nextcloud.android.sso.helper.SingleAccountHelper
+import co.appreactor.news.common.getAuthType
+import co.appreactor.news.common.setAuthType
 import kotlinx.coroutines.flow.first
-import timber.log.Timber
 
 class AuthFragmentModel(
     private val prefs: Preferences
 ) : ViewModel() {
 
-    suspend fun isLoggedIn(context: Context): Boolean {
-        if (prefs.getServerUrl().first().isNotBlank()) {
-            return true
-        }
+    suspend fun getAuthType() = prefs.getAuthType().first()
 
-        return try {
-            SingleAccountHelper.getCurrentSingleSignOnAccount(context)
-            true
-        } catch (e: Exception) {
-            if (e !is NoCurrentAccountSelectedException) {
-                Timber.e(e)
-            }
-
-            false
-        }
-    }
+    suspend fun setAuthType(authType: String) = prefs.setAuthType(authType)
 }

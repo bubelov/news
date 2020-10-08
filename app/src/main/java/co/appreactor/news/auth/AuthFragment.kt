@@ -13,9 +13,11 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
+import co.appreactor.news.common.Preferences
 import co.appreactor.news.common.getColorFromAttr
-import co.appreactor.news.di.apiModule
 import co.appreactor.news.di.appModule
+import co.appreactor.news.di.nextcloudNewsApiModule
+import co.appreactor.news.di.standaloneNewsApiModule
 import com.nextcloud.android.sso.AccountImporter
 import com.nextcloud.android.sso.AccountImporter.IAccountAccessGranted
 import com.nextcloud.android.sso.exceptions.SSOException
@@ -27,6 +29,7 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.android.viewmodel.ext.android.viewModel
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
+import org.koin.core.module.Module
 
 class AuthFragment : Fragment() {
 
@@ -38,15 +41,24 @@ class AuthFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         return runBlocking {
-            if (!model.isLoggedIn(requireContext())) {
-                inflater.inflate(
-                    R.layout.fragment_auth,
-                    container,
-                    false
-                )
-            } else {
-                showNews()
-                null
+            when (model.getAuthType()) {
+                Preferences.AUTH_TYPE_STANDALONE -> {
+                    showNews(standaloneNewsApiModule)
+                    null
+                }
+
+                Preferences.AUTH_TYPE_NEXTCLOUD_APP, Preferences.AUTH_TYPE_NEXTCLOUD_DIRECT -> {
+                    showNews(nextcloudNewsApiModule)
+                    null
+                }
+
+                else -> {
+                    inflater.inflate(
+                        R.layout.fragment_auth,
+                        container,
+                        false
+                    )
+                }
             }
         }
     }
@@ -55,11 +67,18 @@ class AuthFragment : Fragment() {
         hideStatusBarBackground()
         invertStatusBarTextColorInLightMode()
 
-        loginViaApp.setOnClickListener {
+        continueWithoutLogin.setOnClickListener {
+            lifecycleScope.launchWhenResumed {
+                model.setAuthType(Preferences.AUTH_TYPE_NEXTCLOUD_DIRECT)
+                showNews(standaloneNewsApiModule)
+            }
+        }
+
+        loginWithNextcloudApp.setOnClickListener {
             showAccountPicker()
         }
 
-        directLogin.setOnClickListener {
+        directNextcloudLogin.setOnClickListener {
             findNavController().navigate(AuthFragmentDirections.actionAuthFragmentToDirectAuthFragment())
         }
     }
@@ -68,13 +87,16 @@ class AuthFragment : Fragment() {
         super.onActivityResult(requestCode, resultCode, data)
 
         val onAccessGranted = IAccountAccessGranted { account ->
-            SingleAccountHelper.setCurrentAccount(context, account.name)
-            showNews()
+            runBlocking {
+                SingleAccountHelper.setCurrentAccount(context, account.name)
+                model.setAuthType(Preferences.AUTH_TYPE_NEXTCLOUD_APP)
+                showNews(nextcloudNewsApiModule)
+            }
         }
 
         when (resultCode) {
             AppCompatActivity.RESULT_CANCELED -> {
-                loginViaApp.isEnabled = true
+                loginWithNextcloudApp.isEnabled = true
             }
 
             else -> {
@@ -90,7 +112,7 @@ class AuthFragment : Fragment() {
     }
 
     private fun showAccountPicker() {
-        loginViaApp.isEnabled = false
+        loginWithNextcloudApp.isEnabled = false
 
         try {
             AccountImporter.pickNewAccount(this)
@@ -99,11 +121,11 @@ class AuthFragment : Fragment() {
                 UiExceptionManager.showDialogForException(context, e)
             }
 
-            loginViaApp.isEnabled = true
+            loginWithNextcloudApp.isEnabled = true
         }
     }
 
-    private fun showNews() {
+    private fun showNews(apiModule: Module) {
         stopKoin()
 
         startKoin {

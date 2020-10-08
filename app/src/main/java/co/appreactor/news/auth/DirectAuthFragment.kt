@@ -9,9 +9,10 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
+import co.appreactor.news.common.Preferences
 import co.appreactor.news.common.showDialog
-import co.appreactor.news.di.apiModule
 import co.appreactor.news.di.appModule
+import co.appreactor.news.di.nextcloudNewsApiModule
 import kotlinx.android.synthetic.main.fragment_direct_auth.*
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -73,6 +74,8 @@ class DirectAuthFragment : Fragment() {
                         password.text.toString()
                     )
                 }.onSuccess {
+                    model.setAuthType(Preferences.AUTH_TYPE_NEXTCLOUD_DIRECT)
+
                     model.setServer(
                         serverUrl.text.toString(),
                         username.text.toString(),
@@ -83,7 +86,7 @@ class DirectAuthFragment : Fragment() {
 
                     startKoin {
                         androidContext(requireContext())
-                        modules(listOf(appModule, apiModule))
+                        modules(listOf(appModule, nextcloudNewsApiModule))
                     }
 
                     findNavController().apply {

@@ -4,10 +4,7 @@ import co.appreactor.news.api.DirectNextcloudNewsApiBuilder
 import co.appreactor.news.api.NewsApi
 import co.appreactor.news.api.NextcloudNewsApi
 import co.appreactor.news.api.NextcloudNewsApiAdapter
-import co.appreactor.news.common.Preferences
-import co.appreactor.news.common.getServerPassword
-import co.appreactor.news.common.getServerUrl
-import co.appreactor.news.common.getServerUsername
+import co.appreactor.news.common.*
 import com.google.gson.GsonBuilder
 import com.nextcloud.android.sso.api.NextcloudAPI
 import com.nextcloud.android.sso.helper.SingleAccountHelper
@@ -17,7 +14,7 @@ import org.koin.dsl.module
 import retrofit2.NextcloudRetrofitApiBuilder
 import timber.log.Timber
 
-val apiModule = module {
+val nextcloudNewsApiModule = module {
 
     single<NewsApi> {
         NextcloudNewsApiAdapter(get())
@@ -26,31 +23,38 @@ val apiModule = module {
     single<NextcloudNewsApi> {
         val prefs = get<Preferences>()
 
-        val serverUrl = runBlocking {
-            prefs.getServerUrl().first()
+        val authType = runBlocking {
+            prefs.getAuthType().first()
         }
 
-        if (serverUrl.isNotBlank()) {
-            val username = runBlocking { prefs.getServerUsername().first() }
-            val password = runBlocking { prefs.getServerPassword().first() }
+        return@single when (authType) {
+            Preferences.AUTH_TYPE_NEXTCLOUD_APP -> {
+                val nextcloudApi = NextcloudAPI(
+                    get(),
+                    get(),
+                    GsonBuilder().create(),
+                    get()
+                )
 
-            DirectNextcloudNewsApiBuilder().build(
-                serverUrl,
-                username,
-                password
-            )
-        } else {
-            val nextcloudApi = NextcloudAPI(
-                get(),
-                get(),
-                GsonBuilder().create(),
-                get()
-            )
+                NextcloudRetrofitApiBuilder(
+                    nextcloudApi,
+                    "/index.php/apps/news/api/v1-2/"
+                ).create(NextcloudNewsApi::class.java)
+            }
 
-            NextcloudRetrofitApiBuilder(
-                nextcloudApi,
-                "/index.php/apps/news/api/v1-2/"
-            ).create(NextcloudNewsApi::class.java)
+            Preferences.AUTH_TYPE_NEXTCLOUD_DIRECT -> {
+                val serverUrl = runBlocking { prefs.getNextcloudServerUrl().first() }
+                val username = runBlocking { prefs.getNextcloudServerUsername().first() }
+                val password = runBlocking { prefs.getNextcloudServerPassword().first() }
+
+                DirectNextcloudNewsApiBuilder().build(
+                    serverUrl,
+                    username,
+                    password
+                )
+            }
+
+            else -> throw IllegalStateException()
         }
     }
 
