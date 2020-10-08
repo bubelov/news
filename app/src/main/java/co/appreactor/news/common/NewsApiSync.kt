@@ -34,7 +34,13 @@ class NewsApiSync(
 
                     val entriesSync = async {
                         entriesRepository.syncNotViewedAndBookmarked().collect { progress ->
-                            syncMessage.value = "Fetching unread news. Got ${progress.itemsSynced} items so far..."
+                            var message = "Fetching unread news..."
+
+                            if (progress.itemsSynced > 0) {
+                                message += " Got ${progress.itemsSynced} items so far..."
+                            }
+
+                            syncMessage.value = message
                         }
                     }
 
