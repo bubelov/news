@@ -100,6 +100,13 @@ class EntriesFragment : Fragment() {
     private suspend fun showEntries() {
         progress.isVisible = true
 
+        lifecycleScope.launchWhenResumed {
+            model.syncMessage.collect {
+                progressMessage.isVisible = it.isNotBlank()
+                progressMessage.text = it
+            }
+        }
+
         runCatching {
             model.performInitialSyncIfNecessary()
         }.onFailure {

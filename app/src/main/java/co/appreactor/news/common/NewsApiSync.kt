@@ -4,6 +4,8 @@ import co.appreactor.news.feeds.FeedsRepository
 import co.appreactor.news.entries.EntriesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -16,6 +18,8 @@ class NewsApiSync(
     private val connectivityProbe: ConnectivityProbe,
 ) {
 
+    val syncMessage = MutableStateFlow("")
+
     private val mutex = Mutex()
 
     suspend fun performInitialSync() {
@@ -25,13 +29,24 @@ class NewsApiSync(
                     return@withLock
                 }
 
-                val feedsSync = async { feedsRepository.sync() }
-                val entriesSync = async { entriesRepository.syncNotViewedAndBookmarked() }
+                runCatching {
+                    val feedsSync = async { feedsRepository.sync() }
 
-                feedsSync.await()
-                entriesSync.await()
+                    val entriesSync = async {
+                        entriesRepository.syncNotViewedAndBookmarked().collect { progress ->
+                            syncMessage.value = "Fetching unread news. Got ${progress.itemsSynced} items so far..."
+                        }
+                    }
 
-                prefs.setInitialSyncCompleted(true)
+                    feedsSync.await()
+                    entriesSync.await()
+                }.onSuccess {
+                    syncMessage.value = ""
+                    prefs.setInitialSyncCompleted(true)
+                }.onFailure {
+                    syncMessage.value = ""
+                    throw it
+                }
             }
         }
     }

@@ -3,6 +3,7 @@ package co.appreactor.news.api
 import co.appreactor.news.db.Entry
 import co.appreactor.news.db.EntryWithoutSummary
 import co.appreactor.news.db.Feed
+import kotlinx.coroutines.flow.Flow
 import org.joda.time.Instant
 
 interface NewsApi {
@@ -15,7 +16,7 @@ interface NewsApi {
 
     suspend fun deleteFeed(feedId: String)
 
-    suspend fun getNotViewedEntries(): List<Entry>
+    suspend fun getNotViewedEntries(): Flow<GetNotViewedEntriesResult>
 
     suspend fun getBookmarkedEntries(): List<Entry>
 

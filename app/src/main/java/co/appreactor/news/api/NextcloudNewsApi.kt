@@ -24,8 +24,11 @@ interface NextcloudNewsApi {
     @DELETE("feeds/{id}")
     fun deleteFeed(@Path("id") id: Long): Call<List<Long>>
 
-    @GET("items?type=3&getRead=false&batchSize=-1")
-    fun getUnreadItems(): Call<ItemsPayload>
+    @GET("items?type=3&getRead=false")
+    fun getUnreadItems(
+        @Query("batchSize") batchSize: Long,
+        @Query("offset") offset: Long,
+    ): Call<ItemsPayload>
 
     @GET("items?type=2&getRead=true&batchSize=-1")
     fun getStarredItems(): Call<ItemsPayload>

@@ -3,8 +3,11 @@ package co.appreactor.news.api
 import co.appreactor.news.db.Entry
 import co.appreactor.news.db.EntryWithoutSummary
 import co.appreactor.news.db.Feed
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import org.joda.time.Instant
 import retrofit2.Response
+import timber.log.Timber
 
 class NextcloudNewsApiAdapter(
     private val api: NextcloudNewsApi
@@ -49,25 +52,50 @@ class NextcloudNewsApiAdapter(
         }
     }
 
-    override suspend fun getNotViewedEntries(): List<Entry> {
-        val response = try {
-            api.getUnreadItems().execute()
-        } catch (e: Exception) {
-            val message = if (e.message == "code < 400: 302") {
-                "Can not load entries. Make sure you have News app installed on your Nextcloud server."
-            } else {
-                e.message
+    override suspend fun getNotViewedEntries(): Flow<GetNotViewedEntriesResult> = flow {
+        emit(GetNotViewedEntriesResult.Loading(0L))
+
+        val fetchedEntries = mutableSetOf<ItemJson>()
+        val batchSize = 250L
+
+        while (true) {
+            val oldestEntryId = fetchedEntries.minOfOrNull { it.id ?: Long.MAX_VALUE }?.toLong() ?: 0L
+            Timber.d("Oldest entry ID: $oldestEntryId")
+
+            val response = try {
+                api.getUnreadItems(
+                    batchSize = batchSize,
+                    offset = oldestEntryId
+                ).execute()
+            } catch (e: Exception) {
+                val message = if (e.message == "code < 400: 302") {
+                    "Can not load entries. Make sure you have News app installed on your Nextcloud server."
+                } else {
+                    e.message
+                }
+
+                throw Exception(message, e)
             }
-            
-            throw Exception(message, e)
+
+            if (!response.isSuccessful) {
+                throw response.toException()
+            } else {
+                val entries =  response.body()?.items ?: throw Exception("Can not parse server response")
+                Timber.d("Got ${entries.size} entries")
+                fetchedEntries += entries
+                Timber.d("Fetched ${fetchedEntries.size} entries so far")
+                emit(GetNotViewedEntriesResult.Loading(fetchedEntries.size.toLong()))
+
+                if (entries.size < batchSize) {
+                    break
+                }
+            }
         }
 
-        if (!response.isSuccessful) {
-            throw response.toException()
-        } else {
-            return response.body()?.items?.mapNotNull { it.toEntry() }
-                ?: throw Exception("Can not parse server response")
-        }
+        Timber.d("Got ${fetchedEntries.size} entries in total")
+        val validEntries = fetchedEntries.mapNotNull { it.toEntry() }
+        Timber.d("Of them, valid: ${validEntries.size}")
+        emit(GetNotViewedEntriesResult.Success(validEntries))
     }
 
     override suspend fun getBookmarkedEntries(): List<Entry> {

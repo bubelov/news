@@ -26,6 +26,8 @@ class EntriesFragmentModel(
     private val prefs: Preferences,
 ) : ViewModel() {
 
+    val syncMessage = newsApiSync.syncMessage
+
     private var syncPreviewsJob: Job? = null
 
     init {

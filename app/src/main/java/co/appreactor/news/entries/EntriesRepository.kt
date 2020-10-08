@@ -8,7 +8,10 @@ import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOne
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import org.joda.time.Instant
 
@@ -17,6 +20,8 @@ class EntriesRepository(
     private val newsApi: NewsApi,
     private val prefs: Preferences,
 ) {
+
+    data class SyncNotViewedAndBookmarkedProgress(val itemsSynced: Long)
 
     suspend fun getAll() = withContext(Dispatchers.IO) {
         entryQueries.selectAll().asFlow().mapToList()
@@ -72,20 +77,33 @@ class EntriesRepository(
         entryQueries.deleteByFeedId(feedId)
     }
 
-    suspend fun syncNotViewedAndBookmarked() = withContext(Dispatchers.IO) {
-        val notViewedEntries = newsApi.getNotViewedEntries()
-        val bookmarkedEntries = newsApi.getBookmarkedEntries()
+    suspend fun syncNotViewedAndBookmarked(): Flow<SyncNotViewedAndBookmarkedProgress> = flow {
+        emit(SyncNotViewedAndBookmarkedProgress(0L))
 
-        entryQueries.transaction {
-            (notViewedEntries + bookmarkedEntries).forEach {
-                entryQueries.insertOrReplace(it)
+        withContext(Dispatchers.IO) {
+            newsApi.getNotViewedEntries().collect { result ->
+                when (result) {
+                    is GetNotViewedEntriesResult.Loading -> {
+                        emit(SyncNotViewedAndBookmarkedProgress(result.entriesLoaded))
+                    }
+
+                    is GetNotViewedEntriesResult.Success -> {
+                        val bookmarkedEntries = newsApi.getBookmarkedEntries()
+
+                        entryQueries.transaction {
+                            (result.entries + bookmarkedEntries).forEach {
+                                entryQueries.insertOrReplace(it)
+                            }
+                        }
+
+                        prefs.putString(
+                            key = Preferences.LAST_ENTRIES_SYNC_DATE_TIME,
+                            value = Instant.now().toString()
+                        )
+                    }
+                }
             }
         }
-
-        prefs.putString(
-            key = Preferences.LAST_ENTRIES_SYNC_DATE_TIME,
-            value = Instant.now().toString()
-        )
     }
 
     suspend fun syncViewedFlags() = withContext(Dispatchers.IO) {
