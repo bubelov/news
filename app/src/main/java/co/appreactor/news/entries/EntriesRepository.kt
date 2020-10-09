@@ -69,10 +69,6 @@ class EntriesRepository(
         entryQueries.selectMaxUpdaded().executeAsOneOrNull()?.MAX
     }
 
-    suspend fun clear() = withContext(Dispatchers.IO) {
-        entryQueries.deleteAll()
-    }
-
     fun deleteByFeedId(feedId: String) {
         entryQueries.deleteByFeedId(feedId)
     }

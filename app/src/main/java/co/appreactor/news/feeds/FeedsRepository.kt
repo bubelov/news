@@ -38,10 +38,6 @@ class FeedsRepository(
         feedQueries.deleteById(feedId)
     }
 
-    suspend fun clear() = withContext(Dispatchers.IO) {
-        feedQueries.deleteAll()
-    }
-
     suspend fun sync() = withContext(Dispatchers.IO) {
         val newFeeds = newsApi.getFeeds()
         val cachedFeeds = getAll().first()

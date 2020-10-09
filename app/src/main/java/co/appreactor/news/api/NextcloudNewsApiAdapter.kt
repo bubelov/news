@@ -13,8 +13,8 @@ class NextcloudNewsApiAdapter(
     private val api: NextcloudNewsApi
 ) : NewsApi {
 
-    override suspend fun addFeed(url: String): Feed {
-        val response = api.postFeed(PostFeedArgs(url, 0)).execute()
+    override suspend fun addFeed(uri: String): Feed {
+        val response = api.postFeed(PostFeedArgs(uri, 0)).execute()
 
         if (!response.isSuccessful) {
             throw response.toException()

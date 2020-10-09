@@ -35,7 +35,7 @@
         android:id="@+id/empty"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/you_have_no_logged_exceptions"
+        android:text="@string/feeds_list_is_empty"
         android:textAppearance="?textAppearanceBody1"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
