@@ -88,7 +88,7 @@ class AuthFragment : Fragment() {
 
         continueWithoutLogin.setOnClickListener {
             lifecycleScope.launchWhenResumed {
-                model.setAuthType(Preferences.AUTH_TYPE_NEXTCLOUD_DIRECT)
+                model.setAuthType(Preferences.AUTH_TYPE_STANDALONE)
                 showNews(standaloneNewsApiModule)
             }
         }
