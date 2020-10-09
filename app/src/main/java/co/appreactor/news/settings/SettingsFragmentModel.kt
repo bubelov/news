@@ -31,6 +31,8 @@ class SettingsFragmentModel(
 
     suspend fun getExceptionsCount() = loggedExceptionsRepository.count()
 
+    suspend fun getAuthType() = prefs.getAuthType().first()
+
     suspend fun getAccountName(context: Context): String {
         val serverUrl = prefs.getNextcloudServerUrl().first()
 

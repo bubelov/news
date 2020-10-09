@@ -48,4 +48,6 @@
     <string name="share">Share</string>
     <string name="continue_without_login">Continue without login</string>
     <string name="nextcloud_login">Nextcloud login</string>
+    <string name="delete_all_data">Delete all data</string>
+    <string name="delete_all_data_warning">This action will reset the app an delete all of the data.</string>
 </resources>

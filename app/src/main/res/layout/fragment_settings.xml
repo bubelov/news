@@ -139,13 +139,14 @@
             android:padding="16dp">
 
             <TextView
+                android:id="@+id/logOutTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/log_out"
                 android:textAppearance="?textAppearanceListItem" />
 
             <TextView
-                android:id="@+id/username"
+                android:id="@+id/logOutSubtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:alpha="0.6"
