@@ -1,9 +1,8 @@
 CREATE TABLE Feed (
   id TEXT PRIMARY KEY NOT NULL,
   title TEXT NOT NULL,
-  link TEXT NOT NULL,
-  alternateLink TEXT NOT NULL,
-  alternateLinkType TEXT NOT NULL
+  selfLink TEXT NOT NULL,
+  alternateLink TEXT NOT NULL
 );
 
 insertOrReplace:

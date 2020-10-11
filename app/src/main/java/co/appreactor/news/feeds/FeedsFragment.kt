@@ -39,7 +39,7 @@ class FeedsFragment : Fragment() {
 
         override fun openLinkClick(feed: Feed) {
             val intent = Intent(Intent.ACTION_VIEW)
-            intent.data = Uri.parse(feed.link)
+            intent.data = Uri.parse(feed.selfLink)
             startActivity(intent)
         }
 

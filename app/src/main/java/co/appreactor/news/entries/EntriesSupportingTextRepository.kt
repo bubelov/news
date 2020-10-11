@@ -35,7 +35,7 @@ class EntriesSupportingTextRepository(
         }
 
         val summary = runCatching {
-            if (feed?.link?.startsWith("https://news.ycombinator.com") == true) {
+            if (feed?.selfLink?.startsWith("https://news.ycombinator.com") == true) {
                 return@runCatching ""
             }
 

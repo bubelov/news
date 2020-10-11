@@ -152,9 +152,8 @@ class NextcloudNewsApiAdapter(
         return Feed(
             id = id?.toString() ?: return null,
             title = title ?: "Untitled",
-            link = url ?: "",
+            selfLink = url ?: "",
             alternateLink = link ?: "",
-            alternateLinkType = "text/html",
         )
     }
 
