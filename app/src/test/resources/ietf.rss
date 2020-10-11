@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<?xml-stylesheet title="CSS_formatting" type="text/css" href="css/rss.css"?>
+<?xml-stylesheet title="XSL_formatting" type="text/xml" href="rss2html.xsl"?>
+<rss version="2.0"
+  xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+><channel>
+<!-- Generated with Perl's XML::RSS::SimpleGen v11.11 -->
+
+<link>https://tools.ietf.org/html/</link>
+<title>New RFCs</title>
+<description>Recently released Request For Comments documents</description>
+<language>en</language>
+<lastBuildDate>Mon, 23 Dec 2019 20:27:17 GMT</lastBuildDate>
+<skipHours><hour>0</hour><hour>1</hour><hour>2</hour><hour>3</hour><hour>4</hour><hour>5</hour><hour>6</hour><hour>7</hour><hour>8</hour><hour>9</hour><hour>10</hour><hour>11</hour><hour>12</hour><hour>13</hour><hour>14</hour><hour>15</hour><hour>16</hour><hour>17</hour><hour>18</hour><hour>19</hour><hour>21</hour><hour>22</hour><hour>23</hour></skipHours>
+<sy:updateFrequency>1</sy:updateFrequency>
+<sy:updatePeriod>daily</sy:updatePeriod>
+<sy:updateBase>1970-01-01T20:30+00:00</sy:updateBase>
+<ttl>1440</ttl>
+<webMaster>webmaster@tools.ietf.org</webMaster>
+<docs>http://www.interglacial.com/rss/about.html</docs>
+
+<item>
+  <title>8632: A YANG Data Model for Alarm Management</title>
+  <link>https://www.rfc-editor.org/info/rfc8632</link>
+  <description>(163KB) This document defines a YANG module for alarm management. It includes functions for alarm-list management, alarm shelving, and notifications to inform management systems. There are also operations to manage the operator state of an alarm and administrative alarm procedures. The module carefully maps to relevant alarm standards.</description>
+</item>
+
+
+</channel></rss>
