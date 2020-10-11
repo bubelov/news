@@ -29,7 +29,7 @@ class EntriesSupportingTextRepository(
 
         val entry = entriesRepository.get(entryId).first()
 
-        if (entry == null || entry.summary.isBlank()) {
+        if (entry == null || entry.content.isBlank()) {
             cache[entryId] = ""
             return@withContext ""
         }
@@ -39,7 +39,7 @@ class EntriesSupportingTextRepository(
                 return@runCatching ""
             }
 
-            val parsedBody = HtmlCompat.fromHtml(entry.summary, HtmlCompat.FROM_HTML_MODE_COMPACT)
+            val parsedBody = HtmlCompat.fromHtml(entry.content, HtmlCompat.FROM_HTML_MODE_COMPACT)
 
             if (parsedBody is SpannableStringBuilder) {
                 parsedBody.clearSpans()

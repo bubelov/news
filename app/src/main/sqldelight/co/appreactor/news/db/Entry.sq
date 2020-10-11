@@ -6,7 +6,7 @@ CREATE TABLE Entry (
   published TEXT NOT NULL,
   updated TEXT NOT NULL,
   authorName TEXT NOT NULL,
-  summary TEXT NOT NULL,
+  content TEXT NOT NULL,
   enclosureLink TEXT NOT NULL,
   enclosureLinkType TEXT NOT NULL,
 

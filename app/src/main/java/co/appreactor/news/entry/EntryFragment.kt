@@ -137,7 +137,7 @@ class EntryFragment : Fragment() {
 
     private fun fillSummary(entry: Entry) {
         val summary = HtmlCompat.fromHtml(
-            entry.summary,
+            entry.content,
             HtmlCompat.FROM_HTML_MODE_LEGACY,
             TextViewImageGetter(summaryView),
             null

@@ -176,7 +176,7 @@ class NextcloudNewsApiAdapter(
             published = published,
             updated = updated,
             authorName = author ?: "",
-            summary = body ?: "No content",
+            content = body ?: "No content",
             enclosureLink = enclosureLink?.replace("http://", "https://") ?: "",
             enclosureLinkType = enclosureMime ?: "",
 
