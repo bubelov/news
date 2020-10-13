@@ -101,6 +101,7 @@ fun Document.toAtomEntries(): List<Entry> {
             feedId = feedId,
             title = title,
             link = link,
+            published = updated, // TODO
             updated = updated,
             authorName = authorName,
             content = content,
@@ -151,6 +152,7 @@ fun Document.toRssEntries(): List<Entry> {
             feedId = feedId,
             title = title,
             link = link,
+            published = RSS_DATE_FORMATTER.parseDateTime(pubDate).toString(),
             updated = RSS_DATE_FORMATTER.parseDateTime(pubDate).toString(),
             authorName = author,
             content = description,

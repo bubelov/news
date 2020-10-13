@@ -88,7 +88,7 @@ class BookmarksFragmentModel(
             id = id,
             title = title,
             subtitle = lazy {
-                val instant = Instant.parse(updated)
+                val instant = Instant.parse(published)
                 val format = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
                 (feed?.title ?: "Unknown feed") + " · " + format.format(Date(instant.millis))
             },
