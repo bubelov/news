@@ -30,7 +30,7 @@ class EntryFragmentModel(
     }
 
     fun getDate(entry: Entry): String {
-        val instant = Instant.parse(entry.published)
+        val instant = Instant.parse(entry.updated)
         return DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT)
             .format(Date(instant.millis))
     }

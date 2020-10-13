@@ -61,14 +61,33 @@ fun Document.toAtomEntries(): List<Entry> {
     return (0 until entries.length).mapNotNull { index ->
         val entry = entries.item(index) as Element
 
+        // > atom:entry elements MUST contain exactly one atom:id element.
+        // Source: https://tools.ietf.org/html/rfc4287
         val id = entry.getElementsByTagName("id").item(0).textContent ?: return@mapNotNull null
+
+        // > atom:entry elements MUST contain exactly one atom:title element.
+        // Source: https://tools.ietf.org/html/rfc4287
         val title = entry.getElementsByTagName("title").item(0).textContent ?: return@mapNotNull null
+
+        // TODO
+        // > atom:entry elements that contain no child atom:content element MUST contain at least
+        // > one atom:link element with a rel attribute value of "alternate".
+        // Source: https://tools.ietf.org/html/rfc4287
         val link = entry.getElementsByTagName("link").item(0).textContent ?: return@mapNotNull null
-        val published = entry.getElementsByTagName("published").item(0).textContent ?: return@mapNotNull null
+
+        // > atom:entry elements MUST contain exactly one atom:updated element.
+        // Source: https://tools.ietf.org/html/rfc4287
         val updated = entry.getElementsByTagName("updated").item(0).textContent ?: return@mapNotNull null
 
+        // > atom:entry elements MUST contain exactly one atom:updated element.
+        // Source: https://tools.ietf.org/html/rfc4287
         val author = entry.getElementsByTagName("author")?.item(0)
 
+        // TODO
+        // atom:entry elements MUST contain one or more atom:author elements, unless the atom:entry
+        // contains an atom:source element that contains an atom:author element or, in an Atom Feed
+        // Document, the atom:feed element contains an atom:author element itself.
+        // Source: https://tools.ietf.org/html/rfc4287
         val authorName = if (author != null && author is Element) {
             author.getElementsByTagName("name")?.item(0)?.textContent ?: ""
         } else {
@@ -82,7 +101,6 @@ fun Document.toAtomEntries(): List<Entry> {
             feedId = feedId,
             title = title,
             link = link,
-            published = published,
             updated = updated,
             authorName = authorName,
             content = content,
@@ -133,7 +151,6 @@ fun Document.toRssEntries(): List<Entry> {
             feedId = feedId,
             title = title,
             link = link,
-            published = RSS_DATE_FORMATTER.parseDateTime(pubDate).toString(),
             updated = RSS_DATE_FORMATTER.parseDateTime(pubDate).toString(),
             authorName = author,
             content = description,

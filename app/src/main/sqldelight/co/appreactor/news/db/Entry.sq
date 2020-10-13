@@ -3,7 +3,6 @@ CREATE TABLE Entry (
   feedId TEXT NOT NULL,
   title TEXT NOT NULL,
   link TEXT NOT NULL,
-  published TEXT NOT NULL,
   updated TEXT NOT NULL,
   authorName TEXT NOT NULL,
   content TEXT NOT NULL,
@@ -26,7 +25,6 @@ SELECT
   feedId,
   title,
   link,
-  published,
   updated,
   authorName,
   enclosureLink,
@@ -46,7 +44,7 @@ VALUES ?;
 selectAll:
 SELECT *
 FROM EntryWithoutSummary
-ORDER BY published DESC;
+ORDER BY updated DESC;
 
 selectById:
 SELECT *
@@ -58,31 +56,31 @@ SELECT *
 FROM EntryWithoutSummary
 WHERE viewed = 0
 OR bookmarked = 1
-ORDER BY published DESC;
+ORDER BY updated DESC;
 
 selectByViewed:
 SELECT *
 FROM EntryWithoutSummary
 WHERE viewed = ?
-ORDER BY published DESC;
+ORDER BY updated DESC;
 
 selectByViewedSynced:
 SELECT *
 FROM EntryWithoutSummary
 WHERE viewedSynced = ?
-ORDER BY published DESC;
+ORDER BY updated DESC;
 
 selectBookmarked:
 SELECT *
 FROM EntryWithoutSummary
 WHERE bookmarked = 1
-ORDER BY published DESC;
+ORDER BY updated DESC;
 
 selectByBookmarkedSynced:
 SELECT *
 FROM EntryWithoutSummary
 WHERE bookmarkedSynced = ?
-ORDER BY published DESC;
+ORDER BY updated DESC;
 
 selectCount:
 SELECT COUNT(*)

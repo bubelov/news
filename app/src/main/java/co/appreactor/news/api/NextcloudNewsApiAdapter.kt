@@ -164,7 +164,6 @@ class NextcloudNewsApiAdapter(
         if (unread == null) return null
         if (starred == null) return null
 
-        val published = Instant.ofEpochSecond(pubDate).toString()
         val updated = Instant.ofEpochSecond(lastModified).toString()
 
         return Entry(
@@ -172,7 +171,6 @@ class NextcloudNewsApiAdapter(
             feedId = feedId?.toString() ?: "",
             title = title ?: "Untitled",
             link = url?.replace("http://", "https://") ?: "",
-            published = published,
             updated = updated,
             authorName = author ?: "",
             content = body ?: "No content",

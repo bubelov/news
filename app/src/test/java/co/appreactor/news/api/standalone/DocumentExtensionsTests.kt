@@ -31,6 +31,14 @@ class DocumentExtensionsTests {
     }
 
     @Test
+    fun toAtomEntries() {
+        "github-curl.atom".toDocument().apply {
+            val entries = this.toAtomEntries()
+            assertEquals(10, entries.size)
+        }
+    }
+
+    @Test
     fun getFeedType_recognizesRss() {
         assertEquals(FeedType.RSS, "ietf.rss".toDocument().getFeedType())
     }
