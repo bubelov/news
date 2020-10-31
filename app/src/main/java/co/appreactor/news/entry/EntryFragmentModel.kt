@@ -35,12 +35,12 @@ class EntryFragmentModel(
             .format(Date(instant.millis))
     }
 
-    suspend fun markAsViewed(entry: Entry) {
-        if (entry.viewed) {
+    suspend fun markAsOpened(entry: Entry) {
+        if (entry.opened) {
             return
         }
 
-        entriesRepository.setViewed(entry.id, !entry.viewed)
+        entriesRepository.setOpened(entry.id, true)
         syncEntriesFlags()
     }
 

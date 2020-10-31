@@ -37,7 +37,7 @@ class EntriesFragmentModel(
         }
 
         viewModelScope.launch {
-            getShowPreviewImages().collect { show ->
+            prefs.showPreviewImages().collect { show ->
                 if (show) {
                     syncPreviews()
                 }
@@ -52,21 +52,19 @@ class EntriesFragmentModel(
         return combine(
             feedsRepository.getAll(),
             entriesRepository.getCount(),
-            getShowReadEntries(),
-            getShowPreviewImages(),
-            getCropPreviewImages(),
-        ) { feeds, _, showViewedEntries, showPreviewImages, cropPreviewImages ->
-            val entries = if (showViewedEntries) {
+            prefs.showOpenedEntries(),
+            prefs.showPreviewImages(),
+            prefs.cropPreviewImages(),
+        ) { feeds, _, showOpenedEntries, showPreviewImages, cropPreviewImages ->
+            val entries = if (showOpenedEntries) {
                 entriesRepository.getAll().first()
             } else {
-                entriesRepository.getNotViewed().first()
-            }
+                entriesRepository.getNotOpened().first()
+            }.filterNot { it.bookmarked }
 
             Timber.d("Got ${entries.size} results in ${System.currentTimeMillis() - start} ms")
 
-            val result = entries.filter {
-                showViewedEntries || !it.viewed
-            }.map {
+            val result = entries.map {
                 val feed = feeds.singleOrNull { feed -> feed.id == it.feedId }
                 it.toRow(feed, showPreviewImages, cropPreviewImages)
             }
@@ -114,22 +112,15 @@ class EntriesFragmentModel(
 
     suspend fun getEntry(id: String) = entriesRepository.get(id).first()
 
-    suspend fun markAsViewed(entryId: String) {
-        entriesRepository.setViewed(entryId, true)
+    suspend fun markAsOpened(entryId: String) {
+        entriesRepository.setOpened(entryId, true)
         newsApiSync.syncEntriesFlags()
     }
 
-    suspend fun markAsViewedAndBookmarked(entryId: String) = withContext(Dispatchers.IO) {
-        entriesRepository.setViewed(entryId, true)
+    suspend fun markAsBookmarked(entryId: String) = withContext(Dispatchers.IO) {
         entriesRepository.setBookmarked(entryId, true)
         newsApiSync.syncEntriesFlags()
     }
-
-    private suspend fun getShowReadEntries() = prefs.showReadEntries()
-
-    private suspend fun getShowPreviewImages() = prefs.showPreviewImages()
-
-    private suspend fun getCropPreviewImages() = prefs.cropPreviewImages()
 
     private suspend fun EntryWithoutSummary.toRow(
         feed: Feed?,
@@ -144,7 +135,6 @@ class EntriesFragmentModel(
                 val format = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
                 (feed?.title ?: "Unknown feed") + " · " + format.format(Date(instant.millis))
             },
-            viewed = viewed,
             podcast = enclosureLinkType.isAudioMime(),
             podcastDownloadPercent = flow {
                 entriesEnclosuresRepository.getDownloadProgress(this@toRow.id).collect {

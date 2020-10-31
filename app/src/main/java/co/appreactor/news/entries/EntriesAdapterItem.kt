@@ -7,7 +7,6 @@ data class EntriesAdapterItem(
     val id: String,
     val title: String,
     val subtitle: Lazy<String>,
-    val viewed: Boolean,
     val podcast: Boolean,
     val podcastDownloadPercent: Flow<Long?>,
     val image: Flow<EntryImage?>,

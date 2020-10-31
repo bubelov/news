@@ -52,8 +52,8 @@ class NextcloudNewsApiAdapter(
         }
     }
 
-    override suspend fun getNotViewedEntries(): Flow<GetNotViewedEntriesResult> = flow {
-        emit(GetNotViewedEntriesResult.Loading(0L))
+    override suspend fun getUnopenedEntries(): Flow<GetUnopenedEntriesResult> = flow {
+        emit(GetUnopenedEntriesResult.Loading(0L))
 
         val fetchedEntries = mutableSetOf<ItemJson>()
         val batchSize = 250L
@@ -84,7 +84,7 @@ class NextcloudNewsApiAdapter(
                 Timber.d("Got ${entries.size} entries")
                 fetchedEntries += entries
                 Timber.d("Fetched ${fetchedEntries.size} entries so far")
-                emit(GetNotViewedEntriesResult.Loading(fetchedEntries.size.toLong()))
+                emit(GetUnopenedEntriesResult.Loading(fetchedEntries.size.toLong()))
 
                 if (entries.size < batchSize) {
                     break
@@ -95,7 +95,7 @@ class NextcloudNewsApiAdapter(
         Timber.d("Got ${fetchedEntries.size} entries in total")
         val validEntries = fetchedEntries.mapNotNull { it.toEntry() }
         Timber.d("Of them, valid: ${validEntries.size}")
-        emit(GetNotViewedEntriesResult.Success(validEntries))
+        emit(GetUnopenedEntriesResult.Success(validEntries))
     }
 
     override suspend fun getBookmarkedEntries(): List<Entry> {
@@ -120,10 +120,10 @@ class NextcloudNewsApiAdapter(
             ?: throw Exception("Can not parse server response")
     }
 
-    override suspend fun markAsViewed(entriesIds: List<String>, viewed: Boolean) {
+    override suspend fun markAsOpened(entriesIds: List<String>, opened: Boolean) {
         val ids = entriesIds.map { it.toLong() }
 
-        val response = if (viewed) {
+        val response = if (opened) {
             api.putRead(PutReadArgs(ids))
         } else {
             api.putUnread(PutReadArgs(ids))
@@ -179,8 +179,8 @@ class NextcloudNewsApiAdapter(
             enclosureLink = enclosureLink?.replace("http://", "https://") ?: "",
             enclosureLinkType = enclosureMime ?: "",
 
-            viewed = unread == false,
-            viewedSynced = true,
+            opened = unread == false,
+            openedSynced = true,
 
             bookmarked = starred,
             bookmarkedSynced = true,

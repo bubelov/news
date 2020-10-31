@@ -139,7 +139,7 @@ class EntriesFragment : Fragment() {
                 if (direction == ItemTouchHelper.LEFT) {
                     lifecycleScope.launchWhenResumed {
                         runCatching {
-                            model.markAsViewed(entry.id)
+                            model.markAsOpened(entry.id)
                         }.onFailure {
                             Timber.e(it)
                         }
@@ -150,7 +150,7 @@ class EntriesFragment : Fragment() {
                 if (direction == ItemTouchHelper.RIGHT) {
                     lifecycleScope.launchWhenResumed {
                         runCatching {
-                            model.markAsViewedAndBookmarked(entry.id)
+                            model.markAsBookmarked(entry.id)
                         }.onFailure {
                             Timber.e(it)
                         }

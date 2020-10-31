@@ -33,8 +33,8 @@ class NewsApiSync(
                     val feedsSync = async { feedsRepository.sync() }
 
                     val entriesSync = async {
-                        entriesRepository.syncNotViewedAndBookmarked().collect { progress ->
-                            var message = "Fetching unread news..."
+                        entriesRepository.syncUnopenedAndBookmarked().collect { progress ->
+                            var message = "Fetching news..."
 
                             if (progress.itemsSynced > 0) {
                                 message += " Got ${progress.itemsSynced} items so far..."
@@ -72,8 +72,17 @@ class NewsApiSync(
 
         mutex.withLock {
             if (syncEntriesFlags) {
-                entriesRepository.syncViewedFlags()
-                entriesRepository.syncBookmarkedFlags()
+                runCatching {
+                    entriesRepository.syncOpenedEntries()
+                }.onFailure {
+                    throw Exception("Can't sync opened news", it)
+                }
+
+                runCatching {
+                    entriesRepository.syncBookmarkedEntries()
+                }.onFailure {
+                    throw Exception("Can't sync bookmarks", it)
+                }
             }
 
             if (syncFeeds) {

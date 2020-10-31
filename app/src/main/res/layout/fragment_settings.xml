@@ -34,10 +34,10 @@
             android:paddingEnd="16dp">
 
             <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/showReadEntries"
+                android:id="@+id/showOpenedEntries"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/show_read_news"
+                android:text="@string/show_opened_news"
                 android:textAppearance="?textAppearanceListItem" />
 
         </LinearLayout>

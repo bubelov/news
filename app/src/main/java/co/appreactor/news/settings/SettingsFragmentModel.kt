@@ -17,9 +17,9 @@ class SettingsFragmentModel(
     private val dbDriver: SqlDriver,
 ) : ViewModel() {
 
-    suspend fun getShowReadEntries() = prefs.showReadEntries()
+    suspend fun getShowOpenedEntries() = prefs.showOpenedEntries()
 
-    suspend fun setShowReadEntries(show: Boolean) = prefs.setShowReadEntries(show)
+    suspend fun setShowOpenedEntries(show: Boolean) = prefs.setShowOpenedEntries(show)
 
     suspend fun getShowPreviewImages() = prefs.showPreviewImages()
 

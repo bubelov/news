@@ -10,8 +10,8 @@ CREATE TABLE Entry (
   enclosureLink TEXT NOT NULL,
   enclosureLinkType TEXT NOT NULL,
 
-  viewed INTEGER AS Boolean NOT NULL,
-  viewedSynced INTEGER AS Boolean NOT NULL,
+  opened INTEGER AS Boolean NOT NULL,
+  openedSynced INTEGER AS Boolean NOT NULL,
 
   bookmarked INTEGER AS Boolean NOT NULL,
   bookmarkedSynced INTEGER AS Boolean NOT NULL,
@@ -31,8 +31,8 @@ SELECT
   authorName,
   enclosureLink,
   enclosureLinkType,
-  viewed,
-  viewedSynced,
+  opened,
+  openedSynced,
   bookmarked,
   bookmarkedSynced,
   guidHash
@@ -53,29 +53,22 @@ SELECT *
 FROM Entry
 WHERE id = ?;
 
-selectNotViewedAndBookmarked:
+selectByOpened:
 SELECT *
 FROM EntryWithoutSummary
-WHERE viewed = 0
-OR bookmarked = 1
+WHERE opened = ?
 ORDER BY published DESC;
 
-selectByViewed:
+selectByOpenedSynced:
 SELECT *
 FROM EntryWithoutSummary
-WHERE viewed = ?
+WHERE openedSynced = ?
 ORDER BY published DESC;
 
-selectByViewedSynced:
+selectByBookmarked:
 SELECT *
 FROM EntryWithoutSummary
-WHERE viewedSynced = ?
-ORDER BY published DESC;
-
-selectBookmarked:
-SELECT *
-FROM EntryWithoutSummary
-WHERE bookmarked = 1
+WHERE bookmarked = ?
 ORDER BY published DESC;
 
 selectByBookmarkedSynced:
@@ -92,19 +85,19 @@ selectMaxUpdaded:
 SELECT MAX(updated)
 FROM Entry;
 
-updateViewed:
+updateOpened:
 UPDATE Entry
-SET viewed = ?, viewedSynced = 0
+SET opened = ?
 WHERE id = ?;
 
-updateViewedSynced:
+updateOpenedSynced:
 UPDATE Entry
-SET viewedSynced = ?
+SET openedSynced = ?
 WHERE id = ?;
 
 updateBookmarked:
 UPDATE Entry
-SET bookmarked = ?, bookmarkedSynced = 0
+SET bookmarked = ?
 WHERE id = ?;
 
 updateBookmarkedSynced:

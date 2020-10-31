@@ -35,15 +35,15 @@ class EntriesImagesRepository(
         .build()
 
     suspend fun syncPreviews() = withContext(Dispatchers.IO) {
-        val notViewedAndBookmarkedEntries = entriesRepository.getNotViewedAndBookmarked().first()
+        val notOpenedEntries = entriesRepository.getNotOpened().first()
 
-        notViewedAndBookmarkedEntries.forEach { entry ->
+        notOpenedEntries.forEach { entry ->
             syncPreview(entry)
         }
 
-        val viewedEntries = entriesRepository.getViewed().first()
+        val openedEntries = entriesRepository.getOpened().first()
 
-        viewedEntries.forEach { entry ->
+        openedEntries.forEach { entry ->
             syncPreview(entry)
         }
     }

@@ -119,10 +119,6 @@ class EntriesAdapterViewHolder(
                 }
             }
 
-            primaryText.isEnabled = !item.viewed
-            secondaryText.isEnabled = !item.viewed
-            supportingText.isEnabled = !item.viewed
-
             podcastPanel.isVisible = false
             podcastPanel.tag = item
 

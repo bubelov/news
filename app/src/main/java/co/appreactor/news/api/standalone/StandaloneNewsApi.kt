@@ -1,6 +1,6 @@
 package co.appreactor.news.api.standalone
 
-import co.appreactor.news.api.GetNotViewedEntriesResult
+import co.appreactor.news.api.GetUnopenedEntriesResult
 import co.appreactor.news.api.NewsApi
 import co.appreactor.news.db.*
 import kotlinx.coroutines.flow.Flow
@@ -52,8 +52,8 @@ class StandaloneNewsApi(
 
     }
 
-    override suspend fun getNotViewedEntries(): Flow<GetNotViewedEntriesResult> {
-        return flowOf(GetNotViewedEntriesResult.Success(emptyList()))
+    override suspend fun getUnopenedEntries(): Flow<GetUnopenedEntriesResult> {
+        return flowOf(GetUnopenedEntriesResult.Success(emptyList()))
     }
 
     override suspend fun getBookmarkedEntries(): List<Entry> {
@@ -92,7 +92,7 @@ class StandaloneNewsApi(
         return entries
     }
 
-    override suspend fun markAsViewed(entriesIds: List<String>, viewed: Boolean) {
+    override suspend fun markAsOpened(entriesIds: List<String>, opened: Boolean) {
 
     }
 

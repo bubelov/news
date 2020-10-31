@@ -89,7 +89,7 @@ class EntryFragment : Fragment() {
             return
         }
 
-        model.markAsViewed(entry)
+        model.markAsOpened(entry)
 
         lifecycleScope.launchWhenResumed {
             model.getBookmarked(entry).collect { bookmarked ->

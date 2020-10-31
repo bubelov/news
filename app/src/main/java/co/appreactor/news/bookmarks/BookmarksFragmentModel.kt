@@ -92,7 +92,6 @@ class BookmarksFragmentModel(
                 val format = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
                 (feed?.title ?: "Unknown feed") + " · " + format.format(Date(instant.millis))
             },
-            viewed = false,
             podcast = enclosureLinkType.isAudioMime(),
             podcastDownloadPercent = flow {
                 entriesEnclosuresRepository.getDownloadProgress(this@toRow.id).collect {

@@ -48,7 +48,7 @@ class Preferences(
         const val INITIAL_SYNC_COMPLETED = "initial_sync_completed"
         const val LAST_ENTRIES_SYNC_DATE_TIME = "last_entries_sync_date_time"
 
-        const val SHOW_READ_ENTRIES = "show_read_entries"
+        const val SHOW_OPENED_ENTRIES = "show_opened_entries"
 
         const val SHOW_PREVIEW_IMAGES = "show_preview_images"
         const val CROP_PREVIEW_IMAGES = "crop_preview_images"

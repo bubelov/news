@@ -21,7 +21,7 @@ class EntriesRepository(
     private val prefs: Preferences,
 ) {
 
-    data class SyncNotViewedAndBookmarkedProgress(val itemsSynced: Long)
+    data class SyncUnopenedAndBookmarkedProgress(val itemsSynced: Long)
 
     suspend fun getAll() = withContext(Dispatchers.IO) {
         entryQueries.selectAll().asFlow().mapToList()
@@ -31,34 +31,34 @@ class EntriesRepository(
         entryQueries.selectById(entryId).asFlow().mapToOneOrNull()
     }
 
-    suspend fun getViewed() = withContext(Dispatchers.IO) {
-        entryQueries.selectByViewed(viewed = true).asFlow().mapToList()
+    suspend fun getOpened() = withContext(Dispatchers.IO) {
+        entryQueries.selectByOpened(true).asFlow().mapToList()
     }
 
-    suspend fun getNotViewed() = withContext(Dispatchers.IO) {
-        entryQueries.selectByViewed(viewed = false).asFlow().mapToList()
+    suspend fun getNotOpened() = withContext(Dispatchers.IO) {
+        entryQueries.selectByOpened(false).asFlow().mapToList()
     }
 
-    suspend fun setViewed(id: String, viewed: Boolean) = withContext(Dispatchers.IO) {
-        entryQueries.updateViewed(
-            viewed = viewed,
-            id = id
-        )
+    suspend fun setOpened(id: String, opened: Boolean) = withContext(Dispatchers.IO) {
+        entryQueries.apply {
+            transaction {
+                updateOpened(opened, id)
+                updateOpenedSynced(false, id)
+            }
+        }
     }
 
     suspend fun getBookmarked() = withContext(Dispatchers.IO) {
-        entryQueries.selectBookmarked().asFlow().mapToList()
+        entryQueries.selectByBookmarked(true).asFlow().mapToList()
     }
 
     suspend fun setBookmarked(id: String, bookmarked: Boolean) = withContext(Dispatchers.IO) {
-        entryQueries.updateBookmarked(
-            bookmarked = bookmarked,
-            id = id
-        )
-    }
-
-    suspend fun getNotViewedAndBookmarked() = withContext(Dispatchers.IO) {
-        entryQueries.selectNotViewedAndBookmarked().asFlow().mapToList()
+        entryQueries.apply {
+            transaction {
+                updateBookmarked(bookmarked, id)
+                updateBookmarkedSynced(false, id)
+            }
+        }
     }
 
     suspend fun getCount() = withContext(Dispatchers.IO) {
@@ -73,17 +73,17 @@ class EntriesRepository(
         entryQueries.deleteByFeedId(feedId)
     }
 
-    suspend fun syncNotViewedAndBookmarked(): Flow<SyncNotViewedAndBookmarkedProgress> = flow {
-        emit(SyncNotViewedAndBookmarkedProgress(0L))
+    suspend fun syncUnopenedAndBookmarked(): Flow<SyncUnopenedAndBookmarkedProgress> = flow {
+        emit(SyncUnopenedAndBookmarkedProgress(0L))
 
         withContext(Dispatchers.IO) {
-            newsApi.getNotViewedEntries().collect { result ->
+            newsApi.getUnopenedEntries().collect { result ->
                 when (result) {
-                    is GetNotViewedEntriesResult.Loading -> {
-                        emit(SyncNotViewedAndBookmarkedProgress(result.entriesLoaded))
+                    is GetUnopenedEntriesResult.Loading -> {
+                        emit(SyncUnopenedAndBookmarkedProgress(result.entriesLoaded))
                     }
 
-                    is GetNotViewedEntriesResult.Success -> {
+                    is GetUnopenedEntriesResult.Success -> {
                         val bookmarkedEntries = newsApi.getBookmarkedEntries()
 
                         entryQueries.transaction {
@@ -102,70 +102,70 @@ class EntriesRepository(
         }
     }
 
-    suspend fun syncViewedFlags() = withContext(Dispatchers.IO) {
-        val unsyncedItems = entryQueries.selectByViewedSynced(false).executeAsList()
+    suspend fun syncOpenedEntries() = withContext(Dispatchers.IO) {
+        val notSyncedEntries = entryQueries.selectByOpenedSynced(false).executeAsList()
 
-        if (unsyncedItems.isEmpty()) {
+        if (notSyncedEntries.isEmpty()) {
             return@withContext
         }
 
-        val unsyncedViewedEntries = unsyncedItems.filter { it.viewed }
+        val notSyncedOpenedEntries = notSyncedEntries.filter { it.opened }
 
-        if (unsyncedViewedEntries.isNotEmpty()) {
-            newsApi.markAsViewed(
-                entriesIds = unsyncedViewedEntries.map { it.id },
-                viewed = true,
+        if (notSyncedOpenedEntries.isNotEmpty()) {
+            newsApi.markAsOpened(
+                entriesIds = notSyncedOpenedEntries.map { it.id },
+                opened = true,
             )
 
             entryQueries.transaction {
-                unsyncedViewedEntries.forEach {
-                    entryQueries.updateViewedSynced(true, it.id)
+                notSyncedOpenedEntries.forEach {
+                    entryQueries.updateOpenedSynced(true, it.id)
                 }
             }
         }
 
-        val unsyncedNotViewedEntries = unsyncedItems.filterNot { it.viewed }
+        val notSyncedNotOpenedEntries = notSyncedEntries.filterNot { it.opened }
 
-        if (unsyncedNotViewedEntries.isNotEmpty()) {
-            newsApi.markAsViewed(
-                entriesIds = unsyncedNotViewedEntries.map { it.id },
-                viewed = false,
+        if (notSyncedNotOpenedEntries.isNotEmpty()) {
+            newsApi.markAsOpened(
+                entriesIds = notSyncedNotOpenedEntries.map { it.id },
+                opened = false,
             )
 
             entryQueries.transaction {
-                unsyncedNotViewedEntries.forEach {
-                    entryQueries.updateViewedSynced(true, it.id)
+                notSyncedNotOpenedEntries.forEach {
+                    entryQueries.updateOpenedSynced(true, it.id)
                 }
             }
         }
     }
 
-    suspend fun syncBookmarkedFlags() = withContext(Dispatchers.IO) {
-        val unsyncedItems = entryQueries.selectByBookmarkedSynced(false).executeAsList()
+    suspend fun syncBookmarkedEntries() = withContext(Dispatchers.IO) {
+        val notSyncedEntries = entryQueries.selectByBookmarkedSynced(false).executeAsList()
 
-        if (unsyncedItems.isEmpty()) {
+        if (notSyncedEntries.isEmpty()) {
             return@withContext
         }
 
-        val unsyncedBookmarkedEntries = unsyncedItems.filter { it.bookmarked }
+        val notSyncedBookmarkedEntries = notSyncedEntries.filter { it.bookmarked }
 
-        if (unsyncedBookmarkedEntries.isNotEmpty()) {
-            newsApi.markAsBookmarked(unsyncedBookmarkedEntries, true)
+        if (notSyncedBookmarkedEntries.isNotEmpty()) {
+            newsApi.markAsBookmarked(notSyncedBookmarkedEntries, true)
 
             entryQueries.transaction {
-                unsyncedBookmarkedEntries.forEach {
+                notSyncedBookmarkedEntries.forEach {
                     entryQueries.updateBookmarkedSynced(true, it.id)
                 }
             }
         }
 
-        val unsyncedNotBookmarkedEntries = unsyncedItems.filterNot { it.bookmarked }
+        val notSyncedNotBookmarkedEntries = notSyncedEntries.filterNot { it.bookmarked }
 
-        if (unsyncedNotBookmarkedEntries.isNotEmpty()) {
-            newsApi.markAsBookmarked(unsyncedNotBookmarkedEntries, false)
+        if (notSyncedNotBookmarkedEntries.isNotEmpty()) {
+            newsApi.markAsBookmarked(notSyncedNotBookmarkedEntries, false)
 
             entryQueries.transaction {
-                unsyncedNotBookmarkedEntries.forEach {
+                notSyncedNotBookmarkedEntries.forEach {
                     entryQueries.updateBookmarkedSynced(true, it.id)
                 }
             }

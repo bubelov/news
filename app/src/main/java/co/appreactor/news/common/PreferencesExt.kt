@@ -8,21 +8,27 @@ suspend fun Preferences.getNextcloudServerUrl() = getString(Preferences.NEXTCLOU
 suspend fun Preferences.setNextcloudServerUrl(nextcloudServerUrl: String) =
     putString(Preferences.NEXTCLOUD_SERVER_URL, nextcloudServerUrl)
 
-suspend fun Preferences.getNextcloudServerUsername() = getString(Preferences.NEXTCLOUD_SERVER_USERNAME)
+suspend fun Preferences.getNextcloudServerUsername() =
+    getString(Preferences.NEXTCLOUD_SERVER_USERNAME)
+
 suspend fun Preferences.setNextcloudServerUsername(nextcloudServerUsername: String) =
     putString(Preferences.NEXTCLOUD_SERVER_USERNAME, nextcloudServerUsername)
 
-suspend fun Preferences.getNextcloudServerPassword() = getString(Preferences.NEXTCLOUD_SERVER_PASSWORD)
+suspend fun Preferences.getNextcloudServerPassword() =
+    getString(Preferences.NEXTCLOUD_SERVER_PASSWORD)
+
 suspend fun Preferences.setNextcloudServerPassword(nextcloudServerPassword: String) =
     putString(Preferences.NEXTCLOUD_SERVER_PASSWORD, nextcloudServerPassword)
 
-suspend fun Preferences.initialSyncCompleted() = getBoolean(Preferences.INITIAL_SYNC_COMPLETED, false)
+suspend fun Preferences.initialSyncCompleted() =
+    getBoolean(Preferences.INITIAL_SYNC_COMPLETED, false)
+
 suspend fun Preferences.setInitialSyncCompleted(initialSyncCompleted: Boolean) =
     putBoolean(Preferences.INITIAL_SYNC_COMPLETED, initialSyncCompleted)
 
-suspend fun Preferences.showReadEntries() = getBoolean(Preferences.SHOW_READ_ENTRIES, false)
-suspend fun Preferences.setShowReadEntries(showReadNews: Boolean) =
-    putBoolean(Preferences.SHOW_READ_ENTRIES, showReadNews)
+suspend fun Preferences.showOpenedEntries() = getBoolean(Preferences.SHOW_OPENED_ENTRIES, false)
+suspend fun Preferences.setShowOpenedEntries(show: Boolean) =
+    putBoolean(Preferences.SHOW_OPENED_ENTRIES, show)
 
 suspend fun Preferences.showPreviewImages() = getBoolean(Preferences.SHOW_PREVIEW_IMAGES, true)
 suspend fun Preferences.setShowPreviewImages(showPreviewImages: Boolean) =

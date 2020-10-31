@@ -10,7 +10,6 @@ class EntriesAdapterDiffCallback : DiffUtil.ItemCallback<EntriesAdapterItem>() {
 
     override fun areContentsTheSame(oldItem: EntriesAdapterItem, newItem: EntriesAdapterItem): Boolean {
         return oldItem.title == newItem.title
-                && oldItem.viewed == newItem.viewed
                 && oldItem.podcast == newItem.podcast
                 && oldItem.showImage == newItem.showImage
                 && oldItem.cropImage == newItem.cropImage

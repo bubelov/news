@@ -37,11 +37,11 @@ class SettingsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         lifecycleScope.launch {
-            showReadEntries.isChecked = model.getShowReadEntries().first()
+            showOpenedEntries.isChecked = model.getShowOpenedEntries().first()
 
-            showReadEntries.setOnCheckedChangeListener { _, isChecked ->
+            showOpenedEntries.setOnCheckedChangeListener { _, isChecked ->
                 lifecycleScope.launch {
-                    model.setShowReadEntries(isChecked)
+                    model.setShowOpenedEntries(isChecked)
                 }
             }
 
