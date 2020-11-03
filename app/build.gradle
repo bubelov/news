@@ -74,6 +74,8 @@ android {
 }
 
 dependencies {
+    implementation project(":feedparser")
+
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$versions_coroutines"
     implementation "androidx.core:core-ktx:$versions_ktx"

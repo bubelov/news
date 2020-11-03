@@ -1,4 +1,4 @@
-package co.appreactor.news.api.standalone
+package co.appreactor.feedparser
 
 enum class FeedType {
     ATOM,

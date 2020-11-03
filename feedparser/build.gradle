@@ -1,0 +1,16 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_7
+    targetCompatibility = JavaVersion.VERSION_1_7
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+    implementation "joda-time:joda-time:$versions_joda_time"
+    
+    testImplementation "junit:junit:$versions_junit"
+}

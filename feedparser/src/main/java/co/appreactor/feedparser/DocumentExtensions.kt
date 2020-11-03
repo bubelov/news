@@ -1,7 +1,5 @@
-package co.appreactor.news.api.standalone
+package co.appreactor.feedparser
 
-import co.appreactor.news.db.Entry
-import co.appreactor.news.db.Feed
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 import org.w3c.dom.Document
@@ -24,7 +22,7 @@ fun Document.getFeedType(): FeedType {
     return FeedType.UNKNOWN
 }
 
-fun Document.toAtomFeed(): Feed {
+fun Document.toAtomFeed(): ParsedFeed {
     val id = documentElement.getElementsByTagName("id").item(0).textContent
         ?: throw Exception("Atom channel has no id")
     val title = documentElement.getElementsByTagName("title").item(0).textContent
@@ -46,7 +44,7 @@ fun Document.toAtomFeed(): Feed {
             }
         }
 
-    return Feed(
+    return ParsedFeed(
         id = id,
         title = title,
         selfLink = selfLink,
@@ -54,7 +52,7 @@ fun Document.toAtomFeed(): Feed {
     )
 }
 
-fun Document.toAtomEntries(): List<Entry> {
+fun Document.toAtomEntries(): List<ParsedEntry> {
     val feedId = getElementsByTagName("id").item(0).textContent ?: return emptyList()
     val entries = getElementsByTagName("entry")
 
@@ -96,7 +94,7 @@ fun Document.toAtomEntries(): List<Entry> {
 
         val content = entry.getElementsByTagName("content").item(0).textContent ?: return@mapNotNull null
 
-        Entry(
+        ParsedEntry(
             id = id,
             feedId = feedId,
             title = title,
@@ -107,23 +105,18 @@ fun Document.toAtomEntries(): List<Entry> {
             content = content,
             enclosureLink = "",
             enclosureLinkType = "",
-            opened = false,
-            openedSynced = true,
-            bookmarked = false,
-            bookmarkedSynced = true,
-            guidHash = "",
         )
     }
 }
 
-fun Document.toRssFeed(documentUri: String): Feed {
+fun Document.toRssFeed(documentUri: String): ParsedFeed {
     val channel = documentElement.getElementsByTagName("channel").item(0) as Element
     val title = channel.getElementsByTagName("title").item(0).textContent
         ?: throw Exception("RSS channel has no title")
     val link = channel.getElementsByTagName("link").item(0).textContent
         ?: throw Exception("RSS channel has no link")
 
-    return Feed(
+    return ParsedFeed(
         id = link,
         title = title,
         selfLink = documentUri,
@@ -131,7 +124,7 @@ fun Document.toRssFeed(documentUri: String): Feed {
     )
 }
 
-fun Document.toRssEntries(): List<Entry> {
+fun Document.toRssEntries(): List<ParsedEntry> {
     val channel = documentElement.getElementsByTagName("channel").item(0) as Element
     val feedId = channel.getElementsByTagName("link").item(0).textContent
         ?: return emptyList()
@@ -147,7 +140,7 @@ fun Document.toRssEntries(): List<Entry> {
         val author = item.getElementsByTagName("author").item(0).textContent ?: ""
         val description = item.getElementsByTagName("description").item(0).textContent ?: ""
 
-        Entry(
+        ParsedEntry(
             id = guid,
             feedId = feedId,
             title = title,
@@ -158,11 +151,6 @@ fun Document.toRssEntries(): List<Entry> {
             content = description,
             enclosureLink = "",
             enclosureLinkType = "",
-            opened = false,
-            openedSynced = true,
-            bookmarked = false,
-            bookmarkedSynced = true,
-            guidHash = "",
         )
     }
 }

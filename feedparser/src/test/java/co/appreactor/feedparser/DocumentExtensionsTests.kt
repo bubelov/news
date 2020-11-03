@@ -1,4 +1,4 @@
-package co.appreactor.news.api.standalone
+package co.appreactor.feedparser
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

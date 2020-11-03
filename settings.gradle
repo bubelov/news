@@ -1,2 +1,3 @@
+include ':feedparser'
 include ':app'
 rootProject.name = "news"
