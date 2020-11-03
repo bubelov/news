@@ -39,14 +39,14 @@ interface NextcloudNewsApi {
     ): Call<ItemsPayload>
 
     @PUT("items/read/multiple")
-    fun putRead(@Body args: PutReadArgs): Call<ResponseBody>
+    fun putRead(@Body args: PutReadArgs): Call<Void>
 
     @PUT("items/unread/multiple")
-    fun putUnread(@Body args: PutReadArgs): Call<ResponseBody>
+    fun putUnread(@Body args: PutReadArgs): Call<Void>
 
     @PUT("items/star/multiple")
-    fun putStarred(@Body args: PutStarredArgs): Call<ResponseBody>
+    fun putStarred(@Body args: PutStarredArgs): Call<Void>
 
     @PUT("items/unstar/multiple")
-    fun putUnstarred(@Body args: PutStarredArgs): Call<ResponseBody>
+    fun putUnstarred(@Body args: PutStarredArgs): Call<Void>
 }
