@@ -64,14 +64,15 @@ class EntriesImagesRepository(
     private suspend fun syncPreview(entry: EntryWithoutSummary) = withContext(Dispatchers.IO) {
         Timber.d("Syncing preview image for entry ${entry.id} ${entry.title}")
 
-        val metadata = imagesMetadataQueries.selectByEntryId(entry.id).executeAsOneOrNull() ?: EntryImagesMetadata(
-            entryId = entry.id,
-            previewImageProcessingStatus = "",
-            previewImageId = null,
-            summaryImagesProcessingStatus = "",
-        ).apply {
-            imagesMetadataQueries.insertOrReplace(this)
-        }
+        val metadata = imagesMetadataQueries.selectByEntryId(entry.id).executeAsOneOrNull()
+            ?: EntryImagesMetadata(
+                entryId = entry.id,
+                previewImageProcessingStatus = "",
+                previewImageId = null,
+                summaryImagesProcessingStatus = "",
+            ).apply {
+                imagesMetadataQueries.insertOrReplace(this)
+            }
 
         if (metadata.previewImageProcessingStatus.isNotBlank()) {
             Timber.d("Preview image already processed or processing, nothing to do here")
@@ -114,11 +115,17 @@ class EntriesImagesRepository(
         Timber.d("Got HTML")
 
         val meta = Jsoup.parse(html).select("meta[property=\"og:image\"]").singleOrNull()
-        val imageUrl = meta?.attr("content")?.replace("http://", "https://")
+
+        var imageUrl = meta?.attr("content") ?: ""
+        imageUrl = imageUrl.replace("http://", "https://")
+
+        if (imageUrl.startsWith("//")) {
+            imageUrl = imageUrl.replaceFirst("//", "https://")
+        }
 
         Timber.d("Got image URL: $imageUrl")
 
-        if (imageUrl.isNullOrBlank()) {
+        if (imageUrl.isBlank()) {
             imagesMetadataQueries.insertOrReplace(metadata.copy(previewImageProcessingStatus = STATUS_PROCESSED))
             return@withContext
         }
@@ -150,10 +157,12 @@ class EntriesImagesRepository(
 
             imageQueries.insertOrReplace(image)
 
-            imagesMetadataQueries.insertOrReplace(metadata.copy(
-                previewImageId = image.id,
-                previewImageProcessingStatus = STATUS_PROCESSED,
-            ))
+            imagesMetadataQueries.insertOrReplace(
+                metadata.copy(
+                    previewImageId = image.id,
+                    previewImageProcessingStatus = STATUS_PROCESSED,
+                )
+            )
         }
     }
 
