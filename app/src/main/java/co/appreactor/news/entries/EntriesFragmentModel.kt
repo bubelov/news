@@ -156,6 +156,7 @@ class EntriesFragmentModel(
             cropImage = cropFeedImages,
             supportingText = flow { emit(entriesSupportingTextRepository.getSupportingText(this@toRow.id, feed)) },
             cachedSupportingText = entriesSupportingTextRepository.getCachedSupportingText(this.id),
+            opened = opened,
         )
     }
 }

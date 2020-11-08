@@ -155,6 +155,10 @@ class EntriesAdapterViewHolder(
                 }
             }
 
+            primaryText.isEnabled = !item.opened
+            secondaryText.isEnabled = !item.opened
+            supportingText.isEnabled = !item.opened
+
             setOnClickListener {
                 callback.onItemClick(item)
             }

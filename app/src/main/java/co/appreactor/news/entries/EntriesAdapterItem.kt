@@ -14,5 +14,6 @@ data class EntriesAdapterItem(
     val showImage: Boolean,
     val cropImage: Boolean,
     val supportingText: Flow<String>,
-    val cachedSupportingText: String?
+    val cachedSupportingText: String?,
+    val opened: Boolean,
 )
