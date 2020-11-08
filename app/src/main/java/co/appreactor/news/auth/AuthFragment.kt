@@ -86,19 +86,15 @@ class AuthFragment : Fragment() {
         hideStatusBarBackground()
         invertStatusBarTextColorInLightMode()
 
-        continueWithoutLogin.setOnClickListener {
+        standaloneMode.setOnClickListener {
             lifecycleScope.launchWhenResumed {
                 model.setAuthType(Preferences.AUTH_TYPE_STANDALONE)
                 showNews(standaloneNewsApiModule)
             }
         }
 
-        loginWithNextcloudApp.setOnClickListener {
+        loginWithNextcloud.setOnClickListener {
             showAccountPicker()
-        }
-
-        directNextcloudLogin.setOnClickListener {
-            findNavController().navigate(AuthFragmentDirections.actionAuthFragmentToDirectAuthFragment())
         }
     }
 
@@ -115,7 +111,7 @@ class AuthFragment : Fragment() {
 
         when (resultCode) {
             AppCompatActivity.RESULT_CANCELED -> {
-                loginWithNextcloudApp.isEnabled = true
+                loginWithNextcloud.isEnabled = true
             }
 
             else -> {
@@ -131,7 +127,7 @@ class AuthFragment : Fragment() {
     }
 
     private fun showAccountPicker() {
-        loginWithNextcloudApp.isEnabled = false
+        loginWithNextcloud.isEnabled = false
 
         try {
             AccountImporter.pickNewAccount(this)
@@ -140,7 +136,7 @@ class AuthFragment : Fragment() {
                 UiExceptionManager.showDialogForException(context, e)
             }
 
-            loginWithNextcloudApp.isEnabled = true
+            loginWithNextcloud.isEnabled = true
         }
     }
 
@@ -193,7 +189,8 @@ class AuthFragment : Fragment() {
                     }
 
                     oldColor = requireActivity().window.navigationBarColor
-                    requireActivity().window.navigationBarColor = requireContext().getColorFromAttr(R.attr.colorSurface)
+                    requireActivity().window.navigationBarColor =
+                        requireContext().getColorFromAttr(R.attr.colorSurface)
                 }
             }
 

@@ -19,9 +19,9 @@
         <ImageView
             android:layout_width="128dp"
             android:layout_height="128dp"
+            android:contentDescription="@string/logo"
             android:src="@drawable/ic_baseline_list_alt_24"
-            app:tint="@color/color_primary"
-            android:contentDescription="@string/logo" />
+            app:tint="@color/color_primary" />
 
         <TextView
             android:id="@+id/title"
@@ -44,29 +44,21 @@
         app:layout_constraintTop_toBottomOf="@id/logo">
 
         <Button
-            android:id="@+id/continueWithoutLogin"
+            android:id="@+id/loginWithNextcloud"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="40dp"
             android:layout_marginEnd="40dp"
-            android:text="@string/continue_without_login" />
+            android:text="@string/login_with_nextcloud" />
 
         <Button
-            android:id="@+id/loginWithNextcloudApp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="40dp"
-            android:layout_marginEnd="40dp"
-            android:text="@string/login_with_nextcloud_app" />
-
-        <Button
-            android:id="@+id/directNextcloudLogin"
+            android:id="@+id/standaloneMode"
             style="?attr/materialButtonOutlinedStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="40dp"
             android:layout_marginEnd="40dp"
-            android:text="@string/direct_nextcloud_login" />
+            android:text="@string/standalone_mode" />
 
     </LinearLayout>
 
