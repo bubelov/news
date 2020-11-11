@@ -56,18 +56,6 @@ android {
         }
     }
 
-    flavorDimensions "default"
-
-    productFlavors {
-        fdroid {
-            dimension "default"
-        }
-
-        play {
-            dimension "default"
-        }
-    }
-
     lintOptions {
         disable 'VectorRaster', 'VectorPath'
     }
