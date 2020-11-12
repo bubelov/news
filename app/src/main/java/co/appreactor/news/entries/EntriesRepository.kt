@@ -2,6 +2,7 @@ package co.appreactor.news.entries
 
 import co.appreactor.news.api.*
 import co.appreactor.news.common.Preferences
+import co.appreactor.news.db.Entry
 import co.appreactor.news.db.EntryQueries
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import org.joda.time.Instant
+import timber.log.Timber
 
 class EntriesRepository(
     private val entryQueries: EntryQueries,
@@ -84,11 +86,12 @@ class EntriesRepository(
                     }
 
                     is GetUnopenedEntriesResult.Success -> {
+                        val unopenedEntries = result.entries
                         val bookmarkedEntries = newsApi.getBookmarkedEntries()
 
                         entryQueries.transaction {
-                            (result.entries + bookmarkedEntries).forEach {
-                                entryQueries.insertOrReplace(it)
+                            (unopenedEntries + bookmarkedEntries).forEach {
+                                entryQueries.insertOrReplace(it.toSafeToInsertEntry())
                             }
                         }
 
@@ -184,7 +187,7 @@ class EntriesRepository(
 
         entryQueries.transaction {
             entries.forEach {
-                entryQueries.insertOrReplace(it)
+                entryQueries.insertOrReplace(it.toSafeToInsertEntry())
             }
         }
 
@@ -192,5 +195,16 @@ class EntriesRepository(
             key = Preferences.LAST_ENTRIES_SYNC_DATE_TIME,
             value = Instant.now().toString()
         )
+    }
+
+    private fun Entry.toSafeToInsertEntry(): Entry {
+        var safeEntry = this
+
+        if (content.toByteArray().size / 1024 > 100) {
+            Timber.d("Entry content is larger than 100 KiB ($link)")
+            safeEntry = safeEntry.copy(content = "Content is too large")
+        }
+
+        return safeEntry
     }
 }
