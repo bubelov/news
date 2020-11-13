@@ -1,6 +1,5 @@
 package co.appreactor.news.auth
 
-import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Build
@@ -14,13 +13,13 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
+import co.appreactor.news.common.App
 import co.appreactor.news.common.Preferences
 import co.appreactor.news.common.getColorFromAttr
 import co.appreactor.news.di.appModule
 import co.appreactor.news.di.dbModule
 import co.appreactor.news.di.nextcloudNewsApiModule
 import co.appreactor.news.di.standaloneNewsApiModule
-import co.appreactor.news.logging.PersistentLogTree
 import com.nextcloud.android.sso.AccountImporter
 import com.nextcloud.android.sso.AccountImporter.IAccountAccessGranted
 import com.nextcloud.android.sso.exceptions.SSOException
@@ -28,31 +27,12 @@ import com.nextcloud.android.sso.helper.SingleAccountHelper
 import com.nextcloud.android.sso.ui.UiExceptionManager
 import kotlinx.android.synthetic.main.fragment_auth.*
 import kotlinx.coroutines.runBlocking
-import org.koin.android.ext.android.get
-import org.koin.android.ext.android.getKoin
-import org.koin.android.ext.koin.androidContext
 import org.koin.android.viewmodel.ext.android.viewModel
-import org.koin.core.context.startKoin
-import org.koin.core.context.stopKoin
 import org.koin.core.module.Module
-import timber.log.Timber
 
 class AuthFragment : Fragment() {
 
     private val model: AuthFragmentModel by viewModel()
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-
-        stopKoin()
-
-        startKoin {
-            androidContext(requireContext())
-            modules(appModule, dbModule)
-            Timber.uprootAll()
-            Timber.plant(Timber.DebugTree(), PersistentLogTree(get()))
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -141,7 +121,8 @@ class AuthFragment : Fragment() {
     }
 
     private fun showNews(apiModule: Module) {
-        getKoin().loadModules(listOf(apiModule))
+        val app = requireContext().applicationContext as App
+        app.setUp(appModule, dbModule, apiModule)
 
         findNavController().apply {
             popBackStack()

@@ -1,7 +1,6 @@
 package co.appreactor.news.bookmarks
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import co.appreactor.news.feeds.FeedsRepository
 import co.appreactor.news.common.Preferences
 import co.appreactor.news.common.cropPreviewImages
@@ -12,13 +11,9 @@ import co.appreactor.news.entries.*
 import co.appreactor.news.entriesimages.EntriesImagesRepository
 import co.appreactor.news.entriesenclosures.EntriesEnclosuresRepository
 import co.appreactor.news.entriesenclosures.isAudioMime
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.joda.time.Instant
-import timber.log.Timber
 import java.text.DateFormat
 import java.util.*
 
@@ -30,18 +25,6 @@ class BookmarksFragmentModel(
     private val entriesEnclosuresRepository: EntriesEnclosuresRepository,
     private val prefs: Preferences,
 ) : ViewModel() {
-
-    private var syncPreviewsJob: Job? = null
-
-    init {
-        viewModelScope.launch {
-            getShowPreviewImages().collect { show ->
-                if (show) {
-                    syncPreviews()
-                }
-            }
-        }
-    }
 
     suspend fun getBookmarks() = combine(
         feedsRepository.getAll(),
@@ -64,20 +47,6 @@ class BookmarksFragmentModel(
     private suspend fun getShowPreviewImages() = prefs.showPreviewImages()
 
     private suspend fun getCropPreviewImages() = prefs.cropPreviewImages()
-
-    private suspend fun syncPreviews() {
-        syncPreviewsJob?.cancel()
-
-        syncPreviewsJob = viewModelScope.launch {
-            runCatching {
-                entriesImagesRepository.syncPreviews()
-            }.onFailure {
-                if (it is CancellationException) {
-                    Timber.d("Sync previews cancelled")
-                }
-            }
-        }
-    }
 
     private suspend fun EntryWithoutSummary.toRow(
         feed: Feed?,

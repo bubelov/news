@@ -10,14 +10,17 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.NavGraphDirections
 import co.appreactor.news.R
+import co.appreactor.news.common.App
 import co.appreactor.news.common.Preferences
+import co.appreactor.news.di.appModule
+import co.appreactor.news.di.dbModule
+import co.appreactor.news.di.standaloneNewsApiModule
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.fragment_settings.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
-import org.koin.core.context.stopKoin
 
 class SettingsFragment : Fragment() {
 
@@ -122,8 +125,9 @@ class SettingsFragment : Fragment() {
 
     private fun logOut() {
         lifecycleScope.launch {
-            stopKoin()
             model.logOut(requireContext())
+            val app = requireContext().applicationContext as App
+            app.setUp(appModule, dbModule, standaloneNewsApiModule)
             findNavController().popBackStack(R.id.entriesFragment, true)
             findNavController().navigate(NavGraphDirections.actionGlobalToAuthFragment())
         }

@@ -1,7 +1,6 @@
 package co.appreactor.news.entries
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import co.appreactor.news.common.*
 import co.appreactor.news.db.EntryWithoutSummary
 import co.appreactor.news.feeds.FeedsRepository
@@ -27,23 +26,6 @@ class EntriesFragmentModel(
 ) : ViewModel() {
 
     val syncMessage = newsApiSync.syncMessage
-
-    private var syncPreviewsJob: Job? = null
-
-    init {
-        viewModelScope.launch {
-            entriesEnclosuresRepository.deleteDownloadedEnclosuresWithoutFiles()
-            entriesEnclosuresRepository.deletePartialDownloads()
-        }
-
-        viewModelScope.launch {
-            prefs.showPreviewImages().collect { show ->
-                if (show) {
-                    syncPreviews()
-                }
-            }
-        }
-    }
 
     suspend fun getEntries(): Flow<List<EntriesAdapterItem>> {
         val start = System.currentTimeMillis()
@@ -81,27 +63,11 @@ class EntriesFragmentModel(
     suspend fun performInitialSyncIfNecessary() {
         if (!prefs.initialSyncCompleted().first()) {
             newsApiSync.performInitialSync()
-            syncPreviews()
         }
     }
 
     suspend fun performFullSync() {
         newsApiSync.sync()
-        syncPreviews()
-    }
-
-    private suspend fun syncPreviews() {
-        syncPreviewsJob?.cancel()
-
-        syncPreviewsJob = viewModelScope.launch {
-            runCatching {
-                entriesImagesRepository.syncPreviews()
-            }.onFailure {
-                if (it is CancellationException) {
-                    Timber.d("Sync previews cancelled")
-                }
-            }
-        }
     }
 
     suspend fun isInitialSyncCompleted() = prefs.initialSyncCompleted().first()
