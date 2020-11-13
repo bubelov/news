@@ -10,44 +10,47 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
 class FeedsRepository(
-    private val feedQueries: FeedQueries,
-    private val newsApi: NewsApi,
+    private val cache: FeedQueries,
+    private val api: NewsApi,
 ) {
 
     suspend fun add(url: String) = withContext(Dispatchers.IO) {
-        val feed = newsApi.addFeed(url)
-        feedQueries.insertOrReplace(feed)
+        val feed = api.addFeed(url)
+        cache.insertOrReplace(feed)
     }
 
     suspend fun getAll() = withContext(Dispatchers.IO) {
-        feedQueries.selectAll().asFlow().mapToList()
+        cache.selectAll().asFlow().mapToList()
     }
 
     suspend fun get(id: String) = withContext(Dispatchers.IO) {
-        feedQueries.selectById(id).asFlow().mapToOneOrNull()
+        cache.selectById(id).asFlow().mapToOneOrNull()
     }
 
-    suspend fun rename(feedId: String, newTitle: String) = withContext(Dispatchers.IO) {
-        newsApi.updateFeedTitle(feedId, newTitle)
-        val feed = get(feedId).first() ?: return@withContext
-        feedQueries.insertOrReplace(feed.copy(title = newTitle))
+    suspend fun updateTitle(feedId: String, newTitle: String) = withContext(Dispatchers.IO) {
+        val feed = cache.selectById(feedId).executeAsOneOrNull()
+            ?: throw Exception("Cannot find feed $feedId in cache")
+
+        val trimmedNewTitle = newTitle.trim()
+        api.updateFeedTitle(feedId, trimmedNewTitle)
+        cache.insertOrReplace(feed.copy(title = trimmedNewTitle))
     }
 
     suspend fun delete(feedId: String) = withContext(Dispatchers.IO) {
-        newsApi.deleteFeed(feedId)
-        feedQueries.deleteById(feedId)
+        api.deleteFeed(feedId)
+        cache.deleteById(feedId)
     }
 
     suspend fun sync() = withContext(Dispatchers.IO) {
-        val newFeeds = newsApi.getFeeds()
+        val newFeeds = api.getFeeds()
         val cachedFeeds = getAll().first()
 
         if (newFeeds.sortedBy { it.id } != cachedFeeds.sortedBy { it.id }) {
-            feedQueries.transaction {
-                feedQueries.deleteAll()
+            cache.transaction {
+                cache.deleteAll()
 
                 newFeeds.forEach {
-                    feedQueries.insertOrReplace(it)
+                    cache.insertOrReplace(it)
                 }
             }
         }

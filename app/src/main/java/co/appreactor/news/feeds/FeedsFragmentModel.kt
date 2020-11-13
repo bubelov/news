@@ -23,7 +23,7 @@ class FeedsFragmentModel(
     suspend fun getFeeds() = feedsRepository.getAll()
 
     suspend fun renameFeed(feedId: String, newTitle: String) {
-        feedsRepository.rename(feedId, newTitle)
+        feedsRepository.updateTitle(feedId, newTitle)
     }
 
     suspend fun deleteFeed(feedId: String) {
