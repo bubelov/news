@@ -24,3 +24,7 @@ selectByEntryId:
 SELECT *
 FROM EntryImage
 WHERE entryId = ?;
+
+deleteAll:
+DELETE
+FROM EntryImage;

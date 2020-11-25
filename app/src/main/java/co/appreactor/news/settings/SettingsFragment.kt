@@ -16,6 +16,7 @@ import co.appreactor.news.di.appModule
 import co.appreactor.news.di.dbModule
 import co.appreactor.news.di.standaloneNewsApiModule
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.nextcloud.android.sso.AccountImporter
 import kotlinx.android.synthetic.main.fragment_settings.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
@@ -125,7 +126,8 @@ class SettingsFragment : Fragment() {
 
     private fun logOut() {
         lifecycleScope.launch {
-            model.logOut(requireContext())
+            AccountImporter.clearAllAuthTokens(context)
+            model.logOut()
             val app = requireContext().applicationContext as App
             app.setUp(appModule, dbModule, standaloneNewsApiModule)
             findNavController().popBackStack(R.id.entriesFragment, true)

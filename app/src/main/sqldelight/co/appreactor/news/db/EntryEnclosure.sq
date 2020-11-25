@@ -17,6 +17,10 @@ SELECT *
 FROM EntryEnclosure
 WHERE entryId = ?;
 
+deleteAll:
+DELETE
+FROM EntryEnclosure;
+
 deleteByEntryId:
 DELETE
 FROM EntryEnclosure

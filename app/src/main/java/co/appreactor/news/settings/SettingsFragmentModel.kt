@@ -2,19 +2,18 @@ package co.appreactor.news.settings
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
+import co.appreactor.news.Database
 import co.appreactor.news.common.*
 import co.appreactor.news.logging.LoggedExceptionsRepository
-import com.nextcloud.android.sso.AccountImporter
 import com.nextcloud.android.sso.exceptions.SSOException
 import com.nextcloud.android.sso.helper.SingleAccountHelper
-import com.squareup.sqldelight.db.SqlDriver
 import kotlinx.coroutines.flow.first
 import timber.log.Timber
 
 class SettingsFragmentModel(
     private val loggedExceptionsRepository: LoggedExceptionsRepository,
     private val prefs: Preferences,
-    private val dbDriver: SqlDriver,
+    private val db: Database,
 ) : ViewModel() {
 
     suspend fun getShowOpenedEntries() = prefs.showOpenedEntries()
@@ -50,9 +49,17 @@ class SettingsFragmentModel(
         }
     }
 
-    fun logOut(context: Context) {
-        AccountImporter.clearAllAuthTokens(context)
-        dbDriver.close()
-        context.deleteDatabase(App.DB_FILE_NAME)
+    fun logOut() {
+        db.apply {
+            transaction {
+                entryQueries.deleteAll()
+                entryEnclosureQueries.deleteAll()
+                entryImageQueries.deleteAll()
+                entryImagesMetadataQueries.deleteAll()
+                feedQueries.deleteAll()
+                loggedExceptionQueries.deleteAll()
+                preferenceQueries.deleteAll()
+            }
+        }
     }
 }

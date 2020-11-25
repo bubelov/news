@@ -14,3 +14,7 @@ selectByEntryId:
 SELECT *
 FROM EntryImagesMetadata
 WHERE entryId = ?;
+
+deleteAll:
+DELETE
+FROM EntryImagesMetadata;
