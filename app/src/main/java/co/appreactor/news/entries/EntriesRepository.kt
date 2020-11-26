@@ -1,6 +1,7 @@
 package co.appreactor.news.entries
 
 import co.appreactor.news.api.*
+import co.appreactor.news.api.GetUnopenedEntriesResult
 import co.appreactor.news.common.Preferences
 import co.appreactor.news.db.Entry
 import co.appreactor.news.db.EntryQueries

@@ -4,7 +4,6 @@ import android.app.Application
 import co.appreactor.news.BuildConfig
 import co.appreactor.news.di.appModule
 import co.appreactor.news.di.dbModule
-import co.appreactor.news.di.standaloneNewsApiModule
 import co.appreactor.news.entriesenclosures.EntriesEnclosuresRepository
 import co.appreactor.news.entriesimages.EntriesImagesRepository
 import co.appreactor.news.logging.PersistentLogTree
@@ -42,10 +41,10 @@ class App : Application() {
 
         Picasso.setSingletonInstance(picasso)
 
-        setUp(appModule, dbModule, standaloneNewsApiModule)
+        setUp(appModule, dbModule)
     }
 
-    fun setUp(vararg modules: Module) {
+    private fun setUp(vararg modules: Module) {
         globalJob?.cancel()
 
         stopKoin()

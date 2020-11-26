@@ -13,13 +13,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
-import co.appreactor.news.common.App
 import co.appreactor.news.common.Preferences
 import co.appreactor.news.common.getColorFromAttr
-import co.appreactor.news.di.appModule
-import co.appreactor.news.di.dbModule
-import co.appreactor.news.di.nextcloudNewsApiModule
-import co.appreactor.news.di.standaloneNewsApiModule
 import com.nextcloud.android.sso.AccountImporter
 import com.nextcloud.android.sso.AccountImporter.IAccountAccessGranted
 import com.nextcloud.android.sso.exceptions.SSOException
@@ -28,7 +23,6 @@ import com.nextcloud.android.sso.ui.UiExceptionManager
 import kotlinx.android.synthetic.main.fragment_auth.*
 import kotlinx.coroutines.runBlocking
 import org.koin.android.viewmodel.ext.android.viewModel
-import org.koin.core.module.Module
 
 class AuthFragment : Fragment() {
 
@@ -42,12 +36,12 @@ class AuthFragment : Fragment() {
         return runBlocking {
             when (model.getAuthType()) {
                 Preferences.AUTH_TYPE_STANDALONE -> {
-                    showNews(standaloneNewsApiModule)
+                    showNews()
                     null
                 }
 
                 Preferences.AUTH_TYPE_NEXTCLOUD_APP, Preferences.AUTH_TYPE_NEXTCLOUD_DIRECT -> {
-                    showNews(nextcloudNewsApiModule)
+                    showNews()
                     null
                 }
 
@@ -69,7 +63,7 @@ class AuthFragment : Fragment() {
         standaloneMode.setOnClickListener {
             lifecycleScope.launchWhenResumed {
                 model.setAuthType(Preferences.AUTH_TYPE_STANDALONE)
-                showNews(standaloneNewsApiModule)
+                showNews()
             }
         }
 
@@ -85,7 +79,7 @@ class AuthFragment : Fragment() {
             runBlocking {
                 SingleAccountHelper.setCurrentAccount(context, account.name)
                 model.setAuthType(Preferences.AUTH_TYPE_NEXTCLOUD_APP)
-                showNews(nextcloudNewsApiModule)
+                showNews()
             }
         }
 
@@ -120,10 +114,7 @@ class AuthFragment : Fragment() {
         }
     }
 
-    private fun showNews(apiModule: Module) {
-        val app = requireContext().applicationContext as App
-        app.setUp(appModule, dbModule, apiModule)
-
+    private fun showNews() {
         findNavController().apply {
             popBackStack()
             navigate(R.id.entriesFragment)

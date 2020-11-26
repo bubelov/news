@@ -1,4 +1,4 @@
-package co.appreactor.news.api
+package co.appreactor.news.api.nextcloud
 
 data class PutStarredArgsItem (
     val feedId: Long,

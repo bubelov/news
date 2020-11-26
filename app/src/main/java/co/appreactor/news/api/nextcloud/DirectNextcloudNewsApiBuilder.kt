@@ -1,4 +1,4 @@
-package co.appreactor.news.api
+package co.appreactor.news.api.nextcloud
 
 import co.appreactor.news.BuildConfig
 import okhttp3.*

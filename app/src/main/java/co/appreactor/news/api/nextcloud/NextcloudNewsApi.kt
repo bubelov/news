@@ -1,4 +1,4 @@
-package co.appreactor.news.api
+package co.appreactor.news.api.nextcloud
 
 import okhttp3.ResponseBody
 import retrofit2.Call

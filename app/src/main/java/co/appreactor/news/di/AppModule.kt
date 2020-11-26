@@ -2,6 +2,9 @@ package co.appreactor.news.di
 
 import android.content.Context
 import android.net.ConnectivityManager
+import co.appreactor.news.api.NewsApi
+import co.appreactor.news.api.NewsApiSwitcher
+import co.appreactor.news.api.NewsApiWrapper
 import co.appreactor.news.auth.AuthFragmentModel
 import co.appreactor.news.auth.DirectAuthFragmentModel
 import co.appreactor.news.common.Preferences
@@ -31,6 +34,9 @@ val appModule = module {
         ConnectivityProbe(connectivityManager)
     }
 
+    single<NewsApi> { NewsApiWrapper() }
+    single { get<NewsApi>() as NewsApiWrapper }
+    single<NewsApiSwitcher>()
     single<NewsApiSync>()
 
     single<FeedsRepository>()

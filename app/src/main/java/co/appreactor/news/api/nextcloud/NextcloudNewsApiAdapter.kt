@@ -1,5 +1,7 @@
-package co.appreactor.news.api
+package co.appreactor.news.api.nextcloud
 
+import co.appreactor.news.api.GetUnopenedEntriesResult
+import co.appreactor.news.api.NewsApi
 import co.appreactor.news.db.Entry
 import co.appreactor.news.db.EntryWithoutSummary
 import co.appreactor.news.db.Feed

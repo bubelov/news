@@ -1,13 +1,15 @@
 package co.appreactor.news.auth
 
 import androidx.lifecycle.ViewModel
-import co.appreactor.news.api.DirectNextcloudNewsApiBuilder
+import co.appreactor.news.api.NewsApiSwitcher
+import co.appreactor.news.api.nextcloud.DirectNextcloudNewsApiBuilder
 import co.appreactor.news.common.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 
 class DirectAuthFragmentModel(
+    private val nextcloudApiSwitcher: NewsApiSwitcher,
     private val prefs: Preferences,
 ) : ViewModel() {
 
@@ -45,5 +47,8 @@ class DirectAuthFragmentModel(
         prefs.setNextcloudServerPassword(password)
     }
 
-    suspend fun setAuthType(authType: String) = prefs.setAuthType(authType)
+    suspend fun setAuthType(authType: String) {
+        prefs.setAuthType(authType)
+        nextcloudApiSwitcher.switch(authType)
+    }
 }
