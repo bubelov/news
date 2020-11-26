@@ -7,8 +7,8 @@ import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -35,16 +35,20 @@ class EntriesImagesRepository(
         .build()
 
     suspend fun syncPreviews() = withContext(Dispatchers.IO) {
-        val notOpenedEntries = entriesRepository.getNotOpened().first()
+        Timber.d("Sync daemon started")
 
-        notOpenedEntries.forEach { entry ->
-            syncPreview(entry)
-        }
+        entriesRepository.getAll().collectLatest { entries ->
+            Timber.d("Got ${entries.size} entries")
+            val notOpenedEntries = entries.filterNot { it.opened }
+            Timber.d("Not opened entries: ${notOpenedEntries.size}")
+            val bookmarkedEntries = entries.filter { it.bookmarked }
+            Timber.d("Bookmarked entries: ${bookmarkedEntries.size}")
+            val otherEntries = entries.filter { it.opened && !it.bookmarked }
+            Timber.d("Other entries: ${otherEntries.size}")
 
-        val openedEntries = entriesRepository.getOpened().first()
-
-        openedEntries.forEach { entry ->
-            syncPreview(entry)
+            (notOpenedEntries + bookmarkedEntries + otherEntries).forEach {
+                syncPreview(it)
+            }
         }
     }
 

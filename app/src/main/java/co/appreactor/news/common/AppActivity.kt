@@ -3,11 +3,15 @@ package co.appreactor.news.common
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import co.appreactor.news.R
+import co.appreactor.news.entriesenclosures.EntriesEnclosuresRepository
+import co.appreactor.news.entriesimages.EntriesImagesRepository
 import kotlinx.android.synthetic.main.activity_app.*
+import org.koin.android.ext.android.get
 
 class AppActivity : AppCompatActivity() {
 
@@ -25,6 +29,17 @@ class AppActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_app)
+
+        lifecycleScope.launchWhenCreated {
+            get<EntriesEnclosuresRepository>().apply {
+                deleteDownloadedEnclosuresWithoutFiles()
+                deletePartialDownloads()
+            }
+        }
+
+        lifecycleScope.launchWhenCreated {
+            get<EntriesImagesRepository>().syncPreviews()
+        }
     }
 
     override fun onStart() {
