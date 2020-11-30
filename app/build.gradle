@@ -5,10 +5,6 @@ apply plugin: "androidx.navigation.safeargs.kotlin"
 apply plugin: "com.squareup.sqldelight"
 apply plugin: "com.github.ben-manes.versions"
 
-try {
-    apply from: ".env.gradle"
-} catch (ignored) { }
-
 android {
     compileSdkVersion 29
 
@@ -32,15 +28,6 @@ android {
         freeCompilerArgs += "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
     }
 
-    signingConfigs {
-        release {
-            storeFile file(keystore_path.toString())
-            storePassword keystore_password.toString()
-            keyAlias = "app"
-            keyPassword keystore_password.toString()
-        }
-    }
-
     buildTypes {
         debug {
             applicationIdSuffix ".dev"
@@ -49,10 +36,6 @@ android {
 
         release {
 
-        }
-
-        signedRelease {
-            signingConfig signingConfigs.release
         }
     }
 
