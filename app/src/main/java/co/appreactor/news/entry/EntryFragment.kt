@@ -20,8 +20,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import co.appreactor.news.R
 import co.appreactor.news.common.showDialog
+import co.appreactor.news.databinding.FragmentEntryBinding
 import co.appreactor.news.db.Entry
-import kotlinx.android.synthetic.main.fragment_entry.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -32,31 +32,34 @@ class EntryFragment : Fragment() {
 
     private val model: EntryFragmentModel by viewModel()
 
+    private var _binding: FragmentEntryBinding? = null
+    private val binding get() = _binding!!
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(
-            R.layout.fragment_entry,
-            container,
-            false
-        )
+    ): View {
+        _binding = FragmentEntryBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     @SuppressLint("NewApi")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        toolbar.setNavigationOnClickListener {
+        binding.toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
 
-        progress.isVisible = true
+        binding.progress.isVisible = true
 
         lifecycleScope.launchWhenResumed {
             val entry = model.getEntry(args.entryId)
 
             if (entry == null) {
-                showDialog(R.string.error, getString(R.string.cannot_find_entry_with_id_s, args.entryId)) {
+                showDialog(
+                    R.string.error,
+                    getString(R.string.cannot_find_entry_with_id_s, args.entryId)
+                ) {
                     findNavController().popBackStack()
                 }
 
@@ -66,21 +69,26 @@ class EntryFragment : Fragment() {
             viewEntry(entry)
         }
 
-        scrollView.setOnScrollChangeListener { _, _, _, _, _ ->
-            fab.isVisible = scrollView.canScrollVertically(1)
+        binding.scrollView.setOnScrollChangeListener { _, _, _, _, _ ->
+            binding.fab.isVisible = binding.scrollView.canScrollVertically(1)
         }
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     private suspend fun viewEntry(entry: Entry) {
-        toolbar.title = model.getFeed(entry.feedId)?.title ?: getString(R.string.unknown_feed)
-        title.text = entry.title
-        date.text = model.getDate(entry)
+        binding.toolbar.title = model.getFeed(entry.feedId)?.title ?: getString(R.string.unknown_feed)
+        binding.title.text = entry.title
+        binding.date.text = model.getDate(entry)
 
         runCatching {
             fillSummary(entry)
-            progress.isVisible = false
+            binding.progress.isVisible = false
         }.onFailure {
-            progress.isVisible = false
+            binding.progress.isVisible = false
 
             showDialog(R.string.error, R.string.cannot_show_content) {
                 findNavController().popBackStack()
@@ -93,7 +101,7 @@ class EntryFragment : Fragment() {
 
         lifecycleScope.launchWhenResumed {
             model.getBookmarked(entry).collect { bookmarked ->
-                val menuItem = toolbar.menu.findItem(R.id.toggleBookmarked)
+                val menuItem = binding.toolbar.menu.findItem(R.id.toggleBookmarked)
 
                 if (bookmarked) {
                     menuItem.setIcon(R.drawable.ic_baseline_bookmark_24)
@@ -105,7 +113,7 @@ class EntryFragment : Fragment() {
             }
         }
 
-        toolbar.setOnMenuItemClickListener { menuItem ->
+        binding.toolbar.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.share -> {
                     val intent = Intent().apply {
@@ -126,7 +134,7 @@ class EntryFragment : Fragment() {
             true
         }
 
-        fab.setOnClickListener {
+        binding.fab.setOnClickListener {
             lifecycleScope.launch {
                 val intent = Intent(Intent.ACTION_VIEW)
                 intent.data = Uri.parse(entry.link)
@@ -139,7 +147,7 @@ class EntryFragment : Fragment() {
         val summary = HtmlCompat.fromHtml(
             entry.content,
             HtmlCompat.FROM_HTML_MODE_LEGACY,
-            TextViewImageGetter(summaryView),
+            TextViewImageGetter(binding.summaryView),
             null
         ) as SpannableStringBuilder
 
@@ -147,7 +155,7 @@ class EntryFragment : Fragment() {
             return
         }
 
-        summary.applyStyle(summaryView)
+        summary.applyStyle(binding.summaryView)
 
         while (summary.contains("\u00A0")) {
             val index = summary.indexOfFirst { it == '\u00A0' }
@@ -167,8 +175,8 @@ class EntryFragment : Fragment() {
             summary.delete(summary.length - 2, summary.length - 1)
         }
 
-        summaryView.text = summary
-        summaryView.movementMethod = LinkMovementMethod.getInstance()
+        binding.summaryView.text = summary
+        binding.summaryView.movementMethod = LinkMovementMethod.getInstance()
     }
 
     private fun SpannableStringBuilder.applyStyle(textView: TextView) {
@@ -197,7 +205,7 @@ class EntryFragment : Fragment() {
                 }
 
                 is QuoteSpan -> {
-                    val color = date.currentTextColor
+                    val color = binding.date.currentTextColor
                     val stripe = resources.getDimension(R.dimen.quote_stripe_width).toInt()
                     val gap = resources.getDimension(R.dimen.quote_gap).toInt()
 

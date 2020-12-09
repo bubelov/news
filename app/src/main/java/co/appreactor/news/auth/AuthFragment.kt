@@ -15,18 +15,21 @@ import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.common.Preferences
 import co.appreactor.news.common.getColorFromAttr
+import co.appreactor.news.databinding.FragmentAuthBinding
 import com.nextcloud.android.sso.AccountImporter
 import com.nextcloud.android.sso.AccountImporter.IAccountAccessGranted
 import com.nextcloud.android.sso.exceptions.SSOException
 import com.nextcloud.android.sso.helper.SingleAccountHelper
 import com.nextcloud.android.sso.ui.UiExceptionManager
-import kotlinx.android.synthetic.main.fragment_auth.*
 import kotlinx.coroutines.runBlocking
 import org.koin.android.viewmodel.ext.android.viewModel
 
 class AuthFragment : Fragment() {
 
     private val model: AuthFragmentModel by viewModel()
+
+    private var _binding: FragmentAuthBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -46,11 +49,8 @@ class AuthFragment : Fragment() {
                 }
 
                 else -> {
-                    inflater.inflate(
-                        R.layout.fragment_auth,
-                        container,
-                        false
-                    )
+                    _binding = FragmentAuthBinding.inflate(inflater, container, false)
+                    binding.root
                 }
             }
         }
@@ -60,14 +60,14 @@ class AuthFragment : Fragment() {
         hideStatusBarBackground()
         invertStatusBarTextColorInLightMode()
 
-        standaloneMode.setOnClickListener {
+        binding.standaloneMode.setOnClickListener {
             lifecycleScope.launchWhenResumed {
                 model.setAuthType(Preferences.AUTH_TYPE_STANDALONE)
                 showNews()
             }
         }
 
-        loginWithNextcloud.setOnClickListener {
+        binding.loginWithNextcloud.setOnClickListener {
             showAccountPicker()
         }
     }
@@ -85,7 +85,7 @@ class AuthFragment : Fragment() {
 
         when (resultCode) {
             AppCompatActivity.RESULT_CANCELED -> {
-                loginWithNextcloud.isEnabled = true
+                binding.loginWithNextcloud.isEnabled = true
             }
 
             else -> {
@@ -100,8 +100,13 @@ class AuthFragment : Fragment() {
         }
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     private fun showAccountPicker() {
-        loginWithNextcloud.isEnabled = false
+        binding.loginWithNextcloud.isEnabled = false
 
         try {
             AccountImporter.pickNewAccount(this)
@@ -110,7 +115,7 @@ class AuthFragment : Fragment() {
                 UiExceptionManager.showDialogForException(context, e)
             }
 
-            loginWithNextcloud.isEnabled = true
+            binding.loginWithNextcloud.isEnabled = true
         }
     }
 

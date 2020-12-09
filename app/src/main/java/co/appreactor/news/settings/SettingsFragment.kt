@@ -11,9 +11,9 @@ import androidx.navigation.fragment.findNavController
 import co.appreactor.news.NavGraphDirections
 import co.appreactor.news.R
 import co.appreactor.news.common.Preferences
+import co.appreactor.news.databinding.FragmentSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.nextcloud.android.sso.AccountImporter
-import kotlinx.android.synthetic.main.fragment_settings.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -23,39 +23,39 @@ class SettingsFragment : Fragment() {
 
     private val model: SettingsFragmentModel by viewModel()
 
+    private var _binding: FragmentSettingsBinding? = null
+    private val binding get() = _binding!!
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(
-            R.layout.fragment_settings,
-            container,
-            false
-        )
+    ): View {
+        _binding = FragmentSettingsBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         lifecycleScope.launch {
-            showOpenedEntries.isChecked = model.getShowOpenedEntries().first()
+            binding.showOpenedEntries.isChecked = model.getShowOpenedEntries().first()
 
-            showOpenedEntries.setOnCheckedChangeListener { _, isChecked ->
+            binding.showOpenedEntries.setOnCheckedChangeListener { _, isChecked ->
                 lifecycleScope.launch {
                     model.setShowOpenedEntries(isChecked)
                 }
             }
 
-            showPreviewImages.isChecked = model.getShowPreviewImages().first()
+            binding.showPreviewImages.isChecked = model.getShowPreviewImages().first()
 
-            showPreviewImages.setOnCheckedChangeListener { _, isChecked ->
+            binding.showPreviewImages.setOnCheckedChangeListener { _, isChecked ->
                 lifecycleScope.launch {
                     model.setShowPreviewImages(isChecked)
                 }
             }
 
-            cropPreviewImages.isChecked = model.getCropPreviewImages().first()
+            binding.cropPreviewImages.isChecked = model.getCropPreviewImages().first()
 
-            cropPreviewImages.setOnCheckedChangeListener { _, isChecked ->
+            binding.cropPreviewImages.setOnCheckedChangeListener { _, isChecked ->
                 lifecycleScope.launch {
                     model.setCropPreviewImages(isChecked)
                 }
@@ -63,31 +63,31 @@ class SettingsFragment : Fragment() {
 
             when (model.getAuthType()) {
                 Preferences.AUTH_TYPE_STANDALONE -> {
-                    logOutTitle.setText(R.string.delete_all_data)
-                    logOutSubtitle.isVisible = false
+                    binding.logOutTitle.setText(R.string.delete_all_data)
+                    binding.logOutSubtitle.isVisible = false
                 }
 
-                else -> logOutSubtitle.text = model.getAccountName(requireContext())
+                else -> binding.logOutSubtitle.text = model.getAccountName(requireContext())
             }
         }
 
-        viewExceptions.setOnClickListener {
+        binding.viewExceptions.setOnClickListener {
             findNavController().navigate(SettingsFragmentDirections.actionSettingsFragmentToExceptionsFragment())
         }
 
         lifecycleScope.launchWhenResumed {
             model.getExceptionsCount().collect {
-                viewExceptionsSubtitle.text = getString(R.string.exceptions_logged_d, it)
+                binding.viewExceptionsSubtitle.text = getString(R.string.exceptions_logged_d, it)
             }
         }
 
         lifecycleScope.launchWhenResumed {
             model.getShowPreviewImages().collect {
-                cropPreviewImages.isEnabled = it
+                binding.cropPreviewImages.isEnabled = it
             }
         }
 
-        logOut.setOnClickListener {
+        binding.logOut.setOnClickListener {
             lifecycleScope.launchWhenResumed {
                 when (model.getAuthType()) {
                     Preferences.AUTH_TYPE_STANDALONE -> {
@@ -118,6 +118,11 @@ class SettingsFragment : Fragment() {
                 }
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     private fun logOut() {

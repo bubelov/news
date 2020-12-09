@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.ListAdapter
-import co.appreactor.news.R
+import co.appreactor.news.databinding.ListItemEntryBinding
 
 class EntriesAdapter(
     var screenWidth: Int = 0,
@@ -13,12 +13,13 @@ class EntriesAdapter(
 ) : ListAdapter<EntriesAdapterItem, EntriesAdapterViewHolder>(EntriesAdapterDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EntriesAdapterViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(
-            R.layout.list_item_entry,
-            parent, false
+        val binding = ListItemEntryBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
         )
 
-        return EntriesAdapterViewHolder(view, screenWidth, scope, callback)
+        return EntriesAdapterViewHolder(binding, screenWidth, scope, callback)
 
     }
 

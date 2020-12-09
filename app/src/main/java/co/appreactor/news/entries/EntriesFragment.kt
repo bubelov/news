@@ -15,8 +15,8 @@ import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
 import co.appreactor.news.common.showDialog
 import co.appreactor.news.common.showErrorDialog
+import co.appreactor.news.databinding.FragmentEntriesBinding
 import co.appreactor.news.entriesenclosures.openCachedEnclosure
-import kotlinx.android.synthetic.main.fragment_entries.*
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -26,6 +26,9 @@ import timber.log.Timber
 class EntriesFragment : Fragment() {
 
     private val model: EntriesFragmentModel by viewModel()
+
+    private var _binding: FragmentEntriesBinding? = null
+    private val binding get() = _binding!!
 
     private val adapter = EntriesAdapter(
         scope = lifecycleScope,
@@ -61,7 +64,7 @@ class EntriesFragment : Fragment() {
         registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
             override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
                 if (positionStart == 0) {
-                    (listView.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(0, 0)
+                    (binding.listView.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(0, 0)
                 }
             }
         })
@@ -71,16 +74,13 @@ class EntriesFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(
-            R.layout.fragment_entries,
-            container,
-            false
-        )
+    ): View {
+        _binding = FragmentEntriesBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        swipeRefresh.setOnRefreshListener {
+        binding.swipeRefresh.setOnRefreshListener {
             lifecycleScope.launch {
                 runCatching {
                     model.performFullSync()
@@ -88,7 +88,7 @@ class EntriesFragment : Fragment() {
                     showErrorDialog(it)
                 }
 
-                swipeRefresh.isRefreshing = false
+                binding.swipeRefresh.isRefreshing = false
             }
         }
 
@@ -97,13 +97,18 @@ class EntriesFragment : Fragment() {
         }
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     private suspend fun showEntries() {
-        progress.isVisible = true
+        binding.progress.isVisible = true
 
         lifecycleScope.launchWhenResumed {
             model.syncMessage.collect {
-                progressMessage.isVisible = it.isNotBlank()
-                progressMessage.text = it
+                binding.progressMessage.isVisible = it.isNotBlank()
+                binding.progressMessage.text = it
             }
         }
 
@@ -111,14 +116,14 @@ class EntriesFragment : Fragment() {
             model.performInitialSyncIfNecessary()
         }.onFailure {
             Timber.e(it)
-            progress.isVisible = false
+            binding.progress.isVisible = false
             showDialog(R.string.error, it.message ?: "")
         }
 
-        listView.setHasFixedSize(true)
-        listView.layoutManager = LinearLayoutManager(context)
-        listView.adapter = adapter
-        listView.addItemDecoration(EntriesAdapterDecoration(resources.getDimensionPixelSize(R.dimen.entries_cards_gap)))
+        binding.listView.setHasFixedSize(true)
+        binding.listView.layoutManager = LinearLayoutManager(context)
+        binding.listView.adapter = adapter
+        binding.listView.addItemDecoration(EntriesAdapterDecoration(resources.getDimensionPixelSize(R.dimen.entries_cards_gap)))
 
         val touchHelper = ItemTouchHelper(object : ItemTouchHelper.Callback() {
             override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
@@ -160,7 +165,7 @@ class EntriesFragment : Fragment() {
             }
         })
 
-        touchHelper.attachToRecyclerView(listView)
+        touchHelper.attachToRecyclerView(binding.listView)
 
         val displayMetrics = DisplayMetrics()
         requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
@@ -170,15 +175,15 @@ class EntriesFragment : Fragment() {
             .getEntries()
             .catch {
                 Timber.e(it)
-                progress.isVisible = false
+                binding.progress.isVisible = false
                 showDialog(R.string.error, it.message ?: "")
             }
             .collect { entries ->
                 if (model.isInitialSyncCompleted()) {
-                    progress.isVisible = false
+                    binding.progress.isVisible = false
                 }
 
-                empty.isVisible = entries.isEmpty() && model.isInitialSyncCompleted()
+                binding.empty.isVisible = entries.isEmpty() && model.isInitialSyncCompleted()
 
                 adapter.submitList(entries)
             }

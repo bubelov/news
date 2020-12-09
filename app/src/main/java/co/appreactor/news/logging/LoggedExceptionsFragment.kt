@@ -11,7 +11,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import co.appreactor.news.R
 import co.appreactor.news.common.showDialog
-import kotlinx.android.synthetic.main.fragment_logged_exceptions.*
+import co.appreactor.news.databinding.FragmentLoggedExceptionsBinding
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -19,6 +19,9 @@ import org.koin.android.viewmodel.ext.android.viewModel
 class LoggedExceptionsFragment : Fragment() {
 
     private val model: LoggedExceptionsFragmentModel by viewModel()
+
+    private var _binding: FragmentLoggedExceptionsBinding? = null
+    private val binding get() = _binding!!
 
     private val adapter = LoggedExceptionsAdapter {
         showDialog(it.exceptionClass, it.stackTrace)
@@ -28,16 +31,13 @@ class LoggedExceptionsFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(
-            R.layout.fragment_logged_exceptions,
-            container,
-            false
-        )
+    ): View {
+        _binding = FragmentLoggedExceptionsBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        toolbar.apply {
+        binding.toolbar.apply {
             setNavigationOnClickListener {
                 findNavController().popBackStack()
             }
@@ -55,18 +55,23 @@ class LoggedExceptionsFragment : Fragment() {
             }
         }
 
-        listView.setHasFixedSize(true)
-        listView.layoutManager = LinearLayoutManager(requireContext())
-        listView.adapter = adapter
+        binding.listView.setHasFixedSize(true)
+        binding.listView.layoutManager = LinearLayoutManager(requireContext())
+        binding.listView.adapter = adapter
 
         lifecycleScope.launchWhenResumed {
-            progress.isVisible = true
+            binding.progress.isVisible = true
 
             model.getExceptions().collect { exceptions ->
-                progress.isVisible = false
-                empty.isVisible = exceptions.isEmpty()
+                binding.progress.isVisible = false
+                binding.empty.isVisible = exceptions.isEmpty()
                 adapter.swapItems(exceptions)
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

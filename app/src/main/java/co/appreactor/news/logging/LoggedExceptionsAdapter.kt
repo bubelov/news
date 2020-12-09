@@ -1,14 +1,12 @@
 package co.appreactor.news.logging
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import co.appreactor.news.R
+import co.appreactor.news.databinding.ListItemLoggedExceptionBinding
 import co.appreactor.news.db.LoggedException
-import kotlinx.android.synthetic.main.list_item_logged_exception.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -18,10 +16,10 @@ class LoggedExceptionsAdapter(
 ) : RecyclerView.Adapter<LoggedExceptionsAdapter.ViewHolder>() {
 
     class ViewHolder(
-        private val view: View,
+        private val view: ListItemLoggedExceptionBinding,
         private val callback: LoggedExceptionsAdapterCallback
     ) :
-        RecyclerView.ViewHolder(view) {
+        RecyclerView.ViewHolder(view.root) {
 
         fun bind(item: LoggedException, isFirst: Boolean) {
             view.apply {
@@ -38,13 +36,13 @@ class LoggedExceptionsAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(
-            R.layout.list_item_logged_exception,
-            parent, false
+        val binding = ListItemLoggedExceptionBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
         )
 
-        return ViewHolder(view, callback)
-
+        return ViewHolder(binding, callback)
     }
 
     override fun getItemCount(): Int {

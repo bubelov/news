@@ -1,6 +1,5 @@
 apply plugin: "com.android.application"
 apply plugin: "kotlin-android"
-apply plugin: "kotlin-android-extensions"
 apply plugin: "androidx.navigation.safeargs.kotlin"
 apply plugin: "com.squareup.sqldelight"
 apply plugin: "com.github.ben-manes.versions"
@@ -37,6 +36,10 @@ android {
         release {
 
         }
+    }
+
+    buildFeatures {
+        viewBinding true
     }
 
     lintOptions {

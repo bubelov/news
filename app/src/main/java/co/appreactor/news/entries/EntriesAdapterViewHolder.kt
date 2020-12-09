@@ -1,29 +1,28 @@
 package co.appreactor.news.entries
 
-import android.view.View
 import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
+import co.appreactor.news.databinding.ListItemEntryBinding
 import co.appreactor.news.db.EntryImage
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.list_item_entry.view.*
 import kotlinx.coroutines.flow.collect
 
 class EntriesAdapterViewHolder(
-    private val view: View,
+    private val binding: ListItemEntryBinding,
     private val screenWidth: Int,
     private val scope: LifecycleCoroutineScope,
     private val callback: EntriesAdapterCallback,
-) : RecyclerView.ViewHolder(view) {
+) : RecyclerView.ViewHolder(binding.root) {
 
     fun bind(item: EntriesAdapterItem) {
-        view.apply {
-            val cardMargin = resources.getDimensionPixelSize(R.dimen.card_horizontal_margin)
+        binding.apply {
+            val cardMargin = root.resources.getDimensionPixelSize(R.dimen.card_horizontal_margin)
 
-            val cardHeightMin = resources.getDimensionPixelSize(R.dimen.card_height_min)
-            val cardHeightMax = resources.getDimensionPixelSize(R.dimen.card_height_max)
+            val cardHeightMin = root.resources.getDimensionPixelSize(R.dimen.card_height_min)
+            val cardHeightMax = root.resources.getDimensionPixelSize(R.dimen.card_height_max)
 
             Picasso.get().load(null as String?).into(imageView)
             imageView.isVisible = false
@@ -159,7 +158,7 @@ class EntriesAdapterViewHolder(
             secondaryText.isEnabled = !item.opened
             supportingText.isEnabled = !item.opened
 
-            setOnClickListener {
+            root.setOnClickListener {
                 callback.onItemClick(item)
             }
         }

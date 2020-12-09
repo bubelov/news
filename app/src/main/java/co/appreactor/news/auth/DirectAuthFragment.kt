@@ -11,7 +11,7 @@ import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.common.Preferences
 import co.appreactor.news.common.showDialog
-import kotlinx.android.synthetic.main.fragment_direct_auth.*
+import co.appreactor.news.databinding.FragmentDirectAuthBinding
 import org.koin.android.viewmodel.ext.android.viewModel
 import timber.log.Timber
 
@@ -19,60 +19,63 @@ class DirectAuthFragment : Fragment() {
 
     private val model: DirectAuthFragmentModel by viewModel()
 
+    private var _binding: FragmentDirectAuthBinding? = null
+    private val binding get() = _binding!!
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(
-            R.layout.fragment_direct_auth,
-            container,
-            false
-        )
+    ): View {
+        _binding = FragmentDirectAuthBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        toolbar.setNavigationOnClickListener {
+        binding.toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
 
-        login.setOnClickListener {
-            if (serverUrl.text.isNullOrEmpty()) {
-                serverUrlLayout.error = getString(R.string.field_is_empty)
+        binding.login.setOnClickListener {
+            if (binding.serverUrl.text.isNullOrEmpty()) {
+                binding.serverUrlLayout.error = getString(R.string.field_is_empty)
             } else {
-                serverUrlLayout.error = null
+                binding.serverUrlLayout.error = null
             }
 
-            if (username.text.isNullOrEmpty()) {
-                usernameLayout.error = getString(R.string.field_is_empty)
+            if (binding.username.text.isNullOrEmpty()) {
+                binding.usernameLayout.error = getString(R.string.field_is_empty)
             } else {
-                usernameLayout.error = null
+                binding.usernameLayout.error = null
             }
 
-            if (password.text.isNullOrEmpty()) {
-                passwordLayout.error = getString(R.string.field_is_empty)
+            if (binding.password.text.isNullOrEmpty()) {
+                binding.passwordLayout.error = getString(R.string.field_is_empty)
             } else {
-                passwordLayout.error = null
+                binding.passwordLayout.error = null
             }
 
-            if (serverUrlLayout.error != null || usernameLayout.error != null || passwordLayout.error != null) {
+            if (binding.serverUrlLayout.error != null
+                || binding.usernameLayout.error != null
+                || binding.passwordLayout.error != null
+            ) {
                 return@setOnClickListener
             }
 
             lifecycleScope.launchWhenResumed {
-                progress.isVisible = true
+                binding.progress.isVisible = true
 
                 runCatching {
                     model.requestFeeds(
-                        serverUrl.text.toString(),
-                        username.text.toString(),
-                        password.text.toString()
+                        binding.serverUrl.text.toString(),
+                        binding.username.text.toString(),
+                        binding.password.text.toString()
                     )
                 }.onSuccess {
                     model.setServer(
-                        serverUrl.text.toString(),
-                        username.text.toString(),
-                        password.text.toString()
+                        binding.serverUrl.text.toString(),
+                        binding.username.text.toString(),
+                        binding.password.text.toString()
                     )
 
                     model.setAuthType(Preferences.AUTH_TYPE_NEXTCLOUD_DIRECT)
@@ -82,11 +85,19 @@ class DirectAuthFragment : Fragment() {
                         navigate(R.id.entriesFragment)
                     }
                 }.onFailure {
-                    progress.isVisible = false
+                    binding.progress.isVisible = false
                     Timber.e(it)
-                    showDialog(R.string.error, it.message ?: getString(R.string.direct_login_failed))
+                    showDialog(
+                        R.string.error,
+                        it.message ?: getString(R.string.direct_login_failed)
+                    )
                 }
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

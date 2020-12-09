@@ -12,14 +12,12 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import co.appreactor.news.R
 import co.appreactor.news.common.showDialog
+import co.appreactor.news.databinding.FragmentBookmarksBinding
 import co.appreactor.news.entries.EntriesAdapter
 import co.appreactor.news.entries.EntriesAdapterCallback
 import co.appreactor.news.entries.EntriesAdapterDecoration
 import co.appreactor.news.entries.EntriesAdapterItem
 import co.appreactor.news.entriesenclosures.openCachedEnclosure
-import kotlinx.android.synthetic.main.fragment_bookmarks.empty
-import kotlinx.android.synthetic.main.fragment_bookmarks.listView
-import kotlinx.android.synthetic.main.fragment_bookmarks.progress
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -29,11 +27,15 @@ class BookmarksFragment : Fragment() {
 
     private val model: BookmarksFragmentModel by viewModel()
 
+    private var _binding: FragmentBookmarksBinding? = null
+    private val binding get() = _binding!!
+
     private val adapter = EntriesAdapter(
         scope = lifecycleScope,
         callback = object : EntriesAdapterCallback {
             override fun onItemClick(item: EntriesAdapterItem) {
-                val action = BookmarksFragmentDirections.actionBookmarksFragmentToEntryFragment(item.id)
+                val action =
+                    BookmarksFragmentDirections.actionBookmarksFragmentToEntryFragment(item.id)
                 findNavController().navigate(action)
             }
 
@@ -65,12 +67,9 @@ class BookmarksFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(
-            R.layout.fragment_bookmarks,
-            container,
-            false
-        )
+    ): View {
+        _binding = FragmentBookmarksBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -79,21 +78,26 @@ class BookmarksFragment : Fragment() {
         }
     }
 
-    private suspend fun showBookmarks() {
-        progress.isVisible = true
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 
-        listView.setHasFixedSize(true)
-        listView.layoutManager = LinearLayoutManager(context)
-        listView.adapter = adapter
-        listView.addItemDecoration(EntriesAdapterDecoration(resources.getDimensionPixelSize(R.dimen.entries_cards_gap)))
+    private suspend fun showBookmarks() {
+        binding.progress.isVisible = true
+
+        binding.listView.setHasFixedSize(true)
+        binding.listView.layoutManager = LinearLayoutManager(context)
+        binding.listView.adapter = adapter
+        binding.listView.addItemDecoration(EntriesAdapterDecoration(resources.getDimensionPixelSize(R.dimen.entries_cards_gap)))
 
         val displayMetrics = DisplayMetrics()
         requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
         adapter.screenWidth = displayMetrics.widthPixels
 
         model.getBookmarks().collect { rows ->
-            progress.isVisible = false
-            empty.isVisible = rows.isEmpty()
+            binding.progress.isVisible = false
+            binding.empty.isVisible = rows.isEmpty()
             adapter.submitList(rows)
         }
     }
