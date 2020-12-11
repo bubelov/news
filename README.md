@@ -1,15 +1,6 @@
 News
 ====
 
-Utilities
----------
+[![](https://img.shields.io/f-droid/v/co.appreactor.news)](https://f-droid.org/packages/co.appreactor.news/)
 
-### Backup and Restore Data
-
-```sh
-adb backup -f news.backup -apk co.appreactor.news.dev
-```
-
-```sh
-adb restore news.backup
-```
+[<img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="80">](https://f-droid.org/packages/co.appreactor.news/)
