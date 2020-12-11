@@ -2,7 +2,6 @@ apply plugin: "com.android.application"
 apply plugin: "kotlin-android"
 apply plugin: "androidx.navigation.safeargs.kotlin"
 apply plugin: "com.squareup.sqldelight"
-apply plugin: "com.github.ben-manes.versions"
 
 android {
     compileSdkVersion 30
@@ -51,6 +50,7 @@ dependencies {
     implementation project(":feedparser")
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$versions_kotlin"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$versions_coroutines"
     implementation "androidx.core:core-ktx:$versions_ktx"
     implementation "androidx.appcompat:appcompat:$versions_appcompat"
