@@ -1,5 +1,6 @@
 package co.appreactor.news.bookmarks
 
+import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
@@ -92,7 +93,14 @@ class BookmarksFragment : Fragment() {
         binding.listView.addItemDecoration(EntriesAdapterDecoration(resources.getDimensionPixelSize(R.dimen.entries_cards_gap)))
 
         val displayMetrics = DisplayMetrics()
-        requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            requireContext().display?.getRealMetrics(displayMetrics)
+        } else {
+            @Suppress("DEPRECATION")
+            requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
+        }
+
         adapter.screenWidth = displayMetrics.widthPixels
 
         model.getBookmarks().collect { rows ->

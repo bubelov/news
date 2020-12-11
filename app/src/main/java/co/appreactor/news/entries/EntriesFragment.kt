@@ -1,5 +1,6 @@
 package co.appreactor.news.entries
 
+import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
@@ -168,7 +169,14 @@ class EntriesFragment : Fragment() {
         touchHelper.attachToRecyclerView(binding.listView)
 
         val displayMetrics = DisplayMetrics()
-        requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            requireContext().display?.getRealMetrics(displayMetrics)
+        } else {
+            @Suppress("DEPRECATION")
+            requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
+        }
+
         adapter.screenWidth = displayMetrics.widthPixels
 
         model

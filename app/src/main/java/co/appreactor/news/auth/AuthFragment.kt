@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowInsetsController
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -162,7 +163,15 @@ class AuthFragment : Fragment() {
                             Configuration.UI_MODE_NIGHT_MASK
 
                     if (uiMode != Configuration.UI_MODE_NIGHT_YES) {
-                        view?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                            view?.windowInsetsController?.setSystemBarsAppearance(
+                                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
+                                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                            )
+                        } else {
+                            @Suppress("DEPRECATION")
+                            view?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                        }
                     }
 
                     oldColor = requireActivity().window.navigationBarColor
@@ -174,7 +183,16 @@ class AuthFragment : Fragment() {
             @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
             fun onPause() {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    view?.systemUiVisibility = 0
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        view?.windowInsetsController?.setSystemBarsAppearance(
+                            0,
+                            WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                        )
+                    } else {
+                        @Suppress("DEPRECATION")
+                        view?.systemUiVisibility = 0
+                    }
+
                     requireActivity().window.navigationBarColor = oldColor
                 }
             }

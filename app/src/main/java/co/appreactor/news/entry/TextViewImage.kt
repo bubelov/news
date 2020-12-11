@@ -4,6 +4,7 @@ import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Handler
+import android.os.Looper
 import android.text.SpannableStringBuilder
 import android.text.style.ImageSpan
 import android.widget.TextView
@@ -47,10 +48,15 @@ class TextViewImage(
         setBounds(0, 0, bitmap.width, (bitmap.height / textView.lineSpacingMultiplier).toInt())
 
         this.drawable = BitmapDrawable(textView.context.resources, bitmap).apply {
-            setBounds(0, -verticalCutoff.toInt(), bitmap.width, -verticalCutoff.toInt() + bitmap.height)
+            setBounds(
+                0,
+                -verticalCutoff.toInt(),
+                bitmap.width,
+                -verticalCutoff.toInt() + bitmap.height
+            )
         }
 
-        Handler().post {
+        Handler(Looper.getMainLooper()).post {
             val text = SpannableStringBuilder(textView.text)
             val spans = text.getSpans(0, text.length - 1, Any::class.java)
 
