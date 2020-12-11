@@ -1,1 +1,1 @@
-News and podcasts aggregator for Nextcloud
+Manage your RSS and Atom feeds (unoficial Nextcloud News client)
