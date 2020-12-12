@@ -16,7 +16,7 @@
 
     <fragment
         android:id="@+id/authFragment"
-        android:name="co.appreactor.news.auth.AuthFragment"
+        android:name="auth.AuthFragment"
         android:label="AuthFragment"
         tools:layout="@layout/fragment_auth">
         <action
@@ -33,7 +33,7 @@
 
     <fragment
         android:id="@+id/directAuthFragment"
-        android:name="co.appreactor.news.auth.DirectAuthFragment"
+        android:name="auth.DirectAuthFragment"
         android:label="DirectAuthFragment"
         tools:layout="@layout/fragment_direct_auth">
         <action
@@ -45,7 +45,7 @@
 
     <fragment
         android:id="@+id/entriesFragment"
-        android:name="co.appreactor.news.entries.EntriesFragment"
+        android:name="entries.EntriesFragment"
         android:label="EntriesFragment"
         tools:layout="@layout/fragment_entries">
         <action
@@ -57,7 +57,7 @@
 
     <fragment
         android:id="@+id/entryFragment"
-        android:name="co.appreactor.news.entry.EntryFragment"
+        android:name="entry.EntryFragment"
         android:label="EntryFragment"
         tools:layout="@layout/fragment_entry">
         <argument
@@ -67,13 +67,13 @@
 
     <fragment
         android:id="@+id/feedsFragment"
-        android:name="co.appreactor.news.feeds.FeedsFragment"
+        android:name="feeds.FeedsFragment"
         android:label="FeedsFragment"
         tools:layout="@layout/fragment_feeds" />
 
     <fragment
         android:id="@+id/bookmarksFragment"
-        android:name="co.appreactor.news.bookmarks.BookmarksFragment"
+        android:name="bookmarks.BookmarksFragment"
         android:label="BookmarksFragment"
         tools:layout="@layout/fragment_bookmarks">
         <action
@@ -85,7 +85,7 @@
 
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="co.appreactor.news.settings.SettingsFragment"
+        android:name="settings.SettingsFragment"
         android:label="SettingsFragment"
         tools:layout="@layout/fragment_settings">
         <action
@@ -97,7 +97,7 @@
 
     <fragment
         android:id="@+id/exceptionsFragment"
-        android:name="co.appreactor.news.logging.LoggedExceptionsFragment"
+        android:name="logging.LoggedExceptionsFragment"
         android:label="ExceptionsFragment"
         tools:layout="@layout/fragment_logged_exceptions" />
 

@@ -26,8 +26,8 @@
             <ProgressBar
                 android:id="@+id/imageProgress"
                 android:layout_width="wrap_content"
-                android:layout_gravity="center"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_gravity="center" />
 
         </FrameLayout>
 
@@ -67,49 +67,49 @@
         <LinearLayout
             android:id="@+id/podcastPanel"
             android:layout_width="match_parent"
-            android:gravity="center_vertical"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
+            android:gravity="center_vertical"
             android:orientation="horizontal">
 
             <com.google.android.material.button.MaterialButton
-                android:layout_width="wrap_content"
                 android:id="@+id/downloadPodcast"
-                android:layout_marginStart="8dp"
-                app:icon="@drawable/ic_baseline_save_alt_24"
-                android:visibility="gone"
+                style="?attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
                 android:text="@string/download"
-                style="?attr/borderlessButtonStyle" />
-
-            <com.google.android.material.button.MaterialButton
-                android:layout_width="wrap_content"
-                android:id="@+id/downloadingPodcast"
-                android:layout_marginStart="8dp"
                 android:visibility="gone"
-                android:enabled="false"
-                android:layout_height="wrap_content"
-                android:text="@string/downloading"
-                style="?attr/borderlessButtonStyle" />
+                app:icon="@drawable/ic_baseline_save_alt_24" />
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/downloadingPodcast"
+                style="?attr/borderlessButtonStyle"
                 android:layout_width="wrap_content"
-                android:id="@+id/playPodcast"
-                android:layout_marginStart="8dp"
-                android:visibility="visible"
-                app:icon="@drawable/ic_baseline_headset_24"
                 android:layout_height="wrap_content"
-                android:text="@string/listen"
-                style="?attr/borderlessButtonStyle" />
-
-            <com.google.android.material.progressindicator.ProgressIndicator
-                android:layout_width="0dp"
-                android:id="@+id/downloadPodcastProgress"
-                android:layout_weight="1"
-                android:layout_marginEnd="16dp"
                 android:layout_marginStart="8dp"
-                android:progress="25"
-                android:layout_height="wrap_content" />
+                android:enabled="false"
+                android:text="@string/downloading"
+                android:visibility="gone" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/playPodcast"
+                style="?attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@string/listen"
+                android:visibility="visible"
+                app:icon="@drawable/ic_baseline_headset_24" />
+
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/downloadPodcastProgress"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="16dp"
+                android:layout_weight="1"
+                android:progress="25" />
 
         </LinearLayout>
 
