@@ -42,7 +42,7 @@ android {
     }
 
     lintOptions {
-        disable 'VectorRaster', 'VectorPath'
+        disable "VectorRaster", "VectorPath"
     }
 }
 
@@ -53,7 +53,6 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect:$versions_kotlin"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$versions_coroutines"
     implementation "androidx.core:core-ktx:$versions_ktx"
-    implementation "androidx.appcompat:appcompat:$versions_appcompat"
     implementation "androidx.constraintlayout:constraintlayout:$versions_constrained_layout"
     implementation "com.squareup.retrofit2:retrofit:$versions_retrofit"
     implementation "com.squareup.retrofit2:converter-gson:$versions_retrofit"
