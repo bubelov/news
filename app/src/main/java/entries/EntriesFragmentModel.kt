@@ -5,6 +5,10 @@ import common.*
 import co.appreactor.news.db.EntryWithoutSummary
 import feeds.FeedsRepository
 import co.appreactor.news.db.Feed
+import common.Preferences.Companion.CROP_PREVIEW_IMAGES
+import common.Preferences.Companion.INITIAL_SYNC_COMPLETED
+import common.Preferences.Companion.SHOW_OPENED_ENTRIES
+import common.Preferences.Companion.SHOW_PREVIEW_IMAGES
 import entriesimages.EntriesImagesRepository
 import entriesenclosures.EntriesEnclosuresRepository
 import entriesenclosures.isAudioMime
@@ -34,9 +38,9 @@ class EntriesFragmentModel(
         return combine(
             feedsRepository.getAll(),
             entriesRepository.getCount(),
-            prefs.showOpenedEntries(),
-            prefs.showPreviewImages(),
-            prefs.cropPreviewImages(),
+            prefs.getBoolean(SHOW_OPENED_ENTRIES),
+            prefs.getBoolean(SHOW_PREVIEW_IMAGES),
+            prefs.getBoolean(CROP_PREVIEW_IMAGES),
         ) { feeds, _, showOpenedEntries, showPreviewImages, cropPreviewImages ->
             val entries = if (showOpenedEntries) {
                 entriesRepository.getAll().first()
@@ -61,7 +65,7 @@ class EntriesFragmentModel(
     }
 
     suspend fun performInitialSyncIfNecessary() {
-        if (!prefs.initialSyncCompleted().first()) {
+        if (!prefs.getBooleanBlocking(INITIAL_SYNC_COMPLETED)) {
             newsApiSync.performInitialSync()
         }
     }
@@ -70,7 +74,7 @@ class EntriesFragmentModel(
         newsApiSync.sync()
     }
 
-    suspend fun isInitialSyncCompleted() = prefs.initialSyncCompleted().first()
+    fun isInitialSyncCompleted() = prefs.getBooleanBlocking(INITIAL_SYNC_COMPLETED)
 
     suspend fun downloadEnclosure(id: String) {
         entriesEnclosuresRepository.downloadEnclosure(id)
@@ -120,7 +124,14 @@ class EntriesFragmentModel(
             },
             showImage = showFeedImages,
             cropImage = cropFeedImages,
-            supportingText = flow { emit(entriesSupportingTextRepository.getSupportingText(this@toRow.id, feed)) },
+            supportingText = flow {
+                emit(
+                    entriesSupportingTextRepository.getSupportingText(
+                        this@toRow.id,
+                        feed
+                    )
+                )
+            },
             cachedSupportingText = entriesSupportingTextRepository.getCachedSupportingText(this.id),
             opened = opened,
         )

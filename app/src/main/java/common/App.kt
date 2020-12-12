@@ -8,7 +8,7 @@ import di.dbModule
 import logging.PersistentLogTree
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
-import kotlinx.coroutines.flow.first
+import common.Preferences.Companion.AUTH_TYPE
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
 import org.koin.android.ext.koin.androidContext
@@ -31,7 +31,7 @@ class App : Application() {
         }
 
         runBlocking {
-            val authType = get<Preferences>().getAuthType().first()
+            val authType = get<Preferences>().getStringBlocking(AUTH_TYPE)
 
             if (authType.isNotBlank()) {
                 get<NewsApiSwitcher>().switch(authType)

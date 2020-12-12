@@ -3,10 +3,10 @@ package bookmarks
 import androidx.lifecycle.ViewModel
 import feeds.FeedsRepository
 import common.Preferences
-import common.cropPreviewImages
-import common.showPreviewImages
 import co.appreactor.news.db.Feed
 import co.appreactor.news.db.EntryWithoutSummary
+import common.Preferences.Companion.CROP_PREVIEW_IMAGES
+import common.Preferences.Companion.SHOW_PREVIEW_IMAGES
 import entries.*
 import entriesimages.EntriesImagesRepository
 import entriesenclosures.EntriesEnclosuresRepository
@@ -29,8 +29,8 @@ class BookmarksFragmentModel(
     suspend fun getBookmarks() = combine(
         feedsRepository.getAll(),
         entriesRepository.getBookmarked(),
-        getShowPreviewImages(),
-        getCropPreviewImages(),
+        prefs.getBoolean(SHOW_PREVIEW_IMAGES),
+        prefs.getBoolean(CROP_PREVIEW_IMAGES),
     ) { feeds, entries, showPreviewImages, cropPreviewImages ->
         entries.map {
             val feed = feeds.singleOrNull { feed -> feed.id == it.feedId }
@@ -43,10 +43,6 @@ class BookmarksFragmentModel(
     }
 
     suspend fun getEntry(id: String) = entriesRepository.get(id).first()
-
-    private suspend fun getShowPreviewImages() = prefs.showPreviewImages()
-
-    private suspend fun getCropPreviewImages() = prefs.cropPreviewImages()
 
     private suspend fun EntryWithoutSummary.toRow(
         feed: Feed?,
@@ -80,7 +76,14 @@ class BookmarksFragmentModel(
             },
             showImage = showPreviewImages,
             cropImage = cropPreviewImages,
-            supportingText = flow { emit(entriesSupportingTextRepository.getSupportingText(this@toRow.id, feed)) },
+            supportingText = flow {
+                emit(
+                    entriesSupportingTextRepository.getSupportingText(
+                        this@toRow.id,
+                        feed
+                    )
+                )
+            },
             cachedSupportingText = entriesSupportingTextRepository.getCachedSupportingText(this.id),
             opened = opened,
         )

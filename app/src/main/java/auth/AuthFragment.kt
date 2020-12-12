@@ -38,7 +38,7 @@ class AuthFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         return runBlocking {
-            when (model.getAuthType()) {
+            when (model.authType) {
                 Preferences.AUTH_TYPE_STANDALONE -> {
                     showNews()
                     null
@@ -63,7 +63,7 @@ class AuthFragment : Fragment() {
 
         binding.standaloneMode.setOnClickListener {
             lifecycleScope.launchWhenResumed {
-                model.setAuthType(Preferences.AUTH_TYPE_STANDALONE)
+                model.authType = Preferences.AUTH_TYPE_STANDALONE
                 showNews()
             }
         }
@@ -79,7 +79,7 @@ class AuthFragment : Fragment() {
         val onAccessGranted = IAccountAccessGranted { account ->
             runBlocking {
                 SingleAccountHelper.setCurrentAccount(context, account.name)
-                model.setAuthType(Preferences.AUTH_TYPE_NEXTCLOUD_APP)
+                model.authType = Preferences.AUTH_TYPE_NEXTCLOUD_APP
                 showNews()
             }
         }

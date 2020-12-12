@@ -1,12 +1,12 @@
 package common
 
+import common.Preferences.Companion.INITIAL_SYNC_COMPLETED
 import feeds.FeedsRepository
 import entries.EntriesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -25,7 +25,7 @@ class NewsApiSync(
     suspend fun performInitialSync() {
         withContext(Dispatchers.IO) {
             mutex.withLock {
-                if (prefs.initialSyncCompleted().first()) {
+                if (prefs.getBooleanBlocking(Preferences.INITIAL_SYNC_COMPLETED)) {
                     return@withLock
                 }
 
@@ -48,7 +48,7 @@ class NewsApiSync(
                     entriesSync.await()
                 }.onSuccess {
                     syncMessage.value = ""
-                    prefs.setInitialSyncCompleted(true)
+                    prefs.putBooleanBlocking(INITIAL_SYNC_COMPLETED, true)
                 }.onFailure {
                     syncMessage.value = ""
                     throw it

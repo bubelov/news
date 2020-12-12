@@ -4,33 +4,66 @@ import co.appreactor.news.db.Preference
 import co.appreactor.news.db.PreferenceQueries
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 class Preferences(
     private val db: PreferenceQueries
 ) {
 
+    init {
+        val all = db.selectAll().executeAsList()
+
+        if (all.none { it.key == INITIAL_SYNC_COMPLETED }) {
+            putBooleanBlocking(INITIAL_SYNC_COMPLETED, false)
+        }
+
+        if (all.none { it.key == SHOW_OPENED_ENTRIES }) {
+            putBooleanBlocking(SHOW_OPENED_ENTRIES, false)
+        }
+
+        if (all.none { it.key == SHOW_PREVIEW_IMAGES }) {
+            putBooleanBlocking(SHOW_PREVIEW_IMAGES, true)
+        }
+
+        if (all.none { it.key == CROP_PREVIEW_IMAGES }) {
+            putBooleanBlocking(CROP_PREVIEW_IMAGES, true)
+        }
+    }
+
     suspend fun getString(key: String) = withContext(Dispatchers.IO) {
         db.selectByKey(key).asFlow().map { it.executeAsOneOrNull()?.value ?: "" }
     }
+
+    fun getStringBlocking(key: String) = runBlocking { getString(key).first() }
 
     suspend fun putString(key: String, value: String) = withContext(Dispatchers.IO) {
         db.insertOrReplace(Preference(key, value))
     }
 
-    suspend fun getBoolean(key: String, default: Boolean) = getString(key).map {
+    fun putStringBlocking(key: String, value: String) {
+        runBlocking { putString(key, value) }
+    }
+
+    suspend fun getBoolean(key: String) = getString(key).map {
         when (it) {
-            "" -> default
             "true" -> true
             "false" -> false
             else -> throw Exception("Unsupported value: $it")
         }
     }
 
+    fun getBooleanBlocking(key: String): Boolean {
+        return runBlocking { getBoolean(key).first() }
+    }
+
     suspend fun putBoolean(key: String, value: Boolean) {
         putString(key, if (value) "true" else "false")
     }
+
+    fun putBooleanBlocking(key: String, value: Boolean) = runBlocking { putBoolean(key, value) }
 
     suspend fun clear() = withContext(Dispatchers.IO) {
         db.deleteAll()

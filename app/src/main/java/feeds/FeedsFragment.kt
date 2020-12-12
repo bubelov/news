@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -14,7 +15,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
-import common.hideKeyboard
 import common.showDialog
 import common.showKeyboard
 import co.appreactor.news.databinding.FragmentFeedsBinding
@@ -69,7 +69,7 @@ class FeedsFragment : Fragment() {
                     }
                 }
                 .setNegativeButton(R.string.cancel, null)
-                .setOnDismissListener { requireActivity().hideKeyboard() }
+                .setOnDismissListener { hideKeyboard() }
                 .show()
 
             val titleView = dialog.findViewById<TextInputEditText>(R.id.titleView)!!
@@ -156,7 +156,7 @@ class FeedsFragment : Fragment() {
                     }
                 }
                 .setNegativeButton(R.string.cancel, null)
-                .setOnDismissListener { requireActivity().hideKeyboard() }
+                .setOnDismissListener { hideKeyboard() }
                 .show()
 
             alert.findViewById<View>(R.id.urlLayout)!!.requestFocus()
@@ -167,5 +167,11 @@ class FeedsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun hideKeyboard() {
+        requireActivity().window.setSoftInputMode(
+            WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
+        )
     }
 }

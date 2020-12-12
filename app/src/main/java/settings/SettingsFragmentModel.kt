@@ -7,7 +7,12 @@ import common.*
 import logging.LoggedExceptionsRepository
 import com.nextcloud.android.sso.exceptions.SSOException
 import com.nextcloud.android.sso.helper.SingleAccountHelper
-import kotlinx.coroutines.flow.first
+import common.Preferences.Companion.AUTH_TYPE
+import common.Preferences.Companion.CROP_PREVIEW_IMAGES
+import common.Preferences.Companion.NEXTCLOUD_SERVER_URL
+import common.Preferences.Companion.NEXTCLOUD_SERVER_USERNAME
+import common.Preferences.Companion.SHOW_OPENED_ENTRIES
+import common.Preferences.Companion.SHOW_PREVIEW_IMAGES
 import timber.log.Timber
 
 class SettingsFragmentModel(
@@ -16,27 +21,27 @@ class SettingsFragmentModel(
     private val db: Database,
 ) : ViewModel() {
 
-    suspend fun getShowOpenedEntries() = prefs.showOpenedEntries()
+    suspend fun getShowOpenedEntries() = prefs.getBoolean(SHOW_OPENED_ENTRIES)
 
-    suspend fun setShowOpenedEntries(show: Boolean) = prefs.setShowOpenedEntries(show)
+    fun setShowOpenedEntries(show: Boolean) = prefs.putBooleanBlocking(SHOW_OPENED_ENTRIES, show)
 
-    suspend fun getShowPreviewImages() = prefs.showPreviewImages()
+    suspend fun getShowPreviewImages() = prefs.getBoolean(SHOW_PREVIEW_IMAGES)
 
-    suspend fun setShowPreviewImages(show: Boolean) = prefs.setShowPreviewImages(show)
+    fun setShowPreviewImages(show: Boolean) = prefs.putBooleanBlocking(SHOW_PREVIEW_IMAGES, show)
 
-    suspend fun getCropPreviewImages() = prefs.cropPreviewImages()
+    suspend fun getCropPreviewImages() = prefs.getBoolean(CROP_PREVIEW_IMAGES)
 
-    suspend fun setCropPreviewImages(crop: Boolean) = prefs.setCropPreviewImages(crop)
+    fun setCropPreviewImages(crop: Boolean) = prefs.putBooleanBlocking(CROP_PREVIEW_IMAGES, crop)
 
     suspend fun getExceptionsCount() = loggedExceptionsRepository.count()
 
-    suspend fun getAuthType() = prefs.getAuthType().first()
+    fun getAuthType() = prefs.getStringBlocking(AUTH_TYPE)
 
-    suspend fun getAccountName(context: Context): String {
-        val serverUrl = prefs.getNextcloudServerUrl().first()
+    fun getAccountName(context: Context): String {
+        val serverUrl = prefs.getStringBlocking(NEXTCLOUD_SERVER_URL)
 
         return if (serverUrl.isNotBlank()) {
-            val username = prefs.getNextcloudServerUsername().first()
+            val username = prefs.getStringBlocking(NEXTCLOUD_SERVER_USERNAME)
             "$username@${serverUrl.replace("https://", "")}"
         } else {
             try {

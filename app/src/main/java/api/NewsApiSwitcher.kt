@@ -11,7 +11,9 @@ import co.appreactor.news.db.FeedQueries
 import com.google.gson.GsonBuilder
 import com.nextcloud.android.sso.api.NextcloudAPI
 import com.nextcloud.android.sso.helper.SingleAccountHelper
-import kotlinx.coroutines.flow.first
+import common.Preferences.Companion.NEXTCLOUD_SERVER_PASSWORD
+import common.Preferences.Companion.NEXTCLOUD_SERVER_URL
+import common.Preferences.Companion.NEXTCLOUD_SERVER_USERNAME
 import retrofit2.NextcloudRetrofitApiBuilder
 import timber.log.Timber
 
@@ -23,7 +25,7 @@ class NewsApiSwitcher(
     private val context: Context,
 ) {
 
-    suspend fun switch(authType: String) {
+    fun switch(authType: String) {
         when (authType) {
             Preferences.AUTH_TYPE_NEXTCLOUD_APP -> switchToAppBasedNextcloudApi()
             Preferences.AUTH_TYPE_NEXTCLOUD_DIRECT -> switchToDirectNextcloudApi()
@@ -59,10 +61,10 @@ class NewsApiSwitcher(
         wrapper.api = NextcloudNewsApiAdapter(nextcloudNewsApi)
     }
 
-    private suspend fun switchToDirectNextcloudApi() {
-        val serverUrl = prefs.getNextcloudServerUrl().first()
-        val username = prefs.getNextcloudServerUsername().first()
-        val password = prefs.getNextcloudServerPassword().first()
+    private fun switchToDirectNextcloudApi() {
+        val serverUrl = prefs.getStringBlocking(NEXTCLOUD_SERVER_URL)
+        val username = prefs.getStringBlocking(NEXTCLOUD_SERVER_USERNAME)
+        val password = prefs.getStringBlocking(NEXTCLOUD_SERVER_PASSWORD)
 
         val api = DirectNextcloudNewsApiBuilder().build(
             serverUrl,
