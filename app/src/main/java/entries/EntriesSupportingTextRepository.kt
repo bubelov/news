@@ -2,7 +2,7 @@ package entries
 
 import android.text.SpannableStringBuilder
 import androidx.core.text.HtmlCompat
-import co.appreactor.news.db.Feed
+import db.Feed
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext

@@ -6,7 +6,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.databinding.ListItemLoggedExceptionBinding
-import co.appreactor.news.db.LoggedException
+import db.LoggedException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

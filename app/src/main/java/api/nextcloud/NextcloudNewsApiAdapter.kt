@@ -2,9 +2,9 @@ package api.nextcloud
 
 import api.GetUnopenedEntriesResult
 import api.NewsApi
-import co.appreactor.news.db.Entry
-import co.appreactor.news.db.EntryWithoutSummary
-import co.appreactor.news.db.Feed
+import db.Entry
+import db.EntryWithoutSummary
+import db.Feed
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.joda.time.Instant

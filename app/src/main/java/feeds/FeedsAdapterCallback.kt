@@ -1,6 +1,6 @@
 package feeds
 
-import co.appreactor.news.db.Feed
+import db.Feed
 
 interface FeedsAdapterCallback {
 

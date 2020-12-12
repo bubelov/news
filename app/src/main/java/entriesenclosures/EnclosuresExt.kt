@@ -3,7 +3,7 @@ package entriesenclosures
 import android.content.Context
 import android.content.Intent
 import androidx.core.content.FileProvider
-import co.appreactor.news.db.Entry
+import db.Entry
 import java.io.File
 
 fun String.isAudioMime() = startsWith("audio")

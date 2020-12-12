@@ -4,7 +4,7 @@ import ParsedEntry
 import ParsedFeed
 import api.GetUnopenedEntriesResult
 import api.NewsApi
-import co.appreactor.news.db.*
+import db.*
 import getFeedType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf

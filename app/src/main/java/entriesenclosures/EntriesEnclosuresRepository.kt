@@ -1,8 +1,8 @@
 package entriesenclosures
 
 import android.content.Context
-import co.appreactor.news.db.EntryEnclosure
-import co.appreactor.news.db.EntryEnclosureQueries
+import db.EntryEnclosure
+import db.EntryEnclosureQueries
 import entries.EntriesRepository
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import kotlinx.coroutines.Dispatchers

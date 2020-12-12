@@ -1,7 +1,7 @@
 package feeds
 
 import api.*
-import co.appreactor.news.db.FeedQueries
+import db.FeedQueries
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull

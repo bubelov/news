@@ -6,8 +6,8 @@ import api.nextcloud.NextcloudNewsApi
 import api.nextcloud.NextcloudNewsApiAdapter
 import api.standalone.StandaloneNewsApi
 import common.*
-import co.appreactor.news.db.EntryQueries
-import co.appreactor.news.db.FeedQueries
+import db.EntryQueries
+import db.FeedQueries
 import com.google.gson.GsonBuilder
 import com.nextcloud.android.sso.api.NextcloudAPI
 import com.nextcloud.android.sso.helper.SingleAccountHelper

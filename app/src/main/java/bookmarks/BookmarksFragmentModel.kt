@@ -3,8 +3,8 @@ package bookmarks
 import androidx.lifecycle.ViewModel
 import feeds.FeedsRepository
 import common.Preferences
-import co.appreactor.news.db.Feed
-import co.appreactor.news.db.EntryWithoutSummary
+import db.Feed
+import db.EntryWithoutSummary
 import common.Preferences.Companion.CROP_PREVIEW_IMAGES
 import common.Preferences.Companion.SHOW_PREVIEW_IMAGES
 import entries.*

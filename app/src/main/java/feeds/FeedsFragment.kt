@@ -18,7 +18,7 @@ import co.appreactor.news.R
 import common.showDialog
 import common.showKeyboard
 import co.appreactor.news.databinding.FragmentFeedsBinding
-import co.appreactor.news.db.Feed
+import db.Feed
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.flow.collect

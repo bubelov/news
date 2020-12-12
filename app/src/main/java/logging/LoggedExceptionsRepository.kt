@@ -1,7 +1,7 @@
 package logging
 
-import co.appreactor.news.db.LoggedException
-import co.appreactor.news.db.LoggedExceptionQueries
+import db.LoggedException
+import db.LoggedExceptionQueries
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOne

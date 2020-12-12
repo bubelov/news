@@ -3,8 +3,8 @@ package entries
 import api.*
 import api.GetUnopenedEntriesResult
 import common.Preferences
-import co.appreactor.news.db.Entry
-import co.appreactor.news.db.EntryQueries
+import db.Entry
+import db.EntryQueries
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOne

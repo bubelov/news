@@ -1,6 +1,6 @@
 package logging
 
-import co.appreactor.news.db.LoggedException
+import db.LoggedException
 
 fun interface LoggedExceptionsAdapterCallback {
     fun onClick(item: LoggedException)

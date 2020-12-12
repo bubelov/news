@@ -1,6 +1,6 @@
 package logging
 
-import co.appreactor.news.db.LoggedException
+import db.LoggedException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.runBlocking
 import org.joda.time.LocalDateTime

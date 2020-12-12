@@ -2,7 +2,7 @@ package entriesimages
 
 import android.graphics.Bitmap
 import android.graphics.Color
-import co.appreactor.news.db.*
+import db.*
 import entries.EntriesRepository
 import com.squareup.picasso.Picasso
 import com.squareup.sqldelight.runtime.coroutines.asFlow

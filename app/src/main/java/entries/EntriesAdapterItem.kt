@@ -1,6 +1,6 @@
 package entries
 
-import co.appreactor.news.db.EntryImage
+import db.EntryImage
 import kotlinx.coroutines.flow.Flow
 
 data class EntriesAdapterItem(

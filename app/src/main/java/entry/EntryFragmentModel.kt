@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import feeds.FeedsRepository
 import common.NewsApiSync
-import co.appreactor.news.db.Feed
-import co.appreactor.news.db.Entry
+import db.Feed
+import db.Entry
 import entries.EntriesRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map

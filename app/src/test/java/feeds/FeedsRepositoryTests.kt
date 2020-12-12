@@ -1,8 +1,8 @@
 package feeds
 
 import api.NewsApi
-import co.appreactor.news.db.Feed
-import co.appreactor.news.db.FeedQueries
+import db.Feed
+import db.FeedQueries
 import io.mockk.*
 import kotlinx.coroutines.runBlocking
 import org.junit.Test

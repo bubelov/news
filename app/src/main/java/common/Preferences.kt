@@ -1,7 +1,7 @@
 package common
 
-import co.appreactor.news.db.Preference
-import co.appreactor.news.db.PreferenceQueries
+import db.Preference
+import db.PreferenceQueries
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first

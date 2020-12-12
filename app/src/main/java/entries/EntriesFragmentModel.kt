@@ -2,9 +2,9 @@ package entries
 
 import androidx.lifecycle.ViewModel
 import common.*
-import co.appreactor.news.db.EntryWithoutSummary
+import db.EntryWithoutSummary
 import feeds.FeedsRepository
-import co.appreactor.news.db.Feed
+import db.Feed
 import common.Preferences.Companion.CROP_PREVIEW_IMAGES
 import common.Preferences.Companion.INITIAL_SYNC_COMPLETED
 import common.Preferences.Companion.SHOW_OPENED_ENTRIES

@@ -1,7 +1,7 @@
 package feeds
 
 import androidx.recyclerview.widget.DiffUtil
-import co.appreactor.news.db.Feed
+import db.Feed
 
 class FeedsAdapterDiff : DiffUtil.ItemCallback<Feed>() {
 

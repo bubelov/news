@@ -1,6 +1,6 @@
 package api
 
-import co.appreactor.news.db.Entry
+import db.Entry
 
 sealed class GetUnopenedEntriesResult {
     data class Loading(val entriesLoaded: Long) : GetUnopenedEntriesResult()

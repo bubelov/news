@@ -2,8 +2,8 @@ package entries
 
 import api.NewsApi
 import common.Preferences
-import co.appreactor.news.db.EntryQueries
-import co.appreactor.news.db.EntryWithoutSummary
+import db.EntryQueries
+import db.EntryWithoutSummary
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import io.mockk.*

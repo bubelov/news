@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import co.appreactor.news.databinding.ListItemFeedBinding
-import co.appreactor.news.db.Feed
+import db.Feed
 
 class FeedsAdapter(
     private val callback: FeedsAdapterCallback

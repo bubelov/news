@@ -1,8 +1,8 @@
 package api
 
-import co.appreactor.news.db.Entry
-import co.appreactor.news.db.EntryWithoutSummary
-import co.appreactor.news.db.Feed
+import db.Entry
+import db.EntryWithoutSummary
+import db.Feed
 import kotlinx.coroutines.flow.Flow
 import org.joda.time.Instant
 

@@ -5,7 +5,7 @@ import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
 import co.appreactor.news.databinding.ListItemEntryBinding
-import co.appreactor.news.db.EntryImage
+import db.EntryImage
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.flow.collect

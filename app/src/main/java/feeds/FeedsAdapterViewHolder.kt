@@ -6,7 +6,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
 import co.appreactor.news.databinding.ListItemFeedBinding
-import co.appreactor.news.db.Feed
+import db.Feed
 
 class FeedsAdapterViewHolder(
     private val binding: ListItemFeedBinding,

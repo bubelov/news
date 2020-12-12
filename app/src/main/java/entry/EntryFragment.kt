@@ -21,7 +21,7 @@ import androidx.navigation.fragment.navArgs
 import co.appreactor.news.R
 import common.showDialog
 import co.appreactor.news.databinding.FragmentEntryBinding
-import co.appreactor.news.db.Entry
+import db.Entry
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
