@@ -28,9 +28,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
+            android:letterSpacing="0.2"
             android:text="@string/news"
-            android:textAppearance="?attr/textAppearanceHeadline3"
-            android:textColor="?colorOnBackground" />
+            android:textAllCaps="true"
+            android:textAppearance="?attr/textAppearanceHeadline4"
+            android:textColor="?colorOnBackground"
+            android:textStyle="bold" />
 
     </LinearLayout>
 
