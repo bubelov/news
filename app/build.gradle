@@ -82,9 +82,6 @@ dependencies {
     implementation "org.jsoup:jsoup:$versions_jsoup"
     implementation "joda-time:joda-time:$versions_joda_time"
 
-    androidTestImplementation "androidx.test.ext:junit:$versions_junit_ext"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$versions_espresso"
-
     testImplementation "junit:junit:$versions_junit"
     testImplementation "io.mockk:mockk:$versions_mockk"
 }
