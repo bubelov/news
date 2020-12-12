@@ -8,10 +8,9 @@ import com.squareup.picasso.Picasso
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.jsoup.Jsoup
@@ -49,8 +48,11 @@ class EntriesImagesRepository(
             val otherEntries = entries.filter { it.opened && !it.bookmarked }
             Timber.d("Other entries: ${otherEntries.size}")
 
-            (notOpenedEntries + bookmarkedEntries + otherEntries).forEach {
-                syncPreview(it)
+            val queue =
+                ((notOpenedEntries + bookmarkedEntries).sortedByDescending { it.published } + otherEntries)
+
+            queue.chunked(10).forEach {
+                it.map { async { syncPreview(it) } }.awaitAll()
             }
         }
     }
