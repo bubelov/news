@@ -13,26 +13,6 @@ class Preferences(
     private val db: PreferenceQueries
 ) {
 
-    init {
-        val all = db.selectAll().executeAsList()
-
-        if (all.none { it.key == INITIAL_SYNC_COMPLETED }) {
-            putBooleanBlocking(INITIAL_SYNC_COMPLETED, false)
-        }
-
-        if (all.none { it.key == SHOW_OPENED_ENTRIES }) {
-            putBooleanBlocking(SHOW_OPENED_ENTRIES, false)
-        }
-
-        if (all.none { it.key == SHOW_PREVIEW_IMAGES }) {
-            putBooleanBlocking(SHOW_PREVIEW_IMAGES, true)
-        }
-
-        if (all.none { it.key == CROP_PREVIEW_IMAGES }) {
-            putBooleanBlocking(CROP_PREVIEW_IMAGES, true)
-        }
-    }
-
     suspend fun getString(key: String) = withContext(Dispatchers.IO) {
         db.selectByKey(key).asFlow().map { it.executeAsOneOrNull()?.value ?: "" }
     }
@@ -51,7 +31,7 @@ class Preferences(
         when (it) {
             "true" -> true
             "false" -> false
-            else -> throw Exception("Unsupported value: $it")
+            else -> getDefaultValue(key)
         }
     }
 
@@ -65,8 +45,14 @@ class Preferences(
 
     fun putBooleanBlocking(key: String, value: Boolean) = runBlocking { putBoolean(key, value) }
 
-    suspend fun clear() = withContext(Dispatchers.IO) {
-        db.deleteAll()
+    private fun getDefaultValue(key: String): Boolean {
+        return when (key) {
+            INITIAL_SYNC_COMPLETED -> false
+            SHOW_OPENED_ENTRIES -> false
+            SHOW_PREVIEW_IMAGES -> true
+            CROP_PREVIEW_IMAGES -> true
+            else -> throw Exception("No defaults for key $key")
+        }
     }
 
     companion object {

@@ -85,7 +85,7 @@ class BookmarksFragmentModel(
                 )
             },
             cachedSupportingText = entriesSupportingTextRepository.getCachedSupportingText(this.id),
-            opened = opened,
+            opened = false,
         )
     }
 }

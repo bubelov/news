@@ -21,7 +21,7 @@
             android:layout_height="128dp"
             android:contentDescription="@string/logo"
             android:src="@drawable/ic_baseline_list_alt_24"
-            app:tint="@color/color_primary" />
+            app:tint="?colorPrimary" />
 
         <TextView
             android:id="@+id/title"
