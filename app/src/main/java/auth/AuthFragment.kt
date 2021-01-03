@@ -17,6 +17,7 @@ import co.appreactor.news.R
 import common.Preferences
 import common.getColorFromAttr
 import co.appreactor.news.databinding.FragmentAuthBinding
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.nextcloud.android.sso.AccountImporter
 import com.nextcloud.android.sso.AccountImporter.IAccountAccessGranted
 import com.nextcloud.android.sso.exceptions.SSOException
@@ -113,7 +114,17 @@ class AuthFragment : Fragment() {
             AccountImporter.pickNewAccount(this)
         } catch (e: Exception) {
             if (e is SSOException) {
-                UiExceptionManager.showDialogForException(context, e)
+                UiExceptionManager.showDialogForException(
+                    context, e
+                ) { _, _ ->
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setMessage(R.string.do_you_want_to_connect_to_nextcloud)
+                        .setPositiveButton(R.string.yes) { _, _ ->
+                            findNavController().navigate(R.id.action_authFragment_to_directAuthFragment)
+                        }
+                        .setNegativeButton(R.string.no, null)
+                        .show()
+                }
             }
 
             binding.loginWithNextcloud.isEnabled = true
