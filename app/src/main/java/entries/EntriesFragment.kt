@@ -17,9 +17,11 @@ import co.appreactor.news.R
 import common.showDialog
 import common.showErrorDialog
 import co.appreactor.news.databinding.FragmentEntriesBinding
+import common.Preferences
 import entriesenclosures.openCachedEnclosure
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
 import timber.log.Timber
@@ -65,7 +67,10 @@ class EntriesFragment : Fragment() {
         registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
             override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
                 if (positionStart == 0) {
-                    (binding.listView.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(0, 0)
+                    (binding.listView.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
+                        0,
+                        0
+                    )
                 }
             }
         })
@@ -91,6 +96,36 @@ class EntriesFragment : Fragment() {
 
                 binding.swipeRefresh.isRefreshing = false
             }
+        }
+
+        val sortOrderMenuItem = binding.toolbar.menu.findItem(R.id.sort)
+
+        lifecycleScope.launchWhenResumed {
+            model.getSortOrder().collect { sortOrder ->
+                when (sortOrder) {
+                    Preferences.SORT_ORDER_ASCENDING -> {
+                        sortOrderMenuItem.setIcon(R.drawable.ic_clock_forward)
+                        sortOrderMenuItem.title = getString(R.string.show_newest_first)
+                    }
+
+                    Preferences.SORT_ORDER_DESCENDING -> {
+                        sortOrderMenuItem.setIcon(R.drawable.ic_clock_back)
+                        sortOrderMenuItem.title = getString(R.string.show_oldest_first)
+                    }
+                }
+            }
+        }
+
+        sortOrderMenuItem.setOnMenuItemClickListener {
+            lifecycleScope.launchWhenResumed {
+
+                when (model.getSortOrder().first()) {
+                    Preferences.SORT_ORDER_ASCENDING -> model.setSortOrder(Preferences.SORT_ORDER_DESCENDING)
+                    Preferences.SORT_ORDER_DESCENDING -> model.setSortOrder(Preferences.SORT_ORDER_ASCENDING)
+                }
+            }
+
+            true
         }
 
         lifecycleScope.launchWhenResumed {
@@ -124,10 +159,19 @@ class EntriesFragment : Fragment() {
         binding.listView.setHasFixedSize(true)
         binding.listView.layoutManager = LinearLayoutManager(context)
         binding.listView.adapter = adapter
-        binding.listView.addItemDecoration(EntriesAdapterDecoration(resources.getDimensionPixelSize(R.dimen.entries_cards_gap)))
+        binding.listView.addItemDecoration(
+            EntriesAdapterDecoration(
+                resources.getDimensionPixelSize(
+                    R.dimen.entries_cards_gap
+                )
+            )
+        )
 
         val touchHelper = ItemTouchHelper(object : ItemTouchHelper.Callback() {
-            override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
+            override fun getMovementFlags(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder
+            ): Int {
                 return makeMovementFlags(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT)
             }
 
@@ -193,7 +237,12 @@ class EntriesFragment : Fragment() {
 
                 binding.empty.isVisible = entries.isEmpty() && model.isInitialSyncCompleted()
 
-                adapter.submitList(entries)
+                adapter.submitList(entries) {
+                    (binding.listView.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
+                        0,
+                        0
+                    )
+                }
             }
     }
 }

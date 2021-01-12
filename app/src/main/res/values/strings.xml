@@ -54,4 +54,6 @@
     <string name="do_you_want_to_connect_to_nextcloud">Do you want to connect to your Nextcloud server manually?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="show_newest_first">Show newest first</string>
+    <string name="show_oldest_first">Show oldest first</string>
 </resources>

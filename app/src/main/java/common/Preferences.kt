@@ -14,7 +14,9 @@ class Preferences(
 ) {
 
     suspend fun getString(key: String) = withContext(Dispatchers.IO) {
-        db.selectByKey(key).asFlow().map { it.executeAsOneOrNull()?.value ?: "" }
+        db.selectByKey(key).asFlow().map {
+            it.executeAsOneOrNull()?.value ?: getDefaultStringValueOrEmpty(key)
+        }
     }
 
     fun getStringBlocking(key: String) = runBlocking { getString(key).first() }
@@ -31,7 +33,7 @@ class Preferences(
         when (it) {
             "true" -> true
             "false" -> false
-            else -> getDefaultValue(key)
+            else -> getDefaultBooleanValue(key)
         }
     }
 
@@ -45,7 +47,16 @@ class Preferences(
 
     fun putBooleanBlocking(key: String, value: Boolean) = runBlocking { putBoolean(key, value) }
 
-    private fun getDefaultValue(key: String): Boolean {
+    fun getCount() = db.selectCount().asFlow().map { it.executeAsOne() }
+
+    private fun getDefaultStringValueOrEmpty(key: String): String {
+        return when (key) {
+            SORT_ORDER -> SORT_ORDER_DESCENDING
+            else -> ""
+        }
+    }
+
+    private fun getDefaultBooleanValue(key: String): Boolean {
         return when (key) {
             INITIAL_SYNC_COMPLETED -> false
             SHOW_OPENED_ENTRIES -> false
@@ -68,6 +79,10 @@ class Preferences(
         const val LAST_ENTRIES_SYNC_DATE_TIME = "last_entries_sync_date_time"
 
         const val SHOW_OPENED_ENTRIES = "show_opened_entries"
+
+        const val SORT_ORDER = "sort_order"
+        const val SORT_ORDER_ASCENDING = "ascending"
+        const val SORT_ORDER_DESCENDING = "descending"
 
         const val SHOW_PREVIEW_IMAGES = "show_preview_images"
         const val CROP_PREVIEW_IMAGES = "crop_preview_images"

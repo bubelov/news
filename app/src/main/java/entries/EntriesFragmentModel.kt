@@ -9,13 +9,15 @@ import common.Preferences.Companion.CROP_PREVIEW_IMAGES
 import common.Preferences.Companion.INITIAL_SYNC_COMPLETED
 import common.Preferences.Companion.SHOW_OPENED_ENTRIES
 import common.Preferences.Companion.SHOW_PREVIEW_IMAGES
+import common.Preferences.Companion.SORT_ORDER
+import common.Preferences.Companion.SORT_ORDER_ASCENDING
+import common.Preferences.Companion.SORT_ORDER_DESCENDING
 import entriesimages.EntriesImagesRepository
 import entriesenclosures.EntriesEnclosuresRepository
 import entriesenclosures.isAudioMime
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import org.joda.time.Instant
-import timber.log.Timber
 import java.text.DateFormat
 import java.util.*
 
@@ -32,32 +34,32 @@ class EntriesFragmentModel(
     val syncMessage = newsApiSync.syncMessage
 
     suspend fun getEntries(): Flow<List<EntriesAdapterItem>> {
-        val start = System.currentTimeMillis()
-        var reported = false
-
         return combine(
-            feedsRepository.getAll(),
             entriesRepository.getCount(),
-            prefs.getBoolean(SHOW_OPENED_ENTRIES),
-            prefs.getBoolean(SHOW_PREVIEW_IMAGES),
-            prefs.getBoolean(CROP_PREVIEW_IMAGES),
-        ) { feeds, _, showOpenedEntries, showPreviewImages, cropPreviewImages ->
-            val entries = if (showOpenedEntries) {
+            feedsRepository.getCount(),
+            prefs.getCount(),
+        ) { _, _, _ ->
+            val showOpenedEntries = prefs.getBoolean(SHOW_OPENED_ENTRIES).first()
+
+            val unsortedEntries = if (showOpenedEntries) {
                 entriesRepository.getAll().first()
             } else {
                 entriesRepository.getNotOpened().first()
             }.filterNot { it.bookmarked }
 
-            Timber.d("Got ${entries.size} results in ${System.currentTimeMillis() - start} ms")
-
-            val result = entries.map {
-                val feed = feeds.singleOrNull { feed -> feed.id == it.feedId }
-                it.toRow(feed, showPreviewImages, cropPreviewImages)
+            val sortedEntries = when (prefs.getString(SORT_ORDER).first()) {
+                SORT_ORDER_ASCENDING -> unsortedEntries.sortedBy { it.published }
+                SORT_ORDER_DESCENDING -> unsortedEntries.sortedByDescending { it.published }
+                else -> unsortedEntries
             }
 
-            if (!reported) {
-                reported = true
-                Timber.d("Prepared results in ${System.currentTimeMillis() - start} ms")
+            val feeds = feedsRepository.getAll().first()
+            val showPreviewImages = prefs.getBoolean(SHOW_PREVIEW_IMAGES).first()
+            val cropPreviewImages = prefs.getBoolean(CROP_PREVIEW_IMAGES).first()
+
+            val result = sortedEntries.map {
+                val feed = feeds.singleOrNull { feed -> feed.id == it.feedId }
+                it.toRow(feed, showPreviewImages, cropPreviewImages)
             }
 
             result
@@ -75,6 +77,10 @@ class EntriesFragmentModel(
     }
 
     fun isInitialSyncCompleted() = prefs.getBooleanBlocking(INITIAL_SYNC_COMPLETED)
+
+    suspend fun getSortOrder() = prefs.getString(SORT_ORDER)
+
+    suspend fun setSortOrder(sortOrder: String) = prefs.putString(SORT_ORDER, sortOrder)
 
     suspend fun downloadEnclosure(id: String) {
         entriesEnclosuresRepository.downloadEnclosure(id)
