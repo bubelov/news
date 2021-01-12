@@ -98,6 +98,28 @@ class EntriesFragment : Fragment() {
             }
         }
 
+        val showOpenedEntriesMenuItem = binding.toolbar.menu.findItem(R.id.showOpenedEntries)
+
+        lifecycleScope.launchWhenResumed {
+            model.getShowOpenedEntries().collect { showOpenedEntries ->
+                if (showOpenedEntries) {
+                    showOpenedEntriesMenuItem.setIcon(R.drawable.ic_baseline_visibility_24)
+                    showOpenedEntriesMenuItem.title = getString(R.string.hide_opened_news)
+                } else {
+                    showOpenedEntriesMenuItem.setIcon(R.drawable.ic_baseline_visibility_off_24)
+                    showOpenedEntriesMenuItem.title = getString(R.string.show_opened_news)
+                }
+            }
+        }
+
+        showOpenedEntriesMenuItem.setOnMenuItemClickListener {
+            lifecycleScope.launchWhenResumed {
+                model.setShowOpenedEntries(!model.getShowOpenedEntries().first())
+            }
+
+            true
+        }
+
         val sortOrderMenuItem = binding.toolbar.menu.findItem(R.id.sort)
 
         lifecycleScope.launchWhenResumed {

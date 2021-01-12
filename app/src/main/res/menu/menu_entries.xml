@@ -4,6 +4,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/showOpenedEntries"
+        android:icon="@drawable/ic_baseline_visibility_off_24"
+        android:title="@string/show_opened_news"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/sort"
         android:icon="@drawable/ic_clock_back"
         android:title="@string/show_oldest_first"

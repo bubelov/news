@@ -78,6 +78,12 @@ class EntriesFragmentModel(
 
     fun isInitialSyncCompleted() = prefs.getBooleanBlocking(INITIAL_SYNC_COMPLETED)
 
+    suspend fun getShowOpenedEntries() = prefs.getBoolean(SHOW_OPENED_ENTRIES)
+
+    suspend fun setShowOpenedEntries(showOpenedEntries: Boolean) = prefs.putBoolean(
+        SHOW_OPENED_ENTRIES, showOpenedEntries
+    )
+
     suspend fun getSortOrder() = prefs.getString(SORT_ORDER)
 
     suspend fun setSortOrder(sortOrder: String) = prefs.putString(SORT_ORDER, sortOrder)
