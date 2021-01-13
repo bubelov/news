@@ -33,7 +33,7 @@ class EntriesFragmentModel(
 
     val syncMessage = newsApiSync.syncMessage
 
-    suspend fun getEntries(): Flow<List<EntriesAdapterItem>> {
+    suspend fun getEntries(feedId: String): Flow<List<EntriesAdapterItem>> {
         return combine(
             entriesRepository.getCount(),
             feedsRepository.getCount(),
@@ -46,6 +46,7 @@ class EntriesFragmentModel(
             } else {
                 entriesRepository.getNotOpened().first()
             }.filterNot { it.bookmarked }
+                .filter { feedId.isEmpty() || it.feedId == feedId }
 
             val sortedEntries = when (prefs.getString(SORT_ORDER).first()) {
                 SORT_ORDER_ASCENDING -> unsortedEntries.sortedBy { it.published }
@@ -93,6 +94,8 @@ class EntriesFragmentModel(
     }
 
     suspend fun getEntry(id: String) = entriesRepository.get(id).first()
+
+    suspend fun getFeed(id: String) = feedsRepository.get(id).first()
 
     suspend fun markAsOpened(entryId: String) {
         entriesRepository.setOpened(entryId, true)

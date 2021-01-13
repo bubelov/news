@@ -55,6 +55,10 @@ class FeedsAdapterViewHolder(
                     true
                 }
             }
+
+            root.setOnClickListener {
+                callback.onFeedClick(item)
+            }
         }
     }
 }

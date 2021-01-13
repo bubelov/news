@@ -33,6 +33,14 @@ class FeedsFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val adapter = FeedsAdapter(callback = object : FeedsAdapterCallback {
+        override fun onFeedClick(feed: Feed) {
+            findNavController().navigate(
+                FeedsFragmentDirections.actionFeedsFragmentToFeedEntriesFragment(
+                    feed.id
+                )
+            )
+        }
+
         override fun onOpenHtmlLinkClick(feed: Feed) {
             val intent = Intent(Intent.ACTION_VIEW)
             intent.data = Uri.parse(feed.alternateLink)

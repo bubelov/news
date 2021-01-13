@@ -53,6 +53,10 @@
             app:destination="@id/entryFragment"
             app:popEnterAnim="@anim/fade_in"
             app:popExitAnim="@anim/fade_out" />
+        <argument
+            android:name="feedId"
+            android:defaultValue=""
+            app:argType="string" />
     </fragment>
 
     <fragment
@@ -69,7 +73,13 @@
         android:id="@+id/feedsFragment"
         android:name="feeds.FeedsFragment"
         android:label="FeedsFragment"
-        tools:layout="@layout/fragment_feeds" />
+        tools:layout="@layout/fragment_feeds">
+        <action
+            android:id="@+id/action_feedsFragment_to_feedEntriesFragment"
+            app:destination="@id/entriesFragment"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
 
     <fragment
         android:id="@+id/bookmarksFragment"

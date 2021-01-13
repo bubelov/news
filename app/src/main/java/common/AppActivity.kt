@@ -21,11 +21,17 @@ class AppActivity : AppCompatActivity() {
         findNavController(R.id.nav_host_fragment)
     }
 
-    private val navListener = NavController.OnDestinationChangedListener { _, destination, _ ->
-        binding.bottomNavigation.isVisible = destination.id == R.id.entriesFragment
-                || destination.id == R.id.feedsFragment
-                || destination.id == R.id.bookmarksFragment
-                || destination.id == R.id.settingsFragment
+    private val navListener = NavController.OnDestinationChangedListener { _, destination, args ->
+        if (destination.id == R.id.entriesFragment) {
+            val feedId = args?.getString("feedId")
+            binding.bottomNavigation.isVisible = feedId.isNullOrEmpty()
+            return@OnDestinationChangedListener
+        }
+
+        binding.bottomNavigation.isVisible =
+            destination.id == R.id.feedsFragment
+                    || destination.id == R.id.bookmarksFragment
+                    || destination.id == R.id.settingsFragment
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

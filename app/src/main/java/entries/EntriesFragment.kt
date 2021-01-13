@@ -29,6 +29,10 @@ import timber.log.Timber
 
 class EntriesFragment : Fragment() {
 
+    private val args by lazy {
+        EntriesFragmentArgs.fromBundle(requireArguments())
+    }
+
     private val model: EntriesFragmentModel by viewModel()
 
     private var _binding: FragmentEntriesBinding? = null
@@ -97,15 +101,30 @@ class EntriesFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        binding.swipeRefresh.setOnRefreshListener {
-            lifecycleScope.launch {
-                runCatching {
-                    model.performFullSync()
-                }.onFailure {
-                    showErrorDialog(it)
-                }
+        if (args.feedId.isNotEmpty()) {
+            binding.toolbar.setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
 
-                binding.swipeRefresh.isRefreshing = false
+            binding.toolbar.setNavigationOnClickListener {
+                findNavController().popBackStack()
+            }
+
+            lifecycleScope.launchWhenResumed {
+                val feed = model.getFeed(args.feedId)
+                binding.toolbar.title = feed?.title
+            }
+
+            binding.swipeRefresh.isEnabled = false
+        } else {
+            binding.swipeRefresh.setOnRefreshListener {
+                lifecycleScope.launch {
+                    runCatching {
+                        model.performFullSync()
+                    }.onFailure {
+                        showErrorDialog(it)
+                    }
+
+                    binding.swipeRefresh.isRefreshing = false
+                }
             }
         }
 
@@ -260,7 +279,7 @@ class EntriesFragment : Fragment() {
         adapter.screenWidth = displayMetrics.widthPixels
 
         model
-            .getEntries()
+            .getEntries(args.feedId)
             .catch {
                 Timber.e(it)
                 binding.progress.isVisible = false
