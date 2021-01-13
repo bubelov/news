@@ -17,6 +17,7 @@ import co.appreactor.news.R
 import common.showDialog
 import common.showErrorDialog
 import co.appreactor.news.databinding.FragmentEntriesBinding
+import com.google.android.material.snackbar.Snackbar
 import common.Preferences
 import entriesenclosures.openCachedEnclosure
 import kotlinx.coroutines.flow.catch
@@ -32,6 +33,16 @@ class EntriesFragment : Fragment() {
 
     private var _binding: FragmentEntriesBinding? = null
     private val binding get() = _binding!!
+
+    private val snackbar by lazy {
+        Snackbar.make(
+            binding.root,
+            "",
+            Snackbar.LENGTH_SHORT
+        ).apply {
+            anchorView = requireActivity().findViewById(R.id.bottomNavigation)
+        }
+    }
 
     private val adapter = EntriesAdapter(
         scope = lifecycleScope,
@@ -212,10 +223,11 @@ class EntriesFragment : Fragment() {
                     lifecycleScope.launchWhenResumed {
                         runCatching {
                             model.markAsOpened(entry.id)
+                            snackbar.setText(R.string.marked_as_read)
+                            snackbar.show()
                         }.onFailure {
                             Timber.e(it)
                         }
-
                     }
                 }
 
@@ -223,6 +235,8 @@ class EntriesFragment : Fragment() {
                     lifecycleScope.launchWhenResumed {
                         runCatching {
                             model.markAsBookmarked(entry.id)
+                            snackbar.setText(R.string.bookmarked)
+                            snackbar.show()
                         }.onFailure {
                             Timber.e(it)
                         }
