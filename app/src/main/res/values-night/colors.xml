@@ -2,7 +2,4 @@
 
 <resources>
     <color name="card_list_background">@android:color/transparent</color>
-
-    <color name="bottom_navigation_item_inactive">#66ffffff</color>
-    <color name="bottom_navigation_item_active">#ffffff</color>
 </resources>
