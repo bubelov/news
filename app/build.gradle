@@ -10,8 +10,8 @@ android {
         applicationId "co.appreactor.news"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 9
-        versionName "0.2.3"
+        versionCode 10
+        versionName "0.2.4"
     }
 
     compileOptions {
