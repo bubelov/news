@@ -48,6 +48,8 @@ class EntriesFragment : Fragment() {
         }
     }
 
+    private var shouldScrollToTop = false
+
     private val adapter = EntriesAdapter(
         scope = lifecycleScope,
         callback = object : EntriesAdapterCallback {
@@ -170,6 +172,7 @@ class EntriesFragment : Fragment() {
 
         sortOrderMenuItem.setOnMenuItemClickListener {
             lifecycleScope.launchWhenResumed {
+                shouldScrollToTop = true
 
                 when (model.getSortOrder().first()) {
                     Preferences.SORT_ORDER_ASCENDING -> model.setSortOrder(Preferences.SORT_ORDER_DESCENDING)
@@ -293,10 +296,14 @@ class EntriesFragment : Fragment() {
                 binding.empty.isVisible = entries.isEmpty() && model.isInitialSyncCompleted()
 
                 adapter.submitList(entries) {
-                    (binding.listView.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
-                        0,
-                        0
-                    )
+                    if (shouldScrollToTop) {
+                        shouldScrollToTop = false
+
+                        (binding.listView.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
+                            0,
+                            0
+                        )
+                    }
                 }
             }
     }
