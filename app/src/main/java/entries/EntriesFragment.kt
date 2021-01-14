@@ -244,9 +244,9 @@ class EntriesFragment : Fragment() {
                 if (direction == ItemTouchHelper.LEFT) {
                     lifecycleScope.launchWhenResumed {
                         runCatching {
-                            model.markAsOpened(entry.id)
                             snackbar.setText(R.string.marked_as_read)
                             snackbar.show()
+                            model.markAsOpened(entry.id)
                         }.onFailure {
                             Timber.e(it)
                         }
@@ -256,13 +256,12 @@ class EntriesFragment : Fragment() {
                 if (direction == ItemTouchHelper.RIGHT) {
                     lifecycleScope.launchWhenResumed {
                         runCatching {
-                            model.markAsBookmarked(entry.id)
                             snackbar.setText(R.string.bookmarked)
                             snackbar.show()
+                            model.markAsBookmarked(entry.id)
                         }.onFailure {
                             Timber.e(it)
                         }
-
                     }
                 }
             }
