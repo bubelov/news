@@ -135,7 +135,13 @@ fun Document.toRssEntries(): List<ParsedEntry> {
         val title = item.getElementsByTagName("title").item(0).textContent ?: "Untitled"
         val link = item.getElementsByTagName("link").item(0).textContent ?: ""
         val pubDate = item.getElementsByTagName("pubDate").item(0).textContent ?: ""
-        val author = item.getElementsByTagName("author").item(0).textContent ?: ""
+
+        val author = if (item.getElementsByTagName("author").length > 0) {
+            item.getElementsByTagName("author").item(0).textContent ?: ""
+        } else {
+            ""
+        }
+
         val description = item.getElementsByTagName("description").item(0).textContent ?: ""
 
         ParsedEntry(
