@@ -50,6 +50,9 @@ class EntryFragment : Fragment() {
             findNavController().popBackStack()
         }
 
+        binding.toolbar.menu.findItem(R.id.share).isVisible = false
+        binding.toolbar.menu.findItem(R.id.toggleBookmarked).isVisible = false
+
         binding.progress.isVisible = true
 
         lifecycleScope.launchWhenResumed {
@@ -82,6 +85,11 @@ class EntryFragment : Fragment() {
     private suspend fun viewEntry(entry: Entry) {
         binding.toolbar.title =
             model.getFeed(entry.feedId)?.title ?: getString(R.string.unknown_feed)
+
+        binding.toolbar.menu.findItem(R.id.share).isVisible = true
+        binding.toolbar.menu.findItem(R.id.toggleBookmarked).isVisible = true
+        updateBookmarkedButton(entry.bookmarked)
+
         binding.title.text = entry.title
         binding.date.text = model.getDate(entry)
 
@@ -102,15 +110,7 @@ class EntryFragment : Fragment() {
 
         lifecycleScope.launchWhenResumed {
             model.getBookmarked(entry).collect { bookmarked ->
-                val menuItem = binding.toolbar.menu.findItem(R.id.toggleBookmarked)
-
-                if (bookmarked) {
-                    menuItem.setIcon(R.drawable.ic_baseline_bookmark_24)
-                    menuItem.setTitle(R.string.remove_bookmark)
-                } else {
-                    menuItem.setIcon(R.drawable.ic_baseline_bookmark_border_24)
-                    menuItem.setTitle(R.string.bookmark)
-                }
+                updateBookmarkedButton(bookmarked)
             }
         }
 
@@ -232,6 +232,18 @@ class EntryFragment : Fragment() {
                     }
                 }
             }
+        }
+    }
+
+    private fun updateBookmarkedButton(bookmarked: Boolean) {
+        val menuItem = binding.toolbar.menu.findItem(R.id.toggleBookmarked)
+
+        if (bookmarked) {
+            menuItem.setIcon(R.drawable.ic_baseline_bookmark_24)
+            menuItem.setTitle(R.string.remove_bookmark)
+        } else {
+            menuItem.setIcon(R.drawable.ic_baseline_bookmark_border_24)
+            menuItem.setTitle(R.string.bookmark)
         }
     }
 }
