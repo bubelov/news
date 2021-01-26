@@ -16,7 +16,7 @@ interface NewsApi {
 
     suspend fun deleteFeed(feedId: String)
 
-    suspend fun getUnopenedEntries(): Flow<GetUnopenedEntriesResult>
+    suspend fun getAllEntries(): Flow<GetEntriesResult>
 
     suspend fun getBookmarkedEntries(): List<Entry>
 

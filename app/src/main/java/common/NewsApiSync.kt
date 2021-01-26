@@ -25,7 +25,7 @@ class NewsApiSync(
     suspend fun performInitialSync() {
         withContext(Dispatchers.IO) {
             mutex.withLock {
-                if (prefs.getBooleanBlocking(Preferences.INITIAL_SYNC_COMPLETED)) {
+                if (prefs.getBooleanBlocking(INITIAL_SYNC_COMPLETED)) {
                     return@withLock
                 }
 
@@ -33,7 +33,7 @@ class NewsApiSync(
                     val feedsSync = async { feedsRepository.sync() }
 
                     val entriesSync = async {
-                        entriesRepository.syncUnopenedAndBookmarked().collect { progress ->
+                        entriesRepository.syncAll().collect { progress ->
                             var message = "Fetching news..."
 
                             if (progress.itemsSynced > 0) {

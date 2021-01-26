@@ -2,7 +2,7 @@ package api.standalone
 
 import ParsedEntry
 import ParsedFeed
-import api.GetUnopenedEntriesResult
+import api.GetEntriesResult
 import api.NewsApi
 import db.*
 import getFeedType
@@ -59,8 +59,8 @@ class StandaloneNewsApi(
 
     }
 
-    override suspend fun getUnopenedEntries(): Flow<GetUnopenedEntriesResult> {
-        return flowOf(GetUnopenedEntriesResult.Success(emptyList()))
+    override suspend fun getAllEntries(): Flow<GetEntriesResult> {
+        return flowOf(GetEntriesResult.Success(emptyList()))
     }
 
     override suspend fun getBookmarkedEntries(): List<Entry> {

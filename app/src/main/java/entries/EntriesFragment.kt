@@ -294,7 +294,25 @@ class EntriesFragment : Fragment() {
 
                 binding.empty.isVisible = entries.isEmpty() && model.isInitialSyncCompleted()
 
+                val superSlowUpdate = adapter.itemCount > 1000 && entries.count() > 1000
+
+                if (superSlowUpdate) {
+                    adapter.submitList(null)
+                }
+
+                val slowUpdate = adapter.itemCount > 1000 || entries.count() > 1000
+
+                if (slowUpdate) {
+                    binding.listView.isVisible = false
+                    binding.progress.isVisible = true
+                }
+
                 adapter.submitList(entries) {
+                    if (slowUpdate) {
+                        binding.listView.isVisible = true
+                        binding.progress.isVisible = false
+                    }
+
                     if (shouldScrollToTop) {
                         shouldScrollToTop = false
 

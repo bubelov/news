@@ -1,6 +1,6 @@
 package api.nextcloud
 
-import api.GetUnopenedEntriesResult
+import api.GetEntriesResult
 import api.NewsApi
 import db.Entry
 import db.EntryWithoutSummary
@@ -54,8 +54,8 @@ class NextcloudNewsApiAdapter(
         }
     }
 
-    override suspend fun getUnopenedEntries(): Flow<GetUnopenedEntriesResult> = flow {
-        emit(GetUnopenedEntriesResult.Loading(0L))
+    override suspend fun getAllEntries(): Flow<GetEntriesResult> = flow {
+        emit(GetEntriesResult.Loading(0L))
 
         val fetchedEntries = mutableSetOf<ItemJson>()
         val batchSize = 250L
@@ -65,7 +65,7 @@ class NextcloudNewsApiAdapter(
             Timber.d("Oldest entry ID: $oldestEntryId")
 
             val response = try {
-                api.getUnreadItems(
+                api.getAllItems(
                     batchSize = batchSize,
                     offset = oldestEntryId
                 ).execute()
@@ -86,7 +86,7 @@ class NextcloudNewsApiAdapter(
                 Timber.d("Got ${entries.size} entries")
                 fetchedEntries += entries
                 Timber.d("Fetched ${fetchedEntries.size} entries so far")
-                emit(GetUnopenedEntriesResult.Loading(fetchedEntries.size.toLong()))
+                emit(GetEntriesResult.Loading(fetchedEntries.size.toLong()))
 
                 if (entries.size < batchSize) {
                     break
@@ -97,7 +97,7 @@ class NextcloudNewsApiAdapter(
         Timber.d("Got ${fetchedEntries.size} entries in total")
         val validEntries = fetchedEntries.mapNotNull { it.toEntry() }
         Timber.d("Of them, valid: ${validEntries.size}")
-        emit(GetUnopenedEntriesResult.Success(validEntries))
+        emit(GetEntriesResult.Success(validEntries))
     }
 
     override suspend fun getBookmarkedEntries(): List<Entry> {

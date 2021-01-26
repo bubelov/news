@@ -10,12 +10,12 @@ import java.util.*
 
 class FeedsRepositoryTests {
 
-    private val cache = mockk<FeedQueries>(relaxUnitFun = true)
+    private val db = mockk<FeedQueries>(relaxUnitFun = true)
 
     private val api = mockk<NewsApi>(relaxUnitFun = true)
 
     private val repository = FeedsRepository(
-        cache = cache,
+        db = db,
         api = api,
     )
 
@@ -31,7 +31,7 @@ class FeedsRepositoryTests {
         val newTitle = "  " + feed.title + "_modified "
         val trimmedNewTitle = newTitle.trim()
 
-        every { cache.selectById(feed.id) } returns mockk {
+        every { db.selectById(feed.id) } returns mockk {
             every { executeAsOneOrNull() } returns feed
         }
 
@@ -41,14 +41,14 @@ class FeedsRepositoryTests {
         )
 
         coVerifySequence {
-            cache.selectById(feed.id)
+            db.selectById(feed.id)
             api.updateFeedTitle(feed.id, trimmedNewTitle)
-            cache.insertOrReplace(feed.copy(title = trimmedNewTitle))
+            db.insertOrReplace(feed.copy(title = trimmedNewTitle))
         }
 
         confirmVerified(
             api,
-            cache,
+            db,
         )
     }
 }

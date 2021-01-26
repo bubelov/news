@@ -1,7 +1,7 @@
 package entries
 
 import api.*
-import api.GetUnopenedEntriesResult
+import api.GetEntriesResult
 import common.Preferences
 import db.Entry
 import db.EntryQueries
@@ -24,7 +24,7 @@ class EntriesRepository(
     private val prefs: Preferences,
 ) {
 
-    data class SyncUnopenedAndBookmarkedProgress(val itemsSynced: Long)
+    data class SyncProgress(val itemsSynced: Long)
 
     suspend fun getAll() = withContext(Dispatchers.IO) {
         entryQueries.selectAll().asFlow().mapToList()
@@ -76,22 +76,19 @@ class EntriesRepository(
         entryQueries.deleteByFeedId(feedId)
     }
 
-    suspend fun syncUnopenedAndBookmarked(): Flow<SyncUnopenedAndBookmarkedProgress> = flow {
-        emit(SyncUnopenedAndBookmarkedProgress(0L))
+    suspend fun syncAll(): Flow<SyncProgress> = flow {
+        emit(SyncProgress(0L))
 
         withContext(Dispatchers.IO) {
-            newsApi.getUnopenedEntries().collect { result ->
+            newsApi.getAllEntries().collect { result ->
                 when (result) {
-                    is GetUnopenedEntriesResult.Loading -> {
-                        emit(SyncUnopenedAndBookmarkedProgress(result.entriesLoaded))
+                    is GetEntriesResult.Loading -> {
+                        emit(SyncProgress(result.entriesLoaded))
                     }
 
-                    is GetUnopenedEntriesResult.Success -> {
-                        val unopenedEntries = result.entries
-                        val bookmarkedEntries = newsApi.getBookmarkedEntries()
-
+                    is GetEntriesResult.Success -> {
                         entryQueries.transaction {
-                            (unopenedEntries + bookmarkedEntries).forEach {
+                            result.entries.forEach {
                                 entryQueries.insertOrReplace(it.toSafeToInsertEntry())
                             }
                         }
@@ -177,7 +174,8 @@ class EntriesRepository(
     }
 
     suspend fun syncNewAndUpdated() = withContext(Dispatchers.IO) {
-        val threshold = getMaxUpdated() ?: prefs.getString(Preferences.LAST_ENTRIES_SYNC_DATE_TIME).first()
+        val threshold =
+            getMaxUpdated() ?: prefs.getString(Preferences.LAST_ENTRIES_SYNC_DATE_TIME).first()
 
         if (threshold.isBlank()) {
             throw Exception("Can not find any reference dates")

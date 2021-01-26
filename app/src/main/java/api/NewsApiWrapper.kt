@@ -26,8 +26,8 @@ class NewsApiWrapper : NewsApi {
         api.deleteFeed(feedId)
     }
 
-    override suspend fun getUnopenedEntries(): Flow<GetUnopenedEntriesResult> {
-        return api.getUnopenedEntries()
+    override suspend fun getAllEntries(): Flow<GetEntriesResult> {
+        return api.getAllEntries()
     }
 
     override suspend fun getBookmarkedEntries(): List<Entry> {
