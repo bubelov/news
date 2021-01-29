@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -12,6 +13,7 @@ import co.appreactor.news.R
 import common.Preferences
 import common.showDialog
 import co.appreactor.news.databinding.FragmentDirectAuthBinding
+import entries.EntriesFilter
 import org.koin.android.viewmodel.ext.android.viewModel
 import timber.log.Timber
 
@@ -82,7 +84,10 @@ class DirectAuthFragment : Fragment() {
 
                     findNavController().apply {
                         popBackStack()
-                        navigate(R.id.entriesFragment)
+                        navigate(
+                            R.id.entriesFragment,
+                            bundleOf(Pair("filter", EntriesFilter.OnlyNotBookmarked))
+                        )
                     }
                 }.onFailure {
                     binding.progress.isVisible = false

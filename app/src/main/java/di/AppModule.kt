@@ -18,7 +18,6 @@ import entry.EntryFragmentModel
 import entriesimages.EntriesImagesRepository
 import entriesenclosures.EntriesEnclosuresRepository
 import settings.SettingsFragmentModel
-import bookmarks.BookmarksFragmentModel
 import common.ConnectivityProbe
 import entries.EntriesSupportingTextRepository
 import feeds.FeedsFragmentModel
@@ -50,7 +49,6 @@ val appModule = module {
     viewModel<AuthFragmentModel>()
     viewModel<EntriesFragmentModel>()
     viewModel<EntryFragmentModel>()
-    viewModel<BookmarksFragmentModel>()
     viewModel<SettingsFragmentModel>()
     viewModel<DirectAuthFragmentModel>()
     viewModel<LoggedExceptionsFragmentModel>()

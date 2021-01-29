@@ -31,9 +31,15 @@ class EntriesFragmentModel(
     private val prefs: Preferences,
 ) : ViewModel() {
 
+    lateinit var filter: EntriesFilter
+
     val syncMessage = newsApiSync.syncMessage
 
-    suspend fun getEntries(feedId: String): Flow<List<EntriesAdapterItem>> {
+    fun init(filter: EntriesFilter) {
+        this.filter = filter
+    }
+
+    suspend fun getEntries(): Flow<List<EntriesAdapterItem>> {
         return combine(
             entriesRepository.getCount(),
             feedsRepository.getCount(),
@@ -41,12 +47,23 @@ class EntriesFragmentModel(
         ) { _, _, _ ->
             val showOpenedEntries = prefs.getBoolean(SHOW_OPENED_ENTRIES).first()
 
-            val unsortedEntries = if (showOpenedEntries) {
-                entriesRepository.getAll().first()
-            } else {
-                entriesRepository.getNotOpened().first()
-            }.filterNot { it.bookmarked }
-                .filter { feedId.isEmpty() || it.feedId == feedId }
+            val unsortedEntries = when (val filter = filter) {
+                is EntriesFilter.OnlyNotBookmarked -> {
+                    if (showOpenedEntries) {
+                        entriesRepository.getAll().first()
+                    } else {
+                        entriesRepository.getNotOpened().first()
+                    }.filterNot { it.bookmarked }
+                }
+
+                is EntriesFilter.OnlyBookmarked -> {
+                    entriesRepository.getBookmarked().first()
+                }
+
+                is EntriesFilter.OnlyFromFeed -> {
+                    entriesRepository.getAll().first().filter { it.feedId == filter.feedId }
+                }
+            }
 
             val sortedEntries = when (prefs.getString(SORT_ORDER).first()) {
                 SORT_ORDER_ASCENDING -> unsortedEntries.sortedBy { it.published }

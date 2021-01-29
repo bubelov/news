@@ -54,9 +54,25 @@
             app:popEnterAnim="@anim/fade_in"
             app:popExitAnim="@anim/fade_out" />
         <argument
-            android:name="feedId"
-            android:defaultValue=""
-            app:argType="string" />
+            android:name="filter"
+            app:argType="entries.EntriesFilter"
+            app:nullable="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/bookmarksFragment"
+        android:name="entries.EntriesFragment"
+        android:label="EntriesFragment"
+        tools:layout="@layout/fragment_entries">
+        <action
+            android:id="@+id/action_entriesFragment_to_entryFragment"
+            app:destination="@id/entryFragment"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <argument
+            android:name="filter"
+            app:argType="entries.EntriesFilter"
+            app:nullable="true" />
     </fragment>
 
     <fragment
@@ -77,18 +93,6 @@
         <action
             android:id="@+id/action_feedsFragment_to_feedEntriesFragment"
             app:destination="@id/entriesFragment"
-            app:popEnterAnim="@anim/fade_in"
-            app:popExitAnim="@anim/fade_out" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/bookmarksFragment"
-        android:name="bookmarks.BookmarksFragment"
-        android:label="BookmarksFragment"
-        tools:layout="@layout/fragment_bookmarks">
-        <action
-            android:id="@+id/action_bookmarksFragment_to_entryFragment"
-            app:destination="@id/entryFragment"
             app:popEnterAnim="@anim/fade_in"
             app:popExitAnim="@anim/fade_out" />
     </fragment>

@@ -98,34 +98,43 @@ class EntriesFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        model.init(args.filter!!)
         _binding = FragmentEntriesBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        if (args.feedId.isNotEmpty()) {
-            binding.toolbar.setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
+        when (val filter = args.filter) {
+            is EntriesFilter.OnlyNotBookmarked -> {
+                binding.swipeRefresh.setOnRefreshListener {
+                    lifecycleScope.launch {
+                        runCatching {
+                            model.performFullSync()
+                        }.onFailure {
+                            showErrorDialog(it)
+                        }
 
-            binding.toolbar.setNavigationOnClickListener {
-                findNavController().popBackStack()
-            }
-
-            lifecycleScope.launchWhenResumed {
-                val feed = model.getFeed(args.feedId)
-                binding.toolbar.title = feed?.title
-            }
-
-            binding.swipeRefresh.isEnabled = false
-        } else {
-            binding.swipeRefresh.setOnRefreshListener {
-                lifecycleScope.launch {
-                    runCatching {
-                        model.performFullSync()
-                    }.onFailure {
-                        showErrorDialog(it)
+                        binding.swipeRefresh.isRefreshing = false
                     }
+                }
+            }
 
-                    binding.swipeRefresh.isRefreshing = false
+            is EntriesFilter.OnlyBookmarked -> {
+                binding.swipeRefresh.isEnabled = false
+            }
+
+            is EntriesFilter.OnlyFromFeed -> {
+                binding.swipeRefresh.isEnabled = false
+
+                binding.toolbar.setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
+
+                binding.toolbar.setNavigationOnClickListener {
+                    findNavController().popBackStack()
+                }
+
+                lifecycleScope.launchWhenResumed {
+                    val feed = model.getFeed(filter.feedId)
+                    binding.toolbar.title = feed?.title
                 }
             }
         }
@@ -281,7 +290,7 @@ class EntriesFragment : Fragment() {
         adapter.screenWidth = displayMetrics.widthPixels
 
         model
-            .getEntries(args.feedId)
+            .getEntries()
             .catch {
                 Timber.e(it)
                 binding.progress.isVisible = false

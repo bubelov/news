@@ -21,6 +21,7 @@ import co.appreactor.news.databinding.FragmentFeedsBinding
 import db.Feed
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
+import entries.EntriesFilter
 import kotlinx.coroutines.flow.collect
 import org.koin.android.viewmodel.ext.android.viewModel
 import timber.log.Timber
@@ -36,7 +37,7 @@ class FeedsFragment : Fragment() {
         override fun onFeedClick(feed: Feed) {
             findNavController().navigate(
                 FeedsFragmentDirections.actionFeedsFragmentToFeedEntriesFragment(
-                    feed.id
+                    EntriesFilter.OnlyFromFeed(feedId = feed.id)
                 )
             )
         }

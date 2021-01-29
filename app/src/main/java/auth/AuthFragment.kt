@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.view.WindowInsetsController
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
 import androidx.navigation.fragment.findNavController
@@ -23,6 +24,7 @@ import com.nextcloud.android.sso.AccountImporter.IAccountAccessGranted
 import com.nextcloud.android.sso.exceptions.SSOException
 import com.nextcloud.android.sso.helper.SingleAccountHelper
 import com.nextcloud.android.sso.ui.UiExceptionManager
+import entries.EntriesFilter
 import kotlinx.coroutines.runBlocking
 import org.koin.android.viewmodel.ext.android.viewModel
 
@@ -134,7 +136,10 @@ class AuthFragment : Fragment() {
     private fun showNews() {
         findNavController().apply {
             popBackStack()
-            navigate(R.id.entriesFragment)
+            navigate(
+                R.id.entriesFragment,
+                bundleOf(Pair("filter", EntriesFilter.OnlyNotBookmarked))
+            )
         }
     }
 
