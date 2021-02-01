@@ -4,6 +4,8 @@ apply plugin: "kotlin-parcelize"
 apply plugin: "androidx.navigation.safeargs.kotlin"
 apply plugin: "com.squareup.sqldelight"
 
+def signingPropertiesFile = rootProject.file("signing.properties")
+
 android {
     compileSdkVersion 30
 
@@ -24,9 +26,30 @@ android {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 
+    signingConfigs {
+        if (signingPropertiesFile.exists()) {
+            play {
+                def signingProperties = new Properties()
+                signingProperties.load(new FileInputStream(signingPropertiesFile))
+                storeFile file(signingProperties['playKeystoreFile'])
+                storePassword signingProperties['playKeystorePassword']
+                keyAlias signingProperties['playKeyAlias']
+                keyPassword signingProperties['playKeyPassword']
+            }
+        }
+    }
+
     buildTypes {
         debug {
             applicationIdSuffix ".dev"
+        }
+
+        if (signingPropertiesFile.exists()) {
+            play {
+                def signingProperties = new Properties()
+                signingProperties.load(new FileInputStream(signingPropertiesFile))
+                signingConfig signingConfigs.play
+            }
         }
     }
 
