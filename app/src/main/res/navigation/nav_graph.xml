@@ -53,6 +53,11 @@
             app:destination="@id/entryFragment"
             app:popEnterAnim="@anim/fade_in"
             app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_entriesFragment_to_searchFragment"
+            app:destination="@id/searchFragment"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
         <argument
             android:name="filter"
             app:argType="entries.EntriesFilter"
@@ -67,6 +72,11 @@
         <action
             android:id="@+id/action_entriesFragment_to_entryFragment"
             app:destination="@id/entryFragment"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_entriesFragment_to_searchFragment"
+            app:destination="@id/searchFragment"
             app:popEnterAnim="@anim/fade_in"
             app:popExitAnim="@anim/fade_out" />
         <argument
@@ -114,5 +124,17 @@
         android:name="logging.LoggedExceptionsFragment"
         android:label="ExceptionsFragment"
         tools:layout="@layout/fragment_logged_exceptions" />
+
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="search.SearchFragment"
+        android:label="SearchFragment"
+        tools:layout="@layout/fragment_search">
+        <action
+            android:id="@+id/action_searchFragment_to_entryFragment"
+            app:destination="@id/entryFragment"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
 
 </navigation>

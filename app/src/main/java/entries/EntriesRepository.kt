@@ -72,6 +72,10 @@ class EntriesRepository(
         entryQueries.selectMaxUpdaded().executeAsOneOrNull()?.MAX
     }
 
+    suspend fun search(query: String) = withContext(Dispatchers.IO) {
+        entryQueries.selectByQuery(query).asFlow().mapToList()
+    }
+
     fun deleteByFeedId(feedId: String) {
         entryQueries.deleteByFeedId(feedId)
     }

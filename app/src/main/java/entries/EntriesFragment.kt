@@ -192,6 +192,17 @@ class EntriesFragment : Fragment() {
             true
         }
 
+        val searchMenuItem = binding.toolbar.menu.findItem(R.id.search)
+
+        if (args.filter is EntriesFilter.OnlyFromFeed) {
+            searchMenuItem.isVisible = false
+        }
+
+        searchMenuItem.setOnMenuItemClickListener {
+            findNavController().navigate(EntriesFragmentDirections.actionEntriesFragmentToSearchFragment())
+            true
+        }
+
         lifecycleScope.launchWhenResumed {
             showEntries()
         }

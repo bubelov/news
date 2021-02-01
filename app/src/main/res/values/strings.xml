@@ -59,4 +59,6 @@
     <string name="show_oldest_first">Show oldest first</string>
     <string name="marked_as_read">Marked as read</string>
     <string name="bookmarked">Bookmarked</string>
+    <string name="search">Search</string>
+    <string name="clear_search_input">Clear search input</string>
 </resources>

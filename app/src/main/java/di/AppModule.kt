@@ -24,12 +24,14 @@ import feeds.FeedsFragmentModel
 import org.koin.android.experimental.dsl.viewModel
 import org.koin.dsl.module
 import org.koin.experimental.builder.single
+import search.SearchFragmentModel
 
 val appModule = module {
 
     single {
         val context = get<Context>()
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         ConnectivityProbe(connectivityManager)
     }
 
@@ -53,4 +55,5 @@ val appModule = module {
     viewModel<DirectAuthFragmentModel>()
     viewModel<LoggedExceptionsFragmentModel>()
     viewModel<FeedsFragmentModel>()
+    viewModel<SearchFragmentModel>()
 }

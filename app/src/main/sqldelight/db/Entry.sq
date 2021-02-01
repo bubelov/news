@@ -77,6 +77,13 @@ FROM EntryWithoutSummary
 WHERE bookmarkedSynced = ?
 ORDER BY published DESC;
 
+selectByQuery:
+SELECT *
+FROM Entry
+WHERE UPPER(title) LIKE '%' || UPPER(:query) || '%'
+OR UPPER(content) LIKE '%' || UPPER(:query) || '%'
+ORDER BY published DESC;
+
 selectCount:
 SELECT COUNT(*)
 FROM Entry;
