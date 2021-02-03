@@ -20,9 +20,7 @@ import co.appreactor.news.databinding.FragmentEntriesBinding
 import com.google.android.material.snackbar.Snackbar
 import common.Preferences
 import entriesenclosures.openCachedEnclosure
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
 import timber.log.Timber
@@ -120,6 +118,7 @@ class EntriesFragment : Fragment() {
             }
 
             is EntriesFilter.OnlyBookmarked -> {
+                binding.toolbar.title = getString(R.string.bookmarks)
                 binding.swipeRefresh.isEnabled = false
             }
 
@@ -140,6 +139,7 @@ class EntriesFragment : Fragment() {
         }
 
         val showOpenedEntriesMenuItem = binding.toolbar.menu.findItem(R.id.showOpenedEntries)
+        showOpenedEntriesMenuItem.isVisible = getShowReadEntriesButtonVisibility()
 
         lifecycleScope.launchWhenResumed {
             model.getShowOpenedEntries().collect { showOpenedEntries ->
@@ -155,6 +155,7 @@ class EntriesFragment : Fragment() {
 
         showOpenedEntriesMenuItem.setOnMenuItemClickListener {
             lifecycleScope.launchWhenResumed {
+                adapter.submitList(null)
                 model.setShowOpenedEntries(!model.getShowOpenedEntries().first())
             }
 
@@ -181,7 +182,7 @@ class EntriesFragment : Fragment() {
 
         sortOrderMenuItem.setOnMenuItemClickListener {
             lifecycleScope.launchWhenResumed {
-                shouldScrollToTop = true
+                adapter.submitList(null)
 
                 when (model.getSortOrder().first()) {
                     Preferences.SORT_ORDER_ASCENDING -> model.setSortOrder(Preferences.SORT_ORDER_DESCENDING)
@@ -193,6 +194,7 @@ class EntriesFragment : Fragment() {
         }
 
         val searchMenuItem = binding.toolbar.menu.findItem(R.id.search)
+        searchMenuItem.isVisible = getSearchButtonVisibility()
 
         if (args.filter is EntriesFilter.OnlyFromFeed) {
             searchMenuItem.isVisible = false
@@ -214,7 +216,19 @@ class EntriesFragment : Fragment() {
     }
 
     private suspend fun showEntries() {
-        binding.progress.isVisible = true
+        lifecycleScope.launchWhenResumed {
+            combine(
+                flow = model.isInitialSyncCompleted(),
+                flow2 = model.loadingEntries,
+            ) { initialSyncCompleted, loadingEntries ->
+                if (!initialSyncCompleted) {
+                    binding.progress.isVisible = true
+                    return@combine
+                }
+
+                binding.progress.isVisible = loadingEntries && adapter.itemCount == 0
+            }.collect()
+        }
 
         lifecycleScope.launchWhenResumed {
             model.syncMessage.collect {
@@ -306,33 +320,12 @@ class EntriesFragment : Fragment() {
                 Timber.e(it)
                 binding.progress.isVisible = false
                 showDialog(R.string.error, it.message ?: "")
-            }
-            .collect { entries ->
-                if (model.isInitialSyncCompleted()) {
-                    binding.progress.isVisible = false
-                }
-
-                binding.empty.isVisible = entries.isEmpty() && model.isInitialSyncCompleted()
-
-                val superSlowUpdate = adapter.itemCount > 1000 && entries.count() > 1000
-
-                if (superSlowUpdate) {
-                    adapter.submitList(null)
-                }
-
-                val slowUpdate = adapter.itemCount > 1000 || entries.count() > 1000
-
-                if (slowUpdate) {
-                    binding.listView.isVisible = false
-                    binding.progress.isVisible = true
-                }
+            }.collect { entries ->
+                binding.empty.isVisible =
+                    model.isInitialSyncCompleted()
+                        .first() && !model.loadingEntries.first() && entries.isEmpty()
 
                 adapter.submitList(entries) {
-                    if (slowUpdate) {
-                        binding.listView.isVisible = true
-                        binding.progress.isVisible = false
-                    }
-
                     if (shouldScrollToTop) {
                         shouldScrollToTop = false
 
@@ -343,5 +336,19 @@ class EntriesFragment : Fragment() {
                     }
                 }
             }
+    }
+
+    private fun getShowReadEntriesButtonVisibility(): Boolean {
+        return when (args.filter) {
+            is EntriesFilter.OnlyNotBookmarked -> true
+            else -> false
+        }
+    }
+
+    private fun getSearchButtonVisibility(): Boolean {
+        return when (args.filter) {
+            is EntriesFilter.OnlyNotBookmarked -> true
+            else -> false
+        }
     }
 }

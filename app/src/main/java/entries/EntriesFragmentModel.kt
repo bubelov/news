@@ -34,6 +34,8 @@ class EntriesFragmentModel(
 
     lateinit var filter: EntriesFilter
 
+    val loadingEntries = MutableStateFlow(false)
+
     val syncMessage = newsApiSync.syncMessage
 
     fun init(filter: EntriesFilter) {
@@ -41,11 +43,14 @@ class EntriesFragmentModel(
     }
 
     suspend fun getEntries(): Flow<List<EntriesAdapterItem>> {
+        loadingEntries.value = true
+
         return combine(
             entriesRepository.getCount(),
             feedsRepository.getCount(),
             getEntriesPrefs(),
         ) { entriesCount, feedsCount, prefs ->
+            loadingEntries.value = true
             Timber.d("Entries: $entriesCount, feeds: $feedsCount, prefs: $prefs")
 
             val unsortedEntries = when (val filter = filter) {
@@ -79,6 +84,7 @@ class EntriesFragmentModel(
                 it.toRow(feed, prefs.showPreviewImages, prefs.cropPreviewImages)
             }
 
+            loadingEntries.value = false
             result
         }
     }
@@ -104,7 +110,7 @@ class EntriesFragmentModel(
         newsApiSync.sync()
     }
 
-    fun isInitialSyncCompleted() = prefs.getBooleanBlocking(INITIAL_SYNC_COMPLETED)
+    suspend fun isInitialSyncCompleted() = prefs.getBoolean(INITIAL_SYNC_COMPLETED)
 
     suspend fun getShowOpenedEntries() = prefs.getBoolean(SHOW_OPENED_ENTRIES)
 
