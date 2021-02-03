@@ -18,6 +18,7 @@ import entriesenclosures.isAudioMime
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import org.joda.time.Instant
+import timber.log.Timber
 import java.text.DateFormat
 import java.util.*
 
@@ -43,13 +44,13 @@ class EntriesFragmentModel(
         return combine(
             entriesRepository.getCount(),
             feedsRepository.getCount(),
-            prefs.getCount(),
-        ) { _, _, _ ->
-            val showOpenedEntries = prefs.getBoolean(SHOW_OPENED_ENTRIES).first()
+            getEntriesPrefs(),
+        ) { entriesCount, feedsCount, prefs ->
+            Timber.d("Entries: $entriesCount, feeds: $feedsCount, prefs: $prefs")
 
             val unsortedEntries = when (val filter = filter) {
                 is EntriesFilter.OnlyNotBookmarked -> {
-                    if (showOpenedEntries) {
+                    if (prefs.showOpenedEntries) {
                         entriesRepository.getAll().first()
                     } else {
                         entriesRepository.getNotOpened().first()
@@ -65,23 +66,32 @@ class EntriesFragmentModel(
                 }
             }
 
-            val sortedEntries = when (prefs.getString(SORT_ORDER).first()) {
+            val sortedEntries = when (prefs.sortOrder) {
                 SORT_ORDER_ASCENDING -> unsortedEntries.sortedBy { it.published }
                 SORT_ORDER_DESCENDING -> unsortedEntries.sortedByDescending { it.published }
                 else -> unsortedEntries
             }
 
             val feeds = feedsRepository.getAll().first()
-            val showPreviewImages = prefs.getBoolean(SHOW_PREVIEW_IMAGES).first()
-            val cropPreviewImages = prefs.getBoolean(CROP_PREVIEW_IMAGES).first()
 
             val result = sortedEntries.map {
                 val feed = feeds.singleOrNull { feed -> feed.id == it.feedId }
-                it.toRow(feed, showPreviewImages, cropPreviewImages)
+                it.toRow(feed, prefs.showPreviewImages, prefs.cropPreviewImages)
             }
 
             result
         }
+    }
+
+    private suspend fun getEntriesPrefs(): Flow<EntriesSettings> {
+        return combine(
+            flow = prefs.getBoolean(SHOW_OPENED_ENTRIES),
+            flow2 = prefs.getString(SORT_ORDER),
+            flow3 = prefs.getBoolean(SHOW_PREVIEW_IMAGES),
+            flow4 = prefs.getBoolean(CROP_PREVIEW_IMAGES),
+        ) { showOpenedEntries, sortOrder, showPreviewImages, cropPreviewImages ->
+            EntriesSettings(showOpenedEntries, sortOrder, showPreviewImages, cropPreviewImages)
+        }.distinctUntilChanged()
     }
 
     suspend fun performInitialSyncIfNecessary() {
@@ -168,4 +178,11 @@ class EntriesFragmentModel(
             opened = opened,
         )
     }
+
+    private data class EntriesSettings(
+        val showOpenedEntries: Boolean,
+        val sortOrder: String,
+        val showPreviewImages: Boolean,
+        val cropPreviewImages: Boolean,
+    )
 }
