@@ -324,6 +324,7 @@ class EntriesFragment : Fragment() {
                 binding.empty.isVisible =
                     model.isInitialSyncCompleted()
                         .first() && !model.loadingEntries.first() && entries.isEmpty()
+                binding.empty.text = getEmptyMessage()
 
                 adapter.submitList(entries) {
                     if (shouldScrollToTop) {
@@ -349,6 +350,13 @@ class EntriesFragment : Fragment() {
         return when (args.filter) {
             is EntriesFilter.OnlyNotBookmarked -> true
             else -> false
+        }
+    }
+
+    private fun getEmptyMessage(): String {
+        return when (args.filter) {
+            is EntriesFilter.OnlyBookmarked -> getString(R.string.you_have_no_bookmarks)
+            else -> getString(R.string.news_list_is_empty)
         }
     }
 }

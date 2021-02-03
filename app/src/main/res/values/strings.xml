@@ -18,7 +18,7 @@
     <string name="username">Username</string>
     <string name="password">Password</string>
     <string name="news_list_is_empty">News list is empty</string>
-    <string name="you_have_no_starred_news">You have no starred news</string>
+    <string name="you_have_no_bookmarks">You have no bookmarks</string>
     <string name="field_is_empty">Field is empty</string>
     <string name="error">Error</string>
     <string name="download">Download</string>
@@ -61,4 +61,5 @@
     <string name="bookmarked">Bookmarked</string>
     <string name="search">Search</string>
     <string name="clear_search_input">Clear search input</string>
+    <string name="no_results">No results</string>
 </resources>
