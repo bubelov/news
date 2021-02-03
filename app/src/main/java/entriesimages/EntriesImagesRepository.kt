@@ -8,6 +8,7 @@ import com.squareup.picasso.Picasso
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
+import common.Preferences
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
@@ -23,6 +24,7 @@ class EntriesImagesRepository(
     private val imagesMetadataQueries: EntryImagesMetadataQueries,
     private val imageQueries: EntryImageQueries,
     private val entriesRepository: EntriesRepository,
+    private val prefs: Preferences,
 ) {
 
     companion object {
@@ -39,20 +41,26 @@ class EntriesImagesRepository(
     suspend fun syncPreviews() = withContext(Dispatchers.IO) {
         Timber.d("Sync daemon started")
 
-        entriesRepository.getAll().collectLatest { entries ->
-            Timber.d("Got ${entries.size} entries")
-            val notOpenedEntries = entries.filterNot { it.opened }
-            Timber.d("Not opened entries: ${notOpenedEntries.size}")
-            val bookmarkedEntries = entries.filter { it.bookmarked }
-            Timber.d("Bookmarked entries: ${bookmarkedEntries.size}")
-            val otherEntries = entries.filter { it.opened && !it.bookmarked }
-            Timber.d("Other entries: ${otherEntries.size}")
+        prefs.getBoolean(Preferences.SHOW_PREVIEW_IMAGES).collectLatest { showPreviewImages ->
+            if (!showPreviewImages) {
+                return@collectLatest
+            }
 
-            val queue =
-                ((notOpenedEntries + bookmarkedEntries).sortedByDescending { it.published } + otherEntries)
+            entriesRepository.getAll().collectLatest { entries ->
+                Timber.d("Got ${entries.size} entries")
+                val notOpenedEntries = entries.filterNot { it.opened }
+                Timber.d("Not opened entries: ${notOpenedEntries.size}")
+                val bookmarkedEntries = entries.filter { it.bookmarked }
+                Timber.d("Bookmarked entries: ${bookmarkedEntries.size}")
+                val otherEntries = entries.filter { it.opened && !it.bookmarked }
+                Timber.d("Other entries: ${otherEntries.size}")
 
-            queue.chunked(10).forEach {
-                it.map { async { syncPreview(it) } }.awaitAll()
+                val queue =
+                    ((notOpenedEntries + bookmarkedEntries).sortedByDescending { it.published } + otherEntries)
+
+                queue.chunked(10).forEach {
+                    it.map { async { syncPreview(it) } }.awaitAll()
+                }
             }
         }
     }
