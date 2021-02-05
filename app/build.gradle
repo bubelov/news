@@ -15,6 +15,7 @@ android {
         targetSdkVersion 30
         versionCode 11
         versionName "0.2.5"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     compileOptions {
@@ -99,4 +100,7 @@ dependencies {
 
     testImplementation "junit:junit:$versions_junit"
     testImplementation "io.mockk:mockk:$versions_mockk"
+
+    androidTestImplementation "androidx.test:runner:$versions_test_runner"
+    androidTestImplementation "androidx.test:rules:$versions_test_rules"
 }
