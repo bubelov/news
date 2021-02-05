@@ -52,11 +52,9 @@ class EntriesImagesRepository(
                 Timber.d("Not opened entries: ${notOpenedEntries.size}")
                 val bookmarkedEntries = entries.filter { it.bookmarked }
                 Timber.d("Bookmarked entries: ${bookmarkedEntries.size}")
-                val otherEntries = entries.filter { it.opened && !it.bookmarked }
-                Timber.d("Other entries: ${otherEntries.size}")
 
                 val queue =
-                    ((notOpenedEntries + bookmarkedEntries).sortedByDescending { it.published } + otherEntries)
+                    ((notOpenedEntries + bookmarkedEntries).sortedByDescending { it.published })
 
                 queue.chunked(10).forEach {
                     it.map { async { syncPreview(it) } }.awaitAll()
