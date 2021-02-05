@@ -11,7 +11,7 @@ import androidx.navigation.ui.setupWithNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.ActivityAppBinding
 import entries.EntriesFilter
-import entriesenclosures.EntriesEnclosuresRepository
+import podcasts.PodcastsRepository
 import entriesimages.EntriesImagesRepository
 import org.koin.android.ext.android.get
 
@@ -46,8 +46,8 @@ class AppActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         lifecycleScope.launchWhenCreated {
-            get<EntriesEnclosuresRepository>().apply {
-                deleteDownloadedEnclosuresWithoutFiles()
+            get<PodcastsRepository>().apply {
+                deleteDownloadedPodcastsWithoutFiles()
                 deletePartialDownloads()
             }
         }

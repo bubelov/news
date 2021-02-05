@@ -1,11 +1,14 @@
 package entries
 
+import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -19,10 +22,11 @@ import common.showErrorDialog
 import co.appreactor.news.databinding.FragmentEntriesBinding
 import com.google.android.material.snackbar.Snackbar
 import common.Preferences
-import entriesenclosures.openCachedEnclosure
+import db.Entry
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
+import podcasts.getCachedPodcast
 import timber.log.Timber
 
 class EntriesFragment : Fragment() {
@@ -59,7 +63,7 @@ class EntriesFragment : Fragment() {
             override fun onDownloadPodcastClick(item: EntriesAdapterItem) {
                 lifecycleScope.launchWhenResumed {
                     runCatching {
-                        model.downloadEnclosure(item.id)
+                        model.downloadPodcast(item.id)
                     }.onFailure {
                         Timber.e(it)
                         showDialog(R.string.error, it.message ?: "")
@@ -70,7 +74,7 @@ class EntriesFragment : Fragment() {
             override fun onPlayPodcastClick(item: EntriesAdapterItem) {
                 lifecycleScope.launch {
                     runCatching {
-                        requireContext().openCachedEnclosure(model.getEntry(item.id)!!)
+                        requireContext().openCachedPodcast(model.getEntry(item.id)!!)
                     }.onFailure {
                         Timber.e(it)
                         showDialog(R.string.error, it.message ?: "")
@@ -358,5 +362,21 @@ class EntriesFragment : Fragment() {
             is EntriesFilter.OnlyBookmarked -> getString(R.string.you_have_no_bookmarks)
             else -> getString(R.string.news_list_is_empty)
         }
+    }
+
+    private fun Context.openCachedPodcast(entry: Entry) {
+        val fileUri = FileProvider.getUriForFile(
+            this,
+            "${packageName}.fileprovider",
+            getCachedPodcast(entry.id, entry.enclosureLink)
+        )
+
+        val intent = Intent().apply {
+            action = Intent.ACTION_VIEW
+            data = fileUri
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+
+        startActivity(intent)
     }
 }

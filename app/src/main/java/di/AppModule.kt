@@ -16,7 +16,7 @@ import entries.EntriesFragmentModel
 import entries.EntriesRepository
 import entry.EntryFragmentModel
 import entriesimages.EntriesImagesRepository
-import entriesenclosures.EntriesEnclosuresRepository
+import podcasts.PodcastsRepository
 import settings.SettingsFragmentModel
 import common.ConnectivityProbe
 import entries.EntriesSupportingTextRepository
@@ -44,7 +44,7 @@ val appModule = module {
     single<EntriesRepository>()
     single<EntriesSupportingTextRepository>()
     single<EntriesImagesRepository>()
-    single<EntriesEnclosuresRepository>()
+    single<PodcastsRepository>()
     single<Preferences>()
     single<LoggedExceptionsRepository>()
 

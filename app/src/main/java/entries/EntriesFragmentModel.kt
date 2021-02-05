@@ -13,8 +13,7 @@ import common.Preferences.Companion.SORT_ORDER
 import common.Preferences.Companion.SORT_ORDER_ASCENDING
 import common.Preferences.Companion.SORT_ORDER_DESCENDING
 import entriesimages.EntriesImagesRepository
-import entriesenclosures.EntriesEnclosuresRepository
-import entriesenclosures.isAudioMime
+import podcasts.PodcastsRepository
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import org.joda.time.Instant
@@ -27,7 +26,7 @@ class EntriesFragmentModel(
     private val entriesRepository: EntriesRepository,
     private val entriesSupportingTextRepository: EntriesSupportingTextRepository,
     private val entriesImagesRepository: EntriesImagesRepository,
-    private val entriesEnclosuresRepository: EntriesEnclosuresRepository,
+    private val podcastsRepository: PodcastsRepository,
     private val newsApiSync: NewsApiSync,
     private val prefs: Preferences,
 ) : ViewModel() {
@@ -122,8 +121,8 @@ class EntriesFragmentModel(
 
     suspend fun setSortOrder(sortOrder: String) = prefs.putString(SORT_ORDER, sortOrder)
 
-    suspend fun downloadEnclosure(id: String) {
-        entriesEnclosuresRepository.downloadEnclosure(id)
+    suspend fun downloadPodcast(id: String) {
+        podcastsRepository.download(id)
     }
 
     suspend fun getEntry(id: String) = entriesRepository.get(id).first()
@@ -153,9 +152,9 @@ class EntriesFragmentModel(
                 val format = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
                 (feed?.title ?: "Unknown feed") + " · " + format.format(Date(instant.millis))
             },
-            podcast = enclosureLinkType.isAudioMime(),
+            podcast = enclosureLinkType.startsWith("audio"),
             podcastDownloadPercent = flow {
-                entriesEnclosuresRepository.getDownloadProgress(this@toRow.id).collect {
+                podcastsRepository.getDownloadProgress(this@toRow.id).collect {
                     emit(it)
                 }
             },

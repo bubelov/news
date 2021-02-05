@@ -1,6 +1,8 @@
-package entriesenclosures
+package podcasts
 
 import android.content.Context
+import android.media.MediaScannerConnection
+import android.os.Environment
 import db.EntryEnclosure
 import db.EntryEnclosureQueries
 import entries.EntriesRepository
@@ -13,8 +15,10 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okio.buffer
 import okio.sink
+import timber.log.Timber
+import java.io.File
 
-class EntriesEnclosuresRepository(
+class PodcastsRepository(
     private val db: EntryEnclosureQueries,
     private val entriesRepository: EntriesRepository,
     private val context: Context,
@@ -29,7 +33,7 @@ class EntriesEnclosuresRepository(
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")
-    suspend fun downloadEnclosure(entryId: String) = withContext(Dispatchers.IO) {
+    suspend fun download(entryId: String) = withContext(Dispatchers.IO) {
         val entry = entriesRepository.get(entryId).first()
 
         if (entry == null) {
@@ -54,7 +58,7 @@ class EntriesEnclosuresRepository(
 
         db.insertOrReplace(enclosure)
 
-        val file = context.getCachedEnclosure(entryId, entry.enclosureLink, entry.enclosureLinkType)
+        val file = context.getCachedPodcast(entryId, entry.enclosureLink)
 
         if (file.exists()) {
             file.delete()
@@ -99,7 +103,8 @@ class EntriesEnclosuresRepository(
                         downloadedBytes += buffer
 
                         if (downloadedBytes > 0) {
-                            downloadedPercent = (downloadedBytes.toDouble() / bytesInBody.toDouble() * 100.0).toLong()
+                            downloadedPercent =
+                                (downloadedBytes.toDouble() / bytesInBody.toDouble() * 100.0).toLong()
 
                             if (downloadedPercent > lastReportedDownloadedPercent) {
                                 db.insertOrReplace(enclosure.copy(downloadPercent = downloadedPercent))
@@ -110,7 +115,15 @@ class EntriesEnclosuresRepository(
                 }
             }
         }.onSuccess {
+            Timber.d("Podcast downloaded")
             db.insertOrReplace(enclosure.copy(downloadPercent = 100))
+
+            Timber.d("Notifying media scanner")
+            MediaScannerConnection.scanFile(
+                context,
+                arrayOf(file.absolutePath),
+                null
+            ) { path, uri -> Timber.d("Scan completed: $path $uri") }
         }.onFailure {
             db.deleteByEntryId(entryId)
             file.delete()
@@ -127,7 +140,7 @@ class EntriesEnclosuresRepository(
                 return@forEach
             }
 
-            val file = context.getCachedEnclosure(entry.id, entry.enclosureLink, entry.enclosureLinkType)
+            val file = context.getCachedPodcast(entry.id, entry.enclosureLink)
 
             if (file.exists() && download.downloadPercent != null && download.downloadPercent != 100L) {
                 file.delete()
@@ -136,7 +149,7 @@ class EntriesEnclosuresRepository(
         }
     }
 
-    suspend fun deleteDownloadedEnclosuresWithoutFiles() {
+    suspend fun deleteDownloadedPodcastsWithoutFiles() {
         db.selectAll().executeAsList().forEach {
             if (it.downloadPercent == 100L) {
                 val entry = entriesRepository.get(it.entryId).first()
@@ -146,7 +159,7 @@ class EntriesEnclosuresRepository(
                     return@forEach
                 }
 
-                val file = context.getCachedEnclosure(entry.id, entry.enclosureLink, entry.enclosureLinkType)
+                val file = context.getCachedPodcast(entry.id, entry.enclosureLink)
 
                 if (!file.exists()) {
                     db.deleteByEntryId(it.entryId)
@@ -154,4 +167,12 @@ class EntriesEnclosuresRepository(
             }
         }
     }
+}
+
+fun Context.getCachedPodcast(
+    entryId: String,
+    entryEnclosureLink: String,
+): File {
+    val fileName = "$entryId-${entryEnclosureLink.split("/").last().split("?").first()}"
+    return File(getExternalFilesDir(Environment.DIRECTORY_PODCASTS), fileName)
 }
