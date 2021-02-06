@@ -66,6 +66,8 @@ class PodcastsRepository(
             cacheUri = "",
         )
 
+        db.insertOrReplace(enclosure)
+
         val request = Request.Builder()
             .url(entry.enclosureLink)
             .build()
