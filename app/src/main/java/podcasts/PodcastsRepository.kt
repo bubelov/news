@@ -1,13 +1,16 @@
 package podcasts
 
+import android.content.ContentValues
 import android.content.Context
-import android.media.MediaScannerConnection
+import android.net.Uri
 import android.os.Environment
+import android.provider.MediaStore
 import db.EntryEnclosure
 import db.EntryEnclosureQueries
 import entries.EntriesRepository
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -16,7 +19,7 @@ import okhttp3.Request
 import okio.buffer
 import okio.sink
 import timber.log.Timber
-import java.io.File
+import java.util.*
 
 class PodcastsRepository(
     private val db: EntryEnclosureQueries,
@@ -29,6 +32,12 @@ class PodcastsRepository(
     suspend fun getDownloadProgress(entryId: String) = withContext(Dispatchers.IO) {
         db.selectByEntryId(entryId).asFlow().map {
             it.executeAsOneOrNull()?.downloadPercent
+        }
+    }
+
+    suspend fun getCachedPodcastUri(entryId: String): Flow<Uri> = withContext(Dispatchers.IO) {
+        db.selectByEntryId(entryId).asFlow().map {
+            Uri.parse(it.executeAsOneOrNull()?.cacheUri)
         }
     }
 
@@ -53,18 +62,9 @@ class PodcastsRepository(
 
         val enclosure = EntryEnclosure(
             entryId = entryId,
-            downloadPercent = null,
+            downloadPercent = 0,
+            cacheUri = "",
         )
-
-        db.insertOrReplace(enclosure)
-
-        val file = context.getCachedPodcast(entryId, entry.enclosureLink)
-
-        if (file.exists()) {
-            file.delete()
-        }
-
-        db.insertOrReplace(enclosure.copy(downloadPercent = 0))
 
         val request = Request.Builder()
             .url(entry.enclosureLink)
@@ -84,11 +84,27 @@ class PodcastsRepository(
             return@withContext
         }
 
+        var cacheUri: Uri? = null
+
         runCatching {
+            cacheUri = context.contentResolver.insert(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                ContentValues().apply {
+                    put(MediaStore.MediaColumns.DISPLAY_NAME, entryId)
+                    put(MediaStore.MediaColumns.MIME_TYPE, entry.enclosureLinkType)
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PODCASTS)
+                    put(MediaStore.MediaColumns.IS_PENDING, true)
+                }
+            )
+
+            db.insertOrReplace(enclosure.copy(cacheUri = cacheUri.toString()))
+
+            val outputStream = context.contentResolver.openOutputStream(cacheUri!!)
+
             val bytesInBody = responseBody.contentLength()
 
             responseBody.source().use { bufferedSource ->
-                file.sink().buffer().use { bufferedSink ->
+                outputStream!!.sink().buffer().use { bufferedSink ->
                     var downloadedBytes = 0L
                     var downloadedPercent: Long
                     var lastReportedDownloadedPercent = 0L
@@ -115,64 +131,78 @@ class PodcastsRepository(
                 }
             }
         }.onSuccess {
-            Timber.d("Podcast downloaded")
-            db.insertOrReplace(enclosure.copy(downloadPercent = 100))
+            db.insertOrReplace(
+                enclosure.copy(
+                    downloadPercent = 100,
+                    cacheUri = cacheUri.toString(),
+                )
+            )
 
-            Timber.d("Notifying media scanner")
-            MediaScannerConnection.scanFile(
-                context,
-                arrayOf(file.absolutePath),
-                null
-            ) { path, uri -> Timber.d("Scan completed: $path $uri") }
+            cacheUri?.let {
+                context.contentResolver.update(
+                    it,
+                    ContentValues().apply { put(MediaStore.MediaColumns.IS_PENDING, false) },
+                    null,
+                    null
+                )
+            }
         }.onFailure {
             db.deleteByEntryId(entryId)
-            file.delete()
+
+            cacheUri?.let { uri ->
+                context.contentResolver.delete(uri, null, null)
+            }
+
             throw it
         }
     }
 
-    suspend fun deletePartialDownloads() = withContext(Dispatchers.IO) {
-        db.selectAll().executeAsList().forEach { download ->
-            val entry = entriesRepository.get(download.entryId).first()
+    suspend fun deleteIncompleteDownloads() = withContext(Dispatchers.IO) {
+        Timber.d("Deleting incomplete downloads")
 
-            if (entry == null) {
-                db.deleteByEntryId(download.entryId)
+        db.selectAll().executeAsList().forEach { metadata ->
+            if (metadata.cacheUri.isEmpty()) {
+                Timber.d("Cache URI is empty, deleting metadata")
+                db.deleteByEntryId(metadata.entryId)
                 return@forEach
             }
 
-            val file = context.getCachedPodcast(entry.id, entry.enclosureLink)
+            val uri = Uri.parse(metadata.cacheUri)
+            Timber.d("Enclosure URI: $uri")
 
-            if (file.exists() && download.downloadPercent != null && download.downloadPercent != 100L) {
-                file.delete()
-                db.deleteByEntryId(download.entryId)
+            val cursor = context.contentResolver.query(
+                uri,
+                arrayOf(MediaStore.MediaColumns.DISPLAY_NAME, MediaStore.MediaColumns.IS_PENDING),
+                null,
+                null,
+                null,
+            )
+
+            if (cursor == null) {
+                Timber.d("Didn't find enclosure with URI: $uri")
+                db.deleteByEntryId(metadata.entryId)
+
+            }
+
+            cursor?.use {
+                if (!it.moveToFirst()) {
+                    Timber.d("Didn't find enclosure with URI: $uri")
+                    return@use
+                }
+
+                Timber.d("Found enclosure with URI: $uri")
+                Timber.d("Name: ${cursor.getString(cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME))}")
+
+                val pending =
+                    cursor.getInt(cursor.getColumnIndex(MediaStore.MediaColumns.IS_PENDING))
+                Timber.d("Pending: $pending")
+
+                if (pending == 1) {
+                    Timber.d("Found pending enclosure, deleting metadata")
+                } else {
+                    Timber.d("Enclosure is in sync with metadata")
+                }
             }
         }
     }
-
-    suspend fun deleteDownloadedPodcastsWithoutFiles() {
-        db.selectAll().executeAsList().forEach {
-            if (it.downloadPercent == 100L) {
-                val entry = entriesRepository.get(it.entryId).first()
-
-                if (entry == null) {
-                    db.deleteByEntryId(it.entryId)
-                    return@forEach
-                }
-
-                val file = context.getCachedPodcast(entry.id, entry.enclosureLink)
-
-                if (!file.exists()) {
-                    db.deleteByEntryId(it.entryId)
-                }
-            }
-        }
-    }
-}
-
-fun Context.getCachedPodcast(
-    entryId: String,
-    entryEnclosureLink: String,
-): File {
-    val fileName = "$entryId-${entryEnclosureLink.split("/").last().split("?").first()}"
-    return File(getExternalFilesDir(Environment.DIRECTORY_PODCASTS), fileName)
 }

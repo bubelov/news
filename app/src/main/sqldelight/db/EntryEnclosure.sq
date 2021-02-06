@@ -1,6 +1,7 @@
 CREATE TABLE EntryEnclosure (
   entryId TEXT PRIMARY KEY NOT NULL,
-  downloadPercent INTEGER
+  downloadPercent INTEGER,
+  cacheUri TEXT NOT NULL
 );
 
 insertOrReplace:

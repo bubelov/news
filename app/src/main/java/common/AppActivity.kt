@@ -47,8 +47,7 @@ class AppActivity : AppCompatActivity() {
 
         lifecycleScope.launchWhenCreated {
             get<PodcastsRepository>().apply {
-                deleteDownloadedPodcastsWithoutFiles()
-                deletePartialDownloads()
+                deleteIncompleteDownloads()
             }
         }
 

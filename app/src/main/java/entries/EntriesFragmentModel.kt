@@ -127,6 +127,9 @@ class EntriesFragmentModel(
 
     suspend fun getEntry(id: String) = entriesRepository.get(id).first()
 
+    suspend fun getCachedEnclosureUri(entryId: String) =
+        podcastsRepository.getCachedPodcastUri(entryId)
+
     suspend fun getFeed(id: String) = feedsRepository.get(id).first()
 
     suspend fun markAsOpened(entryId: String) {

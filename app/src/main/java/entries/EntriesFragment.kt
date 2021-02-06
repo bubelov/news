@@ -8,7 +8,6 @@ import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -26,7 +25,6 @@ import db.Entry
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
-import podcasts.getCachedPodcast
 import timber.log.Timber
 
 class EntriesFragment : Fragment() {
@@ -365,18 +363,15 @@ class EntriesFragment : Fragment() {
     }
 
     private fun Context.openCachedPodcast(entry: Entry) {
-        val fileUri = FileProvider.getUriForFile(
-            this,
-            "${packageName}.fileprovider",
-            getCachedPodcast(entry.id, entry.enclosureLink)
-        )
+        lifecycleScope.launchWhenResumed {
+            val cacheUri = model.getCachedEnclosureUri(entryId = entry.id).first()
 
-        val intent = Intent().apply {
-            action = Intent.ACTION_VIEW
-            data = fileUri
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            val intent = Intent().apply {
+                action = Intent.ACTION_VIEW
+                data = cacheUri
+            }
+
+            startActivity(intent)
         }
-
-        startActivity(intent)
     }
 }
