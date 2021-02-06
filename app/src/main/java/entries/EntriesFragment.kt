@@ -93,6 +93,51 @@ class EntriesFragment : Fragment() {
         })
     }
 
+    private val touchHelper = ItemTouchHelper(object : ItemTouchHelper.Callback() {
+        override fun getMovementFlags(
+            recyclerView: RecyclerView,
+            viewHolder: RecyclerView.ViewHolder
+        ): Int {
+            return makeMovementFlags(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT)
+        }
+
+        override fun onMove(
+            recyclerView: RecyclerView,
+            viewHolder: RecyclerView.ViewHolder,
+            target: RecyclerView.ViewHolder
+        ): Boolean {
+            return false
+        }
+
+        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+            val entry = adapter.currentList[viewHolder.bindingAdapterPosition]
+
+            if (direction == ItemTouchHelper.LEFT) {
+                lifecycleScope.launchWhenResumed {
+                    runCatching {
+                        snackbar.setText(R.string.marked_as_read)
+                        snackbar.show()
+                        model.markAsOpened(entry.id)
+                    }.onFailure {
+                        Timber.e(it)
+                    }
+                }
+            }
+
+            if (direction == ItemTouchHelper.RIGHT) {
+                lifecycleScope.launchWhenResumed {
+                    runCatching {
+                        snackbar.setText(R.string.bookmarked)
+                        snackbar.show()
+                        model.markAsBookmarked(entry.id)
+                    }.onFailure {
+                        Timber.e(it)
+                    }
+                }
+            }
+        }
+    })
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -148,9 +193,14 @@ class EntriesFragment : Fragment() {
                 if (showOpenedEntries) {
                     showOpenedEntriesMenuItem.setIcon(R.drawable.ic_baseline_visibility_24)
                     showOpenedEntriesMenuItem.title = getString(R.string.hide_opened_news)
+                    touchHelper.attachToRecyclerView(null)
                 } else {
                     showOpenedEntriesMenuItem.setIcon(R.drawable.ic_baseline_visibility_off_24)
                     showOpenedEntriesMenuItem.title = getString(R.string.show_opened_news)
+
+                    if (swipesAllowed()) {
+                        touchHelper.attachToRecyclerView(binding.listView)
+                    }
                 }
             }
         }
@@ -258,52 +308,9 @@ class EntriesFragment : Fragment() {
             )
         )
 
-        val touchHelper = ItemTouchHelper(object : ItemTouchHelper.Callback() {
-            override fun getMovementFlags(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder
-            ): Int {
-                return makeMovementFlags(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT)
-            }
-
-            override fun onMove(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                target: RecyclerView.ViewHolder
-            ): Boolean {
-                return false
-            }
-
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val entry = adapter.currentList[viewHolder.bindingAdapterPosition]
-
-                if (direction == ItemTouchHelper.LEFT) {
-                    lifecycleScope.launchWhenResumed {
-                        runCatching {
-                            snackbar.setText(R.string.marked_as_read)
-                            snackbar.show()
-                            model.markAsOpened(entry.id)
-                        }.onFailure {
-                            Timber.e(it)
-                        }
-                    }
-                }
-
-                if (direction == ItemTouchHelper.RIGHT) {
-                    lifecycleScope.launchWhenResumed {
-                        runCatching {
-                            snackbar.setText(R.string.bookmarked)
-                            snackbar.show()
-                            model.markAsBookmarked(entry.id)
-                        }.onFailure {
-                            Timber.e(it)
-                        }
-                    }
-                }
-            }
-        })
-
-        touchHelper.attachToRecyclerView(binding.listView)
+        if (swipesAllowed()) {
+            touchHelper.attachToRecyclerView(binding.listView)
+        }
 
         val displayMetrics = DisplayMetrics()
 
@@ -372,6 +379,13 @@ class EntriesFragment : Fragment() {
             }
 
             startActivity(intent)
+        }
+    }
+
+    private fun swipesAllowed(): Boolean {
+        return when (args.filter) {
+            is EntriesFilter.OnlyNotBookmarked -> true
+            else -> false
         }
     }
 }
