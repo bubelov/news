@@ -92,7 +92,10 @@ class PodcastsRepository(
             cacheUri = context.contentResolver.insert(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 ContentValues().apply {
-                    put(MediaStore.MediaColumns.DISPLAY_NAME, entryId)
+                    put(
+                        MediaStore.MediaColumns.DISPLAY_NAME,
+                        "$entryId.${getExtension(entry.enclosureLinkType)}"
+                    )
                     put(MediaStore.MediaColumns.MIME_TYPE, entry.enclosureLinkType)
                     put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PODCASTS)
                     put(MediaStore.MediaColumns.IS_PENDING, true)
@@ -205,6 +208,16 @@ class PodcastsRepository(
                     Timber.d("Enclosure is in sync with metadata")
                 }
             }
+        }
+    }
+
+    private fun getExtension(mime: String): String {
+        return when (mime) {
+            "audio/mp3" -> "mp3"
+            "audio/mpeg" -> "mp3"
+            "audio/x-m4a" -> "m4a"
+            "audio/opus" -> "opus"
+            else -> mime.split("/").last()
         }
     }
 }
