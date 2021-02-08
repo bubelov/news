@@ -1,12 +1,8 @@
-import org.joda.time.format.DateTimeFormat
-import org.joda.time.format.DateTimeFormatter
 import org.w3c.dom.Document
 import org.w3c.dom.Element
+import java.time.Instant
+import java.time.format.DateTimeFormatter
 import java.util.*
-
-private val RSS_DATE_FORMATTER: DateTimeFormatter =
-    DateTimeFormat.forPattern("EEE, dd MMM yyyy HH:mm:ss Z")
-        .withZoneUTC().withLocale(Locale.US)
 
 fun Document.getFeedType(): FeedType {
     if (documentElement.tagName == "feed" && documentElement.getAttribute("xmlns") == "http://www.w3.org/2005/Atom") {
@@ -63,7 +59,8 @@ fun Document.toAtomEntries(): List<ParsedEntry> {
 
         // > atom:entry elements MUST contain exactly one atom:title element.
         // Source: https://tools.ietf.org/html/rfc4287
-        val title = entry.getElementsByTagName("title").item(0).textContent ?: return@mapNotNull null
+        val title =
+            entry.getElementsByTagName("title").item(0).textContent ?: return@mapNotNull null
 
         // TODO
         // > atom:entry elements that contain no child atom:content element MUST contain at least
@@ -73,7 +70,8 @@ fun Document.toAtomEntries(): List<ParsedEntry> {
 
         // > atom:entry elements MUST contain exactly one atom:updated element.
         // Source: https://tools.ietf.org/html/rfc4287
-        val updated = entry.getElementsByTagName("updated").item(0).textContent ?: return@mapNotNull null
+        val updated =
+            entry.getElementsByTagName("updated").item(0).textContent ?: return@mapNotNull null
 
         // > atom:entry elements MUST contain exactly one atom:updated element.
         // Source: https://tools.ietf.org/html/rfc4287
@@ -90,7 +88,8 @@ fun Document.toAtomEntries(): List<ParsedEntry> {
             ""
         }
 
-        val content = entry.getElementsByTagName("content").item(0).textContent ?: return@mapNotNull null
+        val content =
+            entry.getElementsByTagName("content").item(0).textContent ?: return@mapNotNull null
 
         ParsedEntry(
             id = id,
@@ -144,13 +143,15 @@ fun Document.toRssEntries(): List<ParsedEntry> {
 
         val description = item.getElementsByTagName("description").item(0).textContent ?: ""
 
+        val parsedDate = Instant.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(pubDate))!!
+
         ParsedEntry(
             id = guid,
             feedId = feedId,
             title = title,
             link = link,
-            published = RSS_DATE_FORMATTER.parseDateTime(pubDate).toString(),
-            updated = RSS_DATE_FORMATTER.parseDateTime(pubDate).toString(),
+            published = parsedDate.toString(),
+            updated = parsedDate.toString(),
             authorName = author,
             content = description,
             enclosureLink = "",
