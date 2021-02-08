@@ -1,5 +1,7 @@
 package settings
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,9 +16,14 @@ import common.Preferences
 import co.appreactor.news.databinding.FragmentSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.nextcloud.android.sso.AccountImporter
+import common.showDialog
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import opml.readOpml
+import opml.writeOpml
 import org.koin.android.viewmodel.ext.android.viewModel
 
 class SettingsFragment : Fragment() {
@@ -118,6 +125,78 @@ class SettingsFragment : Fragment() {
                 }
             }
         }
+
+        binding.importFeeds.setOnClickListener {
+            val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+                type = "*/*"
+            }
+
+            startActivityForResult(Intent.createChooser(intent, ""), IMPORT_REQUEST)
+        }
+
+        binding.exportFeeds.setOnClickListener {
+            val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "text/xml"
+                putExtra(Intent.EXTRA_TITLE, "feeds.opml")
+            }
+
+            startActivityForResult(intent, EXPORT_REQUEST)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == IMPORT_REQUEST && resultCode == Activity.RESULT_OK) {
+            if (data == null) {
+                showDialog(R.string.error, "The app didn't receive any data")
+                return
+            }
+
+            val uri = data.data
+
+            if (uri == null) {
+                showDialog(R.string.error, "The app didn't receive file URI")
+                return
+            }
+
+            lifecycleScope.launchWhenResumed {
+                withContext(Dispatchers.IO) {
+                    requireContext().contentResolver.openInputStream(uri)?.use {
+                        val feeds = readOpml(it.bufferedReader().readText())
+                        val result = model.importFeeds(feeds)
+
+                        withContext(Dispatchers.Main) {
+                            showDialog(
+                                title = "Import",
+                                message = "Added: ${result.added}\nExists: ${result.exists}\nFailed: ${result.failed}"
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        if (requestCode == EXPORT_REQUEST && resultCode == Activity.RESULT_OK) {
+            if (data == null) {
+                showDialog(R.string.error, "The app didn't receive any data")
+                return
+            }
+
+            val uri = data.data
+
+            if (uri == null) {
+                showDialog(R.string.error, "The app didn't receive file URI")
+                return
+            }
+
+            lifecycleScope.launchWhenResumed {
+                withContext(Dispatchers.IO) {
+                    requireContext().contentResolver.openOutputStream(uri)?.use {
+                        it.write(writeOpml(model.getAllFeeds().first()).toByteArray())
+                    }
+                }
+            }
+        }
     }
 
     override fun onDestroyView() {
@@ -132,5 +211,10 @@ class SettingsFragment : Fragment() {
             findNavController().popBackStack(R.id.entriesFragment, true)
             findNavController().navigate(NavGraphDirections.actionGlobalToAuthFragment())
         }
+    }
+
+    companion object {
+        private const val IMPORT_REQUEST = 1000
+        private const val EXPORT_REQUEST = 1001
     }
 }

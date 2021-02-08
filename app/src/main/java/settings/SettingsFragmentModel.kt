@@ -13,10 +13,14 @@ import common.Preferences.Companion.NEXTCLOUD_SERVER_URL
 import common.Preferences.Companion.NEXTCLOUD_SERVER_USERNAME
 import common.Preferences.Companion.SHOW_OPENED_ENTRIES
 import common.Preferences.Companion.SHOW_PREVIEW_IMAGES
+import feeds.FeedsRepository
+import kotlinx.coroutines.flow.first
+import opml.OpmlElement
 import timber.log.Timber
 
 class SettingsFragmentModel(
     private val loggedExceptionsRepository: LoggedExceptionsRepository,
+    private val feedsRepository: FeedsRepository,
     private val prefs: Preferences,
     private val db: Database,
 ) : ViewModel() {
@@ -54,6 +58,37 @@ class SettingsFragmentModel(
         }
     }
 
+    suspend fun getAllFeeds() = feedsRepository.getAll()
+
+    suspend fun importFeeds(feeds: List<OpmlElement>): FeedImportResult {
+        var added = 0
+        var exists = 0
+        var failed = 0
+
+        val cachedFeeds = feedsRepository.getAll().first()
+
+        feeds.forEach { opml ->
+            if (cachedFeeds.any { it.selfLink == opml.xmlUrl }) {
+                exists++
+                return@forEach
+            }
+
+            runCatching {
+                feedsRepository.add(opml.xmlUrl)
+            }.onSuccess {
+                added++
+            }.onFailure {
+                failed++
+            }
+        }
+
+        return FeedImportResult(
+            added = added,
+            exists = exists,
+            failed = failed,
+        )
+    }
+
     fun logOut() {
         db.apply {
             transaction {
@@ -67,4 +102,10 @@ class SettingsFragmentModel(
             }
         }
     }
+
+    data class FeedImportResult(
+        val added: Int,
+        val exists: Int,
+        val failed: Int,
+    )
 }

@@ -63,4 +63,6 @@
     <string name="clear_search_input">Clear search input</string>
     <string name="no_results">No results</string>
     <string name="you_have_no_apps_which_can_play_this_podcast">You have no apps which can play this podcast.</string>
+    <string name="import_feeds_from_opml_file">Import feeds from OPML file</string>
+    <string name="export_feeds_to_opml_file">Export feeds to OPML file</string>
 </resources>

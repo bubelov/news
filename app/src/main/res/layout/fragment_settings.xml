@@ -30,8 +30,8 @@
             android:orientation="vertical"
             android:paddingStart="16dp"
             android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:paddingEnd="16dp">
+            android:paddingEnd="16dp"
+            android:paddingBottom="8dp">
 
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/showOpenedEntries"
@@ -55,8 +55,8 @@
             android:orientation="vertical"
             android:paddingStart="16dp"
             android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:paddingEnd="16dp">
+            android:paddingEnd="16dp"
+            android:paddingBottom="8dp">
 
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/showPreviewImages"
@@ -80,8 +80,8 @@
             android:orientation="vertical"
             android:paddingStart="16dp"
             android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:paddingEnd="16dp">
+            android:paddingEnd="16dp"
+            android:paddingBottom="8dp">
 
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/cropPreviewImages"
@@ -122,6 +122,36 @@
                 tools:text="Exceptions logged: 123" />
 
         </LinearLayout>
+
+        <View
+            style="@style/Divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp" />
+
+        <TextView
+            android:id="@+id/importFeeds"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="16dp"
+            android:text="@string/import_feeds_from_opml_file"
+            android:textAppearance="?textAppearanceListItem" />
+
+        <View
+            style="@style/Divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp" />
+
+        <TextView
+            android:id="@+id/exportFeeds"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="16dp"
+            android:text="@string/export_feeds_to_opml_file"
+            android:textAppearance="?textAppearanceListItem" />
 
         <View
             style="@style/Divider"
