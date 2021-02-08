@@ -143,6 +143,18 @@ fun Document.toRssEntries(): List<ParsedEntry> {
 
         val description = item.getElementsByTagName("description").item(0).textContent ?: ""
 
+        val enclosureLink = if (item.getElementsByTagName("enclosure").length > 0) {
+            item.getElementsByTagName("enclosure").item(0).attributes.getNamedItem("url").textContent ?: ""
+        } else {
+            ""
+        }
+
+        val enclosureLinkType = if (item.getElementsByTagName("enclosure").length > 0) {
+            item.getElementsByTagName("enclosure").item(0).attributes.getNamedItem("type").textContent ?: ""
+        } else {
+            ""
+        }
+
         val parsedDate = Instant.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(pubDate))!!
 
         ParsedEntry(
@@ -154,8 +166,8 @@ fun Document.toRssEntries(): List<ParsedEntry> {
             updated = parsedDate.toString(),
             authorName = author,
             content = description,
-            enclosureLink = "",
-            enclosureLinkType = "",
+            enclosureLink = enclosureLink,
+            enclosureLinkType = enclosureLinkType,
         )
     }
 }
