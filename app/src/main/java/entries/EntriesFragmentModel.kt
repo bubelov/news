@@ -137,8 +137,18 @@ class EntriesFragmentModel(
         newsApiSync.syncEntriesFlags()
     }
 
+    suspend fun markAsNotOpened(entryId: String) {
+        entriesRepository.setOpened(entryId, false)
+        newsApiSync.syncEntriesFlags()
+    }
+
     suspend fun markAsBookmarked(entryId: String) = withContext(Dispatchers.IO) {
         entriesRepository.setBookmarked(entryId, true)
+        newsApiSync.syncEntriesFlags()
+    }
+
+    suspend fun markAsNotBookmarked(entryId: String) = withContext(Dispatchers.IO) {
+        entriesRepository.setBookmarked(entryId, false)
         newsApiSync.syncEntriesFlags()
     }
 

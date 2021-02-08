@@ -117,6 +117,11 @@ class EntriesFragment : Fragment() {
                 lifecycleScope.launchWhenResumed {
                     runCatching {
                         snackbar.setText(R.string.marked_as_read)
+                        snackbar.setAction(getString(R.string.undo)) {
+                            lifecycleScope.launchWhenResumed {
+                                model.markAsNotOpened(entry.id)
+                            }
+                        }
                         snackbar.show()
                         model.markAsOpened(entry.id)
                     }.onFailure {
@@ -129,6 +134,11 @@ class EntriesFragment : Fragment() {
                 lifecycleScope.launchWhenResumed {
                     runCatching {
                         snackbar.setText(R.string.bookmarked)
+                        snackbar.setAction(getString(R.string.undo)) {
+                            lifecycleScope.launchWhenResumed {
+                                model.markAsNotBookmarked(entry.id)
+                            }
+                        }
                         snackbar.show()
                         model.markAsBookmarked(entry.id)
                     }.onFailure {
