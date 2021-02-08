@@ -18,11 +18,21 @@ SELECT *
 FROM EntryEnclosure
 WHERE entryId = ?;
 
+setDowloadPercent:
+UPDATE EntryEnclosure
+SET downloadPercent = :downloadPercent
+WHERE entryId = :entryId;
+
+setCacheUri:
+UPDATE EntryEnclosure
+SET cacheUri = :cacheUri
+WHERE entryId = :entryId;
+
 deleteAll:
 DELETE
 FROM EntryEnclosure;
 
-deleteByEntryId:
+deleteWhere:
 DELETE
 FROM EntryEnclosure
 WHERE entryId = ?;

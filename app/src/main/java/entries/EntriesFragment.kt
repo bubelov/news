@@ -1,5 +1,6 @@
 package entries
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -376,9 +377,23 @@ class EntriesFragment : Fragment() {
             val intent = Intent().apply {
                 action = Intent.ACTION_VIEW
                 data = cacheUri
+                setDataAndType(cacheUri, entry.enclosureLinkType)
             }
 
-            startActivity(intent)
+            runCatching {
+                startActivity(intent)
+            }.onFailure {
+                Timber.e(it)
+
+                if (it is ActivityNotFoundException) {
+                    showDialog(
+                        R.string.error,
+                        R.string.you_have_no_apps_which_can_play_this_podcast
+                    )
+                } else {
+                    showDialog(R.string.error, it.message ?: "")
+                }
+            }
         }
     }
 
