@@ -26,6 +26,17 @@ class StandaloneNewsApi(
     private val httpClient = OkHttpClient()
 
     override suspend fun addFeed(uri: String): Feed {
+        val isHttps = uri.startsWith("https")
+        val isCleartextHttp = !isHttps && uri.startsWith("http")
+
+        if (isCleartextHttp) {
+            throw Exception("Insecure feeds are not allowed. Please use HTTPS.")
+        }
+
+        if (!isHttps) {
+            throw Exception("Unknown URI format.")
+        }
+
         val request = Request.Builder()
             .url(uri)
             .build()
@@ -41,7 +52,7 @@ class StandaloneNewsApi(
         val document = builder.parse(responseBody.byteStream())
 
         return when (document.getFeedType()) {
-            FeedType.ATOM -> document.toAtomFeed().toFeed()
+            FeedType.ATOM -> document.toAtomFeed(uri).toFeed()
             FeedType.RSS -> document.toRssFeed(uri).toFeed()
             FeedType.UNKNOWN -> throw Exception("Unknown feed type")
         }
