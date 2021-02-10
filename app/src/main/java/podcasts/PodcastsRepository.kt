@@ -93,7 +93,7 @@ class PodcastsRepository(
         var cacheUri: Uri? = null
 
         runCatching {
-            val fileName = "${UUID.randomUUID()}.${getExtension(entry.enclosureLinkType)}"
+            val fileName = "${entry.title}.${getExtension(entry.enclosureLinkType)}"
             val outputStream: OutputStream
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
