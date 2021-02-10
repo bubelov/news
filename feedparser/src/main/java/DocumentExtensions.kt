@@ -16,13 +16,13 @@ fun Document.getFeedType(): FeedType {
     return FeedType.UNKNOWN
 }
 
-fun Document.toAtomFeed(): ParsedFeed {
+fun Document.toAtomFeed(documentUri: String): ParsedFeed {
     val id = documentElement.getElementsByTagName("id").item(0).textContent
         ?: throw Exception("Atom channel has no id")
     val title = documentElement.getElementsByTagName("title").item(0).textContent
         ?: throw Exception("Atom channel has no title")
 
-    var selfLink = ""
+    var selfLink = documentUri
     var alternateLink = ""
 
     (0 until documentElement.childNodes.length)
@@ -144,13 +144,15 @@ fun Document.toRssEntries(): List<ParsedEntry> {
         val description = item.getElementsByTagName("description").item(0).textContent ?: ""
 
         val enclosureLink = if (item.getElementsByTagName("enclosure").length > 0) {
-            item.getElementsByTagName("enclosure").item(0).attributes.getNamedItem("url").textContent ?: ""
+            item.getElementsByTagName("enclosure")
+                .item(0).attributes.getNamedItem("url").textContent ?: ""
         } else {
             ""
         }
 
         val enclosureLinkType = if (item.getElementsByTagName("enclosure").length > 0) {
-            item.getElementsByTagName("enclosure").item(0).attributes.getNamedItem("type").textContent ?: ""
+            item.getElementsByTagName("enclosure")
+                .item(0).attributes.getNamedItem("type").textContent ?: ""
         } else {
             ""
         }

@@ -15,6 +15,8 @@ class PersistentLogTree(
 
     override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
         if (t != null && t !is CancellationException) {
+            t.printStackTrace()
+
             val sw = StringWriter()
             val pw = PrintWriter(sw)
             t.printStackTrace(pw)
