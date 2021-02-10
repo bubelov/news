@@ -92,8 +92,13 @@ fun Document.toAtomEntries(): List<ParsedEntry> {
             ""
         }
 
-        val content =
-            entry.getElementsByTagName("content").item(0).textContent ?: return@mapNotNull null
+        var content = ""
+
+        val contentItems = entry.getElementsByTagName("content")
+
+        if (contentItems.length > 0) {
+            content = contentItems.item(0).textContent ?: ""
+        }
 
         ParsedEntry(
             id = id,
