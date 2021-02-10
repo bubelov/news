@@ -66,11 +66,28 @@ fun Document.toAtomEntries(): List<ParsedEntry> {
         val title =
             entry.getElementsByTagName("title").item(0).textContent ?: return@mapNotNull null
 
-        // TODO
+        var content = ""
+
+        val contentElements = entry.getElementsByTagName("content")
+
+        if (contentElements.length > 0) {
+            content = contentElements.item(0).textContent ?: ""
+        }
+
+        val linkElements = entry.getElementsByTagName("link")
+
         // > atom:entry elements that contain no child atom:content element MUST contain at least
         // > one atom:link element with a rel attribute value of "alternate".
         // Source: https://tools.ietf.org/html/rfc4287
-        val link = entry.getElementsByTagName("link").item(0).textContent ?: return@mapNotNull null
+        if (contentElements.length == 0 && linkElements.length == 0) {
+            return@mapNotNull null
+        }
+
+        var link = ""
+
+        if (linkElements.length > 0) {
+            link = linkElements.item(0).attributes.getNamedItem("href").textContent ?: ""
+        }
 
         // > atom:entry elements MUST contain exactly one atom:updated element.
         // Source: https://tools.ietf.org/html/rfc4287
@@ -90,14 +107,6 @@ fun Document.toAtomEntries(): List<ParsedEntry> {
             author.getElementsByTagName("name")?.item(0)?.textContent ?: ""
         } else {
             ""
-        }
-
-        var content = ""
-
-        val contentItems = entry.getElementsByTagName("content")
-
-        if (contentItems.length > 0) {
-            content = contentItems.item(0).textContent ?: ""
         }
 
         ParsedEntry(
