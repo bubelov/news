@@ -26,6 +26,20 @@ class DocumentExtensionsTests {
             assertEquals("https://www.kernel.org/feeds/all.atom.xml", selfLink)
             assertEquals("https://www.kernel.org/", alternateLink)
         }
+
+        "theverge.atom".toDocument().toAtomFeed("https://www.theverge.com/rss/full.xml").apply {
+            assertEquals("https://www.theverge.com/rss/full.xml", id)
+            assertEquals("The Verge -  All Posts", title)
+            assertEquals("https://www.theverge.com/rss/full.xml", selfLink)
+            assertEquals("https://www.theverge.com/", alternateLink)
+        }
+
+        "youtube.atom".toDocument().toAtomFeed().apply {
+            assertEquals("yt:channel:UCXuqSBlHAE6Xw-yeJA0Tunw", id)
+            assertEquals("Linus Tech Tips", title)
+            assertEquals("https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw", selfLink)
+            assertEquals("https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw", alternateLink)
+        }
     }
 
     @Test

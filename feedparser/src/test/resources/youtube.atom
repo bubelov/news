@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns:media="http://search.yahoo.com/mrss/" xmlns="http://www.w3.org/2005/Atom">
+ <link rel="self" href="http://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw"/>
+ <id>yt:channel:UCXuqSBlHAE6Xw-yeJA0Tunw</id>
+ <yt:channelId>UCXuqSBlHAE6Xw-yeJA0Tunw</yt:channelId>
+ <title>Linus Tech Tips</title>
+ <link rel="alternate" href="https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw"/>
+ <author>
+  <name>Linus Tech Tips</name>
+  <uri>https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw</uri>
+ </author>
+ <published>2008-11-25T00:46:52+00:00</published>
+ <entry>
+  <id>yt:video:Fh1a2K9ZgNA</id>
+  <yt:videoId>Fh1a2K9ZgNA</yt:videoId>
+  <yt:channelId>UCXuqSBlHAE6Xw-yeJA0Tunw</yt:channelId>
+  <title>Gaming on STARLINK!!</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=Fh1a2K9ZgNA"/>
+  <author>
+   <name>Linus Tech Tips</name>
+   <uri>https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw</uri>
+  </author>
+  <published>2021-02-09T18:00:10+00:00</published>
+  <updated>2021-02-09T18:32:15+00:00</updated>
+  <media:group>
+   <media:title>Gaming on STARLINK!!</media:title>
+   <media:content url="https://www.youtube.com/v/Fh1a2K9ZgNA?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i3.ytimg.com/vi/Fh1a2K9ZgNA/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Try FreshBooks free, for 30 days, no credit card required at https://www.freshbooks.com/linus
+
+Save 10% and Free Worldwide Shipping at Ridge Wallets by using offer code LINUS at https://www.ridge.com/LINUS
+
+The next generation of satellite internet is here... but is it any good... and how does it work, exactly? But most importantly, can you pwn noobs from space with it?
+
+Check out https://www.starlink.com/ - access is opening up based on location!
+
+A huge thank-you goes out to Ken Keiter for letting us use his footage - check out his video here: https://youtu.be/iOmdQnIlnRo
+
+Another thanks to LEOLabs.space for the orbital visualization, which you can check out here: https://platform.leolabs.space/visualization
+
+Buy Nvidia RTX 2080 Super (PAID LINK): https://geni.us/IAXh1lI
+
+Purchases made through some store links may provide some compensation to Linus Media Group.
+
+Discuss on the forum: https://linustechtips.com/topic/1304101-gaming-on-starlink/
+
+►GET MERCH: http://www.LTTStore.com/
+►SUPPORT US ON FLOATPLANE: https://www.floatplane.com/
+►LTX EXPO: https://www.ltxexpo.com/
+
+AFFILIATES &amp; REFERRALS
+---------------------------------------------------
+►Affiliates, Sponsors &amp; Referrals: https://lmg.gg/sponsors
+►Check out our podcast gear: https://kit.co/linustechtips/lmg-podcast-gear
+►Private Internet Access VPN: https://lmg.gg/pialinus2
+►Our Official Charging Partner Anker: https://lmg.gg/AnkerLTT
+►MK Keyboards: https://lmg.gg/LyLtl
+►Nerd or Die Stream Overlays: https://lmg.gg/avLlO
+►NEEDforSEAT Gaming Chairs: https://lmg.gg/DJQYb
+►Displate Metal Prints: https://lmg.gg/displateltt
+►Official Game Store: https://www.nexus.gg/ltt
+►Epic Games Store (LINUSMEDIAGROUP): https://lmg.gg/kRTpY
+►Amazon Prime: https://lmg.gg/8KV1v
+►Audible Free Trial: https://lmg.gg/8242J
+►Streamlabs Prime: https://geni.us/cOHCiHh
+►Our Gear on Amazon: https://geni.us/OhmF
+
+FOLLOW US ELSEWHERE
+---------------------------------------------------
+Twitter: https://twitter.com/linustech
+Facebook: http://www.facebook.com/LinusTech
+Instagram: https://www.instagram.com/linustech
+Twitch: https://www.twitch.tv/linustech
+
+FOLLOW OUR OTHER CHANNELS
+---------------------------------------------------
+Techquickie: https://lmg.gg/techquickieyt
+TechLinked: https://lmg.gg/techlinkedyt
+ShortCircuit: https://lmg.gg/shortcircuityt
+
+LMG Clips: https://lmg.gg/lmgclipsyt
+Channel Super Fun: https://lmg.gg/channelsuperfunyt
+Carpool Critics: https://lmg.gg/carpoolcriticsyt
+
+MUSIC CREDIT
+---------------------------------------------------
+Title: Laszlo - Supernova
+Video Link: https://www.youtube.com/watch?v=PKfxmFU3lWY
+iTunes Download Link: https://itunes.apple.com/us/album/supernova/id936805712
+Artist Link: https://soundcloud.com/laszlomusic
+
+Outro Screen Music Credit: Approaching Nirvana - Sugar High http://www.youtube.com/approachingnirvana
+
+Monitor And Keyboard by vadimmihalkevich / CC BY 4.0  https://geni.us/PgGWp
+Mechanical RGB Keyboard by BigBrotherECE / CC BY 4.0 https://geni.us/mj6pHk4
+Mouse Gamer free Model By Oscar Creativo / CC BY 4.0 https://geni.us/Ps3XfE</media:description>
+   <media:community>
+    <media:starRating count="88009" average="4.95" min="1" max="5"/>
+    <media:statistics views="1233604"/>
+   </media:community>
+  </media:group>
+ </entry>
+</feed>

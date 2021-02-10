@@ -16,7 +16,7 @@ fun Document.getFeedType(): FeedType {
     return FeedType.UNKNOWN
 }
 
-fun Document.toAtomFeed(documentUri: String): ParsedFeed {
+fun Document.toAtomFeed(documentUri: String = ""): ParsedFeed {
     val id = documentElement.getElementsByTagName("id").item(0).textContent
         ?: throw Exception("Atom channel has no id")
     val title = documentElement.getElementsByTagName("title").item(0).textContent
@@ -37,6 +37,10 @@ fun Document.toAtomFeed(documentUri: String): ParsedFeed {
                 "alternate" -> alternateLink = href
             }
         }
+
+    if (selfLink.startsWith("http") && !selfLink.startsWith("https")) {
+        selfLink = selfLink.replaceFirst("http", "https")
+    }
 
     return ParsedFeed(
         id = id,
