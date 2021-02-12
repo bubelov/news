@@ -12,8 +12,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import co.appreactor.news.R
 import common.showDialog
 import co.appreactor.news.databinding.FragmentLoggedExceptionsBinding
+import common.Result
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
 
 class LoggedExceptionsFragment : Fragment() {
@@ -42,16 +42,12 @@ class LoggedExceptionsFragment : Fragment() {
                 findNavController().popBackStack()
             }
 
-            setOnMenuItemClickListener {
-                if (it.itemId == R.id.delete) {
-                    lifecycleScope.launch {
-                        model.deleteAll()
-                    }
-
-                    true
-                } else {
-                    false
+            setOnMenuItemClickListener { menuItem ->
+                when (menuItem.itemId) {
+                    R.id.delete -> lifecycleScope.launchWhenResumed { model.deleteAllItems() }
                 }
+
+                true
             }
         }
 
@@ -60,12 +56,29 @@ class LoggedExceptionsFragment : Fragment() {
         binding.listView.adapter = adapter
 
         lifecycleScope.launchWhenResumed {
-            binding.progress.isVisible = true
+            model.onViewReady()
+        }
 
-            model.getExceptions().collect { exceptions ->
+        lifecycleScope.launchWhenResumed {
+            model.items.collect { result ->
                 binding.progress.isVisible = false
-                binding.empty.isVisible = exceptions.isEmpty()
-                adapter.swapItems(exceptions)
+
+                when (result) {
+                    is Result.Progress -> {
+                        binding.progress.isVisible = true
+                        binding.progress.alpha = 0f
+                        binding.progress.animate().alpha(1f).setDuration(1000).start()
+                    }
+
+                    is Result.Success -> {
+                        binding.empty.isVisible = result.data.isEmpty()
+                        adapter.swapItems(result.data)
+                    }
+
+                    else -> {
+
+                    }
+                }
             }
         }
     }
