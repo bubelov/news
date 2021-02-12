@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import common.Result
 import db.LoggedException
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.first
 
 class LoggedExceptionsFragmentModel(
     private val repository: LoggedExceptionsRepository
@@ -27,7 +26,7 @@ class LoggedExceptionsFragmentModel(
         items.value = Result.Progress
 
         runCatching {
-            items.value = Result.Success(repository.all().first())
+            items.value = Result.Success(repository.selectAll())
         }.onFailure {
             items.value = Result.Failure(it)
         }

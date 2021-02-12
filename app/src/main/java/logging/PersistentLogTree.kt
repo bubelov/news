@@ -23,7 +23,7 @@ class PersistentLogTree(
             val stackTrace = sw.toString()
 
             runBlocking {
-                exceptionsRepository.add(
+                exceptionsRepository.insertOrReplace(
                     LoggedException(
                         id = UUID.randomUUID().toString(),
                         date = LocalDateTime.now().toString(),

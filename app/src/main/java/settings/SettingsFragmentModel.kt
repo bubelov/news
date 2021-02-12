@@ -37,7 +37,7 @@ class SettingsFragmentModel(
 
     fun setCropPreviewImages(crop: Boolean) = prefs.putBooleanBlocking(CROP_PREVIEW_IMAGES, crop)
 
-    suspend fun getExceptionsCount() = loggedExceptionsRepository.count()
+    suspend fun getExceptionsCount() = loggedExceptionsRepository.selectCount()
 
     fun getAuthType() = prefs.getStringBlocking(AUTH_TYPE)
 
