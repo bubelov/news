@@ -103,13 +103,19 @@ class EntriesImagesRepository(
             return@withContext
         }
 
-        Timber.d("Requesting ${entry.link}")
-        val request = httpClient.newCall(Request.Builder().url(entry.link).build())
+        val link = if (entry.link.startsWith("http:")) {
+            entry.link.replaceFirst("http:", "https:")
+        } else {
+            entry.link
+        }
+
+        Timber.d("Requesting $link")
+        val request = httpClient.newCall(Request.Builder().url(link).build())
 
         val response = runCatching {
             request.execute()
         }.getOrElse {
-            it.log("Cannot fetch url for feed item ${entry.id} (${entry.title})")
+            it.log("Cannot fetch URL for feed item\nItem: ${entry.id} (${entry.title})\nURL: $link")
             imagesMetadataQueries.insertOrReplace(metadata.copy(previewImageProcessingStatus = STATUS_PROCESSED))
             return@withContext
         }
@@ -148,7 +154,7 @@ class EntriesImagesRepository(
         val bitmap = kotlin.runCatching {
             Picasso.get().load(imageUrl).resize(MAX_WIDTH, 0).onlyScaleDown().get()
         }.getOrElse {
-            it.log("Cannot download image by url $imageUrl")
+            it.log("Cannot download image by URL $imageUrl")
             imagesMetadataQueries.insertOrReplace(metadata.copy(previewImageProcessingStatus = STATUS_PROCESSED))
             return@withContext
         }
