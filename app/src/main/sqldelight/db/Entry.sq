@@ -88,6 +88,12 @@ selectCount:
 SELECT COUNT(*)
 FROM Entry;
 
+selectUnreadCount:
+SELECT COUNT(*)
+FROM Entry
+WHERE feedId = :feedId
+AND opened = 0;
+
 selectMaxUpdaded:
 SELECT MAX(updated)
 FROM Entry;

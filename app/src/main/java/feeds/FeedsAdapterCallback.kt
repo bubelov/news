@@ -1,16 +1,14 @@
 package feeds
 
-import db.Feed
-
 interface FeedsAdapterCallback {
 
-    fun onFeedClick(feed: Feed)
+    fun onFeedClick(feed: FeedsAdapterItem)
 
-    fun onOpenHtmlLinkClick(feed: Feed)
+    fun onOpenHtmlLinkClick(feed: FeedsAdapterItem)
 
-    fun openLinkClick(feed: Feed)
+    fun openLinkClick(feed: FeedsAdapterItem)
 
-    fun onRenameClick(feed: Feed)
+    fun onRenameClick(feed: FeedsAdapterItem)
 
-    fun onDeleteClick(feed: Feed)
+    fun onDeleteClick(feed: FeedsAdapterItem)
 }

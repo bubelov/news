@@ -18,7 +18,6 @@ import co.appreactor.news.R
 import common.showDialog
 import common.showKeyboard
 import co.appreactor.news.databinding.FragmentFeedsBinding
-import db.Feed
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import entries.EntriesFilter
@@ -34,7 +33,7 @@ class FeedsFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val adapter = FeedsAdapter(callback = object : FeedsAdapterCallback {
-        override fun onFeedClick(feed: Feed) {
+        override fun onFeedClick(feed: FeedsAdapterItem) {
             findNavController().navigate(
                 FeedsFragmentDirections.actionFeedsFragmentToFeedEntriesFragment(
                     EntriesFilter.OnlyFromFeed(feedId = feed.id)
@@ -42,19 +41,19 @@ class FeedsFragment : Fragment() {
             )
         }
 
-        override fun onOpenHtmlLinkClick(feed: Feed) {
+        override fun onOpenHtmlLinkClick(feed: FeedsAdapterItem) {
             val intent = Intent(Intent.ACTION_VIEW)
             intent.data = Uri.parse(feed.alternateLink)
             startActivity(intent)
         }
 
-        override fun openLinkClick(feed: Feed) {
+        override fun openLinkClick(feed: FeedsAdapterItem) {
             val intent = Intent(Intent.ACTION_VIEW)
             intent.data = Uri.parse(feed.selfLink)
             startActivity(intent)
         }
 
-        override fun onRenameClick(feed: Feed) {
+        override fun onRenameClick(feed: FeedsAdapterItem) {
             val dialog = MaterialAlertDialogBuilder(requireContext())
                 .setTitle(getString(R.string.rename))
                 .setView(R.layout.dialog_rename_feed)
@@ -88,7 +87,7 @@ class FeedsFragment : Fragment() {
             requireContext().showKeyboard()
         }
 
-        override fun onDeleteClick(feed: Feed) {
+        override fun onDeleteClick(feed: FeedsAdapterItem) {
             lifecycleScope.launchWhenResumed {
                 binding.actionProgress.isVisible = true
                 binding.fab.isVisible = false

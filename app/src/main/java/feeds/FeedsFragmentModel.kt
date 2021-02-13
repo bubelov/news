@@ -3,6 +3,7 @@ package feeds
 import androidx.lifecycle.ViewModel
 import common.NewsApiSync
 import entries.EntriesRepository
+import kotlinx.coroutines.flow.first
 
 class FeedsFragmentModel(
     private val feedsRepository: FeedsRepository,
@@ -20,7 +21,17 @@ class FeedsFragmentModel(
         )
     }
 
-    suspend fun getFeeds() = feedsRepository.getAll()
+    suspend fun getFeeds() = feedsRepository.getAll().map { feeds ->
+        feeds.map { feed ->
+            FeedsAdapterItem(
+                id = feed.id,
+                title = feed.title,
+                selfLink = feed.selfLink,
+                alternateLink = feed.alternateLink,
+                unreadCount = entriesRepository.getUnreadCount(feed.id).first().toInt()
+            )
+        }
+    }
 
     suspend fun renameFeed(feedId: String, newTitle: String) {
         feedsRepository.updateTitle(feedId, newTitle)

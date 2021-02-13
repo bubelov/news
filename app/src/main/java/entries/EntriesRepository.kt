@@ -12,7 +12,6 @@ import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import org.joda.time.Instant
@@ -66,6 +65,10 @@ class EntriesRepository(
 
     suspend fun getCount() = withContext(Dispatchers.IO) {
         entryQueries.selectCount().asFlow().mapToOne()
+    }
+
+    suspend fun getUnreadCount(feedId: String) = withContext(Dispatchers.IO) {
+        entryQueries.selectUnreadCount(feedId).asFlow().mapToOne()
     }
 
     private suspend fun getMaxUpdated() = withContext(Dispatchers.IO) {

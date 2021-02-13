@@ -4,11 +4,10 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import co.appreactor.news.databinding.ListItemFeedBinding
-import db.Feed
 
 class FeedsAdapter(
     private val callback: FeedsAdapterCallback
-) : ListAdapter<Feed, FeedsAdapterViewHolder>(FeedsAdapterDiff()) {
+) : ListAdapter<FeedsAdapterItem, FeedsAdapterViewHolder>(FeedsAdapterDiff()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FeedsAdapterViewHolder {
         val binding = ListItemFeedBinding.inflate(

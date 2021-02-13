@@ -1,15 +1,14 @@
 package feeds
 
 import androidx.recyclerview.widget.DiffUtil
-import db.Feed
 
-class FeedsAdapterDiff : DiffUtil.ItemCallback<Feed>() {
+class FeedsAdapterDiff : DiffUtil.ItemCallback<FeedsAdapterItem>() {
 
-    override fun areItemsTheSame(oldItem: Feed, newItem: Feed): Boolean {
+    override fun areItemsTheSame(oldItem: FeedsAdapterItem, newItem: FeedsAdapterItem): Boolean {
         return oldItem.id == newItem.id
     }
 
-    override fun areContentsTheSame(oldItem: Feed, newItem: Feed): Boolean {
+    override fun areContentsTheSame(oldItem: FeedsAdapterItem, newItem: FeedsAdapterItem): Boolean {
         return oldItem == newItem
     }
 }

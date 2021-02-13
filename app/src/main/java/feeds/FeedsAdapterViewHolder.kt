@@ -6,14 +6,13 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
 import co.appreactor.news.databinding.ListItemFeedBinding
-import db.Feed
 
 class FeedsAdapterViewHolder(
     private val binding: ListItemFeedBinding,
     private val callback: FeedsAdapterCallback
 ) : RecyclerView.ViewHolder(binding.root) {
 
-    fun bind(item: Feed) {
+    fun bind(item: FeedsAdapterItem) {
         binding.apply {
             primaryText.text = item.title
             secondaryText.text = item.alternateLink
@@ -26,6 +25,9 @@ class FeedsAdapterViewHolder(
 //            } else {
 //                errorText.isVisible = false
 //            }
+
+            unread.isVisible = item.unreadCount > 0
+            unread.text = item.unreadCount.toString()
 
             actions.setOnClickListener {
                 val popup = PopupMenu(root.context, actions)
