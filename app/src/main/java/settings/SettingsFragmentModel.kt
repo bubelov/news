@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import co.appreactor.news.Database
 import common.*
-import logging.LoggedExceptionsRepository
+import exceptions.AppExceptionsRepository
 import com.nextcloud.android.sso.exceptions.SSOException
 import com.nextcloud.android.sso.helper.SingleAccountHelper
 import common.Preferences.Companion.AUTH_TYPE
@@ -19,7 +19,7 @@ import opml.OpmlElement
 import timber.log.Timber
 
 class SettingsFragmentModel(
-    private val loggedExceptionsRepository: LoggedExceptionsRepository,
+    private val appExceptionsRepository: AppExceptionsRepository,
     private val feedsRepository: FeedsRepository,
     private val prefs: Preferences,
     private val db: Database,
@@ -37,7 +37,7 @@ class SettingsFragmentModel(
 
     fun setCropPreviewImages(crop: Boolean) = prefs.putBooleanBlocking(CROP_PREVIEW_IMAGES, crop)
 
-    suspend fun getExceptionsCount() = loggedExceptionsRepository.selectCount()
+    suspend fun getExceptionsCount() = appExceptionsRepository.selectCount()
 
     fun getAuthType() = prefs.getStringBlocking(AUTH_TYPE)
 

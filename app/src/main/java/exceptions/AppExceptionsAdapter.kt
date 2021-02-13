@@ -1,4 +1,4 @@
-package logging
+package exceptions
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -9,15 +9,18 @@ import co.appreactor.news.databinding.ListItemLoggedExceptionBinding
 import db.LoggedException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.joda.time.Instant
+import java.text.DateFormat
+import java.util.*
 
-class LoggedExceptionsAdapter(
+class AppExceptionsAdapter(
     private val items: MutableList<LoggedException> = mutableListOf(),
-    private val callback: LoggedExceptionsAdapterCallback
-) : RecyclerView.Adapter<LoggedExceptionsAdapter.ViewHolder>() {
+    private val callback: AppExceptionsAdapterCallback
+) : RecyclerView.Adapter<AppExceptionsAdapter.ViewHolder>() {
 
     class ViewHolder(
         private val view: ListItemLoggedExceptionBinding,
-        private val callback: LoggedExceptionsAdapterCallback
+        private val callback: AppExceptionsAdapterCallback
     ) :
         RecyclerView.ViewHolder(view.root) {
 
@@ -26,7 +29,10 @@ class LoggedExceptionsAdapter(
                 topOffset.isVisible = isFirst
 
                 primaryText.text = item.exceptionClass
-                secondaryText.text = item.date
+
+                val instant = Instant.parse(item.date)
+                val format = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
+                secondaryText.text = format.format(Date(instant.millis))
 
                 clickableArea.setOnClickListener {
                     callback.onClick(item)
@@ -58,7 +64,7 @@ class LoggedExceptionsAdapter(
 
     suspend fun swapItems(newItems: List<LoggedException>) {
         val diff = withContext(Dispatchers.IO) {
-            DiffUtil.calculateDiff(LoggedExceptionsAdapterDiffCallback(items, newItems))
+            DiffUtil.calculateDiff(AppExceptionsAdapterDiffCallback(items, newItems))
         }
 
         diff.dispatchUpdatesTo(this)

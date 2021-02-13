@@ -5,7 +5,7 @@ import co.appreactor.news.BuildConfig
 import api.NewsApiSwitcher
 import di.appModule
 import di.dbModule
-import logging.PersistentLogTree
+import exceptions.AppExceptionsTree
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import common.Preferences.Companion.AUTH_TYPE
@@ -38,7 +38,7 @@ class App : Application() {
             }
         }
 
-        Timber.plant(PersistentLogTree(get()))
+        Timber.plant(AppExceptionsTree(get()))
 
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())

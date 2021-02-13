@@ -1,4 +1,4 @@
-package logging
+package exceptions
 
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToOne
@@ -11,11 +11,11 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-class LoggingExceptionsRepositoryTests {
+class AppExceptionsRepositoryTests {
 
     private val db = mockk<LoggedExceptionQueries>(relaxed = true)
 
-    private val repository = LoggedExceptionsRepository(db)
+    private val repository = AppExceptionsRepository(db)
 
     @Test
     fun `insertOrReplace()`(): Unit = runBlocking {

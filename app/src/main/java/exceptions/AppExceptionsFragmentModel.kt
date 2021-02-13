@@ -1,12 +1,12 @@
-package logging
+package exceptions
 
 import androidx.lifecycle.ViewModel
 import common.Result
 import db.LoggedException
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class LoggedExceptionsFragmentModel(
-    private val repository: LoggedExceptionsRepository
+class AppExceptionsFragmentModel(
+    private val repository: AppExceptionsRepository
 ) : ViewModel() {
 
     val items = MutableStateFlow<Result<List<LoggedException>>>(Result.Inactive)

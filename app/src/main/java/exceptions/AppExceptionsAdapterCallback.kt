@@ -1,7 +1,7 @@
-package logging
+package exceptions
 
 import db.LoggedException
 
-fun interface LoggedExceptionsAdapterCallback {
+fun interface AppExceptionsAdapterCallback {
     fun onClick(item: LoggedException)
 }

@@ -1,4 +1,4 @@
-package logging
+package exceptions
 
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToOne
@@ -7,7 +7,7 @@ import db.LoggedExceptionQueries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class LoggedExceptionsRepository(
+class AppExceptionsRepository(
     private val db: LoggedExceptionQueries
 ) {
 

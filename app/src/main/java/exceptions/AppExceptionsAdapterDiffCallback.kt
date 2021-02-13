@@ -1,9 +1,9 @@
-package logging
+package exceptions
 
 import androidx.recyclerview.widget.DiffUtil
 import db.LoggedException
 
-class LoggedExceptionsAdapterDiffCallback(
+class AppExceptionsAdapterDiffCallback(
     private val oldItems: List<LoggedException>,
     private val newItems: List<LoggedException>
 ) : DiffUtil.Callback() {

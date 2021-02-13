@@ -121,9 +121,9 @@
 
     <fragment
         android:id="@+id/exceptionsFragment"
-        android:name="logging.LoggedExceptionsFragment"
+        android:name="exceptions.AppExceptionsFragment"
         android:label="ExceptionsFragment"
-        tools:layout="@layout/fragment_logged_exceptions" />
+        tools:layout="@layout/fragment_app_exceptions" />
 
     <fragment
         android:id="@+id/searchFragment"

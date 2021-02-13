@@ -10,8 +10,8 @@ import auth.DirectAuthFragmentModel
 import common.Preferences
 import common.NewsApiSync
 import feeds.FeedsRepository
-import logging.LoggedExceptionsFragmentModel
-import logging.LoggedExceptionsRepository
+import exceptions.AppExceptionsFragmentModel
+import exceptions.AppExceptionsRepository
 import entries.EntriesFragmentModel
 import entries.EntriesRepository
 import entry.EntryFragmentModel
@@ -46,14 +46,14 @@ val appModule = module {
     single<EntriesImagesRepository>()
     single<PodcastsRepository>()
     single<Preferences>()
-    single<LoggedExceptionsRepository>()
+    single<AppExceptionsRepository>()
 
     viewModel<AuthFragmentModel>()
     viewModel<EntriesFragmentModel>()
     viewModel<EntryFragmentModel>()
     viewModel<SettingsFragmentModel>()
     viewModel<DirectAuthFragmentModel>()
-    viewModel<LoggedExceptionsFragmentModel>()
+    viewModel<AppExceptionsFragmentModel>()
     viewModel<FeedsFragmentModel>()
     viewModel<SearchFragmentModel>()
 }

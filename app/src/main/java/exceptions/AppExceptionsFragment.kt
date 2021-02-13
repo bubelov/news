@@ -1,4 +1,4 @@
-package logging
+package exceptions
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,20 +10,20 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import co.appreactor.news.R
+import co.appreactor.news.databinding.FragmentAppExceptionsBinding
 import common.showDialog
-import co.appreactor.news.databinding.FragmentLoggedExceptionsBinding
 import common.Result
 import kotlinx.coroutines.flow.collect
 import org.koin.android.viewmodel.ext.android.viewModel
 
-class LoggedExceptionsFragment : Fragment() {
+class AppExceptionsFragment : Fragment() {
 
-    private val model: LoggedExceptionsFragmentModel by viewModel()
+    private val model: AppExceptionsFragmentModel by viewModel()
 
-    private var _binding: FragmentLoggedExceptionsBinding? = null
+    private var _binding: FragmentAppExceptionsBinding? = null
     private val binding get() = _binding!!
 
-    private val adapter = LoggedExceptionsAdapter {
+    private val adapter = AppExceptionsAdapter {
         showDialog(it.exceptionClass, it.stackTrace)
     }
 
@@ -32,7 +32,7 @@ class LoggedExceptionsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentLoggedExceptionsBinding.inflate(inflater, container, false)
+        _binding = FragmentAppExceptionsBinding.inflate(inflater, container, false)
         return binding.root
     }
 
