@@ -20,7 +20,6 @@ class EntriesAdapter(
         )
 
         return EntriesAdapterViewHolder(binding, screenWidth, scope, callback)
-
     }
 
     override fun onBindViewHolder(holder: EntriesAdapterViewHolder, position: Int) {

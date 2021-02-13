@@ -80,7 +80,7 @@ class AppExceptionsFragment : Fragment() {
 
                     is Result.Success -> {
                         binding.empty.isVisible = result.data.isEmpty()
-                        adapter.swapItems(result.data)
+                        adapter.submitList(result.data)
                     }
 
                     else -> {

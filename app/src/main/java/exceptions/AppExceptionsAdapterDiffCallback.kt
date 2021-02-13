@@ -3,24 +3,13 @@ package exceptions
 import androidx.recyclerview.widget.DiffUtil
 import db.LoggedException
 
-class AppExceptionsAdapterDiffCallback(
-    private val oldItems: List<LoggedException>,
-    private val newItems: List<LoggedException>
-) : DiffUtil.Callback() {
+class AppExceptionsAdapterDiffCallback : DiffUtil.ItemCallback<LoggedException>() {
 
-    override fun getOldListSize(): Int {
-        return oldItems.size
+    override fun areItemsTheSame(oldItem: LoggedException, newItem: LoggedException): Boolean {
+        return oldItem.id == newItem.id
     }
 
-    override fun getNewListSize(): Int {
-        return newItems.size
-    }
-
-    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        return oldItems[oldItemPosition].id == newItems[newItemPosition].id
-    }
-
-    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        return oldItems[oldItemPosition] == newItems[newItemPosition]
+    override fun areContentsTheSame(oldItem: LoggedException, newItem: LoggedException): Boolean {
+        return true
     }
 }
