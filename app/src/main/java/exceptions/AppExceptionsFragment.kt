@@ -11,7 +11,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentAppExceptionsBinding
-import common.showDialog
 import common.Result
 import entries.EntriesAdapterDecoration
 import kotlinx.coroutines.flow.collect
@@ -25,7 +24,11 @@ class AppExceptionsFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val adapter = AppExceptionsAdapter {
-        showDialog(it.exceptionClass, it.stackTrace)
+        findNavController().navigate(
+            AppExceptionsFragmentDirections.actionExceptionsFragmentToExceptionFragment(
+                exceptionId = it.id
+            )
+        )
     }
 
     override fun onCreateView(

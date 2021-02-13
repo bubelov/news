@@ -19,6 +19,10 @@ class AppExceptionsRepository(
         db.selectAll().executeAsList()
     }
 
+    suspend fun select(id: String) = withContext(Dispatchers.IO) {
+        db.select(id).executeAsOneOrNull()
+    }
+
     suspend fun selectCount() = withContext(Dispatchers.IO) {
         db.selectCount().asFlow().mapToOne()
     }

@@ -11,6 +11,11 @@ INSERT OR REPLACE
 INTO LoggedException
 VALUES ?;
 
+select:
+SELECT *
+FROM LoggedException
+WHERE id = :id;
+
 selectAll:
 SELECT *
 FROM LoggedException
