@@ -182,7 +182,7 @@ class EntriesImagesRepository(
     }
 
     private fun Throwable.log(message: String) {
-        Timber.e(EntryImageProcessingException(message, this))
+        Timber.e(ImageProcessingException(message, this))
     }
 
     private fun Bitmap.hasTransparentAngles(): Boolean {

@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import co.appreactor.news.databinding.ListItemLoggedExceptionBinding
+import co.appreactor.news.databinding.ListItemAppExceptionBinding
 import db.LoggedException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -15,26 +15,27 @@ import java.util.*
 
 class AppExceptionsAdapter(
     private val items: MutableList<LoggedException> = mutableListOf(),
-    private val callback: AppExceptionsAdapterCallback
+    private val callback: AppExceptionsAdapterCallback,
 ) : RecyclerView.Adapter<AppExceptionsAdapter.ViewHolder>() {
 
     class ViewHolder(
-        private val view: ListItemLoggedExceptionBinding,
-        private val callback: AppExceptionsAdapterCallback
+        private val view: ListItemAppExceptionBinding,
+        private val callback: AppExceptionsAdapterCallback,
     ) :
         RecyclerView.ViewHolder(view.root) {
 
-        fun bind(item: LoggedException, isFirst: Boolean) {
+        fun bind(item: LoggedException) {
             view.apply {
-                topOffset.isVisible = isFirst
-
                 primaryText.text = item.exceptionClass
 
                 val instant = Instant.parse(item.date)
                 val format = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
                 secondaryText.text = format.format(Date(instant.millis))
 
-                clickableArea.setOnClickListener {
+                supportingText.isVisible = item.message.isNotBlank()
+                supportingText.text = item.message
+
+                root.setOnClickListener {
                     callback.onClick(item)
                 }
             }
@@ -42,7 +43,7 @@ class AppExceptionsAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding = ListItemLoggedExceptionBinding.inflate(
+        val binding = ListItemAppExceptionBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
@@ -56,10 +57,7 @@ class AppExceptionsAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(
-            item = items[position],
-            isFirst = position == 0
-        )
+        holder.bind(items[position])
     }
 
     suspend fun swapItems(newItems: List<LoggedException>) {

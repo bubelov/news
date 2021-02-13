@@ -13,6 +13,7 @@ import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentAppExceptionsBinding
 import common.showDialog
 import common.Result
+import entries.EntriesAdapterDecoration
 import kotlinx.coroutines.flow.collect
 import org.koin.android.viewmodel.ext.android.viewModel
 
@@ -54,6 +55,13 @@ class AppExceptionsFragment : Fragment() {
         binding.listView.setHasFixedSize(true)
         binding.listView.layoutManager = LinearLayoutManager(requireContext())
         binding.listView.adapter = adapter
+        binding.listView.addItemDecoration(
+            EntriesAdapterDecoration(
+                resources.getDimensionPixelSize(
+                    R.dimen.entries_cards_gap
+                )
+            )
+        )
 
         lifecycleScope.launchWhenResumed {
             model.onViewReady()

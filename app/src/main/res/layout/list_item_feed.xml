@@ -9,8 +9,7 @@
     android:clickable="true"
     android:focusable="true"
     android:paddingTop="8dp"
-    android:paddingBottom="8dp"
-    app:layout_constraintTop_toBottomOf="@id/topOffset">
+    android:paddingBottom="8dp">
 
     <TextView
         android:id="@+id/primaryText"
