@@ -9,6 +9,9 @@ class FeedsAdapterDiff : DiffUtil.ItemCallback<FeedsAdapterItem>() {
     }
 
     override fun areContentsTheSame(oldItem: FeedsAdapterItem, newItem: FeedsAdapterItem): Boolean {
-        return oldItem == newItem
+        return oldItem.id == newItem.id
+                && oldItem.title == newItem.title
+                && oldItem.selfLink == newItem.selfLink
+                && oldItem.alternateLink == newItem.alternateLink
     }
 }

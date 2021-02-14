@@ -3,12 +3,16 @@ package feeds
 import android.view.MenuInflater
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.isVisible
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
 import co.appreactor.news.databinding.ListItemFeedBinding
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
 
 class FeedsAdapterViewHolder(
     private val binding: ListItemFeedBinding,
+    private val scope: LifecycleCoroutineScope,
     private val callback: FeedsAdapterCallback
 ) : RecyclerView.ViewHolder(binding.root) {
 
@@ -26,8 +30,19 @@ class FeedsAdapterViewHolder(
 //                errorText.isVisible = false
 //            }
 
-            unread.isVisible = item.unreadCount > 0
-            unread.text = item.unreadCount.toString()
+            unread.isVisible = false
+
+            val job: Job? = unread.tag as Job?
+            job?.cancel()
+
+            unread.tag = scope.launchWhenResumed {
+                item.unreadCount.collect {
+                    unread.isVisible = it > 0
+                    unread.text = it.toString()
+                    unread.alpha = 0f
+                    unread.animate().alpha(1f).setDuration(150).start()
+                }
+            }
 
             actions.setOnClickListener {
                 val popup = PopupMenu(root.context, actions)

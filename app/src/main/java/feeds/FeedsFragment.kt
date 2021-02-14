@@ -32,7 +32,7 @@ class FeedsFragment : Fragment() {
     private var _binding: FragmentFeedsBinding? = null
     private val binding get() = _binding!!
 
-    private val adapter = FeedsAdapter(callback = object : FeedsAdapterCallback {
+    private val adapter = FeedsAdapter(scope = lifecycleScope, callback = object : FeedsAdapterCallback {
         override fun onFeedClick(feed: FeedsAdapterItem) {
             findNavController().navigate(
                 FeedsFragmentDirections.actionFeedsFragmentToFeedEntriesFragment(
