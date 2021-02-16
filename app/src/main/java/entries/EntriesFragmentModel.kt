@@ -17,7 +17,6 @@ import podcasts.PodcastsRepository
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import org.joda.time.Instant
-import timber.log.Timber
 import java.text.DateFormat
 import java.util.*
 
@@ -33,59 +32,78 @@ class EntriesFragmentModel(
 
     lateinit var filter: EntriesFilter
 
-    val loadingEntries = MutableStateFlow(false)
+    val state = MutableStateFlow<State>(State.WaitingForFirstView)
 
-    val syncMessage = newsApiSync.syncMessage
-
-    fun init(filter: EntriesFilter) {
+    suspend fun onViewReady(filter: EntriesFilter) {
         this.filter = filter
+
+        if (state.value is State.FailedToSync) {
+            return
+        }
+
+        if (state.value == State.WaitingForFirstView) {
+            if (prefs.getBoolean(INITIAL_SYNC_COMPLETED).first()) {
+                state.value = State.LoadingEntries
+            } else {
+                runCatching {
+                    state.value = State.PerformingInitialSync(newsApiSync.syncMessage)
+                    newsApiSync.performInitialSync()
+                }.onFailure {
+                    state.value = State.FailedToSync(it)
+                    return
+                }
+            }
+        }
+
+        getEntriesPrefs().collect { prefs ->
+            reloadEntries(prefs)
+        }
     }
 
-    suspend fun getEntries(): Flow<List<EntriesAdapterItem>> {
-        loadingEntries.value = true
+    suspend fun onRetry() {
+        state.value = State.WaitingForFirstView
+        onViewReady(filter)
+    }
 
-        return combine(
-            entriesRepository.getCount(),
-            feedsRepository.getCount(),
-            getEntriesPrefs(),
-        ) { entriesCount, feedsCount, prefs ->
-            loadingEntries.value = true
-            Timber.d("Entries: $entriesCount, feeds: $feedsCount, prefs: $prefs")
+    private suspend fun reloadEntries(prefs: EntriesSettings) {
+        state.value = State.LoadingEntries
 
-            val unsortedEntries = when (val filter = filter) {
-                is EntriesFilter.OnlyNotBookmarked -> {
-                    if (prefs.showOpenedEntries) {
-                        entriesRepository.getAll().first()
-                    } else {
-                        entriesRepository.getNotOpened().first()
-                    }.filterNot { it.bookmarked }
-                }
-
-                is EntriesFilter.OnlyBookmarked -> {
-                    entriesRepository.getBookmarked().first()
-                }
-
-                is EntriesFilter.OnlyFromFeed -> {
-                    entriesRepository.getAll().first().filter { it.feedId == filter.feedId }
-                }
+        val unsortedEntries = when (val filter = filter) {
+            is EntriesFilter.OnlyNotBookmarked -> {
+                if (prefs.showOpenedEntries) {
+                    entriesRepository.getAll().first()
+                } else {
+                    entriesRepository.getNotOpened().first()
+                }.filterNot { it.bookmarked }
             }
 
-            val sortedEntries = when (prefs.sortOrder) {
-                SORT_ORDER_ASCENDING -> unsortedEntries.sortedBy { it.published }
-                SORT_ORDER_DESCENDING -> unsortedEntries.sortedByDescending { it.published }
-                else -> unsortedEntries
+            is EntriesFilter.OnlyBookmarked -> {
+                entriesRepository.getBookmarked().first()
             }
 
-            val feeds = feedsRepository.getAll().first()
-
-            val result = sortedEntries.map {
-                val feed = feeds.singleOrNull { feed -> feed.id == it.feedId }
-                it.toRow(feed, prefs.showPreviewImages, prefs.cropPreviewImages)
+            is EntriesFilter.OnlyFromFeed -> {
+                if (prefs.showOpenedEntries) {
+                    entriesRepository.getNotOpened().first()
+                } else {
+                    entriesRepository.getAll().first()
+                }.filter { it.feedId == filter.feedId }
             }
-
-            loadingEntries.value = false
-            result
         }
+
+        val sortedEntries = when (prefs.sortOrder) {
+            SORT_ORDER_ASCENDING -> unsortedEntries.sortedBy { it.published }
+            SORT_ORDER_DESCENDING -> unsortedEntries.sortedByDescending { it.published }
+            else -> unsortedEntries
+        }
+
+        val feeds = feedsRepository.getAll().first()
+
+        val result = sortedEntries.map {
+            val feed = feeds.singleOrNull { feed -> feed.id == it.feedId }
+            it.toRow(feed, prefs.showPreviewImages, prefs.cropPreviewImages)
+        }
+
+        state.value = State.ShowingEntries(result)
     }
 
     private suspend fun getEntriesPrefs(): Flow<EntriesSettings> {
@@ -99,17 +117,10 @@ class EntriesFragmentModel(
         }.distinctUntilChanged()
     }
 
-    suspend fun performInitialSyncIfNecessary() {
-        if (!prefs.getBooleanBlocking(INITIAL_SYNC_COMPLETED)) {
-            newsApiSync.performInitialSync()
-        }
-    }
-
     suspend fun performFullSync() {
         newsApiSync.sync()
+        reloadEntries(getEntriesPrefs().first())
     }
-
-    suspend fun isInitialSyncCompleted() = prefs.getBoolean(INITIAL_SYNC_COMPLETED)
 
     suspend fun getShowOpenedEntries() = prefs.getBoolean(SHOW_OPENED_ENTRIES)
 
@@ -133,22 +144,28 @@ class EntriesFragmentModel(
     suspend fun getFeed(id: String) = feedsRepository.get(id).first()
 
     suspend fun markAsOpened(entryId: String) {
+        val state = state.value as State.ShowingEntries
+        this.state.value = State.ShowingEntries(state.entries.filterNot { it.id == entryId })
         entriesRepository.setOpened(entryId, true)
         newsApiSync.syncEntriesFlags()
     }
 
     suspend fun markAsNotOpened(entryId: String) {
         entriesRepository.setOpened(entryId, false)
+        reloadEntries(getEntriesPrefs().first())
         newsApiSync.syncEntriesFlags()
     }
 
-    suspend fun markAsBookmarked(entryId: String) = withContext(Dispatchers.IO) {
+    suspend fun markAsBookmarked(entryId: String) {
+        val state = state.value as State.ShowingEntries
+        this.state.value = State.ShowingEntries(state.entries.filterNot { it.id == entryId })
         entriesRepository.setBookmarked(entryId, true)
         newsApiSync.syncEntriesFlags()
     }
 
     suspend fun markAsNotBookmarked(entryId: String) = withContext(Dispatchers.IO) {
         entriesRepository.setBookmarked(entryId, false)
+        reloadEntries(getEntriesPrefs().first())
         newsApiSync.syncEntriesFlags()
     }
 
@@ -203,4 +220,12 @@ class EntriesFragmentModel(
         val showPreviewImages: Boolean,
         val cropPreviewImages: Boolean,
     )
+
+    sealed class State {
+        object WaitingForFirstView : State()
+        data class PerformingInitialSync(val message: Flow<String>) : State()
+        data class FailedToSync(val error: Throwable) : State()
+        object LoadingEntries : State()
+        data class ShowingEntries(val entries: List<EntriesAdapterItem>) : State()
+    }
 }

@@ -49,8 +49,6 @@ class EntriesFragment : Fragment() {
         }
     }
 
-    private var shouldScrollToTop = false
-
     private val adapter = EntriesAdapter(
         scope = lifecycleScope,
         callback = object : EntriesAdapterCallback {
@@ -154,12 +152,21 @@ class EntriesFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        model.init(args.filter!!)
         _binding = FragmentEntriesBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        lifecycleScope.launchWhenResumed {
+            model.onViewReady(args.filter!!)
+        }
+
+        binding.retry.setOnClickListener {
+            lifecycleScope.launchWhenResumed {
+                model.onRetry()
+            }
+        }
+
         when (val filter = args.filter) {
             is EntriesFilter.OnlyNotBookmarked -> {
                 binding.swipeRefresh.setOnRefreshListener {
@@ -279,35 +286,6 @@ class EntriesFragment : Fragment() {
     }
 
     private suspend fun showEntries() {
-        lifecycleScope.launchWhenResumed {
-            combine(
-                flow = model.isInitialSyncCompleted(),
-                flow2 = model.loadingEntries,
-            ) { initialSyncCompleted, loadingEntries ->
-                if (!initialSyncCompleted) {
-                    binding.progress.isVisible = true
-                    return@combine
-                }
-
-                binding.progress.isVisible = loadingEntries && adapter.itemCount == 0
-            }.collect()
-        }
-
-        lifecycleScope.launchWhenResumed {
-            model.syncMessage.collect {
-                binding.progressMessage.isVisible = it.isNotBlank()
-                binding.progressMessage.text = it
-            }
-        }
-
-        runCatching {
-            model.performInitialSyncIfNecessary()
-        }.onFailure {
-            Timber.e(it)
-            binding.progress.isVisible = false
-            showDialog(R.string.error, it.message ?: "")
-        }
-
         binding.listView.setHasFixedSize(true)
         binding.listView.layoutManager = LinearLayoutManager(context)
         binding.listView.adapter = adapter
@@ -334,35 +312,61 @@ class EntriesFragment : Fragment() {
 
         adapter.screenWidth = displayMetrics.widthPixels
 
-        model
-            .getEntries()
-            .catch {
-                Timber.e(it)
-                binding.progress.isVisible = false
-                showDialog(R.string.error, it.message ?: "")
-            }.collect { entries ->
-                binding.empty.isVisible =
-                    model.isInitialSyncCompleted()
-                        .first() && !model.loadingEntries.first() && entries.isEmpty()
-                binding.empty.text = getEmptyMessage()
+        model.state.collectLatest { state ->
+            binding.progress.isVisible = false
+            binding.message.isVisible = false
+            binding.retry.isVisible = false
 
-                adapter.submitList(entries) {
-                    if (shouldScrollToTop) {
-                        shouldScrollToTop = false
+            when (state) {
+                is EntriesFragmentModel.State.PerformingInitialSync -> {
+                    binding.progress.isVisible = true
+                    binding.progress.alpha = 0f
+                    binding.progress.animate().alpha(1f).duration = 1000
 
-                        (binding.listView.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
-                            0,
-                            0
-                        )
+                    binding.message.isVisible = true
+                    binding.message.alpha = 0f
+                    binding.message.animate().alpha(1f).duration = 1000
+
+                    state.message.collect {
+                        binding.message.text = it
                     }
                 }
+
+                is EntriesFragmentModel.State.FailedToSync -> {
+                    showDialog(R.string.error, state.error.message ?: "")
+
+                    binding.retry.isVisible = true
+                    binding.retry.alpha = 0f
+                    binding.retry.animate().alpha(1f).duration = 250
+                }
+
+                EntriesFragmentModel.State.LoadingEntries -> {
+                    binding.progress.isVisible = true
+                    binding.progress.alpha = 0f
+                    binding.progress.animate().alpha(1f).duration = 1000
+                }
+
+                is EntriesFragmentModel.State.ShowingEntries -> {
+                    binding.message.text = getEmptyMessage()
+                    binding.message.isVisible = state.entries.isEmpty()
+                    binding.message.alpha = 0f
+                    binding.message.animate().alpha(1f).duration = 500
+
+                    adapter.submitList(state.entries)
+                }
+
+                else -> {
+
+                }
             }
+        }
     }
 
     private fun getShowReadEntriesButtonVisibility(): Boolean {
-        return when (args.filter) {
+        return when (args.filter!!) {
             is EntriesFilter.OnlyNotBookmarked -> true
-            else -> false
+            is EntriesFilter.OnlyBookmarked -> false
+            is EntriesFilter.OnlyFromFeed -> true
         }
     }
 

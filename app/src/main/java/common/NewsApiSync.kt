@@ -34,10 +34,10 @@ class NewsApiSync(
 
                     val entriesSync = async {
                         entriesRepository.syncAll().collect { progress ->
-                            var message = "Fetching news..."
+                            var message = "Fetching news"
 
                             if (progress.itemsSynced > 0) {
-                                message += " Got ${progress.itemsSynced} items so far..."
+                                message += "\n Got ${progress.itemsSynced} items so far"
                             }
 
                             syncMessage.value = message

@@ -66,4 +66,5 @@
     <string name="import_feeds_from_opml_file">Importera flöde från OPML-fil</string>
     <string name="export_feeds_to_opml_file">Exportera flöde till OPML-fil</string>
     <string name="undo">Ångra</string>
+    <string name="retry">Retry</string>
 </resources>
