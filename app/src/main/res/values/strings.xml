@@ -67,4 +67,5 @@
     <string name="export_feeds_to_opml_file">Export feeds to OPML file</string>
     <string name="undo">Undo</string>
     <string name="retry">Retry</string>
+    <string name="you_have_no_unread_news">You have no unread news</string>
 </resources>

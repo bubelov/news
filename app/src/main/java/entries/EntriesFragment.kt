@@ -347,7 +347,7 @@ class EntriesFragment : Fragment() {
                 }
 
                 is EntriesFragmentModel.State.ShowingEntries -> {
-                    binding.message.text = getEmptyMessage()
+                    binding.message.text = getEmptyMessage(state.includesUnread)
                     binding.message.isVisible = state.entries.isEmpty()
                     binding.message.alpha = 0f
                     binding.message.animate().alpha(1f).duration = 500
@@ -377,10 +377,14 @@ class EntriesFragment : Fragment() {
         }
     }
 
-    private fun getEmptyMessage(): String {
+    private fun getEmptyMessage(includesUnread: Boolean): String {
         return when (args.filter) {
             is EntriesFilter.OnlyBookmarked -> getString(R.string.you_have_no_bookmarks)
-            else -> getString(R.string.news_list_is_empty)
+            else -> if (includesUnread) {
+                getString(R.string.news_list_is_empty)
+            } else {
+                getString(R.string.you_have_no_unread_news)
+            }
         }
     }
 

@@ -54,12 +54,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
+            android:lineSpacingMultiplier="1.4"
             android:paddingStart="40dp"
             android:paddingTop="8dp"
             android:paddingEnd="40dp"
             android:paddingBottom="16dp"
             android:textAppearance="?textAppearanceBody1"
-            tools:text="Error" />
+            tools:text="Error\nFoobar" />
 
         <Button
             android:id="@+id/retry"

@@ -103,7 +103,7 @@ class EntriesFragmentModel(
             it.toRow(feed, prefs.showPreviewImages, prefs.cropPreviewImages)
         }
 
-        state.value = State.ShowingEntries(result)
+        state.value = State.ShowingEntries(result, prefs.showOpenedEntries)
     }
 
     private suspend fun getEntriesPrefs(): Flow<EntriesSettings> {
@@ -145,7 +145,8 @@ class EntriesFragmentModel(
 
     suspend fun markAsOpened(entryId: String) {
         val state = state.value as State.ShowingEntries
-        this.state.value = State.ShowingEntries(state.entries.filterNot { it.id == entryId })
+        this.state.value =
+            State.ShowingEntries(state.entries.filterNot { it.id == entryId }, state.includesUnread)
         entriesRepository.setOpened(entryId, true)
         newsApiSync.syncEntriesFlags()
     }
@@ -158,7 +159,8 @@ class EntriesFragmentModel(
 
     suspend fun markAsBookmarked(entryId: String) {
         val state = state.value as State.ShowingEntries
-        this.state.value = State.ShowingEntries(state.entries.filterNot { it.id == entryId })
+        this.state.value =
+            State.ShowingEntries(state.entries.filterNot { it.id == entryId }, state.includesUnread)
         entriesRepository.setBookmarked(entryId, true)
         newsApiSync.syncEntriesFlags()
     }
@@ -226,6 +228,10 @@ class EntriesFragmentModel(
         data class PerformingInitialSync(val message: Flow<String>) : State()
         data class FailedToSync(val error: Throwable) : State()
         object LoadingEntries : State()
-        data class ShowingEntries(val entries: List<EntriesAdapterItem>) : State()
+
+        data class ShowingEntries(
+            val entries: List<EntriesAdapterItem>,
+            val includesUnread: Boolean,
+        ) : State()
     }
 }

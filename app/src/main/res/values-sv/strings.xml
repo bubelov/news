@@ -67,4 +67,5 @@
     <string name="export_feeds_to_opml_file">Exportera flöde till OPML-fil</string>
     <string name="undo">Ångra</string>
     <string name="retry">Retry</string>
+    <string name="you_have_no_unread_news">You have no unread news</string>
 </resources>
