@@ -13,13 +13,20 @@
         app:layout_constraintTop_toTopOf="parent"
         app:title="@string/feeds" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/listView"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefresh"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:scrollbars="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar" />
+        app:layout_constraintTop_toBottomOf="@id/toolbar">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/listView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <ProgressBar
         android:id="@+id/listViewProgress"

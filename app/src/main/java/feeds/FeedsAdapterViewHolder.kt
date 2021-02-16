@@ -39,8 +39,9 @@ class FeedsAdapterViewHolder(
                 item.unreadCount.collect {
                     unread.isVisible = it > 0
                     unread.text = it.toString()
+
                     unread.alpha = 0f
-                    unread.animate().alpha(1f).setDuration(150).start()
+                    unread.animate().alpha(1f).duration = 150
                 }
             }
 

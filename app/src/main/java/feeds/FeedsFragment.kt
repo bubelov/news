@@ -20,6 +20,7 @@ import common.showKeyboard
 import co.appreactor.news.databinding.FragmentFeedsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
+import common.Result
 import entries.EntriesFilter
 import kotlinx.coroutines.flow.collect
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -32,78 +33,74 @@ class FeedsFragment : Fragment() {
     private var _binding: FragmentFeedsBinding? = null
     private val binding get() = _binding!!
 
-    private val adapter = FeedsAdapter(scope = lifecycleScope, callback = object : FeedsAdapterCallback {
-        override fun onFeedClick(feed: FeedsAdapterItem) {
-            findNavController().navigate(
-                FeedsFragmentDirections.actionFeedsFragmentToFeedEntriesFragment(
-                    EntriesFilter.OnlyFromFeed(feedId = feed.id)
+    private val adapter =
+        FeedsAdapter(scope = lifecycleScope, callback = object : FeedsAdapterCallback {
+            override fun onFeedClick(feed: FeedsAdapterItem) {
+                findNavController().navigate(
+                    FeedsFragmentDirections.actionFeedsFragmentToFeedEntriesFragment(
+                        EntriesFilter.OnlyFromFeed(feedId = feed.id)
+                    )
                 )
-            )
-        }
-
-        override fun onOpenHtmlLinkClick(feed: FeedsAdapterItem) {
-            val intent = Intent(Intent.ACTION_VIEW)
-            intent.data = Uri.parse(feed.alternateLink)
-            startActivity(intent)
-        }
-
-        override fun openLinkClick(feed: FeedsAdapterItem) {
-            val intent = Intent(Intent.ACTION_VIEW)
-            intent.data = Uri.parse(feed.selfLink)
-            startActivity(intent)
-        }
-
-        override fun onRenameClick(feed: FeedsAdapterItem) {
-            val dialog = MaterialAlertDialogBuilder(requireContext())
-                .setTitle(getString(R.string.rename))
-                .setView(R.layout.dialog_rename_feed)
-                .setPositiveButton(R.string.rename) { dialogInterface, _ ->
-                    val dialog = dialogInterface as AlertDialog
-
-                    lifecycleScope.launchWhenResumed {
-                        binding.actionProgress.isVisible = true
-                        binding.fab.isVisible = false
-
-                        runCatching {
-                            val titleView = dialog.findViewById<TextInputEditText>(R.id.titleView)!!
-                            model.renameFeed(feed.id, titleView.text.toString())
-                        }.onFailure {
-                            Timber.e(it)
-                            showDialog(R.string.error, it.message ?: "")
-                        }
-
-                        binding.actionProgress.isVisible = false
-                        binding.fab.isVisible = true
-                    }
-                }
-                .setNegativeButton(R.string.cancel, null)
-                .setOnDismissListener { hideKeyboard() }
-                .show()
-
-            val titleView = dialog.findViewById<TextInputEditText>(R.id.titleView)!!
-            titleView.append(feed.title)
-            titleView.requestFocus()
-
-            requireContext().showKeyboard()
-        }
-
-        override fun onDeleteClick(feed: FeedsAdapterItem) {
-            lifecycleScope.launchWhenResumed {
-                binding.actionProgress.isVisible = true
-                binding.fab.isVisible = false
-
-                runCatching {
-                    model.deleteFeed(feed.id)
-                }.onFailure {
-                    Timber.e(it)
-                    showDialog(R.string.error, it.message ?: "")
-                }
-
-                binding.actionProgress.isVisible = false
-                binding.fab.isVisible = true
             }
-        }
-    })
+
+            override fun onOpenHtmlLinkClick(feed: FeedsAdapterItem) {
+                val intent = Intent(Intent.ACTION_VIEW)
+                intent.data = Uri.parse(feed.alternateLink)
+                startActivity(intent)
+            }
+
+            override fun openLinkClick(feed: FeedsAdapterItem) {
+                val intent = Intent(Intent.ACTION_VIEW)
+                intent.data = Uri.parse(feed.selfLink)
+                startActivity(intent)
+            }
+
+            override fun onRenameClick(feed: FeedsAdapterItem) {
+                val dialog = MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(getString(R.string.rename))
+                    .setView(R.layout.dialog_rename_feed)
+                    .setPositiveButton(R.string.rename) { dialogInterface, _ ->
+                        lifecycleScope.launchWhenResumed {
+                            binding.swipeRefresh.isRefreshing = true
+
+                            runCatching {
+                                val dialog = dialogInterface as AlertDialog
+                                val title = dialog.findViewById<TextInputEditText>(R.id.title)!!
+                                model.renameFeed(feed.id, title.text.toString())
+                            }.onFailure {
+                                Timber.e(it)
+                                showDialog(R.string.error, it.message ?: "")
+                            }
+
+                            binding.swipeRefresh.isRefreshing = false
+                        }
+                    }
+                    .setNegativeButton(R.string.cancel, null)
+                    .setOnDismissListener { hideKeyboard() }
+                    .show()
+
+                val title = dialog.findViewById<TextInputEditText>(R.id.title)!!
+                title.append(feed.title)
+                title.requestFocus()
+
+                requireContext().showKeyboard()
+            }
+
+            override fun onDeleteClick(feed: FeedsAdapterItem) {
+                lifecycleScope.launchWhenResumed {
+                    binding.swipeRefresh.isRefreshing = true
+
+                    runCatching {
+                        model.deleteFeed(feed.id)
+                    }.onFailure {
+                        Timber.e(it)
+                        showDialog(R.string.error, it.message ?: "")
+                    }
+
+                    binding.swipeRefresh.isRefreshing = false
+                }
+            }
+        })
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -115,6 +112,8 @@ class FeedsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        binding.swipeRefresh.isEnabled = false
+
         binding.toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
@@ -131,12 +130,30 @@ class FeedsFragment : Fragment() {
         })
 
         lifecycleScope.launchWhenResumed {
-            binding.listViewProgress.isVisible = true
+            model.onViewReady()
+        }
 
-            model.getFeeds().collect { feeds ->
+        lifecycleScope.launchWhenResumed {
+            model.items.collect { result ->
                 binding.listViewProgress.isVisible = false
-                binding.empty.isVisible = feeds.isEmpty()
-                adapter.submitList(feeds)
+
+                when (result) {
+                    Result.Progress -> {
+                        binding.listViewProgress.isVisible = true
+
+                        binding.listViewProgress.alpha = 0f
+                        binding.listViewProgress.animate().alpha(1f).duration = 1000
+                    }
+
+                    is Result.Success -> {
+                        binding.empty.isVisible = result.data.isEmpty()
+                        adapter.submitList(result.data)
+                    }
+
+                    else -> {
+
+                    }
+                }
             }
         }
 
@@ -148,19 +165,17 @@ class FeedsFragment : Fragment() {
                     val dialog = dialogInterface as AlertDialog
 
                     lifecycleScope.launchWhenResumed {
-                        binding.actionProgress.isVisible = true
-                        binding.fab.isVisible = false
+                        binding.swipeRefresh.isRefreshing = true
 
                         runCatching {
-                            val urlView = dialog.findViewById<TextInputEditText>(R.id.urlView)!!
+                            val urlView = dialog.findViewById<TextInputEditText>(R.id.url)!!
                             model.createFeed(urlView.text.toString())
                         }.onFailure {
                             Timber.e(it)
                             showDialog(R.string.error, it.message ?: "")
                         }
 
-                        binding.actionProgress.isVisible = false
-                        binding.fab.isVisible = true
+                        binding.swipeRefresh.isRefreshing = false
                     }
                 }
                 .setNegativeButton(R.string.cancel, null)

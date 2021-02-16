@@ -77,8 +77,9 @@ class AppExceptionsFragment : Fragment() {
                 when (result) {
                     is Result.Progress -> {
                         binding.progress.isVisible = true
+
                         binding.progress.alpha = 0f
-                        binding.progress.animate().alpha(1f).setDuration(1000).start()
+                        binding.progress.animate().alpha(1f).duration = 1000
                     }
 
                     is Result.Success -> {
