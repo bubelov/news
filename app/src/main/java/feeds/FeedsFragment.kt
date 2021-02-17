@@ -146,7 +146,14 @@ class FeedsFragment : Fragment() {
                     }
 
                     is Result.Success -> {
-                        binding.empty.isVisible = result.data.isEmpty()
+                        if (result.data.isEmpty()) {
+                            binding.empty.isVisible = true
+                            binding.empty.alpha = 0f
+                            binding.empty.animate().alpha(1f).duration = 250
+                        } else {
+                            binding.empty.isVisible
+                        }
+
                         adapter.submitList(result.data)
                     }
 

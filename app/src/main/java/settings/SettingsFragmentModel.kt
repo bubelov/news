@@ -14,6 +14,7 @@ import common.Preferences.Companion.NEXTCLOUD_SERVER_USERNAME
 import common.Preferences.Companion.SHOW_OPENED_ENTRIES
 import common.Preferences.Companion.SHOW_PREVIEW_IMAGES
 import feeds.FeedsRepository
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import opml.OpmlElement
 import timber.log.Timber
@@ -24,6 +25,8 @@ class SettingsFragmentModel(
     private val prefs: Preferences,
     private val db: Database,
 ) : ViewModel() {
+
+    val state = MutableStateFlow<State>(State.NoActivity)
 
     suspend fun getShowOpenedEntries() = prefs.getBoolean(SHOW_OPENED_ENTRIES)
 
@@ -65,6 +68,11 @@ class SettingsFragmentModel(
         var exists = 0
         var failed = 0
 
+        state.value = State.ImportingFeeds(
+            imported = 0,
+            total = feeds.size,
+        )
+
         val cachedFeeds = feedsRepository.getAll().first()
 
         feeds.forEach { opml ->
@@ -80,7 +88,14 @@ class SettingsFragmentModel(
             }.onFailure {
                 failed++
             }
+
+            state.value = State.ImportingFeeds(
+                imported = added + exists + failed,
+                total = feeds.size,
+            )
         }
+
+        state.value = State.NoActivity
 
         return FeedImportResult(
             added = added,
@@ -108,4 +123,9 @@ class SettingsFragmentModel(
         val exists: Int,
         val failed: Int,
     )
+
+    sealed class State {
+        object NoActivity : State()
+        data class ImportingFeeds(val imported: Int, val total: Int) : State()
+    }
 }

@@ -143,6 +143,34 @@ class SettingsFragment : Fragment() {
 
             startActivityForResult(intent, EXPORT_REQUEST)
         }
+
+        lifecycleScope.launchWhenResumed {
+            model.state.collect { state ->
+                if (state is SettingsFragmentModel.State.ImportingFeeds) {
+                    binding.content.isVisible = false
+
+                    if (!binding.progress.isVisible) {
+                        binding.progress.isVisible = true
+                        binding.progress.alpha = 0f
+                        binding.progress.animate().alpha(1f).duration = 1000
+                    }
+
+                    if (!binding.progressMessage.isVisible) {
+                        binding.progressMessage.isVisible = true
+                        binding.progressMessage.alpha = 0f
+                        binding.progressMessage.animate().alpha(1f).duration = 1000
+                    }
+
+                    binding.progressMessage.text =
+                        getString(R.string.importing_feeds_n_of_n, state.imported, state.total)
+                } else {
+                    binding.content.isVisible = true
+
+                    binding.progress.isVisible = false
+                    binding.progressMessage.isVisible = false
+                }
+            }
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

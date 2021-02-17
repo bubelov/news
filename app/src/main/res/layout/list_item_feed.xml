@@ -63,13 +63,13 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:background="@drawable/bg_circle"
-        android:paddingTop="2dp"
-        android:paddingBottom="2dp"
         android:paddingStart="6dp"
+        android:paddingTop="2dp"
         android:paddingEnd="6dp"
-        android:text="666"
+        android:paddingBottom="2dp"
         android:textAppearance="?attr/textAppearanceCaption"
-        android:textColor="@android:color/white" />
+        android:textColor="@android:color/white"
+        tools:text="666" />
 
     <ImageView
         android:id="@+id/actions"
