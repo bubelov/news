@@ -69,4 +69,5 @@
     <string name="retry">Retry</string>
     <string name="you_have_no_unread_news">You have no unread news</string>
     <string name="importing_feeds_n_of_n">Importing feeds (%1$d of %2$d)</string>
+    <string name="mark_scrolled_entries_as_read">Mark scrolled entries as read</string>
 </resources>

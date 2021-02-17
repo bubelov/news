@@ -39,6 +39,12 @@ class EntriesFragment : Fragment() {
     private var _binding: FragmentEntriesBinding? = null
     private val binding get() = _binding!!
 
+    private val layoutManager by lazy {
+        LinearLayoutManager(context)
+    }
+
+    private val seenItems = mutableSetOf<Int>()
+
     private val snackbar by lazy {
         Snackbar.make(
             binding.root,
@@ -287,7 +293,7 @@ class EntriesFragment : Fragment() {
 
     private suspend fun showEntries() {
         binding.listView.setHasFixedSize(true)
-        binding.listView.layoutManager = LinearLayoutManager(context)
+        binding.listView.layoutManager = layoutManager
         binding.listView.adapter = adapter
         binding.listView.addItemDecoration(
             EntriesAdapterDecoration(
@@ -296,6 +302,53 @@ class EntriesFragment : Fragment() {
                 )
             )
         )
+
+        lifecycleScope.launchWhenResumed {
+            if (model.getMarkScrolledEntriesAsRead().first()
+                && args.filter is EntriesFilter.OnlyNotBookmarked
+            ) {
+                binding.listView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                    override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+
+                    }
+
+                    override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                        if (recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE) {
+                            return
+                        }
+
+                        if (layoutManager.findFirstVisibleItemPosition() == RecyclerView.NO_POSITION) {
+                            return
+                        }
+
+                        if (layoutManager.findLastVisibleItemPosition() == RecyclerView.NO_POSITION) {
+                            return
+                        }
+
+                        val visibleRange =
+                            layoutManager.findFirstVisibleItemPosition()..layoutManager.findLastVisibleItemPosition()
+                        seenItems.addAll(visibleRange)
+
+                        val seenItemsOutOfRange = seenItems.filterNot { visibleRange.contains(it) }
+                        seenItems.removeAll(seenItemsOutOfRange)
+
+                        seenItemsOutOfRange.forEach {
+                            adapter.currentList[it]?.apply {
+                                if (!opened.value) {
+                                    opened.value = true
+                                    lifecycleScope.launchWhenResumed {
+                                        model.markAsOpened(
+                                            this@apply.id,
+                                            changeState = false,
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                })
+            }
+        }
 
         if (swipesAllowed()) {
             touchHelper.attachToRecyclerView(binding.listView)
@@ -352,6 +405,7 @@ class EntriesFragment : Fragment() {
                     binding.message.alpha = 0f
                     binding.message.animate().alpha(1f).duration = 500
 
+                    seenItems.clear()
                     adapter.submitList(state.entries)
                 }
 

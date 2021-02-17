@@ -2,6 +2,7 @@ package entries
 
 import db.EntryImage
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 
 data class EntriesAdapterItem(
     val id: String,
@@ -15,5 +16,5 @@ data class EntriesAdapterItem(
     val cropImage: Boolean,
     val supportingText: Flow<String>,
     val cachedSupportingText: String?,
-    val opened: Boolean,
+    var opened: MutableStateFlow<Boolean>,
 )

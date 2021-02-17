@@ -78,7 +78,7 @@ class SearchFragmentModel(
                 )
             },
             cachedSupportingText = entriesSupportingTextRepository.getCachedSupportingText(this.id),
-            opened = opened,
+            opened = MutableStateFlow(opened),
         )
     }
 }

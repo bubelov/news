@@ -68,6 +68,15 @@ class SettingsFragment : Fragment() {
                 }
             }
 
+            binding.markScrolledEntriesAsRead.isChecked =
+                model.getMarkScrolledEntriesAsRead().first()
+
+            binding.markScrolledEntriesAsRead.setOnCheckedChangeListener { _, isChecked ->
+                lifecycleScope.launch {
+                    model.setMarkScrolledEntriesAsRead(isChecked)
+                }
+            }
+
             when (model.getAuthType()) {
                 Preferences.AUTH_TYPE_STANDALONE -> {
                     binding.logOutTitle.setText(R.string.delete_all_data)

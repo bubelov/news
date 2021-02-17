@@ -62,6 +62,7 @@ class Preferences(
             SHOW_OPENED_ENTRIES -> false
             SHOW_PREVIEW_IMAGES -> true
             CROP_PREVIEW_IMAGES -> true
+            MARK_SCROLLED_ENTRIES_AS_READ -> false
             else -> throw Exception("No defaults for key $key")
         }
     }
@@ -86,5 +87,7 @@ class Preferences(
 
         const val SHOW_PREVIEW_IMAGES = "show_preview_images"
         const val CROP_PREVIEW_IMAGES = "crop_preview_images"
+
+        const val MARK_SCROLLED_ENTRIES_AS_READ = "mark_scrolled_entries_as_read"
     }
 }

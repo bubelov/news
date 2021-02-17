@@ -7,6 +7,7 @@ import feeds.FeedsRepository
 import db.Feed
 import common.Preferences.Companion.CROP_PREVIEW_IMAGES
 import common.Preferences.Companion.INITIAL_SYNC_COMPLETED
+import common.Preferences.Companion.MARK_SCROLLED_ENTRIES_AS_READ
 import common.Preferences.Companion.SHOW_OPENED_ENTRIES
 import common.Preferences.Companion.SHOW_PREVIEW_IMAGES
 import common.Preferences.Companion.SORT_ORDER
@@ -132,6 +133,8 @@ class EntriesFragmentModel(
 
     suspend fun setSortOrder(sortOrder: String) = prefs.putString(SORT_ORDER, sortOrder)
 
+    suspend fun getMarkScrolledEntriesAsRead() = prefs.getBoolean(MARK_SCROLLED_ENTRIES_AS_READ)
+
     suspend fun downloadPodcast(id: String) {
         podcastsRepository.download(id)
     }
@@ -143,10 +146,13 @@ class EntriesFragmentModel(
 
     suspend fun getFeed(id: String) = feedsRepository.get(id).first()
 
-    suspend fun markAsOpened(entryId: String) {
-        val state = state.value as State.ShowingEntries
-        this.state.value =
-            State.ShowingEntries(state.entries.filterNot { it.id == entryId }, state.includesUnread)
+    suspend fun markAsOpened(entryId: String, changeState: Boolean = true) {
+        if (changeState) {
+            val state = state.value as State.ShowingEntries
+            this.state.value =
+                State.ShowingEntries(state.entries.filterNot { it.id == entryId }, state.includesUnread)
+        }
+
         entriesRepository.setOpened(entryId, true)
         newsApiSync.syncEntriesFlags()
     }
@@ -212,7 +218,7 @@ class EntriesFragmentModel(
                 )
             },
             cachedSupportingText = entriesSupportingTextRepository.getCachedSupportingText(this.id),
-            opened = opened,
+            opened = MutableStateFlow(opened),
         )
     }
 

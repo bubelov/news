@@ -9,6 +9,7 @@ import com.nextcloud.android.sso.exceptions.SSOException
 import com.nextcloud.android.sso.helper.SingleAccountHelper
 import common.Preferences.Companion.AUTH_TYPE
 import common.Preferences.Companion.CROP_PREVIEW_IMAGES
+import common.Preferences.Companion.MARK_SCROLLED_ENTRIES_AS_READ
 import common.Preferences.Companion.NEXTCLOUD_SERVER_URL
 import common.Preferences.Companion.NEXTCLOUD_SERVER_USERNAME
 import common.Preferences.Companion.SHOW_OPENED_ENTRIES
@@ -39,6 +40,13 @@ class SettingsFragmentModel(
     suspend fun getCropPreviewImages() = prefs.getBoolean(CROP_PREVIEW_IMAGES)
 
     fun setCropPreviewImages(crop: Boolean) = prefs.putBooleanBlocking(CROP_PREVIEW_IMAGES, crop)
+
+    suspend fun getMarkScrolledEntriesAsRead() = prefs.getBoolean(MARK_SCROLLED_ENTRIES_AS_READ)
+
+    fun setMarkScrolledEntriesAsRead(mark: Boolean) = prefs.putBooleanBlocking(
+        key = MARK_SCROLLED_ENTRIES_AS_READ,
+        value = mark,
+    )
 
     suspend fun getExceptionsCount() = appExceptionsRepository.selectCount()
 

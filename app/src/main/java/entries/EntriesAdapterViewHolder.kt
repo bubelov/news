@@ -8,6 +8,7 @@ import co.appreactor.news.databinding.ListItemEntryBinding
 import db.EntryImage
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 
 class EntriesAdapterViewHolder(
@@ -68,7 +69,8 @@ class EntriesAdapterViewHolder(
                         }
                     }
 
-                    val picassoRequestCreator = Picasso.get().load(if (image.url.isBlank()) null else image.url)
+                    val picassoRequestCreator =
+                        Picasso.get().load(if (image.url.isBlank()) null else image.url)
 
                     if (image.width > 0) {
                         picassoRequestCreator.resize(image.width.toInt(), 0)
@@ -155,9 +157,16 @@ class EntriesAdapterViewHolder(
                 }
             }
 
-            primaryText.isEnabled = !item.opened
-            secondaryText.isEnabled = !item.opened
-            supportingText.isEnabled = !item.opened
+            val job: Job? = primaryText.tag as Job?
+            job?.cancel()
+
+            primaryText.tag = scope.launchWhenResumed {
+                item.opened.collect {
+                    primaryText.isEnabled = !it
+                    secondaryText.isEnabled = !it
+                    supportingText.isEnabled = !it
+                }
+            }
 
             root.setOnClickListener {
                 callback.onItemClick(item)
