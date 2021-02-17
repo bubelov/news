@@ -1,8 +1,9 @@
 import org.w3c.dom.Document
 import org.w3c.dom.Element
-import java.time.Instant
-import java.time.format.DateTimeFormatter
+import java.text.SimpleDateFormat
 import java.util.*
+
+val RFC_822 = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.US)
 
 fun Document.getFeedType(): FeedType {
     if (documentElement.tagName == "feed" && documentElement.getAttribute("xmlns") == "http://www.w3.org/2005/Atom") {
@@ -159,7 +160,13 @@ fun Document.toRssEntries(): List<ParsedEntry> {
             ""
         }
 
-        val description = item.getElementsByTagName("description").item(0).textContent ?: ""
+        val descriptionElements = item.getElementsByTagName("description")
+
+        val description = if (descriptionElements.length > 0) {
+            descriptionElements.item(0).textContent ?: ""
+        } else {
+            ""
+        }
 
         val enclosureLink = if (item.getElementsByTagName("enclosure").length > 0) {
             item.getElementsByTagName("enclosure")
@@ -175,7 +182,7 @@ fun Document.toRssEntries(): List<ParsedEntry> {
             ""
         }
 
-        val parsedDate = Instant.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(pubDate))!!
+        val parsedDate = RFC_822.parse(pubDate).toInstant()
 
         ParsedEntry(
             id = guid,

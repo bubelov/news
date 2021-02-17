@@ -37,7 +37,10 @@ class DocumentExtensionsTests {
         "youtube.atom".toDocument().toAtomFeed().apply {
             assertEquals("yt:channel:UCXuqSBlHAE6Xw-yeJA0Tunw", id)
             assertEquals("Linus Tech Tips", title)
-            assertEquals("https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw", selfLink)
+            assertEquals(
+                "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
+                selfLink
+            )
             assertEquals("https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw", alternateLink)
         }
     }
@@ -62,6 +65,20 @@ class DocumentExtensionsTests {
             assertEquals("New RFCs", title)
             assertEquals("https://foo.bar", selfLink)
             assertEquals("https://tools.ietf.org/html/", alternateLink)
+        }
+    }
+
+    @Test
+    fun parseDates() {
+        val dates = listOf(
+            "Mon, 21 Jan 2019 16:06:12 GMT",
+            "Mon, 27 Jan 2020 17:55:00 EST",
+        )
+
+        dates.forEach { date ->
+            println("Testing date: $date")
+            val parsedDate = RFC_822.parse(date).toInstant()
+            println("Parsed date: $parsedDate")
         }
     }
 
