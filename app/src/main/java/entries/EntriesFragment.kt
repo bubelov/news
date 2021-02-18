@@ -39,10 +39,6 @@ class EntriesFragment : Fragment() {
     private var _binding: FragmentEntriesBinding? = null
     private val binding get() = _binding!!
 
-    private val layoutManager by lazy {
-        LinearLayoutManager(context)
-    }
-
     private val seenItems = mutableSetOf<Int>()
 
     private val snackbar by lazy {
@@ -293,6 +289,7 @@ class EntriesFragment : Fragment() {
 
     private suspend fun showEntries() {
         binding.listView.setHasFixedSize(true)
+        val layoutManager = LinearLayoutManager(requireContext())
         binding.listView.layoutManager = layoutManager
         binding.listView.adapter = adapter
         binding.listView.addItemDecoration(
