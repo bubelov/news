@@ -157,6 +157,13 @@ class EntriesFragmentModel(
         newsApiSync.syncEntriesFlags()
     }
 
+    fun markAsOpened(entriesIds: List<String>) {
+        GlobalScope.launch {
+            entriesIds.forEach { entriesRepository.setOpened(it, true) }
+            newsApiSync.syncEntriesFlags()
+        }
+    }
+
     suspend fun markAsNotOpened(entryId: String) {
         entriesRepository.setOpened(entryId, false)
         reloadEntries(getEntriesPrefs().first())

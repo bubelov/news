@@ -11,6 +11,7 @@ java {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
     implementation "joda-time:joda-time:$versions_joda_time"
+    implementation "org.jsoup:jsoup:$versions_jsoup"
     
     testImplementation "junit:junit:$versions_junit"
 }

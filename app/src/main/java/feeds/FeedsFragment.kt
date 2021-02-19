@@ -136,6 +136,7 @@ class FeedsFragment : Fragment() {
         lifecycleScope.launchWhenResumed {
             model.items.collect { result ->
                 binding.listViewProgress.isVisible = false
+                binding.empty.isVisible = false
 
                 when (result) {
                     Result.Progress -> {

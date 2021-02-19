@@ -73,6 +73,7 @@ class AppExceptionsFragment : Fragment() {
         lifecycleScope.launchWhenResumed {
             model.items.collect { result ->
                 binding.progress.isVisible = false
+                binding.empty.isVisible = false
 
                 when (result) {
                     is Result.Progress -> {
@@ -83,7 +84,12 @@ class AppExceptionsFragment : Fragment() {
                     }
 
                     is Result.Success -> {
-                        binding.empty.isVisible = result.data.isEmpty()
+                        if (result.data.isEmpty()) {
+                            binding.empty.isVisible = true
+                            binding.empty.alpha = 0f
+                            binding.empty.animate().alpha(1f).duration = 250
+                        }
+
                         adapter.submitList(result.data)
                     }
 

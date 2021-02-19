@@ -25,6 +25,7 @@ import common.Preferences
 import db.Entry
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.koin.android.viewmodel.ext.android.viewModel
 import timber.log.Timber
 
@@ -39,7 +40,7 @@ class EntriesFragment : Fragment() {
     private var _binding: FragmentEntriesBinding? = null
     private val binding get() = _binding!!
 
-    private val seenItems = mutableSetOf<Int>()
+    private val seenEntries = mutableSetOf<EntriesAdapterItem>()
 
     private val snackbar by lazy {
         Snackbar.make(
@@ -285,6 +286,10 @@ class EntriesFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+
+        if (runBlocking { model.getMarkScrolledEntriesAsRead().first() }) {
+            model.markAsOpened(seenEntries.map { it.id })
+        }
     }
 
     private suspend fun showEntries() {
@@ -322,23 +327,25 @@ class EntriesFragment : Fragment() {
                             return
                         }
 
-                        val visibleRange =
-                            layoutManager.findFirstVisibleItemPosition()..layoutManager.findLastVisibleItemPosition()
-                        seenItems.addAll(visibleRange)
+                        val visibleEntries =
+                            (layoutManager.findFirstVisibleItemPosition()..layoutManager.findLastVisibleItemPosition()).map {
+                                adapter.currentList[it]
+                            }
 
-                        val seenItemsOutOfRange = seenItems.filterNot { visibleRange.contains(it) }
-                        seenItems.removeAll(seenItemsOutOfRange)
+                        seenEntries.addAll(visibleEntries)
+
+                        val seenItemsOutOfRange =
+                            seenEntries.filterNot { visibleEntries.contains(it) }
+                        seenEntries.removeAll(seenItemsOutOfRange)
 
                         seenItemsOutOfRange.forEach {
-                            adapter.currentList[it]?.apply {
-                                if (!opened.value) {
-                                    opened.value = true
-                                    lifecycleScope.launchWhenResumed {
-                                        model.markAsOpened(
-                                            this@apply.id,
-                                            changeState = false,
-                                        )
-                                    }
+                            if (!it.opened.value) {
+                                it.opened.value = true
+                                lifecycleScope.launchWhenResumed {
+                                    model.markAsOpened(
+                                        it.id,
+                                        changeState = false,
+                                    )
                                 }
                             }
                         }
@@ -402,7 +409,7 @@ class EntriesFragment : Fragment() {
                     binding.message.alpha = 0f
                     binding.message.animate().alpha(1f).duration = 500
 
-                    seenItems.clear()
+                    seenEntries.clear()
                     adapter.submitList(state.entries)
                 }
 

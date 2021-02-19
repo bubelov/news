@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.flowOf
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.joda.time.Instant
+import org.jsoup.Jsoup
 import timber.log.Timber
 import toAtomEntries
 import toAtomFeed
@@ -33,10 +34,16 @@ class StandaloneNewsApi(
             throw Exception("Insecure feeds are not allowed. Please use HTTPS.")
         }
 
-        if (!isHttps) {
-            throw Exception("Unknown URI format.")
+        val fullUri = if (!isHttps) {
+            "https://$uri"
+        } else {
+            uri
         }
 
+        return getFeed(fullUri)
+    }
+
+    private fun getFeed(uri: String): Feed {
         val request = Request.Builder()
             .url(uri)
             .build()
@@ -48,13 +55,32 @@ class StandaloneNewsApi(
         }
 
         val responseBody = response.body ?: throw Exception("Response has empty body")
-        val builder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-        val document = builder.parse(responseBody.byteStream())
 
-        return when (document.getFeedType()) {
-            FeedType.ATOM -> document.toAtomFeed(uri).toFeed()
-            FeedType.RSS -> document.toRssFeed(uri).toFeed()
-            FeedType.UNKNOWN -> throw Exception("Unknown feed type")
+        if (response.header("content-type") == "text/html") {
+            val html = responseBody.string()
+
+            val atomElements = Jsoup
+                .parse(html)
+                .select("link[type=\"application/rss+xml\"]")
+
+            val rssElements = Jsoup
+                .parse(html)
+                .select("link[type=\"application/atom+xml\"]")
+
+            if (atomElements.isEmpty() && rssElements.isEmpty()) {
+                throw Exception("Cannot find feeds for $uri")
+            }
+
+            return getFeed((atomElements + rssElements).first().attr("href"))
+        } else {
+            val builder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+            val document = builder.parse(responseBody.byteStream())
+
+            return when (document.getFeedType()) {
+                FeedType.ATOM -> document.toAtomFeed(uri).toFeed()
+                FeedType.RSS -> document.toRssFeed(uri).toFeed()
+                FeedType.UNKNOWN -> throw Exception("Unknown feed type")
+            }
         }
     }
 
