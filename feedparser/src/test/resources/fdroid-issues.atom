@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/">
+<title>Requests For Packaging issues</title>
+<link href="/fdroid/rfp/-/issues.atom?feed_token=gdoyU2ZstimRyxzcCh4P&amp;state=opened" rel="self" type="application/atom+xml"/>
+<link href="https://gitlab.com/fdroid/rfp/-/issues" rel="alternate" type="text/html"/>
+<id>https://gitlab.com/fdroid/rfp/-/issues</id>
+<updated>2021-02-19T07:07:46Z</updated>
+<entry>
+  <id>https://gitlab.com/fdroid/rfp/-/issues/1649</id>
+  <link href="https://gitlab.com/fdroid/rfp/-/issues/1649"/>
+  <title>Udemy Grabber</title>
+  <updated>2021-02-19T07:07:46Z</updated>
+  <media:thumbnail width="40" height="40" url="https://secure.gravatar.com/avatar/5899f15ed9e3fe41d7302548957c658e?s=80&amp;d=identicon"/>
+  <author>
+    <name>Anish Gowda</name>
+    <email></email>
+  </author>
+  <summary>Udemy Grabber</summary>
+  <description>* [x] The app complies with the [inclusion criteria](https://f-droid.org/docs/Inclusion_Policy/?title=Inclusion_Policy).
+* [x] The app is not already [listed](https://gitlab.com/search?scope=issues&amp;group_id=28397) in the repo or issue tracker.
+* [x] The app has not already [been requested](https://gitlab.com/search?scope=issues&amp;project_id=2167965)
+* [ ] The upstream app source code repo contains the app metadata _(summary/description/images/changelog/etc)_ in a [Fastlane](https://gitlab.com/snippets/1895688) or [Triple-T](https://gitlab.com/snippets/1901490) folder structure
+* [x] The original app author has been notified, and does not oppose the inclusion.
+* [ ] [Donated](https://f-droid.org/donate/) to support the maintenance of this app in F-Droid.
+
+---------------------
+
+The first step is to find the app's
+[_Application ID_](https://developer.android.com/studio/build/application-id.html).
+This is usually the same as the app's _Package Name_. You will find it
+in files called _AndroidManifest.xml_ or _build.gradle_ most of the
+time. You can also see it in the URLs for the app's page in various
+app stores. Write it here:
+
+#### APPLICATION ID: com.gowdaanish21.udemy_course_grabber
+
+Below is a template "metadata file" to fill out, it has only the
+required fields.  F-Droid uses this file to build and publish the app.
+[Build Metadata Reference](https://f-droid.org/docs/Build_Metadata_Reference)
+documents all available options. Add values after the colon
+
+
+```yaml
+# Categories (one per line, each starting with a space and a minus), chosen from the
+# official list: https://gitlab.com/fdroid/fdroiddata/blob/master/stats/categories.txt
+Categories:
+ - Science &amp; Education 250
+
+# the one license that the whole app is available under, use
+# https://spdx.org/licenses/ short identifiers, must be
+# floss-compatible.
+License:
+- GPL-3.0-only
+
+# You can provide details on how to contact the author. These are optional, but
+# nice to have.
+AuthorName: Anish Gowda
+AuthorEmail: simplecomplexthinker@protonmail.com
+AuthorWebSite:
+
+# A URL for the project's website, and to the source code repository to visit
+# using a web browser. WebSite is optional.
+WebSite:
+SourceCode: https://github.com/anishgowda21/Udemy-Grabber/
+
+# A link to the issue tracker where bugs are reported
+IssueTracker: https://github.com/anishgowda21/Udemy-Grabber/issues
+
+# If available, you can also provide links/IDs for donations.
+Donate:
+Bitcoin:
+LiberaPay:
+
+# Name of the application
+AutoName: Udemy Grabber
+
+# One sentence, no more than 30-50 chars, no trailing punctuation,
+# focus on actions what the users does with the app, e.g. "Read and
+# send emails" instead of "Email client".
+# NOTE: Summary and Description are preferably provided via Fastlane or Triple-T!
+Summary: App to grab udemy paid courses which are temporarily free
+Description:
+- Get paid udemy courses for free using the coupen codes.
+- One click to get the course url with coupen code embedded int it.
+
+# Repository details to be used by VCS (Version Control Systems)
+# git, git-svn, svn, hg or bzr
+RepoType: git
+
+# source code repo URL (HTTPS required)
+Repo: https://github.com/anishgowda21/Udemy-Grabber/
+```</description>
+  <content>* [x] The app complies with the [inclusion criteria](https://f-droid.org/docs/Inclusion_Policy/?title=Inclusion_Policy).
+* [x] The app is not already [listed](https://gitlab.com/search?scope=issues&amp;group_id=28397) in the repo or issue tracker.
+* [x] The app has not already [been requested](https://gitlab.com/search?scope=issues&amp;project_id=2167965)
+* [ ] The upstream app source code repo contains the app metadata _(summary/description/images/changelog/etc)_ in a [Fastlane](https://gitlab.com/snippets/1895688) or [Triple-T](https://gitlab.com/snippets/1901490) folder structure
+* [x] The original app author has been notified, and does not oppose the inclusion.
+* [ ] [Donated](https://f-droid.org/donate/) to support the maintenance of this app in F-Droid.
+
+---------------------
+
+The first step is to find the app's
+[_Application ID_](https://developer.android.com/studio/build/application-id.html).
+This is usually the same as the app's _Package Name_. You will find it
+in files called _AndroidManifest.xml_ or _build.gradle_ most of the
+time. You can also see it in the URLs for the app's page in various
+app stores. Write it here:
+
+#### APPLICATION ID: com.gowdaanish21.udemy_course_grabber
+
+Below is a template "metadata file" to fill out, it has only the
+required fields.  F-Droid uses this file to build and publish the app.
+[Build Metadata Reference](https://f-droid.org/docs/Build_Metadata_Reference)
+documents all available options. Add values after the colon
+
+
+```yaml
+# Categories (one per line, each starting with a space and a minus), chosen from the
+# official list: https://gitlab.com/fdroid/fdroiddata/blob/master/stats/categories.txt
+Categories:
+ - Science &amp; Education 250
+
+# the one license that the whole app is available under, use
+# https://spdx.org/licenses/ short identifiers, must be
+# floss-compatible.
+License:
+- GPL-3.0-only
+
+# You can provide details on how to contact the author. These are optional, but
+# nice to have.
+AuthorName: Anish Gowda
+AuthorEmail: simplecomplexthinker@protonmail.com
+AuthorWebSite:
+
+# A URL for the project's website, and to the source code repository to visit
+# using a web browser. WebSite is optional.
+WebSite:
+SourceCode: https://github.com/anishgowda21/Udemy-Grabber/
+
+# A link to the issue tracker where bugs are reported
+IssueTracker: https://github.com/anishgowda21/Udemy-Grabber/issues
+
+# If available, you can also provide links/IDs for donations.
+Donate:
+Bitcoin:
+LiberaPay:
+
+# Name of the application
+AutoName: Udemy Grabber
+
+# One sentence, no more than 30-50 chars, no trailing punctuation,
+# focus on actions what the users does with the app, e.g. "Read and
+# send emails" instead of "Email client".
+# NOTE: Summary and Description are preferably provided via Fastlane or Triple-T!
+Summary: App to grab udemy paid courses which are temporarily free
+Description:
+- Get paid udemy courses for free using the coupen codes.
+- One click to get the course url with coupen code embedded int it.
+
+# Repository details to be used by VCS (Version Control Systems)
+# git, git-svn, svn, hg or bzr
+RepoType: git
+
+# source code repo URL (HTTPS required)
+Repo: https://github.com/anishgowda21/Udemy-Grabber/
+```</content>
+  <labels>
+    <label>com.gowdaanish21.udemy_course_grabber</label>
+    <label>dart</label>
+    <label>fdroid-bot</label>
+    <label>flutter</label>
+    <label>git-url</label>
+    <label>gradle</label>
+    <label>in-github-releases</label>
+    <label>insecure-gradlew</label>
+    <label>kotlin</label>
+    <label>license</label>
+    <label>waiting-on-response</label>
+  </labels>
+</entry>
+</feed>

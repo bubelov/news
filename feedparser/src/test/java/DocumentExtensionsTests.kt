@@ -43,6 +43,18 @@ class DocumentExtensionsTests {
             )
             assertEquals("https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw", alternateLink)
         }
+
+        "fdroid-issues.atom".toDocument()
+            .toAtomFeed(documentUrl = "https://gitlab.com/fdroid/rfp/-/issues.atom?feed_token=gdoyU2ZstimRyxzcCh4P&state=opened")
+            .apply {
+                assertEquals("https://gitlab.com/fdroid/rfp/-/issues", id)
+                assertEquals("Requests For Packaging issues", title)
+                assertEquals(
+                    "https://gitlab.com/fdroid/rfp/-/issues.atom?feed_token=gdoyU2ZstimRyxzcCh4P&state=opened",
+                    selfLink
+                )
+                assertEquals("https://gitlab.com/fdroid/rfp/-/issues", alternateLink)
+            }
     }
 
     @Test

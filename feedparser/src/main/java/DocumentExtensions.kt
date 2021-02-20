@@ -17,13 +17,13 @@ fun Document.getFeedType(): FeedType {
     return FeedType.UNKNOWN
 }
 
-fun Document.toAtomFeed(documentUri: String = ""): ParsedFeed {
+fun Document.toAtomFeed(documentUrl: String = ""): ParsedFeed {
     val id = documentElement.getElementsByTagName("id").item(0).textContent
         ?: throw Exception("Atom channel has no id")
     val title = documentElement.getElementsByTagName("title").item(0).textContent
         ?: throw Exception("Atom channel has no title")
 
-    var selfLink = documentUri
+    var selfLink = documentUrl
     var alternateLink = ""
 
     (0 until documentElement.childNodes.length)
@@ -41,6 +41,10 @@ fun Document.toAtomFeed(documentUri: String = ""): ParsedFeed {
 
     if (selfLink.startsWith("http") && !selfLink.startsWith("https")) {
         selfLink = selfLink.replaceFirst("http", "https")
+    }
+
+    if (!selfLink.startsWith("https")) {
+        selfLink = documentUrl
     }
 
     return ParsedFeed(
@@ -125,7 +129,7 @@ fun Document.toAtomEntries(): List<ParsedEntry> {
     }
 }
 
-fun Document.toRssFeed(documentUri: String): ParsedFeed {
+fun Document.toRssFeed(documentUrl: String): ParsedFeed {
     val channel = documentElement.getElementsByTagName("channel").item(0) as Element
     val title = channel.getElementsByTagName("title").item(0).textContent
         ?: throw Exception("RSS channel has no title")
@@ -135,7 +139,7 @@ fun Document.toRssFeed(documentUri: String): ParsedFeed {
     return ParsedFeed(
         id = link,
         title = title,
-        selfLink = documentUri,
+        selfLink = documentUrl,
         alternateLink = link,
     )
 }
