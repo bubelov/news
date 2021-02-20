@@ -1,1 +1,1 @@
-Manage your RSS and Atom feeds (unoficial Nextcloud News client)
+Manage your RSS and Atom feeds (unofficial Nextcloud News client)
