@@ -56,7 +56,7 @@ class StandaloneNewsApi(
 
         val responseBody = response.body ?: throw Exception("Response has empty body")
 
-        if (response.header("content-type") == "text/html") {
+        if (response.header("content-type")?.startsWith("text/html") == true) {
             val html = responseBody.string()
 
             val atomElements = Jsoup
