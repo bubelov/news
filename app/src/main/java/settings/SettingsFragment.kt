@@ -17,6 +17,7 @@ import co.appreactor.news.databinding.FragmentSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.nextcloud.android.sso.AccountImporter
 import common.showDialog
+import common.showErrorDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
@@ -199,14 +200,20 @@ class SettingsFragment : Fragment() {
             lifecycleScope.launchWhenResumed {
                 withContext(Dispatchers.IO) {
                     requireContext().contentResolver.openInputStream(uri)?.use {
-                        val feeds = readOpml(it.bufferedReader().readText())
-                        val result = model.importFeeds(feeds)
+                        runCatching {
+                            val feeds = readOpml(it.bufferedReader().readText())
+                            val result = model.importFeeds(feeds)
 
-                        withContext(Dispatchers.Main) {
-                            showDialog(
-                                title = "Import",
-                                message = "Added: ${result.added}\nExists: ${result.exists}\nFailed: ${result.failed}"
-                            )
+                            withContext(Dispatchers.Main) {
+                                showDialog(
+                                    title = "Import",
+                                    message = "Added: ${result.added}\nExists: ${result.exists}\nFailed: ${result.failed}"
+                                )
+                            }
+                        }.onFailure {
+                            withContext(Dispatchers.Main) {
+                                showErrorDialog(it)
+                            }
                         }
                     }
                 }
