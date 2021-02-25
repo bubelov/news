@@ -220,6 +220,7 @@ class PodcastsRepository(
                 cursor?.use {
                     if (!it.moveToFirst()) {
                         Timber.d("Didn't find enclosure with URI: $uri")
+                        db.deleteWhere(entryId = metadata.entryId)
                         return@use
                     }
 
