@@ -37,9 +37,9 @@ fun readOpml(document: String): List<OpmlElement> {
             } else if (insideOpml && parser.name == Symbols.OUTLINE) {
                 parser.apply {
                     elements += OpmlElement(
-                        text = getAttributeValue(null, Symbols.TITLE),
+                        text = getAttributeValue(null, Symbols.TITLE) ?: "",
                         xmlUrl = getAttributeValue(null, Symbols.XMLURL),
-                        htmlUrl = getAttributeValue(null, Symbols.HTMLURL),
+                        htmlUrl = getAttributeValue(null, Symbols.HTMLURL) ?: "",
                         type = getAttributeValue(null, Symbols.TYPE),
                     )
                 }
