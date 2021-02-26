@@ -205,9 +205,27 @@ class SettingsFragment : Fragment() {
                             val result = model.importFeeds(feeds)
 
                             withContext(Dispatchers.Main) {
+                                val message = buildString {
+                                    append("Added: ${result.added}\n")
+                                    append("Exists: ${result.exists}\n")
+                                    append("Failed: ${result.failed}")
+
+                                    if (result.errors.isNotEmpty()) {
+                                        append("\n\n")
+                                    }
+
+                                    result.errors.forEach {
+                                        append(it)
+
+                                        if (result.errors.last() != it) {
+                                            append("\n\n")
+                                        }
+                                    }
+                                }
+
                                 showDialog(
                                     title = "Import",
-                                    message = "Added: ${result.added}\nExists: ${result.exists}\nFailed: ${result.failed}"
+                                    message = message,
                                 )
                             }
                         }.onFailure {

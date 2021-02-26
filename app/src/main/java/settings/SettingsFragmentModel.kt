@@ -75,6 +75,7 @@ class SettingsFragmentModel(
         var added = 0
         var exists = 0
         var failed = 0
+        val errors = mutableListOf<String>()
 
         state.value = State.ImportingFeeds(
             imported = 0,
@@ -94,6 +95,8 @@ class SettingsFragmentModel(
             }.onSuccess {
                 added++
             }.onFailure {
+                errors += "Failed to import feed ${opml.xmlUrl}\nReason: ${it.message}"
+                Timber.e(it)
                 failed++
             }
 
@@ -109,6 +112,7 @@ class SettingsFragmentModel(
             added = added,
             exists = exists,
             failed = failed,
+            errors = errors,
         )
     }
 
@@ -130,6 +134,7 @@ class SettingsFragmentModel(
         val added: Int,
         val exists: Int,
         val failed: Int,
+        val errors: List<String>,
     )
 
     sealed class State {
