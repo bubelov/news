@@ -91,7 +91,7 @@ class SettingsFragmentModel(
             }
 
             runCatching {
-                feedsRepository.add(opml.xmlUrl)
+                feedsRepository.add(opml.xmlUrl.replace("http://", "https://"))
             }.onSuccess {
                 added++
             }.onFailure {
