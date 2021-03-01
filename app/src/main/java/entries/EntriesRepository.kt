@@ -34,6 +34,10 @@ class EntriesRepository(
         entryQueries.selectById(entryId).asFlow().mapToOneOrNull()
     }
 
+    suspend fun selectByFeedId(feedId: String) = withContext(Dispatchers.IO) {
+        entryQueries.selectByFeedId(feedId).asFlow().mapToList()
+    }
+
     suspend fun getOpened() = withContext(Dispatchers.IO) {
         entryQueries.selectByOpened(true).asFlow().mapToList()
     }

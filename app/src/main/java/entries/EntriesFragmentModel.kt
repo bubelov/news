@@ -83,11 +83,13 @@ class EntriesFragmentModel(
             }
 
             is EntriesFilter.OnlyFromFeed -> {
+                val feedEntries = entriesRepository.selectByFeedId(filter.feedId).first()
+
                 if (prefs.showOpenedEntries) {
-                    entriesRepository.getNotOpened().first()
+                    feedEntries
                 } else {
-                    entriesRepository.getAll().first()
-                }.filter { it.feedId == filter.feedId }
+                    feedEntries.filter { !it.opened }
+                }
             }
         }
 
@@ -150,7 +152,10 @@ class EntriesFragmentModel(
         if (changeState) {
             val state = state.value as State.ShowingEntries
             this.state.value =
-                State.ShowingEntries(state.entries.filterNot { it.id == entryId }, state.includesUnread)
+                State.ShowingEntries(
+                    state.entries.filterNot { it.id == entryId },
+                    state.includesUnread
+                )
         }
 
         entriesRepository.setOpened(entryId, true)

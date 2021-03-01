@@ -53,6 +53,11 @@ SELECT *
 FROM Entry
 WHERE id = ?;
 
+selectByFeedId:
+SELECT *
+FROM EntryWithoutSummary
+WHERE feedId = ?;
+
 selectByOpened:
 SELECT *
 FROM EntryWithoutSummary
