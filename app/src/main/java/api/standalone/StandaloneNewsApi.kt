@@ -6,8 +6,10 @@ import api.GetEntriesResult
 import api.NewsApi
 import db.*
 import getFeedType
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.joda.time.Instant
@@ -104,28 +106,16 @@ class StandaloneNewsApi(
         return emptyList()
     }
 
-    override suspend fun getNewAndUpdatedEntries(since: Instant): List<Entry> {
+    override suspend fun getNewAndUpdatedEntries(
+        since: Instant,
+    ): List<Entry> = withContext(Dispatchers.IO) {
         val entries = mutableListOf<Entry>()
 
         feedQueries.selectAll().executeAsList().forEach { feed ->
-            val request = Request.Builder()
-                .url(feed.selfLink)
-                .build()
-
-            val response = httpClient.newCall(request).execute()
-
-            if (!response.isSuccessful) {
-                return@forEach
-            }
-
-            val responseBody = response.body ?: return@forEach
-            val builder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-            val document = builder.parse(responseBody.byteStream())
-
-            when (document.getFeedType()) {
-                FeedType.ATOM -> entries += document.toAtomEntries().map { it.toEntry() }
-                FeedType.RSS -> entries += document.toRssEntries().map { it.toEntry() }
-                FeedType.UNKNOWN -> Timber.e(Exception("Unknown feed type for feed ${feed.id}"))
+            runCatching {
+                entries += fetchEntries(feed.selfLink)
+            }.onFailure {
+                Timber.e("Failed to fetch entries for feed ${feed.selfLink}")
             }
         }
 
@@ -133,7 +123,29 @@ class StandaloneNewsApi(
             entryQueries.selectById(it.id).executeAsOneOrNull() != null
         }
 
-        return entries
+        return@withContext entries
+    }
+
+    private fun fetchEntries(feedUrl: String): List<Entry> {
+        val request = Request.Builder()
+            .url(feedUrl)
+            .build()
+
+        val response = httpClient.newCall(request).execute()
+
+        if (!response.isSuccessful) {
+            throw Exception(response.toString())
+        }
+
+        val responseBody = response.body ?: throw Exception("Response has no body")
+        val builder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+        val document = builder.parse(responseBody.byteStream())
+
+        return when (document.getFeedType()) {
+            FeedType.ATOM -> document.toAtomEntries().map { it.toEntry() }
+            FeedType.RSS -> document.toRssEntries().map { it.toEntry() }
+            FeedType.UNKNOWN -> throw Exception("Unknown feed type")
+        }
     }
 
     override suspend fun markAsOpened(entriesIds: List<String>, opened: Boolean) {
