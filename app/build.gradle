@@ -17,7 +17,7 @@ android {
         versionName "0.2.7"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        setProperty("archivesBaseName", "calendar-$versionName")
+        setProperty("archivesBaseName", "news-$versionName")
     }
 
     compileOptions {
