@@ -1,8 +1,10 @@
-apply plugin: "com.android.application"
-apply plugin: "kotlin-android"
-apply plugin: "kotlin-parcelize"
-apply plugin: "androidx.navigation.safeargs.kotlin"
-apply plugin: "com.squareup.sqldelight"
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "kotlin-parcelize"
+    id "androidx.navigation.safeargs.kotlin"
+    id "com.squareup.sqldelight"
+}
 
 def signingPropertiesFile = rootProject.file("signing.properties")
 
