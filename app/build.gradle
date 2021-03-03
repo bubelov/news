@@ -29,6 +29,15 @@ android {
 
     kotlinOptions {
         jvmTarget = "1.8"
+        //allWarningsAsErrors = true TODO enable
+    }
+
+    buildFeatures {
+        compose true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion "1.0.0-beta01"
     }
 
     signingConfigs {
@@ -109,6 +118,18 @@ dependencies {
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:$versions_swipe_refresh"
     implementation "org.jsoup:jsoup:$versions_jsoup"
     implementation "joda-time:joda-time:$versions_joda_time"
+
+    implementation "androidx.compose.runtime:runtime:$versions_compose"
+    implementation "androidx.compose.ui:ui:$versions_compose"
+    // Tooling support (Previews, etc.)
+    implementation "androidx.compose.ui:ui-tooling:$versions_compose"
+    // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)
+    implementation "androidx.compose.foundation:foundation:$versions_compose"
+    // Material Design
+    implementation "androidx.compose.material:material:$versions_compose"
+    implementation "androidx.compose.material:material-icons-extended:$versions_compose"
+    // Activity.setContent()
+    implementation "androidx.activity:activity-compose:1.3.0-alpha03"
 
     testImplementation "junit:junit:$versions_junit"
     testImplementation "io.mockk:mockk:$versions_mockk"
