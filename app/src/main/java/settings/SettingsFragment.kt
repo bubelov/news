@@ -1,11 +1,10 @@
 package settings
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -136,67 +135,9 @@ class SettingsFragment : Fragment() {
             }
         }
 
-        binding.importFeeds.setOnClickListener {
-            val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
-                type = "*/*"
-            }
-
-            startActivityForResult(Intent.createChooser(intent, ""), IMPORT_REQUEST)
-        }
-
-        binding.exportFeeds.setOnClickListener {
-            val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                addCategory(Intent.CATEGORY_OPENABLE)
-                type = "text/xml"
-                putExtra(Intent.EXTRA_TITLE, "feeds.opml")
-            }
-
-            startActivityForResult(intent, EXPORT_REQUEST)
-        }
-
-        lifecycleScope.launchWhenResumed {
-            model.state.collect { state ->
-                if (state is SettingsFragmentModel.State.ImportingFeeds) {
-                    binding.content.isVisible = false
-
-                    if (!binding.progress.isVisible) {
-                        binding.progress.isVisible = true
-                        binding.progress.alpha = 0f
-                        binding.progress.animate().alpha(1f).duration = 1000
-                    }
-
-                    if (!binding.progressMessage.isVisible) {
-                        binding.progressMessage.isVisible = true
-                        binding.progressMessage.alpha = 0f
-                        binding.progressMessage.animate().alpha(1f).duration = 1000
-                    }
-
-                    binding.progressMessage.text =
-                        getString(R.string.importing_feeds_n_of_n, state.imported, state.total)
-                } else {
-                    binding.content.isVisible = true
-
-                    binding.progress.isVisible = false
-                    binding.progressMessage.isVisible = false
-                }
-            }
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == IMPORT_REQUEST && resultCode == Activity.RESULT_OK) {
-            if (data == null) {
-                showDialog(R.string.error, "The app didn't receive any data")
-                return
-            }
-
-            val uri = data.data
-
-            if (uri == null) {
-                showDialog(R.string.error, "The app didn't receive file URI")
-                return
-            }
-
+        val importFeedsLauncher = registerForActivityResult(
+            ActivityResultContracts.GetContent()
+        ) { uri ->
             lifecycleScope.launchWhenResumed {
                 withContext(Dispatchers.IO) {
                     requireContext().contentResolver.openInputStream(uri)?.use {
@@ -238,24 +179,50 @@ class SettingsFragment : Fragment() {
             }
         }
 
-        if (requestCode == EXPORT_REQUEST && resultCode == Activity.RESULT_OK) {
-            if (data == null) {
-                showDialog(R.string.error, "The app didn't receive any data")
-                return
-            }
+        binding.importFeeds.setOnClickListener {
+            importFeedsLauncher.launch("*/*")
+        }
 
-            val uri = data.data
-
-            if (uri == null) {
-                showDialog(R.string.error, "The app didn't receive file URI")
-                return
-            }
-
+        val exportFeedsLauncher = registerForActivityResult(
+            ActivityResultContracts.CreateDocument()
+        ) { uri ->
             lifecycleScope.launchWhenResumed {
                 withContext(Dispatchers.IO) {
                     requireContext().contentResolver.openOutputStream(uri)?.use {
                         it.write(writeOpml(model.getAllFeeds().first()).toByteArray())
                     }
+                }
+            }
+        }
+
+        binding.exportFeeds.setOnClickListener {
+            exportFeedsLauncher.launch("feeds.opml")
+        }
+
+        lifecycleScope.launchWhenResumed {
+            model.state.collect { state ->
+                if (state is SettingsFragmentModel.State.ImportingFeeds) {
+                    binding.content.isVisible = false
+
+                    if (!binding.progress.isVisible) {
+                        binding.progress.isVisible = true
+                        binding.progress.alpha = 0f
+                        binding.progress.animate().alpha(1f).duration = 1000
+                    }
+
+                    if (!binding.progressMessage.isVisible) {
+                        binding.progressMessage.isVisible = true
+                        binding.progressMessage.alpha = 0f
+                        binding.progressMessage.animate().alpha(1f).duration = 1000
+                    }
+
+                    binding.progressMessage.text =
+                        getString(R.string.importing_feeds_n_of_n, state.imported, state.total)
+                } else {
+                    binding.content.isVisible = true
+
+                    binding.progress.isVisible = false
+                    binding.progressMessage.isVisible = false
                 }
             }
         }
@@ -273,10 +240,5 @@ class SettingsFragment : Fragment() {
             findNavController().popBackStack(R.id.entriesFragment, true)
             findNavController().navigate(NavGraphDirections.actionGlobalToAuthFragment())
         }
-    }
-
-    companion object {
-        private const val IMPORT_REQUEST = 1000
-        private const val EXPORT_REQUEST = 1001
     }
 }
