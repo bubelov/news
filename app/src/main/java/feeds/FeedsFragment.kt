@@ -34,7 +34,7 @@ import timber.log.Timber
 
 class FeedsFragment : Fragment() {
 
-    private val model: FeedsFragmentModel by viewModel()
+    private val model: FeedsViewModel by viewModel()
 
     private var _binding: FragmentFeedsBinding? = null
     private val binding get() = _binding!!
@@ -210,15 +210,15 @@ class FeedsFragment : Fragment() {
                     Timber.d("State: ${state.javaClass.simpleName}")
 
                     when (state) {
-                        is FeedsFragmentModel.State.Inactive -> {
+                        is FeedsViewModel.State.Inactive -> {
 
                         }
 
-                        FeedsFragmentModel.State.LoadingFeeds -> {
+                        FeedsViewModel.State.LoadingFeeds -> {
                             progress.show(animate = true)
                         }
 
-                        is FeedsFragmentModel.State.LoadedFeeds -> {
+                        is FeedsViewModel.State.LoadedFeeds -> {
                             swipeRefresh.show()
 
                             if (state.feeds.isEmpty()) {
@@ -234,7 +234,7 @@ class FeedsFragment : Fragment() {
                             fab.show(animate = true)
                         }
 
-                        is FeedsFragmentModel.State.ImportingFeeds -> {
+                        is FeedsViewModel.State.ImportingFeeds -> {
                             progress.show(animate = true)
 
                             message.show(animate = true)
@@ -248,7 +248,7 @@ class FeedsFragment : Fragment() {
                             }
                         }
 
-                        is FeedsFragmentModel.State.DisplayingImportResult -> {
+                        is FeedsViewModel.State.DisplayingImportResult -> {
                             val message = buildString {
                                 append(getString(R.string.added_d, state.result.added))
                                 append("\n")
@@ -274,7 +274,7 @@ class FeedsFragment : Fragment() {
                                 message = message,
                             ) {
                                 lifecycleScope.launchWhenResumed {
-                                    model.state.value = FeedsFragmentModel.State.Inactive
+                                    model.state.value = FeedsViewModel.State.Inactive
                                     model.onViewReady()
                                 }
                             }

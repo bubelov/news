@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.first
 import opml.OpmlElement
 import timber.log.Timber
 
-class FeedsFragmentModel(
+class FeedsViewModel(
     private val feedsRepository: FeedsRepository,
     private val entriesRepository: EntriesRepository,
     private val newsApiSync: NewsApiSync,

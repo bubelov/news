@@ -21,7 +21,7 @@ import settings.SettingsFragmentModel
 import common.ConnectivityProbe
 import entries.EntriesSupportingTextRepository
 import exception.AppExceptionFragmentModel
-import feeds.FeedsFragmentModel
+import feeds.FeedsViewModel
 import org.koin.android.experimental.dsl.viewModel
 import org.koin.dsl.module
 import org.koin.experimental.builder.single
@@ -56,6 +56,6 @@ val appModule = module {
     viewModel<DirectAuthFragmentModel>()
     viewModel<AppExceptionsFragmentModel>()
     viewModel<AppExceptionFragmentModel>()
-    viewModel<FeedsFragmentModel>()
+    viewModel<FeedsViewModel>()
     viewModel<SearchFragmentModel>()
 }
