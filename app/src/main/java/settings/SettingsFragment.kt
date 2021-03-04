@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -15,15 +14,9 @@ import common.Preferences
 import co.appreactor.news.databinding.FragmentSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.nextcloud.android.sso.AccountImporter
-import common.showDialog
-import common.showErrorDialog
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import opml.readOpml
-import opml.writeOpml
 import org.koin.android.viewmodel.ext.android.viewModel
 
 class SettingsFragment : Fragment() {
@@ -131,98 +124,6 @@ class SettingsFragment : Fragment() {
                                 null
                             ).show()
                     }
-                }
-            }
-        }
-
-        val importFeedsLauncher = registerForActivityResult(
-            ActivityResultContracts.GetContent()
-        ) { uri ->
-            lifecycleScope.launchWhenResumed {
-                withContext(Dispatchers.IO) {
-                    requireContext().contentResolver.openInputStream(uri)?.use {
-                        runCatching {
-                            val feeds = readOpml(it.bufferedReader().readText())
-                            val result = model.importFeeds(feeds)
-
-                            withContext(Dispatchers.Main) {
-                                val message = buildString {
-                                    append("Added: ${result.added}\n")
-                                    append("Exists: ${result.exists}\n")
-                                    append("Failed: ${result.failed}")
-
-                                    if (result.errors.isNotEmpty()) {
-                                        append("\n\n")
-                                    }
-
-                                    result.errors.forEach {
-                                        append(it)
-
-                                        if (result.errors.last() != it) {
-                                            append("\n\n")
-                                        }
-                                    }
-                                }
-
-                                showDialog(
-                                    title = "Import",
-                                    message = message,
-                                )
-                            }
-                        }.onFailure {
-                            withContext(Dispatchers.Main) {
-                                showErrorDialog(it)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        binding.importFeeds.setOnClickListener {
-            importFeedsLauncher.launch("*/*")
-        }
-
-        val exportFeedsLauncher = registerForActivityResult(
-            ActivityResultContracts.CreateDocument()
-        ) { uri ->
-            lifecycleScope.launchWhenResumed {
-                withContext(Dispatchers.IO) {
-                    requireContext().contentResolver.openOutputStream(uri)?.use {
-                        it.write(writeOpml(model.getAllFeeds().first()).toByteArray())
-                    }
-                }
-            }
-        }
-
-        binding.exportFeeds.setOnClickListener {
-            exportFeedsLauncher.launch("feeds.opml")
-        }
-
-        lifecycleScope.launchWhenResumed {
-            model.state.collect { state ->
-                if (state is SettingsFragmentModel.State.ImportingFeeds) {
-                    binding.content.isVisible = false
-
-                    if (!binding.progress.isVisible) {
-                        binding.progress.isVisible = true
-                        binding.progress.alpha = 0f
-                        binding.progress.animate().alpha(1f).duration = 1000
-                    }
-
-                    if (!binding.progressMessage.isVisible) {
-                        binding.progressMessage.isVisible = true
-                        binding.progressMessage.alpha = 0f
-                        binding.progressMessage.animate().alpha(1f).duration = 1000
-                    }
-
-                    binding.progressMessage.text =
-                        getString(R.string.importing_feeds_n_of_n, state.imported, state.total)
-                } else {
-                    binding.content.isVisible = true
-
-                    binding.progress.isVisible = false
-                    binding.progressMessage.isVisible = false
                 }
             }
         }

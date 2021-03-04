@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -20,9 +21,14 @@ import common.showKeyboard
 import co.appreactor.news.databinding.FragmentFeedsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
-import common.Result
+import common.showErrorDialog
 import entries.EntriesFilter
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
+import opml.readOpml
+import opml.writeOpml
 import org.koin.android.viewmodel.ext.android.viewModel
 import timber.log.Timber
 
@@ -102,6 +108,47 @@ class FeedsFragment : Fragment() {
             }
         })
 
+    @Suppress("BlockingMethodInNonBlockingContext")
+    private val importFeedsLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        if (uri == null) {
+            return@registerForActivityResult
+        }
+
+        lifecycleScope.launchWhenResumed {
+            withContext(Dispatchers.IO) {
+                requireContext().contentResolver.openInputStream(uri)?.use {
+                    runCatching {
+                        val feeds = readOpml(it.bufferedReader().readText())
+                        model.importFeeds(feeds)
+                    }.onFailure {
+                        withContext(Dispatchers.Main) {
+                            showErrorDialog(it)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Suppress("BlockingMethodInNonBlockingContext")
+    private val exportFeedsLauncher = registerForActivityResult(
+        ActivityResultContracts.CreateDocument()
+    ) { uri ->
+        if (uri == null) {
+            return@registerForActivityResult
+        }
+
+        lifecycleScope.launchWhenResumed {
+            withContext(Dispatchers.IO) {
+                requireContext().contentResolver.openOutputStream(uri)?.use {
+                    it.write(writeOpml(model.getAllFeeds().first()).toByteArray())
+                }
+            }
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -112,86 +159,162 @@ class FeedsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        binding.swipeRefresh.isEnabled = false
+        binding.apply {
+            swipeRefresh.isEnabled = false
 
-        binding.toolbar.setNavigationOnClickListener {
-            findNavController().popBackStack()
-        }
+            toolbar.apply {
+                setNavigationOnClickListener {
+                    findNavController().popBackStack()
+                }
 
-        binding.listView.setHasFixedSize(true)
-        binding.listView.layoutManager = LinearLayoutManager(requireContext())
-        binding.listView.adapter = adapter
-        binding.listView.addItemDecoration(FeedsAdapterDecoration(resources.getDimensionPixelSize(R.dimen.dp_8)))
-
-        binding.listView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                binding.fab.isVisible = binding.listView.canScrollVertically(1)
-            }
-        })
-
-        lifecycleScope.launchWhenResumed {
-            model.onViewReady()
-        }
-
-        lifecycleScope.launchWhenResumed {
-            model.items.collect { result ->
-                binding.listViewProgress.isVisible = false
-                binding.empty.isVisible = false
-
-                when (result) {
-                    Result.Progress -> {
-                        binding.listViewProgress.isVisible = true
-
-                        binding.listViewProgress.alpha = 0f
-                        binding.listViewProgress.animate().alpha(1f).duration = 1000
-                    }
-
-                    is Result.Success -> {
-                        if (result.data.isEmpty()) {
-                            binding.empty.isVisible = true
-                            binding.empty.alpha = 0f
-                            binding.empty.animate().alpha(1f).duration = 250
-                        } else {
-                            binding.empty.isVisible
+                setOnMenuItemClickListener {
+                    when (it.itemId) {
+                        R.id.importFeeds -> {
+                            importFeedsLauncher.launch("*/*")
                         }
 
-                        adapter.submitList(result.data)
+                        R.id.exportFeeds -> {
+                            exportFeedsLauncher.launch("feeds.opml")
+                        }
                     }
 
-                    else -> {
+                    true
+                }
+            }
 
+            list.apply {
+                setHasFixedSize(true)
+                layoutManager = LinearLayoutManager(requireContext())
+                adapter = this@FeedsFragment.adapter
+                addItemDecoration(FeedsAdapterDecoration(resources.getDimensionPixelSize(R.dimen.dp_8)))
+
+                addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                    override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                        fab.isVisible = list.canScrollVertically(1)
+                    }
+                })
+            }
+
+            lifecycleScope.launchWhenResumed {
+                model.onViewReady()
+            }
+
+            lifecycleScope.launchWhenResumed {
+                model.state.collectLatest { state ->
+                    swipeRefresh.hide()
+                    progress.hide()
+                    message.hide()
+                    importOpml.hide()
+                    fab.hide()
+
+                    Timber.d("State: ${state.javaClass.simpleName}")
+
+                    when (state) {
+                        is FeedsFragmentModel.State.Inactive -> {
+
+                        }
+
+                        FeedsFragmentModel.State.LoadingFeeds -> {
+                            progress.show(animate = true)
+                        }
+
+                        is FeedsFragmentModel.State.LoadedFeeds -> {
+                            swipeRefresh.show()
+
+                            if (state.feeds.isEmpty()) {
+                                message.show(animate = true)
+                                message.text = getString(R.string.feeds_list_is_empty)
+
+                                importOpml.show(animate = true)
+                            }
+
+                            Timber.d("Got ${state.feeds.size} feeds")
+                            adapter.submitList(state.feeds)
+
+                            fab.show(animate = true)
+                        }
+
+                        is FeedsFragmentModel.State.ImportingFeeds -> {
+                            progress.show(animate = true)
+
+                            message.show(animate = true)
+
+                            state.progress.collectLatest { progress ->
+                                message.text = getString(
+                                    R.string.importing_feeds_n_of_n,
+                                    progress.imported,
+                                    progress.total,
+                                )
+                            }
+                        }
+
+                        is FeedsFragmentModel.State.DisplayingImportResult -> {
+                            val message = buildString {
+                                append(getString(R.string.added_d, state.result.added))
+                                append("\n")
+                                append(getString(R.string.exists_d, state.result.exists))
+                                append("\n")
+                                append(getString(R.string.failed_d, state.result.failed))
+
+                                if (state.result.errors.isNotEmpty()) {
+                                    append("\n\n")
+                                }
+
+                                state.result.errors.forEach {
+                                    append(it)
+
+                                    if (state.result.errors.last() != it) {
+                                        append("\n\n")
+                                    }
+                                }
+                            }
+
+                            showDialog(
+                                title = getString(R.string.import_title),
+                                message = message,
+                            ) {
+                                lifecycleScope.launchWhenResumed {
+                                    model.state.value = FeedsFragmentModel.State.Inactive
+                                    model.onViewReady()
+                                }
+                            }
+                        }
                     }
                 }
             }
-        }
 
-        binding.fab.setOnClickListener {
-            val alert = MaterialAlertDialogBuilder(requireContext())
-                .setTitle(getString(R.string.add_feed))
-                .setView(R.layout.dialog_add_feed)
-                .setPositiveButton(R.string.add) { dialogInterface, _ ->
-                    val dialog = dialogInterface as AlertDialog
+            importOpml.setOnClickListener {
+                importFeedsLauncher.launch("*/*")
+            }
 
-                    lifecycleScope.launchWhenResumed {
-                        binding.swipeRefresh.isRefreshing = true
+            fab.setOnClickListener {
+                val alert = MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(getString(R.string.add_feed))
+                    .setView(R.layout.dialog_add_feed)
+                    .setPositiveButton(R.string.add) { dialogInterface, _ ->
+                        val dialog = dialogInterface as AlertDialog
 
-                        runCatching {
-                            val urlView = dialog.findViewById<TextInputEditText>(R.id.url)!!
-                            model.createFeed(urlView.text.toString())
-                        }.onFailure {
-                            Timber.e(it)
-                            showDialog(R.string.error, it.message ?: "")
+                        lifecycleScope.launchWhenResumed {
+                            swipeRefresh.isRefreshing = true
+
+                            runCatching {
+                                val urlView = dialog.findViewById<TextInputEditText>(R.id.url)!!
+                                model.createFeed(urlView.text.toString())
+                            }.onFailure {
+                                Timber.e(it)
+                                showDialog(R.string.error, it.message ?: "")
+                            }
+
+                            swipeRefresh.isRefreshing = false
                         }
-
-                        binding.swipeRefresh.isRefreshing = false
                     }
-                }
-                .setNegativeButton(R.string.cancel, null)
-                .setOnDismissListener { hideKeyboard() }
-                .show()
+                    .setNegativeButton(R.string.cancel, null)
+                    .setOnDismissListener { hideKeyboard() }
+                    .show()
 
-            alert.findViewById<View>(R.id.urlLayout)!!.requestFocus()
-            requireContext().showKeyboard()
+                alert.findViewById<View>(R.id.urlLayout)!!.requestFocus()
+                requireContext().showKeyboard()
+            }
         }
     }
 
@@ -204,5 +327,18 @@ class FeedsFragment : Fragment() {
         requireActivity().window.setSoftInputMode(
             WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
         )
+    }
+
+    private fun View.show(animate: Boolean = false) {
+        isVisible = true
+
+        if (animate) {
+            alpha = 0f
+            this.animate().alpha(1f).duration = 300
+        }
+    }
+
+    private fun View.hide() {
+        isVisible = false
     }
 }

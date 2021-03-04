@@ -14,20 +14,13 @@ import common.Preferences.Companion.NEXTCLOUD_SERVER_URL
 import common.Preferences.Companion.NEXTCLOUD_SERVER_USERNAME
 import common.Preferences.Companion.SHOW_OPENED_ENTRIES
 import common.Preferences.Companion.SHOW_PREVIEW_IMAGES
-import feeds.FeedsRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.first
-import opml.OpmlElement
 import timber.log.Timber
 
 class SettingsFragmentModel(
     private val appExceptionsRepository: AppExceptionsRepository,
-    private val feedsRepository: FeedsRepository,
     private val prefs: Preferences,
     private val db: Database,
 ) : ViewModel() {
-
-    val state = MutableStateFlow<State>(State.NoActivity)
 
     suspend fun getShowOpenedEntries() = prefs.getBoolean(SHOW_OPENED_ENTRIES)
 
@@ -69,53 +62,6 @@ class SettingsFragmentModel(
         }
     }
 
-    suspend fun getAllFeeds() = feedsRepository.getAll()
-
-    suspend fun importFeeds(feeds: List<OpmlElement>): FeedImportResult {
-        var added = 0
-        var exists = 0
-        var failed = 0
-        val errors = mutableListOf<String>()
-
-        state.value = State.ImportingFeeds(
-            imported = 0,
-            total = feeds.size,
-        )
-
-        val cachedFeeds = feedsRepository.getAll().first()
-
-        feeds.forEach { opml ->
-            if (cachedFeeds.any { it.selfLink == opml.xmlUrl }) {
-                exists++
-                return@forEach
-            }
-
-            runCatching {
-                feedsRepository.add(opml.xmlUrl.replace("http://", "https://"))
-            }.onSuccess {
-                added++
-            }.onFailure {
-                errors += "Failed to import feed ${opml.xmlUrl}\nReason: ${it.message}"
-                Timber.e(it)
-                failed++
-            }
-
-            state.value = State.ImportingFeeds(
-                imported = added + exists + failed,
-                total = feeds.size,
-            )
-        }
-
-        state.value = State.NoActivity
-
-        return FeedImportResult(
-            added = added,
-            exists = exists,
-            failed = failed,
-            errors = errors,
-        )
-    }
-
     fun logOut() {
         db.apply {
             transaction {
@@ -128,17 +74,5 @@ class SettingsFragmentModel(
                 preferenceQueries.deleteAll()
             }
         }
-    }
-
-    data class FeedImportResult(
-        val added: Int,
-        val exists: Int,
-        val failed: Int,
-        val errors: List<String>,
-    )
-
-    sealed class State {
-        object NoActivity : State()
-        data class ImportingFeeds(val imported: Int, val total: Int) : State()
     }
 }
