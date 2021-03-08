@@ -1,7 +1,6 @@
 package feeds
 
 import androidx.lifecycle.ViewModel
-import common.NewsApiSync
 import db.Feed
 import entries.EntriesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,7 +10,6 @@ import timber.log.Timber
 class FeedsViewModel(
     private val feedsRepository: FeedsRepository,
     private val entriesRepository: EntriesRepository,
-    private val newsApiSync: NewsApiSync,
 ) : ViewModel() {
 
     val state = MutableStateFlow<State>(State.Inactive)
@@ -27,22 +25,22 @@ class FeedsViewModel(
     }
 
     suspend fun createFeed(url: String) {
+        state.value = State.LoadingFeeds
         feedsRepository.insertByUrl(url)
-
-        newsApiSync.sync(
-            syncEntriesFlags = false,
-            syncFeeds = true,
-            syncNewAndUpdatedEntries = false,
-        )
+        reloadFeeds()
     }
 
     suspend fun renameFeed(feedId: String, newTitle: String) {
+        state.value = State.LoadingFeeds
         feedsRepository.updateTitle(feedId, newTitle)
+        reloadFeeds()
     }
 
     suspend fun deleteFeed(feedId: String) {
+        state.value = State.LoadingFeeds
         feedsRepository.deleteById(feedId)
         entriesRepository.deleteByFeedId(feedId)
+        reloadFeeds()
     }
 
     suspend fun getAllFeeds() = feedsRepository.selectAll()
@@ -93,6 +91,14 @@ class FeedsViewModel(
                 failed = failed,
                 errors = errors,
             )
+        )
+    }
+
+    private suspend fun reloadFeeds() {
+        state.value = State.LoadingFeeds
+
+        state.value = State.LoadedFeeds(
+            feeds = feedsRepository.selectAll().map { it.toItem() }
         )
     }
 

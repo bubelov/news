@@ -2,7 +2,7 @@ package entries
 
 import api.*
 import api.GetEntriesResult
-import common.Preferences
+import common.PreferencesRepository
 import db.Entry
 import db.EntryQueries
 import com.squareup.sqldelight.runtime.coroutines.asFlow
@@ -12,7 +12,6 @@ import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import org.joda.time.Instant
@@ -21,7 +20,7 @@ import timber.log.Timber
 class EntriesRepository(
     private val entryQueries: EntryQueries,
     private val newsApi: NewsApi,
-    private val prefs: Preferences,
+    private val preferencesRepository: PreferencesRepository,
 ) {
 
     data class SyncProgress(val itemsSynced: Long)
@@ -105,10 +104,9 @@ class EntriesRepository(
                             }
                         }
 
-                        prefs.putString(
-                            key = Preferences.LAST_ENTRIES_SYNC_DATE_TIME,
-                            value = Instant.now().toString()
-                        )
+                        preferencesRepository.save {
+                            lastEntriesSyncDateTime = Instant.now().toString()
+                        }
                     }
                 }
             }
@@ -187,7 +185,7 @@ class EntriesRepository(
 
     suspend fun syncNewAndUpdated() = withContext(Dispatchers.IO) {
         val threshold =
-            getMaxUpdated() ?: prefs.getString(Preferences.LAST_ENTRIES_SYNC_DATE_TIME).first()
+            getMaxUpdated() ?: preferencesRepository.get().lastEntriesSyncDateTime
 
         if (threshold.isBlank()) {
             throw Exception("Can not find any reference dates")
@@ -202,10 +200,9 @@ class EntriesRepository(
             }
         }
 
-        prefs.putString(
-            key = Preferences.LAST_ENTRIES_SYNC_DATE_TIME,
-            value = Instant.now().toString()
-        )
+        preferencesRepository.save {
+            lastEntriesSyncDateTime = Instant.now().toString()
+        }
     }
 
     private fun Entry.toSafeToInsertEntry(): Entry {

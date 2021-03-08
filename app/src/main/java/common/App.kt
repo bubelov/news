@@ -8,7 +8,6 @@ import di.dbModule
 import exceptions.AppExceptionsTree
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
-import common.Preferences.Companion.AUTH_TYPE
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
 import org.koin.android.ext.koin.androidContext
@@ -31,7 +30,7 @@ class App : Application() {
         }
 
         runBlocking {
-            val authType = get<Preferences>().getStringBlocking(AUTH_TYPE)
+            val authType = get<PreferencesRepository>().get().authType
 
             if (authType.isNotBlank()) {
                 get<NewsApiSwitcher>().switch(authType)

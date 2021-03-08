@@ -10,12 +10,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.NavGraphDirections
 import co.appreactor.news.R
-import common.Preferences
+import common.PreferencesRepository
 import co.appreactor.news.databinding.FragmentSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.nextcloud.android.sso.AccountImporter
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
 
@@ -37,41 +36,50 @@ class SettingsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         lifecycleScope.launch {
-            binding.showOpenedEntries.isChecked = model.getShowOpenedEntries().first()
+            val prefs = model.getPreferences()
+
+            binding.showOpenedEntries.isChecked = prefs.showOpenedEntries
 
             binding.showOpenedEntries.setOnCheckedChangeListener { _, isChecked ->
                 lifecycleScope.launch {
-                    model.setShowOpenedEntries(isChecked)
+                    model.savePreferences {
+                        showOpenedEntries = isChecked
+                    }
                 }
             }
 
-            binding.showPreviewImages.isChecked = model.getShowPreviewImages().first()
+            binding.showPreviewImages.isChecked = prefs.showPreviewImages
 
             binding.showPreviewImages.setOnCheckedChangeListener { _, isChecked ->
                 lifecycleScope.launch {
-                    model.setShowPreviewImages(isChecked)
+                    model.savePreferences {
+                        showPreviewImages = isChecked
+                    }
                 }
             }
 
-            binding.cropPreviewImages.isChecked = model.getCropPreviewImages().first()
+            binding.cropPreviewImages.isChecked = prefs.cropPreviewImages
 
             binding.cropPreviewImages.setOnCheckedChangeListener { _, isChecked ->
                 lifecycleScope.launch {
-                    model.setCropPreviewImages(isChecked)
+                    model.savePreferences {
+                        cropPreviewImages = isChecked
+                    }
                 }
             }
 
-            binding.markScrolledEntriesAsRead.isChecked =
-                model.getMarkScrolledEntriesAsRead().first()
+            binding.markScrolledEntriesAsRead.isChecked = prefs.markScrolledEntriesAsRead
 
             binding.markScrolledEntriesAsRead.setOnCheckedChangeListener { _, isChecked ->
                 lifecycleScope.launch {
-                    model.setMarkScrolledEntriesAsRead(isChecked)
+                    model.savePreferences {
+                        markScrolledEntriesAsRead = isChecked
+                    }
                 }
             }
 
-            when (model.getAuthType()) {
-                Preferences.AUTH_TYPE_STANDALONE -> {
+            when (prefs.authType) {
+                PreferencesRepository.AUTH_TYPE_STANDALONE -> {
                     binding.logOutTitle.setText(R.string.delete_all_data)
                     binding.logOutSubtitle.isVisible = false
                 }
@@ -90,16 +98,10 @@ class SettingsFragment : Fragment() {
             }
         }
 
-        lifecycleScope.launchWhenResumed {
-            model.getShowPreviewImages().collect {
-                binding.cropPreviewImages.isEnabled = it
-            }
-        }
-
         binding.logOut.setOnClickListener {
             lifecycleScope.launchWhenResumed {
-                when (model.getAuthType()) {
-                    Preferences.AUTH_TYPE_STANDALONE -> {
+                when (model.getPreferences().authType) {
+                    PreferencesRepository.AUTH_TYPE_STANDALONE -> {
                         MaterialAlertDialogBuilder(requireContext())
                             .setMessage(R.string.delete_all_data_warning)
                             .setPositiveButton(

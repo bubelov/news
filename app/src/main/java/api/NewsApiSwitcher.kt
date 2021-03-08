@@ -11,9 +11,7 @@ import db.FeedQueries
 import com.google.gson.GsonBuilder
 import com.nextcloud.android.sso.api.NextcloudAPI
 import com.nextcloud.android.sso.helper.SingleAccountHelper
-import common.Preferences.Companion.NEXTCLOUD_SERVER_PASSWORD
-import common.Preferences.Companion.NEXTCLOUD_SERVER_URL
-import common.Preferences.Companion.NEXTCLOUD_SERVER_USERNAME
+import kotlinx.coroutines.runBlocking
 import retrofit2.NextcloudRetrofitApiBuilder
 import timber.log.Timber
 
@@ -21,15 +19,15 @@ class NewsApiSwitcher(
     private val wrapper: NewsApiWrapper,
     private val feedQueries: FeedQueries,
     private val entryQueries: EntryQueries,
-    private val prefs: Preferences,
+    private val preferencesRepository: PreferencesRepository,
     private val context: Context,
 ) {
 
     fun switch(authType: String) {
         when (authType) {
-            Preferences.AUTH_TYPE_NEXTCLOUD_APP -> switchToAppBasedNextcloudApi()
-            Preferences.AUTH_TYPE_NEXTCLOUD_DIRECT -> switchToDirectNextcloudApi()
-            Preferences.AUTH_TYPE_STANDALONE -> switchToStandaloneApi()
+            PreferencesRepository.AUTH_TYPE_NEXTCLOUD_APP -> switchToAppBasedNextcloudApi()
+            PreferencesRepository.AUTH_TYPE_NEXTCLOUD_DIRECT -> switchToDirectNextcloudApi()
+            PreferencesRepository.AUTH_TYPE_STANDALONE -> switchToStandaloneApi()
             else -> throw Exception("Unknown auth type: $authType")
         }
     }
@@ -62,14 +60,12 @@ class NewsApiSwitcher(
     }
 
     private fun switchToDirectNextcloudApi() {
-        val serverUrl = prefs.getStringBlocking(NEXTCLOUD_SERVER_URL)
-        val username = prefs.getStringBlocking(NEXTCLOUD_SERVER_USERNAME)
-        val password = prefs.getStringBlocking(NEXTCLOUD_SERVER_PASSWORD)
+        val prefs = runBlocking { preferencesRepository.get() }
 
         val api = DirectNextcloudNewsApiBuilder().build(
-            serverUrl,
-            username,
-            password,
+            prefs.nextcloudServerUrl,
+            prefs.nextcloudServerUsername,
+            prefs.nextcloudServerPassword,
         )
 
         wrapper.api = NextcloudNewsApiAdapter(api)

@@ -1,7 +1,7 @@
 package entries
 
 import api.NewsApi
-import common.Preferences
+import common.PreferencesRepository
 import db.EntryQueries
 import db.EntryWithoutSummary
 import com.squareup.sqldelight.runtime.coroutines.asFlow
@@ -19,7 +19,7 @@ class EntriesRepositoryTests {
 
     private val api = mockk<NewsApi>()
 
-    private val prefs = mockk<Preferences>()
+    private val prefs = mockk<PreferencesRepository>()
 
     @Test
     fun `getAll()`(): Unit = runBlocking {

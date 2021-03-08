@@ -5,14 +5,8 @@ import common.*
 import db.EntryWithoutSummary
 import feeds.FeedsRepository
 import db.Feed
-import common.Preferences.Companion.CROP_PREVIEW_IMAGES
-import common.Preferences.Companion.INITIAL_SYNC_COMPLETED
-import common.Preferences.Companion.MARK_SCROLLED_ENTRIES_AS_READ
-import common.Preferences.Companion.SHOW_OPENED_ENTRIES
-import common.Preferences.Companion.SHOW_PREVIEW_IMAGES
-import common.Preferences.Companion.SORT_ORDER
-import common.Preferences.Companion.SORT_ORDER_ASCENDING
-import common.Preferences.Companion.SORT_ORDER_DESCENDING
+import common.PreferencesRepository.Companion.SORT_ORDER_ASCENDING
+import common.PreferencesRepository.Companion.SORT_ORDER_DESCENDING
 import entriesimages.EntriesImagesRepository
 import podcasts.PodcastsRepository
 import kotlinx.coroutines.*
@@ -28,7 +22,7 @@ class EntriesViewModel(
     private val entriesImagesRepository: EntriesImagesRepository,
     private val podcastsRepository: PodcastsRepository,
     private val newsApiSync: NewsApiSync,
-    private val prefs: Preferences,
+    private val preferencesRepository: PreferencesRepository,
 ) : ViewModel() {
 
     lateinit var filter: EntriesFilter
@@ -43,8 +37,8 @@ class EntriesViewModel(
         }
 
         if (state.value == State.Inactive) {
-            if (prefs.getBoolean(INITIAL_SYNC_COMPLETED).first()) {
-                state.value = State.LoadingEntries
+            if (getPreferences().initialSyncCompleted) {
+                reloadEntries()
             } else {
                 runCatching {
                     state.value = State.PerformingInitialSync(newsApiSync.syncMessage)
@@ -55,10 +49,6 @@ class EntriesViewModel(
                 }
             }
         }
-
-        getEntriesPrefs().collect { prefs ->
-            reloadEntries(prefs)
-        }
     }
 
     suspend fun onRetry() {
@@ -66,8 +56,9 @@ class EntriesViewModel(
         onViewReady(filter)
     }
 
-    private suspend fun reloadEntries(prefs: EntriesSettings) {
+    private suspend fun reloadEntries() {
         state.value = State.LoadingEntries
+        val prefs = getPreferences()
 
         val unsortedEntries = when (val filter = filter) {
             is EntriesFilter.OnlyNotBookmarked -> {
@@ -109,34 +100,16 @@ class EntriesViewModel(
         state.value = State.ShowingEntries(result, prefs.showOpenedEntries)
     }
 
-    private suspend fun getEntriesPrefs(): Flow<EntriesSettings> {
-        return combine(
-            flow = prefs.getBoolean(SHOW_OPENED_ENTRIES),
-            flow2 = prefs.getString(SORT_ORDER),
-            flow3 = prefs.getBoolean(SHOW_PREVIEW_IMAGES),
-            flow4 = prefs.getBoolean(CROP_PREVIEW_IMAGES),
-        ) { showOpenedEntries, sortOrder, showPreviewImages, cropPreviewImages ->
-            EntriesSettings(showOpenedEntries, sortOrder, showPreviewImages, cropPreviewImages)
-        }.distinctUntilChanged()
-    }
-
     suspend fun performFullSync() {
         newsApiSync.sync()
-        reloadEntries(getEntriesPrefs().first())
+        reloadEntries()
     }
 
-    suspend fun getShowOpenedEntries() = prefs.getBoolean(SHOW_OPENED_ENTRIES)
+    suspend fun getPreferences() = preferencesRepository.get()
 
-    suspend fun setShowOpenedEntries(showOpenedEntries: Boolean) = prefs.putBoolean(
-        SHOW_OPENED_ENTRIES, showOpenedEntries
-    )
-
-    suspend fun getSortOrder() = prefs.getString(SORT_ORDER)
-
-    suspend fun setSortOrder(sortOrder: String) = prefs.putString(SORT_ORDER, sortOrder)
-
-    suspend fun getMarkScrolledEntriesAsRead(): Boolean {
-        return prefs.getBoolean(MARK_SCROLLED_ENTRIES_AS_READ).first()
+    suspend fun savePreferences(action: Preferences.() -> Unit) {
+        preferencesRepository.save(action)
+        reloadEntries()
     }
 
     suspend fun downloadPodcast(id: String) {
@@ -173,7 +146,7 @@ class EntriesViewModel(
 
     suspend fun markAsNotOpened(entryId: String) {
         entriesRepository.setOpened(entryId, false)
-        reloadEntries(getEntriesPrefs().first())
+        reloadEntries()
         newsApiSync.syncEntriesFlags()
     }
 
@@ -187,7 +160,7 @@ class EntriesViewModel(
 
     suspend fun markAsNotBookmarked(entryId: String) = withContext(Dispatchers.IO) {
         entriesRepository.setBookmarked(entryId, false)
-        reloadEntries(getEntriesPrefs().first())
+        reloadEntries()
         newsApiSync.syncEntriesFlags()
     }
 
@@ -235,13 +208,6 @@ class EntriesViewModel(
             opened = MutableStateFlow(opened),
         )
     }
-
-    private data class EntriesSettings(
-        val showOpenedEntries: Boolean,
-        val sortOrder: String,
-        val showPreviewImages: Boolean,
-        val cropPreviewImages: Boolean,
-    )
 
     sealed class State {
 

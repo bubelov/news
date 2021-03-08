@@ -161,7 +161,7 @@ class EntriesFragment : Fragment() {
         }
     })
 
-    private val listLayoutManager by lazy { LinearLayoutManager(requireContext()) }
+    private lateinit var listLayoutManager: LinearLayoutManager
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -221,49 +221,35 @@ class EntriesFragment : Fragment() {
             }
         }
 
-        val showOpenedEntriesMenuItem = binding.toolbar.menu.findItem(R.id.showOpenedEntries)
-        showOpenedEntriesMenuItem.isVisible = getShowReadEntriesButtonVisibility()
+        initShowOpenedEntriesButton()
+        initSortOrderButton()
+        initSearchButton()
+    }
 
-        lifecycleScope.launchWhenResumed {
-            model.getShowOpenedEntries().collect { showOpenedEntries ->
-                if (showOpenedEntries) {
-                    showOpenedEntriesMenuItem.setIcon(R.drawable.ic_baseline_visibility_24)
-                    showOpenedEntriesMenuItem.title = getString(R.string.hide_opened_news)
-                    touchHelper.attachToRecyclerView(null)
-                } else {
-                    showOpenedEntriesMenuItem.setIcon(R.drawable.ic_baseline_visibility_off_24)
-                    showOpenedEntriesMenuItem.title = getString(R.string.show_opened_news)
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
 
-                    if (swipesAllowed()) {
-                        touchHelper.attachToRecyclerView(binding.listView)
-                    }
-                }
-            }
+        if (runBlocking { model.getPreferences().markScrolledEntriesAsRead }) {
+            model.markAsOpened(seenEntries.map { it.id })
         }
+    }
 
-        showOpenedEntriesMenuItem.setOnMenuItemClickListener {
-            lifecycleScope.launchWhenResumed {
-                adapter.submitList(null)
-                model.setShowOpenedEntries(!model.getShowOpenedEntries().first())
-            }
-
-            true
-        }
-
+    private fun initSortOrderButton() {
         val sortOrderMenuItem = binding.toolbar.menu.findItem(R.id.sort)
 
         lifecycleScope.launchWhenResumed {
-            model.getSortOrder().collect { sortOrder ->
-                when (sortOrder) {
-                    Preferences.SORT_ORDER_ASCENDING -> {
-                        sortOrderMenuItem.setIcon(R.drawable.ic_clock_forward)
-                        sortOrderMenuItem.title = getString(R.string.show_newest_first)
-                    }
+            val prefs = model.getPreferences()
 
-                    Preferences.SORT_ORDER_DESCENDING -> {
-                        sortOrderMenuItem.setIcon(R.drawable.ic_clock_back)
-                        sortOrderMenuItem.title = getString(R.string.show_oldest_first)
-                    }
+            when (prefs.sortOrder) {
+                PreferencesRepository.SORT_ORDER_ASCENDING -> {
+                    sortOrderMenuItem.setIcon(R.drawable.ic_clock_forward)
+                    sortOrderMenuItem.title = getString(R.string.show_newest_first)
+                }
+
+                PreferencesRepository.SORT_ORDER_DESCENDING -> {
+                    sortOrderMenuItem.setIcon(R.drawable.ic_clock_back)
+                    sortOrderMenuItem.title = getString(R.string.show_oldest_first)
                 }
             }
         }
@@ -272,15 +258,56 @@ class EntriesFragment : Fragment() {
             lifecycleScope.launchWhenResumed {
                 adapter.submitList(null)
 
-                when (model.getSortOrder().first()) {
-                    Preferences.SORT_ORDER_ASCENDING -> model.setSortOrder(Preferences.SORT_ORDER_DESCENDING)
-                    Preferences.SORT_ORDER_DESCENDING -> model.setSortOrder(Preferences.SORT_ORDER_ASCENDING)
+                val preferences = model.getPreferences()
+
+                val newSortOrder = when (preferences.sortOrder) {
+                    PreferencesRepository.SORT_ORDER_ASCENDING -> PreferencesRepository.SORT_ORDER_DESCENDING
+                    PreferencesRepository.SORT_ORDER_DESCENDING -> PreferencesRepository.SORT_ORDER_ASCENDING
+                    else -> throw Exception()
                 }
+
+                model.savePreferences { sortOrder = newSortOrder }
+                initSortOrderButton()
             }
 
             true
         }
+    }
 
+    private fun initShowOpenedEntriesButton() {
+        val showOpenedEntriesMenuItem = binding.toolbar.menu.findItem(R.id.showOpenedEntries)
+        showOpenedEntriesMenuItem.isVisible = getShowReadEntriesButtonVisibility()
+
+        lifecycleScope.launchWhenResumed {
+            val prefs = model.getPreferences()
+
+            if (prefs.showOpenedEntries) {
+                showOpenedEntriesMenuItem.setIcon(R.drawable.ic_baseline_visibility_24)
+                showOpenedEntriesMenuItem.title = getString(R.string.hide_opened_news)
+                touchHelper.attachToRecyclerView(null)
+            } else {
+                showOpenedEntriesMenuItem.setIcon(R.drawable.ic_baseline_visibility_off_24)
+                showOpenedEntriesMenuItem.title = getString(R.string.show_opened_news)
+
+                if (swipesAllowed()) {
+                    touchHelper.attachToRecyclerView(binding.listView)
+                }
+            }
+        }
+
+        showOpenedEntriesMenuItem.setOnMenuItemClickListener {
+            lifecycleScope.launchWhenResumed {
+                adapter.submitList(null)
+                val prefs = model.getPreferences()
+                model.savePreferences { showOpenedEntries = !prefs.showOpenedEntries }
+                initShowOpenedEntriesButton()
+            }
+
+            true
+        }
+    }
+
+    private fun initSearchButton() {
         val searchMenuItem = binding.toolbar.menu.findItem(R.id.search)
         searchMenuItem.isVisible = getSearchButtonVisibility()
 
@@ -294,16 +321,9 @@ class EntriesFragment : Fragment() {
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-
-        if (runBlocking { model.getMarkScrolledEntriesAsRead() }) {
-            model.markAsOpened(seenEntries.map { it.id })
-        }
-    }
-
     private fun initListView() {
+        listLayoutManager = LinearLayoutManager(requireContext())
+
         val listItemDecoration = EntriesAdapterDecoration(
             resources.getDimensionPixelSize(R.dimen.entries_cards_gap)
         )
@@ -322,7 +342,7 @@ class EntriesFragment : Fragment() {
         }
 
         lifecycleScope.launchWhenResumed {
-            if (model.getMarkScrolledEntriesAsRead()
+            if (model.getPreferences().markScrolledEntriesAsRead
                 && args.filter is EntriesFilter.OnlyNotBookmarked
             ) {
                 markScrolledEntriesAsRead()

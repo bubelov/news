@@ -8,7 +8,7 @@ import com.squareup.picasso.Picasso
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
-import common.Preferences
+import common.PreferencesRepository
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
@@ -24,7 +24,7 @@ class EntriesImagesRepository(
     private val imagesMetadataQueries: EntryImagesMetadataQueries,
     private val imageQueries: EntryImageQueries,
     private val entriesRepository: EntriesRepository,
-    private val prefs: Preferences,
+    private val preferencesRepository: PreferencesRepository,
 ) {
 
     companion object {
@@ -41,8 +41,8 @@ class EntriesImagesRepository(
     suspend fun syncPreviews() = withContext(Dispatchers.IO) {
         Timber.d("Sync daemon started")
 
-        prefs.getBoolean(Preferences.SHOW_PREVIEW_IMAGES).collectLatest { showPreviewImages ->
-            if (!showPreviewImages) {
+        preferencesRepository.getAsFlow().collectLatest { prefs ->
+            if (!prefs.showPreviewImages) {
                 return@collectLatest
             }
 

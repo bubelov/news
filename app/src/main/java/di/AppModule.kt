@@ -7,7 +7,7 @@ import api.NewsApiSwitcher
 import api.NewsApiWrapper
 import auth.AuthFragmentModel
 import auth.DirectAuthFragmentModel
-import common.Preferences
+import common.PreferencesRepository
 import common.NewsApiSync
 import feeds.FeedsRepository
 import exceptions.AppExceptionsFragmentModel
@@ -46,7 +46,7 @@ val appModule = module {
     single<EntriesSupportingTextRepository>()
     single<EntriesImagesRepository>()
     single<PodcastsRepository>()
-    single<Preferences>()
+    single<PreferencesRepository>()
     single<AppExceptionsRepository>()
 
     viewModel<AuthFragmentModel>()

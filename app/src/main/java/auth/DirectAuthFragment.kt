@@ -10,7 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
-import common.Preferences
+import common.PreferencesRepository
 import common.showDialog
 import co.appreactor.news.databinding.FragmentDirectAuthBinding
 import entries.EntriesFilter
@@ -80,7 +80,7 @@ class DirectAuthFragment : Fragment() {
                         binding.password.text.toString()
                     )
 
-                    model.setAuthType(Preferences.AUTH_TYPE_NEXTCLOUD_DIRECT)
+                    model.setAuthType(PreferencesRepository.AUTH_TYPE_NEXTCLOUD_DIRECT)
 
                     findNavController().apply {
                         popBackStack()

@@ -4,23 +4,19 @@ import androidx.lifecycle.ViewModel
 import api.NewsApiSwitcher
 import api.nextcloud.DirectNextcloudNewsApiBuilder
 import common.*
-import common.Preferences.Companion.AUTH_TYPE
-import common.Preferences.Companion.NEXTCLOUD_SERVER_PASSWORD
-import common.Preferences.Companion.NEXTCLOUD_SERVER_URL
-import common.Preferences.Companion.NEXTCLOUD_SERVER_USERNAME
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 
 class DirectAuthFragmentModel(
     private val nextcloudApiSwitcher: NewsApiSwitcher,
-    private val prefs: Preferences,
+    private val preferencesRepository: PreferencesRepository,
 ) : ViewModel() {
 
     suspend fun requestFeeds(
         serverUrl: String,
         username: String,
-        password: String
+        password: String,
     ) {
         val api = DirectNextcloudNewsApiBuilder().build(
             serverUrl,
@@ -41,18 +37,23 @@ class DirectAuthFragmentModel(
         }
     }
 
-    fun setServer(
+    suspend fun setServer(
         serverUrl: String,
         username: String,
         password: String,
     ) {
-        prefs.putStringBlocking(NEXTCLOUD_SERVER_URL, serverUrl)
-        prefs.putStringBlocking(NEXTCLOUD_SERVER_USERNAME, username)
-        prefs.putStringBlocking(NEXTCLOUD_SERVER_PASSWORD, password)
+        preferencesRepository.save {
+            nextcloudServerUrl = serverUrl
+            nextcloudServerUsername = username
+            nextcloudServerPassword = password
+        }
     }
 
-    fun setAuthType(authType: String) {
-        prefs.putStringBlocking(AUTH_TYPE, authType)
-        nextcloudApiSwitcher.switch(authType)
+    suspend fun setAuthType(newAuthType: String) {
+        preferencesRepository.save {
+            authType = newAuthType
+        }
+
+        nextcloudApiSwitcher.switch(newAuthType)
     }
 }

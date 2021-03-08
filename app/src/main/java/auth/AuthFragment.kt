@@ -15,7 +15,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
-import common.Preferences
+import common.PreferencesRepository
 import common.getColorFromAttr
 import co.appreactor.news.databinding.FragmentAuthBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -41,13 +41,13 @@ class AuthFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         return runBlocking {
-            when (model.authType) {
-                Preferences.AUTH_TYPE_STANDALONE -> {
+            when (model.getAuthType()) {
+                PreferencesRepository.AUTH_TYPE_STANDALONE -> {
                     showNews()
                     null
                 }
 
-                Preferences.AUTH_TYPE_NEXTCLOUD_APP, Preferences.AUTH_TYPE_NEXTCLOUD_DIRECT -> {
+                PreferencesRepository.AUTH_TYPE_NEXTCLOUD_APP, PreferencesRepository.AUTH_TYPE_NEXTCLOUD_DIRECT -> {
                     showNews()
                     null
                 }
@@ -66,7 +66,7 @@ class AuthFragment : Fragment() {
 
         binding.standaloneMode.setOnClickListener {
             lifecycleScope.launchWhenResumed {
-                model.authType = Preferences.AUTH_TYPE_STANDALONE
+                model.setAuthType(PreferencesRepository.AUTH_TYPE_STANDALONE)
                 showNews()
             }
         }
@@ -83,7 +83,7 @@ class AuthFragment : Fragment() {
         val onAccessGranted = IAccountAccessGranted { account ->
             runBlocking {
                 SingleAccountHelper.setCurrentAccount(context, account.name)
-                model.authType = Preferences.AUTH_TYPE_NEXTCLOUD_APP
+                model.setAuthType(PreferencesRepository.AUTH_TYPE_NEXTCLOUD_APP)
                 showNews()
             }
         }

@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -187,7 +186,11 @@ class FeedsFragment : Fragment() {
 
                 addOnScrollListener(object : RecyclerView.OnScrollListener() {
                     override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                        fab.isVisible = list.canScrollVertically(1)
+                        if (list.canScrollVertically(1) || !list.canScrollVertically(-1)) {
+                            fab.show()
+                        } else {
+                            fab.hide()
+                        }
                     }
                 })
             }
@@ -228,7 +231,7 @@ class FeedsFragment : Fragment() {
                             Timber.d("Got ${state.feeds.size} feeds")
                             adapter.submitList(state.feeds)
 
-                            fab.show(animate = true)
+                            fab.show()
                         }
 
                         is FeedsViewModel.State.ImportingFeeds -> {
