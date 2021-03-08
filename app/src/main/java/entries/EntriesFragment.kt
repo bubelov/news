@@ -9,7 +9,6 @@ import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -17,11 +16,9 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
-import common.showDialog
-import common.showErrorDialog
 import co.appreactor.news.databinding.FragmentEntriesBinding
 import com.google.android.material.snackbar.Snackbar
-import common.Preferences
+import common.*
 import db.Entry
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -35,7 +32,7 @@ class EntriesFragment : Fragment() {
         EntriesFragmentArgs.fromBundle(requireArguments())
     }
 
-    private val model: EntriesFragmentModel by viewModel()
+    private val model: EntriesViewModel by viewModel()
 
     private var _binding: FragmentEntriesBinding? = null
     private val binding get() = _binding!!
@@ -52,47 +49,61 @@ class EntriesFragment : Fragment() {
         }
     }
 
-    private val adapter = EntriesAdapter(
-        scope = lifecycleScope,
-        callback = object : EntriesAdapterCallback {
-            override fun onItemClick(item: EntriesAdapterItem) {
-                val action = EntriesFragmentDirections.actionEntriesFragmentToEntryFragment(item.id)
-                findNavController().navigate(action)
-            }
+    private val adapter by lazy {
+        EntriesAdapter(
+            scope = lifecycleScope,
+            callback = object : EntriesAdapterCallback {
+                override fun onItemClick(item: EntriesAdapterItem) {
+                    val action =
+                        EntriesFragmentDirections.actionEntriesFragmentToEntryFragment(item.id)
+                    findNavController().navigate(action)
+                }
 
-            override fun onDownloadPodcastClick(item: EntriesAdapterItem) {
-                lifecycleScope.launchWhenResumed {
-                    runCatching {
-                        model.downloadPodcast(item.id)
-                    }.onFailure {
-                        Timber.e(it)
-                        showDialog(R.string.error, it.message ?: "")
+                override fun onDownloadPodcastClick(item: EntriesAdapterItem) {
+                    lifecycleScope.launchWhenResumed {
+                        runCatching {
+                            model.downloadPodcast(item.id)
+                        }.onFailure {
+                            Timber.e(it)
+                            showDialog(R.string.error, it.message ?: "")
+                        }
+                    }
+                }
+
+                override fun onPlayPodcastClick(item: EntriesAdapterItem) {
+                    lifecycleScope.launch {
+                        runCatching {
+                            requireContext().openCachedPodcast(model.getEntry(item.id)!!)
+                        }.onFailure {
+                            Timber.e(it)
+                            showDialog(R.string.error, it.message ?: "")
+                        }
                     }
                 }
             }
+        ).apply {
+            val displayMetrics = DisplayMetrics()
 
-            override fun onPlayPodcastClick(item: EntriesAdapterItem) {
-                lifecycleScope.launch {
-                    runCatching {
-                        requireContext().openCachedPodcast(model.getEntry(item.id)!!)
-                    }.onFailure {
-                        Timber.e(it)
-                        showDialog(R.string.error, it.message ?: "")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                requireContext().display?.getRealMetrics(displayMetrics)
+            } else {
+                @Suppress("DEPRECATION")
+                requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
+            }
+
+            screenWidth = displayMetrics.widthPixels
+
+            registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+                override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                    if (positionStart == 0) {
+                        (binding.listView.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
+                            0,
+                            0
+                        )
                     }
                 }
-            }
+            })
         }
-    ).apply {
-        registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
-            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-                if (positionStart == 0) {
-                    (binding.listView.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
-                        0,
-                        0
-                    )
-                }
-            }
-        })
     }
 
     private val touchHelper = ItemTouchHelper(object : ItemTouchHelper.Callback() {
@@ -150,6 +161,8 @@ class EntriesFragment : Fragment() {
         }
     })
 
+    private val listLayoutManager by lazy { LinearLayoutManager(requireContext()) }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -160,6 +173,8 @@ class EntriesFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        initListView()
+
         lifecycleScope.launchWhenResumed {
             model.onViewReady(args.filter!!)
         }
@@ -277,80 +292,28 @@ class EntriesFragment : Fragment() {
             findNavController().navigate(EntriesFragmentDirections.actionEntriesFragmentToSearchFragment())
             true
         }
-
-        lifecycleScope.launchWhenResumed {
-            showEntries()
-        }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
 
-        if (runBlocking { model.getMarkScrolledEntriesAsRead().first() }) {
+        if (runBlocking { model.getMarkScrolledEntriesAsRead() }) {
             model.markAsOpened(seenEntries.map { it.id })
         }
     }
 
-    private suspend fun showEntries() {
-        binding.listView.setHasFixedSize(true)
-        val layoutManager = LinearLayoutManager(requireContext())
-        binding.listView.layoutManager = layoutManager
-        binding.listView.adapter = adapter
-        binding.listView.addItemDecoration(
-            EntriesAdapterDecoration(
-                resources.getDimensionPixelSize(
-                    R.dimen.entries_cards_gap
-                )
-            )
+    private fun initListView() {
+        val listItemDecoration = EntriesAdapterDecoration(
+            resources.getDimensionPixelSize(R.dimen.entries_cards_gap)
         )
 
-        lifecycleScope.launchWhenResumed {
-            if (model.getMarkScrolledEntriesAsRead().first()
-                && args.filter is EntriesFilter.OnlyNotBookmarked
-            ) {
-                binding.listView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                    override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-
-                    }
-
-                    override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                        if (recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE) {
-                            return
-                        }
-
-                        if (layoutManager.findFirstVisibleItemPosition() == RecyclerView.NO_POSITION) {
-                            return
-                        }
-
-                        if (layoutManager.findLastVisibleItemPosition() == RecyclerView.NO_POSITION) {
-                            return
-                        }
-
-                        val visibleEntries =
-                            (layoutManager.findFirstVisibleItemPosition()..layoutManager.findLastVisibleItemPosition()).map {
-                                adapter.currentList[it]
-                            }
-
-                        seenEntries.addAll(visibleEntries)
-
-                        val seenItemsOutOfRange =
-                            seenEntries.filterNot { visibleEntries.contains(it) }
-                        seenEntries.removeAll(seenItemsOutOfRange)
-
-                        seenItemsOutOfRange.forEach {
-                            if (!it.opened.value) {
-                                it.opened.value = true
-                                lifecycleScope.launchWhenResumed {
-                                    model.markAsOpened(
-                                        it.id,
-                                        changeState = false,
-                                    )
-                                }
-                            }
-                        }
-                    }
-                })
+        binding.apply {
+            listView.apply {
+                layoutManager = listLayoutManager
+                setHasFixedSize(true)
+                adapter = this@EntriesFragment.adapter
+                addItemDecoration(listItemDecoration)
             }
         }
 
@@ -358,63 +321,98 @@ class EntriesFragment : Fragment() {
             touchHelper.attachToRecyclerView(binding.listView)
         }
 
-        val displayMetrics = DisplayMetrics()
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            requireContext().display?.getRealMetrics(displayMetrics)
-        } else {
-            @Suppress("DEPRECATION")
-            requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
+        lifecycleScope.launchWhenResumed {
+            if (model.getMarkScrolledEntriesAsRead()
+                && args.filter is EntriesFilter.OnlyNotBookmarked
+            ) {
+                markScrolledEntriesAsRead()
+            }
         }
 
-        adapter.screenWidth = displayMetrics.widthPixels
+        showListItems()
+    }
 
-        model.state.collectLatest { state ->
-            binding.progress.isVisible = false
-            binding.message.isVisible = false
-            binding.retry.isVisible = false
+    private fun markScrolledEntriesAsRead() = lifecycleScope.launchWhenResumed {
+        binding.listView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
 
-            when (state) {
-                is EntriesFragmentModel.State.PerformingInitialSync -> {
-                    binding.progress.isVisible = true
-                    binding.progress.alpha = 0f
-                    binding.progress.animate().alpha(1f).duration = 1000
+            }
 
-                    binding.message.isVisible = true
-                    binding.message.alpha = 0f
-                    binding.message.animate().alpha(1f).duration = 1000
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if (recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE) {
+                    return
+                }
 
-                    state.message.collect {
-                        binding.message.text = it
+                if (listLayoutManager.findFirstVisibleItemPosition() == RecyclerView.NO_POSITION) {
+                    return
+                }
+
+                if (listLayoutManager.findLastVisibleItemPosition() == RecyclerView.NO_POSITION) {
+                    return
+                }
+
+                val visibleEntries =
+                    (listLayoutManager.findFirstVisibleItemPosition()..listLayoutManager.findLastVisibleItemPosition()).map {
+                        adapter.currentList[it]
+                    }
+
+                seenEntries.addAll(visibleEntries)
+
+                val seenItemsOutOfRange =
+                    seenEntries.filterNot { visibleEntries.contains(it) }
+                seenEntries.removeAll(seenItemsOutOfRange)
+
+                seenItemsOutOfRange.forEach {
+                    if (!it.opened.value) {
+                        it.opened.value = true
+                        lifecycleScope.launchWhenResumed {
+                            model.markAsOpened(
+                                it.id,
+                                changeState = false,
+                            )
+                        }
                     }
                 }
+            }
+        })
+    }
 
-                is EntriesFragmentModel.State.FailedToSync -> {
-                    showDialog(R.string.error, state.error.message ?: "")
+    private fun showListItems() = lifecycleScope.launchWhenResumed {
+        binding.apply {
+            model.state.collectLatest { state ->
+                progress.hide()
+                message.hide()
+                retry.hide()
 
-                    binding.retry.isVisible = true
-                    binding.retry.alpha = 0f
-                    binding.retry.animate().alpha(1f).duration = 250
-                }
+                when (state) {
+                    is EntriesViewModel.State.Inactive -> {
 
-                EntriesFragmentModel.State.LoadingEntries -> {
-                    binding.progress.isVisible = true
-                    binding.progress.alpha = 0f
-                    binding.progress.animate().alpha(1f).duration = 1000
-                }
+                    }
 
-                is EntriesFragmentModel.State.ShowingEntries -> {
-                    binding.message.text = getEmptyMessage(state.includesUnread)
-                    binding.message.isVisible = state.entries.isEmpty()
-                    binding.message.alpha = 0f
-                    binding.message.animate().alpha(1f).duration = 500
+                    is EntriesViewModel.State.PerformingInitialSync -> {
+                        progress.show(animate = true)
+                        message.show(animate = true)
+                        state.message.collect { message.text = it }
+                    }
 
-                    seenEntries.clear()
-                    adapter.submitList(state.entries)
-                }
+                    is EntriesViewModel.State.FailedToSync -> {
+                        showDialog(R.string.error, state.error.message ?: "")
+                        retry.show(animate = true)
+                    }
 
-                else -> {
+                    EntriesViewModel.State.LoadingEntries -> {
+                        progress.show(animate = true)
+                    }
 
+                    is EntriesViewModel.State.ShowingEntries -> {
+                        if (state.entries.isEmpty()) {
+                            message.text = getEmptyMessage(state.includesUnread)
+                            message.show(animate = true)
+                        }
+
+                        seenEntries.clear()
+                        adapter.submitList(state.entries)
+                    }
                 }
             }
         }

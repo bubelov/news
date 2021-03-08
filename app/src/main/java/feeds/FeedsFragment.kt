@@ -16,12 +16,10 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
-import common.showDialog
-import common.showKeyboard
 import co.appreactor.news.databinding.FragmentFeedsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
-import common.showErrorDialog
+import common.*
 import entries.EntriesFilter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -326,18 +324,5 @@ class FeedsFragment : Fragment() {
         requireActivity().window.setSoftInputMode(
             WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
         )
-    }
-
-    private fun View.show(animate: Boolean = false) {
-        isVisible = true
-
-        if (animate) {
-            alpha = 0f
-            this.animate().alpha(1f).duration = 300
-        }
-    }
-
-    private fun View.hide() {
-        isVisible = false
     }
 }

@@ -12,7 +12,7 @@ import common.NewsApiSync
 import feeds.FeedsRepository
 import exceptions.AppExceptionsFragmentModel
 import exceptions.AppExceptionsRepository
-import entries.EntriesFragmentModel
+import entries.EntriesViewModel
 import entries.EntriesRepository
 import entry.EntryFragmentModel
 import entriesimages.EntriesImagesRepository
@@ -50,7 +50,7 @@ val appModule = module {
     single<AppExceptionsRepository>()
 
     viewModel<AuthFragmentModel>()
-    viewModel<EntriesFragmentModel>()
+    viewModel<EntriesViewModel>()
     viewModel<EntryFragmentModel>()
     viewModel<SettingsFragmentModel>()
     viewModel<DirectAuthFragmentModel>()

@@ -21,7 +21,7 @@ import org.joda.time.Instant
 import java.text.DateFormat
 import java.util.*
 
-class EntriesFragmentModel(
+class EntriesViewModel(
     private val feedsRepository: FeedsRepository,
     private val entriesRepository: EntriesRepository,
     private val entriesSupportingTextRepository: EntriesSupportingTextRepository,
@@ -33,7 +33,7 @@ class EntriesFragmentModel(
 
     lateinit var filter: EntriesFilter
 
-    val state = MutableStateFlow<State>(State.WaitingForFirstView)
+    val state = MutableStateFlow<State>(State.Inactive)
 
     suspend fun onViewReady(filter: EntriesFilter) {
         this.filter = filter
@@ -42,7 +42,7 @@ class EntriesFragmentModel(
             return
         }
 
-        if (state.value == State.WaitingForFirstView) {
+        if (state.value == State.Inactive) {
             if (prefs.getBoolean(INITIAL_SYNC_COMPLETED).first()) {
                 state.value = State.LoadingEntries
             } else {
@@ -62,7 +62,7 @@ class EntriesFragmentModel(
     }
 
     suspend fun onRetry() {
-        state.value = State.WaitingForFirstView
+        state.value = State.Inactive
         onViewReady(filter)
     }
 
@@ -135,7 +135,9 @@ class EntriesFragmentModel(
 
     suspend fun setSortOrder(sortOrder: String) = prefs.putString(SORT_ORDER, sortOrder)
 
-    suspend fun getMarkScrolledEntriesAsRead() = prefs.getBoolean(MARK_SCROLLED_ENTRIES_AS_READ)
+    suspend fun getMarkScrolledEntriesAsRead(): Boolean {
+        return prefs.getBoolean(MARK_SCROLLED_ENTRIES_AS_READ).first()
+    }
 
     suspend fun downloadPodcast(id: String) {
         podcastsRepository.download(id)
@@ -242,9 +244,13 @@ class EntriesFragmentModel(
     )
 
     sealed class State {
-        object WaitingForFirstView : State()
+
+        object Inactive : State()
+
         data class PerformingInitialSync(val message: Flow<String>) : State()
+
         data class FailedToSync(val error: Throwable) : State()
+
         object LoadingEntries : State()
 
         data class ShowingEntries(
