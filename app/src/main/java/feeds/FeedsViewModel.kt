@@ -4,9 +4,7 @@ import androidx.lifecycle.ViewModel
 import common.NewsApiSync
 import db.Feed
 import entries.EntriesRepository
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.first
 import opml.OpmlElement
 import timber.log.Timber
 
@@ -24,12 +22,12 @@ class FeedsViewModel(
         }
 
         state.value = State.LoadedFeeds(
-            feeds = feedsRepository.getAll().first().map { it.toItem() }
+            feeds = feedsRepository.selectAll().map { it.toItem() }
         )
     }
 
     suspend fun createFeed(url: String) {
-        feedsRepository.add(url)
+        feedsRepository.insertByUrl(url)
 
         newsApiSync.sync(
             syncEntriesFlags = false,
@@ -43,11 +41,11 @@ class FeedsViewModel(
     }
 
     suspend fun deleteFeed(feedId: String) {
-        feedsRepository.delete(feedId)
+        feedsRepository.deleteById(feedId)
         entriesRepository.deleteByFeedId(feedId)
     }
 
-    suspend fun getAllFeeds() = feedsRepository.getAll()
+    suspend fun getAllFeeds() = feedsRepository.selectAll()
 
     suspend fun importFeeds(feeds: List<OpmlElement>) {
         var added = 0
@@ -64,7 +62,7 @@ class FeedsViewModel(
 
         state.value = State.ImportingFeeds(progressFlow)
 
-        val cachedFeeds = feedsRepository.getAll().first()
+        val cachedFeeds = feedsRepository.selectAll()
 
         feeds.forEach { opml ->
             if (cachedFeeds.any { it.selfLink == opml.xmlUrl }) {
@@ -73,7 +71,7 @@ class FeedsViewModel(
             }
 
             runCatching {
-                feedsRepository.add(opml.xmlUrl.replace("http://", "https://"))
+                feedsRepository.insertByUrl(opml.xmlUrl.replace("http://", "https://"))
             }.onSuccess {
                 added++
             }.onFailure {

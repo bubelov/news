@@ -8,7 +8,7 @@ import org.joda.time.Instant
 
 interface NewsApi {
 
-    suspend fun addFeed(uri: String): Feed
+    suspend fun addFeed(url: String): Feed
 
     suspend fun getFeeds(): List<Feed>
 

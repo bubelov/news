@@ -41,7 +41,7 @@ class SearchFragmentModel(
             delay(1500)
 
             val entries = entriesRepository.search(query).first()
-            val feeds = feedsRepository.getAll().first()
+            val feeds = feedsRepository.selectAll()
 
             val results = entries.map { entry ->
                 val feed = feeds.singleOrNull { feed -> feed.id == entry.feedId }

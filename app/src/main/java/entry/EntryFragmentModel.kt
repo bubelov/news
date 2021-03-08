@@ -22,7 +22,7 @@ class EntryFragmentModel(
 ) : ViewModel() {
 
     suspend fun getFeed(id: String): Feed? {
-        return feedsRepository.get(id).first()
+        return feedsRepository.selectById(id)
     }
 
     suspend fun getEntry(id: String): Entry? {

@@ -25,7 +25,6 @@ import common.showErrorDialog
 import entries.EntriesFilter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import opml.readOpml
 import opml.writeOpml
@@ -143,7 +142,7 @@ class FeedsFragment : Fragment() {
         lifecycleScope.launchWhenResumed {
             withContext(Dispatchers.IO) {
                 requireContext().contentResolver.openOutputStream(uri)?.use {
-                    it.write(writeOpml(model.getAllFeeds().first()).toByteArray())
+                    it.write(writeOpml(model.getAllFeeds()).toByteArray())
                 }
             }
         }

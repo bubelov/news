@@ -20,10 +20,6 @@ SELECT *
 FROM Feed
 WHERE id = ?;
 
-selectCount:
-SELECT COUNT(*)
-FROM Feed;
-
 deleteAll:
 DELETE
 FROM Feed;

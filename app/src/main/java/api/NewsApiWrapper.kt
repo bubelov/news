@@ -10,8 +10,8 @@ class NewsApiWrapper : NewsApi {
 
     lateinit var api: NewsApi
 
-    override suspend fun addFeed(uri: String): Feed {
-        return api.addFeed(uri)
+    override suspend fun addFeed(url: String): Feed {
+        return api.addFeed(url)
     }
 
     override suspend fun getFeeds(): List<Feed> {

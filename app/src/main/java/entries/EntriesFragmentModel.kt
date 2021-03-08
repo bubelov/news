@@ -99,7 +99,7 @@ class EntriesFragmentModel(
             else -> unsortedEntries
         }
 
-        val feeds = feedsRepository.getAll().first()
+        val feeds = feedsRepository.selectAll()
 
         val result = sortedEntries.map {
             val feed = feeds.singleOrNull { feed -> feed.id == it.feedId }
@@ -146,7 +146,7 @@ class EntriesFragmentModel(
     suspend fun getCachedEnclosureUri(entryId: String) =
         podcastsRepository.getCachedPodcastUri(entryId)
 
-    suspend fun getFeed(id: String) = feedsRepository.get(id).first()
+    suspend fun getFeed(id: String) = feedsRepository.selectById(id)
 
     suspend fun markAsOpened(entryId: String, changeState: Boolean = true) {
         if (changeState) {

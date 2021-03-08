@@ -28,18 +28,18 @@ class StandaloneNewsApi(
 
     private val httpClient = OkHttpClient()
 
-    override suspend fun addFeed(uri: String): Feed {
-        val isHttps = uri.startsWith("https")
-        val isCleartextHttp = !isHttps && uri.startsWith("http")
+    override suspend fun addFeed(url: String): Feed {
+        val isHttps = url.startsWith("https")
+        val isCleartextHttp = !isHttps && url.startsWith("http")
 
         if (isCleartextHttp) {
             throw Exception("Insecure feeds are not allowed. Please use HTTPS.")
         }
 
         val fullUri = if (!isHttps) {
-            "https://$uri"
+            "https://$url"
         } else {
-            uri
+            url
         }
 
         return getFeed(fullUri)
