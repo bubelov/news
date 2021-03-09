@@ -54,6 +54,7 @@ class EntriesFragment : Fragment() {
             scope = lifecycleScope,
             callback = object : EntriesAdapterCallback {
                 override fun onItemClick(item: EntriesAdapterItem) {
+                    model.openedEntry.value = item
                     val action =
                         EntriesFragmentDirections.actionEntriesFragmentToEntryFragment(item.id)
                     findNavController().navigate(action)
@@ -224,6 +225,17 @@ class EntriesFragment : Fragment() {
         initShowOpenedEntriesButton()
         initSortOrderButton()
         initSearchButton()
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        model.openedEntry.value?.let {
+            lifecycleScope.launchWhenResumed {
+                model.reloadEntry(it)
+                model.openedEntry.value = null
+            }
+        }
     }
 
     override fun onDestroyView() {

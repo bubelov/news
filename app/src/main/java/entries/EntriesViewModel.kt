@@ -29,6 +29,8 @@ class EntriesViewModel(
 
     val state = MutableStateFlow<State>(State.Inactive)
 
+    val openedEntry = MutableStateFlow<EntriesAdapterItem?>(null)
+
     suspend fun onViewReady(filter: EntriesFilter) {
         this.filter = filter
 
@@ -54,6 +56,35 @@ class EntriesViewModel(
     suspend fun onRetry() {
         state.value = State.Inactive
         onViewReady(filter)
+    }
+
+    suspend fun reloadEntry(entry: EntriesAdapterItem) {
+        val freshEntry = entriesRepository.get(entry.id).first() ?: return
+        entry.opened.value = freshEntry.opened
+
+        val currentState = state.value
+
+        if (currentState is State.ShowingEntries) {
+            val hideEntry = fun() {
+                state.value = currentState.copy(
+                    entries = currentState.entries.toMutableList().apply {
+                        remove(entry)
+                    }
+                )
+            }
+
+            if (freshEntry.opened && !currentState.includesUnread) {
+                hideEntry()
+            }
+
+            if (freshEntry.bookmarked && filter is EntriesFilter.OnlyNotBookmarked) {
+                hideEntry()
+            }
+
+            if (!freshEntry.bookmarked && filter is EntriesFilter.OnlyBookmarked) {
+                hideEntry()
+            }
+        }
     }
 
     private suspend fun reloadEntries() {
@@ -97,7 +128,10 @@ class EntriesViewModel(
             it.toRow(feed, prefs.showPreviewImages, prefs.cropPreviewImages)
         }
 
-        state.value = State.ShowingEntries(result, prefs.showOpenedEntries)
+        state.value = State.ShowingEntries(
+            result,
+            prefs.showOpenedEntries || filter is EntriesFilter.OnlyBookmarked,
+        )
     }
 
     suspend fun performFullSync() {
