@@ -32,14 +32,6 @@ android {
         allWarningsAsErrors = true
     }
 
-    buildFeatures {
-        compose true
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion "1.0.0-beta01"
-    }
-
     signingConfigs {
         if (signingPropertiesFile.exists()) {
             play {
@@ -90,46 +82,35 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
     implementation "org.jetbrains.kotlin:kotlin-reflect"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$versions_coroutines"
+
     implementation "androidx.core:core-ktx:$versions_ktx"
+    implementation "androidx.fragment:fragment-ktx:$versions_fragment"
+    implementation "androidx.lifecycle:lifecycle-common-java8:$versions_lifecycle"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$versions_lifecycle"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$versions_lifecycle"
+    implementation "androidx.navigation:navigation-ui-ktx:$versions_nav"
+    implementation "androidx.navigation:navigation-fragment-ktx:$versions_nav"
     implementation "androidx.constraintlayout:constraintlayout:$versions_constrained_layout"
+    implementation "androidx.recyclerview:recyclerview:$versions_recyclerview"
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:$versions_swipe_refresh"
+
     implementation "com.squareup.retrofit2:retrofit:$versions_retrofit"
     implementation "com.squareup.retrofit2:converter-gson:$versions_retrofit"
     implementation "com.squareup.okhttp3:okhttp-bom:$versions_okhttp"
     implementation "com.squareup.okhttp3:okhttp"
     implementation "com.squareup.okhttp3:logging-interceptor"
-    // If using Java8, use the following instead of lifecycle-compiler
-    implementation "androidx.lifecycle:lifecycle-common-java8:$versions_lifecycle"
-    // ViewModel
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$versions_lifecycle"
-    // LifecycleScope
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$versions_lifecycle"
-    implementation "androidx.recyclerview:recyclerview:$versions_recyclerview"
+
     implementation "com.github.nextcloud:Android-SingleSignOn:$versions_nextcloud_sso"
     implementation "com.google.android.material:material:$versions_material"
     implementation "com.squareup.picasso:picasso:$versions_picasso"
-    implementation "androidx.navigation:navigation-fragment-ktx:$versions_nav"
-    implementation "androidx.navigation:navigation-ui-ktx:$versions_nav"
     implementation "org.koin:koin-android:$versions_koin"
     implementation "org.koin:koin-android-ext:$versions_koin"
     implementation "org.koin:koin-android-viewmodel:$versions_koin"
     implementation "com.squareup.sqldelight:android-driver:$versions_sqldelight"
     implementation "com.squareup.sqldelight:coroutines-extensions:$versions_sqldelight"
     implementation "com.jakewharton.timber:timber:$versions_timber"
-    implementation "androidx.swiperefreshlayout:swiperefreshlayout:$versions_swipe_refresh"
     implementation "org.jsoup:jsoup:$versions_jsoup"
     implementation "joda-time:joda-time:$versions_joda_time"
-
-    implementation "androidx.compose.runtime:runtime:$versions_compose"
-    implementation "androidx.compose.ui:ui:$versions_compose"
-    // Tooling support (Previews, etc.)
-    implementation "androidx.compose.ui:ui-tooling:$versions_compose"
-    // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)
-    implementation "androidx.compose.foundation:foundation:$versions_compose"
-    // Material Design
-    implementation "androidx.compose.material:material:$versions_compose"
-    implementation "androidx.compose.material:material-icons-extended:$versions_compose"
-    // Activity.setContent()
-    implementation "androidx.activity:activity-compose:1.3.0-alpha03"
 
     testImplementation "junit:junit:$versions_junit"
     testImplementation "io.mockk:mockk:$versions_mockk"
