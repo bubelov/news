@@ -1,7 +1,6 @@
 package entries
 
 import api.NewsApi
-import common.PreferencesRepository
 import db.EntryQueries
 import db.EntryWithoutSummary
 import com.squareup.sqldelight.runtime.coroutines.asFlow
@@ -15,14 +14,12 @@ import org.junit.Test
 
 class EntriesRepositoryTests {
 
-    private val entryQueries = mockk<EntryQueries>()
-
     private val api = mockk<NewsApi>()
 
-    private val prefs = mockk<PreferencesRepository>()
+    private val db = mockk<EntryQueries>()
 
     @Test
-    fun `getAll()`(): Unit = runBlocking {
+    fun selectAll(): Unit = runBlocking {
         val entries = listOf(
             EntryWithoutSummary(
                 id = "",
@@ -44,26 +41,24 @@ class EntriesRepositoryTests {
 
         mockkStatic("com.squareup.sqldelight.runtime.coroutines.FlowQuery")
 
-        every { entryQueries.selectAll() } returns mockk {
+        every { db.selectAll() } returns mockk {
             every { asFlow() } returns mockk {
                 every { mapToList() } returns flowOf(entries)
             }
         }
 
         val repository = EntriesRepository(
-            entryQueries = entryQueries,
-            newsApi = api,
-            prefs = prefs,
+            api = api,
+            db = db,
         )
 
-        assertEquals(entries, repository.getAll().first())
+        assertEquals(entries, repository.selectAll().first())
 
-        verify { entryQueries.selectAll() }
+        verify { db.selectAll() }
 
         confirmVerified(
-            entryQueries,
             api,
-            prefs,
+            db,
         )
     }
 }

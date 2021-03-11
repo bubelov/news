@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import org.joda.time.Instant
 
 class NewsApiSync(
     private val feedsRepository: FeedsRepository,
@@ -45,6 +46,10 @@ class NewsApiSync(
 
                     feedsSync.await()
                     entriesSync.await()
+
+                    preferencesRepository.save {
+                        lastEntriesSyncDateTime = Instant.now().toString()
+                    }
                 }.onSuccess {
                     syncMessage.value = ""
                     preferencesRepository.save { initialSyncCompleted = true }
@@ -89,7 +94,13 @@ class NewsApiSync(
             }
 
             if (syncNewAndUpdatedEntries) {
-                entriesRepository.syncNewAndUpdated()
+                entriesRepository.syncNewAndUpdated(
+                    lastEntriesSyncDateTime = preferencesRepository.get().lastEntriesSyncDateTime
+                )
+
+                preferencesRepository.save {
+                    lastEntriesSyncDateTime = Instant.now().toString()
+                }
             }
         }
     }

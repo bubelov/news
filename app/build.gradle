@@ -64,7 +64,7 @@ android {
     }
 
     lintOptions {
-        disable "VectorRaster", "VectorPath"
+        disable "VectorRaster", "VectorPath", "InvalidFragmentVersionForActivityResult"
     }
 }
 

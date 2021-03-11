@@ -8,7 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class AppExceptionsRepository(
-    private val db: LoggedExceptionQueries
+    private val db: LoggedExceptionQueries,
 ) {
 
     suspend fun insertOrReplace(exception: LoggedException) = withContext(Dispatchers.IO) {

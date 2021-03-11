@@ -46,7 +46,7 @@ class EntriesImagesRepository(
                 return@collectLatest
             }
 
-            entriesRepository.getAll().collectLatest { entries ->
+            entriesRepository.selectAll().collectLatest { entries ->
                 Timber.d("Got ${entries.size} entries")
                 val notOpenedEntries = entries.filterNot { it.opened }
                 Timber.d("Not opened entries: ${notOpenedEntries.size}")
