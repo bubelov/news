@@ -1,33 +1,53 @@
-package di
+package injections
 
 import android.content.Context
 import android.net.ConnectivityManager
 import api.NewsApi
 import api.NewsApiSwitcher
 import api.NewsApiWrapper
-import auth.AuthFragmentModel
-import auth.DirectAuthFragmentModel
+import auth.AuthViewModel
+import auth.DirectAuthViewModel
+import co.appreactor.news.Database
+import com.squareup.sqldelight.android.AndroidSqliteDriver
 import common.PreferencesRepository
 import common.NewsApiSync
 import feeds.FeedsRepository
-import exceptions.AppExceptionsFragmentModel
+import exceptions.AppExceptionsViewModel
 import exceptions.AppExceptionsRepository
 import entries.EntriesViewModel
 import entries.EntriesRepository
-import entry.EntryFragmentModel
+import entry.EntryViewModel
 import entriesimages.EntriesImagesRepository
 import podcasts.PodcastsRepository
-import settings.SettingsFragmentModel
+import settings.SettingsViewModel
 import common.ConnectivityProbe
 import entries.EntriesSupportingTextRepository
-import exception.AppExceptionFragmentModel
+import exception.AppExceptionViewModel
 import feeds.FeedsViewModel
 import org.koin.android.experimental.dsl.viewModel
 import org.koin.dsl.module
 import org.koin.experimental.builder.single
-import search.SearchFragmentModel
+import search.SearchViewModel
 
 val appModule = module {
+
+    single {
+        Database(
+            AndroidSqliteDriver(
+                schema = Database.Schema,
+                context = get(),
+                name = "news.db",
+            )
+        )
+    }
+
+    single { get<Database>().feedQueries }
+    single { get<Database>().entryQueries }
+    single { get<Database>().entryImagesMetadataQueries }
+    single { get<Database>().entryImageQueries }
+    single { get<Database>().entryEnclosureQueries }
+    single { get<Database>().preferenceQueries }
+    single { get<Database>().loggedExceptionQueries }
 
     single {
         val context = get<Context>()
@@ -49,13 +69,13 @@ val appModule = module {
     single<PreferencesRepository>()
     single<AppExceptionsRepository>()
 
-    viewModel<AuthFragmentModel>()
+    viewModel<AuthViewModel>()
     viewModel<EntriesViewModel>()
-    viewModel<EntryFragmentModel>()
-    viewModel<SettingsFragmentModel>()
-    viewModel<DirectAuthFragmentModel>()
-    viewModel<AppExceptionsFragmentModel>()
-    viewModel<AppExceptionFragmentModel>()
+    viewModel<EntryViewModel>()
+    viewModel<SettingsViewModel>()
+    viewModel<DirectAuthViewModel>()
+    viewModel<AppExceptionsViewModel>()
+    viewModel<AppExceptionViewModel>()
     viewModel<FeedsViewModel>()
-    viewModel<SearchFragmentModel>()
+    viewModel<SearchViewModel>()
 }

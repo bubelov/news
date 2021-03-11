@@ -24,7 +24,7 @@ import org.koin.android.viewmodel.ext.android.viewModel
 
 class SearchFragment : Fragment() {
 
-    private val model: SearchFragmentModel by viewModel()
+    private val model: SearchViewModel by viewModel()
 
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!

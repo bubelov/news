@@ -15,7 +15,7 @@ import timber.log.Timber
 import java.text.DateFormat
 import java.util.*
 
-class EntryFragmentModel(
+class EntryViewModel(
     private val feedsRepository: FeedsRepository,
     private val entriesRepository: EntriesRepository,
     private val newsApiSync: NewsApiSync,

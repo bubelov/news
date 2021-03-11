@@ -19,7 +19,7 @@ import timber.log.Timber
 
 class DirectAuthFragment : Fragment() {
 
-    private val model: DirectAuthFragmentModel by viewModel()
+    private val model: DirectAuthViewModel by viewModel()
 
     private var _binding: FragmentDirectAuthBinding? = null
     private val binding get() = _binding!!

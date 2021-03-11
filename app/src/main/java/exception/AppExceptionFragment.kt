@@ -18,7 +18,7 @@ class AppExceptionFragment : Fragment() {
         AppExceptionFragmentArgs.fromBundle(requireArguments())
     }
 
-    private val model: AppExceptionFragmentModel by viewModel()
+    private val model: AppExceptionViewModel by viewModel()
 
     private var _binding: FragmentAppExceptionBinding? = null
     private val binding get() = _binding!!

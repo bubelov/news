@@ -5,7 +5,7 @@ import common.Result
 import db.LoggedException
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class AppExceptionsFragmentModel(
+class AppExceptionsViewModel(
     private val repository: AppExceptionsRepository
 ) : ViewModel() {
 

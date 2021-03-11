@@ -6,11 +6,11 @@ import org.junit.Test
 import common.Result
 import org.junit.Assert.*
 
-class AppExceptionsFragmentModelTests {
+class AppExceptionsViewModelTests {
 
     private val repository = mockk<AppExceptionsRepository>(relaxed = true)
 
-    private val model = AppExceptionsFragmentModel(repository)
+    private val model = AppExceptionsViewModel(repository)
 
     @Test
     fun `Should be inactive by default`(): Unit = runBlocking {

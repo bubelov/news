@@ -30,7 +30,7 @@ import org.koin.android.viewmodel.ext.android.viewModel
 
 class AuthFragment : Fragment() {
 
-    private val model: AuthFragmentModel by viewModel()
+    private val model: AuthViewModel by viewModel()
 
     private var _binding: FragmentAuthBinding? = null
     private val binding get() = _binding!!

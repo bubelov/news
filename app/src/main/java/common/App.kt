@@ -3,8 +3,7 @@ package common
 import android.app.Application
 import co.appreactor.news.BuildConfig
 import api.NewsApiSwitcher
-import di.appModule
-import di.dbModule
+import injections.appModule
 import exceptions.AppExceptionsTree
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
@@ -17,16 +16,12 @@ import java.io.File
 
 class App : Application() {
 
-    companion object {
-        const val DB_FILE_NAME = "news.db"
-    }
-
     override fun onCreate() {
         super.onCreate()
 
         startKoin {
             androidContext(this@App)
-            modules(appModule, dbModule)
+            modules(appModule)
         }
 
         runBlocking {

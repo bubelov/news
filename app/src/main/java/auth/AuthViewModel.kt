@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import api.NewsApiSwitcher
 import common.PreferencesRepository
 
-class AuthFragmentModel(
+class AuthViewModel(
     private val newsApiSwitcher: NewsApiSwitcher,
     private val preferencesRepository: PreferencesRepository,
 ) : ViewModel() {

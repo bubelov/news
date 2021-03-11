@@ -30,7 +30,7 @@ class EntryFragment : Fragment() {
 
     private val args: EntryFragmentArgs by navArgs()
 
-    private val model: EntryFragmentModel by viewModel()
+    private val model: EntryViewModel by viewModel()
 
     private var _binding: FragmentEntryBinding? = null
     private val binding get() = _binding!!

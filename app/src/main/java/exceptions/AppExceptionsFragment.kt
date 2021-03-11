@@ -18,7 +18,7 @@ import org.koin.android.viewmodel.ext.android.viewModel
 
 class AppExceptionsFragment : Fragment() {
 
-    private val model: AppExceptionsFragmentModel by viewModel()
+    private val model: AppExceptionsViewModel by viewModel()
 
     private var _binding: FragmentAppExceptionsBinding? = null
     private val binding get() = _binding!!

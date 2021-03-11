@@ -3,7 +3,7 @@ package exception
 import androidx.lifecycle.ViewModel
 import exceptions.AppExceptionsRepository
 
-class AppExceptionFragmentModel(
+class AppExceptionViewModel(
     private val repository: AppExceptionsRepository,
 ) : ViewModel() {
 

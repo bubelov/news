@@ -8,7 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 
-class DirectAuthFragmentModel(
+class DirectAuthViewModel(
     private val nextcloudApiSwitcher: NewsApiSwitcher,
     private val preferencesRepository: PreferencesRepository,
 ) : ViewModel() {

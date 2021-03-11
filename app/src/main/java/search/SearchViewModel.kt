@@ -13,7 +13,7 @@ import org.joda.time.Instant
 import java.text.DateFormat
 import java.util.*
 
-class SearchFragmentModel(
+class SearchViewModel(
     private val feedsRepository: FeedsRepository,
     private val entriesRepository: EntriesRepository,
     private val entriesSupportingTextRepository: EntriesSupportingTextRepository,

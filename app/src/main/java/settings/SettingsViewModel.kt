@@ -10,7 +10,7 @@ import com.nextcloud.android.sso.helper.SingleAccountHelper
 import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
-class SettingsFragmentModel(
+class SettingsViewModel(
     private val appExceptionsRepository: AppExceptionsRepository,
     private val preferencesRepository: PreferencesRepository,
     private val db: Database,

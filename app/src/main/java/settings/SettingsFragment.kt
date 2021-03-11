@@ -20,7 +20,7 @@ import org.koin.android.viewmodel.ext.android.viewModel
 
 class SettingsFragment : Fragment() {
 
-    private val model: SettingsFragmentModel by viewModel()
+    private val model: SettingsViewModel by viewModel()
 
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
