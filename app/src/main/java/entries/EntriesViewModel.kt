@@ -45,6 +45,7 @@ class EntriesViewModel(
                 runCatching {
                     state.value = State.PerformingInitialSync(newsApiSync.syncMessage)
                     newsApiSync.performInitialSync()
+                    reloadEntries()
                 }.onFailure {
                     state.value = State.FailedToSync(it)
                     return

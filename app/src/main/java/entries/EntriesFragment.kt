@@ -412,6 +412,8 @@ class EntriesFragment : Fragment() {
     private fun showListItems() = lifecycleScope.launchWhenResumed {
         binding.apply {
             model.state.collectLatest { state ->
+                Timber.d("State: ${state.javaClass.simpleName}")
+
                 progress.hide()
                 message.hide()
                 retry.hide()
