@@ -130,6 +130,14 @@ class EntryFragment : Fragment() {
                 R.id.toggleBookmarked -> lifecycleScope.launchWhenResumed {
                     model.toggleBookmarked(args.entryId)
                 }
+
+                R.id.feedSettings -> {
+                    findNavController().navigate(
+                        EntryFragmentDirections.actionEntryFragmentToFeedSettingsFragment(
+                            feedId = entry.feedId,
+                        )
+                    )
+                }
             }
 
             true

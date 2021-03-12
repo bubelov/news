@@ -93,6 +93,11 @@
         <argument
             android:name="entryId"
             app:argType="string" />
+        <action
+            android:id="@+id/action_entryFragment_to_feedSettingsFragment"
+            app:destination="@id/feedSettingsFragment"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
     </fragment>
 
     <fragment
@@ -103,6 +108,11 @@
         <action
             android:id="@+id/action_feedsFragment_to_feedEntriesFragment"
             app:destination="@id/entriesFragment"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_feedsFragment_to_feedSettingsFragment"
+            app:destination="@id/feedSettingsFragment"
             app:popEnterAnim="@anim/fade_in"
             app:popExitAnim="@anim/fade_out" />
     </fragment>
@@ -151,6 +161,16 @@
             app:destination="@id/entryFragment"
             app:popEnterAnim="@anim/fade_in"
             app:popExitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/feedSettingsFragment"
+        android:name="feedsettings.FeedSettingsFragment"
+        android:label="FeedSettingsFragment"
+        tools:layout="@layout/fragment_feed_settings">
+        <argument
+            android:name="feedId"
+            app:argType="string" />
     </fragment>
 
 </navigation>

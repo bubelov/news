@@ -53,6 +53,10 @@ class FeedsAdapterViewHolder(
 
                 popup.setOnMenuItemClickListener {
                     when (it.itemId) {
+                        R.id.openSettings -> {
+                            callback.onSettingsClick(item)
+                        }
+
                         R.id.openHtmlLink -> {
                             callback.onOpenHtmlLinkClick(item)
                         }

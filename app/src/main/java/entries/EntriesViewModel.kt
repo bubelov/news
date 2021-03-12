@@ -25,7 +25,7 @@ class EntriesViewModel(
     private val preferencesRepository: PreferencesRepository,
 ) : ViewModel() {
 
-    lateinit var filter: EntriesFilter
+    private lateinit var filter: EntriesFilter
 
     val state = MutableStateFlow<State>(State.Inactive)
 

@@ -74,4 +74,5 @@
     <string name="added_d">Added: %1$d</string>
     <string name="exists_d">Exists: %1$d</string>
     <string name="failed_d">Failed: %1$d</string>
+    <string name="open_feed_settings">Open feed settings</string>
 </resources>
