@@ -3,6 +3,7 @@ package common
 import android.content.DialogInterface
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import co.appreactor.news.R
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import timber.log.Timber
@@ -46,7 +47,15 @@ fun Fragment.showDialog(
         .show()
 }
 
-fun Fragment.showErrorDialog(t: Throwable) {
+fun Fragment.showErrorDialog(
+    t: Throwable,
+    onDismissListener: (suspend () -> Unit)? = null,
+) {
     Timber.e(t)
-    showDialog(R.string.error, t.message ?: "")
+
+    showDialog(R.string.error, t.message ?: "") {
+        lifecycleScope.launchWhenResumed {
+            onDismissListener?.invoke()
+        }
+    }
 }

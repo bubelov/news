@@ -4,7 +4,8 @@ import androidx.lifecycle.ViewModel
 import db.Feed
 import entries.EntriesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
-import opml.OpmlElement
+import opml.readOpml
+import opml.writeOpml
 import timber.log.Timber
 
 class FeedsViewModel(
@@ -14,38 +15,42 @@ class FeedsViewModel(
 
     val state = MutableStateFlow<State>(State.Inactive)
 
-    suspend fun onViewReady() {
-        if (state.value == State.Inactive) {
-            state.value = State.LoadingFeeds
-        }
+    suspend fun loadFeeds() {
+        state.value = State.Loading
 
-        state.value = State.LoadedFeeds(
+        state.value = State.ShowingFeeds(
             feeds = feedsRepository.selectAll().map { it.toItem() }
         )
     }
 
-    suspend fun createFeed(url: String) {
-        state.value = State.LoadingFeeds
+    suspend fun createFeed(url: String) = changeState {
+        value = State.Loading
         feedsRepository.insertByUrl(url)
-        reloadFeeds()
+        loadFeeds()
     }
 
-    suspend fun renameFeed(feedId: String, newTitle: String) {
-        state.value = State.LoadingFeeds
+    suspend fun renameFeed(feedId: String, newTitle: String) = changeState {
+        value = State.Loading
         feedsRepository.updateTitle(feedId, newTitle)
-        reloadFeeds()
+        loadFeeds()
     }
 
-    suspend fun deleteFeed(feedId: String) {
-        state.value = State.LoadingFeeds
+    suspend fun deleteFeed(feedId: String) = changeState {
+        value = State.Loading
         feedsRepository.deleteById(feedId)
         entriesRepository.deleteByFeedId(feedId)
-        reloadFeeds()
+        loadFeeds()
     }
 
-    suspend fun getAllFeeds() = feedsRepository.selectAll()
+    suspend fun getFeedsOpml(): ByteArray {
+        return writeOpml(feedsRepository.selectAll()).toByteArray()
+    }
 
-    suspend fun importFeeds(feeds: List<OpmlElement>) {
+    suspend fun importFeeds(opmlDocument: String) = changeState {
+        value = State.Loading
+
+        val feeds = readOpml(opmlDocument)
+
         var added = 0
         var exists = 0
         var failed = 0
@@ -58,7 +63,7 @@ class FeedsViewModel(
             )
         )
 
-        state.value = State.ImportingFeeds(progressFlow)
+        value = State.ImportingFeeds(progressFlow)
 
         val cachedFeeds = feedsRepository.selectAll()
 
@@ -84,7 +89,7 @@ class FeedsViewModel(
             )
         }
 
-        state.value = State.DisplayingImportResult(
+        value = State.ShowingImportResult(
             FeedImportResult(
                 added = added,
                 exists = exists,
@@ -94,12 +99,15 @@ class FeedsViewModel(
         )
     }
 
-    private suspend fun reloadFeeds() {
-        state.value = State.LoadingFeeds
+    private suspend fun changeState(action: suspend MutableStateFlow<State>.() -> Unit) {
+        val initialState = state.value
 
-        state.value = State.LoadedFeeds(
-            feeds = feedsRepository.selectAll().map { it.toItem() }
-        )
+        runCatching {
+            action.invoke(state)
+        }.onFailure {
+            state.value = initialState
+            throw it
+        }
     }
 
     private suspend fun Feed.toItem(): FeedsAdapterItem = FeedsAdapterItem(
@@ -112,10 +120,10 @@ class FeedsViewModel(
 
     sealed class State {
         object Inactive : State()
-        object LoadingFeeds : State()
-        data class LoadedFeeds(val feeds: List<FeedsAdapterItem>) : State()
+        object Loading : State()
+        data class ShowingFeeds(val feeds: List<FeedsAdapterItem>) : State()
         data class ImportingFeeds(val progress: MutableStateFlow<FeedImportProgress>) : State()
-        data class DisplayingImportResult(val result: FeedImportResult) : State()
+        data class ShowingImportResult(val result: FeedImportResult) : State()
     }
 
     data class FeedImportProgress(

@@ -7,6 +7,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.view.inputmethod.EditorInfo
+import android.widget.EditText
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -23,8 +25,6 @@ import entries.EntriesFilter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.withContext
-import opml.readOpml
-import opml.writeOpml
 import org.koin.android.viewmodel.ext.android.viewModel
 import timber.log.Timber
 
@@ -71,18 +71,13 @@ class FeedsFragment : Fragment() {
                     .setView(R.layout.dialog_rename_feed)
                     .setPositiveButton(R.string.rename) { dialogInterface, _ ->
                         lifecycleScope.launchWhenResumed {
-                            binding.swipeRefresh.isRefreshing = true
-
                             runCatching {
                                 val dialog = dialogInterface as AlertDialog
                                 val title = dialog.findViewById<TextInputEditText>(R.id.title)!!
                                 model.renameFeed(feed.id, title.text.toString())
                             }.onFailure {
-                                Timber.e(it)
-                                showDialog(R.string.error, it.message ?: "")
+                                showErrorDialog(it)
                             }
-
-                            binding.swipeRefresh.isRefreshing = false
                         }
                     }
                     .setNegativeButton(R.string.cancel, null)
@@ -98,16 +93,11 @@ class FeedsFragment : Fragment() {
 
             override fun onDeleteClick(feed: FeedsAdapterItem) {
                 lifecycleScope.launchWhenResumed {
-                    binding.swipeRefresh.isRefreshing = true
-
                     runCatching {
                         model.deleteFeed(feed.id)
                     }.onFailure {
-                        Timber.e(it)
-                        showDialog(R.string.error, it.message ?: "")
+                        showErrorDialog(it)
                     }
-
-                    binding.swipeRefresh.isRefreshing = false
                 }
             }
         })
@@ -124,8 +114,7 @@ class FeedsFragment : Fragment() {
             withContext(Dispatchers.IO) {
                 requireContext().contentResolver.openInputStream(uri)?.use {
                     runCatching {
-                        val feeds = readOpml(it.bufferedReader().readText())
-                        model.importFeeds(feeds)
+                        model.importFeeds(it.bufferedReader().readText())
                     }.onFailure {
                         withContext(Dispatchers.Main) {
                             showErrorDialog(it)
@@ -147,7 +136,7 @@ class FeedsFragment : Fragment() {
         lifecycleScope.launchWhenResumed {
             withContext(Dispatchers.IO) {
                 requireContext().contentResolver.openOutputStream(uri)?.use {
-                    it.write(writeOpml(model.getAllFeeds()).toByteArray())
+                    it.write(model.getFeedsOpml())
                 }
             }
         }
@@ -164,8 +153,6 @@ class FeedsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.apply {
-            swipeRefresh.isEnabled = false
-
             toolbar.apply {
                 setNavigationOnClickListener {
                     findNavController().popBackStack()
@@ -204,12 +191,14 @@ class FeedsFragment : Fragment() {
             }
 
             lifecycleScope.launchWhenResumed {
-                model.onViewReady()
+                if (model.state.value is FeedsViewModel.State.Inactive) {
+                    model.loadFeeds()
+                }
             }
 
             lifecycleScope.launchWhenResumed {
                 model.state.collectLatest { state ->
-                    swipeRefresh.hide()
+                    list.hide()
                     progress.hide()
                     message.hide()
                     importOpml.hide()
@@ -222,12 +211,12 @@ class FeedsFragment : Fragment() {
 
                         }
 
-                        FeedsViewModel.State.LoadingFeeds -> {
+                        FeedsViewModel.State.Loading -> {
                             progress.show(animate = true)
                         }
 
-                        is FeedsViewModel.State.LoadedFeeds -> {
-                            swipeRefresh.show()
+                        is FeedsViewModel.State.ShowingFeeds -> {
+                            Timber.d("Got ${state.feeds.size} feeds")
 
                             if (state.feeds.isEmpty()) {
                                 message.show(animate = true)
@@ -236,7 +225,7 @@ class FeedsFragment : Fragment() {
                                 importOpml.show(animate = true)
                             }
 
-                            Timber.d("Got ${state.feeds.size} feeds")
+                            list.show()
                             adapter.submitList(state.feeds)
 
                             fab.show()
@@ -256,7 +245,7 @@ class FeedsFragment : Fragment() {
                             }
                         }
 
-                        is FeedsViewModel.State.DisplayingImportResult -> {
+                        is FeedsViewModel.State.ShowingImportResult -> {
                             val message = buildString {
                                 append(getString(R.string.added_d, state.result.added))
                                 append("\n")
@@ -282,8 +271,7 @@ class FeedsFragment : Fragment() {
                                 message = message,
                             ) {
                                 lifecycleScope.launchWhenResumed {
-                                    model.state.value = FeedsViewModel.State.Inactive
-                                    model.onViewReady()
+                                    model.loadFeeds()
                                 }
                             }
                         }
@@ -303,24 +291,41 @@ class FeedsFragment : Fragment() {
                         val dialog = dialogInterface as AlertDialog
 
                         lifecycleScope.launchWhenResumed {
-                            swipeRefresh.isRefreshing = true
-
                             runCatching {
-                                val urlView = dialog.findViewById<TextInputEditText>(R.id.url)!!
-                                model.createFeed(urlView.text.toString())
+                                dialog.findViewById<TextInputEditText>(R.id.url)?.apply {
+                                    model.createFeed(text.toString())
+                                }
                             }.onFailure {
-                                Timber.e(it)
-                                showDialog(R.string.error, it.message ?: "")
+                                showErrorDialog(it)
                             }
-
-                            swipeRefresh.isRefreshing = false
                         }
                     }
                     .setNegativeButton(R.string.cancel, null)
                     .setOnDismissListener { hideKeyboard() }
                     .show()
 
-                alert.findViewById<View>(R.id.urlLayout)!!.requestFocus()
+                alert.findViewById<View>(R.id.urlLayout)?.requestFocus()
+
+                alert.findViewById<EditText>(R.id.url)?.apply {
+                    setOnEditorActionListener { _, actionId, _ ->
+                        if (actionId == EditorInfo.IME_ACTION_DONE) {
+                            alert.dismiss()
+
+                            lifecycleScope.launchWhenResumed {
+                                runCatching {
+                                    model.createFeed(text.toString())
+                                }.onFailure {
+                                    showErrorDialog(it)
+                                }
+                            }
+
+                            return@setOnEditorActionListener true
+                        }
+
+                        false
+                    }
+                }
+
                 requireContext().showKeyboard()
             }
         }
