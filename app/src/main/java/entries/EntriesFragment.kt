@@ -23,6 +23,7 @@ import db.Entry
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.koin.android.viewmodel.ext.android.sharedViewModel
 import org.koin.android.viewmodel.ext.android.viewModel
 import timber.log.Timber
 
@@ -33,6 +34,7 @@ class EntriesFragment : Fragment() {
     }
 
     private val model: EntriesViewModel by viewModel()
+    private val sharedModel: EntriesSharedViewModel by sharedViewModel()
 
     private var _binding: FragmentEntriesBinding? = null
     private val binding get() = _binding!!
@@ -177,12 +179,12 @@ class EntriesFragment : Fragment() {
         initListView()
 
         lifecycleScope.launchWhenResumed {
-            model.onViewReady(args.filter!!)
+            model.onViewReady(args.filter!!, sharedModel)
         }
 
         binding.retry.setOnClickListener {
             lifecycleScope.launchWhenResumed {
-                model.onRetry()
+                model.onRetry(sharedModel)
             }
         }
 
@@ -191,12 +193,10 @@ class EntriesFragment : Fragment() {
                 binding.swipeRefresh.setOnRefreshListener {
                     lifecycleScope.launch {
                         runCatching {
-                            model.performFullSync()
+                            model.fetchEntriesFromApi()
                         }.onFailure {
                             showErrorDialog(it)
                         }
-
-                        binding.swipeRefresh.isRefreshing = false
                     }
                 }
             }
@@ -414,36 +414,52 @@ class EntriesFragment : Fragment() {
             model.state.collectLatest { state ->
                 Timber.d("State: ${state.javaClass.simpleName}")
 
-                progress.hide()
-                message.hide()
-                retry.hide()
-
                 when (state) {
                     is EntriesViewModel.State.Inactive -> {
-
+                        swipeRefresh.isRefreshing = false
+                        listView.hide()
+                        progress.hide()
+                        message.hide()
+                        retry.hide()
                     }
 
                     is EntriesViewModel.State.PerformingInitialSync -> {
-                        progress.show(animate = true)
+                        swipeRefresh.isRefreshing = false
+                        listView.hide()
+                        progress.hide()
                         message.show(animate = true)
                         state.message.collect { message.text = it }
+                        retry.hide()
                     }
 
                     is EntriesViewModel.State.FailedToSync -> {
-                        showDialog(R.string.error, state.error.message ?: "")
+                        swipeRefresh.isRefreshing = false
+                        listView.hide()
+                        progress.hide()
+                        message.hide()
                         retry.show(animate = true)
+                        showDialog(R.string.error, state.error.message ?: "")
                     }
 
                     EntriesViewModel.State.LoadingEntries -> {
+                        swipeRefresh.isRefreshing = false
+                        listView.hide()
                         progress.show(animate = true)
+                        message.hide()
+                        retry.hide()
                     }
 
                     is EntriesViewModel.State.ShowingEntries -> {
+                        swipeRefresh.isRefreshing = state.showBackgroundProgress
+                        listView.show()
+                        progress.hide()
+
                         if (state.entries.isEmpty()) {
                             message.text = getEmptyMessage(state.includesUnread)
                             message.show(animate = true)
                         }
 
+                        retry.hide()
                         seenEntries.clear()
                         adapter.submitList(state.entries)
                     }

@@ -15,4 +15,8 @@ class AuthViewModel(
         preferencesRepository.save { authType = newAuthType }
         newsApiSwitcher.switch(newAuthType)
     }
+
+    suspend fun setSyncOnStartup(syncOnStartup: Boolean) {
+        preferencesRepository.save { this.syncOnStartup = syncOnStartup }
+    }
 }

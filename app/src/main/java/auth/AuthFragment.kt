@@ -67,6 +67,7 @@ class AuthFragment : Fragment() {
         binding.standaloneMode.setOnClickListener {
             lifecycleScope.launchWhenResumed {
                 model.setAuthType(PreferencesRepository.AUTH_TYPE_STANDALONE)
+                model.setSyncOnStartup(false)
                 showNews()
             }
         }

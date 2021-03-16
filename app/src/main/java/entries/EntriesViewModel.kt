@@ -31,7 +31,7 @@ class EntriesViewModel(
 
     val openedEntry = MutableStateFlow<EntriesAdapterItem?>(null)
 
-    suspend fun onViewReady(filter: EntriesFilter) {
+    suspend fun onViewReady(filter: EntriesFilter, sharedModel: EntriesSharedViewModel) {
         this.filter = filter
 
         if (state.value is State.FailedToSync) {
@@ -39,8 +39,18 @@ class EntriesViewModel(
         }
 
         if (state.value == State.Inactive) {
-            if (getPreferences().initialSyncCompleted) {
+            val prefs = getPreferences()
+
+            if (prefs.initialSyncCompleted) {
                 reloadEntries()
+
+                if (filter is EntriesFilter.OnlyNotBookmarked
+                    && prefs.syncOnStartup
+                    && !sharedModel.syncedOnStartup
+                ) {
+                    sharedModel.syncedOnStartup = true
+                    fetchEntriesFromApi()
+                }
             } else {
                 runCatching {
                     state.value = State.PerformingInitialSync(newsApiSync.syncMessage)
@@ -54,9 +64,9 @@ class EntriesViewModel(
         }
     }
 
-    suspend fun onRetry() {
+    suspend fun onRetry(sharedModel: EntriesSharedViewModel) {
         state.value = State.Inactive
-        onViewReady(filter)
+        onViewReady(filter, sharedModel)
     }
 
     suspend fun reloadEntry(entry: EntriesAdapterItem) {
@@ -88,8 +98,16 @@ class EntriesViewModel(
         }
     }
 
-    private suspend fun reloadEntries() {
-        state.value = State.LoadingEntries
+    private suspend fun reloadEntries(inBackground: Boolean = false) {
+        if (inBackground) {
+            state.value = when (val prevState = state.value) {
+                is State.ShowingEntries -> prevState.copy(showBackgroundProgress = true)
+                else -> State.LoadingEntries
+            }
+        } else {
+            state.value = State.LoadingEntries
+        }
+
         val prefs = getPreferences()
 
         val unsortedEntries = when (val filter = filter) {
@@ -130,14 +148,20 @@ class EntriesViewModel(
         }
 
         state.value = State.ShowingEntries(
-            result,
-            prefs.showOpenedEntries || filter is EntriesFilter.OnlyBookmarked,
+            entries = result,
+            includesUnread = prefs.showOpenedEntries || filter is EntriesFilter.OnlyBookmarked,
+            showBackgroundProgress = false,
         )
     }
 
-    suspend fun performFullSync() {
-        newsApiSync.sync()
-        reloadEntries()
+    suspend fun fetchEntriesFromApi() {
+        when (val prevState = state.value) {
+            is State.ShowingEntries -> {
+                state.value = prevState.copy(showBackgroundProgress = true)
+                newsApiSync.sync()
+                reloadEntries(inBackground = true)
+            }
+        }
     }
 
     suspend fun getPreferences() = preferencesRepository.get()
@@ -161,11 +185,10 @@ class EntriesViewModel(
     suspend fun markAsOpened(entryId: String, changeState: Boolean = true) {
         if (changeState) {
             val state = state.value as State.ShowingEntries
-            this.state.value =
-                State.ShowingEntries(
-                    state.entries.filterNot { it.id == entryId },
-                    state.includesUnread
-                )
+
+            this.state.value = state.copy(
+                entries = state.entries.filterNot { it.id == entryId },
+            )
         }
 
         entriesRepository.setOpened(entryId, true)
@@ -187,8 +210,11 @@ class EntriesViewModel(
 
     suspend fun markAsBookmarked(entryId: String) {
         val state = state.value as State.ShowingEntries
-        this.state.value =
-            State.ShowingEntries(state.entries.filterNot { it.id == entryId }, state.includesUnread)
+
+        this.state.value = state.copy(
+            entries = state.entries.filterNot { it.id == entryId },
+        )
+
         entriesRepository.setBookmarked(entryId, true)
         newsApiSync.syncEntriesFlags()
     }
@@ -257,6 +283,7 @@ class EntriesViewModel(
         data class ShowingEntries(
             val entries: List<EntriesAdapterItem>,
             val includesUnread: Boolean,
+            val showBackgroundProgress: Boolean,
         ) : State()
     }
 }

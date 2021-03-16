@@ -12,4 +12,5 @@ data class Preferences(
     var showPreviewImages: Boolean = true,
     var cropPreviewImages: Boolean = true,
     var markScrolledEntriesAsRead: Boolean = false,
+    var syncOnStartup: Boolean = true,
 )

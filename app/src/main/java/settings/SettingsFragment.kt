@@ -38,6 +38,16 @@ class SettingsFragment : Fragment() {
         lifecycleScope.launch {
             val prefs = model.getPreferences()
 
+            binding.syncOnStartup.isChecked = prefs.syncOnStartup
+
+            binding.syncOnStartup.setOnCheckedChangeListener { _, isChecked ->
+                lifecycleScope.launch {
+                    model.savePreferences {
+                        syncOnStartup = isChecked
+                    }
+                }
+            }
+
             binding.showOpenedEntries.isChecked = prefs.showOpenedEntries
 
             binding.showOpenedEntries.setOnCheckedChangeListener { _, isChecked ->

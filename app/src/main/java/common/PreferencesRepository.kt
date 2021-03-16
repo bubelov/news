@@ -61,6 +61,10 @@ class PreferencesRepository(
                 it.find { it.key == MARK_SCROLLED_ENTRIES_AS_READ }?.value?.apply {
                     markScrolledEntriesAsRead = this.toBoolean()
                 }
+
+                it.find { it.key == SYNC_ON_STARTUP }?.value?.apply {
+                    syncOnStartup = this.toBoolean()
+                }
             }
         }
     }
@@ -83,6 +87,7 @@ class PreferencesRepository(
                 putBoolean(SHOW_PREVIEW_IMAGES, showPreviewImages)
                 putBoolean(CROP_PREVIEW_IMAGES, cropPreviewImages)
                 putBoolean(MARK_SCROLLED_ENTRIES_AS_READ, markScrolledEntriesAsRead)
+                putBoolean(SYNC_ON_STARTUP, syncOnStartup)
             }
         }
     }
@@ -125,5 +130,7 @@ class PreferencesRepository(
         const val CROP_PREVIEW_IMAGES = "crop_preview_images"
 
         const val MARK_SCROLLED_ENTRIES_AS_READ = "mark_scrolled_entries_as_read"
+
+        const val SYNC_ON_STARTUP = "sync_on_startup"
     }
 }

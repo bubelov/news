@@ -21,6 +21,7 @@ import entriesimages.EntriesImagesRepository
 import podcasts.PodcastsRepository
 import settings.SettingsViewModel
 import common.ConnectivityProbe
+import entries.EntriesSharedViewModel
 import entries.EntriesSupportingTextRepository
 import exception.AppExceptionViewModel
 import feeds.FeedsViewModel
@@ -71,6 +72,7 @@ val appModule = module {
 
     viewModel<AuthViewModel>()
     viewModel<EntriesViewModel>()
+    viewModel<EntriesSharedViewModel>()
     viewModel<EntryViewModel>()
     viewModel<SettingsViewModel>()
     viewModel<DirectAuthViewModel>()
