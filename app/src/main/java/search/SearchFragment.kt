@@ -24,6 +24,10 @@ import org.koin.android.viewmodel.ext.android.viewModel
 
 class SearchFragment : Fragment() {
 
+    private val args by lazy {
+        SearchFragmentArgs.fromBundle(requireArguments())
+    }
+
     private val model: SearchViewModel by viewModel()
 
     private var _binding: FragmentSearchBinding? = null
@@ -58,6 +62,7 @@ class SearchFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.toolbar.setNavigationOnClickListener {
+            requireContext().hideKeyboard(binding.searchInput)
             findNavController().popBackStack()
         }
 
@@ -121,7 +126,7 @@ class SearchFragment : Fragment() {
         }
 
         lifecycleScope.launch {
-            model.activate()
+            model.onViewCreated(args.filter!!)
         }
     }
 

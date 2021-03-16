@@ -52,6 +52,8 @@ class EntriesViewModel(
                     fetchEntriesFromApi()
                 }
             } else {
+                sharedModel.syncedOnStartup = true
+
                 runCatching {
                     state.value = State.PerformingInitialSync(newsApiSync.syncMessage)
                     newsApiSync.performInitialSync()

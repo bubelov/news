@@ -67,9 +67,19 @@ class EntriesRepository(
         db.selectMaxUpdaded().executeAsOneOrNull()?.MAX
     }
 
-    suspend fun search(query: String) = withContext(Dispatchers.IO) {
-        db.selectByQuery(query).asFlow().mapToList()
+    suspend fun selectByQuery(query: String) = withContext(Dispatchers.IO) {
+        db.selectByQuery(query).executeAsList()
     }
+
+    suspend fun selectByQueryAndBookmarked(query: String, bookmarked: Boolean) =
+        withContext(Dispatchers.IO) {
+            db.selectByQueryAndBookmarked(bookmarked, query).executeAsList()
+        }
+
+    suspend fun selectByQueryAndFeedid(query: String, feedId: String) =
+        withContext(Dispatchers.IO) {
+            db.selectByQueryAndFeedId(feedId, query).executeAsList()
+        }
 
     fun deleteByFeedId(feedId: String) {
         db.deleteByFeedId(feedId)

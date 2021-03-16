@@ -321,14 +321,13 @@ class EntriesFragment : Fragment() {
 
     private fun initSearchButton() {
         val searchMenuItem = binding.toolbar.menu.findItem(R.id.search)
-        searchMenuItem.isVisible = getSearchButtonVisibility()
-
-        if (args.filter is EntriesFilter.OnlyFromFeed) {
-            searchMenuItem.isVisible = false
-        }
 
         searchMenuItem.setOnMenuItemClickListener {
-            findNavController().navigate(EntriesFragmentDirections.actionEntriesFragmentToSearchFragment())
+            findNavController().navigate(
+                EntriesFragmentDirections.actionEntriesFragmentToSearchFragment(
+                    args.filter!!
+                )
+            )
             true
         }
     }
@@ -426,7 +425,7 @@ class EntriesFragment : Fragment() {
                     is EntriesViewModel.State.PerformingInitialSync -> {
                         swipeRefresh.isRefreshing = false
                         listView.hide()
-                        progress.hide()
+                        progress.show(animate = true)
                         message.show(animate = true)
                         state.message.collect { message.text = it }
                         retry.hide()
@@ -473,13 +472,6 @@ class EntriesFragment : Fragment() {
             is EntriesFilter.OnlyNotBookmarked -> true
             is EntriesFilter.OnlyBookmarked -> false
             is EntriesFilter.OnlyFromFeed -> true
-        }
-    }
-
-    private fun getSearchButtonVisibility(): Boolean {
-        return when (args.filter) {
-            is EntriesFilter.OnlyNotBookmarked -> true
-            else -> false
         }
     }
 

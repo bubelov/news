@@ -1,0 +1,2 @@
+CREATE INDEX idx_entry_bookmarked ON Entry (bookmarked);
+CREATE INDEX idx_entry_feedId ON Entry (feedId);

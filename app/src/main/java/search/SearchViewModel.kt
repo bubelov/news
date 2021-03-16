@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import db.Entry
 import db.Feed
 import entries.EntriesAdapterItem
+import entries.EntriesFilter
 import entries.EntriesRepository
 import entries.EntriesSupportingTextRepository
 import feeds.FeedsRepository
@@ -27,7 +28,7 @@ class SearchViewModel(
 
     val showEmpty = MutableStateFlow(false)
 
-    suspend fun activate() {
+    suspend fun onViewCreated(filter: EntriesFilter) {
         searchString.collectLatest { query ->
             searchResults.value = emptyList()
             showProgress.value = false
@@ -38,9 +39,22 @@ class SearchViewModel(
             }
 
             showProgress.value = true
-            delay(1500)
 
-            val entries = entriesRepository.search(query).first()
+            val entries = when (filter) {
+                EntriesFilter.OnlyNotBookmarked -> {
+                    delay(1500)
+                    entriesRepository.selectByQuery(query)
+                }
+                EntriesFilter.OnlyBookmarked -> entriesRepository.selectByQueryAndBookmarked(
+                    query,
+                    true,
+                )
+                is EntriesFilter.OnlyFromFeed -> entriesRepository.selectByQueryAndFeedid(
+                    query,
+                    filter.feedId,
+                )
+            }
+
             val feeds = feedsRepository.selectAll()
 
             val results = entries.map { entry ->

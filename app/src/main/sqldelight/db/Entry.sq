@@ -89,6 +89,20 @@ WHERE UPPER(title) LIKE '%' || UPPER(:query) || '%'
 OR UPPER(content) LIKE '%' || UPPER(:query) || '%'
 ORDER BY published DESC;
 
+selectByQueryAndBookmarked:
+SELECT *
+FROM Entry
+WHERE bookmarked = :bookmarked
+AND (UPPER(title) LIKE '%' || UPPER(:query) || '%'OR UPPER(content) LIKE '%' || UPPER(:query) || '%')
+ORDER BY published DESC;
+
+selectByQueryAndFeedId:
+SELECT *
+FROM Entry
+WHERE feedId = :feedId
+AND (UPPER(title) LIKE '%' || UPPER(:query) || '%'OR UPPER(content) LIKE '%' || UPPER(:query) || '%')
+ORDER BY published DESC;
+
 selectCount:
 SELECT COUNT(*)
 FROM Entry;
