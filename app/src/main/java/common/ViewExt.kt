@@ -5,6 +5,10 @@ import android.view.animation.AccelerateInterpolator
 import androidx.core.view.isVisible
 
 fun View.show(animate: Boolean = false) {
+    if (isVisible) {
+        return
+    }
+
     isVisible = true
 
     if (animate) {
@@ -15,6 +19,8 @@ fun View.show(animate: Boolean = false) {
             duration = 300
             interpolator = AccelerateInterpolator()
         }
+    } else {
+        alpha = 1f
     }
 }
 
