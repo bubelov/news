@@ -456,6 +456,8 @@ class EntriesFragment : Fragment() {
                         if (state.entries.isEmpty()) {
                             message.text = getEmptyMessage(state.includesUnread)
                             message.show(animate = true)
+                        } else {
+                            message.hide()
                         }
 
                         retry.hide()
