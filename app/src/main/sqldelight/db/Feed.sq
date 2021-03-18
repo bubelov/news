@@ -2,7 +2,9 @@ CREATE TABLE Feed (
   id TEXT PRIMARY KEY NOT NULL,
   title TEXT NOT NULL,
   selfLink TEXT NOT NULL,
-  alternateLink TEXT NOT NULL
+  alternateLink TEXT NOT NULL,
+  openEntriesInBrowser INTEGER AS Boolean NOT NULL DEFAULT 0,
+  blockedWords TEXT NOT NULL DEFAULT ''
 );
 
 insertOrReplace:

@@ -1,5 +1,7 @@
 package search
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
@@ -37,8 +39,17 @@ class SearchFragment : Fragment() {
         scope = lifecycleScope,
         callback = object : EntriesAdapterCallback {
             override fun onItemClick(item: EntriesAdapterItem) {
-                val action = SearchFragmentDirections.actionSearchFragmentToEntryFragment(item.id)
-                findNavController().navigate(action)
+                lifecycleScope.launchWhenResumed {
+                    val entry = model.getEntry(item.id) ?: return@launchWhenResumed
+                    val feed = model.getFeed(entry.feedId) ?: return@launchWhenResumed
+
+                    if (feed.openEntriesInBrowser) {
+                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(entry.link)))
+                    } else {
+                        val action = SearchFragmentDirections.actionSearchFragmentToEntryFragment(item.id)
+                        findNavController().navigate(action)
+                    }
+                }
             }
 
             override fun onDownloadPodcastClick(item: EntriesAdapterItem) {

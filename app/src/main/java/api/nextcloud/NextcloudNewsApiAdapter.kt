@@ -156,6 +156,8 @@ class NextcloudNewsApiAdapter(
             title = title ?: "Untitled",
             selfLink = url ?: "",
             alternateLink = link ?: "",
+            openEntriesInBrowser = false,
+            blockedWords = "",
         )
     }
 

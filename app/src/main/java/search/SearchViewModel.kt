@@ -68,6 +68,10 @@ class SearchViewModel(
         }
     }
 
+    suspend fun getEntry(id: String) = entriesRepository.get(id).first()
+
+    suspend fun getFeed(id: String) = feedsRepository.selectById(id)
+
     private suspend fun Entry.toRow(feed: Feed?): EntriesAdapterItem {
         return EntriesAdapterItem(
             id = id,

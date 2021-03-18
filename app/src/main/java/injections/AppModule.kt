@@ -25,6 +25,7 @@ import entries.EntriesSharedViewModel
 import entries.EntriesSupportingTextRepository
 import exception.AppExceptionViewModel
 import feeds.FeedsViewModel
+import feedsettings.FeedSettingsViewModel
 import org.koin.android.experimental.dsl.viewModel
 import org.koin.dsl.module
 import org.koin.experimental.builder.single
@@ -79,5 +80,6 @@ val appModule = module {
     viewModel<AppExceptionsViewModel>()
     viewModel<AppExceptionViewModel>()
     viewModel<FeedsViewModel>()
+    viewModel<FeedSettingsViewModel>()
     viewModel<SearchViewModel>()
 }

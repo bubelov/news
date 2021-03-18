@@ -1,6 +1,7 @@
 package feeds
 
 import api.*
+import db.Feed
 import db.FeedQueries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -9,6 +10,10 @@ class FeedsRepository(
     private val api: NewsApi,
     private val db: FeedQueries,
 ) {
+
+    suspend fun insertOrReplace(feed: Feed) = withContext(Dispatchers.IO) {
+        db.insertOrReplace(feed)
+    }
 
     suspend fun insertByUrl(url: String) = withContext(Dispatchers.IO) {
         db.insertOrReplace(api.addFeed(url))
@@ -35,15 +40,22 @@ class FeedsRepository(
     }
 
     suspend fun sync() = withContext(Dispatchers.IO) {
-        val newFeeds = api.getFeeds()
-        val cachedFeeds = selectAll()
+        val newFeeds = api.getFeeds().sortedBy { it.id }
+        val cachedFeeds = selectAll().sortedBy { it.id }
 
-        if (newFeeds.sortedBy { it.id } != cachedFeeds.sortedBy { it.id }) {
+        if (newFeeds.map { it.id } != cachedFeeds.map { it.id }) {
             db.transaction {
                 db.deleteAll()
 
-                newFeeds.forEach {
-                    db.insertOrReplace(it)
+                newFeeds.forEach { feed ->
+                    val cachedFeed = cachedFeeds.find { it.id == feed.id }
+
+                    db.insertOrReplace(
+                        feed.copy(
+                            openEntriesInBrowser = cachedFeed?.openEntriesInBrowser ?: false,
+                            blockedWords = cachedFeed?.blockedWords ?: "",
+                        )
+                    )
                 }
             }
         }

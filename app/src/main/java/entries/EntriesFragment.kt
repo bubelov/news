@@ -3,6 +3,7 @@ package entries
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
@@ -56,10 +57,19 @@ class EntriesFragment : Fragment() {
             scope = lifecycleScope,
             callback = object : EntriesAdapterCallback {
                 override fun onItemClick(item: EntriesAdapterItem) {
-                    model.openedEntry.value = item
-                    val action =
-                        EntriesFragmentDirections.actionEntriesFragmentToEntryFragment(item.id)
-                    findNavController().navigate(action)
+                    lifecycleScope.launchWhenResumed {
+                        val entry = model.getEntry(item.id) ?: return@launchWhenResumed
+                        val feed = model.getFeed(entry.feedId) ?: return@launchWhenResumed
+
+                        if (feed.openEntriesInBrowser) {
+                            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(entry.link)))
+                        } else {
+                            model.openedEntry.value = item
+                            val action =
+                                EntriesFragmentDirections.actionEntriesFragmentToEntryFragment(item.id)
+                            findNavController().navigate(action)
+                        }
+                    }
                 }
 
                 override fun onDownloadPodcastClick(item: EntriesAdapterItem) {
