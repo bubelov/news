@@ -136,21 +136,22 @@ class EntriesFragment : Fragment() {
         }
 
         override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+            val entryIndex = viewHolder.bindingAdapterPosition
             val entry = adapter.currentList[viewHolder.bindingAdapterPosition]
 
             when (direction) {
                 ItemTouchHelper.LEFT -> {
                     when (args.filter) {
                         EntriesFilter.OnlyNotBookmarked -> setRead(entry)
-                        EntriesFilter.OnlyBookmarked -> setBookmarked(entry, false)
+                        EntriesFilter.OnlyBookmarked -> setBookmarked(entry, entryIndex, false)
                         else -> Timber.e(Exception("Unexpected filter: ${args.filter}"))
                     }
                 }
 
                 ItemTouchHelper.RIGHT -> {
                     when (args.filter) {
-                        EntriesFilter.OnlyNotBookmarked -> setBookmarked(entry, true)
-                        EntriesFilter.OnlyBookmarked -> setBookmarked(entry, false)
+                        EntriesFilter.OnlyNotBookmarked -> setBookmarked(entry, entryIndex, true)
+                        EntriesFilter.OnlyBookmarked -> setBookmarked(entry, entryIndex, false)
                         else -> Timber.e(Exception("Unexpected filter: ${args.filter}"))
                     }
                 }
@@ -534,17 +535,17 @@ class EntriesFragment : Fragment() {
         }
     }
 
-    private fun setBookmarked(entry: EntriesAdapterItem, bookmarked: Boolean) {
+    private fun setBookmarked(entry: EntriesAdapterItem, entryIndex: Int, bookmarked: Boolean) {
         lifecycleScope.launchWhenResumed {
             runCatching {
                 snackbar.setText(if (bookmarked) R.string.bookmarked else R.string.removed_from_bookmarks)
                 snackbar.setAction(getString(R.string.undo)) {
                     lifecycleScope.launchWhenResumed {
-                        model.setBookmarked(entry.id, !bookmarked)
+                        model.setBookmarked(entry, entryIndex, !bookmarked)
                     }
                 }
                 snackbar.show()
-                model.setBookmarked(entry.id, bookmarked)
+                model.setBookmarked(entry, entryIndex, bookmarked)
             }.onFailure {
                 Timber.e(it)
             }
