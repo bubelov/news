@@ -10,7 +10,7 @@
   </a>
 </p>
 
-RSS 📰 **Feed Reader** and 🎧 **Podcast Player** for **Nextcloud** ☁️ *(unofficial)*
+📰 **Feed Reader** and 🎧 **Podcast Player** for **Nextcloud** ☁️ *(unofficial)*
 
 ---
 
@@ -25,19 +25,16 @@ RSS 📰 **Feed Reader** and 🎧 **Podcast Player** for **Nextcloud** ☁️ *(
 
 ## ✨ Main Features:
 
-- Subscribe to your favorite RSS/Atom feeds
+- Subscribe to your favorite RSS and Atom feeds
 - Sync with your personal Nextcloud News server
-- Built-in podcast downloader (you need to have a separate player app, there are plenty of them available free of charge)
+- Smooth and snappy user experience even on the older and cheaper devices
+- Built-in podcast fetcher which can be used with external players
 - Enchance your news feed with high-resolution preview images
-- Modern and minimalistic Material Design
-- This app supports both light and dark modes
-
-
-This is an open source app that respects your privacy. You can always access or audit the source code here: https://github.com/bubelov/news
+- Enjoy modern and minimalistic Material Design
+- Both light and dark color schemes are supported
+- This is an open source app which respects your privacy
 
 ---
 
 ## ⚠️ Notes About Standalone Mode
 The standalone mode is still work in progress, which means it's not reliable at the moment. You're welcome to test it out and leave your feedback.
-
-
