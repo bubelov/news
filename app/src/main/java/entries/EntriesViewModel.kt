@@ -1,6 +1,7 @@
 package entries
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import common.*
 import db.EntryWithoutSummary
 import feeds.FeedsRepository
@@ -210,21 +211,59 @@ class EntriesViewModel(
         newsApiSync.syncEntriesFlags()
     }
 
-    suspend fun markAsBookmarked(entryId: String) {
-        val state = state.value as State.ShowingEntries
+    suspend fun setBookmarked(entryId: String, bookmarked: Boolean) {
+        val state = state.value
 
-        this.state.value = state.copy(
-            entries = state.entries.filterNot { it.id == entryId },
-        )
+        if (state !is State.ShowingEntries) {
+            return
+        }
 
-        entriesRepository.setBookmarked(entryId, true)
-        newsApiSync.syncEntriesFlags()
-    }
+        when (filter) {
+            EntriesFilter.OnlyNotBookmarked -> {
+                if (bookmarked) {
+                    this.state.value = state.copy(
+                        entries = state.entries.filterNot { it.id == entryId },
+                    )
 
-    suspend fun markAsNotBookmarked(entryId: String) = withContext(Dispatchers.IO) {
-        entriesRepository.setBookmarked(entryId, false)
-        reloadEntries()
-        newsApiSync.syncEntriesFlags()
+                    viewModelScope.launch {
+                        entriesRepository.setBookmarked(entryId, true)
+                        newsApiSync.syncEntriesFlags()
+                    }
+                } else {
+                    entriesRepository.setBookmarked(entryId, false)
+                    reloadEntries()
+
+                    viewModelScope.launch {
+                        newsApiSync.syncEntriesFlags()
+                    }
+                }
+            }
+
+            EntriesFilter.OnlyBookmarked -> {
+                if (bookmarked) {
+                    entriesRepository.setBookmarked(entryId, true)
+                    reloadEntries()
+
+                    viewModelScope.launch {
+                        newsApiSync.syncEntriesFlags()
+                    }
+                } else {
+                    this.state.value = state.copy(
+                        entries = state.entries.filterNot { it.id == entryId },
+                    )
+
+                    viewModelScope.launch {
+                        entriesRepository.setBookmarked(entryId, false)
+                        newsApiSync.syncEntriesFlags()
+                    }
+                }
+            }
+
+            else -> {
+
+            }
+        }
+
     }
 
     private suspend fun EntryWithoutSummary.toRow(

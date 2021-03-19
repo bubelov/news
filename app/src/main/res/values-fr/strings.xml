@@ -77,4 +77,5 @@
     <string name="open_feed_settings">Open feed settings</string>
     <string name="fetch_news_on_startup">Fetch news on startup</string>
     <string name="open_entries_in_browser">Open entries in browser</string>
+    <string name="removed_from_bookmarks">Removed from bookmarks</string>
 </resources>

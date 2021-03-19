@@ -138,36 +138,20 @@ class EntriesFragment : Fragment() {
         override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
             val entry = adapter.currentList[viewHolder.bindingAdapterPosition]
 
-            if (direction == ItemTouchHelper.LEFT) {
-                lifecycleScope.launchWhenResumed {
-                    runCatching {
-                        snackbar.setText(R.string.marked_as_read)
-                        snackbar.setAction(getString(R.string.undo)) {
-                            lifecycleScope.launchWhenResumed {
-                                model.markAsNotOpened(entry.id)
-                            }
-                        }
-                        snackbar.show()
-                        model.markAsOpened(entry.id)
-                    }.onFailure {
-                        Timber.e(it)
+            when (direction) {
+                ItemTouchHelper.LEFT -> {
+                    when (args.filter) {
+                        EntriesFilter.OnlyNotBookmarked -> setRead(entry)
+                        EntriesFilter.OnlyBookmarked -> setBookmarked(entry, false)
+                        else -> Timber.e(Exception("Unexpected filter: ${args.filter}"))
                     }
                 }
-            }
 
-            if (direction == ItemTouchHelper.RIGHT) {
-                lifecycleScope.launchWhenResumed {
-                    runCatching {
-                        snackbar.setText(R.string.bookmarked)
-                        snackbar.setAction(getString(R.string.undo)) {
-                            lifecycleScope.launchWhenResumed {
-                                model.markAsNotBookmarked(entry.id)
-                            }
-                        }
-                        snackbar.show()
-                        model.markAsBookmarked(entry.id)
-                    }.onFailure {
-                        Timber.e(it)
+                ItemTouchHelper.RIGHT -> {
+                    when (args.filter) {
+                        EntriesFilter.OnlyNotBookmarked -> setBookmarked(entry, true)
+                        EntriesFilter.OnlyBookmarked -> setBookmarked(entry, false)
+                        else -> Timber.e(Exception("Unexpected filter: ${args.filter}"))
                     }
                 }
             }
@@ -528,7 +512,42 @@ class EntriesFragment : Fragment() {
     private fun swipesAllowed(): Boolean {
         return when (args.filter) {
             is EntriesFilter.OnlyNotBookmarked -> true
+            is EntriesFilter.OnlyBookmarked -> true
             else -> false
+        }
+    }
+
+    private fun setRead(entry: EntriesAdapterItem) {
+        lifecycleScope.launchWhenResumed {
+            runCatching {
+                snackbar.setText(R.string.marked_as_read)
+                snackbar.setAction(getString(R.string.undo)) {
+                    lifecycleScope.launchWhenResumed {
+                        model.markAsNotOpened(entry.id)
+                    }
+                }
+                snackbar.show()
+                model.markAsOpened(entry.id)
+            }.onFailure {
+                Timber.e(it)
+            }
+        }
+    }
+
+    private fun setBookmarked(entry: EntriesAdapterItem, bookmarked: Boolean) {
+        lifecycleScope.launchWhenResumed {
+            runCatching {
+                snackbar.setText(if (bookmarked) R.string.bookmarked else R.string.removed_from_bookmarks)
+                snackbar.setAction(getString(R.string.undo)) {
+                    lifecycleScope.launchWhenResumed {
+                        model.setBookmarked(entry.id, !bookmarked)
+                    }
+                }
+                snackbar.show()
+                model.setBookmarked(entry.id, bookmarked)
+            }.onFailure {
+                Timber.e(it)
+            }
         }
     }
 }
