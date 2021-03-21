@@ -10,6 +10,7 @@ import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -60,6 +61,8 @@ class EntriesFragment : Fragment() {
                     lifecycleScope.launchWhenResumed {
                         val entry = model.getEntry(item.id) ?: return@launchWhenResumed
                         val feed = model.getFeed(entry.feedId) ?: return@launchWhenResumed
+
+                        model.setRead(listOf(entry.id), true)
 
                         if (feed.openEntriesInBrowser) {
                             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(entry.link)))
@@ -142,16 +145,52 @@ class EntriesFragment : Fragment() {
             when (direction) {
                 ItemTouchHelper.LEFT -> {
                     when (args.filter) {
-                        EntriesFilter.OnlyNotBookmarked -> setRead(entry)
-                        EntriesFilter.OnlyBookmarked -> setBookmarked(entry, entryIndex, false)
+                        EntriesFilter.OnlyNotBookmarked -> {
+                            dismissEntry(
+                                entry = entry,
+                                entryIndex = entryIndex,
+                                actionText = R.string.marked_as_read,
+                                action = { model.setRead(listOf(entry.id), true) },
+                                undoAction = { model.setRead(listOf(entry.id), false) }
+                            )
+                        }
+
+                        EntriesFilter.OnlyBookmarked -> {
+                            dismissEntry(
+                                entry = entry,
+                                entryIndex = entryIndex,
+                                actionText = R.string.removed_from_bookmarks,
+                                action = { model.setBookmarked(entry.id, false) },
+                                undoAction = { model.setBookmarked(entry.id, true) }
+                            )
+                        }
+
                         else -> Timber.e(Exception("Unexpected filter: ${args.filter}"))
                     }
                 }
 
                 ItemTouchHelper.RIGHT -> {
                     when (args.filter) {
-                        EntriesFilter.OnlyNotBookmarked -> setBookmarked(entry, entryIndex, true)
-                        EntriesFilter.OnlyBookmarked -> setBookmarked(entry, entryIndex, false)
+                        EntriesFilter.OnlyNotBookmarked -> {
+                            dismissEntry(
+                                entry = entry,
+                                entryIndex = entryIndex,
+                                actionText = R.string.bookmarked,
+                                action = { model.setBookmarked(entry.id, true) },
+                                undoAction = { model.setBookmarked(entry.id, false) }
+                            )
+                        }
+
+                        EntriesFilter.OnlyBookmarked -> {
+                            dismissEntry(
+                                entry = entry,
+                                entryIndex = entryIndex,
+                                actionText = R.string.removed_from_bookmarks,
+                                action = { model.setBookmarked(entry.id, false) },
+                                undoAction = { model.setBookmarked(entry.id, true) }
+                            )
+                        }
+
                         else -> Timber.e(Exception("Unexpected filter: ${args.filter}"))
                     }
                 }
@@ -238,7 +277,13 @@ class EntriesFragment : Fragment() {
         _binding = null
 
         if (runBlocking { model.getPreferences().markScrolledEntriesAsRead }) {
-            model.markAsOpened(seenEntries.map { it.id })
+            model.setRead(
+                entryIds = seenEntries.map { it.id },
+                read = true,
+                scope = requireActivity().lifecycleScope,
+            )
+
+            seenEntries.clear()
         }
     }
 
@@ -391,12 +436,7 @@ class EntriesFragment : Fragment() {
                 seenItemsOutOfRange.forEach {
                     if (!it.opened.value) {
                         it.opened.value = true
-                        lifecycleScope.launchWhenResumed {
-                            model.markAsOpened(
-                                it.id,
-                                changeState = false,
-                            )
-                        }
+                        model.setRead(listOf(it.id), true)
                     }
                 }
             }
@@ -518,37 +558,28 @@ class EntriesFragment : Fragment() {
         }
     }
 
-    private fun setRead(entry: EntriesAdapterItem) {
-        lifecycleScope.launchWhenResumed {
-            runCatching {
-                snackbar.setText(R.string.marked_as_read)
-                snackbar.setAction(getString(R.string.undo)) {
-                    lifecycleScope.launchWhenResumed {
-                        model.markAsNotOpened(entry.id)
-                    }
+    private fun dismissEntry(
+        entry: EntriesAdapterItem,
+        entryIndex: Int,
+        @StringRes actionText: Int,
+        action: (() -> Unit),
+        undoAction: (() -> Unit),
+    ) {
+        runCatching {
+            snackbar.apply {
+                setText(actionText)
+                setAction(R.string.undo) {
+                    model.show(entry, entryIndex)
+                    undoAction.invoke()
                 }
-                snackbar.show()
-                model.markAsOpened(entry.id)
-            }.onFailure {
-                Timber.e(it)
-            }
-        }
-    }
+            }.show()
 
-    private fun setBookmarked(entry: EntriesAdapterItem, entryIndex: Int, bookmarked: Boolean) {
-        lifecycleScope.launchWhenResumed {
-            runCatching {
-                snackbar.setText(if (bookmarked) R.string.bookmarked else R.string.removed_from_bookmarks)
-                snackbar.setAction(getString(R.string.undo)) {
-                    lifecycleScope.launchWhenResumed {
-                        model.setBookmarked(entry, entryIndex, !bookmarked)
-                    }
-                }
-                snackbar.show()
-                model.setBookmarked(entry, entryIndex, bookmarked)
-            }.onFailure {
-                Timber.e(it)
+            model.apply {
+                hide(entry)
+                action.invoke()
             }
+        }.onFailure {
+            showErrorDialog(it)
         }
     }
 }

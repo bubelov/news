@@ -43,10 +43,13 @@ class SearchFragment : Fragment() {
                     val entry = model.getEntry(item.id) ?: return@launchWhenResumed
                     val feed = model.getFeed(entry.feedId) ?: return@launchWhenResumed
 
+                    model.setRead(entry.id)
+
                     if (feed.openEntriesInBrowser) {
                         startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(entry.link)))
                     } else {
-                        val action = SearchFragmentDirections.actionSearchFragmentToEntryFragment(item.id)
+                        val action =
+                            SearchFragmentDirections.actionSearchFragmentToEntryFragment(item.id)
                         findNavController().navigate(action)
                     }
                 }

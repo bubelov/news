@@ -37,7 +37,7 @@ class EntriesRepository(
         db.selectByOpened(false).asFlow().mapToList()
     }
 
-    suspend fun setOpened(id: String, opened: Boolean) = withContext(Dispatchers.IO) {
+    fun setOpened(id: String, opened: Boolean) {
         db.apply {
             transaction {
                 updateOpened(opened, id)
@@ -50,7 +50,7 @@ class EntriesRepository(
         db.selectByBookmarked(true).asFlow().mapToList()
     }
 
-    suspend fun setBookmarked(id: String, bookmarked: Boolean) = withContext(Dispatchers.IO) {
+    fun setBookmarked(id: String, bookmarked: Boolean) {
         db.apply {
             transaction {
                 updateBookmarked(bookmarked, id)

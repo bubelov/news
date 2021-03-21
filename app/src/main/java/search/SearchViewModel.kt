@@ -1,6 +1,8 @@
 package search
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import common.NewsApiSync
 import db.Entry
 import db.Feed
 import entries.EntriesAdapterItem
@@ -10,6 +12,7 @@ import entries.EntriesSupportingTextRepository
 import feeds.FeedsRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import org.joda.time.Instant
 import java.text.DateFormat
 import java.util.*
@@ -18,6 +21,7 @@ class SearchViewModel(
     private val feedsRepository: FeedsRepository,
     private val entriesRepository: EntriesRepository,
     private val entriesSupportingTextRepository: EntriesSupportingTextRepository,
+    private val sync: NewsApiSync,
 ) : ViewModel() {
 
     val searchString = MutableStateFlow("")
@@ -71,6 +75,11 @@ class SearchViewModel(
     suspend fun getEntry(id: String) = entriesRepository.get(id).first()
 
     suspend fun getFeed(id: String) = feedsRepository.selectById(id)
+
+    fun setRead(entryId: String) {
+        entriesRepository.setOpened(entryId, true)
+        viewModelScope.launch { sync.syncEntriesFlags() }
+    }
 
     private suspend fun Entry.toRow(feed: Feed?): EntriesAdapterItem {
         return EntriesAdapterItem(

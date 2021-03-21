@@ -106,8 +106,6 @@ class EntryFragment : Fragment() {
             return
         }
 
-        model.markAsOpened(entry)
-
         lifecycleScope.launchWhenResumed {
             model.getBookmarked(entry).collect { bookmarked ->
                 updateBookmarkedButton(bookmarked)

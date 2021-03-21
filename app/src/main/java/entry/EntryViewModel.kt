@@ -35,15 +35,6 @@ class EntryViewModel(
             .format(Date(instant.millis))
     }
 
-    suspend fun markAsOpened(entry: Entry) {
-        if (entry.opened) {
-            return
-        }
-
-        entriesRepository.setOpened(entry.id, true)
-        syncEntriesFlags()
-    }
-
     suspend fun getBookmarked(entry: Entry) = entriesRepository.get(entry.id).map { it?.bookmarked == true }
 
     suspend fun toggleBookmarked(entryId: String) {

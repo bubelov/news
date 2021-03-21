@@ -185,55 +185,37 @@ class EntriesViewModel(
 
     suspend fun getFeed(id: String) = feedsRepository.selectById(id)
 
-    suspend fun markAsOpened(entryId: String, changeState: Boolean = true) {
-        if (changeState) {
-            val state = state.value as State.ShowingEntries
-
-            this.state.value = state.copy(
-                entries = state.entries.filterNot { it.id == entryId },
-            )
-        }
-
-        entriesRepository.setOpened(entryId, true)
-        newsApiSync.syncEntriesFlags()
+    fun setRead(
+        entryIds: Collection<String>,
+        read: Boolean,
+        scope: CoroutineScope = viewModelScope,
+    ) {
+        entryIds.forEach { entriesRepository.setOpened(it, read) }
+        scope.launch { newsApiSync.syncEntriesFlags() }
     }
 
-    fun markAsOpened(entriesIds: List<String>) {
-        GlobalScope.launch {
-            entriesIds.forEach { entriesRepository.setOpened(it, true) }
-            newsApiSync.syncEntriesFlags()
-        }
+    fun setBookmarked(entryId: String, bookmarked: Boolean) {
+        entriesRepository.setBookmarked(entryId, bookmarked)
+        viewModelScope.launch { newsApiSync.syncEntriesFlags() }
     }
 
-    suspend fun markAsNotOpened(entryId: String) {
-        entriesRepository.setOpened(entryId, false)
-        reloadEntries()
-        newsApiSync.syncEntriesFlags()
-    }
-
-    suspend fun setBookmarked(entry: EntriesAdapterItem, entryIndex: Int, bookmarked: Boolean) {
-        val state = state.value
-
-        if (state !is State.ShowingEntries) {
-            return
-        }
-
-        val shouldBeVisible = (!bookmarked && filter is EntriesFilter.OnlyNotBookmarked)
-                || (bookmarked && filter is EntriesFilter.OnlyBookmarked)
-
-        this.state.value = state.copy(
-            entries = state.entries.toMutableList().apply {
-                if (shouldBeVisible) {
-                    add(entryIndex, entry)
-                } else {
-                    removeAt(entryIndex)
-                }
+    fun show(entry: EntriesAdapterItem, entryIndex: Int) {
+        when (val state = state.value) {
+            is State.ShowingEntries -> {
+                this.state.value = state.copy(
+                    entries = state.entries.toMutableList().apply { add(entryIndex, entry) }
+                )
             }
-        )
+        }
+    }
 
-        viewModelScope.launch {
-            entriesRepository.setBookmarked(entry.id, bookmarked)
-            newsApiSync.syncEntriesFlags()
+    fun hide(entry: EntriesAdapterItem) {
+        when (val state = state.value) {
+            is State.ShowingEntries -> {
+                this.state.value = state.copy(
+                    entries = state.entries.toMutableList().apply { removeAll { it == entry } }
+                )
+            }
         }
     }
 
