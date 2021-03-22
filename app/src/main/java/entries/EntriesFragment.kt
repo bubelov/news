@@ -266,10 +266,10 @@ class EntriesFragment : Fragment() {
     override fun onResume() {
         super.onResume()
 
-        model.openedEntry.value?.let {
-            lifecycleScope.launchWhenResumed {
-                model.reloadEntry(it)
-                model.openedEntry.value = null
+        model.apply {
+            openedEntry.value?.let {
+                reloadEntry(it)
+                openedEntry.value = null
             }
         }
     }

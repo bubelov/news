@@ -7,16 +7,10 @@ class FeedSettingsViewModel(
     private val feedsRepository: FeedsRepository,
 ) : ViewModel() {
 
-    suspend fun getFeedTitle(feedId: String): String {
-        return feedsRepository.selectById(feedId)!!.title
-    }
+    fun getFeed(id: String) = feedsRepository.selectById(id)
 
-    suspend fun isOpenEntriesInBrowser(feedId: String): Boolean {
-        return feedsRepository.selectById(feedId)!!.openEntriesInBrowser
-    }
-
-    suspend fun setOpenEntriesInBrowser(feedId: String, openEntriesInBrowser: Boolean) {
-        val feed = feedsRepository.selectById(feedId)!!
+    fun setOpenEntriesInBrowser(feedId: String, openEntriesInBrowser: Boolean) {
+        val feed = getFeed(feedId) ?: return
         feedsRepository.insertOrReplace(feed.copy(openEntriesInBrowser = openEntriesInBrowser))
     }
 }

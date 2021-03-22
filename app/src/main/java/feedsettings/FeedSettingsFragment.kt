@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import co.appreactor.news.databinding.FragmentFeedSettingsBinding
@@ -30,24 +29,24 @@ class FeedSettingsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        val feed = model.getFeed(args.feedId)
+
+        if (feed == null) {
+            findNavController().popBackStack()
+            return
+        }
+
         binding.apply {
             toolbar.apply {
-                lifecycleScope.launchWhenResumed {
-                    title = model.getFeedTitle(args.feedId)
-                }
-
-                setNavigationOnClickListener {
-                    findNavController().popBackStack()
-                }
+                title = feed.title
+                setNavigationOnClickListener { findNavController().popBackStack() }
             }
 
-            lifecycleScope.launchWhenResumed {
-                openEntriesInBrowser.isChecked = model.isOpenEntriesInBrowser(args.feedId)
+            openEntriesInBrowser.apply {
+                isChecked = feed.openEntriesInBrowser
 
-                openEntriesInBrowser.setOnCheckedChangeListener { _, isChecked ->
-                    lifecycleScope.launchWhenResumed {
-                        model.setOpenEntriesInBrowser(args.feedId, isChecked)
-                    }
+                setOnCheckedChangeListener { _, isChecked ->
+                    model.setOpenEntriesInBrowser(args.feedId, isChecked)
                 }
             }
         }

@@ -21,6 +21,14 @@ class FeedsRepositoryTests {
     )
 
     @Test
+    fun insertOrReplace(): Unit = runBlocking {
+        val feed = feed()
+        repository.insertOrReplace(feed)
+        verify { db.insertOrReplace(feed) }
+        confirmVerified(db)
+    }
+
+    @Test
     fun insertByUrl(): Unit = runBlocking {
         val feed = feed()
 
@@ -57,13 +65,13 @@ class FeedsRepositoryTests {
     fun selectById(): Unit = runBlocking {
         val feed = feed().copy(id = UUID.randomUUID().toString())
 
-        coEvery { db.selectById(feed.id) } returns mockk {
+        every { db.selectById(feed.id) } returns mockk {
             every { executeAsOneOrNull() } returns feed
         }
 
         Assert.assertEquals(feed, repository.selectById(feed.id))
 
-        coVerify { db.selectById(feed.id) }
+        verify { db.selectById(feed.id) }
 
         confirmVerified(db)
     }
@@ -112,5 +120,7 @@ class FeedsRepositoryTests {
         title = "",
         selfLink = "",
         alternateLink = "",
+        openEntriesInBrowser = false,
+        blockedWords = "",
     )
 }

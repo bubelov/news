@@ -7,11 +7,8 @@ import common.NewsApiSync
 import db.Feed
 import db.Entry
 import entries.EntriesRepository
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.joda.time.Instant
-import timber.log.Timber
 import java.text.DateFormat
 import java.util.*
 
@@ -21,12 +18,12 @@ class EntryViewModel(
     private val newsApiSync: NewsApiSync,
 ) : ViewModel() {
 
-    suspend fun getFeed(id: String): Feed? {
+    fun getFeed(id: String): Feed? {
         return feedsRepository.selectById(id)
     }
 
-    suspend fun getEntry(id: String): Entry? {
-        return entriesRepository.get(id).first()
+    fun getEntry(id: String): Entry? {
+        return entriesRepository.selectById(id)
     }
 
     fun getDate(entry: Entry): String {
@@ -35,21 +32,12 @@ class EntryViewModel(
             .format(Date(instant.millis))
     }
 
-    suspend fun getBookmarked(entry: Entry) = entriesRepository.get(entry.id).map { it?.bookmarked == true }
-
-    suspend fun toggleBookmarked(entryId: String) {
+    fun toggleBookmarked(entryId: String) {
         val entry = getEntry(entryId) ?: return
         entriesRepository.setBookmarked(entry.id, !entry.bookmarked)
-        syncEntriesFlags()
-    }
 
-    private fun syncEntriesFlags() {
         viewModelScope.launch {
-            runCatching {
-                newsApiSync.syncEntriesFlags()
-            }.onFailure {
-                Timber.e(it)
-            }
+            runCatching { newsApiSync.syncEntriesFlags() }
         }
     }
 }

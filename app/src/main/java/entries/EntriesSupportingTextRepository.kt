@@ -4,7 +4,6 @@ import android.text.SpannableStringBuilder
 import androidx.core.text.HtmlCompat
 import db.Feed
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.util.*
@@ -27,7 +26,7 @@ class EntriesSupportingTextRepository(
             return@withContext cachedSummary
         }
 
-        val entry = entriesRepository.get(entryId).first()
+        val entry = entriesRepository.selectById(entryId)
 
         if (entry == null || entry.content.isBlank()) {
             cache[entryId] = ""

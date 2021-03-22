@@ -9,6 +9,7 @@ import android.text.SpannableStringBuilder
 import android.text.method.LinkMovementMethod
 import android.text.style.*
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
@@ -21,9 +22,8 @@ import androidx.navigation.fragment.navArgs
 import co.appreactor.news.R
 import common.showDialog
 import co.appreactor.news.databinding.FragmentEntryBinding
+import common.showErrorDialog
 import db.Entry
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
 
 class EntryFragment : Fragment() {
@@ -46,34 +46,49 @@ class EntryFragment : Fragment() {
 
     @SuppressLint("NewApi")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        binding.toolbar.setNavigationOnClickListener {
-            findNavController().popBackStack()
-        }
+        val entry = model.getEntry(args.entryId)
 
-        binding.toolbar.menu.findItem(R.id.share).isVisible = false
-        binding.toolbar.menu.findItem(R.id.toggleBookmarked).isVisible = false
-
-        binding.progress.isVisible = true
-
-        lifecycleScope.launchWhenResumed {
-            val entry = model.getEntry(args.entryId)
-
-            if (entry == null) {
-                showDialog(
-                    R.string.error,
-                    getString(R.string.cannot_find_entry_with_id_s, args.entryId)
-                ) {
-                    findNavController().popBackStack()
-                }
-
-                return@launchWhenResumed
+        if (entry == null) {
+            showDialog(
+                R.string.error,
+                getString(R.string.cannot_find_entry_with_id_s, args.entryId)
+            ) {
+                findNavController().popBackStack()
             }
 
-            viewEntry(entry)
+            return
         }
 
-        binding.scrollView.setOnScrollChangeListener { _, _, _, _, _ ->
-            binding.fab.isVisible = binding.scrollView.canScrollVertically(1)
+        binding.apply {
+            toolbar.apply {
+                setNavigationOnClickListener { findNavController().popBackStack() }
+                title = model.getFeed(entry.feedId)?.title ?: getString(R.string.unknown_feed)
+                updateBookmarkedButton()
+                setOnMenuItemClickListener { menuItem -> onMenuItemClick(menuItem, entry) }
+            }
+
+            scrollView.setOnScrollChangeListener { _, _, _, _, _ ->
+                fab.isVisible = binding.scrollView.canScrollVertically(1)
+            }
+
+            title.text = entry.title
+            date.text = model.getDate(entry)
+
+            fab.setOnClickListener {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(entry.link)))
+            }
+
+            summaryView.post {
+                progress.isVisible = true
+
+                runCatching {
+                    fillSummary(entry)
+                }.onFailure {
+                    showErrorDialog(it) { findNavController().popBackStack() }
+                }
+
+                progress.isVisible = false
+            }
         }
     }
 
@@ -82,70 +97,53 @@ class EntryFragment : Fragment() {
         _binding = null
     }
 
-    private suspend fun viewEntry(entry: Entry) {
-        binding.toolbar.title =
-            model.getFeed(entry.feedId)?.title ?: getString(R.string.unknown_feed)
-
-        binding.toolbar.menu.findItem(R.id.share).isVisible = true
-        binding.toolbar.menu.findItem(R.id.toggleBookmarked).isVisible = true
-        updateBookmarkedButton(entry.bookmarked)
-
-        binding.title.text = entry.title
-        binding.date.text = model.getDate(entry)
-
-        runCatching {
-            fillSummary(entry)
-            binding.progress.isVisible = false
-        }.onFailure {
-            binding.progress.isVisible = false
-
-            showDialog(R.string.error, R.string.cannot_show_content) {
-                findNavController().popBackStack()
-            }
-
-            return
-        }
-
-        lifecycleScope.launchWhenResumed {
-            model.getBookmarked(entry).collect { bookmarked ->
-                updateBookmarkedButton(bookmarked)
-            }
-        }
-
-        binding.toolbar.setOnMenuItemClickListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.share -> {
-                    val intent = Intent().apply {
-                        action = Intent.ACTION_SEND
-                        type = "text/plain"
-                        putExtra(Intent.EXTRA_SUBJECT, entry.title)
-                        putExtra(Intent.EXTRA_TEXT, entry.link)
-                    }
-
-                    startActivity(Intent.createChooser(intent, ""))
+    private fun onMenuItemClick(menuItem: MenuItem?, entry: Entry): Boolean {
+        when (menuItem?.itemId) {
+            R.id.share -> {
+                val intent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_SUBJECT, entry.title)
+                    putExtra(Intent.EXTRA_TEXT, entry.link)
                 }
 
-                R.id.toggleBookmarked -> lifecycleScope.launchWhenResumed {
+                startActivity(Intent.createChooser(intent, ""))
+                return true
+            }
+
+            R.id.toggleBookmarked -> {
+                lifecycleScope.launchWhenResumed {
                     model.toggleBookmarked(args.entryId)
+                    updateBookmarkedButton()
                 }
 
-                R.id.feedSettings -> {
-                    findNavController().navigate(
-                        EntryFragmentDirections.actionEntryFragmentToFeedSettingsFragment(
-                            feedId = entry.feedId,
-                        )
-                    )
-                }
+                return true
             }
 
-            true
+            R.id.feedSettings -> {
+                findNavController().navigate(
+                    EntryFragmentDirections.actionEntryFragmentToFeedSettingsFragment(
+                        feedId = entry.feedId,
+                    )
+                )
+
+                return true
+            }
         }
 
-        binding.fab.setOnClickListener {
-            lifecycleScope.launch {
-                val intent = Intent(Intent.ACTION_VIEW)
-                intent.data = Uri.parse(entry.link)
-                startActivity(intent)
+        return false
+    }
+
+    private fun updateBookmarkedButton() {
+        val entry = model.getEntry(args.entryId) ?: return
+
+        binding.toolbar.menu.findItem(R.id.toggleBookmarked)?.apply {
+            if (entry.bookmarked) {
+                setIcon(R.drawable.ic_baseline_bookmark_24)
+                setTitle(R.string.remove_bookmark)
+            } else {
+                setIcon(R.drawable.ic_baseline_bookmark_border_24)
+                setTitle(R.string.bookmark)
             }
         }
     }
@@ -238,18 +236,6 @@ class EntryFragment : Fragment() {
                     }
                 }
             }
-        }
-    }
-
-    private fun updateBookmarkedButton(bookmarked: Boolean) {
-        val menuItem = binding.toolbar.menu.findItem(R.id.toggleBookmarked)
-
-        if (bookmarked) {
-            menuItem.setIcon(R.drawable.ic_baseline_bookmark_24)
-            menuItem.setTitle(R.string.remove_bookmark)
-        } else {
-            menuItem.setIcon(R.drawable.ic_baseline_bookmark_border_24)
-            menuItem.setTitle(R.string.bookmark)
         }
     }
 }

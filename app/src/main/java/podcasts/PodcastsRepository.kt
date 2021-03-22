@@ -12,7 +12,6 @@ import entries.EntriesRepository
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -47,7 +46,7 @@ class PodcastsRepository(
 
     @Suppress("BlockingMethodInNonBlockingContext")
     suspend fun download(entryId: String) = withContext(Dispatchers.IO) {
-        val entry = entriesRepository.get(entryId).first()
+        val entry = entriesRepository.selectById(entryId)
 
         if (entry == null) {
             db.deleteWhere(entryId = entryId)

@@ -8,6 +8,7 @@ import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOne
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
+import db.EntryWithoutSummary
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
@@ -25,8 +26,8 @@ class EntriesRepository(
         db.selectAll().asFlow().mapToList()
     }
 
-    suspend fun get(entryId: String) = withContext(Dispatchers.IO) {
-        db.selectById(entryId).asFlow().mapToOneOrNull()
+    fun selectById(entryId: String): Entry? {
+        return db.selectById(entryId).executeAsOneOrNull()
     }
 
     suspend fun selectByFeedId(feedId: String) = withContext(Dispatchers.IO) {

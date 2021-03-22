@@ -72,9 +72,9 @@ class SearchViewModel(
         }
     }
 
-    suspend fun getEntry(id: String) = entriesRepository.get(id).first()
+    fun getEntry(id: String) = entriesRepository.selectById(id)
 
-    suspend fun getFeed(id: String) = feedsRepository.selectById(id)
+    fun getFeed(id: String) = feedsRepository.selectById(id)
 
     fun setRead(entryId: String) {
         entriesRepository.setOpened(entryId, true)

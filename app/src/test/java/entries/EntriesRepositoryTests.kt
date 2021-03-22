@@ -5,12 +5,14 @@ import db.EntryQueries
 import db.EntryWithoutSummary
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
+import db.Entry
 import io.mockk.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
+import org.junit.Assert
 import org.junit.Test
+import java.util.*
 
 class EntriesRepositoryTests {
 
@@ -18,26 +20,14 @@ class EntriesRepositoryTests {
 
     private val db = mockk<EntryQueries>()
 
+    private val repository = EntriesRepository(
+        api = api,
+        db = db,
+    )
+
     @Test
     fun selectAll(): Unit = runBlocking {
-        val entries = listOf(
-            EntryWithoutSummary(
-                id = "",
-                feedId = "",
-                title = "",
-                link = "",
-                published = "",
-                updated = "",
-                authorName = "",
-                enclosureLink = "",
-                enclosureLinkType = "",
-                opened = false,
-                openedSynced = true,
-                bookmarked = false,
-                bookmarkedSynced = true,
-                guidHash = "",
-            )
-        )
+        val entries = listOf(entryWithoutSummary())
 
         mockkStatic("com.squareup.sqldelight.runtime.coroutines.FlowQuery")
 
@@ -47,12 +37,7 @@ class EntriesRepositoryTests {
             }
         }
 
-        val repository = EntriesRepository(
-            api = api,
-            db = db,
-        )
-
-        assertEquals(entries, repository.selectAll().first())
+        Assert.assertEquals(entries, repository.selectAll().first())
 
         verify { db.selectAll() }
 
@@ -61,4 +46,54 @@ class EntriesRepositoryTests {
             db,
         )
     }
+
+    @Test
+    fun selectById(): Unit = runBlocking {
+        val entry = entry().copy(id = UUID.randomUUID().toString())
+
+        every { db.selectById(entry.id) } returns mockk {
+            every { executeAsOneOrNull() } returns entry
+        }
+
+        Assert.assertEquals(entry, repository.selectById(entry.id))
+
+        verify { db.selectById(entry.id) }
+
+        confirmVerified(db)
+    }
+
+    private fun entry() = Entry(
+        id = "",
+        feedId = "",
+        title = "",
+        link = "",
+        published = "",
+        updated = "",
+        authorName = "",
+        content = "",
+        enclosureLink = "",
+        enclosureLinkType = "",
+        opened = false,
+        openedSynced = true,
+        bookmarked = false,
+        bookmarkedSynced = true,
+        guidHash = "",
+    )
+
+    private fun entryWithoutSummary() = EntryWithoutSummary(
+        id = "",
+        feedId = "",
+        title = "",
+        link = "",
+        published = "",
+        updated = "",
+        authorName = "",
+        enclosureLink = "",
+        enclosureLinkType = "",
+        opened = false,
+        openedSynced = true,
+        bookmarked = false,
+        bookmarkedSynced = true,
+        guidHash = "",
+    )
 }

@@ -11,7 +11,7 @@ class FeedsRepository(
     private val db: FeedQueries,
 ) {
 
-    suspend fun insertOrReplace(feed: Feed) = withContext(Dispatchers.IO) {
+    fun insertOrReplace(feed: Feed) {
         db.insertOrReplace(feed)
     }
 
@@ -23,8 +23,8 @@ class FeedsRepository(
         db.selectAll().executeAsList()
     }
 
-    suspend fun selectById(id: String) = withContext(Dispatchers.IO) {
-        db.selectById(id).executeAsOneOrNull()
+    fun selectById(id: String): Feed? {
+        return db.selectById(id).executeAsOneOrNull()
     }
 
     suspend fun updateTitle(feedId: String, newTitle: String) = withContext(Dispatchers.IO) {

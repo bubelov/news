@@ -72,8 +72,8 @@ class EntriesViewModel(
         onViewReady(filter, sharedModel)
     }
 
-    suspend fun reloadEntry(entry: EntriesAdapterItem) {
-        val freshEntry = entriesRepository.get(entry.id).first() ?: return
+    fun reloadEntry(entry: EntriesAdapterItem) {
+        val freshEntry = entriesRepository.selectById(entry.id) ?: return
         entry.opened.value = freshEntry.opened
 
         val currentState = state.value
@@ -178,12 +178,12 @@ class EntriesViewModel(
         podcastsRepository.download(id)
     }
 
-    suspend fun getEntry(id: String) = entriesRepository.get(id).first()
+    fun getEntry(id: String) = entriesRepository.selectById(id)
 
     suspend fun getCachedEnclosureUri(entryId: String) =
         podcastsRepository.getCachedPodcastUri(entryId)
 
-    suspend fun getFeed(id: String) = feedsRepository.selectById(id)
+    fun getFeed(id: String) = feedsRepository.selectById(id)
 
     fun setRead(
         entryIds: Collection<String>,
