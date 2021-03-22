@@ -63,11 +63,11 @@ class EntriesFragment : Fragment() {
                         val feed = model.getFeed(entry.feedId) ?: return@launchWhenResumed
 
                         model.setRead(listOf(entry.id), true)
+                        model.openedEntry.value = item
 
                         if (feed.openEntriesInBrowser) {
                             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(entry.link)))
                         } else {
-                            model.openedEntry.value = item
                             val action =
                                 EntriesFragmentDirections.actionEntriesFragmentToEntryFragment(item.id)
                             findNavController().navigate(action)
