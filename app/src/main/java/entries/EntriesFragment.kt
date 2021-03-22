@@ -89,10 +89,12 @@ class EntriesFragment : Fragment() {
                 override fun onPlayPodcastClick(item: EntriesAdapterItem) {
                     lifecycleScope.launch {
                         runCatching {
-                            requireContext().openCachedPodcast(model.getEntry(item.id)!!)
+                            val entry = model.getEntry(item.id) ?: return@launch
+                            model.setRead(listOf(entry.id), true)
+                            model.reloadEntry(item)
+                            requireContext().openCachedPodcast(entry)
                         }.onFailure {
-                            Timber.e(it)
-                            showDialog(R.string.error, it.message ?: "")
+                            showErrorDialog(it)
                         }
                     }
                 }
