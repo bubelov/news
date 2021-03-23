@@ -163,8 +163,15 @@ class EntriesViewModel(
         when (val prevState = state.value) {
             is State.ShowingEntries -> {
                 state.value = prevState.copy(showBackgroundProgress = true)
-                newsApiSync.sync()
-                reloadEntries(inBackground = true)
+
+                runCatching {
+                    newsApiSync.sync()
+                }.onSuccess {
+                    reloadEntries(inBackground = true)
+                }.onFailure {
+                    state.value = prevState.copy()
+                    throw it
+                }
             }
         }
     }

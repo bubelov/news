@@ -231,6 +231,7 @@ class EntriesFragment : Fragment() {
                         runCatching {
                             model.fetchEntriesFromApi()
                         }.onFailure {
+                            binding.swipeRefresh.isRefreshing = false
                             showErrorDialog(it)
                         }
                     }
