@@ -1,5 +1,6 @@
 package entries
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import common.*
@@ -13,6 +14,7 @@ import podcasts.PodcastsRepository
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import org.joda.time.Instant
+import timber.log.Timber
 import java.text.DateFormat
 import java.util.*
 
@@ -180,8 +182,17 @@ class EntriesViewModel(
 
     fun getEntry(id: String) = entriesRepository.selectById(id)
 
-    suspend fun getCachedEnclosureUri(entryId: String) =
-        podcastsRepository.getCachedPodcastUri(entryId)
+    fun getCachedPodcastUri(entryId: String): Uri? {
+        val enclosure = podcastsRepository.selectByEntryId(entryId) ?: return null
+
+        val uri = runCatching {
+            Uri.parse(enclosure.cacheUri)
+        }.onFailure {
+            Timber.e(it)
+        }
+
+        return uri.getOrNull()
+    }
 
     fun getFeed(id: String) = feedsRepository.selectById(id)
 

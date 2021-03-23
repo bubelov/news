@@ -11,7 +11,6 @@ import db.EntryEnclosureQueries
 import entries.EntriesRepository
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -38,10 +37,8 @@ class PodcastsRepository(
         }
     }
 
-    suspend fun getCachedPodcastUri(entryId: String): Flow<Uri> = withContext(Dispatchers.IO) {
-        db.selectByEntryId(entryId).asFlow().map {
-            Uri.parse(it.executeAsOneOrNull()?.cacheUri)
-        }
+    fun selectByEntryId(entryId: String): EntryEnclosure? {
+        return db.selectByEntryId(entryId).executeAsOneOrNull()
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")

@@ -526,28 +526,29 @@ class EntriesFragment : Fragment() {
     }
 
     private fun Context.openCachedPodcast(entry: Entry) {
-        lifecycleScope.launchWhenResumed {
-            val cacheUri = model.getCachedEnclosureUri(entryId = entry.id).first()
+        val cacheUri = model.getCachedPodcastUri(entryId = entry.id)
 
-            val intent = Intent().apply {
-                action = Intent.ACTION_VIEW
-                data = cacheUri
-                setDataAndType(cacheUri, entry.enclosureLinkType)
-            }
+        if (cacheUri == null) {
+            showErrorDialog(Exception("Can't find cache URI for podcast entry ${entry.id}"))
+            return
+        }
 
-            runCatching {
-                startActivity(intent)
-            }.onFailure {
-                Timber.e(it)
+        val intent = Intent().apply {
+            action = Intent.ACTION_VIEW
+            data = cacheUri
+            setDataAndType(cacheUri, entry.enclosureLinkType)
+        }
 
-                if (it is ActivityNotFoundException) {
-                    showDialog(
-                        R.string.error,
-                        R.string.you_have_no_apps_which_can_play_this_podcast
-                    )
-                } else {
-                    showDialog(R.string.error, it.message ?: "")
-                }
+        runCatching {
+            startActivity(intent)
+        }.onFailure {
+            if (it is ActivityNotFoundException) {
+                showDialog(
+                    R.string.error,
+                    R.string.you_have_no_apps_which_can_play_this_podcast
+                )
+            } else {
+                showErrorDialog(it)
             }
         }
     }
