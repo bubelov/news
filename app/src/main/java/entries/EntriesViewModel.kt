@@ -129,7 +129,7 @@ class EntriesViewModel(
             }
 
             is EntriesFilter.OnlyFromFeed -> {
-                val feedEntries = entriesRepository.selectByFeedId(filter.feedId).first()
+                val feedEntries = entriesRepository.selectByFeedId(filter.feedId)
 
                 if (prefs.showOpenedEntries) {
                     feedEntries

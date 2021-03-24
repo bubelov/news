@@ -62,6 +62,25 @@ class EntriesRepositoryTests {
         confirmVerified(db)
     }
 
+    @Test
+    fun selectByFeedId(): Unit = runBlocking {
+        val feedId = UUID.randomUUID().toString()
+
+        val entries = listOf(
+            entryWithoutSummary().copy(feedId = feedId),
+        )
+
+        every { db.selectByFeedId(feedId) } returns mockk {
+            every { executeAsList() } returns entries
+        }
+
+        Assert.assertEquals(entries, repository.selectByFeedId(feedId))
+
+        verify { db.selectByFeedId(feedId) }
+
+        confirmVerified(db)
+    }
+
     private fun entry() = Entry(
         id = "",
         feedId = "",
