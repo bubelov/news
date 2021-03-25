@@ -22,8 +22,11 @@ import androidx.navigation.fragment.navArgs
 import co.appreactor.news.R
 import common.showDialog
 import co.appreactor.news.databinding.FragmentEntryBinding
+import common.show
 import common.showErrorDialog
 import db.Entry
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.koin.android.viewmodel.ext.android.viewModel
 
 class EntryFragment : Fragment() {
@@ -78,11 +81,12 @@ class EntryFragment : Fragment() {
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(entry.link)))
             }
 
-            summaryView.post {
-                progress.isVisible = true
+            lifecycleScope.launchWhenResumed {
+                progress.isVisible = false
+                progress.show(animate = true)
 
                 runCatching {
-                    fillSummary(entry)
+                    showSummary(entry)
                 }.onFailure {
                     showErrorDialog(it) { findNavController().popBackStack() }
                 }
@@ -148,40 +152,50 @@ class EntryFragment : Fragment() {
         }
     }
 
-    private fun fillSummary(entry: Entry) {
-        val summary = HtmlCompat.fromHtml(
-            entry.content,
-            HtmlCompat.FROM_HTML_MODE_LEGACY,
-            TextViewImageGetter(binding.summaryView),
-            null
-        ) as SpannableStringBuilder
+    private suspend fun showSummary(entry: Entry) {
+        val summary = withContext(Dispatchers.IO) {
+            val summary = HtmlCompat.fromHtml(
+                entry.content,
+                HtmlCompat.FROM_HTML_MODE_LEGACY,
+                TextViewImageGetter(binding.summaryView),
+                null
+            ) as SpannableStringBuilder
+
+            if (summary.isBlank()) {
+                return@withContext summary
+            }
+
+            summary.applyStyle(binding.summaryView)
+
+            while (summary.contains("\u00A0")) {
+                val index = summary.indexOfFirst { it == '\u00A0' }
+                summary.delete(index, index + 1)
+            }
+
+            while (summary.contains("\n\n\n")) {
+                val index = summary.indexOf("\n\n\n")
+                summary.delete(index, index + 1)
+            }
+
+            while (summary.startsWith("\n\n")) {
+                summary.delete(0, 1)
+            }
+
+            while (summary.endsWith("\n\n")) {
+                summary.delete(summary.length - 2, summary.length - 1)
+            }
+
+            summary
+        }
 
         if (summary.isBlank()) {
             return
         }
 
-        summary.applyStyle(binding.summaryView)
-
-        while (summary.contains("\u00A0")) {
-            val index = summary.indexOfFirst { it == '\u00A0' }
-            summary.delete(index, index + 1)
+        binding.summaryView.apply {
+            text = summary
+            movementMethod = LinkMovementMethod.getInstance()
         }
-
-        while (summary.contains("\n\n\n")) {
-            val index = summary.indexOf("\n\n\n")
-            summary.delete(index, index + 1)
-        }
-
-        while (summary.startsWith("\n\n")) {
-            summary.delete(0, 1)
-        }
-
-        while (summary.endsWith("\n\n")) {
-            summary.delete(summary.length - 2, summary.length - 1)
-        }
-
-        binding.summaryView.text = summary
-        binding.summaryView.movementMethod = LinkMovementMethod.getInstance()
     }
 
     private fun SpannableStringBuilder.applyStyle(textView: TextView) {
