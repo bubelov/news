@@ -81,17 +81,21 @@ class EntryFragment : Fragment() {
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(entry.link)))
             }
 
-            lifecycleScope.launchWhenResumed {
-                progress.isVisible = false
-                progress.show(animate = true)
+            progress.post {
+                lifecycleScope.launchWhenResumed {
+                    progress.apply {
+                        isVisible = false
+                        show(animate = true)
 
-                runCatching {
-                    showSummary(entry)
-                }.onFailure {
-                    showErrorDialog(it) { findNavController().popBackStack() }
+                        runCatching {
+                            showSummary(entry)
+                        }.onFailure {
+                            showErrorDialog(it) { findNavController().popBackStack() }
+                        }
+
+                        isVisible = false
+                    }
                 }
-
-                progress.isVisible = false
             }
         }
     }
@@ -157,7 +161,7 @@ class EntryFragment : Fragment() {
             val summary = HtmlCompat.fromHtml(
                 entry.content,
                 HtmlCompat.FROM_HTML_MODE_LEGACY,
-                TextViewImageGetter(binding.summaryView),
+                TextViewImageGetter(binding.summaryView, lifecycleScope),
                 null
             ) as SpannableStringBuilder
 
