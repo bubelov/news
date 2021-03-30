@@ -78,4 +78,5 @@
     <string name="fetch_news_on_startup">Fetch news on startup</string>
     <string name="open_entries_in_browser">Open entries in browser</string>
     <string name="removed_from_bookmarks">Removed from bookmarks</string>
+    <string name="cannot_find_feed_with_id_s">Can not find feed with id %1$s</string>
 </resources>

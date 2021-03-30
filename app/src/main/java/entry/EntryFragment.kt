@@ -1,6 +1,5 @@
 package entry
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -13,20 +12,18 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.core.text.HtmlCompat
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import co.appreactor.news.R
-import common.showDialog
 import co.appreactor.news.databinding.FragmentEntryBinding
+import common.hide
 import common.show
 import common.showErrorDialog
 import db.Entry
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
 
 class EntryFragment : Fragment() {
@@ -47,55 +44,17 @@ class EntryFragment : Fragment() {
         return binding.root
     }
 
-    @SuppressLint("NewApi")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val entry = model.getEntry(args.entryId)
-
-        if (entry == null) {
-            showDialog(
-                R.string.error,
-                getString(R.string.cannot_find_entry_with_id_s, args.entryId)
-            ) {
-                findNavController().popBackStack()
-            }
-
-            return
-        }
-
         binding.apply {
-            toolbar.apply {
-                setNavigationOnClickListener { findNavController().popBackStack() }
-                title = model.getFeed(entry.feedId)?.title ?: getString(R.string.unknown_feed)
-                updateBookmarkedButton()
-                setOnMenuItemClickListener { menuItem -> onMenuItemClick(menuItem, entry) }
-            }
+            toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
-            scrollView.setOnScrollChangeListener { _, _, _, _, _ ->
-                fab.isVisible = binding.scrollView.canScrollVertically(1)
-            }
+            viewLifecycleOwner.lifecycleScope.launch {
+                model.onViewCreated(
+                    entryId = args.entryId,
+                    imageGetter = TextViewImageGetter(binding.summaryView, lifecycleScope),
+                )
 
-            title.text = entry.title
-            date.text = model.getDate(entry)
-
-            fab.setOnClickListener {
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(entry.link)))
-            }
-
-            progress.post {
-                lifecycleScope.launchWhenResumed {
-                    progress.apply {
-                        isVisible = false
-                        show(animate = true)
-
-                        runCatching {
-                            showSummary(entry)
-                        }.onFailure {
-                            showErrorDialog(it) { findNavController().popBackStack() }
-                        }
-
-                        isVisible = false
-                    }
-                }
+                model.state.collect { setState(it) }
             }
         }
     }
@@ -105,24 +64,74 @@ class EntryFragment : Fragment() {
         _binding = null
     }
 
-    private fun onMenuItemClick(menuItem: MenuItem?, entry: Entry): Boolean {
-        when (menuItem?.itemId) {
-            R.id.share -> {
-                val intent = Intent().apply {
-                    action = Intent.ACTION_SEND
-                    type = "text/plain"
-                    putExtra(Intent.EXTRA_SUBJECT, entry.title)
-                    putExtra(Intent.EXTRA_TEXT, entry.link)
+    private fun setState(state: EntryViewModel.State?) {
+        binding.apply {
+            val menuItemBookmark = toolbar.menu.findItem(R.id.toggleBookmarked)
+            val menuItemFeedSettings = toolbar.menu.findItem(R.id.feedSettings)
+            val menuItemShare = toolbar.menu.findItem(R.id.share)
+
+            when (state) {
+                EntryViewModel.State.Progress -> {
+                    menuItemBookmark.isVisible = false
+                    menuItemFeedSettings.isVisible = false
+                    menuItemShare.isVisible = false
+                    contentContainer.hide()
+                    progress.show(animate = true)
+                    fab.hide()
                 }
 
-                startActivity(Intent.createChooser(intent, ""))
-                return true
-            }
+                is EntryViewModel.State.Success -> {
+                    menuItemBookmark.isVisible = true
+                    menuItemFeedSettings.isVisible = true
+                    menuItemShare.isVisible = true
+                    contentContainer.show(animate = true)
+                    toolbar.title = state.feedTitle
 
+                    toolbar.setOnMenuItemClickListener {
+                        onMenuItemClick(
+                            menuItem = it,
+                            entry = state.entry
+                        )
+                    }
+
+                    updateBookmarkedButton(state.entry.bookmarked)
+                    title.text = state.entry.title
+                    date.text = state.entry.published
+                    state.parsedContent.applyStyle(summaryView)
+                    summaryView.text = state.parsedContent
+                    summaryView.movementMethod = LinkMovementMethod.getInstance()
+                    progress.hide()
+                    fab.show()
+
+                    fab.setOnClickListener {
+                        startActivity(
+                            Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse(state.entry.link)
+                            )
+                        )
+                    }
+                }
+
+                is EntryViewModel.State.Error -> {
+                    menuItemBookmark.isVisible = false
+                    menuItemFeedSettings.isVisible = false
+                    menuItemShare.isVisible = false
+                    contentContainer.hide()
+                    showErrorDialog(state.message) { findNavController().popBackStack() }
+                }
+            }
+        }
+    }
+
+    private fun onMenuItemClick(menuItem: MenuItem?, entry: Entry): Boolean {
+        when (menuItem?.itemId) {
             R.id.toggleBookmarked -> {
                 lifecycleScope.launchWhenResumed {
-                    model.toggleBookmarked(args.entryId)
-                    updateBookmarkedButton()
+                    model.setBookmarked(
+                        entry.id,
+                        !entry.bookmarked,
+                    )
                 }
 
                 return true
@@ -137,68 +146,32 @@ class EntryFragment : Fragment() {
 
                 return true
             }
+
+            R.id.share -> {
+                val intent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_SUBJECT, entry.title)
+                    putExtra(Intent.EXTRA_TEXT, entry.link)
+                }
+
+                startActivity(Intent.createChooser(intent, ""))
+                return true
+            }
         }
 
         return false
     }
 
-    private fun updateBookmarkedButton() {
-        val entry = model.getEntry(args.entryId) ?: return
-
-        binding.toolbar.menu.findItem(R.id.toggleBookmarked)?.apply {
-            if (entry.bookmarked) {
+    private fun updateBookmarkedButton(bookmarked: Boolean) {
+        binding.toolbar.menu.findItem(R.id.toggleBookmarked).apply {
+            if (bookmarked) {
                 setIcon(R.drawable.ic_baseline_bookmark_24)
                 setTitle(R.string.remove_bookmark)
             } else {
                 setIcon(R.drawable.ic_baseline_bookmark_border_24)
                 setTitle(R.string.bookmark)
             }
-        }
-    }
-
-    private suspend fun showSummary(entry: Entry) {
-        val summary = withContext(Dispatchers.IO) {
-            val summary = HtmlCompat.fromHtml(
-                entry.content,
-                HtmlCompat.FROM_HTML_MODE_LEGACY,
-                TextViewImageGetter(binding.summaryView, lifecycleScope),
-                null
-            ) as SpannableStringBuilder
-
-            if (summary.isBlank()) {
-                return@withContext summary
-            }
-
-            summary.applyStyle(binding.summaryView)
-
-            while (summary.contains("\u00A0")) {
-                val index = summary.indexOfFirst { it == '\u00A0' }
-                summary.delete(index, index + 1)
-            }
-
-            while (summary.contains("\n\n\n")) {
-                val index = summary.indexOf("\n\n\n")
-                summary.delete(index, index + 1)
-            }
-
-            while (summary.startsWith("\n\n")) {
-                summary.delete(0, 1)
-            }
-
-            while (summary.endsWith("\n\n")) {
-                summary.delete(summary.length - 2, summary.length - 1)
-            }
-
-            summary
-        }
-
-        if (summary.isBlank()) {
-            return
-        }
-
-        binding.summaryView.apply {
-            text = summary
-            movementMethod = LinkMovementMethod.getInstance()
         }
     }
 

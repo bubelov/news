@@ -59,3 +59,14 @@ fun Fragment.showErrorDialog(
         }
     }
 }
+
+fun Fragment.showErrorDialog(
+    message: String,
+    onDismissListener: (suspend () -> Unit)? = null,
+) {
+    showDialog(R.string.error, message) {
+        lifecycleScope.launchWhenResumed {
+            onDismissListener?.invoke()
+        }
+    }
+}

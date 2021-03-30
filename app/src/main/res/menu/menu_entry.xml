@@ -1,24 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <item
         android:id="@+id/toggleBookmarked"
         android:icon="@drawable/ic_baseline_bookmark_border_24"
         android:title="@string/bookmark"
-        app:showAsAction="ifRoom" />
+        android:visible="false"
+        app:showAsAction="ifRoom"
+        tools:visible="true" />
 
     <item
         android:id="@+id/feedSettings"
         android:icon="@drawable/ic_baseline_settings_24"
         android:title="@string/open_feed_settings"
-        app:showAsAction="never" />
+        android:visible="false"
+        app:showAsAction="never"
+        tools:visible="true" />
 
     <item
         android:id="@+id/share"
         android:icon="@drawable/ic_baseline_share_24"
         android:title="@string/share"
-        app:showAsAction="never" />
+        android:visible="false"
+        app:showAsAction="never"
+        tools:visible="true" />
 
 </menu>

@@ -14,7 +14,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:menu="@menu/menu_entry"
         app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
-        tools:title="Item" />
+        tools:title="Entry" />
 
     <ScrollView
         android:id="@+id/scrollView"
@@ -24,7 +24,7 @@
         app:layout_constraintTop_toBottomOf="@id/toolbar">
 
         <LinearLayout
-            android:id="@+id/container"
+            android:id="@+id/contentContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -67,6 +67,7 @@
         android:id="@+id/progress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -79,6 +80,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:contentDescription="@string/open_in_browser"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/ic_baseline_open_in_browser_24" />
