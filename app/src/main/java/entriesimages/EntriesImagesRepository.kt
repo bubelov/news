@@ -46,17 +46,11 @@ class EntriesImagesRepository(
                 return@collectLatest
             }
 
-            entriesRepository.selectAll().collectLatest { entries ->
-                Timber.d("Got ${entries.size} entries")
-                val notOpenedEntries = entries.filterNot { it.opened }
-                Timber.d("Not opened entries: ${notOpenedEntries.size}")
-                val bookmarkedEntries = entries.filter { it.bookmarked }
-                Timber.d("Bookmarked entries: ${bookmarkedEntries.size}")
-
-                val queue =
-                    ((notOpenedEntries + bookmarkedEntries).sortedByDescending { it.published })
-
-                queue.chunked(10).forEach {
+            entriesRepository.selectByReadOrBookmarked(
+                read = false,
+                bookmarked = true,
+            ).collectLatest { entries ->
+                entries.chunked(10).forEach {
                     it.map { async { syncPreview(it) } }.awaitAll()
                 }
             }

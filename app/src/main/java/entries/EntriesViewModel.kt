@@ -122,7 +122,7 @@ class EntriesViewModel(
         val unsortedEntries = when (val filter = filter) {
             is EntriesFilter.OnlyNotBookmarked -> {
                 if (prefs.showOpenedEntries) {
-                    entriesRepository.selectAll().first()
+                    entriesRepository.selectAll()
                 } else {
                     entriesRepository.getNotOpened().first()
                 }.filterNot { it.bookmarked }

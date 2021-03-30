@@ -1,11 +1,9 @@
 package entries
 
 import api.NewsApi
-import db.EntryQueries
-import db.EntryWithoutSummary
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
-import db.Entry
+import db.*
 import io.mockk.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
@@ -29,15 +27,11 @@ class EntriesRepositoryTests {
     fun selectAll(): Unit = runBlocking {
         val entries = listOf(entryWithoutSummary())
 
-        mockkStatic("com.squareup.sqldelight.runtime.coroutines.FlowQuery")
-
         every { db.selectAll() } returns mockk {
-            every { asFlow() } returns mockk {
-                every { mapToList() } returns flowOf(entries)
-            }
+            every { executeAsList() } returns entries
         }
 
-        Assert.assertEquals(entries, repository.selectAll().first())
+        Assert.assertEquals(entries, repository.selectAll())
 
         verify { db.selectAll() }
 
@@ -81,38 +75,27 @@ class EntriesRepositoryTests {
         confirmVerified(db)
     }
 
-    private fun entry() = Entry(
-        id = "",
-        feedId = "",
-        title = "",
-        link = "",
-        published = "",
-        updated = "",
-        authorName = "",
-        content = "",
-        enclosureLink = "",
-        enclosureLinkType = "",
-        opened = false,
-        openedSynced = true,
-        bookmarked = false,
-        bookmarkedSynced = true,
-        guidHash = "",
-    )
+    @Test
+    fun selectByReadOrBookmarked(): Unit = runBlocking {
+        val read = false
+        val bookmarked = true
 
-    private fun entryWithoutSummary() = EntryWithoutSummary(
-        id = "",
-        feedId = "",
-        title = "",
-        link = "",
-        published = "",
-        updated = "",
-        authorName = "",
-        enclosureLink = "",
-        enclosureLinkType = "",
-        opened = false,
-        openedSynced = true,
-        bookmarked = false,
-        bookmarkedSynced = true,
-        guidHash = "",
-    )
+        val entries = listOf(
+            entryWithoutSummary(),
+        )
+
+        mockkStatic("com.squareup.sqldelight.runtime.coroutines.FlowQuery")
+
+        every { db.selectByReadOrBookmarked(read, bookmarked) } returns mockk {
+            every { asFlow() } returns mockk {
+                every { mapToList() } returns flowOf(entries)
+            }
+        }
+
+        Assert.assertEquals(entries, repository.selectByReadOrBookmarked(read, bookmarked).first())
+
+        verify { db.selectByReadOrBookmarked(read, bookmarked) }
+
+        confirmVerified(db)
+    }
 }

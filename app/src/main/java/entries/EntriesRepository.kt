@@ -21,8 +21,8 @@ class EntriesRepository(
     private val db: EntryQueries,
 ) {
 
-    suspend fun selectAll() = withContext(Dispatchers.IO) {
-        db.selectAll().asFlow().mapToList()
+    suspend fun selectAll(): List<EntryWithoutSummary> = withContext(Dispatchers.IO) {
+        db.selectAll().executeAsList()
     }
 
     fun selectById(entryId: String): Entry? {
@@ -33,6 +33,13 @@ class EntriesRepository(
         return withContext(Dispatchers.IO) {
             db.selectByFeedId(feedId).executeAsList()
         }
+    }
+
+    suspend fun selectByReadOrBookmarked(
+        read: Boolean,
+        bookmarked: Boolean,
+    ) = withContext(Dispatchers.IO) {
+        db.selectByReadOrBookmarked(read, bookmarked).asFlow().mapToList()
     }
 
     suspend fun getNotOpened() = withContext(Dispatchers.IO) {
