@@ -26,6 +26,7 @@ class EntriesViewModel(
     private val podcastsRepository: PodcastsRepository,
     private val newsApiSync: NewsApiSync,
     private val preferencesRepository: PreferencesRepository,
+    private val connectivityProbe: ConnectivityProbe,
 ) : ViewModel() {
 
     private lateinit var filter: EntriesFilter
@@ -52,7 +53,10 @@ class EntriesViewModel(
                     && !sharedModel.syncedOnStartup
                 ) {
                     sharedModel.syncedOnStartup = true
-                    fetchEntriesFromApi()
+
+                    if (connectivityProbe.online) {
+                        fetchEntriesFromApi()
+                    }
                 }
             } else {
                 sharedModel.syncedOnStartup = true

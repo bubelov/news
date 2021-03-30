@@ -215,7 +215,11 @@ class EntriesFragment : Fragment() {
         initListView()
 
         lifecycleScope.launchWhenResumed {
-            model.onViewReady(args.filter!!, sharedModel)
+            runCatching {
+                model.onViewReady(args.filter!!, sharedModel)
+            }.onFailure {
+                showErrorDialog(it)
+            }
         }
 
         binding.retry.setOnClickListener {
