@@ -287,7 +287,6 @@ class EntriesFragment : Fragment() {
             model.setRead(
                 entryIds = seenEntries.map { it.id },
                 read = true,
-                scope = requireActivity().lifecycleScope,
             )
 
             seenEntries.clear()

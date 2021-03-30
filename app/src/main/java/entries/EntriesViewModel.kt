@@ -210,10 +210,17 @@ class EntriesViewModel(
     fun setRead(
         entryIds: Collection<String>,
         read: Boolean,
-        scope: CoroutineScope = viewModelScope,
     ) {
         entryIds.forEach { entriesRepository.setOpened(it, read) }
-        scope.launch { newsApiSync.syncEntriesFlags() }
+        viewModelScope.launch {
+            runCatching {
+                if (connectivityProbe.online) {
+                    newsApiSync.syncEntriesFlags()
+                }
+            }.onFailure {
+                Timber.e(it)
+            }
+        }
     }
 
     fun setBookmarked(entryId: String, bookmarked: Boolean) {
