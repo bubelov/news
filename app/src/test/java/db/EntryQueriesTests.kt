@@ -62,7 +62,7 @@ fun entry() = Entry(
 )
 
 fun entryWithoutSummary() = EntryWithoutSummary(
-    id = "",
+    id = UUID.randomUUID().toString(),
     feedId = "",
     title = "",
     link = "",

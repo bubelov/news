@@ -2,10 +2,16 @@ package opml
 
 import android.util.Xml
 import db.Feed
+import org.xml.sax.InputSource
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.StringReader
 import java.io.StringWriter
+import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.transform.OutputKeys
+import javax.xml.transform.TransformerFactory
+import javax.xml.transform.dom.DOMSource
+import javax.xml.transform.stream.StreamResult
 
 private object Symbols {
     const val OPML = "opml"
@@ -20,11 +26,11 @@ private object Symbols {
     const val TITLE = "title"
 }
 
-fun readOpml(document: String): List<OpmlElement> {
+fun importOpml(xml: String): List<OpmlElement> {
     val elements = mutableListOf<OpmlElement>()
 
     val parser = XmlPullParserFactory.newInstance().newPullParser().apply {
-        setInput(StringReader(document))
+        setInput(StringReader(xml))
     }
 
     var eventType = parser.eventType
@@ -52,7 +58,7 @@ fun readOpml(document: String): List<OpmlElement> {
     return elements
 }
 
-fun writeOpml(feeds: List<Feed>): String {
+fun exportOpml(feeds: List<Feed>): String {
     val result = StringWriter()
 
     Xml.newSerializer().apply {
@@ -85,5 +91,20 @@ fun writeOpml(feeds: List<Feed>): String {
         endDocument()
     }
 
-    return result.toString()
+    return prettify(result.toString())
+}
+
+private fun prettify(xml: String): String {
+    val result = StringWriter()
+
+    val builder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+    val document = builder.parse(InputSource(StringReader(xml)))
+
+    TransformerFactory.newInstance().newTransformer().apply {
+        setOutputProperty(OutputKeys.INDENT, "yes")
+        setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4")
+        transform(DOMSource(document), StreamResult(result))
+    }
+
+    return result.toString().replaceFirst("<opml", "\n\n<opml")
 }

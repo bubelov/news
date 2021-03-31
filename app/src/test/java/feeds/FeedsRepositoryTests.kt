@@ -1,8 +1,8 @@
 package feeds
 
 import api.NewsApi
-import db.Feed
 import db.FeedQueries
+import db.feed
 import io.mockk.*
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
@@ -63,7 +63,7 @@ class FeedsRepositoryTests {
 
     @Test
     fun selectById(): Unit = runBlocking {
-        val feed = feed().copy(id = UUID.randomUUID().toString())
+        val feed = feed()
 
         every { db.selectById(feed.id) } returns mockk {
             every { executeAsOneOrNull() } returns feed
@@ -114,13 +114,4 @@ class FeedsRepositoryTests {
 
         confirmVerified(api, db)
     }
-
-    private fun feed() = Feed(
-        id = "",
-        title = "",
-        selfLink = "",
-        alternateLink = "",
-        openEntriesInBrowser = false,
-        blockedWords = "",
-    )
 }

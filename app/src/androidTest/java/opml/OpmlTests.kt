@@ -30,7 +30,7 @@ class OpmlTests {
 
     @Test
     fun readsSampleDocument() {
-        val elements = readOpml(readFile("sample.opml"))
+        val elements = importOpml(readFile("sample.opml"))
         Assert.assertArrayEquals(sampleElements.toTypedArray(), elements.toTypedArray())
     }
 
@@ -42,11 +42,14 @@ class OpmlTests {
                 title = it.text,
                 selfLink = it.xmlUrl,
                 alternateLink = it.htmlUrl,
+                openEntriesInBrowser = false,
+                blockedWords = "",
             )
         }
 
-        val opml = writeOpml(feeds)
-        val elements = readOpml(opml)
+        val opml = exportOpml(feeds)
+        val elements = importOpml(opml)
+        Assert.assertTrue(opml.lines().size > 1)
         Assert.assertArrayEquals(sampleElements.toTypedArray(), elements.toTypedArray())
     }
 }

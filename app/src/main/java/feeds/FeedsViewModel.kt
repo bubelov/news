@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import db.Feed
 import entries.EntriesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
-import opml.readOpml
-import opml.writeOpml
+import opml.exportOpml
+import opml.importOpml
 import timber.log.Timber
 
 class FeedsViewModel(
@@ -43,13 +43,13 @@ class FeedsViewModel(
     }
 
     suspend fun getFeedsOpml(): ByteArray {
-        return writeOpml(feedsRepository.selectAll()).toByteArray()
+        return exportOpml(feedsRepository.selectAll()).toByteArray()
     }
 
     suspend fun importFeeds(opmlDocument: String) = changeState {
         value = State.Loading
 
-        val feeds = readOpml(opmlDocument)
+        val feeds = importOpml(opmlDocument)
 
         var added = 0
         var exists = 0
