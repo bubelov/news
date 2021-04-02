@@ -13,9 +13,7 @@ import entriesimages.EntriesImagesRepository
 import podcasts.PodcastsRepository
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import org.joda.time.Instant
 import timber.log.Timber
-import java.text.DateFormat
 import java.util.*
 
 class EntriesViewModel(
@@ -257,9 +255,7 @@ class EntriesViewModel(
             id = id,
             title = title,
             subtitle = lazy {
-                val instant = Instant.parse(published)
-                val format = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
-                (feed?.title ?: "Unknown feed") + " · " + format.format(Date(instant.millis))
+                "${feed?.title ?: "Unknown feed"} · ${formatDateTime(published)}"
             },
             podcast = enclosureLinkType.startsWith("audio"),
             podcastDownloadPercent = flow {

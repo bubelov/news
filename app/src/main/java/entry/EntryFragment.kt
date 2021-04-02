@@ -18,6 +18,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentEntryBinding
+import common.formatDateTime
 import common.hide
 import common.show
 import common.showErrorDialog
@@ -96,7 +97,7 @@ class EntryFragment : Fragment() {
 
                     updateBookmarkedButton(state.entry.bookmarked)
                     title.text = state.entry.title
-                    date.text = state.entry.published
+                    date.text = formatDateTime(state.entry.published)
                     state.parsedContent.applyStyle(summaryView)
                     summaryView.text = state.parsedContent
                     summaryView.movementMethod = LinkMovementMethod.getInstance()
