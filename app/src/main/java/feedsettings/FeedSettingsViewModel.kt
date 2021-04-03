@@ -13,4 +13,24 @@ class FeedSettingsViewModel(
         val feed = getFeed(feedId) ?: return
         feedsRepository.insertOrReplace(feed.copy(openEntriesInBrowser = openEntriesInBrowser))
     }
+
+    fun formatBlockedWords(blockedWords: String): String {
+        val separatedWords = blockedWords.split(",")
+
+        return if (separatedWords.isEmpty()) {
+            ""
+        } else {
+            buildString {
+                separatedWords.forEach {
+                    append(it.trim())
+                    append(",")
+                }
+            }.dropLast(1)
+        }
+    }
+
+    fun setBlockedWords(feedId: String, blockedWords: String) {
+        val feed = getFeed(feedId) ?: return
+        feedsRepository.insertOrReplace(feed.copy(blockedWords = blockedWords))
+    }
 }

@@ -64,7 +64,7 @@ FROM EntryWithoutSummary
 WHERE opened = :read OR bookmarked = :bookmarked
 ORDER BY published DESC;
 
-selectByOpened:
+selectByRead:
 SELECT *
 FROM EntryWithoutSummary
 WHERE opened = ?

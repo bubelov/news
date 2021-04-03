@@ -4,10 +4,18 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentFeedSettingsBinding
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputEditText
+import common.showErrorDialog
+import common.showKeyboard
 import org.koin.android.viewmodel.ext.android.viewModel
 
 class FeedSettingsFragment : Fragment() {
@@ -49,11 +57,50 @@ class FeedSettingsFragment : Fragment() {
                     model.setOpenEntriesInBrowser(args.feedId, isChecked)
                 }
             }
+
+            blockedWords.text = feed.blockedWords.replace(",", ", ")
+
+            blockedWordsPanel.setOnClickListener {
+                val dialog = MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(getString(R.string.blocked_words))
+                    .setView(R.layout.dialog_blocked_words)
+                    .setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
+                        lifecycleScope.launchWhenResumed {
+                            runCatching {
+                                val dialog = dialogInterface as AlertDialog
+                                val blockedWords =
+                                    dialog.findViewById<TextInputEditText>(R.id.blockedWords)!!
+                                val formattedBlockedWords =
+                                    model.formatBlockedWords(blockedWords.text.toString())
+                                model.setBlockedWords(feed.id, formattedBlockedWords)
+                                binding.blockedWords.text = formattedBlockedWords.replace(",", ", ")
+                            }.onFailure {
+                                showErrorDialog(it)
+                            }
+                        }
+                    }
+                    .setNegativeButton(R.string.cancel, null)
+                    .setOnDismissListener { hideKeyboard() }
+                    .show()
+
+                val blockedWords = dialog.findViewById<TextInputEditText>(R.id.blockedWords)!!
+                val formattedBlockedWords = model.formatBlockedWords(blockedWords.text.toString())
+                model.setBlockedWords(feed.id, formattedBlockedWords)
+                blockedWords.requestFocus()
+
+                requireContext().showKeyboard()
+            }
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun hideKeyboard() {
+        requireActivity().window.setSoftInputMode(
+            WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
+        )
     }
 }

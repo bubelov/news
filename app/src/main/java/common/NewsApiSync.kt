@@ -95,7 +95,8 @@ class NewsApiSync(
 
             if (syncNewAndUpdatedEntries) {
                 entriesRepository.syncNewAndUpdated(
-                    lastEntriesSyncDateTime = preferencesRepository.get().lastEntriesSyncDateTime
+                    lastEntriesSyncDateTime = preferencesRepository.get().lastEntriesSyncDateTime,
+                    feeds = feedsRepository.selectAll(),
                 )
 
                 preferencesRepository.save {

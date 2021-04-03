@@ -8,6 +8,7 @@ import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOne
 import db.EntryWithoutSummary
+import db.Feed
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
@@ -42,8 +43,8 @@ class EntriesRepository(
         db.selectByReadOrBookmarked(read, bookmarked).asFlow().mapToList()
     }
 
-    suspend fun getNotOpened() = withContext(Dispatchers.IO) {
-        db.selectByOpened(false).asFlow().mapToList()
+    suspend fun selectByRead(read: Boolean) = withContext(Dispatchers.IO) {
+        db.selectByRead(read).executeAsList()
     }
 
     fun setOpened(id: String, opened: Boolean) {
@@ -107,7 +108,7 @@ class EntriesRepository(
                     is GetEntriesResult.Success -> {
                         db.transaction {
                             result.entries.forEach {
-                                db.insertOrReplace(it.toSafeToInsertEntry())
+                                db.insertOrReplace(it.postProcess())
                             }
                         }
                     }
@@ -186,7 +187,10 @@ class EntriesRepository(
         }
     }
 
-    suspend fun syncNewAndUpdated(lastEntriesSyncDateTime: String) = withContext(Dispatchers.IO) {
+    suspend fun syncNewAndUpdated(
+        lastEntriesSyncDateTime: String,
+        feeds: List<Feed>,
+    ) = withContext(Dispatchers.IO) {
         val threshold = getMaxUpdated() ?: lastEntriesSyncDateTime
 
         if (threshold.isBlank()) {
@@ -197,21 +201,27 @@ class EntriesRepository(
         val entries = api.getNewAndUpdatedEntries(since)
 
         db.transaction {
-            entries.forEach {
-                db.insertOrReplace(it.toSafeToInsertEntry())
+            entries.forEach { entry ->
+                db.insertOrReplace(entry.postProcess(feeds.firstOrNull { it.id == entry.feedId }))
             }
         }
     }
 
-    private fun Entry.toSafeToInsertEntry(): Entry {
-        var safeEntry = this
+    private fun Entry.postProcess(feed: Feed? = null): Entry {
+        var processedEntry = this
 
         if (content.toByteArray().size / 1024 > 100) {
             Timber.d("Entry content is larger than 100 KiB ($link)")
-            safeEntry = safeEntry.copy(content = "Content is too large")
+            processedEntry = processedEntry.copy(content = "Content is too large")
         }
 
-        return safeEntry
+        feed?.blockedWords?.split(",")?.forEach { word ->
+            if (processedEntry.title.contains(word)) {
+                processedEntry = processedEntry.copy(opened = true)
+            }
+        }
+
+        return processedEntry
     }
 
     data class SyncProgress(val itemsSynced: Long)

@@ -122,7 +122,7 @@ class EntriesViewModel(
                 if (prefs.showOpenedEntries) {
                     entriesRepository.selectAll()
                 } else {
-                    entriesRepository.getNotOpened().first()
+                    entriesRepository.selectByRead(false)
                 }.filterNot { it.bookmarked }
             }
 

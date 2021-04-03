@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Test
-import java.util.*
 
 class EntriesRepositoryTests {
 
@@ -43,7 +42,7 @@ class EntriesRepositoryTests {
 
     @Test
     fun selectById(): Unit = runBlocking {
-        val entry = entry().copy(id = UUID.randomUUID().toString())
+        val entry = entry()
 
         every { db.selectById(entry.id) } returns mockk {
             every { executeAsOneOrNull() } returns entry
@@ -58,11 +57,11 @@ class EntriesRepositoryTests {
 
     @Test
     fun selectByFeedId(): Unit = runBlocking {
-        val feedId = UUID.randomUUID().toString()
-
         val entries = listOf(
-            entryWithoutSummary().copy(feedId = feedId),
+            entryWithoutSummary(),
         )
+
+        val feedId = entries.first().feedId
 
         every { db.selectByFeedId(feedId) } returns mockk {
             every { executeAsList() } returns entries
@@ -95,6 +94,25 @@ class EntriesRepositoryTests {
         Assert.assertEquals(entries, repository.selectByReadOrBookmarked(read, bookmarked).first())
 
         verify { db.selectByReadOrBookmarked(read, bookmarked) }
+
+        confirmVerified(db)
+    }
+
+    @Test
+    fun selectByRead(): Unit = runBlocking {
+        val read = false
+
+        val entries = listOf(
+            entryWithoutSummary().copy(opened = false),
+        )
+
+        every { db.selectByRead(read) } returns mockk {
+            every { executeAsList() } returns entries
+        }
+
+        Assert.assertEquals(entries, repository.selectByRead(read))
+
+        verify { db.selectByRead(read) }
 
         confirmVerified(db)
     }

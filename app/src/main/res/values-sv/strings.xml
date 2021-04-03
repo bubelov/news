@@ -79,4 +79,7 @@
     <string name="open_entries_in_browser">Open entries in browser</string>
     <string name="removed_from_bookmarks">Removed from bookmarks</string>
     <string name="cannot_find_feed_with_id_s">Can not find feed with id %1$s</string>
+    <string name="blocked_words">Blocked words</string>
+    <string name="the_list_is_empty">The list is empty</string>
+    <string name="comma_separated">comma-separated</string>
 </resources>
