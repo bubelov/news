@@ -216,7 +216,7 @@ class EntriesRepository(
         }
 
         feed?.blockedWords?.split(",")?.forEach { word ->
-            if (processedEntry.title.contains(word)) {
+            if (processedEntry.title.contains(word, ignoreCase = true)) {
                 processedEntry = processedEntry.copy(opened = true)
             }
         }
