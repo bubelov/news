@@ -2,6 +2,7 @@ package auth
 
 import androidx.lifecycle.ViewModel
 import api.NewsApiSwitcher
+import common.Preferences
 import common.PreferencesRepository
 
 class AuthViewModel(
@@ -16,7 +17,5 @@ class AuthViewModel(
         newsApiSwitcher.switch(newAuthType)
     }
 
-    suspend fun setSyncOnStartup(syncOnStartup: Boolean) {
-        preferencesRepository.save { this.syncOnStartup = syncOnStartup }
-    }
+    suspend fun savePreferences(action: Preferences.() -> Unit) = preferencesRepository.save(action)
 }

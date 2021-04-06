@@ -93,6 +93,7 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout:$versions_constrained_layout"
     implementation "androidx.recyclerview:recyclerview:$versions_recyclerview"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:$versions_swipe_refresh"
+    implementation "androidx.work:work-runtime-ktx:$versions_work"
 
     implementation "com.squareup.retrofit2:retrofit:$versions_retrofit"
     implementation "com.squareup.retrofit2:converter-gson:$versions_retrofit"

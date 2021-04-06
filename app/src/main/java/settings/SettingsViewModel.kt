@@ -16,9 +16,10 @@ class SettingsViewModel(
     private val db: Database,
 ) : ViewModel() {
 
-    suspend fun getPreferences() = preferencesRepository.get()
+    fun getPreferences() = runBlocking { preferencesRepository.get() }
 
-    suspend fun savePreferences(action: Preferences.() -> Unit) = preferencesRepository.save(action)
+    fun savePreferences(action: Preferences.() -> Unit) =
+        runBlocking { preferencesRepository.save(action) }
 
     suspend fun getExceptionsCount() = appExceptionsRepository.selectCount()
 

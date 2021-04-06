@@ -1,5 +1,7 @@
 package common
 
+import java.util.concurrent.TimeUnit
+
 data class Preferences(
     var authType: String = "",
     var nextcloudServerUrl: String = "",
@@ -13,4 +15,6 @@ data class Preferences(
     var cropPreviewImages: Boolean = true,
     var markScrolledEntriesAsRead: Boolean = false,
     var syncOnStartup: Boolean = true,
+    var syncInBackground: Boolean = true,
+    var backgroundSyncIntervalMillis: Long = TimeUnit.HOURS.toMillis(3)
 )

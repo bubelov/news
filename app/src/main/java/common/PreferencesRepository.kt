@@ -65,6 +65,14 @@ class PreferencesRepository(
                 it.find { it.key == SYNC_ON_STARTUP }?.value?.apply {
                     syncOnStartup = this.toBoolean()
                 }
+
+                it.find { it.key == SYNC_IN_BACKGROUND }?.value?.apply {
+                    syncInBackground = this.toBoolean()
+                }
+
+                it.find { it.key == BACKGROUND_SYNC_INTERVAL_MILLIS }?.value?.apply {
+                    backgroundSyncIntervalMillis = this.toLong()
+                }
             }
         }
     }
@@ -88,6 +96,8 @@ class PreferencesRepository(
                 putBoolean(CROP_PREVIEW_IMAGES, cropPreviewImages)
                 putBoolean(MARK_SCROLLED_ENTRIES_AS_READ, markScrolledEntriesAsRead)
                 putBoolean(SYNC_ON_STARTUP, syncOnStartup)
+                putBoolean(SYNC_IN_BACKGROUND, syncInBackground)
+                putString(BACKGROUND_SYNC_INTERVAL_MILLIS, backgroundSyncIntervalMillis.toString())
             }
         }
     }
@@ -132,5 +142,8 @@ class PreferencesRepository(
         const val MARK_SCROLLED_ENTRIES_AS_READ = "mark_scrolled_entries_as_read"
 
         const val SYNC_ON_STARTUP = "sync_on_startup"
+
+        const val SYNC_IN_BACKGROUND = "sync_in_background"
+        const val BACKGROUND_SYNC_INTERVAL_MILLIS = "background_sync_interval_millis"
     }
 }

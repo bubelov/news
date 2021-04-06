@@ -27,6 +27,7 @@ import com.nextcloud.android.sso.ui.UiExceptionManager
 import entries.EntriesFilter
 import kotlinx.coroutines.runBlocking
 import org.koin.android.viewmodel.ext.android.viewModel
+import java.util.concurrent.TimeUnit
 
 class AuthFragment : Fragment() {
 
@@ -67,7 +68,12 @@ class AuthFragment : Fragment() {
         binding.standaloneMode.setOnClickListener {
             lifecycleScope.launchWhenResumed {
                 model.setAuthType(PreferencesRepository.AUTH_TYPE_STANDALONE)
-                model.setSyncOnStartup(false)
+
+                model.savePreferences {
+                    syncOnStartup = false
+                    backgroundSyncIntervalMillis = TimeUnit.HOURS.toMillis(12)
+                }
+
                 showNews()
             }
         }

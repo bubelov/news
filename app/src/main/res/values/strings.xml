@@ -82,4 +82,14 @@
     <string name="blocked_words">Blocked words</string>
     <string name="the_list_is_empty">The list is empty</string>
     <string name="comma_separated">comma-separated</string>
+    <string name="fetch_news_in_background">Sync in background</string>
+    <string name="background_sync_interval">Background sync interval</string>
+    <plurals name="d_hours">
+        <item quantity="zero">%d hours</item>
+        <item quantity="one">%d hour</item>
+        <item quantity="two">%d hours</item>
+        <item quantity="few">%d hours</item>
+        <item quantity="many">%d hours</item>
+        <item quantity="other">%d hours</item>
+    </plurals>
 </resources>

@@ -8,6 +8,8 @@ import co.appreactor.news.R
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import timber.log.Timber
 
+fun Fragment.app() = requireContext().applicationContext as App
+
 fun Fragment.showDialog(
     @StringRes titleId: Int,
     @StringRes messageId: Int,
