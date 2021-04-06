@@ -400,7 +400,7 @@ class EntriesFragment : Fragment() {
 
         lifecycleScope.launchWhenResumed {
             if (model.getPreferences().markScrolledEntriesAsRead
-                && args.filter is EntriesFilter.OnlyNotBookmarked
+                && (args.filter is EntriesFilter.OnlyNotBookmarked || args.filter is EntriesFilter.OnlyFromFeed)
             ) {
                 markScrolledEntriesAsRead()
             }
