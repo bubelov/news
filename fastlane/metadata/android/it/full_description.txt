@@ -1,13 +1,13 @@
-NOTE: This is NOT an official Nextcloud News client
+ATTENZIONE: Questo non è un client ufficiale per Nextcloud News
 
-Main Features:
+Funzioni principali:
 
-* Subscribe to your favorite RSS and Atom feeds
-* Sync with your personal Nextcloud News server
-* Smooth and snappy user experience even on the older and cheaper devices
-* Built-in podcast fetcher which can be used with external players
-* Enhance your news feed with high-resolution preview images
-* Enjoy modern and minimalistic Material Design
-* Both light and dark color schemes are supported
-* This is an open source app which respects your privacy
+* Iscriviti ai tuoi feed RSS e Atom preferiti
+* Sincronizza col tuo server Nextcloud News personale
+* Esperienza utente fluida e scattante anche sui dispositivi più vecchi ed economici
+* Esploratore di podcast integrato che può essere utilizzato con riproduttori esterni
+* Migliora il tuo feed delle novità con delle immagini di anteprima in alta definizione
+* Goditi un Material Design moderno e minimale
+* Supporta entrambi i temi chiaro e scuro
+* Questa è un'applicazione open source che rispetta la tua privacy
 
