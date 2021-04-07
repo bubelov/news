@@ -32,6 +32,7 @@ class App : Application() {
 
             if (authType.isNotBlank()) {
                 get<NewsApiSwitcher>().switch(authType)
+                setupBackgroundSync(override = false)
             }
         }
 
@@ -46,8 +47,6 @@ class App : Application() {
             .build()
 
         Picasso.setSingletonInstance(picasso)
-
-        setupBackgroundSync(override = false)
     }
 
     fun setupBackgroundSync(override: Boolean) {

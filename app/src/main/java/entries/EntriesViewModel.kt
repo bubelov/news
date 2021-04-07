@@ -246,6 +246,34 @@ class EntriesViewModel(
         }
     }
 
+    suspend fun markAllAsRead() {
+        when (val filter = filter) {
+            is EntriesFilter.OnlyNotBookmarked -> {
+                entriesRepository.updateReadByBookmarked(
+                    read = true,
+                    bookmarked = false,
+                )
+            }
+
+            is EntriesFilter.OnlyBookmarked -> {
+                entriesRepository.updateReadByBookmarked(
+                    read = true,
+                    bookmarked = true,
+                )
+            }
+
+            is EntriesFilter.OnlyFromFeed -> {
+                entriesRepository.updateReadByFeedId(
+                    read = true,
+                    feedId = filter.feedId,
+                )
+            }
+        }
+
+        reloadEntries(inBackground = true)
+        viewModelScope.launch { newsApiSync.syncEntriesFlags() }
+    }
+
     private suspend fun EntryWithoutSummary.toRow(
         feed: Feed?,
         showFeedImages: Boolean,

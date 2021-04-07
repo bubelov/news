@@ -4,8 +4,8 @@
     <string name="post_image">Post image</string>
     <string name="settings">Settings</string>
     <string name="news">News</string>
-    <string name="show_opened_news">Show opened news</string>
-    <string name="hide_opened_news">Hide opened news</string>
+    <string name="show_read_news">Show read news</string>
+    <string name="hide_read_news">Hide read news</string>
     <string name="bookmark">Bookmark</string>
     <string name="remove_bookmark">Remove bookmark</string>
     <string name="logo">Logo</string>
@@ -84,6 +84,7 @@
     <string name="comma_separated">comma-separated</string>
     <string name="fetch_news_in_background">Sync in background</string>
     <string name="background_sync_interval">Background sync interval</string>
+    <string name="mark_all_as_read">Mark all as read</string>
     <plurals name="d_hours">
         <item quantity="zero">%d hours</item>
         <item quantity="one">%d hour</item>

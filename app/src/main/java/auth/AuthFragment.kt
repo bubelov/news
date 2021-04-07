@@ -24,6 +24,7 @@ import com.nextcloud.android.sso.AccountImporter.IAccountAccessGranted
 import com.nextcloud.android.sso.exceptions.SSOException
 import com.nextcloud.android.sso.helper.SingleAccountHelper
 import com.nextcloud.android.sso.ui.UiExceptionManager
+import common.app
 import entries.EntriesFilter
 import kotlinx.coroutines.runBlocking
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -74,6 +75,8 @@ class AuthFragment : Fragment() {
                     backgroundSyncIntervalMillis = TimeUnit.HOURS.toMillis(12)
                 }
 
+                app().setupBackgroundSync(override = true)
+
                 showNews()
             }
         }
@@ -91,6 +94,7 @@ class AuthFragment : Fragment() {
             runBlocking {
                 SingleAccountHelper.setCurrentAccount(context, account.name)
                 model.setAuthType(PreferencesRepository.AUTH_TYPE_NEXTCLOUD_APP)
+                app().setupBackgroundSync(override = true)
                 showNews()
             }
         }

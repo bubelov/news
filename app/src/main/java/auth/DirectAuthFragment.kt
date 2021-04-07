@@ -13,6 +13,7 @@ import co.appreactor.news.R
 import common.PreferencesRepository
 import common.showDialog
 import co.appreactor.news.databinding.FragmentDirectAuthBinding
+import common.app
 import entries.EntriesFilter
 import org.koin.android.viewmodel.ext.android.viewModel
 import timber.log.Timber
@@ -81,6 +82,8 @@ class DirectAuthFragment : Fragment() {
                     )
 
                     model.setAuthType(PreferencesRepository.AUTH_TYPE_NEXTCLOUD_DIRECT)
+
+                    app().setupBackgroundSync(override = true)
 
                     findNavController().apply {
                         popBackStack()

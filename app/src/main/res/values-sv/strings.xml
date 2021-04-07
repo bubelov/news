@@ -4,8 +4,8 @@
     <string name="post_image">Artikelbild</string>
     <string name="settings">Inställningar</string>
     <string name="news">Nyheter</string>
-    <string name="show_opened_news">Visa lästa nyheter</string>
-    <string name="hide_opened_news">Göm lästa nyheter</string>
+    <string name="show_read_news">Visa lästa nyheter</string>
+    <string name="hide_read_news">Göm lästa nyheter</string>
     <string name="bookmark">Bokmärken</string>
     <string name="remove_bookmark">Ta bort bokmärke</string>
     <string name="logo">Logo</string>
@@ -84,6 +84,7 @@
     <string name="comma_separated">comma-separated</string>
     <string name="fetch_news_in_background">Sync in background</string>
     <string name="background_sync_interval">Background sync interval</string>
+    <string name="mark_all_as_read">Mark all as read</string>
     <plurals name="d_hours">
         <item quantity="one">%d hour</item>
         <item quantity="other">%d hours</item>

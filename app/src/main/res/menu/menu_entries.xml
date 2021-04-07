@@ -4,21 +4,24 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/showOpenedEntries"
-        android:icon="@drawable/ic_baseline_visibility_off_24"
-        android:title="@string/show_opened_news"
-        app:showAsAction="ifRoom" />
-
-    <item
-        android:id="@+id/sort"
-        android:icon="@drawable/ic_clock_back"
-        android:title="@string/show_oldest_first"
-        app:showAsAction="ifRoom" />
-
-    <item
         android:id="@+id/search"
         android:icon="@drawable/ic_baseline_search_24"
         android:title="@string/search"
         app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/showOpenedEntries"
+        android:title="@string/show_read_news"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/sort"
+        android:title="@string/show_oldest_first"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/markAllAsRead"
+        android:title="@string/mark_all_as_read"
+        app:showAsAction="never" />
 
 </menu>

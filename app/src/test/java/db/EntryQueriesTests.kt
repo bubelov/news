@@ -41,6 +41,52 @@ class EntryQueriesTests {
             result.map { it.id },
         )
     }
+
+    @Test
+    fun updateReadByFeedId() {
+        val feedId = UUID.randomUUID().toString()
+
+        val all = listOf(
+            entry().copy(feedId = feedId, opened = true),
+            entry().copy(opened = true),
+            entry().copy(feedId = feedId, opened = false),
+            entry().copy(opened = false),
+        )
+
+        queries.apply {
+            transaction { all.forEach { queries.insertOrReplace(it) } }
+
+            updateReadByFeedId(read = true, feedId = feedId)
+
+            selectAll().executeAsList().apply {
+                Assert.assertEquals(1, filterNot { it.openedSynced }.size)
+                Assert.assertEquals(2, filter { it.feedId == feedId && it.opened }.size)
+            }
+        }
+    }
+
+    @Test
+    fun updateReadByBookmarked() {
+        val bookmarked = true
+
+        val all = listOf(
+            entry().copy(bookmarked = true, opened = true),
+            entry().copy(opened = true),
+            entry().copy(bookmarked = true, opened = false),
+            entry().copy(opened = false),
+        )
+
+        queries.apply {
+            transaction { all.forEach { queries.insertOrReplace(it) } }
+
+            updateReadByBookmarked(read = true, bookmarked = bookmarked)
+
+            selectAll().executeAsList().apply {
+                Assert.assertEquals(1, filterNot { it.openedSynced }.size)
+                Assert.assertEquals(2, filter { it.bookmarked && it.opened }.size)
+            }
+        }
+    }
 }
 
 fun entry() = Entry(

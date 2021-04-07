@@ -47,6 +47,19 @@ class EntriesRepository(
         db.selectByRead(read).executeAsList()
     }
 
+    suspend fun updateReadByFeedId(read: Boolean, feedId: String) = withContext(Dispatchers.IO) {
+        db.updateReadByFeedId(read, feedId)
+    }
+
+    suspend fun updateReadByBookmarked(
+        read: Boolean,
+        bookmarked: Boolean,
+    ) {
+        withContext(Dispatchers.IO) {
+            db.updateReadByBookmarked(read = read, bookmarked = bookmarked)
+        }
+    }
+
     fun setOpened(id: String, opened: Boolean) {
         db.apply {
             transaction {
@@ -215,7 +228,7 @@ class EntriesRepository(
             processedEntry = processedEntry.copy(content = "Content is too large")
         }
 
-        feed?.blockedWords?.split(",")?.forEach { word ->
+        feed?.blockedWords?.split(",")?.filter { it.isNotBlank() }?.forEach { word ->
             if (processedEntry.title.contains(word, ignoreCase = true)) {
                 processedEntry = processedEntry.copy(opened = true)
             }

@@ -4,8 +4,8 @@
     <string name="post_image">Photo de l’article</string>
     <string name="settings">Paramètres</string>
     <string name="news">Articles</string>
-    <string name="show_opened_news">Afficher les articles lus</string>
-    <string name="hide_opened_news">Masquer les articles lus</string>
+    <string name="show_read_news">Afficher les articles lus</string>
+    <string name="hide_read_news">Masquer les articles lus</string>
     <string name="bookmark">Épinglés</string>
     <string name="remove_bookmark">Désépingler l’article</string>
     <string name="logo">Logo</string>
@@ -84,6 +84,7 @@
     <string name="comma_separated">comma-separated</string>
     <string name="fetch_news_in_background">Sync in background</string>
     <string name="background_sync_interval">Background sync interval</string>
+    <string name="mark_all_as_read">Mark all as read</string>
     <plurals name="d_hours">
         <item quantity="one">%d hour</item>
         <item quantity="other">%d hours</item>

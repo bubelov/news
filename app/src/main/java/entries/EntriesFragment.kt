@@ -263,9 +263,10 @@ class EntriesFragment : Fragment() {
             }
         }
 
-        initShowOpenedEntriesButton()
-        initSortOrderButton()
         initSearchButton()
+        initShowReadEntriesButton()
+        initSortOrderButton()
+        initMarkAllAsReadButton()
     }
 
     override fun onResume() {
@@ -290,6 +291,52 @@ class EntriesFragment : Fragment() {
             )
 
             seenEntries.clear()
+        }
+    }
+
+    private fun initSearchButton() {
+        val searchMenuItem = binding.toolbar.menu.findItem(R.id.search)
+
+        searchMenuItem.setOnMenuItemClickListener {
+            findNavController().navigate(
+                EntriesFragmentDirections.actionEntriesFragmentToSearchFragment(
+                    args.filter!!
+                )
+            )
+            true
+        }
+    }
+
+    private fun initShowReadEntriesButton() {
+        val showOpenedEntriesMenuItem = binding.toolbar.menu.findItem(R.id.showOpenedEntries)
+        showOpenedEntriesMenuItem.isVisible = getShowReadEntriesButtonVisibility()
+
+        lifecycleScope.launchWhenResumed {
+            val prefs = model.getPreferences()
+
+            if (prefs.showOpenedEntries) {
+                showOpenedEntriesMenuItem.setIcon(R.drawable.ic_baseline_visibility_24)
+                showOpenedEntriesMenuItem.title = getString(R.string.hide_read_news)
+                touchHelper.attachToRecyclerView(null)
+            } else {
+                showOpenedEntriesMenuItem.setIcon(R.drawable.ic_baseline_visibility_off_24)
+                showOpenedEntriesMenuItem.title = getString(R.string.show_read_news)
+
+                if (swipesAllowed()) {
+                    touchHelper.attachToRecyclerView(binding.listView)
+                }
+            }
+        }
+
+        showOpenedEntriesMenuItem.setOnMenuItemClickListener {
+            lifecycleScope.launchWhenResumed {
+                adapter.submitList(null)
+                val prefs = model.getPreferences()
+                model.savePreferences { showOpenedEntries = !prefs.showOpenedEntries }
+                initShowReadEntriesButton()
+            }
+
+            true
         }
     }
 
@@ -332,48 +379,9 @@ class EntriesFragment : Fragment() {
         }
     }
 
-    private fun initShowOpenedEntriesButton() {
-        val showOpenedEntriesMenuItem = binding.toolbar.menu.findItem(R.id.showOpenedEntries)
-        showOpenedEntriesMenuItem.isVisible = getShowReadEntriesButtonVisibility()
-
-        lifecycleScope.launchWhenResumed {
-            val prefs = model.getPreferences()
-
-            if (prefs.showOpenedEntries) {
-                showOpenedEntriesMenuItem.setIcon(R.drawable.ic_baseline_visibility_24)
-                showOpenedEntriesMenuItem.title = getString(R.string.hide_opened_news)
-                touchHelper.attachToRecyclerView(null)
-            } else {
-                showOpenedEntriesMenuItem.setIcon(R.drawable.ic_baseline_visibility_off_24)
-                showOpenedEntriesMenuItem.title = getString(R.string.show_opened_news)
-
-                if (swipesAllowed()) {
-                    touchHelper.attachToRecyclerView(binding.listView)
-                }
-            }
-        }
-
-        showOpenedEntriesMenuItem.setOnMenuItemClickListener {
-            lifecycleScope.launchWhenResumed {
-                adapter.submitList(null)
-                val prefs = model.getPreferences()
-                model.savePreferences { showOpenedEntries = !prefs.showOpenedEntries }
-                initShowOpenedEntriesButton()
-            }
-
-            true
-        }
-    }
-
-    private fun initSearchButton() {
-        val searchMenuItem = binding.toolbar.menu.findItem(R.id.search)
-
-        searchMenuItem.setOnMenuItemClickListener {
-            findNavController().navigate(
-                EntriesFragmentDirections.actionEntriesFragmentToSearchFragment(
-                    args.filter!!
-                )
-            )
+    private fun initMarkAllAsReadButton() {
+        binding.toolbar.menu.findItem(R.id.markAllAsRead)?.setOnMenuItemClickListener {
+            lifecycleScope.launchWhenResumed { model.markAllAsRead() }
             true
         }
     }

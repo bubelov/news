@@ -123,6 +123,16 @@ selectMaxUpdaded:
 SELECT MAX(updated)
 FROM Entry;
 
+updateReadByFeedId:
+UPDATE Entry
+SET opened = :read, openedSynced = 0
+WHERE opened != :read AND feedId = ?;
+
+updateReadByBookmarked:
+UPDATE Entry
+SET opened = :read, openedSynced = 0
+WHERE opened != :read AND bookmarked = ?;
+
 updateOpened:
 UPDATE Entry
 SET opened = ?
