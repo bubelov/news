@@ -18,7 +18,7 @@ class AppExceptionsRepositoryTests {
     private val repository = AppExceptionsRepository(db)
 
     @Test
-    fun `insertOrReplace()`(): Unit = runBlocking {
+    fun insertOrReplace(): Unit = runBlocking {
         val item = LoggedException(
             id = "",
             date = "",
@@ -34,7 +34,7 @@ class AppExceptionsRepositoryTests {
     }
 
     @Test
-    fun `selectAll()`(): Unit = runBlocking {
+    fun selectAll(): Unit = runBlocking {
         val items = listOf(
             LoggedException(
                 id = "",
@@ -56,7 +56,7 @@ class AppExceptionsRepositoryTests {
     }
 
     @Test
-    fun `selectCount()`(): Unit = runBlocking {
+    fun selectCount(): Unit = runBlocking {
         val count = 5L
 
         mockkStatic("com.squareup.sqldelight.runtime.coroutines.FlowQuery")
@@ -74,7 +74,7 @@ class AppExceptionsRepositoryTests {
     }
 
     @Test
-    fun `deleteAll()`(): Unit = runBlocking {
+    fun deleteAll(): Unit = runBlocking {
         repository.deleteAll()
 
         verify { db.deleteAll() }

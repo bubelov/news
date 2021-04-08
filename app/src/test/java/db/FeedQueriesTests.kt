@@ -1,20 +1,24 @@
 package db
 
-import co.appreactor.news.Database
-import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
+import org.junit.Assert
 import org.junit.Before
+import org.junit.Test
 import java.util.*
 
 class FeedQueriesTests {
 
-    lateinit var queries: FeedQueries
+    lateinit var db: FeedQueries
 
     @Before
-    fun setUp() {
-        val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
-        Database.Schema.create(driver)
-        val database = Database(driver)
-        queries = database.feedQueries
+    fun setup() {
+        db = database().feedQueries
+    }
+
+    @Test
+    fun insertOrReplace() {
+        val feed = feed()
+        db.insertOrReplace(feed)
+        Assert.assertEquals(feed, db.selectAll().executeAsList().single())
     }
 }
 

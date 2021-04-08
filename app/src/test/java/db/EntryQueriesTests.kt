@@ -1,7 +1,5 @@
 package db
 
-import co.appreactor.news.Database
-import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -9,14 +7,11 @@ import java.util.*
 
 class EntryQueriesTests {
 
-    lateinit var queries: EntryQueries
+    private lateinit var db: EntryQueries
 
     @Before
-    fun setUp() {
-        val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
-        Database.Schema.create(driver)
-        val database = Database(driver)
-        queries = database.entryQueries
+    fun setup() {
+        db = database().entryQueries
     }
 
     @Test
@@ -29,9 +24,9 @@ class EntryQueriesTests {
 
         val unreadOrBookmarked = all.filter { !it.opened || it.bookmarked }
 
-        queries.transaction { all.forEach { queries.insertOrReplace(it) } }
+        all.forEach { db.insertOrReplace(it) }
 
-        val result = queries.selectByReadOrBookmarked(
+        val result = db.selectByReadOrBookmarked(
             read = false,
             bookmarked = true,
         ).executeAsList()
@@ -53,8 +48,8 @@ class EntryQueriesTests {
             entry().copy(opened = false),
         )
 
-        queries.apply {
-            transaction { all.forEach { queries.insertOrReplace(it) } }
+        db.apply {
+            all.forEach { insertOrReplace(it) }
 
             updateReadByFeedId(read = true, feedId = feedId)
 
@@ -76,8 +71,8 @@ class EntryQueriesTests {
             entry().copy(opened = false),
         )
 
-        queries.apply {
-            transaction { all.forEach { queries.insertOrReplace(it) } }
+        db.apply {
+            all.forEach { insertOrReplace(it) }
 
             updateReadByBookmarked(read = true, bookmarked = bookmarked)
 
