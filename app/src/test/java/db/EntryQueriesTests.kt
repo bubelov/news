@@ -15,6 +15,20 @@ class EntryQueriesTests {
     }
 
     @Test
+    fun insertOrReplace() {
+        val item = entry()
+        db.insertOrReplace(item)
+        Assert.assertEquals(item, db.selectById(item.id).executeAsOne())
+    }
+
+    @Test
+    fun selectAll() {
+        val items = listOf(entry(), entry())
+        items.forEach { db.insertOrReplace(it) }
+        Assert.assertEquals(items.map { it.withoutSummary() }, db.selectAll().executeAsList())
+    }
+
+    @Test
     fun selectByReadOrBookmarked() {
         val all = listOf(
             entry().copy(opened = true, bookmarked = true),
@@ -117,4 +131,21 @@ fun entryWithoutSummary() = EntryWithoutSummary(
     bookmarked = false,
     bookmarkedSynced = true,
     guidHash = "",
+)
+
+fun Entry.withoutSummary() = EntryWithoutSummary(
+    id = id,
+    feedId = feedId,
+    title = title,
+    link = link,
+    published = published,
+    updated = updated,
+    authorName = authorName,
+    enclosureLink = enclosureLink,
+    enclosureLinkType = enclosureLinkType,
+    opened = opened,
+    openedSynced = openedSynced,
+    bookmarked = bookmarked,
+    bookmarkedSynced = bookmarkedSynced,
+    guidHash = guidHash,
 )
