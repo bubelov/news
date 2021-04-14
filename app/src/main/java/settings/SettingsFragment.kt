@@ -130,6 +130,10 @@ class SettingsFragment : Fragment() {
                 }
             }
 
+            viewLogEntries.setOnClickListener {
+                findNavController().navigate(SettingsFragmentDirections.actionSettingsFragmentToLogEntriesFragment())
+            }
+
             viewExceptions.setOnClickListener {
                 findNavController().navigate(SettingsFragmentDirections.actionSettingsFragmentToExceptionsFragment())
             }

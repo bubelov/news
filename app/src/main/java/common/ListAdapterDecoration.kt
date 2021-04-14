@@ -1,10 +1,10 @@
-package feeds
+package common
 
 import android.graphics.Rect
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 
-class FeedsAdapterDecoration(private val gapInPixels: Int) : RecyclerView.ItemDecoration() {
+class ListAdapterDecoration(private val gapInPixels: Int) : RecyclerView.ItemDecoration() {
 
     override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
         val adapter = parent.adapter

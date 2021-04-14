@@ -85,6 +85,9 @@
     <string name="fetch_news_in_background">Sync in background</string>
     <string name="background_sync_interval">Background sync interval</string>
     <string name="mark_all_as_read">Mark all as read</string>
+    <string name="event_log_is_empty">Event log is empty</string>
+    <string name="event_log">Event log</string>
+    <string name="view_event_log">View event log</string>
     <plurals name="d_hours">
         <item quantity="zero">%d hours</item>
         <item quantity="one">%d hour</item>

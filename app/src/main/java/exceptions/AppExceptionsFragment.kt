@@ -11,8 +11,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentAppExceptionsBinding
+import common.CardListAdapterDecoration
 import common.Result
-import entries.EntriesAdapterDecoration
 import kotlinx.coroutines.flow.collect
 import org.koin.android.viewmodel.ext.android.viewModel
 
@@ -59,7 +59,7 @@ class AppExceptionsFragment : Fragment() {
         binding.listView.layoutManager = LinearLayoutManager(requireContext())
         binding.listView.adapter = adapter
         binding.listView.addItemDecoration(
-            EntriesAdapterDecoration(
+            CardListAdapterDecoration(
                 resources.getDimensionPixelSize(
                     R.dimen.entries_cards_gap
                 )

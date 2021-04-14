@@ -389,7 +389,7 @@ class EntriesFragment : Fragment() {
     private fun initListView() {
         listLayoutManager = LinearLayoutManager(requireContext())
 
-        val listItemDecoration = EntriesAdapterDecoration(
+        val listItemDecoration = CardListAdapterDecoration(
             resources.getDimensionPixelSize(R.dimen.entries_cards_gap)
         )
 

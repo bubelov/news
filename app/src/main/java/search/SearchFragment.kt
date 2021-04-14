@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentSearchBinding
 import com.google.android.material.internal.TextWatcherAdapter
+import common.CardListAdapterDecoration
 import common.hideKeyboard
 import common.showKeyboard
 import entries.*
@@ -115,7 +116,7 @@ class SearchFragment : Fragment() {
         binding.listView.layoutManager = LinearLayoutManager(context)
         binding.listView.adapter = adapter
         binding.listView.addItemDecoration(
-            EntriesAdapterDecoration(
+            CardListAdapterDecoration(
                 resources.getDimensionPixelSize(
                     R.dimen.entries_cards_gap
                 )

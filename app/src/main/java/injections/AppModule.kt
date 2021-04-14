@@ -26,6 +26,8 @@ import entries.EntriesSupportingTextRepository
 import exception.AppExceptionViewModel
 import feeds.FeedsViewModel
 import feedsettings.FeedSettingsViewModel
+import logentries.LogEntriesRepository
+import logentries.LogEntriesViewModel
 import org.koin.android.experimental.dsl.viewModel
 import org.koin.dsl.module
 import org.koin.experimental.builder.single
@@ -50,6 +52,7 @@ val appModule = module {
     single { get<Database>().entryEnclosureQueries }
     single { get<Database>().preferenceQueries }
     single { get<Database>().loggedExceptionQueries }
+    single { get<Database>().logEntryQueries }
 
     single {
         val context = get<Context>()
@@ -70,6 +73,7 @@ val appModule = module {
     single<PodcastsRepository>()
     single<PreferencesRepository>()
     single<AppExceptionsRepository>()
+    single<LogEntriesRepository>()
 
     viewModel<AuthViewModel>()
     viewModel<EntriesViewModel>()
@@ -82,4 +86,5 @@ val appModule = module {
     viewModel<FeedsViewModel>()
     viewModel<FeedSettingsViewModel>()
     viewModel<SearchViewModel>()
+    viewModel<LogEntriesViewModel>()
 }

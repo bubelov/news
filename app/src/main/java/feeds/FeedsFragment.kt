@@ -177,7 +177,7 @@ class FeedsFragment : Fragment() {
                 setHasFixedSize(true)
                 layoutManager = LinearLayoutManager(requireContext())
                 adapter = this@FeedsFragment.adapter
-                addItemDecoration(FeedsAdapterDecoration(resources.getDimensionPixelSize(R.dimen.dp_8)))
+                addItemDecoration(ListAdapterDecoration(resources.getDimensionPixelSize(R.dimen.dp_8)))
 
                 addOnScrollListener(object : RecyclerView.OnScrollListener() {
                     override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {

@@ -123,6 +123,11 @@
         android:label="SettingsFragment"
         tools:layout="@layout/fragment_settings">
         <action
+            android:id="@+id/action_settingsFragment_to_logEntriesFragment"
+            app:destination="@id/logEntriesFragment"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+        <action
             android:id="@+id/action_settingsFragment_to_exceptionsFragment"
             app:destination="@id/exceptionsFragment"
             app:popEnterAnim="@anim/fade_in"
@@ -149,6 +154,18 @@
         <argument
             android:name="exceptionId"
             app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/logEntriesFragment"
+        android:name="logentries.LogEntriesFragment"
+        android:label="LogEntriesFragment"
+        tools:layout="@layout/fragment_log_entries">
+        <action
+            android:id="@+id/action_exceptionsFragment_to_exceptionFragment"
+            app:destination="@id/exceptionFragment"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
     </fragment>
 
     <fragment
