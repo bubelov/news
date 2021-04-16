@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">News</string>
     <string name="login_with_nextcloud">Accedi con Nextcloud</string>
