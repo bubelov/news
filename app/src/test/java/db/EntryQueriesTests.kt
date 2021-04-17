@@ -29,6 +29,29 @@ class EntryQueriesTests {
     }
 
     @Test
+    fun selectByReadAndBookmarked() {
+        val all = listOf(
+            entry().copy(opened = true, bookmarked = true),
+            entry().copy(opened = true, bookmarked = false),
+            entry().copy(opened = false, bookmarked = false),
+        )
+
+        val unreadAndNotBookmarked = all.filter { !it.opened && !it.bookmarked }
+
+        all.forEach { db.insertOrReplace(it) }
+
+        val result = db.selectByReadAndBookmarked(
+            read = false,
+            bookmarked = false,
+        ).executeAsList()
+
+        Assert.assertEquals(
+            unreadAndNotBookmarked.map { it.id },
+            result.map { it.id },
+        )
+    }
+
+    @Test
     fun selectByReadOrBookmarked() {
         val all = listOf(
             entry().copy(opened = true, bookmarked = true),

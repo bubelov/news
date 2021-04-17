@@ -89,6 +89,8 @@
     <string name="event_log_is_empty">Event log is empty</string>
     <string name="event_log">Event log</string>
     <string name="view_event_log">View event log</string>
+    <string name="you_have_d_unread_news">You have %1$d unread news</string>
+    <string name="unread_news">Unread news</string>
     <plurals name="d_hours">
         <item quantity="zero">%d hours</item>
         <item quantity="one">%d hour</item>

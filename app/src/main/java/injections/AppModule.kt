@@ -10,7 +10,7 @@ import auth.DirectAuthViewModel
 import co.appreactor.news.Database
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import common.PreferencesRepository
-import common.NewsApiSync
+import sync.NewsApiSync
 import feeds.FeedsRepository
 import exceptions.AppExceptionsViewModel
 import exceptions.AppExceptionsRepository

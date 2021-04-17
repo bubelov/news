@@ -1,5 +1,7 @@
-package common
+package sync
 
+import common.ConnectivityProbe
+import common.PreferencesRepository
 import feeds.FeedsRepository
 import entries.EntriesRepository
 import kotlinx.coroutines.Dispatchers
@@ -71,38 +73,52 @@ class NewsApiSync(
         syncFeeds: Boolean = true,
         syncEntriesFlags: Boolean = true,
         syncNewAndUpdatedEntries: Boolean = true,
-    ) {
-        connectivityProbe.throwIfOffline()
+    ): SyncResult {
+        if (!connectivityProbe.online) {
+            return SyncResult.Err(Exception("Device is offline"))
+        }
 
         mutex.withLock {
             if (syncEntriesFlags) {
                 runCatching {
                     entriesRepository.syncOpenedEntries()
                 }.onFailure {
-                    throw Exception("Can't sync opened news", it)
+                    return SyncResult.Err(Exception("Can't sync opened news", it))
                 }
 
                 runCatching {
                     entriesRepository.syncBookmarkedEntries()
                 }.onFailure {
-                    throw Exception("Can't sync bookmarks", it)
+                    return SyncResult.Err(Exception("Can't sync bookmarks", it))
                 }
             }
 
             if (syncFeeds) {
-                feedsRepository.sync()
+                runCatching {
+                    feedsRepository.sync()
+                }.onFailure {
+                    return SyncResult.Err(Exception("Can't sync feeds", it))
+                }
             }
 
             if (syncNewAndUpdatedEntries) {
-                entriesRepository.syncNewAndUpdated(
-                    lastEntriesSyncDateTime = preferencesRepository.get().lastEntriesSyncDateTime,
-                    feeds = feedsRepository.selectAll(),
-                )
+                runCatching {
+                    val newAndUpdatedEntries = entriesRepository.syncNewAndUpdated(
+                        lastEntriesSyncDateTime = preferencesRepository.get().lastEntriesSyncDateTime,
+                        feeds = feedsRepository.selectAll(),
+                    )
 
-                preferencesRepository.save {
-                    lastEntriesSyncDateTime = Instant.now().toString()
+                    preferencesRepository.save {
+                        lastEntriesSyncDateTime = Instant.now().toString()
+                    }
+
+                    return SyncResult.Ok(newAndUpdatedEntries)
+                }.onFailure {
+                    return SyncResult.Err(Exception("Can't sync new and updated entries", it))
                 }
             }
         }
+
+        return SyncResult.Ok(0)
     }
 }

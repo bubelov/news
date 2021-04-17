@@ -8,13 +8,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.appreactor.news.R
 import feeds.FeedsRepository
-import common.NewsApiSync
+import sync.NewsApiSync
 import db.Entry
 import entries.EntriesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import sync.SyncResult
+import timber.log.Timber
 import java.util.*
 
 class EntryViewModel(
@@ -72,7 +74,9 @@ class EntryViewModel(
         }
 
         viewModelScope.launch {
-            runCatching { newsApiSync.syncEntriesFlags() }
+            when (val r = newsApiSync.syncEntriesFlags()) {
+                is SyncResult.Err -> Timber.e(r.e)
+            }
         }
     }
 

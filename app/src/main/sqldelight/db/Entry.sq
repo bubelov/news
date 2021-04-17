@@ -58,6 +58,12 @@ SELECT *
 FROM EntryWithoutSummary
 WHERE feedId = ?;
 
+selectByReadAndBookmarked:
+SELECT *
+FROM EntryWithoutSummary
+WHERE opened = :read AND bookmarked = :bookmarked
+ORDER BY published DESC;
+
 selectByReadOrBookmarked:
 SELECT *
 FROM EntryWithoutSummary

@@ -36,6 +36,13 @@ class EntriesRepository(
         }
     }
 
+    suspend fun selectByReadAndBookmarked(
+        read: Boolean,
+        bookmarked: Boolean,
+    ) = withContext(Dispatchers.IO) {
+        db.selectByReadAndBookmarked(read, bookmarked).executeAsList()
+    }
+
     suspend fun selectByReadOrBookmarked(
         read: Boolean,
         bookmarked: Boolean,
@@ -203,7 +210,7 @@ class EntriesRepository(
     suspend fun syncNewAndUpdated(
         lastEntriesSyncDateTime: String,
         feeds: List<Feed>,
-    ) = withContext(Dispatchers.IO) {
+    ): Int = withContext(Dispatchers.IO) {
         val threshold = getMaxUpdated() ?: lastEntriesSyncDateTime
 
         if (threshold.isBlank()) {
@@ -218,6 +225,8 @@ class EntriesRepository(
                 db.insertOrReplace(entry.postProcess(feeds.firstOrNull { it.id == entry.feedId }))
             }
         }
+
+        return@withContext entries.size
     }
 
     private fun Entry.postProcess(feed: Feed? = null): Entry {

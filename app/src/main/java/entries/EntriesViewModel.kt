@@ -13,6 +13,8 @@ import entriesimages.EntriesImagesRepository
 import podcasts.PodcastsRepository
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import sync.NewsApiSync
+import sync.SyncResult
 import timber.log.Timber
 import java.util.*
 
@@ -166,13 +168,14 @@ class EntriesViewModel(
             is State.ShowingEntries -> {
                 state.value = prevState.copy(showBackgroundProgress = true)
 
-                runCatching {
-                    newsApiSync.sync()
-                }.onSuccess {
-                    reloadEntries(inBackground = true)
-                }.onFailure {
-                    state.value = prevState.copy()
-                    throw it
+                when (val res = newsApiSync.sync()) {
+                    is SyncResult.Ok -> {
+                        reloadEntries(inBackground = true)
+                    }
+                    is SyncResult.Err -> {
+                        state.value = prevState.copy()
+                        throw res.e
+                    }
                 }
             }
         }
@@ -210,20 +213,26 @@ class EntriesViewModel(
         read: Boolean,
     ) {
         entryIds.forEach { entriesRepository.setOpened(it, read) }
+
         viewModelScope.launch {
-            runCatching {
-                if (connectivityProbe.online) {
-                    newsApiSync.syncEntriesFlags()
+            when (val r = newsApiSync.syncEntriesFlags()) {
+                is SyncResult.Err -> {
+                    Timber.e(r.e)
                 }
-            }.onFailure {
-                Timber.e(it)
             }
         }
     }
 
     fun setBookmarked(entryId: String, bookmarked: Boolean) {
         entriesRepository.setBookmarked(entryId, bookmarked)
-        viewModelScope.launch { newsApiSync.syncEntriesFlags() }
+
+        viewModelScope.launch {
+            when (val r = newsApiSync.syncEntriesFlags()) {
+                is SyncResult.Err -> {
+                    Timber.e(r.e)
+                }
+            }
+        }
     }
 
     fun show(entry: EntriesAdapterItem, entryIndex: Int) {
@@ -271,7 +280,14 @@ class EntriesViewModel(
         }
 
         reloadEntries(inBackground = true)
-        viewModelScope.launch { newsApiSync.syncEntriesFlags() }
+
+        viewModelScope.launch {
+            when (val r = newsApiSync.syncEntriesFlags()) {
+                is SyncResult.Err -> {
+                    Timber.e(r.e)
+                }
+            }
+        }
     }
 
     private suspend fun EntryWithoutSummary.toRow(

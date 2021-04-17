@@ -2,7 +2,7 @@ package search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import common.NewsApiSync
+import sync.NewsApiSync
 import db.Entry
 import db.Feed
 import entries.EntriesAdapterItem
@@ -14,6 +14,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.joda.time.Instant
+import sync.SyncResult
+import timber.log.Timber
 import java.text.DateFormat
 import java.util.*
 
@@ -78,7 +80,12 @@ class SearchViewModel(
 
     fun setRead(entryId: String) {
         entriesRepository.setOpened(entryId, true)
-        viewModelScope.launch { sync.syncEntriesFlags() }
+
+        viewModelScope.launch {
+            when (val r = sync.syncEntriesFlags()) {
+                is SyncResult.Err -> Timber.e(r.e)
+            }
+        }
     }
 
     private suspend fun Entry.toRow(feed: Feed?): EntriesAdapterItem {

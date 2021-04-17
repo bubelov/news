@@ -75,6 +75,27 @@ class EntriesRepositoryTests {
     }
 
     @Test
+    fun selectByReadAndBookmarked(): Unit = runBlocking {
+        val read = false
+        val bookmarked = true
+
+        val entries = listOf(
+            entryWithoutSummary(),
+            entryWithoutSummary(),
+        )
+
+        every { db.selectByReadAndBookmarked(read, bookmarked) } returns mockk {
+            every { executeAsList() } returns entries
+        }
+
+        Assert.assertEquals(entries, repository.selectByReadAndBookmarked(read, bookmarked))
+
+        verify { db.selectByReadAndBookmarked(read, bookmarked) }
+
+        confirmVerified(db)
+    }
+
+    @Test
     fun selectByReadOrBookmarked(): Unit = runBlocking {
         val read = false
         val bookmarked = true
