@@ -82,13 +82,13 @@
     <string name="cannot_find_feed_with_id_s">Non è possibile trovare un feed con identificativo %1$s</string>
     <string name="blocked_words">Parole bloccate</string>
     <string name="the_list_is_empty">La lista è vuota</string>
-    <string name="comma_separated">comma-separated</string>
+    <string name="comma_separated">separati da virgola</string>
     <string name="fetch_news_in_background">Sincronizza in background</string>
     <string name="background_sync_interval">Intervallo di sincronizzazione in background</string>
     <string name="mark_all_as_read">Segna tutti come letti</string>
-    <string name="event_log_is_empty">Event log is empty</string>
-    <string name="event_log">Event log</string>
-    <string name="view_event_log">View event log</string>
+    <string name="event_log_is_empty">Il registro degli eventi è vuoto</string>
+    <string name="event_log">Registro degli eventi</string>
+    <string name="view_event_log">Visualizza il registro degli eventi</string>
     <string name="you_have_d_unread_news">You have %1$d unread news</string>
     <string name="unread_news">Unread news</string>
     <plurals name="d_hours">
