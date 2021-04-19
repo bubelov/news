@@ -10,7 +10,7 @@ import java.io.StringWriter
 import java.util.*
 
 class AppExceptionsTree(
-    private val exceptionsRepository: AppExceptionsRepository
+    private val exceptionsRepository: AppExceptionsRepository,
 ) : Timber.Tree() {
 
     override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
@@ -21,7 +21,7 @@ class AppExceptionsTree(
             val stackTrace = sw.toString()
 
             runBlocking {
-                exceptionsRepository.insertOrReplace(
+                exceptionsRepository.insert(
                     LoggedException(
                         id = UUID.randomUUID().toString(),
                         date = LocalDateTime.now().toString(),

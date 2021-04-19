@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit
 
 class DirectNextcloudNewsApiBuilder {
 
-    fun build(serverUrl: String, username: String, password: String): NextcloudNewsApi {
+    fun build(url: String, username: String, password: String): NextcloudNewsApi {
         val authenticatingInterceptor = Interceptor {
             val request = it.request()
             val credential = Credentials.basic(username, password)
@@ -36,7 +36,7 @@ class DirectNextcloudNewsApiBuilder {
             .build()
 
         val retrofit = Retrofit.Builder()
-            .baseUrl("$serverUrl/index.php/apps/news/api/v1-2/")
+            .baseUrl("$url/index.php/apps/news/api/v1-2/")
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()

@@ -26,7 +26,6 @@
     <string name="downloading">Laddar ner</string>
     <string name="listen">Lyssna</string>
     <string name="crop_feed_images">Beskär artikelbilden</string>
-    <string name="exceptions_logged_d">Felmeddelande loggad: %1$d</string>
     <string name="exceptions">Felmeddelanden</string>
     <string name="you_have_no_logged_exceptions">Det finns inga loggade fel</string>
     <string name="feeds_list_is_empty">Flödet är tomt</string>
@@ -37,16 +36,13 @@
     <string name="open_html_link">Öppna webbplats</string>
     <string name="actions">Åtgärder</string>
     <string name="delete">Ta bort</string>
-    <string name="unknown_feed">Okänt flöde</string>
     <string name="add_feed_url_hint">Klistra in adressen till flödet här</string>
     <string name="add_feed">Lägg till Flöde</string>
     <string name="add">Lägg till</string>
     <string name="show_feed_images">Visa nyhetsbilder</string>
-    <string name="view_exceptions">Visa fel</string>
     <string name="rename">Byt namn</string>
     <string name="feed_title">Flödestitel</string>
     <string name="cannot_find_entry_with_id_s">Kan inte hitta inlägg med id %1$s</string>
-    <string name="cannot_show_content">Kan inte visa innehåll</string>
     <string name="share">Dela</string>
     <string name="nextcloud_login">Nextcloud inloggning</string>
     <string name="delete_all_data">Ta bort all data</string>
@@ -91,6 +87,7 @@
     <string name="view_event_log">View event log</string>
     <string name="you_have_d_unread_news">You have %1$d unread news</string>
     <string name="unread_news">Unread news</string>
+    <string name="view_exception_log">View exception log</string>
     <plurals name="d_hours">
         <item quantity="one">%d hour</item>
         <item quantity="other">%d hours</item>

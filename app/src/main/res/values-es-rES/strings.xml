@@ -26,7 +26,6 @@
     <string name="downloading">Descargando...</string>
     <string name="listen">Escuchar</string>
     <string name="crop_feed_images">Recortar imágenes de vista previa</string>
-    <string name="exceptions_logged_d">Excepciones registradas: %1$d</string>
     <string name="exceptions">Excepciones</string>
     <string name="you_have_no_logged_exceptions">No tiene excepciones registradas</string>
     <string name="feeds_list_is_empty">La lista de feeds está vacía</string>
@@ -37,16 +36,13 @@
     <string name="open_html_link">Abrir sitio web</string>
     <string name="actions">Acciones</string>
     <string name="delete">Eliminar</string>
-    <string name="unknown_feed">Feed desconocido</string>
     <string name="add_feed_url_hint">Pegar URL del feed aquí</string>
     <string name="add_feed">Añadir feed</string>
     <string name="add">Añadir</string>
     <string name="show_feed_images">Mostrar imágenes de vista previa</string>
-    <string name="view_exceptions">Ver excepciones</string>
     <string name="rename">Renombrar</string>
     <string name="feed_title">Título del feed</string>
     <string name="cannot_find_entry_with_id_s">No se puede encontrar la entrada con %1$s</string>
-    <string name="cannot_show_content">No se puede mostrar el contenido</string>
     <string name="share">Compartir</string>
     <string name="nextcloud_login">Inicio de sesión con Nextcloud</string>
     <string name="delete_all_data">Eliminar todos los datos</string>
@@ -91,6 +87,7 @@
     <string name="view_event_log">Ver registro de eventos</string>
     <string name="you_have_d_unread_news">Tienes %1$d noticias sin leer</string>
     <string name="unread_news">Noticias no leídas</string>
+    <string name="view_exception_log">View exception log</string>
     <plurals name="d_hours">
         <item quantity="one">%d horas</item>
         <item quantity="other">%d horas</item>

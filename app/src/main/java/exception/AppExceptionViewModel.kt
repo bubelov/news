@@ -7,5 +7,5 @@ class AppExceptionViewModel(
     private val repository: AppExceptionsRepository,
 ) : ViewModel() {
 
-    suspend fun select(id: String) = repository.select(id)
+    suspend fun selectById(id: String) = repository.selectById(id)
 }

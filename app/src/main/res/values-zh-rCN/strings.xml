@@ -26,7 +26,6 @@
     <string name="downloading">Downloading</string>
     <string name="listen">Listen</string>
     <string name="crop_feed_images">Crop preview images</string>
-    <string name="exceptions_logged_d">Exceptions logged: %1$d</string>
     <string name="exceptions">Exceptions</string>
     <string name="you_have_no_logged_exceptions">You have no logged exceptions</string>
     <string name="feeds_list_is_empty">Feeds list is empty</string>
@@ -37,16 +36,13 @@
     <string name="open_html_link">Open website</string>
     <string name="actions">Actions</string>
     <string name="delete">Delete</string>
-    <string name="unknown_feed">Unknown feed</string>
     <string name="add_feed_url_hint">Paste feed URL here</string>
     <string name="add_feed">Add feed</string>
     <string name="add">Add</string>
     <string name="show_feed_images">Show preview images</string>
-    <string name="view_exceptions">View exceptions</string>
     <string name="rename">Rename</string>
     <string name="feed_title">Feed title</string>
     <string name="cannot_find_entry_with_id_s">Can not find entry with id %1$s</string>
-    <string name="cannot_show_content">Can not show content</string>
     <string name="share">Share</string>
     <string name="nextcloud_login">Nextcloud login</string>
     <string name="delete_all_data">Delete all data</string>
@@ -91,6 +87,7 @@
     <string name="view_event_log">View event log</string>
     <string name="you_have_d_unread_news">You have %1$d unread news</string>
     <string name="unread_news">Unread news</string>
+    <string name="view_exception_log">View exception log</string>
     <plurals name="d_hours">
         <item quantity="other">%d hours</item>
     </plurals>

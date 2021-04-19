@@ -34,7 +34,7 @@ class AppExceptionFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         lifecycleScope.launchWhenResumed {
-            val exception = model.select(args.exceptionId) ?: return@launchWhenResumed
+            val exception = model.selectById(args.exceptionId) ?: return@launchWhenResumed
 
             binding.toolbar.apply {
                 setNavigationOnClickListener {

@@ -26,7 +26,6 @@
     <string name="downloading">Téléchargement</string>
     <string name="listen">Écouter</string>
     <string name="crop_feed_images">Recadrer les images d’aperçu</string>
-    <string name="exceptions_logged_d">Erreurs capturées: %1$d</string>
     <string name="exceptions">Journal d’erreurs</string>
     <string name="you_have_no_logged_exceptions">Vous n’avez pas d’erreurs capturées</string>
     <string name="feeds_list_is_empty">La liste de flux est vide</string>
@@ -37,16 +36,13 @@
     <string name="open_html_link">Ouvrir le site</string>
     <string name="actions">Actions</string>
     <string name="delete">Supprimer</string>
-    <string name="unknown_feed">Source inconnue</string>
     <string name="add_feed_url_hint">Coller l’URL du flux ici</string>
     <string name="add_feed">Ajouter un flux</string>
     <string name="add">Ajouter</string>
     <string name="show_feed_images">Afficher les images d’aperçu</string>
-    <string name="view_exceptions">Voir les erreurs</string>
     <string name="rename">Renommer</string>
     <string name="feed_title">Titre du flux</string>
     <string name="cannot_find_entry_with_id_s">Impossible de trouver l’élément avec l’id %1$s</string>
-    <string name="cannot_show_content">Le contenu ne peut pas être affiché</string>
     <string name="share">Partager</string>
     <string name="nextcloud_login">Connexion à votre Nextcloud</string>
     <string name="delete_all_data">Supprimer toutes les données</string>
@@ -91,6 +87,7 @@
     <string name="view_event_log">View event log</string>
     <string name="you_have_d_unread_news">You have %1$d unread news</string>
     <string name="unread_news">Unread news</string>
+    <string name="view_exception_log">View exception log</string>
     <plurals name="d_hours">
         <item quantity="one">%d hour</item>
         <item quantity="other">%d hours</item>

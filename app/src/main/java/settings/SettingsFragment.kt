@@ -16,7 +16,6 @@ import co.appreactor.news.databinding.FragmentSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.nextcloud.android.sso.AccountImporter
 import common.app
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
 import java.util.concurrent.TimeUnit
@@ -136,13 +135,6 @@ class SettingsFragment : Fragment() {
 
             viewExceptions.setOnClickListener {
                 findNavController().navigate(SettingsFragmentDirections.actionSettingsFragmentToExceptionsFragment())
-            }
-
-            lifecycleScope.launchWhenResumed {
-                model.getExceptionsCount().collect {
-                    binding.viewExceptionsSubtitle.text =
-                        getString(R.string.exceptions_logged_d, it)
-                }
             }
 
             logOut.setOnClickListener {

@@ -6,15 +6,10 @@ CREATE TABLE LoggedException (
   stackTrace TEXT NOT NULL
 );
 
-insertOrReplace:
+insert:
 INSERT OR REPLACE
 INTO LoggedException
 VALUES ?;
-
-select:
-SELECT *
-FROM LoggedException
-WHERE id = :id;
 
 selectAll:
 SELECT *
@@ -25,10 +20,6 @@ selectById:
 SELECT *
 FROM LoggedException
 WHERE id = ?;
-
-selectCount:
-SELECT COUNT(*)
-FROM LoggedException;
 
 deleteAll:
 DELETE

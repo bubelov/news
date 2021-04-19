@@ -4,24 +4,19 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import co.appreactor.news.Database
 import common.*
-import exceptions.AppExceptionsRepository
 import com.nextcloud.android.sso.exceptions.SSOException
 import com.nextcloud.android.sso.helper.SingleAccountHelper
 import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
 class SettingsViewModel(
-    private val appExceptionsRepository: AppExceptionsRepository,
-    private val preferencesRepository: PreferencesRepository,
+    private val prefs: PreferencesRepository,
     private val db: Database,
 ) : ViewModel() {
 
-    fun getPreferences() = runBlocking { preferencesRepository.get() }
+    fun getPreferences() = runBlocking { prefs.get() }
 
-    fun savePreferences(action: Preferences.() -> Unit) =
-        runBlocking { preferencesRepository.save(action) }
-
-    suspend fun getExceptionsCount() = appExceptionsRepository.selectCount()
+    fun savePreferences(action: Preferences.() -> Unit) = runBlocking { prefs.save(action) }
 
     fun getAccountName(context: Context): String {
         val prefs = runBlocking { getPreferences() }

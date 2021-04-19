@@ -1,12 +1,8 @@
 package exceptions
 
-import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToOne
-import db.LoggedException
 import db.LoggedExceptionQueries
+import db.appException
 import io.mockk.*
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -18,32 +14,16 @@ class AppExceptionsRepositoryTests {
     private val repository = AppExceptionsRepository(db)
 
     @Test
-    fun insertOrReplace(): Unit = runBlocking {
-        val item = LoggedException(
-            id = "",
-            date = "",
-            exceptionClass = "",
-            message = "",
-            stackTrace = "",
-        )
-
-        repository.insertOrReplace(item)
-
-        verify { db.insertOrReplace(item) }
+    fun insert(): Unit = runBlocking {
+        val item = appException()
+        repository.insert(item)
+        verify { db.insert(item) }
         confirmVerified(db)
     }
 
     @Test
     fun selectAll(): Unit = runBlocking {
-        val items = listOf(
-            LoggedException(
-                id = "",
-                date = "",
-                exceptionClass = "",
-                message = "",
-                stackTrace = "",
-            )
-        )
+        val items = listOf(appException(), appException())
 
         every { db.selectAll() } returns mockk {
             every { executeAsList() } returns items
@@ -56,27 +36,22 @@ class AppExceptionsRepositoryTests {
     }
 
     @Test
-    fun selectCount(): Unit = runBlocking {
-        val count = 5L
+    fun selectById(): Unit = runBlocking {
+        val item = appException()
 
-        mockkStatic("com.squareup.sqldelight.runtime.coroutines.FlowQuery")
-
-        every { db.selectCount() } returns mockk {
-            every { asFlow() } returns mockk {
-                every { mapToOne() } returns flowOf(count)
-            }
+        every { db.selectById(item.id) } returns mockk {
+            every { executeAsOneOrNull() } returns item
         }
 
-        assertEquals(count, repository.selectCount().first())
+        assertEquals(item, repository.selectById(item.id))
 
-        verify { db.selectCount() }
+        verify { db.selectById(item.id) }
         confirmVerified(db)
     }
 
     @Test
     fun deleteAll(): Unit = runBlocking {
         repository.deleteAll()
-
         verify { db.deleteAll() }
         confirmVerified(db)
     }

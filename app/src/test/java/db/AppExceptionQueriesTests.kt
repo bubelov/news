@@ -5,41 +5,49 @@ import org.junit.Before
 import org.junit.Test
 import java.util.*
 
-class LogEntryQueriesTests {
+class AppExceptionQueriesTests {
 
-    lateinit var db: LogEntryQueries
+    lateinit var db: LoggedExceptionQueries
 
     @Before
     fun setup() {
-        db = database().logEntryQueries
+        db = database().loggedExceptionQueries
     }
 
     @Test
     fun insert() {
-        val item = logEntry()
+        val item = appException()
         db.insert(item)
         Assert.assertEquals(item, db.selectAll().executeAsList().single())
     }
 
     @Test
     fun selectAll() {
-        val items = listOf(logEntry(), logEntry(), logEntry())
+        val items = listOf(appException(), appException(), appException())
         items.forEach { db.insert(it) }
         Assert.assertEquals(items, db.selectAll().executeAsList())
     }
 
     @Test
+    fun selectById() {
+        val item = appException()
+        db.insert(item)
+        Assert.assertEquals(item, db.selectById(item.id).executeAsOne())
+    }
+
+    @Test
     fun deleteAll() {
-        val items = listOf(logEntry(), logEntry(), logEntry())
+        val items = listOf(appException(), appException(), appException())
         items.forEach { db.insert(it) }
         db.deleteAll()
         Assert.assertTrue(db.selectAll().executeAsList().isEmpty())
     }
 }
 
-fun logEntry() = LogEntry(
+fun appException() = LoggedException(
     id = UUID.randomUUID().toString(),
     date = "",
-    tag = "",
+    exceptionClass = "",
     message = "",
+    stackTrace = "",
 )
