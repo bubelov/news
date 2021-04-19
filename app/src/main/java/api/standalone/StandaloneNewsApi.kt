@@ -115,7 +115,7 @@ class StandaloneNewsApi(
             runCatching {
                 entries += fetchEntries(feed.selfLink)
             }.onFailure {
-                Timber.e("Failed to fetch entries for feed ${feed.selfLink}")
+                Timber.e(it, "Failed to fetch entries for feed ${feed.selfLink}")
             }
         }
 

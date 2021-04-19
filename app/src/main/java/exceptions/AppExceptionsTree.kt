@@ -26,7 +26,7 @@ class AppExceptionsTree(
                         id = UUID.randomUUID().toString(),
                         date = LocalDateTime.now().toString(),
                         exceptionClass = t.javaClass.simpleName,
-                        message = t.message ?: "",
+                        message = message.lines().first(),
                         stackTrace = stackTrace,
                     )
                 )
