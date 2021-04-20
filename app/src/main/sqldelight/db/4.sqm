@@ -1,0 +1,8 @@
+CREATE TABLE LogEntry (
+  id TEXT PRIMARY KEY,
+  date TEXT NOT NULL,
+  tag TEXT NOT NULL,
+  message TEXT NOT NULL
+);
+
+CREATE INDEX idx_logentry_tag ON LogEntry(tag);
