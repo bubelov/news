@@ -7,6 +7,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.ActivityAppBinding
@@ -61,7 +62,15 @@ class AppActivity : AppCompatActivity() {
         binding.bottomNavigation.setupWithNavController(navController)
 
         binding.bottomNavigation.setOnNavigationItemReselectedListener {
-
+            supportFragmentManager.fragments.forEach { fragment ->
+                if (fragment is NavHostFragment) {
+                    fragment.childFragmentManager.fragments.forEach { childFragment ->
+                        if (childFragment is Scrollable) {
+                            childFragment.scrollToTop()
+                        }
+                    }
+                }
+            }
         }
 
         binding.bottomNavigation.setOnNavigationItemSelectedListener {

@@ -29,7 +29,7 @@ import org.koin.android.viewmodel.ext.android.sharedViewModel
 import org.koin.android.viewmodel.ext.android.viewModel
 import timber.log.Timber
 
-class EntriesFragment : Fragment() {
+class EntriesFragment : Fragment(), Scrollable {
 
     private val args by lazy {
         EntriesFragmentArgs.fromBundle(requireArguments())
@@ -292,6 +292,10 @@ class EntriesFragment : Fragment() {
 
             seenEntries.clear()
         }
+    }
+
+    override fun scrollToTop() {
+        binding.listView.layoutManager?.scrollToPosition(0)
     }
 
     private fun initSearchButton() {
