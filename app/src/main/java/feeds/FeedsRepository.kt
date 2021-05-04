@@ -15,8 +15,17 @@ class FeedsRepository(
         db.insertOrReplace(feed)
     }
 
-    suspend fun insertByUrl(url: String) = withContext(Dispatchers.IO) {
-        db.insertOrReplace(api.addFeed(url))
+    suspend fun insertByFeedUrl(
+        url: String,
+        title: String? = null,
+    ) = withContext(Dispatchers.IO) {
+        var feed = api.addFeed(url)
+
+        if (!title.isNullOrBlank()) {
+           feed = feed.copy(title = title)
+        }
+
+        db.insertOrReplace(feed)
     }
 
     suspend fun selectAll() = withContext(Dispatchers.IO) {

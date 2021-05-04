@@ -25,7 +25,7 @@ class FeedsViewModel(
 
     suspend fun createFeed(url: String) = changeState {
         value = State.Loading
-        feedsRepository.insertByUrl(url)
+        feedsRepository.insertByFeedUrl(url)
         loadFeeds()
     }
 
@@ -67,18 +67,21 @@ class FeedsViewModel(
 
         val cachedFeeds = feedsRepository.selectAll()
 
-        feeds.forEach { opml ->
-            if (cachedFeeds.any { it.selfLink == opml.xmlUrl }) {
+        feeds.forEach { outline ->
+            if (cachedFeeds.any { it.selfLink == outline.xmlUrl }) {
                 exists++
                 return@forEach
             }
 
             runCatching {
-                feedsRepository.insertByUrl(opml.xmlUrl.replace("http://", "https://"))
+                feedsRepository.insertByFeedUrl(
+                    url = outline.xmlUrl.replace("http://", "https://"),
+                    title = outline.text,
+                )
             }.onSuccess {
                 added++
             }.onFailure {
-                errors += "Failed to import feed ${opml.xmlUrl}\nReason: ${it.message}"
+                errors += "Failed to import feed ${outline.xmlUrl}\nReason: ${it.message}"
                 Timber.e(it)
                 failed++
             }

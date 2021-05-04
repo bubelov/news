@@ -142,8 +142,10 @@ class StandaloneNewsApi(
         val document = builder.parse(responseBody.byteStream())
 
         return when (document.getFeedType()) {
-            FeedType.ATOM -> document.toAtomEntries().map { it.toEntry() }
-            FeedType.RSS -> document.toRssEntries().map { it.toEntry() }
+            FeedType.ATOM -> document.toAtomEntries().map { it.copy(feedId = feedUrl) }
+                .map { it.toEntry() }
+            FeedType.RSS -> document.toRssEntries().map { it.copy(feedId = feedUrl) }
+                .map { it.toEntry() }
             FeedType.UNKNOWN -> throw Exception("Unknown feed type")
         }
     }

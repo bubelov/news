@@ -36,7 +36,7 @@ class FeedsRepositoryTests {
 
         coEvery { api.addFeed(feedUrl) } returns feed
 
-        repository.insertByUrl(feedUrl)
+        repository.insertByFeedUrl(feedUrl)
 
         coVerifySequence {
             api.addFeed(feedUrl)

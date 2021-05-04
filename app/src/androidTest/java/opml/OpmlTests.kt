@@ -8,23 +8,20 @@ import readFile
 class OpmlTests {
 
     private val sampleElements = listOf(
-        OpmlElement(
+        Outline(
             text = "WirelessMoves",
+            type = "rss",
             xmlUrl = "https://blog.wirelessmoves.com/feed",
-            htmlUrl = "https://blog.wirelessmoves.com",
-            type = "rss",
         ),
-        OpmlElement(
+        Outline(
             text = "Nextcloud",
+            type = "rss",
             xmlUrl = "https://nextcloud.com/blogfeed",
-            htmlUrl = "https://nextcloud.com",
-            type = "rss",
         ),
-        OpmlElement(
+        Outline(
             text = "PINE64",
-            xmlUrl = "https://www.pine64.org/feed/",
-            htmlUrl = "https://www.pine64.org",
             type = "rss",
+            xmlUrl = "https://www.pine64.org/feed/",
         ),
     )
 
@@ -41,7 +38,7 @@ class OpmlTests {
                 id = "",
                 title = it.text,
                 selfLink = it.xmlUrl,
-                alternateLink = it.htmlUrl,
+                alternateLink = "",
                 openEntriesInBrowser = false,
                 blockedWords = "",
             )
@@ -51,5 +48,11 @@ class OpmlTests {
         val elements = importOpml(opml)
         Assert.assertTrue(opml.lines().size > 1)
         Assert.assertArrayEquals(sampleElements.toTypedArray(), elements.toTypedArray())
+    }
+
+    @Test
+    fun readsMozillaOpml() {
+        val elements = importOpml(readFile("mozilla.opml"))
+        Assert.assertEquals(2, elements.size)
     }
 }

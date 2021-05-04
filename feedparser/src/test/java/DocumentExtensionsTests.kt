@@ -1,4 +1,5 @@
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Test
 import org.w3c.dom.Document
 import java.io.File
@@ -45,7 +46,7 @@ class DocumentExtensionsTests {
         }
 
         "fdroid-issues.atom".toDocument()
-            .toAtomFeed(documentUrl = "https://gitlab.com/fdroid/rfp/-/issues.atom?feed_token=gdoyU2ZstimRyxzcCh4P&state=opened")
+            .toAtomFeed("https://gitlab.com/fdroid/rfp/-/issues.atom?feed_token=gdoyU2ZstimRyxzcCh4P&state=opened")
             .apply {
                 assertEquals("https://gitlab.com/fdroid/rfp/-/issues", id)
                 assertEquals("Requests For Packaging issues", title)
@@ -73,11 +74,15 @@ class DocumentExtensionsTests {
     @Test
     fun toRssFeed() {
         "ietf.rss".toDocument().toRssFeed("https://foo.bar").apply {
-            assertEquals("https://tools.ietf.org/html/", id)
+            assertEquals("https://foo.bar", id)
             assertEquals("New RFCs", title)
             assertEquals("https://foo.bar", selfLink)
             assertEquals("https://tools.ietf.org/html/", alternateLink)
         }
+
+        val mozilla = rssFeed("mozilla.rss", "https://blog.mozilla.org/feed/")
+        val mozillaComments = rssFeed("mozilla-comments.rss", "https://blog.mozilla.org/comments/feed/")
+        assertNotEquals(mozilla.id, mozillaComments.id)
     }
 
     @Test
@@ -97,5 +102,11 @@ class DocumentExtensionsTests {
     private fun String.toDocument(): Document {
         val documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
         return documentBuilder.parse(File("src/test/resources/$this"))
+    }
+
+    fun rssFeed(fileName: String, feedUrl: String): ParsedFeed {
+        val documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+        val document = documentBuilder.parse(File("src/test/resources/$fileName"))
+        return document.toRssFeed(feedUrl)
     }
 }

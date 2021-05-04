@@ -26,8 +26,8 @@ private object Symbols {
     const val TITLE = "title"
 }
 
-fun importOpml(xml: String): List<OpmlElement> {
-    val elements = mutableListOf<OpmlElement>()
+fun importOpml(xml: String): List<Outline> {
+    val elements = mutableListOf<Outline>()
 
     val parser = XmlPullParserFactory.newInstance().newPullParser().apply {
         setInput(StringReader(xml))
@@ -42,11 +42,10 @@ fun importOpml(xml: String): List<OpmlElement> {
                 insideOpml = true
             } else if (insideOpml && parser.name == Symbols.OUTLINE) {
                 parser.apply {
-                    elements += OpmlElement(
-                        text = getAttributeValue(null, Symbols.TITLE) ?: "",
-                        xmlUrl = getAttributeValue(null, Symbols.XMLURL),
-                        htmlUrl = getAttributeValue(null, Symbols.HTMLURL) ?: "",
+                    elements += Outline(
+                        text = getAttributeValue(null, Symbols.TEXT),
                         type = getAttributeValue(null, Symbols.TYPE),
+                        xmlUrl = getAttributeValue(null, Symbols.XMLURL),
                     )
                 }
             }
