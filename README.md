@@ -40,4 +40,5 @@
 The standalone mode is still work in progress, which means it's not reliable at the moment. You're welcome to test it out and leave your feedback.
 
 ## 🌍 Translators Needed
-See [here](https://github.com/bubelov/news/issues/54)
+
+https://crwd.in/news-android
