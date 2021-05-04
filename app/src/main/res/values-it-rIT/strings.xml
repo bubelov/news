@@ -4,7 +4,7 @@
     <string name="login_with_nextcloud">Accedi con Nextcloud</string>
     <string name="post_image">Immagine dell\'articolo</string>
     <string name="settings">Impostazioni</string>
-    <string name="news">Novità</string>
+    <string name="news">Notizie</string>
     <string name="show_read_news">Mostra gli articoli già letti</string>
     <string name="hide_read_news">Nascondi gli articoli già letti</string>
     <string name="bookmark">Segnalibro</string>
@@ -18,7 +18,7 @@
     <string name="server_url_hint">https://mycloud.com</string>
     <string name="username">Nome utente</string>
     <string name="password">Password</string>
-    <string name="news_list_is_empty">Non ci sono novità</string>
+    <string name="news_list_is_empty">Non ci sono notizie</string>
     <string name="you_have_no_bookmarks">Non hai alcun segnalibro</string>
     <string name="field_is_empty">Il campo è vuoto</string>
     <string name="error">Errore</string>
@@ -64,7 +64,7 @@
     <string name="export_feeds_to_opml_file">Esporta in un file OPML</string>
     <string name="undo">Annulla</string>
     <string name="retry">Riprova</string>
-    <string name="you_have_no_unread_news">Non ci sono novità non lette</string>
+    <string name="you_have_no_unread_news">Non ci sono notizie non lette</string>
     <string name="importing_feeds_n_of_n">Importo i feed (%1$d di %2$d)</string>
     <string name="mark_scrolled_entries_as_read">Segna come letti gli articoli che scorri</string>
     <string name="import_title">Importa</string>
@@ -72,7 +72,7 @@
     <string name="exists_d">Esiste: %1$d</string>
     <string name="failed_d">Fallito: %1$d</string>
     <string name="open_feed_settings">Apri le impostazioni del feed</string>
-    <string name="fetch_news_on_startup">Aggiorna le novità all\'apertura</string>
+    <string name="fetch_news_on_startup">Aggiorna le notizie all\'apertura</string>
     <string name="open_entries_in_browser">Apri gli articoli nel browser</string>
     <string name="removed_from_bookmarks">Rimosso dai segnalibri</string>
     <string name="cannot_find_feed_with_id_s">Non è possibile trovare un feed con identificativo %1$s</string>
@@ -85,9 +85,9 @@
     <string name="event_log_is_empty">Il registro degli eventi è vuoto</string>
     <string name="event_log">Registro degli eventi</string>
     <string name="view_event_log">Visualizza il registro degli eventi</string>
-    <string name="you_have_d_unread_news">You have %1$d unread news</string>
-    <string name="unread_news">Unread news</string>
-    <string name="view_exception_log">View exception log</string>
+    <string name="you_have_d_unread_news">Hai %1$d notizie non lette</string>
+    <string name="unread_news">Notizie non lette</string>
+    <string name="view_exception_log">Visualizza il registro delle eccezioni</string>
     <plurals name="d_hours">
         <item quantity="one">%d ora</item>
         <item quantity="other">%d ore</item>
