@@ -80,8 +80,7 @@ class EntriesFragment : Fragment(), Scrollable {
                         runCatching {
                             model.downloadPodcast(item.id)
                         }.onFailure {
-                            Timber.e(it)
-                            showDialog(R.string.error, it.message ?: "")
+                            showErrorDialog(it)
                         }
                     }
                 }

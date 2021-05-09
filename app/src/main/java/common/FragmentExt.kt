@@ -55,7 +55,9 @@ fun Fragment.showErrorDialog(
 ) {
     Timber.e(t)
 
-    showDialog(R.string.error, t.message ?: "") {
+    val message = t.message ?: getString(R.string.got_exception_of_class_s, t.javaClass.simpleName)
+
+    showDialog(R.string.error, message) {
         lifecycleScope.launchWhenResumed {
             onDismissListener?.invoke()
         }

@@ -88,6 +88,7 @@
     <string name="you_have_d_unread_news">У вас %1$d непрочитанных новостей</string>
     <string name="unread_news">Непрочитанные новости</string>
     <string name="view_exception_log">Просмотр журнала исключений</string>
+    <string name="got_exception_of_class_s">Got %1$s. See exception log for details</string>
     <plurals name="d_hours">
         <item quantity="one">%d час</item>
         <item quantity="few">%d часа</item>
