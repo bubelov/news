@@ -24,7 +24,7 @@ import java.io.OutputStream
 import java.util.*
 
 class PodcastsRepository(
-    private val db: EntryEnclosureQueries,
+    private val entryEnclosureQueries: EntryEnclosureQueries,
     private val entriesRepository: EntriesRepository,
     private val context: Context,
 ) {
@@ -32,13 +32,13 @@ class PodcastsRepository(
     private val httpClient = OkHttpClient()
 
     suspend fun getDownloadProgress(entryId: String) = withContext(Dispatchers.IO) {
-        db.selectByEntryId(entryId).asFlow().map {
+        entryEnclosureQueries.selectByEntryId(entryId).asFlow().map {
             it.executeAsOneOrNull()?.downloadPercent
         }
     }
 
     fun selectByEntryId(entryId: String): EntryEnclosure? {
-        return db.selectByEntryId(entryId).executeAsOneOrNull()
+        return entryEnclosureQueries.selectByEntryId(entryId).executeAsOneOrNull()
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")
@@ -46,7 +46,7 @@ class PodcastsRepository(
         val entry = entriesRepository.selectById(entryId)
 
         if (entry == null) {
-            db.deleteWhere(entryId = entryId)
+            entryEnclosureQueries.deleteWhere(entryId = entryId)
             return@withContext
         }
 
@@ -54,7 +54,7 @@ class PodcastsRepository(
             return@withContext
         }
 
-        val existingEnclosure = db.selectByEntryId(entryId).executeAsOneOrNull()
+        val existingEnclosure = entryEnclosureQueries.selectByEntryId(entryId).executeAsOneOrNull()
 
         if (existingEnclosure != null) {
             return@withContext
@@ -66,7 +66,7 @@ class PodcastsRepository(
             cacheUri = "",
         )
 
-        db.insertOrReplace(enclosure)
+        entryEnclosureQueries.insertOrReplace(enclosure)
 
         val request = Request.Builder()
             .url(entry.enclosureLink)
@@ -75,21 +75,21 @@ class PodcastsRepository(
         val response = httpClient.newCall(request).execute()
 
         if (!response.isSuccessful) {
-            db.deleteWhere(entryId = entryId)
+            entryEnclosureQueries.deleteWhere(entryId = entryId)
             return@withContext
         }
 
         val responseBody = response.body
 
         if (responseBody == null) {
-            db.deleteWhere(entryId = entryId)
+            entryEnclosureQueries.deleteWhere(entryId = entryId)
             return@withContext
         }
 
         var cacheUri: Uri? = null
 
         runCatching {
-            val fileName = "${entry.title}.${getExtension(entry.enclosureLinkType)}"
+            val fileName = "${UUID.randomUUID()}.${getExtension(entry.enclosureLinkType)}"
             val outputStream: OutputStream
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -103,6 +103,10 @@ class PodcastsRepository(
                     }
                 )
 
+                if (cacheUri == null) {
+                    throw Exception("Can't save podcast to media store")
+                }
+
                 outputStream = context.contentResolver.openOutputStream(cacheUri!!)!!
             } else {
                 val podcastsDirectory = context.getExternalFilesDir(Environment.DIRECTORY_PODCASTS)
@@ -111,7 +115,7 @@ class PodcastsRepository(
                 outputStream = FileOutputStream(file)
             }
 
-            db.setCacheUri(
+            entryEnclosureQueries.setCacheUri(
                 cacheUri = cacheUri.toString(),
                 entryId = enclosure.entryId,
             )
@@ -126,6 +130,7 @@ class PodcastsRepository(
 
                     while (true) {
                         val buffer = bufferedSource.read(bufferedSink.buffer, 1024 * 16)
+                        bufferedSink.flush()
 
                         if (buffer == -1L) {
                             break
@@ -138,7 +143,7 @@ class PodcastsRepository(
                                 (downloadedBytes.toDouble() / bytesInBody.toDouble() * 100.0).toLong()
 
                             if (downloadedPercent > lastReportedDownloadedPercent) {
-                                db.setDowloadPercent(
+                                entryEnclosureQueries.setDowloadPercent(
                                     downloadPercent = downloadedPercent,
                                     entryId = enclosure.entryId,
                                 )
@@ -150,7 +155,7 @@ class PodcastsRepository(
                 }
             }
         }.onSuccess {
-            db.setDowloadPercent(
+            entryEnclosureQueries.setDowloadPercent(
                 downloadPercent = 100,
                 entryId = enclosure.entryId,
             )
@@ -166,7 +171,9 @@ class PodcastsRepository(
                 }
             }
         }.onFailure {
-            db.deleteWhere(entryId = entryId)
+            Timber.e("Fail")
+
+            entryEnclosureQueries.deleteWhere(entryId = entryId)
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 cacheUri?.let { uri ->
@@ -181,10 +188,10 @@ class PodcastsRepository(
     suspend fun deleteIncompleteDownloads() = withContext(Dispatchers.IO) {
         Timber.d("Deleting incomplete downloads")
 
-        db.selectAll().executeAsList().forEach { metadata ->
+        entryEnclosureQueries.selectAll().executeAsList().forEach { metadata ->
             if (metadata.cacheUri.isEmpty()) {
                 Timber.d("Cache URI is empty, deleting metadata")
-                db.deleteWhere(entryId = metadata.entryId)
+                entryEnclosureQueries.deleteWhere(entryId = metadata.entryId)
                 return@forEach
             }
 
@@ -194,7 +201,7 @@ class PodcastsRepository(
 
                 if (uri.toString().contains(context.packageName)) {
                     Timber.d("URI contains ${context.packageName}, deleting metadata")
-                    db.deleteWhere(entryId = metadata.entryId)
+                    entryEnclosureQueries.deleteWhere(entryId = metadata.entryId)
                 }
 
                 val cursor = context.contentResolver.query(
@@ -210,13 +217,13 @@ class PodcastsRepository(
 
                 if (cursor == null) {
                     Timber.d("Didn't find enclosure with URI: $uri")
-                    db.deleteWhere(entryId = metadata.entryId)
+                    entryEnclosureQueries.deleteWhere(entryId = metadata.entryId)
                 }
 
                 cursor?.use {
                     if (!it.moveToFirst()) {
                         Timber.d("Didn't find enclosure with URI: $uri")
-                        db.deleteWhere(entryId = metadata.entryId)
+                        entryEnclosureQueries.deleteWhere(entryId = metadata.entryId)
                         return@use
                     }
 
@@ -229,7 +236,7 @@ class PodcastsRepository(
 
                     if (pending == 1) {
                         Timber.d("Found pending enclosure, deleting metadata")
-                        db.deleteWhere(entryId = metadata.entryId)
+                        entryEnclosureQueries.deleteWhere(entryId = metadata.entryId)
                     } else {
                         Timber.d("Enclosure is in sync with metadata")
                     }
@@ -239,7 +246,7 @@ class PodcastsRepository(
 
                 if (file.exists() && metadata.downloadPercent != null && metadata.downloadPercent != 100L) {
                     file.delete()
-                    db.deleteWhere(entryId = metadata.entryId)
+                    entryEnclosureQueries.deleteWhere(entryId = metadata.entryId)
                 }
             }
         }
