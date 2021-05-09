@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<opml version="2.0">
+
+<opml xmlns:news="https://appreactor.co/news" version="2.0">
   <head>
     <title>Subscriptions</title>
   </head>
   <body>
-    <outline title="WirelessMoves" text="WirelessMoves" type="rss" xmlUrl="https://blog.wirelessmoves.com/feed" htmlUrl="https://blog.wirelessmoves.com"/>
+    <outline title="WirelessMoves" text="WirelessMoves" type="rss" xmlUrl="https://blog.wirelessmoves.com/feed" htmlUrl="https://blog.wirelessmoves.com" news:openEntriesInBrowser="true" news:blockedWords="abc"/>
     <outline title="Nextcloud" text="Nextcloud" type="rss" xmlUrl="https://nextcloud.com/blogfeed" htmlUrl="https://nextcloud.com"/>
-    <outline title="PINE64" text="PINE64" type="rss" xmlUrl="https://www.pine64.org/feed/" htmlUrl="https://www.pine64.org"/>
+    <outline title="PINE64" text="PINE64" type="rss" xmlUrl="https://www.pine64.org/feed/" htmlUrl="https://www.pine64.org" news:openEntriesInBrowser="true" news:blockedWords="xyz"/>
   </body>
 </opml>

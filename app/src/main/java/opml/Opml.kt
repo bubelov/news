@@ -15,15 +15,18 @@ import javax.xml.transform.stream.StreamResult
 
 private object Symbols {
     const val OPML = "opml"
-    const val BODY = "body"
-    const val OUTLINE = "outline"
-    const val TEXT = "text"
-    const val XMLURL = "xmlUrl"
-    const val HTMLURL = "htmlUrl"
-    const val TYPE = "type"
     const val VERSION = "version"
     const val HEAD = "head"
     const val TITLE = "title"
+    const val BODY = "body"
+    const val OUTLINE = "outline"
+    const val TEXT = "text"
+    const val TYPE = "type"
+    const val XML_URL = "xmlUrl"
+    const val NEWS_NAMESPACE_PREFIX = "news"
+    const val NEWS_NAMESPACE = "https://appreactor.co/news"
+    const val OPEN_ENTRIES_IN_BROWSER = "openEntriesInBrowser"
+    const val BLOCKED_WORDS = "blockedWords"
 }
 
 fun importOpml(xml: String): List<Outline> {
@@ -45,7 +48,15 @@ fun importOpml(xml: String): List<Outline> {
                     elements += Outline(
                         text = getAttributeValue(null, Symbols.TEXT),
                         type = getAttributeValue(null, Symbols.TYPE),
-                        xmlUrl = getAttributeValue(null, Symbols.XMLURL),
+                        xmlUrl = getAttributeValue(null, Symbols.XML_URL),
+                        openEntriesInBrowser = getAttributeValue(
+                            null,
+                            "${Symbols.NEWS_NAMESPACE_PREFIX}:${Symbols.OPEN_ENTRIES_IN_BROWSER}"
+                        )?.toBoolean() ?: false,
+                        blockedWords = getAttributeValue(
+                            null,
+                            "${Symbols.NEWS_NAMESPACE_PREFIX}:${Symbols.BLOCKED_WORDS}"
+                        ) ?: "",
                     )
                 }
             }
@@ -63,7 +74,8 @@ fun exportOpml(feeds: List<Feed>): String {
     Xml.newSerializer().apply {
         setOutput(result)
 
-        startDocument("UTF-8", false)
+        startDocument("UTF-8", true)
+        setPrefix(Symbols.NEWS_NAMESPACE_PREFIX, Symbols.NEWS_NAMESPACE)
         startTag(null, Symbols.OPML)
         attribute(null, Symbols.VERSION, "2.0")
 
@@ -78,10 +90,14 @@ fun exportOpml(feeds: List<Feed>): String {
         feeds.forEach { feed ->
             startTag(null, Symbols.OUTLINE)
             attribute(null, Symbols.TEXT, feed.title)
-            attribute(null, Symbols.TITLE, feed.title)
             attribute(null, Symbols.TYPE, "rss")
-            attribute(null, Symbols.XMLURL, feed.selfLink)
-            attribute(null, Symbols.HTMLURL, feed.alternateLink)
+            attribute(null, Symbols.XML_URL, feed.selfLink)
+            attribute(
+                Symbols.NEWS_NAMESPACE,
+                Symbols.OPEN_ENTRIES_IN_BROWSER,
+                feed.openEntriesInBrowser.toString()
+            )
+            attribute(Symbols.NEWS_NAMESPACE, Symbols.BLOCKED_WORDS, feed.blockedWords)
             endTag(null, Symbols.OUTLINE)
         }
 
