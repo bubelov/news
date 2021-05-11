@@ -68,7 +68,16 @@ class FeedsViewModel(
         val cachedFeeds = feedsRepository.selectAll()
 
         feeds.forEach { outline ->
-            if (cachedFeeds.any { it.selfLink == outline.xmlUrl }) {
+            val cachedFeed = cachedFeeds.firstOrNull { it.selfLink == outline.xmlUrl }
+
+            if (cachedFeed != null) {
+                feedsRepository.insertOrReplace(
+                    cachedFeed.copy(
+                        openEntriesInBrowser = outline.openEntriesInBrowser,
+                        blockedWords = outline.blockedWords,
+                    )
+                )
+
                 exists++
                 return@forEach
             }
