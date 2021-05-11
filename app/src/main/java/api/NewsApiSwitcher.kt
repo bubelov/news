@@ -74,6 +74,7 @@ class NewsApiSwitcher(
                     url = nextcloudServerUrl,
                     username = nextcloudServerUsername,
                     password = nextcloudServerPassword,
+                    trustSelfSignedCerts = prefs.get().nextcloudServerTrustSelfSignedCerts,
                 )
             )
         }

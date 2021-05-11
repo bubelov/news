@@ -17,11 +17,13 @@ class DirectAuthViewModel(
         serverUrl: String,
         username: String,
         password: String,
+        trustSelfSignedCerts: Boolean,
     ) {
         val api = DirectNextcloudNewsApiBuilder().build(
             serverUrl,
             username,
-            password
+            password,
+            trustSelfSignedCerts,
         )
 
         withContext(Dispatchers.IO) {
@@ -41,9 +43,11 @@ class DirectAuthViewModel(
         serverUrl: String,
         username: String,
         password: String,
+        trustSelfSignedCerts: Boolean,
     ) {
         preferencesRepository.save {
             nextcloudServerUrl = serverUrl
+            nextcloudServerTrustSelfSignedCerts = trustSelfSignedCerts
             nextcloudServerUsername = username
             nextcloudServerPassword = password
         }

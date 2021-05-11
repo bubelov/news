@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit
 data class Preferences(
     var authType: String = "",
     var nextcloudServerUrl: String = "",
+    var nextcloudServerTrustSelfSignedCerts: Boolean = true,
     var nextcloudServerUsername: String = "",
     var nextcloudServerPassword: String = "",
     var initialSyncCompleted: Boolean = false,

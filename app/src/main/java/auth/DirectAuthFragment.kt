@@ -70,15 +70,17 @@ class DirectAuthFragment : Fragment() {
 
                 runCatching {
                     model.requestFeeds(
-                        binding.serverUrl.text.toString(),
-                        binding.username.text.toString(),
-                        binding.password.text.toString()
+                        serverUrl = binding.serverUrl.text.toString(),
+                        username = binding.username.text.toString(),
+                        password = binding.password.text.toString(),
+                        trustSelfSignedCerts = binding.trustSelfSignedCerts.isChecked,
                     )
                 }.onSuccess {
                     model.setServer(
                         binding.serverUrl.text.toString(),
                         binding.username.text.toString(),
-                        binding.password.text.toString()
+                        binding.password.text.toString(),
+                        binding.trustSelfSignedCerts.isChecked,
                     )
 
                     model.setAuthType(PreferencesRepository.AUTH_TYPE_NEXTCLOUD_DIRECT)

@@ -31,14 +31,27 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/trustSelfSignedCerts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingTop="24dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="24dp"
+        android:text="@string/trust_self_signed_certificates"
+        app:layout_constraintTop_toBottomOf="@id/serverUrlLayout" />
+
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/usernameLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
         android:hint="@string/username"
         app:errorEnabled="true"
-        app:layout_constraintTop_toBottomOf="@id/serverUrlLayout"
+        app:layout_constraintTop_toBottomOf="@id/trustSelfSignedCerts"
         app:startIconDrawable="@drawable/ic_baseline_person_24">
 
         <com.google.android.material.textfield.TextInputEditText

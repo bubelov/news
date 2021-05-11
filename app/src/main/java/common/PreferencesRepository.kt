@@ -26,6 +26,10 @@ class PreferencesRepository(
                     nextcloudServerUrl = this
                 }
 
+                it.find { it.key == NEXTCLOUD_SERVER_TRUST_SELF_SIGNED_CERTS }?.value?.apply {
+                    nextcloudServerTrustSelfSignedCerts = this.toBoolean()
+                }
+
                 it.find { it.key == NEXTCLOUD_SERVER_USERNAME }?.value?.apply {
                     nextcloudServerUsername = this
                 }
@@ -87,6 +91,10 @@ class PreferencesRepository(
                 putString(AUTH_TYPE, authType)
                 putString(NEXTCLOUD_SERVER_URL, nextcloudServerUrl)
                 putString(NEXTCLOUD_SERVER_USERNAME, nextcloudServerUsername)
+                putBoolean(
+                    NEXTCLOUD_SERVER_TRUST_SELF_SIGNED_CERTS,
+                    nextcloudServerTrustSelfSignedCerts
+                )
                 putString(NEXTCLOUD_SERVER_PASSWORD, nextcloudServerPassword)
                 putBoolean(INITIAL_SYNC_COMPLETED, initialSyncCompleted)
                 putString(LAST_ENTRIES_SYNC_DATE_TIME, lastEntriesSyncDateTime)
@@ -124,6 +132,8 @@ class PreferencesRepository(
         const val AUTH_TYPE_NEXTCLOUD_APP = "nextcloud_app"
         const val AUTH_TYPE_NEXTCLOUD_DIRECT = "nextcloud_direct"
         const val NEXTCLOUD_SERVER_URL = "nextcloud_server_url"
+        const val NEXTCLOUD_SERVER_TRUST_SELF_SIGNED_CERTS =
+            "nextcloud_server_trust_self_signed_certs"
         const val NEXTCLOUD_SERVER_USERNAME = "nextcloud_server_username"
         const val NEXTCLOUD_SERVER_PASSWORD = "nextcloud_server_password"
 

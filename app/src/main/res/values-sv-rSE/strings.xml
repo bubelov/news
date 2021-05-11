@@ -89,6 +89,7 @@
     <string name="unread_news">Unread news</string>
     <string name="view_exception_log">View exception log</string>
     <string name="got_exception_of_class_s">Got %1$s. See exception log for details</string>
+    <string name="trust_self_signed_certificates">Trust self-signed certificates</string>
     <plurals name="d_hours">
         <item quantity="one">%d hour</item>
         <item quantity="other">%d hours</item>
