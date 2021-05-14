@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+
+<channel>
+<title>Luke Smith</title>
+<description>Updates from Luke Smith.</description>
+<language>en-us</language>
+<link>https://lukesmith.xyz/rss.xml</link>
+<atom:link href="https://lukesmith.xyz/rss.xml" rel="self" type="application/rss+xml" />
+<image>
+<title>Luke Smith</title>
+<url>https://lukesmith.xyz/pix/portrait.jpg</url>
+<link>https://lukesmith.xyz/rss.xml</link>
+</image>
+
+<!-- LB -->
+
+<item>
+	<title>Short Notice: Appearing on Millenniyule TONIGHT at 7PM New York Time</title>
+	<guid isPermaLink="false">https://www.millennialwoes.com/millenniyule?y=2020</guid>
+	<pubDate> Tue, 29 Dec 2020 17:18:17 -0500</pubDate>
+	<link>https://www.millennialwoes.com/millenniyule?y=2020</link>
+	<description><![CDATA[
+	<p>Sorry for the short notice, I've been busy for the holidays, but I've been asked to be interviewed on Millenniyule in less than two hours from when I'm posting this. I'm scheduled for 7PM to as late as 9PM New York time.</p>
+
+	<p>The livestream will be on <a href="https://www.youtube.com/user/MillennialWoes">this channel</a> (i.e. not my own due to bandwidth issues).
+	</p>
+
+	<p>If you miss it, you can get it <a href="https://www.youtube.com/playlist?list=PLLt8gt-3ZZmHNxM5nNdDtHiuKSz-Iu1nL">at the bottom of this playlist</a> when it's over.</p>
+
+		]]></description>
+</item>
+
+</channel>
+
+</rss>

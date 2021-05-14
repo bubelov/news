@@ -86,10 +86,19 @@ class DocumentExtensionsTests {
     }
 
     @Test
+    fun toRssEntries() {
+        "2021-05-14-lukesmith.xyz.rss".toDocument().apply {
+            val entries = this.toRssEntries()
+            assertEquals(1, entries.size)
+        }
+    }
+
+    @Test
     fun parseDates() {
         val dates = listOf(
             "Mon, 21 Jan 2019 16:06:12 GMT",
             "Mon, 27 Jan 2020 17:55:00 EST",
+            "Sat, 13 Mar 2021 08:47:51 -0500",
         )
 
         dates.forEach { date ->
