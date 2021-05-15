@@ -13,29 +13,29 @@ class PodcastsRepositoryTests {
 
     private val entriesRepository = mockk<EntriesRepository>()
 
-    private val db = mockk<EntryEnclosureQueries>()
-
     private val context = mockk<Context>()
+
+    private val entryEnclosureQueries = mockk<EntryEnclosureQueries>()
 
     private val repository = PodcastsRepository(
         entriesRepository = entriesRepository,
-        db = db,
         context = context,
+        entryEnclosureQueries = entryEnclosureQueries,
     )
 
     @Test
     fun selectByEntryId(): Unit = runBlocking {
         val enclosure = entryEnclosure().copy(entryId = UUID.randomUUID().toString())
 
-        every { db.selectByEntryId(enclosure.entryId) } returns mockk {
+        every { entryEnclosureQueries.selectByEntryId(enclosure.entryId) } returns mockk {
             every { executeAsOneOrNull() } returns enclosure
         }
 
         Assert.assertEquals(enclosure, repository.selectByEntryId(enclosure.entryId))
 
-        verify { db.selectByEntryId(enclosure.entryId) }
+        verify { entryEnclosureQueries.selectByEntryId(enclosure.entryId) }
 
-        confirmVerified(db)
+        confirmVerified(entryEnclosureQueries)
     }
 
     private fun entryEnclosure() = EntryEnclosure(
