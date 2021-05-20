@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">News Dev</string>
+    <string name="app_name">News</string>
     <string name="login_with_nextcloud">Login with Nextcloud</string>
     <string name="post_image">Post image</string>
     <string name="settings">Settings</string>
