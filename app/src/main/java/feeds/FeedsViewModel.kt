@@ -49,7 +49,11 @@ class FeedsViewModel(
     suspend fun importFeeds(opmlDocument: String) = changeState {
         value = State.Loading
 
-        val feeds = importOpml(opmlDocument)
+        val feeds = runCatching {
+            importOpml(opmlDocument)
+        }.getOrElse {
+            throw Exception("Can't parse OPML file: ${it.message}", it)
+        }
 
         var added = 0
         var exists = 0
