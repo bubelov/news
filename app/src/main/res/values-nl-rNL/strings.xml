@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <resources>
     <string name="app_name">Nieuws</string>
     <string name="login_with_nextcloud">Login met Nextcloud</string>
@@ -90,6 +89,7 @@
     <string name="view_exception_log">Bekijk uitzonderingslogboek</string>
     <string name="got_exception_of_class_s">Heb %1$s. Zie uitzonderingen in de logboek voor details</string>
     <string name="trust_self_signed_certificates">Vertrouwd zelfondertekend certificaats</string>
+    <string name="you_have_no_feeds">You have no feeds</string>
     <plurals name="d_hours">
         <item quantity="one">%d uur</item>
         <item quantity="other">%d uren</item>

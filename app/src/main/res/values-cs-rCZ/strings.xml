@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <resources>
     <string name="app_name">Novinky</string>
     <string name="login_with_nextcloud">Přihlásit se přes Nextcloud</string>
@@ -90,8 +89,11 @@
     <string name="view_exception_log">Zobrazit seznam výjimek</string>
     <string name="got_exception_of_class_s">Máte %1$s. Podrobnosti naleznete v logu výjimek</string>
     <string name="trust_self_signed_certificates">Certifikát podepsaný sám sebou</string>
+    <string name="you_have_no_feeds">You have no feeds</string>
     <plurals name="d_hours">
         <item quantity="one">%d hodinu</item>
         <item quantity="few">%d hodina</item>
+        <item quantity="many">%d hodina</item>
+        <item quantity="other">%d hodina</item>
     </plurals>
 </resources>

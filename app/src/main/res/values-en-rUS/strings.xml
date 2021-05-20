@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <resources>
-    <string name="app_name">News</string>
+    <string name="app_name">News Dev</string>
     <string name="login_with_nextcloud">Login with Nextcloud</string>
     <string name="post_image">Post image</string>
     <string name="settings">Settings</string>
@@ -90,6 +89,7 @@
     <string name="view_exception_log">View exception log</string>
     <string name="got_exception_of_class_s">Got %1$s. See exception log for details</string>
     <string name="trust_self_signed_certificates">Trust self-signed certificates</string>
+    <string name="you_have_no_feeds">You have no feeds</string>
     <plurals name="d_hours">
         <item quantity="one">%d hour</item>
         <item quantity="other">%d hours</item>
