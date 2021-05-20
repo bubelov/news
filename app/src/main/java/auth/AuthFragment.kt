@@ -77,7 +77,7 @@ class AuthFragment : Fragment() {
 
                 app().setupBackgroundSync(override = true)
 
-                showNews()
+                showFeeds()
             }
         }
 
@@ -152,6 +152,13 @@ class AuthFragment : Fragment() {
                 R.id.entriesFragment,
                 bundleOf(Pair("filter", EntriesFilter.OnlyNotBookmarked))
             )
+        }
+    }
+
+    private fun showFeeds() {
+        findNavController().apply {
+            popBackStack()
+            navigate(R.id.feedsFragment)
         }
     }
 
