@@ -29,7 +29,6 @@
     <string name="crop_feed_images">Recortar imágenes de vista previa</string>
     <string name="exceptions">Excepciones</string>
     <string name="you_have_no_logged_exceptions">No tiene excepciones registradas</string>
-    <string name="feeds_list_is_empty">La lista de feeds está vacía</string>
     <string name="feeds">Feeds</string>
     <string name="bookmarks">Marcadores</string>
     <string name="delete_all">Eliminar todo</string>

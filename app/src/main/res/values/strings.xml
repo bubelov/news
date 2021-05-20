@@ -27,7 +27,6 @@
     <string name="crop_feed_images">Crop preview images</string>
     <string name="exceptions">Exceptions</string>
     <string name="you_have_no_logged_exceptions">You have no logged exceptions</string>
-    <string name="feeds_list_is_empty">Feeds list is empty</string>
     <string name="feeds">Feeds</string>
     <string name="bookmarks">Bookmarks</string>
     <string name="delete_all">Delete all</string>
@@ -89,6 +88,7 @@
     <string name="view_exception_log">View exception log</string>
     <string name="got_exception_of_class_s">Got %1$s. See exception log for details</string>
     <string name="trust_self_signed_certificates">Trust self-signed certificates</string>
+    <string name="you_have_no_feeds">You have no feeds</string>
     <plurals name="d_hours">
         <item quantity="zero">%d hours</item>
         <item quantity="one">%d hour</item>

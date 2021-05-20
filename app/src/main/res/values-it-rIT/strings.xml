@@ -29,7 +29,6 @@
     <string name="crop_feed_images">Ritaglia le immagini di anteprima</string>
     <string name="exceptions">Eccezioni</string>
     <string name="you_have_no_logged_exceptions">Non è stata registrata alcuna eccezione</string>
-    <string name="feeds_list_is_empty">Non ci sono feed</string>
     <string name="feeds">Feed</string>
     <string name="bookmarks">Segnalibri</string>
     <string name="delete_all">Elimina tutto</string>

@@ -29,7 +29,6 @@
     <string name="crop_feed_images">Recadrer les images d’aperçu</string>
     <string name="exceptions">Journal d’erreurs</string>
     <string name="you_have_no_logged_exceptions">Vous n’avez pas d’erreurs capturées</string>
-    <string name="feeds_list_is_empty">La liste de flux est vide</string>
     <string name="feeds">Flux</string>
     <string name="bookmarks">Épingles</string>
     <string name="delete_all">Supprimer tout</string>

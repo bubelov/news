@@ -29,7 +29,6 @@
     <string name="crop_feed_images">Beskär artikelbilden</string>
     <string name="exceptions">Felmeddelanden</string>
     <string name="you_have_no_logged_exceptions">Det finns inga loggade fel</string>
-    <string name="feeds_list_is_empty">Flödet är tomt</string>
     <string name="feeds">Flöden</string>
     <string name="bookmarks">Bokmärken</string>
     <string name="delete_all">Ta bort alla</string>

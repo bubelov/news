@@ -29,7 +29,6 @@
     <string name="crop_feed_images">Oříznout náhled obrázků</string>
     <string name="exceptions">Výjimky</string>
     <string name="you_have_no_logged_exceptions">Nemáte žádné zaznamenané výjimky</string>
-    <string name="feeds_list_is_empty">Seznam kanálů je prázdný</string>
     <string name="feeds">Kanály</string>
     <string name="bookmarks">Záložky</string>
     <string name="delete_all">Odstranit vše</string>

@@ -220,7 +220,7 @@ class FeedsFragment : Fragment() {
 
                             if (state.feeds.isEmpty()) {
                                 message.show(animate = true)
-                                message.text = getString(R.string.feeds_list_is_empty)
+                                message.text = getString(R.string.you_have_no_feeds)
 
                                 importOpml.show(animate = true)
                             }

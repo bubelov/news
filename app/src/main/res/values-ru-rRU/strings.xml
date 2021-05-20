@@ -29,7 +29,6 @@
     <string name="crop_feed_images">Обрезать изображения предпросмотра</string>
     <string name="exceptions">Исключения</string>
     <string name="you_have_no_logged_exceptions">У вас нет зарегистрированных исключений</string>
-    <string name="feeds_list_is_empty">Список лент пуст</string>
     <string name="feeds">Ленты</string>
     <string name="bookmarks">Закладки</string>
     <string name="delete_all">Удалить все</string>

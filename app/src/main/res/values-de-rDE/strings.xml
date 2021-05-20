@@ -29,7 +29,6 @@
     <string name="crop_feed_images">Vorschaubilder zuschneiden</string>
     <string name="exceptions">Fehlermeldungen</string>
     <string name="you_have_no_logged_exceptions">Du hast keine protokollierten Fehler</string>
-    <string name="feeds_list_is_empty">Feed-Liste ist leer</string>
     <string name="feeds">Feeds</string>
     <string name="bookmarks">Lesezeichen</string>
     <string name="delete_all">Alle löschen</string>
