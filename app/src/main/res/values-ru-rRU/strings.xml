@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <resources>
     <string name="app_name">Новости</string>
     <string name="login_with_nextcloud">Войти через Nextcloud</string>
@@ -88,8 +89,8 @@
     <string name="you_have_d_unread_news">У вас %1$d непрочитанных новостей</string>
     <string name="unread_news">Непрочитанные новости</string>
     <string name="view_exception_log">Просмотр журнала исключений</string>
-    <string name="got_exception_of_class_s">Got %1$s. See exception log for details</string>
-    <string name="trust_self_signed_certificates">Trust self-signed certificates</string>
+    <string name="got_exception_of_class_s">%1$s получено. Подробности в журнале исключений</string>
+    <string name="trust_self_signed_certificates">Доверять самоподписанным сертификатам</string>
     <plurals name="d_hours">
         <item quantity="one">%d час</item>
         <item quantity="few">%d часа</item>
