@@ -81,7 +81,7 @@ class NewsApiSwitcher(
     }
 
     private fun switchToStandaloneApi() {
-        wrapper.api = StandaloneNewsApi(feedQueries, entryQueries)
+        wrapper.api = StandaloneNewsApi(feedQueries, entryQueries, log)
     }
 
     private fun log(message: String): Unit = runBlocking {

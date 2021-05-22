@@ -8,11 +8,15 @@ import common.trustSelfSignedCerts
 import db.*
 import getFeedType
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withContext
+import logentries.LogEntriesRepository
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.joda.time.DateTime
 import org.joda.time.Instant
 import org.jsoup.Jsoup
 import timber.log.Timber
@@ -20,11 +24,13 @@ import toAtomEntries
 import toAtomFeed
 import toRssEntries
 import toRssFeed
+import java.util.*
 import javax.xml.parsers.DocumentBuilderFactory
 
 class StandaloneNewsApi(
     private val feedQueries: FeedQueries,
     private val entryQueries: EntryQueries,
+    private val log: LogEntriesRepository,
 ) : NewsApi {
 
     private val httpClient = OkHttpClient.Builder().trustSelfSignedCerts().build()
@@ -93,20 +99,30 @@ class StandaloneNewsApi(
     override suspend fun getNewAndUpdatedEntries(
         since: Instant,
     ): List<Entry> = withContext(Dispatchers.IO) {
+        log.insert(logEntry().copy(message = "getNewAndUpdatedEntries was called"))
+        val startTimestamp = System.currentTimeMillis()
         val entries = mutableListOf<Entry>()
 
-        feedQueries.selectAll().executeAsList().forEach { feed ->
-            runCatching {
-                entries += fetchEntries(feed.selfLink)
-            }.onFailure {
-                Timber.e(it, "Failed to fetch entries for feed ${feed.selfLink}")
-            }
+        feedQueries.selectAll().executeAsList().chunked(10).forEach { chunk ->
+            chunk.map { feed ->
+                async {
+                    runCatching {
+                        fetchEntries(feed.selfLink)
+                    }.onSuccess {
+                        synchronized(entries) { entries += it }
+                    }.onFailure {
+                        Timber.e(it, "Failed to fetch entries for feed ${feed.selfLink}")
+                    }
+                }
+            }.awaitAll()
         }
 
         entries.removeAll {
             entryQueries.selectById(it.id).executeAsOneOrNull() != null
         }
 
+        val totalTimeMillis = System.currentTimeMillis() - startTimestamp
+        log.insert(logEntry().copy(message = "getNewAndUpdatedEntries was executed in $totalTimeMillis ms"))
         return@withContext entries
     }
 
@@ -167,5 +183,12 @@ class StandaloneNewsApi(
         bookmarked = false,
         bookmarkedSynced = false,
         guidHash = "",
+    )
+
+    private fun logEntry() = LogEntry(
+        id = UUID.randomUUID().toString(),
+        date = DateTime.now().toString(),
+        tag = "standalone_news_api",
+        message = "",
     )
 }
