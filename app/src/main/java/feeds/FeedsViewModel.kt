@@ -3,10 +3,15 @@ package feeds
 import androidx.lifecycle.ViewModel
 import db.Feed
 import entries.EntriesRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.withContext
 import opml.exportOpml
 import opml.importOpml
 import timber.log.Timber
+import java.util.concurrent.atomic.AtomicInteger
 
 class FeedsViewModel(
     private val feedsRepository: FeedsRepository,
@@ -55,9 +60,9 @@ class FeedsViewModel(
             throw Exception("Can't parse OPML file: ${it.message}", it)
         }
 
-        var added = 0
-        var exists = 0
-        var failed = 0
+        val added = AtomicInteger()
+        val exists = AtomicInteger()
+        val failed = AtomicInteger()
         val errors = mutableListOf<String>()
 
         val progressFlow = MutableStateFlow(
@@ -71,45 +76,51 @@ class FeedsViewModel(
 
         val cachedFeeds = feedsRepository.selectAll()
 
-        feeds.forEach { outline ->
-            val cachedFeed = cachedFeeds.firstOrNull { it.selfLink == outline.xmlUrl }
+        withContext(Dispatchers.IO) {
+            feeds.chunked(10).forEach { chunk ->
+                chunk.map { outline ->
+                    async {
+                        val cachedFeed = cachedFeeds.firstOrNull { it.selfLink == outline.xmlUrl }
 
-            if (cachedFeed != null) {
-                feedsRepository.insertOrReplace(
-                    cachedFeed.copy(
-                        openEntriesInBrowser = outline.openEntriesInBrowser,
-                        blockedWords = outline.blockedWords,
-                    )
-                )
+                        if (cachedFeed != null) {
+                            feedsRepository.insertOrReplace(
+                                cachedFeed.copy(
+                                    openEntriesInBrowser = outline.openEntriesInBrowser,
+                                    blockedWords = outline.blockedWords,
+                                )
+                            )
 
-                exists++
-                return@forEach
+                            exists.incrementAndGet()
+                            return@async
+                        }
+
+                        runCatching {
+                            feedsRepository.insertByFeedUrl(
+                                url = outline.xmlUrl,
+                                title = outline.text,
+                            )
+                        }.onSuccess {
+                            added.incrementAndGet()
+                        }.onFailure {
+                            errors += "Failed to import feed ${outline.xmlUrl}\nReason: ${it.message}"
+                            Timber.e(it)
+                            failed.incrementAndGet()
+                        }
+
+                        progressFlow.value = FeedImportProgress(
+                            imported = added.get() + exists.get() + failed.get(),
+                            total = feeds.size,
+                        )
+                    }
+                }.awaitAll()
             }
-
-            runCatching {
-                feedsRepository.insertByFeedUrl(
-                    url = outline.xmlUrl.replace("http://", "https://"),
-                    title = outline.text,
-                )
-            }.onSuccess {
-                added++
-            }.onFailure {
-                errors += "Failed to import feed ${outline.xmlUrl}\nReason: ${it.message}"
-                Timber.e(it)
-                failed++
-            }
-
-            progressFlow.value = FeedImportProgress(
-                imported = added + exists + failed,
-                total = feeds.size,
-            )
         }
 
         value = State.ShowingImportResult(
             FeedImportResult(
-                added = added,
-                exists = exists,
-                failed = failed,
+                added = added.get(),
+                exists = exists.get(),
+                failed = failed.get(),
                 errors = errors,
             )
         )

@@ -4,6 +4,7 @@ import ParsedEntry
 import ParsedFeed
 import api.GetEntriesResult
 import api.NewsApi
+import common.trustSelfSignedCerts
 import db.*
 import getFeedType
 import kotlinx.coroutines.Dispatchers
@@ -26,28 +27,11 @@ class StandaloneNewsApi(
     private val entryQueries: EntryQueries,
 ) : NewsApi {
 
-    private val httpClient = OkHttpClient()
+    private val httpClient = OkHttpClient.Builder().trustSelfSignedCerts().build()
 
     override suspend fun addFeed(url: String): Feed {
-        val isHttps = url.startsWith("https")
-        val isCleartextHttp = !isHttps && url.startsWith("http")
-
-        if (isCleartextHttp) {
-            throw Exception("Insecure feeds are not allowed. Please use HTTPS.")
-        }
-
-        val fullUri = if (!isHttps) {
-            "https://$url"
-        } else {
-            url
-        }
-
-        return getFeed(fullUri)
-    }
-
-    private fun getFeed(uri: String): Feed {
         val request = Request.Builder()
-            .url(uri)
+            .url(url)
             .build()
 
         val response = httpClient.newCall(request).execute()
@@ -70,17 +54,17 @@ class StandaloneNewsApi(
                 .select("link[type=\"application/atom+xml\"]")
 
             if (atomElements.isEmpty() && rssElements.isEmpty()) {
-                throw Exception("Cannot find feeds for $uri")
+                throw Exception("Cannot find feeds for $url")
             }
 
-            return getFeed((atomElements + rssElements).first().attr("href"))
+            return addFeed((atomElements + rssElements).first().attr("href"))
         } else {
             val builder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
             val document = builder.parse(responseBody.byteStream())
 
             return when (document.getFeedType()) {
-                FeedType.ATOM -> document.toAtomFeed(uri).toFeed()
-                FeedType.RSS -> document.toRssFeed(uri).toFeed()
+                FeedType.ATOM -> document.toAtomFeed(url).toFeed()
+                FeedType.RSS -> document.toRssFeed(url).toFeed()
                 FeedType.UNKNOWN -> throw Exception("Unknown feed type")
             }
         }

@@ -19,7 +19,7 @@ class FeedsAdapterViewHolder(
     fun bind(item: FeedsAdapterItem) {
         binding.apply {
             primaryText.text = item.title
-            secondaryText.text = item.alternateLink
+            secondaryText.text = item.selfLink
 
             errorText.isVisible = false // TODO
 
