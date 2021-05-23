@@ -17,9 +17,7 @@ fun Document.getFeedType(): FeedType {
     return FeedType.UNKNOWN
 }
 
-fun Document.toAtomFeed(feedUrl: String = ""): ParsedFeed {
-    val id = documentElement.getElementsByTagName("id").item(0).textContent
-        ?: throw Exception("Atom channel has no id")
+fun Document.toAtomFeed(feedUrl: String): ParsedFeed {
     val title = documentElement.getElementsByTagName("title").item(0).textContent
         ?: throw Exception("Atom channel has no title")
 
@@ -48,7 +46,7 @@ fun Document.toAtomFeed(feedUrl: String = ""): ParsedFeed {
     }
 
     return ParsedFeed(
-        id = id,
+        id = feedUrl,
         title = title,
         selfLink = selfLink,
         alternateLink = alternateLink,
