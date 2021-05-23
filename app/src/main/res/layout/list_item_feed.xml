@@ -62,6 +62,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:layout_marginEnd="4dp"
         android:background="@drawable/bg_circle"
         android:paddingStart="6dp"
         android:paddingTop="2dp"
@@ -71,18 +72,26 @@
         android:textColor="@android:color/white"
         tools:text="666" />
 
-    <ImageView
-        android:id="@+id/actions"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+    <FrameLayout
+        android:layout_width="40dp"
+        android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
         android:clickable="true"
-        android:contentDescription="@string/actions"
-        android:focusable="true"
-        android:padding="4dp"
-        android:src="@drawable/ic_baseline_more_vert_24" />
+        android:focusable="true">
+
+        <ImageView
+            android:id="@+id/actions"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_gravity="center"
+            android:layout_marginEnd="2dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:contentDescription="@string/actions"
+            android:focusable="true"
+            android:padding="2dp"
+            android:src="@drawable/ic_baseline_more_vert_24" />
+
+    </FrameLayout>
 
 </LinearLayout>
