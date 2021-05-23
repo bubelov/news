@@ -85,6 +85,8 @@ class App : Application() {
     }
 
     companion object {
+        const val DB_FILE_NAME = "news.db"
+
         private const val SYNC_WORK_NAME = "sync"
     }
 }

@@ -9,6 +9,7 @@ import auth.AuthViewModel
 import auth.DirectAuthViewModel
 import co.appreactor.news.Database
 import com.squareup.sqldelight.android.AndroidSqliteDriver
+import common.App
 import common.PreferencesRepository
 import sync.NewsApiSync
 import feeds.FeedsRepository
@@ -40,7 +41,7 @@ val appModule = module {
             AndroidSqliteDriver(
                 schema = Database.Schema,
                 context = get(),
-                name = "news.db",
+                name = App.DB_FILE_NAME,
             )
         )
     }

@@ -5,6 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RadioButton
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -15,8 +17,12 @@ import common.PreferencesRepository
 import co.appreactor.news.databinding.FragmentSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.nextcloud.android.sso.AccountImporter
+import common.App
 import common.app
+import common.showErrorDialog
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.android.viewmodel.ext.android.viewModel
 import java.util.concurrent.TimeUnit
 
@@ -26,6 +32,34 @@ class SettingsFragment : Fragment() {
 
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
+
+    @Suppress("BlockingMethodInNonBlockingContext")
+    private val exportDatabaseLauncher = registerForActivityResult(
+        ActivityResultContracts.CreateDocument()
+    ) { uri ->
+        if (uri == null) {
+            return@registerForActivityResult
+        }
+
+        val database = requireActivity().getDatabasePath(App.DB_FILE_NAME)
+
+        if (!database.exists()) {
+            Toast.makeText(requireContext(), "Database does not exist", Toast.LENGTH_LONG).show()
+            return@registerForActivityResult
+        }
+
+        lifecycleScope.launchWhenResumed {
+            withContext(Dispatchers.IO) {
+                runCatching {
+                    requireContext().contentResolver.openOutputStream(uri)?.use {
+                        database.inputStream().copyTo(it)
+                    }
+                }.onFailure {
+                    showErrorDialog(it)
+                }
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -135,6 +169,10 @@ class SettingsFragment : Fragment() {
 
             viewExceptions.setOnClickListener {
                 findNavController().navigate(SettingsFragmentDirections.actionSettingsFragmentToExceptionsFragment())
+            }
+
+            exportDatabase.setOnClickListener {
+                exportDatabaseLauncher.launch("news.db")
             }
 
             logOut.setOnClickListener {

@@ -266,6 +266,29 @@
                 android:layout_height="1dp" />
 
             <LinearLayout
+                android:id="@+id/exportDatabase"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/export_database"
+                    android:textAppearance="?textAppearanceListItem" />
+
+            </LinearLayout>
+
+            <View
+                style="@style/Divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp" />
+
+            <LinearLayout
                 android:id="@+id/logOut"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -291,6 +314,15 @@
                     tools:text="foo@bar.com" />
 
             </LinearLayout>
+
+            <View
+                style="@style/Divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="40dp" />
 
         </LinearLayout>
 
