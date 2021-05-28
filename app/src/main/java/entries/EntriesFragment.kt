@@ -123,81 +123,93 @@ class EntriesFragment : Fragment(), Scrollable {
         }
     }
 
-    private val touchHelper = ItemTouchHelper(object : ItemTouchHelper.Callback() {
-        override fun getMovementFlags(
-            recyclerView: RecyclerView,
-            viewHolder: RecyclerView.ViewHolder
-        ): Int {
-            return makeMovementFlags(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT)
-        }
+    private val touchHelper: ItemTouchHelper? by lazy {
+        when (args.filter) {
+            EntriesFilter.OnlyNotBookmarked -> {
+                ItemTouchHelper(object : SwipeHelper(
+                    requireContext(),
+                    R.drawable.ic_baseline_visibility_24,
+                    R.drawable.ic_baseline_bookmark_add_24,
+                ) {
+                    override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                        val entryIndex = viewHolder.bindingAdapterPosition
+                        val entry = adapter.currentList[viewHolder.bindingAdapterPosition]
 
-        override fun onMove(
-            recyclerView: RecyclerView,
-            viewHolder: RecyclerView.ViewHolder,
-            target: RecyclerView.ViewHolder
-        ): Boolean {
-            return false
-        }
+                        when (direction) {
+                            ItemTouchHelper.LEFT -> {
+                                dismissEntry(
+                                    entry = entry,
+                                    entryIndex = entryIndex,
+                                    actionText = R.string.marked_as_read,
+                                    action = { model.setRead(listOf(entry.id), true) },
+                                    undoAction = { model.setRead(listOf(entry.id), false) }
+                                )
+                            }
 
-        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-            val entryIndex = viewHolder.bindingAdapterPosition
-            val entry = adapter.currentList[viewHolder.bindingAdapterPosition]
-
-            when (direction) {
-                ItemTouchHelper.LEFT -> {
-                    when (args.filter) {
-                        EntriesFilter.OnlyNotBookmarked -> {
-                            dismissEntry(
-                                entry = entry,
-                                entryIndex = entryIndex,
-                                actionText = R.string.marked_as_read,
-                                action = { model.setRead(listOf(entry.id), true) },
-                                undoAction = { model.setRead(listOf(entry.id), false) }
-                            )
+                            ItemTouchHelper.RIGHT -> {
+                                dismissEntry(
+                                    entry = entry,
+                                    entryIndex = entryIndex,
+                                    actionText = R.string.bookmarked,
+                                    action = { model.setBookmarked(entry.id, true) },
+                                    undoAction = { model.setBookmarked(entry.id, false) }
+                                )
+                            }
                         }
-
-                        EntriesFilter.OnlyBookmarked -> {
-                            dismissEntry(
-                                entry = entry,
-                                entryIndex = entryIndex,
-                                actionText = R.string.removed_from_bookmarks,
-                                action = { model.setBookmarked(entry.id, false) },
-                                undoAction = { model.setBookmarked(entry.id, true) }
-                            )
-                        }
-
-                        else -> Timber.e(Exception("Unexpected filter: ${args.filter}"))
                     }
-                }
-
-                ItemTouchHelper.RIGHT -> {
-                    when (args.filter) {
-                        EntriesFilter.OnlyNotBookmarked -> {
-                            dismissEntry(
-                                entry = entry,
-                                entryIndex = entryIndex,
-                                actionText = R.string.bookmarked,
-                                action = { model.setBookmarked(entry.id, true) },
-                                undoAction = { model.setBookmarked(entry.id, false) }
-                            )
-                        }
-
-                        EntriesFilter.OnlyBookmarked -> {
-                            dismissEntry(
-                                entry = entry,
-                                entryIndex = entryIndex,
-                                actionText = R.string.removed_from_bookmarks,
-                                action = { model.setBookmarked(entry.id, false) },
-                                undoAction = { model.setBookmarked(entry.id, true) }
-                            )
-                        }
-
-                        else -> Timber.e(Exception("Unexpected filter: ${args.filter}"))
-                    }
-                }
+                })
             }
+
+            EntriesFilter.OnlyBookmarked -> {
+                ItemTouchHelper(object : SwipeHelper(
+                    requireContext(),
+                    R.drawable.ic_baseline_bookmark_remove_24,
+                    R.drawable.ic_baseline_bookmark_remove_24,
+                ) {
+                    override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                        val entryIndex = viewHolder.bindingAdapterPosition
+                        val entry = adapter.currentList[viewHolder.bindingAdapterPosition]
+
+                        when (direction) {
+                            ItemTouchHelper.LEFT -> {
+                                dismissEntry(
+                                    entry = entry,
+                                    entryIndex = entryIndex,
+                                    actionText = R.string.removed_from_bookmarks,
+                                    action = {
+                                        model.setRead(listOf(entry.id), true)
+                                        model.setBookmarked(entry.id, false)
+                                    },
+                                    undoAction = {
+                                        model.setRead(listOf(entry.id), false)
+                                        model.setBookmarked(entry.id, true)
+                                    }
+                                )
+                            }
+
+                            ItemTouchHelper.RIGHT -> {
+                                dismissEntry(
+                                    entry = entry,
+                                    entryIndex = entryIndex,
+                                    actionText = R.string.removed_from_bookmarks,
+                                    action = {
+                                        model.setRead(listOf(entry.id), true)
+                                        model.setBookmarked(entry.id, false)
+                                    },
+                                    undoAction = {
+                                        model.setRead(listOf(entry.id), false)
+                                        model.setBookmarked(entry.id, true)
+                                    }
+                                )
+                            }
+                        }
+                    }
+                })
+            }
+
+            else -> null
         }
-    })
+    }
 
     private lateinit var listLayoutManager: LinearLayoutManager
 
@@ -320,14 +332,11 @@ class EntriesFragment : Fragment(), Scrollable {
             if (prefs.showOpenedEntries) {
                 showOpenedEntriesMenuItem.setIcon(R.drawable.ic_baseline_visibility_24)
                 showOpenedEntriesMenuItem.title = getString(R.string.hide_read_news)
-                touchHelper.attachToRecyclerView(null)
+                touchHelper?.attachToRecyclerView(null)
             } else {
                 showOpenedEntriesMenuItem.setIcon(R.drawable.ic_baseline_visibility_off_24)
                 showOpenedEntriesMenuItem.title = getString(R.string.show_read_news)
-
-                if (swipesAllowed()) {
-                    touchHelper.attachToRecyclerView(binding.listView)
-                }
+                touchHelper?.attachToRecyclerView(binding.listView)
             }
         }
 
@@ -405,9 +414,7 @@ class EntriesFragment : Fragment(), Scrollable {
             }
         }
 
-        if (swipesAllowed()) {
-            touchHelper.attachToRecyclerView(binding.listView)
-        }
+        touchHelper?.attachToRecyclerView(binding.listView)
 
         lifecycleScope.launchWhenResumed {
             if (model.getPreferences().markScrolledEntriesAsRead
@@ -523,8 +530,8 @@ class EntriesFragment : Fragment(), Scrollable {
 
     private fun getShowReadEntriesButtonVisibility(): Boolean {
         return when (args.filter!!) {
-            is EntriesFilter.OnlyNotBookmarked -> true
-            is EntriesFilter.OnlyBookmarked -> false
+            EntriesFilter.OnlyNotBookmarked -> true
+            EntriesFilter.OnlyBookmarked -> false
             is EntriesFilter.OnlyFromFeed -> true
         }
     }
@@ -565,14 +572,6 @@ class EntriesFragment : Fragment(), Scrollable {
             } else {
                 showErrorDialog(it)
             }
-        }
-    }
-
-    private fun swipesAllowed(): Boolean {
-        return when (args.filter) {
-            is EntriesFilter.OnlyNotBookmarked -> true
-            is EntriesFilter.OnlyBookmarked -> true
-            else -> false
         }
     }
 
