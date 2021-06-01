@@ -89,7 +89,8 @@
     <string name="view_exception_log">Visualizza il registro delle eccezioni</string>
     <string name="got_exception_of_class_s">Ottenuto %1$s. Vedi il registro delle eccezioni per i dettagli</string>
     <string name="trust_self_signed_certificates">Accetta i certificati auto-firmati</string>
-    <string name="you_have_no_feeds">You have no feeds</string>
+    <string name="you_have_no_feeds">Non hai fonti</string>
+    <string name="export_database">Esporta il database</string>
     <plurals name="d_hours">
         <item quantity="one">%d ora</item>
         <item quantity="other">%d ore</item>

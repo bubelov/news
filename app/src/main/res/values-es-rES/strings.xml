@@ -5,7 +5,7 @@
     <string name="post_image">Publicar imagen</string>
     <string name="settings">Ajustes</string>
     <string name="news">Noticias</string>
-    <string name="show_read_news">Mostrar artículos de leídos</string>
+    <string name="show_read_news">Mostrar artículos leídos</string>
     <string name="hide_read_news">Ocultar artículos leídos</string>
     <string name="bookmark">Marcador</string>
     <string name="remove_bookmark">Eliminar marcador</string>
@@ -90,6 +90,7 @@
     <string name="got_exception_of_class_s">Got %1$s. See exception log for details</string>
     <string name="trust_self_signed_certificates">Trust self-signed certificates</string>
     <string name="you_have_no_feeds">You have no feeds</string>
+    <string name="export_database">Export database</string>
     <plurals name="d_hours">
         <item quantity="one">%d horas</item>
         <item quantity="other">%d horas</item>

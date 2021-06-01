@@ -90,6 +90,7 @@
     <string name="got_exception_of_class_s">Got %1$s. See exception log for details</string>
     <string name="trust_self_signed_certificates">Trust self-signed certificates</string>
     <string name="you_have_no_feeds">You have no feeds</string>
+    <string name="export_database">Export database</string>
     <plurals name="d_hours">
         <item quantity="one">%d hour</item>
         <item quantity="few">%d hours</item>
