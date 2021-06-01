@@ -14,14 +14,14 @@ class DocumentExtensionsTests {
 
     @Test
     fun toAtomFeed() {
-        "github-curl.atom".toDocument().toAtomFeed().apply {
-            assertEquals("tag:github.com,2008:https://github.com/curl/curl/releases", id)
+        "github-curl.atom".toDocument().toAtomFeed("https://github.com/curl/curl/releases").apply {
+            assertEquals("https://github.com/curl/curl/releases", id)
             assertEquals("Release notes from curl", title)
             assertEquals("https://github.com/curl/curl/releases.atom", selfLink)
             assertEquals("https://github.com/curl/curl/releases", alternateLink)
         }
 
-        "kernel.atom".toDocument().toAtomFeed().apply {
+        "kernel.atom".toDocument().toAtomFeed("https://www.kernel.org/").apply {
             assertEquals("https://www.kernel.org/", id)
             assertEquals("The Linux Kernel Archives", title)
             assertEquals("https://www.kernel.org/feeds/all.atom.xml", selfLink)
@@ -35,8 +35,8 @@ class DocumentExtensionsTests {
             assertEquals("https://www.theverge.com/", alternateLink)
         }
 
-        "youtube.atom".toDocument().toAtomFeed().apply {
-            assertEquals("yt:channel:UCXuqSBlHAE6Xw-yeJA0Tunw", id)
+        "youtube.atom".toDocument().toAtomFeed("https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw").apply {
+            assertEquals("https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw", id)
             assertEquals("Linus Tech Tips", title)
             assertEquals(
                 "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
@@ -48,7 +48,7 @@ class DocumentExtensionsTests {
         "fdroid-issues.atom".toDocument()
             .toAtomFeed("https://gitlab.com/fdroid/rfp/-/issues.atom?feed_token=gdoyU2ZstimRyxzcCh4P&state=opened")
             .apply {
-                assertEquals("https://gitlab.com/fdroid/rfp/-/issues", id)
+                assertEquals("https://gitlab.com/fdroid/rfp/-/issues.atom?feed_token=gdoyU2ZstimRyxzcCh4P&state=opened", id)
                 assertEquals("Requests For Packaging issues", title)
                 assertEquals(
                     "https://gitlab.com/fdroid/rfp/-/issues.atom?feed_token=gdoyU2ZstimRyxzcCh4P&state=opened",
@@ -90,6 +90,11 @@ class DocumentExtensionsTests {
         "2021-05-14-lukesmith.xyz.rss".toDocument().apply {
             val entries = this.toRssEntries()
             assertEquals(1, entries.size)
+        }
+
+        "2021-06-01-devicespecifications.com.rss".toDocument().apply {
+            val entries = this.toRssEntries()
+            assertEquals(30, entries.size)
         }
     }
 

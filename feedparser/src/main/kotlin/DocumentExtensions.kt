@@ -151,7 +151,10 @@ fun Document.toRssEntries(): List<ParsedEntry> {
     return (0 until items.length).mapNotNull { index ->
         val item = items.item(index) as Element
 
-        val guid = item.getElementsByTagName("guid").item(0).textContent ?: return@mapNotNull null
+        val guid = item.getElementsByTagName("guid").item(0)?.textContent
+            ?: item.getElementsByTagName("link").item(0)?.textContent
+            ?: return@mapNotNull null
+
         val title = item.getElementsByTagName("title").item(0).textContent ?: "Untitled"
         val link = item.getElementsByTagName("link").item(0)?.textContent ?: ""
         val pubDate = (item.getElementsByTagName("pubDate").item(0).textContent ?: "").trim()
