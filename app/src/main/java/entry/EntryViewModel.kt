@@ -95,11 +95,6 @@ class EntryViewModel(
             return summary
         }
 
-        while (summary.contains("\u00A0")) {
-            val index = summary.indexOfFirst { it == '\u00A0' }
-            summary.delete(index, index + 1)
-        }
-
         while (summary.contains("\n\n\n")) {
             val index = summary.indexOf("\n\n\n")
             summary.delete(index, index + 1)
