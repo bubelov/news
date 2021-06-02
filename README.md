@@ -42,3 +42,9 @@ The standalone mode is still work in progress, which means it's not reliable at 
 ## 🌍 Translators Needed
 
 https://crwd.in/news-android
+
+## 🤚 Get in Touch
+
+If you have some ideas or want to report an issue, you can join our Matrix Space:
+
+https://matrix.to/#/!zqCKnmEfsntESikAoN:matrix.org?via=matrix.org
