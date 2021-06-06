@@ -1,6 +1,8 @@
 package feeds
 
+import android.app.Application
 import androidx.lifecycle.ViewModel
+import co.appreactor.news.R
 import db.Feed
 import entries.EntriesRepository
 import kotlinx.coroutines.Dispatchers
@@ -11,11 +13,13 @@ import kotlinx.coroutines.withContext
 import opml.exportOpml
 import opml.importOpml
 import timber.log.Timber
+import java.net.URL
 import java.util.concurrent.atomic.AtomicInteger
 
 class FeedsViewModel(
     private val feedsRepository: FeedsRepository,
     private val entriesRepository: EntriesRepository,
+    private val app: Application,
 ) : ViewModel() {
 
     val state = MutableStateFlow<State>(State.Inactive)
@@ -24,13 +28,22 @@ class FeedsViewModel(
         state.value = State.Loading
 
         state.value = State.ShowingFeeds(
-            feeds = feedsRepository.selectAll().map { it.toItem() }
+            feeds = feedsRepository.selectAll().map { it.toItem() },
         )
     }
 
     suspend fun createFeed(url: String) = changeState {
         value = State.Loading
-        feedsRepository.insertByFeedUrl(url)
+
+        val fullUrl = if (url.startsWith("http")) url else "https://$url"
+
+        try {
+            URL(fullUrl).toURI()
+        } catch (e: Exception) {
+            throw Exception(app.getString(R.string.invalid_url_s, fullUrl), e)
+        }
+
+        feedsRepository.insertByFeedUrl(fullUrl)
         loadFeeds()
     }
 
