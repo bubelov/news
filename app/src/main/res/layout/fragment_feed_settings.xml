@@ -51,6 +51,37 @@
                 android:layout_height="1dp" />
 
             <LinearLayout
+                android:id="@+id/showPreviewImagesPanel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/preview_images"
+                    android:textAppearance="?textAppearanceListItem" />
+
+                <TextView
+                    android:id="@+id/showPreviewImages"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:alpha="0.6"
+                    android:textAppearance="?textAppearanceListItemSecondary"
+                    tools:text="Follow settings" />
+
+            </LinearLayout>
+
+            <View
+                style="@style/Divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp" />
+
+            <LinearLayout
                 android:id="@+id/blockedWordsPanel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

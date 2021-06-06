@@ -308,13 +308,21 @@ class EntriesViewModel(
                 }
             },
             image = flow {
+                if (feed?.showPreviewImages == false) {
+                    return@flow
+                }
+
                 entriesImagesRepository.getPreviewImage(this@toRow.id).collect {
                     emit(it)
                 }
             },
             cachedImage = lazy {
                 runBlocking {
-                    entriesImagesRepository.getPreviewImage(this@toRow.id).first()
+                    if (feed?.showPreviewImages == false) {
+                        null
+                    } else {
+                        entriesImagesRepository.getPreviewImage(this@toRow.id).first()
+                    }
                 }
 
             },

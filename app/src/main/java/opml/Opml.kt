@@ -27,6 +27,7 @@ private object Symbols {
     const val NEWS_NAMESPACE = "https://appreactor.co/news"
     const val OPEN_ENTRIES_IN_BROWSER = "openEntriesInBrowser"
     const val BLOCKED_WORDS = "blockedWords"
+    const val SHOW_PREVIEW_IMAGES = "showPreviewImages"
 }
 
 fun importOpml(xml: String): List<Outline> {
@@ -45,6 +46,11 @@ fun importOpml(xml: String): List<Outline> {
                 insideOpml = true
             } else if (insideOpml && parser.name == Symbols.OUTLINE) {
                 parser.apply {
+                    val showPreviewImagesString = getAttributeValue(
+                        null,
+                        "${Symbols.NEWS_NAMESPACE_PREFIX}:${Symbols.SHOW_PREVIEW_IMAGES}"
+                    ) ?: "null"
+
                     elements += Outline(
                         text = getAttributeValue(null, Symbols.TEXT),
                         type = getAttributeValue(null, Symbols.TYPE),
@@ -57,6 +63,11 @@ fun importOpml(xml: String): List<Outline> {
                             null,
                             "${Symbols.NEWS_NAMESPACE_PREFIX}:${Symbols.BLOCKED_WORDS}"
                         ) ?: "",
+                        showPreviewImages = when (showPreviewImagesString) {
+                            "true" -> true
+                            "false" -> false
+                            else -> null
+                        },
                     )
                 }
             }
@@ -98,6 +109,11 @@ fun exportOpml(feeds: List<Feed>): String {
                 feed.openEntriesInBrowser.toString()
             )
             attribute(Symbols.NEWS_NAMESPACE, Symbols.BLOCKED_WORDS, feed.blockedWords)
+            attribute(
+                Symbols.NEWS_NAMESPACE,
+                Symbols.SHOW_PREVIEW_IMAGES,
+                feed.showPreviewImages.toString()
+            )
             endTag(null, Symbols.OUTLINE)
         }
 

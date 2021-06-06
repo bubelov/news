@@ -15,6 +15,7 @@ class OpmlTests {
             xmlUrl = "https://blog.wirelessmoves.com/feed",
             openEntriesInBrowser = true,
             blockedWords = "abc",
+            showPreviewImages = false,
         ),
         Outline(
             text = "Nextcloud",
@@ -22,6 +23,7 @@ class OpmlTests {
             xmlUrl = "https://nextcloud.com/blogfeed",
             openEntriesInBrowser = false,
             blockedWords = "",
+            showPreviewImages = true,
         ),
         Outline(
             text = "PINE64",
@@ -29,6 +31,7 @@ class OpmlTests {
             xmlUrl = "https://www.pine64.org/feed/",
             openEntriesInBrowser = true,
             blockedWords = "xyz",
+            showPreviewImages = null,
         ),
     )
 
@@ -48,6 +51,7 @@ class OpmlTests {
                 alternateLink = "",
                 openEntriesInBrowser = it.openEntriesInBrowser,
                 blockedWords = it.blockedWords,
+                showPreviewImages = it.showPreviewImages,
             )
         }
 

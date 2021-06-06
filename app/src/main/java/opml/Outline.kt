@@ -6,4 +6,5 @@ data class Outline(
     val xmlUrl: String,
     val openEntriesInBrowser: Boolean,
     val blockedWords: String,
+    val showPreviewImages: Boolean?,
 )

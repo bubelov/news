@@ -14,6 +14,11 @@ class FeedSettingsViewModel(
         feedsRepository.insertOrReplace(feed.copy(openEntriesInBrowser = openEntriesInBrowser))
     }
 
+    fun setShowPreviewImages(feedId: String, value: Boolean?) {
+        val feed = getFeed(feedId) ?: return
+        feedsRepository.insertOrReplace(feed.copy(showPreviewImages = value))
+    }
+
     fun formatBlockedWords(blockedWords: String): String {
         val separatedWords = blockedWords.split(",")
 

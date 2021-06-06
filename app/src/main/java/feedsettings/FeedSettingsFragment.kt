@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.RadioButton
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -58,6 +59,8 @@ class FeedSettingsFragment : Fragment() {
                 }
             }
 
+            updatePreviewImagesPanel()
+
             blockedWords.text = feed.blockedWords.replace(",", ", ")
 
             blockedWordsPanel.setOnClickListener {
@@ -96,6 +99,45 @@ class FeedSettingsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun updatePreviewImagesPanel() {
+        val feed = model.getFeed(args.feedId)!!
+
+        binding.showPreviewImages.text = when (feed.showPreviewImages) {
+            true -> getString(R.string.show)
+            false -> getString(R.string.hide)
+            else -> getString(R.string.follow_settings)
+        }
+
+        binding.showPreviewImagesPanel.setOnClickListener {
+            val dialog = MaterialAlertDialogBuilder(requireContext())
+                .setTitle(getString(R.string.preview_images))
+                .setView(R.layout.dialog_show_preview_images)
+                .show()
+
+            val btnShow = dialog.findViewById<RadioButton>(R.id.show)!!
+            val btnHide = dialog.findViewById<RadioButton>(R.id.hide)!!
+            val btnFollowSettings = dialog.findViewById<RadioButton>(R.id.followSettings)!!
+
+            val checkedButton = when (feed.showPreviewImages) {
+                true -> btnShow
+                false -> btnHide
+                else -> btnFollowSettings
+            }
+
+            checkedButton.isChecked = true
+
+            val saveValue = fun(value: Boolean?) {
+                model.setShowPreviewImages(args.feedId, value)
+                dialog.dismiss()
+                updatePreviewImagesPanel()
+            }
+
+            btnShow.setOnClickListener { saveValue.invoke(true) }
+            btnHide.setOnClickListener { saveValue.invoke(false) }
+            btnFollowSettings.setOnClickListener { saveValue.invoke(null) }
+        }
     }
 
     private fun hideKeyboard() {

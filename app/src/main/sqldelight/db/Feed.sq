@@ -4,7 +4,8 @@ CREATE TABLE Feed (
   selfLink TEXT NOT NULL,
   alternateLink TEXT NOT NULL,
   openEntriesInBrowser INTEGER AS Boolean NOT NULL DEFAULT 0,
-  blockedWords TEXT NOT NULL DEFAULT ''
+  blockedWords TEXT NOT NULL DEFAULT '',
+  showPreviewImages INTEGER AS Boolean
 );
 
 insertOrReplace:

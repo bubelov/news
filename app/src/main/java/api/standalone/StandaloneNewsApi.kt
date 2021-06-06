@@ -165,6 +165,7 @@ class StandaloneNewsApi(
         alternateLink = alternateLink,
         openEntriesInBrowser = false,
         blockedWords = "",
+        showPreviewImages = null,
     )
 
     private fun ParsedEntry.toEntry() = Entry(

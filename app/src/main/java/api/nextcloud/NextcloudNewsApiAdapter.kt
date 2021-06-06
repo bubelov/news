@@ -158,6 +158,7 @@ class NextcloudNewsApiAdapter(
             alternateLink = link ?: "",
             openEntriesInBrowser = false,
             blockedWords = "",
+            showPreviewImages = null,
         )
     }
 
