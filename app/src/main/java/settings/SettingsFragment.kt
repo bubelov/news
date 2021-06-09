@@ -13,13 +13,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.NavGraphDirections
 import co.appreactor.news.R
-import common.PreferencesRepository
 import co.appreactor.news.databinding.FragmentSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.nextcloud.android.sso.AccountImporter
-import common.App
-import common.app
-import common.showErrorDialog
+import common.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -71,6 +68,16 @@ class SettingsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        resetToolbar()
+
+        toolbar().apply {
+            setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
+            setNavigationOnClickListener { findNavController().popBackStack() }
+            setTitle(R.string.settings)
+        }
+
+        toolbar().setTitle(R.string.settings)
+
         val prefs = model.getPreferences()
 
         binding.apply {

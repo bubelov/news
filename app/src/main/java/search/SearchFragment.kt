@@ -20,6 +20,7 @@ import com.google.android.material.internal.TextWatcherAdapter
 import common.CardListAdapterDecoration
 import common.hideKeyboard
 import common.showKeyboard
+import common.toolbar
 import entries.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -79,6 +80,7 @@ class SearchFragment : Fragment() {
         binding.toolbar.setNavigationOnClickListener {
             requireContext().hideKeyboard(binding.searchInput)
             findNavController().popBackStack()
+            toolbar().isVisible = true
         }
 
         lifecycleScope.launch {

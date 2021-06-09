@@ -152,27 +152,28 @@ class FeedsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        binding.apply {
-            toolbar.apply {
-                setNavigationOnClickListener {
-                    findNavController().popBackStack()
-                }
+        resetToolbar()
 
-                setOnMenuItemClickListener {
-                    when (it.itemId) {
-                        R.id.importFeeds -> {
-                            importFeedsLauncher.launch("*/*")
-                        }
+        toolbar().apply {
+            setTitle(R.string.feeds)
+            inflateMenu(R.menu.menu_feeds)
 
-                        R.id.exportFeeds -> {
-                            exportFeedsLauncher.launch("feeds.opml")
-                        }
+            setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.importFeeds -> {
+                        importFeedsLauncher.launch("*/*")
                     }
 
-                    true
+                    R.id.exportFeeds -> {
+                        exportFeedsLauncher.launch("feeds.opml")
+                    }
                 }
-            }
 
+                true
+            }
+        }
+
+        binding.apply {
             list.apply {
                 setHasFixedSize(true)
                 layoutManager = LinearLayoutManager(requireContext())

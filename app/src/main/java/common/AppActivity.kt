@@ -1,6 +1,7 @@
 package common
 
 import android.os.Bundle
+import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
@@ -24,6 +25,8 @@ class AppActivity : AppCompatActivity() {
         findNavController(R.id.nav_host_fragment)
     }
 
+    lateinit var drawerToggle: ActionBarDrawerToggle
+
     private val navListener = NavController.OnDestinationChangedListener { _, destination, args ->
         if (destination.id == R.id.entriesFragment) {
             val filter = args?.getParcelable<EntriesFilter>("filter")
@@ -35,10 +38,14 @@ class AppActivity : AppCompatActivity() {
             args!!.putParcelable("filter", EntriesFilter.OnlyBookmarked)
         }
 
+        binding.globalToolbar.isVisible =
+            destination.id != R.id.authFragment && destination.id != R.id.searchFragment
+
         binding.bottomNavigation.isVisible =
             destination.id == R.id.feedsFragment
                     || destination.id == R.id.bookmarksFragment
-                    || destination.id == R.id.settingsFragment
+                    || destination.id == R.id.podcastsFragment
+                    || destination.id == R.id.entriesFragment
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,6 +61,26 @@ class AppActivity : AppCompatActivity() {
 
         lifecycleScope.launchWhenCreated {
             get<EntriesImagesRepository>().syncPreviews()
+        }
+
+        drawerToggle = ActionBarDrawerToggle(
+            this,
+            binding.drawerLayout,
+            binding.globalToolbar,
+            R.string.bookmark,
+            R.string.bookmark,
+        )
+
+        binding.drawerLayout.addDrawerListener(drawerToggle)
+
+        binding.navigationView.setNavigationItemSelectedListener {
+            if (it.itemId == R.id.settings) {
+                binding.drawerLayout.close()
+                navController.navigate(R.id.action_global_to_settingsFragment)
+                return@setNavigationItemSelectedListener true
+            }
+
+            false
         }
     }
 
@@ -108,4 +135,6 @@ class AppActivity : AppCompatActivity() {
 
         navController.addOnDestinationChangedListener(navListener)
     }
+
+    fun toolbar() = binding.globalToolbar
 }

@@ -22,9 +22,10 @@
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/settingsFragment"
-        android:icon="@drawable/ic_baseline_settings_24"
-        android:title="@string/settings"
+        android:id="@+id/podcastsFragment"
+        android:icon="@drawable/ic_baseline_headset_24"
+        android:title="@string/podcasts"
+        android:visible="false"
         app:showAsAction="ifRoom" />
 
 </menu>

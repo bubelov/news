@@ -14,6 +14,7 @@ import common.PreferencesRepository
 import common.showDialog
 import co.appreactor.news.databinding.FragmentDirectAuthBinding
 import common.app
+import common.toolbar
 import entries.EntriesFilter
 import org.koin.android.viewmodel.ext.android.viewModel
 import timber.log.Timber
@@ -35,8 +36,14 @@ class DirectAuthFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        binding.toolbar.setNavigationOnClickListener {
-            findNavController().popBackStack()
+        toolbar().apply {
+            setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
+
+            setNavigationOnClickListener {
+                findNavController().popBackStack()
+            }
+
+            setTitle(R.string.nextcloud_login)
         }
 
         binding.login.setOnClickListener {

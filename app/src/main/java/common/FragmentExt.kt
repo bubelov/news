@@ -10,6 +10,14 @@ import timber.log.Timber
 
 fun Fragment.app() = requireContext().applicationContext as App
 
+fun Fragment.resetToolbar() = activity().toolbar().apply {
+    activity().drawerToggle.syncState()
+    title = ""
+    menu?.clear()
+}
+
+fun Fragment.toolbar() = activity().toolbar()
+
 fun Fragment.showDialog(
     @StringRes titleId: Int,
     @StringRes messageId: Int,
@@ -74,3 +82,5 @@ fun Fragment.showErrorDialog(
         }
     }
 }
+
+private fun Fragment.activity() = requireActivity() as AppActivity

@@ -223,6 +223,13 @@ class EntriesFragment : Fragment(), Scrollable {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        resetToolbar()
+
+        toolbar().apply {
+            setTitle(R.string.news)
+            inflateMenu(R.menu.menu_entries)
+        }
+
         initListView()
 
         lifecycleScope.launchWhenResumed {
@@ -254,22 +261,22 @@ class EntriesFragment : Fragment(), Scrollable {
             }
 
             is EntriesFilter.OnlyBookmarked -> {
-                binding.toolbar.title = getString(R.string.bookmarks)
+                toolbar().setTitle(R.string.bookmarks)
                 binding.swipeRefresh.isEnabled = false
             }
 
             is EntriesFilter.OnlyFromFeed -> {
                 binding.swipeRefresh.isEnabled = false
 
-                binding.toolbar.setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
+                toolbar().setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
 
-                binding.toolbar.setNavigationOnClickListener {
+                toolbar().setNavigationOnClickListener {
                     findNavController().popBackStack()
                 }
 
                 lifecycleScope.launchWhenResumed {
                     val feed = model.getFeed(filter.feedId)
-                    binding.toolbar.title = feed?.title
+                    toolbar().title = feed?.title
                 }
             }
         }
@@ -310,7 +317,7 @@ class EntriesFragment : Fragment(), Scrollable {
     }
 
     private fun initSearchButton() {
-        val searchMenuItem = binding.toolbar.menu.findItem(R.id.search)
+        val searchMenuItem = toolbar().menu.findItem(R.id.search)
 
         searchMenuItem.setOnMenuItemClickListener {
             findNavController().navigate(
@@ -323,7 +330,7 @@ class EntriesFragment : Fragment(), Scrollable {
     }
 
     private fun initShowReadEntriesButton() {
-        val showOpenedEntriesMenuItem = binding.toolbar.menu.findItem(R.id.showOpenedEntries)
+        val showOpenedEntriesMenuItem = toolbar().menu.findItem(R.id.showOpenedEntries)
         showOpenedEntriesMenuItem.isVisible = getShowReadEntriesButtonVisibility()
 
         lifecycleScope.launchWhenResumed {
@@ -353,7 +360,7 @@ class EntriesFragment : Fragment(), Scrollable {
     }
 
     private fun initSortOrderButton() {
-        val sortOrderMenuItem = binding.toolbar.menu.findItem(R.id.sort)
+        val sortOrderMenuItem = toolbar().menu.findItem(R.id.sort)
 
         lifecycleScope.launchWhenResumed {
             val prefs = model.getPreferences()
@@ -392,7 +399,7 @@ class EntriesFragment : Fragment(), Scrollable {
     }
 
     private fun initMarkAllAsReadButton() {
-        binding.toolbar.menu.findItem(R.id.markAllAsRead)?.setOnMenuItemClickListener {
+        toolbar().menu.findItem(R.id.markAllAsRead)?.setOnMenuItemClickListener {
             lifecycleScope.launchWhenResumed { model.markAllAsRead() }
             true
         }

@@ -95,6 +95,7 @@
     <string name="show">Show</string>
     <string name="hide">Hide</string>
     <string name="follow_settings">Follow settings</string>
+    <string name="podcasts">Podcasts</string>
     <plurals name="d_hours">
         <item quantity="zero">%d hours</item>
         <item quantity="one">%d hour</item>
