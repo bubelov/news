@@ -100,6 +100,7 @@ class FeedsViewModel(
                                 cachedFeed.copy(
                                     openEntriesInBrowser = outline.openEntriesInBrowser,
                                     blockedWords = outline.blockedWords,
+                                    showPreviewImages = outline.showPreviewImages,
                                 )
                             )
 
