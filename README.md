@@ -48,3 +48,11 @@ https://crwd.in/news-android
 If you have some ideas or want to report an issue, you can join our Matrix Space:
 
 https://matrix.to/#/!zqCKnmEfsntESikAoN:matrix.org?via=matrix.org
+
+## 🪙 Support the Project
+
+Lightning Network
+
+<img src="https://user-images.githubusercontent.com/1189245/121570237-e5b2f280-ca4b-11eb-8bd5-6633f3155b17.png" width=250 height=250/>
+
+LNURL1DP68GURN8GHJ7MRWVF5HGUEWVDHK6TMVDE6HYMRS9ASHQ6F0WCCJ7MRWW4EXCTEJX5CSM6W0XT
