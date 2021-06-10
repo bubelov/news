@@ -13,6 +13,8 @@ import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentAppExceptionsBinding
 import common.CardListAdapterDecoration
 import common.Result
+import common.resetToolbar
+import common.toolbar
 import kotlinx.coroutines.flow.collect
 import org.koin.android.viewmodel.ext.android.viewModel
 
@@ -41,10 +43,13 @@ class AppExceptionsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        binding.toolbar.apply {
-            setNavigationOnClickListener {
-                findNavController().popBackStack()
-            }
+        resetToolbar()
+
+        toolbar().apply {
+            setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
+            setNavigationOnClickListener { findNavController().popBackStack() }
+            setTitle(R.string.exceptions)
+            inflateMenu(R.menu.menu_logged_exceptions)
 
             setOnMenuItemClickListener { menuItem ->
                 when (menuItem.itemId) {

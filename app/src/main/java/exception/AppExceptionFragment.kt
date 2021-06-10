@@ -10,6 +10,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentAppExceptionBinding
+import common.resetToolbar
+import common.toolbar
 import org.koin.android.viewmodel.ext.android.viewModel
 
 class AppExceptionFragment : Fragment() {
@@ -36,12 +38,13 @@ class AppExceptionFragment : Fragment() {
         lifecycleScope.launchWhenResumed {
             val exception = model.selectById(args.exceptionId) ?: return@launchWhenResumed
 
-            binding.toolbar.apply {
-                setNavigationOnClickListener {
-                    findNavController().popBackStack()
-                }
+            resetToolbar()
 
+            toolbar().apply {
+                setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
+                setNavigationOnClickListener { findNavController().popBackStack() }
                 title = exception.exceptionClass
+                inflateMenu(R.menu.menu_logged_exception)
 
                 setOnMenuItemClickListener { menuItem ->
                     when (menuItem.itemId) {
