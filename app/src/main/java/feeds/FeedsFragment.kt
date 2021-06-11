@@ -11,7 +11,6 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -28,7 +27,7 @@ import kotlinx.coroutines.withContext
 import org.koin.android.viewmodel.ext.android.viewModel
 import timber.log.Timber
 
-class FeedsFragment : Fragment() {
+class FeedsFragment : AppFragment() {
 
     private val model: FeedsViewModel by viewModel()
 
@@ -152,9 +151,9 @@ class FeedsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        resetToolbar()
+        super.onViewCreated(view, savedInstanceState)
 
-        toolbar().apply {
+        toolbar.apply {
             setTitle(R.string.feeds)
             inflateMenu(R.menu.menu_feeds)
 

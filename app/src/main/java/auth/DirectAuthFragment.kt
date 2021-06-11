@@ -6,20 +6,16 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
-import common.PreferencesRepository
-import common.showDialog
 import co.appreactor.news.databinding.FragmentDirectAuthBinding
-import common.app
-import common.toolbar
+import common.*
 import entries.EntriesFilter
 import org.koin.android.viewmodel.ext.android.viewModel
 import timber.log.Timber
 
-class DirectAuthFragment : Fragment() {
+class DirectAuthFragment : AppFragment() {
 
     private val model: DirectAuthViewModel by viewModel()
 
@@ -29,20 +25,18 @@ class DirectAuthFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentDirectAuthBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        toolbar().apply {
+        super.onViewCreated(view, savedInstanceState)
+
+        toolbar.apply {
             setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
-
-            setNavigationOnClickListener {
-                findNavController().popBackStack()
-            }
-
+            setNavigationOnClickListener { findNavController().popBackStack() }
             setTitle(R.string.nextcloud_login)
         }
 

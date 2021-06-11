@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.RadioButton
 import androidx.appcompat.app.AlertDialog
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -15,13 +14,10 @@ import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentFeedSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
-import common.resetToolbar
-import common.showErrorDialog
-import common.showKeyboard
-import common.toolbar
+import common.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
-class FeedSettingsFragment : Fragment() {
+class FeedSettingsFragment : AppFragment() {
 
     private val args: FeedSettingsFragmentArgs by navArgs()
 
@@ -40,6 +36,8 @@ class FeedSettingsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
         val feed = model.getFeed(args.feedId)
 
         if (feed == null) {
@@ -47,9 +45,7 @@ class FeedSettingsFragment : Fragment() {
             return
         }
 
-        resetToolbar()
-
-        toolbar().apply {
+        toolbar.apply {
             setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
             setNavigationOnClickListener { findNavController().popBackStack() }
             title = feed.title

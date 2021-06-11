@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,7 +14,7 @@ import common.*
 import kotlinx.coroutines.flow.collect
 import org.koin.android.viewmodel.ext.android.viewModel
 
-class LogEntriesFragment : Fragment() {
+class LogEntriesFragment : AppFragment() {
 
     private val model: LogEntriesViewModel by viewModel()
 
@@ -34,9 +33,9 @@ class LogEntriesFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        resetToolbar()
+        super.onViewCreated(view, savedInstanceState)
 
-        toolbar().apply {
+        toolbar.apply {
             setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
             setNavigationOnClickListener { findNavController().popBackStack() }
             setTitle(R.string.event_log)

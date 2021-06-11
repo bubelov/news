@@ -11,12 +11,9 @@ import android.view.WindowInsetsController
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
-import common.PreferencesRepository
-import common.getColorFromAttr
 import co.appreactor.news.databinding.FragmentAuthBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.nextcloud.android.sso.AccountImporter
@@ -24,13 +21,13 @@ import com.nextcloud.android.sso.AccountImporter.IAccountAccessGranted
 import com.nextcloud.android.sso.exceptions.SSOException
 import com.nextcloud.android.sso.helper.SingleAccountHelper
 import com.nextcloud.android.sso.ui.UiExceptionManager
-import common.app
+import common.*
 import entries.EntriesFilter
 import kotlinx.coroutines.runBlocking
 import org.koin.android.viewmodel.ext.android.viewModel
 import java.util.concurrent.TimeUnit
 
-class AuthFragment : Fragment() {
+class AuthFragment : AppFragment(showToolbar = false) {
 
     private val model: AuthViewModel by viewModel()
 
@@ -63,6 +60,8 @@ class AuthFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
         hideStatusBarBackground()
         invertStatusBarTextColorInLightMode()
 

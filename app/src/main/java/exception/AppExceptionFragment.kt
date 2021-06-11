@@ -5,16 +5,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentAppExceptionBinding
-import common.resetToolbar
-import common.toolbar
+import common.AppFragment
 import org.koin.android.viewmodel.ext.android.viewModel
 
-class AppExceptionFragment : Fragment() {
+class AppExceptionFragment : AppFragment() {
 
     private val args by lazy {
         AppExceptionFragmentArgs.fromBundle(requireArguments())
@@ -35,12 +33,12 @@ class AppExceptionFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
         lifecycleScope.launchWhenResumed {
             val exception = model.selectById(args.exceptionId) ?: return@launchWhenResumed
 
-            resetToolbar()
-
-            toolbar().apply {
+            toolbar.apply {
                 setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
                 setNavigationOnClickListener { findNavController().popBackStack() }
                 title = exception.exceptionClass

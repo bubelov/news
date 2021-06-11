@@ -1,0 +1,31 @@
+package common
+
+import android.os.Bundle
+import android.view.View
+import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
+
+abstract class AppFragment(
+    private val showToolbar: Boolean = true
+) : Fragment() {
+
+    private val activity by lazy { requireActivity() as AppActivity }
+
+    protected val toolbar by lazy { activity.binding.toolbar }
+
+    private val drawer by lazy { activity.binding.drawerLayout }
+
+    private val drawerToggle by lazy { activity.drawerToggle }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        toolbar.apply {
+            isVisible = showToolbar
+            setNavigationOnClickListener { drawer.open() }
+            drawerToggle.syncState()
+            title = ""
+            menu?.clear()
+        }
+    }
+}

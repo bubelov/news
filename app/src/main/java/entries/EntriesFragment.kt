@@ -11,7 +11,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -29,7 +28,7 @@ import org.koin.android.viewmodel.ext.android.sharedViewModel
 import org.koin.android.viewmodel.ext.android.viewModel
 import timber.log.Timber
 
-class EntriesFragment : Fragment(), Scrollable {
+class EntriesFragment : AppFragment(), Scrollable {
 
     private val args by lazy {
         EntriesFragmentArgs.fromBundle(requireArguments())
@@ -223,9 +222,9 @@ class EntriesFragment : Fragment(), Scrollable {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        resetToolbar()
+        super.onViewCreated(view, savedInstanceState)
 
-        toolbar().apply {
+        toolbar.apply {
             setTitle(R.string.news)
             inflateMenu(R.menu.menu_entries)
         }
@@ -261,22 +260,22 @@ class EntriesFragment : Fragment(), Scrollable {
             }
 
             is EntriesFilter.OnlyBookmarked -> {
-                toolbar().setTitle(R.string.bookmarks)
+                toolbar.setTitle(R.string.bookmarks)
                 binding.swipeRefresh.isEnabled = false
             }
 
             is EntriesFilter.OnlyFromFeed -> {
                 binding.swipeRefresh.isEnabled = false
 
-                toolbar().setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
+                toolbar.setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
 
-                toolbar().setNavigationOnClickListener {
+                toolbar.setNavigationOnClickListener {
                     findNavController().popBackStack()
                 }
 
                 lifecycleScope.launchWhenResumed {
                     val feed = model.getFeed(filter.feedId)
-                    toolbar().title = feed?.title
+                    toolbar.title = feed?.title
                 }
             }
         }
@@ -317,7 +316,7 @@ class EntriesFragment : Fragment(), Scrollable {
     }
 
     private fun initSearchButton() {
-        val searchMenuItem = toolbar().menu.findItem(R.id.search)
+        val searchMenuItem = toolbar.menu.findItem(R.id.search)
 
         searchMenuItem.setOnMenuItemClickListener {
             findNavController().navigate(
@@ -330,7 +329,7 @@ class EntriesFragment : Fragment(), Scrollable {
     }
 
     private fun initShowReadEntriesButton() {
-        val showOpenedEntriesMenuItem = toolbar().menu.findItem(R.id.showOpenedEntries)
+        val showOpenedEntriesMenuItem = toolbar.menu.findItem(R.id.showOpenedEntries)
         showOpenedEntriesMenuItem.isVisible = getShowReadEntriesButtonVisibility()
 
         lifecycleScope.launchWhenResumed {
@@ -360,7 +359,7 @@ class EntriesFragment : Fragment(), Scrollable {
     }
 
     private fun initSortOrderButton() {
-        val sortOrderMenuItem = toolbar().menu.findItem(R.id.sort)
+        val sortOrderMenuItem = toolbar.menu.findItem(R.id.sort)
 
         lifecycleScope.launchWhenResumed {
             val prefs = model.getPreferences()
@@ -399,7 +398,7 @@ class EntriesFragment : Fragment(), Scrollable {
     }
 
     private fun initMarkAllAsReadButton() {
-        toolbar().menu.findItem(R.id.markAllAsRead)?.setOnMenuItemClickListener {
+        toolbar.menu.findItem(R.id.markAllAsRead)?.setOnMenuItemClickListener {
             lifecycleScope.launchWhenResumed { model.markAllAsRead() }
             true
         }

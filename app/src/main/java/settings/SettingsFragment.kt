@@ -8,7 +8,6 @@ import android.widget.RadioButton
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.NavGraphDirections
@@ -23,7 +22,7 @@ import kotlinx.coroutines.withContext
 import org.koin.android.viewmodel.ext.android.viewModel
 import java.util.concurrent.TimeUnit
 
-class SettingsFragment : Fragment() {
+class SettingsFragment : AppFragment() {
 
     private val model: SettingsViewModel by viewModel()
 
@@ -68,15 +67,13 @@ class SettingsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        resetToolbar()
+        super.onViewCreated(view, savedInstanceState)
 
-        toolbar().apply {
+        toolbar.apply {
             setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
             setNavigationOnClickListener { findNavController().popBackStack() }
             setTitle(R.string.settings)
         }
-
-        toolbar().setTitle(R.string.settings)
 
         val prefs = model.getPreferences()
 

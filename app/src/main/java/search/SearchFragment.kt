@@ -10,23 +10,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentSearchBinding
 import com.google.android.material.internal.TextWatcherAdapter
-import common.CardListAdapterDecoration
-import common.hideKeyboard
-import common.showKeyboard
-import common.toolbar
+import common.*
 import entries.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
 
-class SearchFragment : Fragment() {
+class SearchFragment : AppFragment() {
 
     private val args by lazy {
         SearchFragmentArgs.fromBundle(requireArguments())
@@ -77,10 +73,12 @@ class SearchFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        binding.toolbar.setNavigationOnClickListener {
+        super.onViewCreated(view, savedInstanceState)
+
+        toolbar.setNavigationOnClickListener {
             requireContext().hideKeyboard(binding.searchInput)
             findNavController().popBackStack()
-            toolbar().isVisible = true
+            toolbar.isVisible = true
         }
 
         lifecycleScope.launch {

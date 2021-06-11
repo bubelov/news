@@ -19,7 +19,7 @@ import org.koin.android.ext.android.get
 
 class AppActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityAppBinding
+    lateinit var binding: ActivityAppBinding
 
     private val navController by lazy {
         findNavController(R.id.nav_host_fragment)
@@ -37,9 +37,6 @@ class AppActivity : AppCompatActivity() {
         if (destination.id == R.id.bookmarksFragment) {
             args!!.putParcelable("filter", EntriesFilter.OnlyBookmarked)
         }
-
-        binding.globalToolbar.isVisible =
-            destination.id != R.id.authFragment && destination.id != R.id.searchFragment
 
         binding.bottomNavigation.isVisible =
             destination.id == R.id.feedsFragment
@@ -66,7 +63,7 @@ class AppActivity : AppCompatActivity() {
         drawerToggle = ActionBarDrawerToggle(
             this,
             binding.drawerLayout,
-            binding.globalToolbar,
+            binding.toolbar,
             R.string.bookmark,
             R.string.bookmark,
         )
@@ -136,5 +133,5 @@ class AppActivity : AppCompatActivity() {
         navController.addOnDestinationChangedListener(navListener)
     }
 
-    fun toolbar() = binding.globalToolbar
+    fun toolbar() = binding.toolbar
 }
