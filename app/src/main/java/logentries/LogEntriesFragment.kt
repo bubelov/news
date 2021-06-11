@@ -11,9 +11,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentLogEntriesBinding
-import common.ListAdapterDecoration
-import common.hide
-import common.show
+import common.*
 import kotlinx.coroutines.flow.collect
 import org.koin.android.viewmodel.ext.android.viewModel
 
@@ -36,21 +34,24 @@ class LogEntriesFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        binding.apply {
-            toolbar.apply {
-                setNavigationOnClickListener {
-                    findNavController().popBackStack()
+        resetToolbar()
+
+        toolbar().apply {
+            setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
+            setNavigationOnClickListener { findNavController().popBackStack() }
+            setTitle(R.string.event_log)
+            inflateMenu(R.menu.menu_log_entries)
+
+            setOnMenuItemClickListener { menuItem ->
+                when (menuItem.itemId) {
+                    R.id.delete -> lifecycleScope.launchWhenResumed { model.deleteAllItems() }
                 }
 
-                setOnMenuItemClickListener { menuItem ->
-                    when (menuItem.itemId) {
-                        R.id.delete -> lifecycleScope.launchWhenResumed { model.deleteAllItems() }
-                    }
-
-                    true
-                }
+                true
             }
+        }
 
+        binding.apply {
             list.apply {
                 setHasFixedSize(true)
                 layoutManager = LinearLayoutManager(requireContext())

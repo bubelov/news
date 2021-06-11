@@ -15,8 +15,10 @@ import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentFeedSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
+import common.resetToolbar
 import common.showErrorDialog
 import common.showKeyboard
+import common.toolbar
 import org.koin.android.viewmodel.ext.android.viewModel
 
 class FeedSettingsFragment : Fragment() {
@@ -45,12 +47,15 @@ class FeedSettingsFragment : Fragment() {
             return
         }
 
-        binding.apply {
-            toolbar.apply {
-                title = feed.title
-                setNavigationOnClickListener { findNavController().popBackStack() }
-            }
+        resetToolbar()
 
+        toolbar().apply {
+            setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
+            setNavigationOnClickListener { findNavController().popBackStack() }
+            title = feed.title
+        }
+
+        binding.apply {
             openEntriesInBrowser.apply {
                 isChecked = feed.openEntriesInBrowser
 
