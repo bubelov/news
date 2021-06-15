@@ -2,6 +2,7 @@
 
 <androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -15,7 +16,42 @@
             style="?appBarLayoutStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:title="Title">
+
+            <LinearLayout
+                android:id="@+id/searchPanel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <EditText
+                    android:id="@+id/searchPanelText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:hint="@string/search"
+                    android:importantForAutofill="no"
+                    android:inputType="text"
+                    android:lines="1" />
+
+                <ImageView
+                    android:id="@+id/searchPanelClearButton"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="?android:selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:contentDescription="@string/clear_search_input"
+                    android:focusable="true"
+                    android:src="@drawable/ic_baseline_close_24" />
+
+            </LinearLayout>
+
+        </com.google.android.material.appbar.MaterialToolbar>
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/nav_host_fragment"

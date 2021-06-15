@@ -75,29 +75,34 @@ class SearchFragment : AppFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        toolbar.setNavigationOnClickListener {
-            requireContext().hideKeyboard(binding.searchInput)
-            findNavController().popBackStack()
-            toolbar.isVisible = true
+        searchPanel.isVisible = true
+
+        toolbar.apply {
+            setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
+
+            setNavigationOnClickListener {
+                requireContext().hideKeyboard(searchPanelText)
+                findNavController().popBackStack()
+            }
         }
 
         lifecycleScope.launch {
             model.searchString.collect {
-                binding.clear.isVisible = it.isNotEmpty()
+                searchPanelClearButton.isVisible = it.isNotEmpty()
             }
         }
 
-        binding.searchInput.addTextChangedListener(object : TextWatcherAdapter() {
+        searchPanelText.addTextChangedListener(object : TextWatcherAdapter() {
             override fun afterTextChanged(s: Editable) {
                 model.searchString.value = s.toString()
             }
         })
 
-        binding.clear.setOnClickListener {
-            binding.searchInput.setText("")
+        searchPanelClearButton.setOnClickListener {
+            searchPanelText.setText("")
         }
 
-        binding.searchInput.requestFocus()
+        searchPanelText.requestFocus()
         requireContext().showKeyboard()
 
         lifecycleScope.launch {
@@ -108,7 +113,7 @@ class SearchFragment : AppFragment() {
 
         lifecycleScope.launch {
             model.showEmpty.collect {
-                binding.empty.isVisible = it
+                binding.message.isVisible = it
             }
         }
 
@@ -146,7 +151,8 @@ class SearchFragment : AppFragment() {
     }
 
     override fun onDestroyView() {
-        requireContext().hideKeyboard(binding.searchInput)
+        searchPanel.isVisible = false
+        requireContext().hideKeyboard(searchPanelText)
         super.onDestroyView()
     }
 }

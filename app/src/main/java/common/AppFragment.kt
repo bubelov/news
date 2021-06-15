@@ -9,9 +9,15 @@ abstract class AppFragment(
     private val showToolbar: Boolean = true
 ) : Fragment() {
 
-    private val activity by lazy { requireActivity() as AppActivity }
-
     protected val toolbar by lazy { activity.binding.toolbar }
+
+    protected val searchPanel by lazy { activity.binding.searchPanel }
+
+    protected val searchPanelText by lazy { activity.binding.searchPanelText }
+
+    protected val searchPanelClearButton by lazy { activity.binding.searchPanelClearButton }
+
+    private val activity by lazy { requireActivity() as AppActivity }
 
     private val drawer by lazy { activity.binding.drawerLayout }
 
