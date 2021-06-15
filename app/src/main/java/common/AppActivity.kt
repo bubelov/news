@@ -30,6 +30,7 @@ class AppActivity : AppCompatActivity() {
     private val navListener = NavController.OnDestinationChangedListener { _, destination, args ->
         if (destination.id == R.id.entriesFragment) {
             val filter = args?.getParcelable<EntriesFilter>("filter")
+            binding.bottomNavigationDivider.isVisible = filter !is EntriesFilter.OnlyFromFeed
             binding.bottomNavigation.isVisible = filter !is EntriesFilter.OnlyFromFeed
             return@OnDestinationChangedListener
         }
@@ -38,11 +39,14 @@ class AppActivity : AppCompatActivity() {
             args!!.putParcelable("filter", EntriesFilter.OnlyBookmarked)
         }
 
-        binding.bottomNavigation.isVisible =
+        val bottomNavigationIsVisible =
             destination.id == R.id.feedsFragment
                     || destination.id == R.id.bookmarksFragment
                     || destination.id == R.id.podcastsFragment
                     || destination.id == R.id.entriesFragment
+
+        binding.bottomNavigationDivider.isVisible = bottomNavigationIsVisible
+        binding.bottomNavigation.isVisible = bottomNavigationIsVisible
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -125,13 +129,6 @@ class AppActivity : AppCompatActivity() {
             false
         }
 
-        if (inDarkMode()) {
-            window.statusBarColor = getSurfaceColor(binding.bottomNavigation.elevation)
-            window.navigationBarColor = getSurfaceColor(binding.bottomNavigation.elevation)
-        }
-
         navController.addOnDestinationChangedListener(navListener)
     }
-
-    fun toolbar() = binding.toolbar
 }

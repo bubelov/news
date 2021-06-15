@@ -1,16 +1,13 @@
 package auth
 
 import android.content.Intent
-import android.content.res.Configuration
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowInsetsController
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.*
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
@@ -27,7 +24,10 @@ import kotlinx.coroutines.runBlocking
 import org.koin.android.viewmodel.ext.android.viewModel
 import java.util.concurrent.TimeUnit
 
-class AuthFragment : AppFragment(showToolbar = false) {
+class AuthFragment : AppFragment(
+    showToolbar = false,
+    drawerLockMode = DrawerLayout.LOCK_MODE_LOCKED_CLOSED,
+) {
 
     private val model: AuthViewModel by viewModel()
 
@@ -61,9 +61,6 @@ class AuthFragment : AppFragment(showToolbar = false) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        hideStatusBarBackground()
-        invertStatusBarTextColorInLightMode()
 
         binding.standaloneMode.setOnClickListener {
             lifecycleScope.launchWhenResumed {
@@ -159,77 +156,5 @@ class AuthFragment : AppFragment(showToolbar = false) {
             popBackStack()
             navigate(R.id.feedsFragment)
         }
-    }
-
-    private fun hideStatusBarBackground() {
-        lifecycle.addObserver(object : LifecycleObserver {
-            var oldColor: Int = 0
-
-            @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
-            fun onResume() {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    oldColor = requireActivity().window.statusBarColor
-
-                    requireActivity().window.statusBarColor = ContextCompat.getColor(
-                        requireContext(),
-                        android.R.color.transparent
-                    )
-                }
-            }
-
-            @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-            fun onPause() {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    requireActivity().window.statusBarColor = oldColor
-                }
-            }
-        })
-    }
-
-    private fun invertStatusBarTextColorInLightMode() {
-        lifecycle.addObserver(object : LifecycleObserver {
-            var oldColor: Int = 0
-
-            @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
-            fun onResume() {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    val uiMode = requireContext().resources.configuration.uiMode and
-                            Configuration.UI_MODE_NIGHT_MASK
-
-                    if (uiMode != Configuration.UI_MODE_NIGHT_YES) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                            view?.windowInsetsController?.setSystemBarsAppearance(
-                                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
-                                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-                            )
-                        } else {
-                            @Suppress("DEPRECATION")
-                            view?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                        }
-                    }
-
-                    oldColor = requireActivity().window.navigationBarColor
-                    requireActivity().window.navigationBarColor =
-                        requireContext().getColorFromAttr(R.attr.colorSurface)
-                }
-            }
-
-            @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-            fun onPause() {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        view?.windowInsetsController?.setSystemBarsAppearance(
-                            0,
-                            WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-                        )
-                    } else {
-                        @Suppress("DEPRECATION")
-                        view?.systemUiVisibility = 0
-                    }
-
-                    requireActivity().window.navigationBarColor = oldColor
-                }
-            }
-        })
     }
 }

@@ -8,6 +8,7 @@ import android.widget.RadioButton
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.NavGraphDirections
@@ -22,7 +23,9 @@ import kotlinx.coroutines.withContext
 import org.koin.android.viewmodel.ext.android.viewModel
 import java.util.concurrent.TimeUnit
 
-class SettingsFragment : AppFragment() {
+class SettingsFragment : AppFragment(
+    drawerLockMode = DrawerLayout.LOCK_MODE_LOCKED_CLOSED,
+) {
 
     private val model: SettingsViewModel by viewModel()
 

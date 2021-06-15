@@ -1,7 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <group android:checkableBehavior="none">
+    <group
+        android:id="@+id/main"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/news"
+            android:checked="true"
+            android:icon="@drawable/ic_baseline_list_alt_24"
+            android:title="@string/news" />
+        <item
+            android:id="@+id/bookmarks"
+            android:icon="@drawable/ic_baseline_bookmark_24"
+            android:title="@string/bookmarks" />
+        <item
+            android:id="@+id/feeds"
+            android:icon="@drawable/ic_baseline_rss_feed_24"
+            android:title="@string/feeds" />
+    </group>
+
+    <group
+        android:id="@+id/meta"
+        android:checkableBehavior="none">
         <item
             android:id="@+id/settings"
             android:icon="@drawable/ic_baseline_settings_24"

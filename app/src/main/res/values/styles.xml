@@ -8,10 +8,12 @@
 
         <item name="appBarLayoutStyle">@style/Toolbar</item>
         <item name="floatingActionButtonStyle">@style/FloatingActionButton</item>
+
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
 
     <style name="AppTheme" parent="BaseAppTheme">
-        <item name="android:navigationBarColor">@android:color/white</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
     </style>
 
@@ -29,14 +31,6 @@
         <item name="android:layout_height">1dp</item>
         <item name="android:background">?attr/colorOnSurface</item>
         <item name="android:alpha">0.12</item>
-    </style>
-
-    <style name="BottomNavigationDivider">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">1dp</item>
-        <item name="android:elevation">4dp</item>
-        <item name="android:background">?attr/colorOnSurface</item>
-        <item name="android:alpha">0.16</item>
     </style>
 
 </resources>
