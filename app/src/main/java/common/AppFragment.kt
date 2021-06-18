@@ -8,7 +8,7 @@ import androidx.fragment.app.Fragment
 
 abstract class AppFragment(
     private val showToolbar: Boolean = true,
-    private val drawerLockMode: Int = DrawerLayout.LOCK_MODE_UNLOCKED,
+    private val lockDrawer: Boolean = true,
 ) : Fragment() {
 
     protected val toolbar by lazy { activity.binding.toolbar }
@@ -18,6 +18,10 @@ abstract class AppFragment(
     protected val searchPanelText by lazy { activity.binding.searchPanelText }
 
     protected val searchPanelClearButton by lazy { activity.binding.searchPanelClearButton }
+
+    protected var isDrawerLocked: Boolean
+        get() = drawer.getDrawerLockMode(drawer) == DrawerLayout.LOCK_MODE_LOCKED_CLOSED
+        set(value) = drawer.setDrawerLockMode(if (value) DrawerLayout.LOCK_MODE_LOCKED_CLOSED else DrawerLayout.LOCK_MODE_UNLOCKED)
 
     private val activity by lazy { requireActivity() as AppActivity }
 
@@ -30,7 +34,7 @@ abstract class AppFragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        drawer.setDrawerLockMode(drawerLockMode)
+        isDrawerLocked = lockDrawer
 
         appBarLayout.isVisible = showToolbar
 

@@ -247,6 +247,7 @@ class EntriesFragment : AppFragment(), Scrollable {
 
         when (val filter = args.filter) {
             is EntriesFilter.OnlyNotBookmarked -> {
+                isDrawerLocked = false
                 binding.swipeRefresh.setOnRefreshListener {
                     lifecycleScope.launch {
                         runCatching {
@@ -260,6 +261,7 @@ class EntriesFragment : AppFragment(), Scrollable {
             }
 
             is EntriesFilter.OnlyBookmarked -> {
+                isDrawerLocked = false
                 toolbar.setTitle(R.string.bookmarks)
                 binding.swipeRefresh.isEnabled = false
             }

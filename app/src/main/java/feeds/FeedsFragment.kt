@@ -27,7 +27,7 @@ import kotlinx.coroutines.withContext
 import org.koin.android.viewmodel.ext.android.viewModel
 import timber.log.Timber
 
-class FeedsFragment : AppFragment() {
+class FeedsFragment : AppFragment(lockDrawer = false) {
 
     private val model: FeedsViewModel by viewModel()
 

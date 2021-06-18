@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.*
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
@@ -26,7 +25,6 @@ import java.util.concurrent.TimeUnit
 
 class AuthFragment : AppFragment(
     showToolbar = false,
-    drawerLockMode = DrawerLayout.LOCK_MODE_LOCKED_CLOSED,
 ) {
 
     private val model: AuthViewModel by viewModel()
