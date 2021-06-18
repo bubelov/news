@@ -6,5 +6,5 @@
     <color name="color_secondary">@color/color_primary</color>
     <color name="color_accent">@color/color_primary</color>
 
-    <color name="card_list_background">#efefef</color>
+    <color name="divider">#15000000</color>
 </resources>
