@@ -63,6 +63,7 @@ class FeedsRepository(
                         feed.copy(
                             openEntriesInBrowser = cachedFeed?.openEntriesInBrowser ?: false,
                             blockedWords = cachedFeed?.blockedWords ?: "",
+                            showPreviewImages = cachedFeed?.showPreviewImages,
                         )
                     )
                 }
