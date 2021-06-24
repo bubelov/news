@@ -5,11 +5,13 @@ import android.net.ConnectivityManager
 import api.NewsApi
 import api.NewsApiSwitcher
 import api.NewsApiWrapper
+import auth.AuthRepository
 import auth.AuthViewModel
 import auth.DirectAuthViewModel
 import co.appreactor.news.Database
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import common.App
+import common.AppViewModel
 import common.PreferencesRepository
 import sync.NewsApiSync
 import feeds.FeedsRepository
@@ -62,11 +64,14 @@ val appModule = module {
         ConnectivityProbe(connectivityManager)
     }
 
+    single { get<Context>().resources }
+
     single<NewsApi> { NewsApiWrapper() }
     single { get<NewsApi>() as NewsApiWrapper }
     single<NewsApiSwitcher>()
     single<NewsApiSync>()
 
+    single<AuthRepository>()
     single<FeedsRepository>()
     single<EntriesRepository>()
     single<EntriesSupportingTextRepository>()
@@ -76,6 +81,7 @@ val appModule = module {
     single<AppExceptionsRepository>()
     single<LogEntriesRepository>()
 
+    viewModel<AppViewModel>()
     viewModel<AuthViewModel>()
     viewModel<EntriesViewModel>()
     viewModel<EntriesSharedViewModel>()

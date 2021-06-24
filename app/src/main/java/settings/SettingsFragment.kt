@@ -217,7 +217,7 @@ class SettingsFragment : AppFragment() {
                     binding.logOutSubtitle.isVisible = false
                 }
 
-                else -> binding.logOutSubtitle.text = model.getAccountName(requireContext())
+                else -> binding.logOutSubtitle.text = model.getAccountName()
             }
         }
     }

@@ -1,6 +1,7 @@
 package common
 
 import android.os.Bundle
+import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
@@ -15,9 +16,13 @@ import co.appreactor.news.databinding.ActivityAppBinding
 import entries.EntriesFilter
 import podcasts.PodcastsRepository
 import entriesimages.EntriesImagesRepository
+import kotlinx.coroutines.flow.collect
 import org.koin.android.ext.android.get
+import org.koin.android.viewmodel.ext.android.viewModel
 
 class AppActivity : AppCompatActivity() {
+
+    val model: AppViewModel by viewModel()
 
     lateinit var binding: ActivityAppBinding
 
@@ -47,6 +52,10 @@ class AppActivity : AppCompatActivity() {
 
         binding.bottomNavigationDivider.isVisible = bottomNavigationIsVisible
         binding.bottomNavigation.isVisible = bottomNavigationIsVisible
+    }
+
+    init {
+        initNavigationView()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -130,5 +139,19 @@ class AppActivity : AppCompatActivity() {
         }
 
         navController.addOnDestinationChangedListener(navListener)
+    }
+
+    private fun initNavigationView() {
+        lifecycleScope.launchWhenResumed {
+            val headerView = binding.navigationView.getHeaderView(0) ?: throw Exception()
+            val titleView = headerView.findViewById<TextView>(R.id.title) ?: throw Exception()
+            val subtitleView = headerView.findViewById<TextView>(R.id.subtitle) ?: throw Exception()
+
+            model.account().collect {
+                titleView.text = it.title
+                subtitleView.isVisible = it.subtitle.isNotBlank()
+                subtitleView.text = it.subtitle
+            }
+        }
     }
 }

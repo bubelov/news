@@ -1,16 +1,15 @@
 package settings
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
+import auth.AuthRepository
 import co.appreactor.news.Database
 import common.*
-import com.nextcloud.android.sso.exceptions.SSOException
-import com.nextcloud.android.sso.helper.SingleAccountHelper
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import timber.log.Timber
 
 class SettingsViewModel(
     private val prefs: PreferencesRepository,
+    private val authRepository: AuthRepository,
     private val db: Database,
 ) : ViewModel() {
 
@@ -18,22 +17,7 @@ class SettingsViewModel(
 
     fun savePreferences(action: Preferences.() -> Unit) = runBlocking { prefs.save(action) }
 
-    fun getAccountName(context: Context): String {
-        val prefs = runBlocking { getPreferences() }
-
-        return if (prefs.nextcloudServerUrl.isNotBlank()) {
-            val username = prefs.nextcloudServerUsername
-            "$username@${prefs.nextcloudServerUrl.replace("https://", "")}"
-        } else {
-            try {
-                val account = SingleAccountHelper.getCurrentSingleSignOnAccount(context)
-                account.name
-            } catch (e: SSOException) {
-                Timber.e(e)
-                "unknown"
-            }
-        }
-    }
+    fun getAccountName(): String = runBlocking { authRepository.account().first().subtitle }
 
     fun logOut() {
         db.apply {
