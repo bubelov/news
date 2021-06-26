@@ -119,7 +119,7 @@ class PreferencesRepository(
     }
 
     private fun String.toBoolean(): Boolean {
-        return when (this.toLowerCase(Locale.ROOT)) {
+        return when (this.lowercase()) {
             "true" -> true
             "false" -> false
             else -> throw Exception()

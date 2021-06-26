@@ -129,7 +129,7 @@ class PodcastsRepository(
                     var lastReportedDownloadedPercent = 0L
 
                     while (true) {
-                        val buffer = bufferedSource.read(bufferedSink.buffer, 1024 * 16)
+                        val buffer = bufferedSource.read(bufferedSink.buffer, 1024L * 16L)
                         bufferedSink.flush()
 
                         if (buffer == -1L) {
