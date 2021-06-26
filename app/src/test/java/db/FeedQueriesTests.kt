@@ -29,4 +29,5 @@ fun feed() = Feed(
     alternateLink = "",
     openEntriesInBrowser = false,
     blockedWords = "",
+    showPreviewImages = null,
 )
