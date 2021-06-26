@@ -77,8 +77,8 @@ class AppActivity : AppCompatActivity() {
             this,
             binding.drawerLayout,
             binding.toolbar,
-            R.string.bookmark,
-            R.string.bookmark,
+            R.string.open,
+            R.string.close,
         )
 
         binding.drawerLayout.addDrawerListener(drawerToggle)

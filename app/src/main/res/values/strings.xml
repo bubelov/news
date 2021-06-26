@@ -97,6 +97,8 @@
     <string name="follow_settings">Follow settings</string>
     <string name="podcasts">Podcasts</string>
     <string name="nextcloud">Nextcloud</string>
+    <string name="open">Open</string>
+    <string name="close">Close</string>
     <plurals name="d_hours">
         <item quantity="zero">%d hours</item>
         <item quantity="one">%d hour</item>
