@@ -91,6 +91,15 @@
     <string name="trust_self_signed_certificates">Trust self-signed certificates</string>
     <string name="you_have_no_feeds">You have no feeds</string>
     <string name="export_database">Export database</string>
+    <string name="invalid_url_s">Invalid URL: %1$s</string>
+    <string name="preview_images">Preview images</string>
+    <string name="show">Show</string>
+    <string name="hide">Hide</string>
+    <string name="follow_settings">Follow settings</string>
+    <string name="podcasts">Podcasts</string>
+    <string name="nextcloud">Nextcloud</string>
+    <string name="open">Open</string>
+    <string name="close">Close</string>
     <plurals name="d_hours">
         <item quantity="one">%d hour</item>
         <item quantity="two">%d hours</item>
