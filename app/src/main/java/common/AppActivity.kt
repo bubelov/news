@@ -84,13 +84,39 @@ class AppActivity : AppCompatActivity() {
         binding.drawerLayout.addDrawerListener(drawerToggle)
 
         binding.navigationView.setNavigationItemSelectedListener {
-            if (it.itemId == R.id.settings) {
-                binding.drawerLayout.close()
-                navController.navigate(R.id.action_global_to_settingsFragment)
-                return@setNavigationItemSelectedListener true
+            binding.drawerLayout.close()
+
+            if (it.isChecked) {
+                return@setNavigationItemSelectedListener false
+            } else {
+                it.isChecked = true
             }
 
-            false
+            when (it.itemId) {
+                R.id.news -> {
+                    navController.navigate(
+                        R.id.entriesFragment,
+                        bundleOf(Pair("filter", EntriesFilter.OnlyNotBookmarked))
+                    )
+                }
+
+                R.id.bookmarks -> {
+                    navController.navigate(
+                        R.id.bookmarksFragment,
+                        bundleOf(Pair("filter", EntriesFilter.OnlyBookmarked))
+                    )
+                }
+
+                R.id.feeds -> {
+                    navController.navigate(R.id.feedsFragment)
+                }
+
+                R.id.settings -> {
+                    navController.navigate(R.id.action_global_to_settingsFragment)
+                }
+            }
+
+            return@setNavigationItemSelectedListener true
         }
     }
 
