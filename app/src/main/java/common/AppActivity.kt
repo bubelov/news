@@ -89,7 +89,7 @@ class AppActivity : AppCompatActivity() {
             if (it.isChecked) {
                 return@setNavigationItemSelectedListener false
             } else {
-                it.isChecked = true
+                it.isChecked = it.groupId == R.id.main
             }
 
             when (it.itemId) {
@@ -137,8 +137,12 @@ class AppActivity : AppCompatActivity() {
         }
 
         binding.bottomNavigation.setOnNavigationItemSelectedListener {
+            val navigationView = binding.navigationView
+
             when (it.itemId) {
                 R.id.entriesFragment -> {
+                    navigationView.setCheckedItem(R.id.news)
+
                     navController.navigate(
                         R.id.entriesFragment,
                         bundleOf(Pair("filter", EntriesFilter.OnlyNotBookmarked))
@@ -146,6 +150,8 @@ class AppActivity : AppCompatActivity() {
                 }
 
                 R.id.bookmarksFragment -> {
+                    navigationView.setCheckedItem(R.id.bookmarks)
+
                     navController.navigate(
                         R.id.bookmarksFragment,
                         bundleOf(Pair("filter", EntriesFilter.OnlyBookmarked))
@@ -153,6 +159,7 @@ class AppActivity : AppCompatActivity() {
                 }
 
                 R.id.feedsFragment -> {
+                    navigationView.setCheckedItem(R.id.feeds)
                     navController.navigate(R.id.feedsFragment)
                 }
 
