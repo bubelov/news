@@ -1,12 +1,12 @@
 package api.standalone
 
-import ParsedEntry
-import ParsedFeed
 import api.GetEntriesResult
 import api.NewsApi
+import co.appreactor.feedparser.AtomEntry
+import co.appreactor.feedparser.RssItem
+import co.appreactor.feedparser.feed
 import common.trustSelfSignedCerts
 import db.*
-import getFeedType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -20,10 +20,7 @@ import org.joda.time.DateTime
 import org.joda.time.Instant
 import org.jsoup.Jsoup
 import timber.log.Timber
-import toAtomEntries
-import toAtomFeed
-import toRssEntries
-import toRssFeed
+import java.net.URI
 import java.util.*
 import javax.xml.parsers.DocumentBuilderFactory
 
@@ -65,14 +62,7 @@ class StandaloneNewsApi(
 
             return addFeed((atomElements + rssElements).first().attr("href"))
         } else {
-            val builder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-            val document = builder.parse(responseBody.byteStream())
-
-            return when (document.getFeedType()) {
-                FeedType.ATOM -> document.toAtomFeed(url).toFeed()
-                FeedType.RSS -> document.toRssFeed(url).toFeed()
-                FeedType.UNKNOWN -> throw Exception("Unknown feed type")
-            }
+            return feed(URI.create(url).toURL()).getOrThrow().toFeed()
         }
     }
 
@@ -107,7 +97,7 @@ class StandaloneNewsApi(
             chunk.map { feed ->
                 async {
                     runCatching {
-                        fetchEntries(feed.selfLink)
+                        fetchEntries(feed)
                     }.onSuccess {
                         synchronized(entries) { entries += it }
                     }.onFailure {
@@ -126,27 +116,12 @@ class StandaloneNewsApi(
         return@withContext entries
     }
 
-    private fun fetchEntries(feedUrl: String): List<Entry> {
-        val request = Request.Builder()
-            .url(feedUrl)
-            .build()
-
-        val response = httpClient.newCall(request).execute()
-
-        if (!response.isSuccessful) {
-            throw Exception(response.toString())
-        }
-
-        val responseBody = response.body ?: throw Exception("Response has no body")
-        val builder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-        val document = builder.parse(responseBody.byteStream())
-
-        return when (document.getFeedType()) {
-            FeedType.ATOM -> document.toAtomEntries().map { it.copy(feedId = feedUrl) }
+    private fun fetchEntries(feed: Feed): List<Entry> {
+        return when (val freshFeed = feed(URI.create(feed.selfLink).toURL()).getOrThrow()) {
+            is co.appreactor.feedparser.AtomFeed -> freshFeed.entries.getOrThrow()
                 .map { it.toEntry() }
-            FeedType.RSS -> document.toRssEntries().map { it.copy(feedId = feedUrl) }
-                .map { it.toEntry() }
-            FeedType.UNKNOWN -> throw Exception("Unknown feed type")
+            is co.appreactor.feedparser.RssFeed -> freshFeed.channel.items.getOrThrow()
+                .map { it.getOrThrow().toEntry() }
         }
     }
 
@@ -158,17 +133,30 @@ class StandaloneNewsApi(
 
     }
 
-    private fun ParsedFeed.toFeed() = Feed(
-        id = id,
-        title = title,
-        selfLink = selfLink,
-        alternateLink = alternateLink,
-        openEntriesInBrowser = false,
-        blockedWords = "",
-        showPreviewImages = null,
-    )
+    private fun co.appreactor.feedparser.Feed.toFeed(): Feed {
+        return when (this) {
+            is co.appreactor.feedparser.AtomFeed -> Feed(
+                id = selfLink,
+                title = title,
+                selfLink = selfLink,
+                alternateLink = alternateLink,
+                openEntriesInBrowser = false,
+                blockedWords = "",
+                showPreviewImages = null,
+            )
+            is co.appreactor.feedparser.RssFeed -> Feed(
+                id = channel.link.toString(),
+                title = channel.title,
+                selfLink = "",
+                alternateLink = channel.link.toString(),
+                openEntriesInBrowser = false,
+                blockedWords = "",
+                showPreviewImages = null,
+            )
+        }
+    }
 
-    private fun ParsedEntry.toEntry() = Entry(
+    private fun AtomEntry.toEntry() = Entry(
         id = id,
         feedId = feedId,
         title = title,
@@ -179,6 +167,24 @@ class StandaloneNewsApi(
         content = content,
         enclosureLink = enclosureLink,
         enclosureLinkType = enclosureLinkType,
+        opened = false,
+        openedSynced = true,
+        bookmarked = false,
+        bookmarkedSynced = false,
+        guidHash = "",
+    )
+
+    private fun RssItem.toEntry() = Entry(
+        id = "",
+        feedId = "",
+        title = title ?: "",
+        link = link.toString(),
+        published = pubDate.toString(),
+        updated = "",
+        authorName = "",
+        content = description ?: "",
+        enclosureLink = enclosure?.url.toString(),
+        enclosureLinkType = enclosure?.type ?: "",
         opened = false,
         openedSynced = true,
         bookmarked = false,

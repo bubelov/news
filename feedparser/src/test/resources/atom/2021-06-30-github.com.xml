@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/" xml:lang="en-US">
+  <id>tag:github.com,2008:https://github.com/curl/curl/releases</id>
+  <link type="text/html" rel="alternate" href="https://github.com/curl/curl/releases"/>
+  <link type="application/atom+xml" rel="self" href="https://github.com/curl/curl/releases.atom"/>
+  <title>Release notes from curl</title>
+  <updated>2021-05-26T06:18:25Z</updated>
+  <entry>
+    <id>tag:github.com,2008:Repository/569041/curl-7_77_0</id>
+    <updated>2021-05-26T06:32:21Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/curl/curl/releases/tag/curl-7_77_0"/>
+    <title>7.77.0</title>
+    <content type="html">&lt;p&gt;&lt;a href=&quot;https://curl.se/changes.html#7_77_0&quot; rel=&quot;nofollow&quot;&gt;changelog&lt;/a&gt;&lt;/p&gt;</content>
+    <author>
+      <name>bagder</name>
+    </author>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/177011?s=60&amp;v=4"/>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/569041/curl-7_76_1</id>
+    <updated>2021-04-14T06:04:15Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/curl/curl/releases/tag/curl-7_76_1"/>
+    <title>7.76.1</title>
+    <content type="html">&lt;p&gt;&lt;a href=&quot;https://curl.se/changes.html#7_76_1&quot; rel=&quot;nofollow&quot;&gt;changelog&lt;/a&gt;&lt;/p&gt;</content>
+    <author>
+      <name>bagder</name>
+    </author>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/177011?s=60&amp;v=4"/>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/569041/curl-7_76_0</id>
+    <updated>2021-03-31T06:05:58Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/curl/curl/releases/tag/curl-7_76_0"/>
+    <title>7.76.0</title>
+    <content type="html">&lt;p&gt;&lt;a href=&quot;https://curl.se/changes.html#7_76_0&quot; rel=&quot;nofollow&quot;&gt;changelog&lt;/a&gt;&lt;/p&gt;</content>
+    <author>
+      <name>bagder</name>
+    </author>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/177011?s=60&amp;v=4"/>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/569041/curl-7_75_0</id>
+    <updated>2021-02-03T07:08:16Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/curl/curl/releases/tag/curl-7_75_0"/>
+    <title>7.75.0</title>
+    <content type="html">&lt;p&gt;&lt;a href=&quot;https://curl.se/changes.html#7_75_0&quot; rel=&quot;nofollow&quot;&gt;changelog&lt;/a&gt;&lt;/p&gt;</content>
+    <author>
+      <name>bagder</name>
+    </author>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/177011?s=60&amp;v=4"/>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/569041/curl-7_74_0</id>
+    <updated>2020-12-09T06:57:07Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/curl/curl/releases/tag/curl-7_74_0"/>
+    <title>7.74.0</title>
+    <content type="html">&lt;p&gt;&lt;a href=&quot;https://curl.se/changes.html#7_74_0&quot; rel=&quot;nofollow&quot;&gt;changelog&lt;/a&gt;&lt;/p&gt;</content>
+    <author>
+      <name>bagder</name>
+    </author>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/177011?s=60&amp;v=4"/>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/569041/curl-7_73_0</id>
+    <updated>2020-10-14T05:58:27Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/curl/curl/releases/tag/curl-7_73_0"/>
+    <title>7.73.0</title>
+    <content type="html">&lt;p&gt;&lt;a href=&quot;https://curl.haxx.se/changes.html#7_73_0&quot; rel=&quot;nofollow&quot;&gt;changelog&lt;/a&gt;&lt;/p&gt;</content>
+    <author>
+      <name>bagder</name>
+    </author>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/177011?s=60&amp;v=4"/>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/569041/tiny-curl-7_72_0</id>
+    <updated>2020-08-27T08:20:02Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/curl/curl/releases/tag/tiny-curl-7_72_0"/>
+    <title>tiny-curl-7_72_0</title>
+    <content type="html">&lt;p&gt;tiny-curl 7.72.0&lt;/p&gt;</content>
+    <author>
+      <name>bagder</name>
+    </author>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/177011?s=60&amp;v=4"/>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/569041/curl-7_72_0</id>
+    <updated>2020-08-19T07:47:58Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/curl/curl/releases/tag/curl-7_72_0"/>
+    <title>curl-7_72_0</title>
+    <content type="html">&lt;p&gt;&lt;a href=&quot;https://curl.haxx.se/changes.html#7_72_0&quot; rel=&quot;nofollow&quot;&gt;changelog&lt;/a&gt;&lt;/p&gt;</content>
+    <author>
+      <name>bagder</name>
+    </author>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/177011?s=60&amp;v=4"/>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/569041/curl-7_71_1</id>
+    <updated>2020-07-01T06:50:45Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/curl/curl/releases/tag/curl-7_71_1"/>
+    <title>7.71.1</title>
+    <content type="html">&lt;p&gt;&lt;a href=&quot;https://curl.haxx.se/changes.html#7_71_1&quot; rel=&quot;nofollow&quot;&gt;changelog&lt;/a&gt;&lt;/p&gt;</content>
+    <author>
+      <name>bagder</name>
+    </author>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/177011?s=60&amp;v=4"/>
+  </entry>
+  <entry>
+    <id>tag:github.com,2008:Repository/569041/curl-7_71_0</id>
+    <updated>2020-06-24T06:53:12Z</updated>
+    <link rel="alternate" type="text/html" href="https://github.com/curl/curl/releases/tag/curl-7_71_0"/>
+    <title>7.71.0</title>
+    <content type="html">&lt;p&gt;&lt;a href=&quot;https://curl.haxx.se/changes.html#7_71_0&quot; rel=&quot;nofollow&quot;&gt;changelog&lt;/a&gt;&lt;/p&gt;</content>
+    <author>
+      <name>bagder</name>
+    </author>
+    <media:thumbnail height="30" width="30" url="https://avatars.githubusercontent.com/u/177011?s=60&amp;v=4"/>
+  </entry>
+</feed>

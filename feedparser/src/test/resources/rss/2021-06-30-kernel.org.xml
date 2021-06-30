@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"><channel><title>Latest Linux Kernel Versions</title><link>http://www.kernel.org</link><description>Latest Linux Kernel Versions</description><lastBuildDate>Tue, 29 Jun 2021 09:57:05 -0000</lastBuildDate><item><title>5.13: mainline</title><link>http://www.kernel.org/</link><description>
+            &lt;table&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Version:&lt;/th&gt;&lt;td&gt;&lt;strong&gt;5.13&lt;/strong&gt; (mainline)&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Released:&lt;/th&gt;&lt;td&gt;2021-06-27&lt;/td&gt;&lt;/tr&gt;
+            
+                &lt;tr&gt;&lt;th align="right"&gt;Source:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.13.tar.xz"&gt;linux-5.13.tar.xz&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;PGP Signature:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.13.tar.sign"&gt;linux-5.13.tar.sign&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Patch:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v5.x/patch-5.13.xz"&gt;full&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+            &lt;/table&gt;</description><pubDate>Sun, 27 Jun 2021 22:21:11 -0000</pubDate><guid isPermaLink="false">kernel.org,mainline,5.13,2021-06-27</guid></item><item><title>5.12.13: stable</title><link>http://www.kernel.org/</link><description>
+            &lt;table&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Version:&lt;/th&gt;&lt;td&gt;&lt;strong&gt;5.12.13&lt;/strong&gt; (stable)&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Released:&lt;/th&gt;&lt;td&gt;2021-06-23&lt;/td&gt;&lt;/tr&gt;
+            
+                &lt;tr&gt;&lt;th align="right"&gt;Source:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.12.13.tar.xz"&gt;linux-5.12.13.tar.xz&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;PGP Signature:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.12.13.tar.sign"&gt;linux-5.12.13.tar.sign&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Patch:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v5.x/patch-5.12.13.xz"&gt;full&lt;/a&gt; (&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v5.x/incr/patch-5.12.12-13.xz"&gt;incremental&lt;/a&gt;)&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;ChangeLog:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.12.13"&gt;ChangeLog-5.12.13&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+            &lt;/table&gt;</description><pubDate>Wed, 23 Jun 2021 12:44:21 -0000</pubDate><guid isPermaLink="false">kernel.org,stable,5.12.13,2021-06-23</guid></item><item><title>5.10.46: longterm</title><link>http://www.kernel.org/</link><description>
+            &lt;table&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Version:&lt;/th&gt;&lt;td&gt;&lt;strong&gt;5.10.46&lt;/strong&gt; (longterm)&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Released:&lt;/th&gt;&lt;td&gt;2021-06-23&lt;/td&gt;&lt;/tr&gt;
+            
+                &lt;tr&gt;&lt;th align="right"&gt;Source:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.10.46.tar.xz"&gt;linux-5.10.46.tar.xz&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;PGP Signature:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.10.46.tar.sign"&gt;linux-5.10.46.tar.sign&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Patch:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v5.x/patch-5.10.46.xz"&gt;full&lt;/a&gt; (&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v5.x/incr/patch-5.10.45-46.xz"&gt;incremental&lt;/a&gt;)&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;ChangeLog:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.10.46"&gt;ChangeLog-5.10.46&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+            &lt;/table&gt;</description><pubDate>Wed, 23 Jun 2021 12:43:01 -0000</pubDate><guid isPermaLink="false">kernel.org,longterm,5.10.46,2021-06-23</guid></item><item><title>5.4.128: longterm</title><link>http://www.kernel.org/</link><description>
+            &lt;table&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Version:&lt;/th&gt;&lt;td&gt;&lt;strong&gt;5.4.128&lt;/strong&gt; (longterm)&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Released:&lt;/th&gt;&lt;td&gt;2021-06-23&lt;/td&gt;&lt;/tr&gt;
+            
+                &lt;tr&gt;&lt;th align="right"&gt;Source:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.4.128.tar.xz"&gt;linux-5.4.128.tar.xz&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;PGP Signature:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.4.128.tar.sign"&gt;linux-5.4.128.tar.sign&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Patch:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v5.x/patch-5.4.128.xz"&gt;full&lt;/a&gt; (&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v5.x/incr/patch-5.4.127-128.xz"&gt;incremental&lt;/a&gt;)&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;ChangeLog:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.4.128"&gt;ChangeLog-5.4.128&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+            &lt;/table&gt;</description><pubDate>Wed, 23 Jun 2021 12:41:49 -0000</pubDate><guid isPermaLink="false">kernel.org,longterm,5.4.128,2021-06-23</guid></item><item><title>4.19.195: longterm</title><link>http://www.kernel.org/</link><description>
+            &lt;table&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Version:&lt;/th&gt;&lt;td&gt;&lt;strong&gt;4.19.195&lt;/strong&gt; (longterm)&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Released:&lt;/th&gt;&lt;td&gt;2021-06-16&lt;/td&gt;&lt;/tr&gt;
+            
+                &lt;tr&gt;&lt;th align="right"&gt;Source:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.19.195.tar.xz"&gt;linux-4.19.195.tar.xz&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;PGP Signature:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.19.195.tar.sign"&gt;linux-4.19.195.tar.sign&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Patch:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v4.x/patch-4.19.195.xz"&gt;full&lt;/a&gt; (&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v4.x/incr/patch-4.19.194-195.xz"&gt;incremental&lt;/a&gt;)&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;ChangeLog:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v4.x/ChangeLog-4.19.195"&gt;ChangeLog-4.19.195&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+            &lt;/table&gt;</description><pubDate>Wed, 16 Jun 2021 09:55:08 -0000</pubDate><guid isPermaLink="false">kernel.org,longterm,4.19.195,2021-06-16</guid></item><item><title>4.14.237: longterm</title><link>http://www.kernel.org/</link><description>
+            &lt;table&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Version:&lt;/th&gt;&lt;td&gt;&lt;strong&gt;4.14.237&lt;/strong&gt; (longterm)&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Released:&lt;/th&gt;&lt;td&gt;2021-06-16&lt;/td&gt;&lt;/tr&gt;
+            
+                &lt;tr&gt;&lt;th align="right"&gt;Source:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.14.237.tar.xz"&gt;linux-4.14.237.tar.xz&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;PGP Signature:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.14.237.tar.sign"&gt;linux-4.14.237.tar.sign&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Patch:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v4.x/patch-4.14.237.xz"&gt;full&lt;/a&gt; (&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v4.x/incr/patch-4.14.236-237.xz"&gt;incremental&lt;/a&gt;)&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;ChangeLog:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v4.x/ChangeLog-4.14.237"&gt;ChangeLog-4.14.237&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+            &lt;/table&gt;</description><pubDate>Wed, 16 Jun 2021 09:53:48 -0000</pubDate><guid isPermaLink="false">kernel.org,longterm,4.14.237,2021-06-16</guid></item><item><title>4.9.273: longterm</title><link>http://www.kernel.org/</link><description>
+            &lt;table&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Version:&lt;/th&gt;&lt;td&gt;&lt;strong&gt;4.9.273&lt;/strong&gt; (longterm)&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Released:&lt;/th&gt;&lt;td&gt;2021-06-16&lt;/td&gt;&lt;/tr&gt;
+            
+                &lt;tr&gt;&lt;th align="right"&gt;Source:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.9.273.tar.xz"&gt;linux-4.9.273.tar.xz&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;PGP Signature:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.9.273.tar.sign"&gt;linux-4.9.273.tar.sign&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Patch:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v4.x/patch-4.9.273.xz"&gt;full&lt;/a&gt; (&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v4.x/incr/patch-4.9.272-273.xz"&gt;incremental&lt;/a&gt;)&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;ChangeLog:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v4.x/ChangeLog-4.9.273"&gt;ChangeLog-4.9.273&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+            &lt;/table&gt;</description><pubDate>Wed, 16 Jun 2021 09:37:44 -0000</pubDate><guid isPermaLink="false">kernel.org,longterm,4.9.273,2021-06-16</guid></item><item><title>4.4.273: longterm</title><link>http://www.kernel.org/</link><description>
+            &lt;table&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Version:&lt;/th&gt;&lt;td&gt;&lt;strong&gt;4.4.273&lt;/strong&gt; (longterm)&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Released:&lt;/th&gt;&lt;td&gt;2021-06-16&lt;/td&gt;&lt;/tr&gt;
+            
+                &lt;tr&gt;&lt;th align="right"&gt;Source:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.4.273.tar.xz"&gt;linux-4.4.273.tar.xz&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;PGP Signature:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.4.273.tar.sign"&gt;linux-4.4.273.tar.sign&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Patch:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v4.x/patch-4.4.273.xz"&gt;full&lt;/a&gt; (&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v4.x/incr/patch-4.4.272-273.xz"&gt;incremental&lt;/a&gt;)&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;ChangeLog:&lt;/th&gt;&lt;td&gt;&lt;a href="https://cdn.kernel.org/pub/linux/kernel/v4.x/ChangeLog-4.4.273"&gt;ChangeLog-4.4.273&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+            &lt;/table&gt;</description><pubDate>Wed, 16 Jun 2021 09:35:37 -0000</pubDate><guid isPermaLink="false">kernel.org,longterm,4.4.273,2021-06-16</guid></item><item><title>next-20210629: linux-next</title><link>http://www.kernel.org/</link><description>
+            &lt;table&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Version:&lt;/th&gt;&lt;td&gt;&lt;strong&gt;next-20210629&lt;/strong&gt; (linux-next)&lt;/td&gt;&lt;/tr&gt;
+                &lt;tr&gt;&lt;th align="right"&gt;Released:&lt;/th&gt;&lt;td&gt;2021-06-29&lt;/td&gt;&lt;/tr&gt;
+            
+            &lt;/table&gt;</description><pubDate>Tue, 29 Jun 2021 09:57:05 -0000</pubDate><guid isPermaLink="false">kernel.org,linux-next,next-20210629,2021-06-29</guid></item></channel></rss>
