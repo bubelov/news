@@ -1,0 +1,429 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:media="http://search.yahoo.com/mrss/" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:nyt="http://www.nytimes.com/namespaces/rss/2.0" version="2.0">
+  <channel>
+    <title>NYT &gt; Top Stories</title>
+    <link>https://www.nytimes.com</link>
+    <atom:link href="https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml" rel="self" type="application/rss+xml"/>
+    <description/>
+    <language>en-us</language>
+    <copyright>Copyright 2021 The New York Times Company</copyright>
+    <lastBuildDate>Sat, 03 Jul 2021 07:27:28 +0000</lastBuildDate>
+    <pubDate>Sat, 03 Jul 2021 04:57:02 +0000</pubDate>
+    <image>
+      <title>NYT &gt; Top Stories</title>
+      <url>https://static01.nyt.com/images/misc/NYT_logo_rss_250x40.png</url>
+      <link>https://www.nytimes.com</link>
+    </image>
+    <item>
+      <title>Supreme Court Term Marked by Conservative Majority in Flux</title>
+      <link>https://www.nytimes.com/2021/07/02/us/supreme-court-conservative-voting-rights.html</link>
+      <guid isPermaLink="true">https://www.nytimes.com/2021/07/02/us/supreme-court-conservative-voting-rights.html</guid>
+      <atom:link href="https://www.nytimes.com/2021/07/02/us/supreme-court-conservative-voting-rights.html" rel="standout"/>
+      <description>The chief justice’s power waned, and the three Trump justices grew more influential. The term ended with an exclamation point, with the court imposing new limits on the Voting Rights Act.</description>
+      <dc:creator>Adam Liptak and Alicia Parlapiano</dc:creator>
+      <pubDate>Fri, 02 Jul 2021 23:50:13 +0000</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">United States Politics and Government</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Conservatism (US Politics)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">Supreme Court (US)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Roberts, John G Jr</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Alito, Samuel A Jr</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Breyer, Stephen G</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Ginsburg, Ruth Bader</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Gorsuch, Neil M</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Kavanaugh, Brett M</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Kennedy, Anthony M</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Sotomayor, Sonia</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Thomas, Clarence</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Civil Rights and Liberties</category>
+      <media:content height="151" medium="image" url="https://static01.nyt.com/images/2021/07/01/us/politics/00dc-scotus1/00dc-scotus1-moth.jpg" width="151"/>
+      <media:credit>Erin Schaff/The New York Times</media:credit>
+      <media:description>The Supreme Court term that just ended was often marked by a fluid center that saw some of of the conservative justices voting with the three liberals.</media:description>
+    </item>
+    <item>
+      <title>Democrats Face High New Bar in Opposing Voting Laws</title>
+      <link>https://www.nytimes.com/2021/07/02/us/politics/supreme-court-arizona-voting.html</link>
+      <guid isPermaLink="true">https://www.nytimes.com/2021/07/02/us/politics/supreme-court-arizona-voting.html</guid>
+      <atom:link href="https://www.nytimes.com/2021/07/02/us/politics/supreme-court-arizona-voting.html" rel="standout"/>
+      <description>Democrats and voting rights groups say they can no longer count on the federal courts, including the Supreme Court, to serve as a backstop for preventing racially discriminatory voting restrictions.</description>
+      <dc:creator>Reid J. Epstein and Nick Corasaniti</dc:creator>
+      <pubDate>Sat, 03 Jul 2021 00:25:39 +0000</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Presidential Election of 2020</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Voter Fraud (Election Fraud)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Voting Rights Act (1965)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Politics and Government</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">United States Politics and Government</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">State Legislatures</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Law and Legislation</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">Democratic Party</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">NAACP Legal Defense Fund</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">Priorities USA</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">Republican National Committee</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">Republican Party</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">Supreme Court (US)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Alito, Samuel A Jr</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Evers, Tony (1951- )</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Trump, Donald J</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">Arizona</category>
+      <media:content height="151" medium="image" url="https://static01.nyt.com/images/2021/07/02/us/politics/02dems-voting1/02dems-voting1-moth.jpg" width="151"/>
+      <media:credit>Cameron Pollack for The New York Times</media:credit>
+      <media:description>Major Supreme Court decisions upholding new restrictions on voting are typically followed by waves of new legislation in statehouses across the country.</media:description>
+    </item>
+    <item>
+      <title>Trump Is Said to Have Called Arizona Official After Election Loss</title>
+      <link>https://www.nytimes.com/2021/07/02/us/politics/trump-arizona-hickman-2020-election.html</link>
+      <guid isPermaLink="true">https://www.nytimes.com/2021/07/02/us/politics/trump-arizona-hickman-2020-election.html</guid>
+      <atom:link href="https://www.nytimes.com/2021/07/02/us/politics/trump-arizona-hickman-2020-election.html" rel="standout"/>
+      <description>Donald Trump tried to reach the top Republican in metropolitan Phoenix as his allies were trying to overturn the state’s 2020 results, according to the official, who said he did not pick up the calls.</description>
+      <dc:creator>Michael Wines and Reid J. Epstein</dc:creator>
+      <pubDate>Fri, 02 Jul 2021 23:54:23 +0000</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Trump, Donald J</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">Arizona</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Hickman, Clint</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Presidential Election of 2020</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">United States Politics and Government</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Voter Fraud (Election Fraud)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Rumors and Misinformation</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Giuliani, Rudolph W</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">Maricopa County (Ariz)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">Republican Party</category>
+      <media:content height="151" medium="image" url="https://static01.nyt.com/images/2021/07/02/lens/02trump-arizona-photo/02trump-arizona-photo-moth.jpg" width="151"/>
+      <media:credit>Doug Mills/The New York Times</media:credit>
+      <media:description>Clint Hickman, a Republican who last year served as the chairman of the Maricopa County Board of Supervisors, greeting President Donald J. Trump in Phoenix in June 2020. </media:description>
+    </item>
+    <item>
+      <title>U.S. Leaves Its Last Afghan Base, Effectively Ending Operations</title>
+      <link>https://www.nytimes.com/2021/07/02/world/asia/afghanistan-bagram-us-withdrawal.html</link>
+      <guid isPermaLink="true">https://www.nytimes.com/2021/07/02/world/asia/afghanistan-bagram-us-withdrawal.html</guid>
+      <atom:link href="https://www.nytimes.com/2021/07/02/world/asia/afghanistan-bagram-us-withdrawal.html" rel="standout"/>
+      <description>With little fanfare, Bagram Air Base — once the military’s nerve center — was handed over to the Afghans, after nearly 20 years of waging war from the hub.</description>
+      <dc:creator>Thomas Gibbons-Neff</dc:creator>
+      <pubDate>Fri, 02 Jul 2021 21:46:33 +0000</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Afghanistan War (2001- )</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">United States Defense and Military Forces</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Terrorism</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Defense and Military Forces</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">Afghan National Security Forces</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">North Atlantic Treaty Organization</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">Afghanistan</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">Bagram Air Base (Afghanistan)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">United States</category>
+      <media:content height="151" medium="image" url="https://static01.nyt.com/images/2021/07/02/world/02AFGHANISTAN-BAGRAM02sub/merlin_165170694_eee66bee-505a-4321-b1bd-a754fe3108ea-moth.jpg" width="151"/>
+      <media:credit>Erin Schaff/The New York Times</media:credit>
+      <media:description>An American soldier in 2019 at Bagram Air Base in Afghanistan.</media:description>
+    </item>
+    <item>
+      <title>Biden Sends Dueling Messages on Afghanistan</title>
+      <link>https://www.nytimes.com/2021/07/02/us/politics/biden-afghanistan.html</link>
+      <guid isPermaLink="true">https://www.nytimes.com/2021/07/02/us/politics/biden-afghanistan.html</guid>
+      <atom:link href="https://www.nytimes.com/2021/07/02/us/politics/biden-afghanistan.html" rel="standout"/>
+      <description>The administration has sought to reassure Americans that it is ending “forever wars” while signaling to Afghans that the U.S. is not abandoning the beleaguered country.</description>
+      <dc:creator>Eric Schmitt</dc:creator>
+      <pubDate>Fri, 02 Jul 2021 23:09:59 +0000</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Biden, Joseph R Jr</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Afghanistan War (2001- )</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">United States Defense and Military Forces</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">United States International Relations</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">United States Politics and Government</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">Taliban</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">Afghan National Police</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">Afghan National Security Forces</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">Defense Department</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">Al Qaeda</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">Islamic State in Iraq and Syria (ISIS)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">Afghanistan</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">Bagram Air Base (Afghanistan)</category>
+      <media:content height="151" medium="image" url="https://static01.nyt.com/images/2021/07/02/us/politics/02dc-assess1/02dc-assess1-moth.jpg" width="151"/>
+      <media:credit>Tom Brenner for The New York Times</media:credit>
+      <media:description>As the United States effectively ended military operations in Afghanistan, top aides said President Biden remained resolute in his choice to withdraw.</media:description>
+    </item>
+    <item>
+      <title>As Afghanistan Forces Crumble, an Air of Unreality Grips the Capital</title>
+      <link>https://www.nytimes.com/2021/07/02/world/asia/afghanistan-withdrawal-taliban.html</link>
+      <guid isPermaLink="true">https://www.nytimes.com/2021/07/02/world/asia/afghanistan-withdrawal-taliban.html</guid>
+      <atom:link href="https://www.nytimes.com/2021/07/02/world/asia/afghanistan-withdrawal-taliban.html" rel="standout"/>
+      <description>With the Taliban advancing and U.S. troops leaving, President Ashraf Ghani and his aides have become increasingly insular, and Kabul is slipping into shock.</description>
+      <dc:creator>Adam Nossiter</dc:creator>
+      <pubDate>Fri, 02 Jul 2021 21:35:02 +0000</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Afghanistan War (2001- )</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Ghani, Ashraf</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">United States Defense and Military Forces</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">Kabul (Afghanistan)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Civilian Casualties</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">National Directorate of Security (Afghanistan)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">Taliban</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">Afghanistan</category>
+      <media:content height="151" medium="image" url="https://static01.nyt.com/images/2021/07/02/world/02afghan-government-crisisSUB2/02afghan-government-crisisSUB2-moth.jpg" width="151"/>
+      <media:credit>Jim Huylebroek for The New York Times</media:credit>
+      <media:description>A park in Kabul on Friday afternoon.</media:description>
+    </item>
+    <item>
+      <title>North Miami Beach Condo Tower Evacuated Over Safety Concerns</title>
+      <link>https://www.nytimes.com/2021/07/02/us/north-miami-beach-condo-evacuated.html</link>
+      <guid isPermaLink="true">https://www.nytimes.com/2021/07/02/us/north-miami-beach-condo-evacuated.html</guid>
+      <atom:link href="https://www.nytimes.com/2021/07/02/us/north-miami-beach-condo-evacuated.html" rel="standout"/>
+      <description/>
+      <dc:creator>Giulia Heyward and Zach Montague</dc:creator>
+      <pubDate>Sat, 03 Jul 2021 04:57:02 +0000</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Surfside, Fla, Building Collapse (2021)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">Miami-Dade County (Fla)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">North Miami (Fla)</category>
+      <media:content height="151" medium="image" url="https://static01.nyt.com/images/2021/07/02/us/02miami-building-collapse-northmiamibeach-evacuation1/02miami-building-collapse-northmiamibeach-evacuation1-moth.jpg" width="151"/>
+      <media:credit>Giulia Heyward/The New York Times</media:credit>
+      <media:description>Crestview Towers in North Miami Beach, Fla., after it was ordered to close and evacuate its residents on Friday.</media:description>
+    </item>
+    <item>
+      <title>Miami Weighs When to End Search for Florida Condo Survivors</title>
+      <link>https://www.nytimes.com/2021/07/02/us/miami-collapse-victims-recovery-rescue.html</link>
+      <guid isPermaLink="true">https://www.nytimes.com/2021/07/02/us/miami-collapse-victims-recovery-rescue.html</guid>
+      <atom:link href="https://www.nytimes.com/2021/07/02/us/miami-collapse-victims-recovery-rescue.html" rel="standout"/>
+      <description>The death toll rose to 22 after four more victims were found, including the 7-year-old daughter of a firefighter. No survivors have been discovered since the day the condo collapsed.</description>
+      <dc:creator>Emily Cochrane</dc:creator>
+      <pubDate>Sat, 03 Jul 2021 01:27:04 +0000</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Surfside, Fla, Building Collapse (2021)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">Surfside (Fla)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Rescues</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Demolition</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Deaths (Fatalities)</category>
+      <media:content height="151" medium="image" url="https://static01.nyt.com/images/2021/07/02/us/02miami-recovery-web1/02miami-recovery-web1-moth.jpg" width="151"/>
+      <media:credit>Scott McIntyre for The New York Times</media:credit>
+      <media:description>Visiting a makeshift memorial near the site of the partially collapsed Champlain Towers South in Surfside, Fla., this week. Officials have asked for prayers and miracles.</media:description>
+    </item>
+    <item>
+      <title>Live Updates: Rubble at Florida Condo Site Is Being Searched Again</title>
+      <link>https://www.nytimes.com/live/2021/07/02/us/condo-building-collapse-miami-updates/</link>
+      <guid isPermaLink="true">https://www.nytimes.com/live/2021/07/02/us/condo-building-collapse-miami-updates/</guid>
+      <atom:link href="https://www.nytimes.com/live/2021/07/02/us/condo-building-collapse-miami-updates/" rel="standout"/>
+      <description>Search-and-rescue crews paused their efforts for about 14 hours on Thursday because of worries about the building’s stability.</description>
+      <dc:creator>The New York Times</dc:creator>
+      <pubDate>Sat, 03 Jul 2021 04:03:59 +0000</pubDate>
+    </item>
+    <item>
+      <title>Alvin Bragg Likely to Take Over Trump Investigation</title>
+      <link>https://www.nytimes.com/2021/07/02/nyregion/alvin-bragg-district-attorney-trump.html</link>
+      <guid isPermaLink="true">https://www.nytimes.com/2021/07/02/nyregion/alvin-bragg-district-attorney-trump.html</guid>
+      <atom:link href="https://www.nytimes.com/2021/07/02/nyregion/alvin-bragg-district-attorney-trump.html" rel="standout"/>
+      <description>With his main rival, Tali Farhadian Weinstein, conceding, Alvin Bragg is poised to lead the investigation into Donald J. Trump’s family business.</description>
+      <dc:creator>Jonah E. Bromwich</dc:creator>
+      <pubDate>Fri, 02 Jul 2021 20:55:49 +0000</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Elections, District Attorneys</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">Color of Change (Nonprofit)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">Trump Organization</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Bragg, Alvin</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Farhadian Weinstein, Tali</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Trump, Donald J</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">Manhattan (NYC)</category>
+      <media:content height="151" medium="image" url="https://static01.nyt.com/images/2021/06/22/nyregion/22nyprimary-da-bragg/22nyprimary-da-bragg-moth.jpg" width="151"/>
+      <media:credit>Dave Sanders for The New York Times</media:credit>
+      <media:description>Alvin Bragg campaigned on West 127th Street hours before polls closed on Primary Day.</media:description>
+    </item>
+    <item>
+      <title>Absentee Ballots May Determine if Eric Adams Wins Mayor's Race</title>
+      <link>https://www.nytimes.com/2021/07/02/nyregion/nyc-mayor-race-voting-count-eric-adams.html</link>
+      <guid isPermaLink="true">https://www.nytimes.com/2021/07/02/nyregion/nyc-mayor-race-voting-count-eric-adams.html</guid>
+      <atom:link href="https://www.nytimes.com/2021/07/02/nyregion/nyc-mayor-race-voting-count-eric-adams.html" rel="standout"/>
+      <description>The tallying of more than 125,000 absentee ballots will determine whether Eric Adams retains his lead in the Democratic primary.</description>
+      <dc:creator>Emma G. Fitzsimmons</dc:creator>
+      <pubDate>Sat, 03 Jul 2021 00:47:00 +0000</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Elections, Mayors</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Ranked-Choice Voting</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Absentee Voting</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Voting and Voters</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Mayors</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">New York City</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Adams, Eric L</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Garcia, Kathryn</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Wiley, Maya</category>
+      <media:content height="151" medium="image" url="https://static01.nyt.com/images/2021/07/02/nyregion/02nymayor-absentee1/02nymayor-absentee1-moth.jpg" width="151"/>
+      <media:credit>Victor J. Blue for The New York Times</media:credit>
+      <media:description>Election workers in Manhattan examined absentee ballots for potential flaws on Friday, as campaign lawyers and volunteers hovered nearby.</media:description>
+    </item>
+    <item>
+      <title>Sha’Carri Richardson and Her Now Uncertain Path to the Olympics</title>
+      <link>https://www.nytimes.com/2021/07/02/sports/olympics/shacarri-richardson-marijuana-doping.html</link>
+      <guid isPermaLink="true">https://www.nytimes.com/2021/07/02/sports/olympics/shacarri-richardson-marijuana-doping.html</guid>
+      <atom:link href="https://www.nytimes.com/2021/07/02/sports/olympics/shacarri-richardson-marijuana-doping.html" rel="standout"/>
+      <description>Richardson has a magnetic combination of speed and charisma. But her use of marijuana before an event has jeopardized her chance to compete in Tokyo.</description>
+      <dc:creator>Matthew Futterman</dc:creator>
+      <pubDate>Fri, 02 Jul 2021 21:12:55 +0000</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Track and Field</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">Louisiana State University</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Richardson, Sha'Carri</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Doping (Sports)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Marijuana</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Olympic Games (2020)</category>
+      <media:content height="151" medium="image" url="https://static01.nyt.com/images/2021/07/02/sports/02oly-richardson/02oly-richardson-moth.jpg" width="151"/>
+      <media:credit>Chang W. Lee/The New York Times</media:credit>
+    </item>
+    <item>
+      <title>Biden Supports Changing Military Law on Sexual Assault Cases</title>
+      <link>https://www.nytimes.com/2021/07/02/us/politics/military-sexual-assault.html</link>
+      <guid isPermaLink="true">https://www.nytimes.com/2021/07/02/us/politics/military-sexual-assault.html</guid>
+      <atom:link href="https://www.nytimes.com/2021/07/02/us/politics/military-sexual-assault.html" rel="standout"/>
+      <description>A growing movement supports independent investigations and prosecutions of sexual assault cases, outside of the military chain of command.</description>
+      <dc:creator>Jennifer Steinhauer</dc:creator>
+      <pubDate>Fri, 02 Jul 2021 20:53:42 +0000</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">United States Defense and Military Forces</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">United States Politics and Government</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Sexual Harassment</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">Defense Department</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">House of Representatives</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">Senate</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Biden, Joseph R Jr</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Austin, Lloyd J III</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Gillibrand, Kirsten E</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Guillen, Vanessa</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Sex Crimes</category>
+      <media:content height="151" medium="image" url="https://static01.nyt.com/images/2021/07/02/us/02new-washington-briefing-military/02new-washington-briefing-military-moth-v2.jpg" width="151"/>
+      <media:credit>Carolyn Kaster/Associated Press</media:credit>
+      <media:description>Demonstrators marched in July 2020, in support of the family of slain Army Specialist Vanessa Guillen. Spc. Guillen was murdered by a fellow soldier last year.</media:description>
+    </item>
+    <item>
+      <title>June Jobs Report Delivers Good News and Big Questions for Washington</title>
+      <link>https://www.nytimes.com/2021/07/02/business/economy/jobs-economy-covid.html</link>
+      <guid isPermaLink="true">https://www.nytimes.com/2021/07/02/business/economy/jobs-economy-covid.html</guid>
+      <atom:link href="https://www.nytimes.com/2021/07/02/business/economy/jobs-economy-covid.html" rel="standout"/>
+      <description>Payrolls surged and wages climbed, both positives for President Biden and the Federal Reserve. But stagnant labor market participation highlights a key risk.</description>
+      <dc:creator>Jeanna Smialek and Jim Tankersley</dc:creator>
+      <pubDate>Fri, 02 Jul 2021 22:09:58 +0000</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Labor and Jobs</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">United States Economy</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Wages and Salaries</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">American Rescue Plan (2021)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Coronavirus Reopenings</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Biden, Joseph R Jr</category>
+      <media:content height="151" medium="image" url="https://static01.nyt.com/images/2021/07/03/business/02JPdc-econ-print/merlin_190248312_7c9bb2cc-686a-4ca0-8479-d60672fe544d-moth.jpg" width="151"/>
+      <media:credit>Tom Brenner for The New York Times</media:credit>
+      <media:description>President Biden said his economic agenda was helping put people back to work, citing the 850,000 workers added to payrolls in June.</media:description>
+    </item>
+    <item>
+      <title>Is Biden Declaring ‘Independence From the Coronavirus’  Too Soon?</title>
+      <link>https://www.nytimes.com/2021/07/02/us/politics/biden-coronavirus.html</link>
+      <guid isPermaLink="true">https://www.nytimes.com/2021/07/02/us/politics/biden-coronavirus.html</guid>
+      <atom:link href="https://www.nytimes.com/2021/07/02/us/politics/biden-coronavirus.html" rel="standout"/>
+      <description>Less than half the country is fully vaccinated against Covid-19, and the contagious Delta variant is spreading. Still, the White House has an “America’s Back Together” celebration planned for July 4.</description>
+      <dc:creator>Sheryl Gay Stolberg</dc:creator>
+      <pubDate>Sat, 03 Jul 2021 03:54:26 +0000</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Independence Day (US) (July 4)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Coronavirus (2019-nCoV)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Disease Rates</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Vaccination and Immunization</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Biden, Joseph R Jr</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">United States Politics and Government</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">White House Building (Washington, DC)</category>
+      <media:content height="151" medium="image" url="https://static01.nyt.com/images/2021/07/01/us/politics/00DC-VIRUS-FOURTH/00DC-VIRUS-FOURTH-moth.jpg" width="151"/>
+      <media:credit>Kenny Holston for The New York Times</media:credit>
+      <media:description>President Biden with service members at Langley Air Force Base in Virginia in May. He has invited 1,000 military personnel and essential workers to an Independence Day celebration on the South Lawn of the White House on Sunday.</media:description>
+    </item>
+    <item>
+      <title>Boryana Straubel, 38, Dies; Founded a ‘Green’ Jewelry Company</title>
+      <link>https://www.nytimes.com/2021/07/01/business/boryana-straubel-dead.html</link>
+      <guid isPermaLink="true">https://www.nytimes.com/2021/07/01/business/boryana-straubel-dead.html</guid>
+      <atom:link href="https://www.nytimes.com/2021/07/01/business/boryana-straubel-dead.html" rel="standout"/>
+      <description>A former Tesla executive, she ran a family foundation that focuses on environmental sustainability. Her jewelry company uses recycled metals.</description>
+      <dc:creator>Penelope Green</dc:creator>
+      <pubDate>Thu, 01 Jul 2021 22:27:40 +0000</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Straubel, Boryana</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Deaths (Obituaries)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Philanthropy</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Sustainable Living</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Jewels and Jewelry</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">Generation Collection Inc</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">Tesla Motors Inc</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Straubel, J B</category>
+    </item>
+    <item>
+      <title>Watch These 11 Titles Before They Leave Netflix This Month</title>
+      <link>https://www.nytimes.com/2021/07/02/movies/netflix-expiring-july.html</link>
+      <guid isPermaLink="true">https://www.nytimes.com/2021/07/02/movies/netflix-expiring-july.html</guid>
+      <atom:link href="https://www.nytimes.com/2021/07/02/movies/netflix-expiring-july.html" rel="standout"/>
+      <description>Plenty to catch up on before a slew of titles leave for U.S. viewers by the end of July. These are the ones most worth seeing.</description>
+      <dc:creator>Jason Bailey</dc:creator>
+      <pubDate>Fri, 02 Jul 2021 19:32:12 +0000</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Movies</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Television</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_ttl">The Iron Lady (Movie)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_ttl">The Invitation (Movie)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_ttl">The Princess and the Frog (Movie)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_ttl">The Croods (Movie)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_ttl">Spotlight (Movie)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_ttl">A Clockwork Orange (Play)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_ttl">Hook (Movie)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_ttl">Jupiter Ascending (Movie)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_ttl">Mad Max (Movie)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_ttl">My Best Friend's Wedding (Movie)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_ttl">Zombieland (Movie)</category>
+    </item>
+    <item>
+      <title>A Christmas Wish for a ‘Once-in-a-Lifetime’ Love Comes True</title>
+      <link>https://www.nytimes.com/2021/07/02/style/jillian-mariutti-david-nieder-wedding.html</link>
+      <guid isPermaLink="true">https://www.nytimes.com/2021/07/02/style/jillian-mariutti-david-nieder-wedding.html</guid>
+      <atom:link href="https://www.nytimes.com/2021/07/02/style/jillian-mariutti-david-nieder-wedding.html" rel="standout"/>
+      <description>Jillian Mariutti and David Nieder met on the dating app the League in December 2018, a week after Ms. Mariutti wrote a letter to Santa.</description>
+      <dc:creator>Vincent M. Mallozzi</dc:creator>
+      <pubDate>Fri, 02 Jul 2021 09:00:12 +0000</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Weddings and Engagements</category>
+    </item>
+    <item>
+      <title> The Most Expensive New York City Homes Sold in June</title>
+      <link>https://www.nytimes.com/2021/07/02/realestate/one-buyer-takes-two-full-floor-apartments-at-220-central-park-south.html</link>
+      <guid isPermaLink="true">https://www.nytimes.com/2021/07/02/realestate/one-buyer-takes-two-full-floor-apartments-at-220-central-park-south.html</guid>
+      <atom:link href="https://www.nytimes.com/2021/07/02/realestate/one-buyer-takes-two-full-floor-apartments-at-220-central-park-south.html" rel="standout"/>
+      <description>The units, on the 60th and 61st floors, sold for a combined $157.5 million, the biggest residential transaction so far in 2021.</description>
+      <dc:creator>Vivian Marino</dc:creator>
+      <pubDate>Fri, 02 Jul 2021 17:09:02 +0000</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Real Estate and Housing (Residential)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Luxury Goods and Services</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">Vornado Realty Trust</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Balazs, Andre</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Barry, David B (1965- )</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Ells, Steve</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Humm, Daniel</category>
+      <media:content height="151" medium="image" url="https://static01.nyt.com/images/2021/07/04/realestate/02ticket2/02ticket2-moth.jpg" width="151"/>
+      <media:credit>Katherine Marks for The New York Times</media:credit>
+      <media:description>Four resales have closed to date at 220 Central Park South, all above their original purchase prices.</media:description>
+    </item>
+    <item>
+      <title>Falling in Love While Navigating Grief</title>
+      <link>https://www.nytimes.com/2021/07/02/style/caitlin-fitzmaurice-richard-thompson-wedding.html</link>
+      <guid isPermaLink="true">https://www.nytimes.com/2021/07/02/style/caitlin-fitzmaurice-richard-thompson-wedding.html</guid>
+      <atom:link href="https://www.nytimes.com/2021/07/02/style/caitlin-fitzmaurice-richard-thompson-wedding.html" rel="standout"/>
+      <description>Caitlin Fitzmaurice and Richard Thompson met a few months after Ms. Fitzmaurice’s mother died. Their relationship soon became a reminder that joy can be found amid sorrow.</description>
+      <dc:creator>Emma Grillo</dc:creator>
+      <pubDate>Fri, 02 Jul 2021 09:00:08 +0000</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Weddings and Engagements</category>
+    </item>
+    <item>
+      <title>Only the Incompetent Need Apply</title>
+      <link>https://www.nytimes.com/2021/07/01/opinion/republicans-incompetence.html</link>
+      <guid isPermaLink="true">https://www.nytimes.com/2021/07/01/opinion/republicans-incompetence.html</guid>
+      <atom:link href="https://www.nytimes.com/2021/07/01/opinion/republicans-incompetence.html" rel="standout"/>
+      <description>On the right, actual expertise is disqualifying.</description>
+      <dc:creator>Paul Krugman</dc:creator>
+      <pubDate>Fri, 02 Jul 2021 00:04:38 +0000</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Appointments and Executive Changes</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Coronavirus (2019-nCoV)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Economics (Theory and Philosophy)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">Heritage Foundation</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">Republican Party</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Moore, Stephen (1960- )</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Rumors and Misinformation</category>
+      <media:content height="151" medium="image" url="https://static01.nyt.com/images/2021/07/01/opinion/01krugman-lead/01krugman-lead-moth.jpg" width="151"/>
+      <media:credit>Mark Peterson/Redux</media:credit>
+    </item>
+    <item>
+      <title>Cherry Grove Exhibit Opens Outside New York Historical Society</title>
+      <link>https://www.nytimes.com/2021/07/01/arts/design/cherry-grove-exhibition.html</link>
+      <guid isPermaLink="true">https://www.nytimes.com/2021/07/01/arts/design/cherry-grove-exhibition.html</guid>
+      <atom:link href="https://www.nytimes.com/2021/07/01/arts/design/cherry-grove-exhibition.html" rel="standout"/>
+      <description>In the 1950s, the Fire Island hamlet was a refuge for gay men and lesbians. Dozens of enlarged photos from the era are now on view outside the New-York Historical Society.</description>
+      <dc:creator>Julianne McShane</dc:creator>
+      <pubDate>Thu, 01 Jul 2021 19:15:30 +0000</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Homosexuality and Bisexuality</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Photography</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Archives and Records</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Museums</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">New-York Historical Society</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">Cherry Grove (NY)</category>
+    </item>
+  </channel>
+</rss>

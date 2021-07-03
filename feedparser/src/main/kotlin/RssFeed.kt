@@ -43,7 +43,7 @@ data class RssItem(
     // Email address of the author of the item
     val author: String?,
     // Includes the item in one or more categories
-    val categories: List<String>?,
+    val categories: List<RssItemCategory>,
     // URL of a page for comments relating to the item
     val comments: URL?,
     // Describes a media object that is attached to the item
@@ -54,6 +54,14 @@ data class RssItem(
     val pubDate: Date?,
     // The RSS channel that the item came from
     val source: RssItemSource?,
+)
+
+data class RssItemCategory(
+    // A string that identifies a categorization taxonomy
+    val domain: String?,
+    // Forward-slash-separated string that identifies a hierarchic location in the indicated
+    // taxonomy
+    val value: String,
 )
 
 data class RssItemEnclosure(
@@ -134,6 +142,13 @@ fun rssItems(document: Document): Result<List<Result<RssItem>>> {
             null
         }
 
+        val categories = element.getElementsByTagName("category").toList().map { categoryElement ->
+            RssItemCategory(
+                domain = categoryElement.attributes?.getNamedItem("domain")?.textContent,
+                value = categoryElement.textContent ?: "",
+            )
+        }
+
         var enclosure: RssItemEnclosure? = null
 
         element.getElementsByTagName("enclosure")?.item(0)?.apply {
@@ -183,8 +198,7 @@ fun rssItems(document: Document): Result<List<Result<RssItem>>> {
                 link = link,
                 description = element.getElementsByTagName("description")?.item(0)?.textContent,
                 author = element.getElementsByTagName("author")?.item(0)?.textContent,
-                // TODO
-                categories = null,
+                categories = categories,
                 // TODO
                 comments = null,
                 enclosure = enclosure,
