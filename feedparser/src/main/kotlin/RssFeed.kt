@@ -149,6 +149,22 @@ fun rssItems(document: Document): Result<List<Result<RssItem>>> {
             )
         }
 
+        val commentsElements = element.getElementsByTagName("comments").toList()
+
+        if (commentsElements.size > 1) {
+            return Result.failure(
+                Exception("Expected 0 or 1 comments elements but got ${commentsElements.size}"),
+            )
+        }
+
+        val comments = if (commentsElements.isEmpty()) null else {
+            runCatching { URI.create(commentsElements.single().textContent).toURL() }.getOrElse {
+                return Result.failure(
+                    Exception("Expected 0 or 1 comments elements but got ${commentsElements.size}"),
+                )
+            }
+        }
+
         var enclosure: RssItemEnclosure? = null
 
         element.getElementsByTagName("enclosure")?.item(0)?.apply {
@@ -199,8 +215,7 @@ fun rssItems(document: Document): Result<List<Result<RssItem>>> {
                 description = element.getElementsByTagName("description")?.item(0)?.textContent,
                 author = element.getElementsByTagName("author")?.item(0)?.textContent,
                 categories = categories,
-                // TODO
-                comments = null,
+                comments = comments,
                 enclosure = enclosure,
                 guid = element.getElementsByTagName("guid")?.item(0)?.textContent,
                 pubDate = pubDate,
@@ -213,7 +228,7 @@ fun rssItems(document: Document): Result<List<Result<RssItem>>> {
     return Result.success(items)
 }
 
-fun NodeList.toList(): List<Element> {
+private fun NodeList.toList(): List<Element> {
     val list = mutableListOf<Element>()
 
     repeat(length) {
