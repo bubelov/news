@@ -196,7 +196,7 @@ fun rssItems(document: Document): Result<List<Result<RssItem>>> {
             )
         }
 
-        val rawPubDate = element.getElementsByTagName("pubDate").item(0).textContent?.trim()
+        val rawPubDate = element.getElementsByTagName("pubDate")?.item(0)?.textContent?.trim()
 
         val pubDate = if (rawPubDate != null) {
             runCatching {
@@ -206,6 +206,24 @@ fun rssItems(document: Document): Result<List<Result<RssItem>>> {
             }
         } else {
             null
+        }
+
+        var source: RssItemSource? = null
+
+        element.getElementsByTagName("source")?.item(0)?.apply {
+            val rawUrl = attributes?.getNamedItem("url")?.textContent
+                ?: return@map Result.failure(Exception("Source URL is missing"))
+
+            val url = runCatching {
+                URI.create(rawUrl).toURL()
+            }.getOrElse {
+                return@map Result.failure(Exception("Failed to parse source URL"))
+            }
+
+            source = RssItemSource(
+                url = url,
+                value = textContent,
+            )
         }
 
         Result.success(
@@ -219,8 +237,7 @@ fun rssItems(document: Document): Result<List<Result<RssItem>>> {
                 enclosure = enclosure,
                 guid = element.getElementsByTagName("guid")?.item(0)?.textContent,
                 pubDate = pubDate,
-                // TODO
-                source = null,
+                source = source,
             )
         )
     }
