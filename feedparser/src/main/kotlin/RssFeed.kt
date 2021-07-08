@@ -12,8 +12,14 @@ import javax.xml.parsers.DocumentBuilderFactory
 val RFC_822 = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.US)
 
 data class RssFeed(
+    // Mandatory attribute that specifies the version of RSS that the document conforms to
+    val version: RssVersion,
     val channel: RssChannel,
 ) : Feed()
+
+enum class RssVersion {
+    RSS_2_0,
+}
 
 data class RssChannel(
     // The name of the channel. It's how people refer to your service. If you have an HTML website
@@ -93,6 +99,17 @@ fun rssFeed(url: URL): Result<RssFeed> {
 }
 
 fun rssFeed(document: Document): Result<RssFeed> {
+    val rawVersion = document.documentElement.attributes?.getNamedItem("version")?.textContent
+
+    if (rawVersion.isNullOrBlank()) {
+        return Result.failure(Exception("RSS version is missing"))
+    }
+
+    val version = when (rawVersion) {
+        "2.0" -> RssVersion.RSS_2_0
+        else -> return Result.failure(Exception("Unsupported RSS version: $rawVersion"))
+    }
+
     val channel = document.documentElement.getElementsByTagName("channel").item(0) as Element
 
     val title = channel.getElementsByTagName("title")?.item(0)?.textContent
@@ -112,6 +129,7 @@ fun rssFeed(document: Document): Result<RssFeed> {
 
     return Result.success(
         RssFeed(
+            version = version,
             channel = RssChannel(
                 title = title,
                 link = link,
