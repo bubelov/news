@@ -1,7 +1,7 @@
 package co.appreactor.feedparser
 
-import org.junit.Test
 import java.io.File
+import kotlin.test.Test
 
 class Test {
 
