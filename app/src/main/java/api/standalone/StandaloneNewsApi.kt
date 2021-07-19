@@ -2,11 +2,10 @@ package api.standalone
 
 import api.GetEntriesResult
 import api.NewsApi
-import co.appreactor.feedparser.AtomEntry
-import co.appreactor.feedparser.RssItem
-import co.appreactor.feedparser.feed
+import co.appreactor.feedk.*
 import common.trustSelfSignedCerts
 import db.*
+import db.Feed
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -22,7 +21,8 @@ import org.jsoup.Jsoup
 import timber.log.Timber
 import java.net.URI
 import java.util.*
-import javax.xml.parsers.DocumentBuilderFactory
+
+typealias ParsedFeed = co.appreactor.feedk.Feed
 
 class StandaloneNewsApi(
     private val feedQueries: FeedQueries,
@@ -118,10 +118,8 @@ class StandaloneNewsApi(
 
     private fun fetchEntries(feed: Feed): List<Entry> {
         return when (val freshFeed = feed(URI.create(feed.selfLink).toURL()).getOrThrow()) {
-            is co.appreactor.feedparser.AtomFeed -> freshFeed.entries.getOrThrow()
-                .map { it.toEntry() }
-            is co.appreactor.feedparser.RssFeed -> freshFeed.channel.items.getOrThrow()
-                .map { it.getOrThrow().toEntry() }
+            is AtomFeed -> freshFeed.entries.getOrThrow().map { it.toEntry() }
+            is RssFeed -> freshFeed.channel.items.getOrThrow().map { it.getOrThrow().toEntry() }
         }
     }
 
@@ -133,9 +131,9 @@ class StandaloneNewsApi(
 
     }
 
-    private fun co.appreactor.feedparser.Feed.toFeed(): Feed {
+    private fun ParsedFeed.toFeed(): Feed {
         return when (this) {
-            is co.appreactor.feedparser.AtomFeed -> Feed(
+            is AtomFeed -> Feed(
                 id = selfLink,
                 title = title,
                 selfLink = selfLink,
@@ -144,7 +142,7 @@ class StandaloneNewsApi(
                 blockedWords = "",
                 showPreviewImages = null,
             )
-            is co.appreactor.feedparser.RssFeed -> Feed(
+            is RssFeed -> Feed(
                 id = channel.link.toString(),
                 title = channel.title,
                 selfLink = "",
