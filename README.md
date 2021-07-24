@@ -15,10 +15,10 @@
 ---
 
 <p>
-<img alt="" src="https://f-droid.org/repo/co.appreactor.news/en-US/phoneScreenshots/1.png" width="19%">
-<img alt="" src="https://f-droid.org/repo/co.appreactor.news/en-US/phoneScreenshots/2.png" width="19%">
-<img alt="" src="https://f-droid.org/repo/co.appreactor.news/en-US/phoneScreenshots/3.png" width="19%">
-<img alt="" src="https://f-droid.org/repo/co.appreactor.news/en-US/phoneScreenshots/4.png" width="19%">
+<img alt="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="19%">
+<img alt="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="19%">
+<img alt="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" width="19%">
+<img alt="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width="19%">
 </p>
 
 ---
