@@ -10,19 +10,21 @@ import kotlinx.coroutines.flow.flow
 import org.joda.time.Instant
 import retrofit2.Response
 import timber.log.Timber
+import java.net.URL
 
 class NextcloudNewsApiAdapter(
     private val api: NextcloudNewsApi
 ) : NewsApi {
 
-    override suspend fun addFeed(url: String): Feed {
-        val response = api.postFeed(PostFeedArgs(url, 0)).execute()
+    override suspend fun addFeed(url: URL): Feed {
+        val response = api.postFeed(PostFeedArgs(url.toString(), 0)).execute()
 
         if (!response.isSuccessful) {
             throw response.toException()
         }
 
-        val feedJson = response.body()?.feeds?.single() ?: throw Exception("Can not parse server response")
+        val feedJson =
+            response.body()?.feeds?.single() ?: throw Exception("Can not parse server response")
 
         return feedJson.toFeed() ?: throw Exception("Invalid server response")
     }
@@ -61,7 +63,8 @@ class NextcloudNewsApiAdapter(
         val batchSize = 250L
 
         while (true) {
-            val oldestEntryId = fetchedEntries.minOfOrNull { it.id ?: Long.MAX_VALUE }?.toLong() ?: 0L
+            val oldestEntryId =
+                fetchedEntries.minOfOrNull { it.id ?: Long.MAX_VALUE }?.toLong() ?: 0L
             Timber.d("Oldest entry ID: $oldestEntryId")
 
             val response = try {
@@ -82,7 +85,8 @@ class NextcloudNewsApiAdapter(
             if (!response.isSuccessful) {
                 throw response.toException()
             } else {
-                val entries =  response.body()?.items ?: throw Exception("Can not parse server response")
+                val entries =
+                    response.body()?.items ?: throw Exception("Can not parse server response")
                 Timber.d("Got ${entries.size} entries")
                 fetchedEntries += entries
                 Timber.d("Fetched ${fetchedEntries.size} entries so far")
@@ -137,7 +141,8 @@ class NextcloudNewsApiAdapter(
     }
 
     override suspend fun markAsBookmarked(entries: List<EntryWithoutSummary>, bookmarked: Boolean) {
-        val args = PutStarredArgs(entries.map { PutStarredArgsItem(it.feedId.toLong(), it.guidHash) })
+        val args =
+            PutStarredArgs(entries.map { PutStarredArgsItem(it.feedId.toLong(), it.guidHash) })
 
         val response = if (bookmarked) {
             api.putStarred(args)
@@ -194,5 +199,6 @@ class NextcloudNewsApiAdapter(
         )
     }
 
-    private fun Response<*>.toException() = Exception("HTTPS request failed with error code ${code()}")
+    private fun Response<*>.toException() =
+        Exception("HTTPS request failed with error code ${code()}")
 }

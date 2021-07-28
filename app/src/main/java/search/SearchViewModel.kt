@@ -2,7 +2,6 @@ package search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import sync.NewsApiSync
 import db.Entry
 import db.Feed
 import entries.EntriesAdapterItem
@@ -14,10 +13,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.joda.time.Instant
+import sync.NewsApiSync
 import sync.SyncResult
 import timber.log.Timber
 import java.text.DateFormat
-import java.util.*
+import java.util.Date
 
 class SearchViewModel(
     private val feedsRepository: FeedsRepository,
@@ -55,7 +55,7 @@ class SearchViewModel(
                     query,
                     true,
                 )
-                is EntriesFilter.OnlyFromFeed -> entriesRepository.selectByQueryAndFeedid(
+                is EntriesFilter.OnlyFromFeed -> entriesRepository.selectByQueryAndFeedId(
                     query,
                     filter.feedId,
                 )

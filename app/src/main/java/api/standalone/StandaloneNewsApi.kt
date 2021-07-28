@@ -1,43 +1,53 @@
 package api.standalone
 
+import android.util.Base64
 import api.GetEntriesResult
 import api.NewsApi
-import co.appreactor.feedk.*
+import co.appreactor.feedk.AtomEntry
+import co.appreactor.feedk.AtomFeed
+import co.appreactor.feedk.RssFeed
+import co.appreactor.feedk.RssItem
+import co.appreactor.feedk.feed
+import common.toIsoString
 import common.trustSelfSignedCerts
-import db.*
+import db.Entry
+import db.EntryQueries
+import db.EntryWithoutSummary
 import db.Feed
+import db.FeedQueries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withContext
-import logentries.LogEntriesRepository
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.joda.time.DateTime
 import org.joda.time.Instant
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Element
 import timber.log.Timber
 import java.net.URI
-import java.util.*
+import java.net.URL
+import java.security.MessageDigest
+import java.util.Date
 
 typealias ParsedFeed = co.appreactor.feedk.Feed
 
 class StandaloneNewsApi(
     private val feedQueries: FeedQueries,
     private val entryQueries: EntryQueries,
-    private val log: LogEntriesRepository,
 ) : NewsApi {
 
-    private val httpClient = OkHttpClient.Builder().trustSelfSignedCerts().build()
+    private val http = OkHttpClient.Builder().trustSelfSignedCerts().build()
 
-    override suspend fun addFeed(url: String): Feed {
+    override suspend fun addFeed(url: URL): Feed {
+        Timber.d("Trying to add feed with URL $url")
         val request = Request.Builder()
             .url(url)
             .build()
 
-        val response = httpClient.newCall(request).execute()
+        val response = http.newCall(request).execute()
 
         if (!response.isSuccessful) {
             throw Exception("Response code: ${response.code}")
@@ -46,23 +56,22 @@ class StandaloneNewsApi(
         val responseBody = response.body ?: throw Exception("Response has empty body")
 
         if (response.header("content-type")?.startsWith("text/html") == true) {
-            val html = responseBody.string()
+            Timber.d("Got an HTML document, looking for feed links")
+            val html = Jsoup.parse(responseBody.string())
 
-            val atomElements = Jsoup
-                .parse(html)
-                .select("link[type=\"application/rss+xml\"]")
+            val feedElements = mutableListOf<Element>().apply {
+                addAll(html.select("link[type=\"application/rss+xml\"]"))
+                addAll(html.select("link[type=\"application/atom+xml\"]"))
+            }
 
-            val rssElements = Jsoup
-                .parse(html)
-                .select("link[type=\"application/atom+xml\"]")
-
-            if (atomElements.isEmpty() && rssElements.isEmpty()) {
+            if (feedElements.isEmpty()) {
                 throw Exception("Cannot find feeds for $url")
             }
 
-            return addFeed((atomElements + rssElements).first().attr("href"))
+            Timber.d("Feed elements found: ${feedElements.size}. Data: $feedElements")
+            return addFeed(URI.create(feedElements.first().attr("href")).toURL())
         } else {
-            return feed(URI.create(url).toURL()).getOrThrow().toFeed()
+            return feed(url).getOrThrow().toFeed(url)
         }
     }
 
@@ -86,25 +95,16 @@ class StandaloneNewsApi(
         return emptyList()
     }
 
+    // TODO return updated entries
     override suspend fun getNewAndUpdatedEntries(
         since: Instant,
     ): List<Entry> = withContext(Dispatchers.IO) {
-        log.insert(logEntry().copy(message = "getNewAndUpdatedEntries was called"))
+        Timber.d("Fetching new and updated entries")
         val startTimestamp = System.currentTimeMillis()
         val entries = mutableListOf<Entry>()
 
         feedQueries.selectAll().executeAsList().chunked(10).forEach { chunk ->
-            chunk.map { feed ->
-                async {
-                    runCatching {
-                        fetchEntries(feed)
-                    }.onSuccess {
-                        synchronized(entries) { entries += it }
-                    }.onFailure {
-                        Timber.e(it, "Failed to fetch entries for feed ${feed.selfLink}")
-                    }
-                }
-            }.awaitAll()
+            chunk.map { feed -> async { entries.addAll(fetchEntries(feed)) } }.awaitAll()
         }
 
         entries.removeAll {
@@ -112,14 +112,41 @@ class StandaloneNewsApi(
         }
 
         val totalTimeMillis = System.currentTimeMillis() - startTimestamp
-        log.insert(logEntry().copy(message = "getNewAndUpdatedEntries was executed in $totalTimeMillis ms"))
+        Timber.d("Fetched new and updated entries in $totalTimeMillis ms")
         return@withContext entries
     }
 
     private fun fetchEntries(feed: Feed): List<Entry> {
-        return when (val freshFeed = feed(URI.create(feed.selfLink).toURL()).getOrThrow()) {
-            is AtomFeed -> freshFeed.entries.getOrThrow().map { it.toEntry() }
-            is RssFeed -> freshFeed.channel.items.getOrThrow().map { it.getOrThrow().toEntry() }
+        val url = runCatching {
+            URI.create(feed.selfLink).toURL()
+        }.getOrElse {
+            Timber.d("Failed to parse feed url for feed $feed")
+            return emptyList()
+        }
+
+        val parsedFeed = feed(url).getOrElse {
+            Timber.d("Failed to parse feed $feed")
+            return emptyList()
+        }
+
+        return when (parsedFeed) {
+            is AtomFeed -> {
+                parsedFeed.entries.getOrElse {
+                    Timber.d("Failed to parse Atom entries for feed $feed")
+                    return emptyList()
+                }.map { it.toEntry() }
+            }
+            is RssFeed -> {
+                parsedFeed.channel.items.getOrElse {
+                    Timber.d("Failed to parse RSS entries for feed $feed")
+                    return emptyList()
+                }.mapNotNull {
+                    it.getOrElse {
+                        Timber.d("Failed to parse RSS entry for feed $feed")
+                        null
+                    }
+                }.map { it.toEntry(feed.id) }
+            }
         }
     }
 
@@ -131,7 +158,7 @@ class StandaloneNewsApi(
 
     }
 
-    private fun ParsedFeed.toFeed(): Feed {
+    private fun ParsedFeed.toFeed(feedUrl: URL): Feed {
         return when (this) {
             is AtomFeed -> Feed(
                 id = selfLink,
@@ -145,7 +172,7 @@ class StandaloneNewsApi(
             is RssFeed -> Feed(
                 id = channel.link.toString(),
                 title = channel.title,
-                selfLink = "",
+                selfLink = feedUrl.toString(),
                 alternateLink = channel.link.toString(),
                 openEntriesInBrowser = false,
                 blockedWords = "",
@@ -172,14 +199,14 @@ class StandaloneNewsApi(
         guidHash = "",
     )
 
-    private fun RssItem.toEntry() = Entry(
-        id = "",
-        feedId = "",
+    private fun RssItem.toEntry(feedId: String) = Entry(
+        id = sha256("$feedId:$title:$description"),
+        feedId = feedId,
         title = title ?: "",
         link = link.toString(),
-        published = pubDate.toString(),
-        updated = "",
-        authorName = "",
+        published = (pubDate ?: Date()).toIsoString(),
+        updated = (pubDate ?: Date()).toIsoString(),
+        authorName = author ?: "",
         content = description ?: "",
         enclosureLink = enclosure?.url.toString(),
         enclosureLinkType = enclosure?.type ?: "",
@@ -190,10 +217,9 @@ class StandaloneNewsApi(
         guidHash = "",
     )
 
-    private fun logEntry() = LogEntry(
-        id = UUID.randomUUID().toString(),
-        date = DateTime.now().toString(),
-        tag = "standalone_news_api",
-        message = "",
-    )
+    private fun sha256(string: String): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        val hash = digest.digest(string.toByteArray())
+        return Base64.encodeToString(hash, Base64.DEFAULT)
+    }
 }

@@ -5,12 +5,13 @@ import db.EntryWithoutSummary
 import db.Feed
 import kotlinx.coroutines.flow.Flow
 import org.joda.time.Instant
+import java.net.URL
 
 class NewsApiWrapper : NewsApi {
 
     lateinit var api: NewsApi
 
-    override suspend fun addFeed(url: String): Feed {
+    override suspend fun addFeed(url: URL): Feed {
         return api.addFeed(url)
     }
 

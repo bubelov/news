@@ -1,10 +1,11 @@
 package feeds
 
-import api.*
+import api.NewsApi
 import db.Feed
 import db.FeedQueries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.net.URL
 
 class FeedsRepository(
     private val api: NewsApi,
@@ -16,13 +17,13 @@ class FeedsRepository(
     }
 
     suspend fun insertByFeedUrl(
-        url: String,
+        url: URL,
         title: String? = null,
     ) = withContext(Dispatchers.IO) {
         var feed = api.addFeed(url)
 
         if (!title.isNullOrBlank()) {
-           feed = feed.copy(title = title)
+            feed = feed.copy(title = title)
         }
 
         db.insertOrReplace(feed)

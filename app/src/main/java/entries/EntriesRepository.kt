@@ -1,12 +1,12 @@
 package entries
 
-import api.*
 import api.GetEntriesResult
-import db.Entry
-import db.EntryQueries
+import api.NewsApi
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOne
+import db.Entry
+import db.EntryQueries
 import db.EntryWithoutSummary
 import db.Feed
 import kotlinx.coroutines.Dispatchers
@@ -106,7 +106,7 @@ class EntriesRepository(
             db.selectByQueryAndBookmarked(bookmarked, query).executeAsList()
         }
 
-    suspend fun selectByQueryAndFeedid(query: String, feedId: String) =
+    suspend fun selectByQueryAndFeedId(query: String, feedId: String) =
         withContext(Dispatchers.IO) {
             db.selectByQueryAndFeedId(feedId, query).executeAsList()
         }
@@ -221,8 +221,9 @@ class EntriesRepository(
         val entries = api.getNewAndUpdatedEntries(since)
 
         db.transaction {
-            entries.forEach { entry ->
-                db.insertOrReplace(entry.postProcess(feeds.firstOrNull { it.id == entry.feedId }))
+            entries.forEach { newEntry ->
+                val feed = feeds.firstOrNull { it.id == newEntry.feedId }
+                db.insertOrReplace(newEntry.postProcess(feed))
             }
         }
 

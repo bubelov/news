@@ -5,19 +5,19 @@ import api.nextcloud.DirectNextcloudNewsApiBuilder
 import api.nextcloud.NextcloudNewsApi
 import api.nextcloud.NextcloudNewsApiAdapter
 import api.standalone.StandaloneNewsApi
-import common.*
 import db.EntryQueries
 import db.FeedQueries
 import com.google.gson.GsonBuilder
 import com.nextcloud.android.sso.api.NextcloudAPI
 import com.nextcloud.android.sso.helper.SingleAccountHelper
+import common.PreferencesRepository
 import db.LogEntry
 import kotlinx.coroutines.runBlocking
 import logentries.LogEntriesRepository
 import org.joda.time.DateTime
 import retrofit2.NextcloudRetrofitApiBuilder
 import timber.log.Timber
-import java.util.*
+import java.util.UUID
 
 class NewsApiSwitcher(
     private val wrapper: NewsApiWrapper,
@@ -81,7 +81,7 @@ class NewsApiSwitcher(
     }
 
     private fun switchToStandaloneApi() {
-        wrapper.api = StandaloneNewsApi(feedQueries, entryQueries, log)
+        wrapper.api = StandaloneNewsApi(feedQueries, entryQueries)
     }
 
     private fun log(message: String): Unit = runBlocking {

@@ -5,10 +5,11 @@ import db.EntryWithoutSummary
 import db.Feed
 import kotlinx.coroutines.flow.Flow
 import org.joda.time.Instant
+import java.net.URL
 
 interface NewsApi {
 
-    suspend fun addFeed(url: String): Feed
+    suspend fun addFeed(url: URL): Feed
 
     suspend fun getFeeds(): List<Feed>
 

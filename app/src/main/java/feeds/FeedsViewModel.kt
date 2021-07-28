@@ -13,7 +13,7 @@ import kotlinx.coroutines.withContext
 import opml.exportOpml
 import opml.importOpml
 import timber.log.Timber
-import java.net.URL
+import java.net.URI
 import java.util.concurrent.atomic.AtomicInteger
 
 class FeedsViewModel(
@@ -32,18 +32,12 @@ class FeedsViewModel(
         )
     }
 
-    suspend fun createFeed(url: String) = changeState {
+    suspend fun createFeed(urlString: String) = changeState {
         value = State.Loading
-
-        val fullUrl = if (url.startsWith("http")) url else "https://$url"
-
-        try {
-            URL(fullUrl).toURI()
-        } catch (e: Exception) {
-            throw Exception(app.getString(R.string.invalid_url_s, fullUrl), e)
-        }
-
-        feedsRepository.insertByFeedUrl(fullUrl)
+        val fullUrlString = if (urlString.startsWith("http")) urlString else "https://$urlString"
+        val url = runCatching { URI.create(fullUrlString).toURL() }
+            .getOrElse { throw Exception(app.getString(R.string.invalid_url_s, fullUrlString), it) }
+        feedsRepository.insertByFeedUrl(url)
         loadFeeds()
     }
 
@@ -110,7 +104,7 @@ class FeedsViewModel(
 
                         runCatching {
                             feedsRepository.insertByFeedUrl(
-                                url = outline.xmlUrl,
+                                url = URI.create(outline.xmlUrl).toURL(),
                                 title = outline.text,
                             )
                         }.onSuccess {

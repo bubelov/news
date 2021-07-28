@@ -2,12 +2,12 @@ package common
 
 import android.app.Application
 import androidx.work.*
-import co.appreactor.news.BuildConfig
 import api.NewsApiSwitcher
-import injections.appModule
-import exceptions.AppExceptionsTree
+import co.appreactor.news.BuildConfig
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
+import exceptions.PersistentTree
+import injections.appModule
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
 import org.koin.android.ext.koin.androidContext
@@ -36,7 +36,7 @@ class App : Application() {
             }
         }
 
-        Timber.plant(AppExceptionsTree(get()))
+        Timber.plant(PersistentTree(get(), get()))
 
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())

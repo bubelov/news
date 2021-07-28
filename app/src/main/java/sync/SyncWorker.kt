@@ -14,90 +14,62 @@ import co.appreactor.news.R
 import common.App
 import common.AppActivity
 import common.PreferencesRepository
-import db.LogEntry
 import entries.EntriesRepository
 import kotlinx.coroutines.runBlocking
-import logentries.LogEntriesRepository
-import org.joda.time.DateTime
 import org.koin.android.ext.android.get
 import timber.log.Timber
-import java.util.*
 
 class SyncWorker(appContext: Context, workerParams: WorkerParameters) :
     Worker(appContext, workerParams) {
 
-    override fun doWork(): Result {
-        return runBlocking {
-            val app = applicationContext as App
-            val prefs = app.get<PreferencesRepository>().get()
-            val sync = app.get<NewsApiSync>()
-            val log = app.get<LogEntriesRepository>()
-            val entriesRepository = app.get<EntriesRepository>()
+    override fun doWork() = runBlocking { doWorkAsync() }
 
-            log.insert(logEntry().copy(message = "Starting background sync"))
+    private suspend fun doWorkAsync(): Result {
+        val app = applicationContext as App
+        val prefs = app.get<PreferencesRepository>().get()
+        val sync = app.get<NewsApiSync>()
+        val entriesRepository = app.get<EntriesRepository>()
+        Timber.d("Attempting background sync")
 
-            if (!prefs.initialSyncCompleted) {
-                log.insert(
-                    logEntry().copy(
-                        message = "Tried to sync in background before initial sync is completed"
-                    )
-                )
+        if (!prefs.initialSyncCompleted) {
+            Timber.d("Initial sync isn't completed yet. Will retry later")
+            return Result.retry()
+        }
 
-                return@runBlocking Result.retry()
-            }
+        val syncResult = sync.sync(
+            syncFeeds = true,
+            syncEntriesFlags = true,
+            syncNewAndUpdatedEntries = true,
+        )
 
-            val syncResult = sync.sync(
-                syncFeeds = true,
-                syncEntriesFlags = true,
-                syncNewAndUpdatedEntries = true,
-            )
+        when (syncResult) {
+            is SyncResult.Ok -> {
+                Timber.d("Got ${syncResult.newAndUpdatedEntries} new and updated entries")
 
-            when (syncResult) {
-                is SyncResult.Ok -> {
-                    log.insert(
-                        logEntry().copy(
-                            message = "Got ${syncResult.newAndUpdatedEntries} new and updated entries"
-                        )
-                    )
+                if (syncResult.newAndUpdatedEntries > 0) {
+                    runCatching {
+                        val unreadEntries = entriesRepository.selectByReadAndBookmarked(
+                            read = false,
+                            bookmarked = false,
+                        ).size
 
-                    if (syncResult.newAndUpdatedEntries > 0) {
-                        runCatching {
-                            val unreadEntries = entriesRepository.selectByReadAndBookmarked(
-                                read = false,
-                                bookmarked = false,
-                            ).size
-
-                            if (unreadEntries > 0) {
-                                showUnreadEntriesNotification(unreadEntries, app)
-                            }
-                        }.onFailure {
-                            Timber.e(it)
-                            log.insert(
-                                logEntry().copy(
-                                    message = "Failed to show unread entries notification (${it.message})"
-                                )
-                            )
+                        if (unreadEntries > 0) {
+                            showUnreadEntriesNotification(unreadEntries, app)
                         }
+                    }.onFailure {
+                        Timber.e(it, "Failed to show unread entries notification (${it.message})")
                     }
                 }
-                is SyncResult.Err -> {
-                    Timber.e(syncResult.e)
-                    log.insert(logEntry().copy(message = "Background sync failed (${syncResult.e.message})"))
-                    return@runBlocking Result.failure()
-                }
             }
-
-            log.insert(logEntry().copy(message = "Finished background sync"))
-            return@runBlocking Result.success()
+            is SyncResult.Err -> {
+                Timber.e(syncResult.e, "Background sync failed (${syncResult.e.message})")
+                return Result.failure()
+            }
         }
-    }
 
-    private fun logEntry() = LogEntry(
-        id = UUID.randomUUID().toString(),
-        date = DateTime.now().toString(),
-        tag = "sync",
-        message = "",
-    )
+        Timber.d("Finished background sync")
+        return Result.success()
+    }
 
     private fun showUnreadEntriesNotification(unreadEntries: Int, context: Context) {
         createNotificationChannel(context)
