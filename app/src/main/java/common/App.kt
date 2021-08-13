@@ -1,12 +1,16 @@
 package common
 
 import android.app.Application
-import androidx.work.*
+import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import api.NewsApiSwitcher
 import co.appreactor.news.BuildConfig
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
-import exceptions.PersistentTree
+import log.LogTree
 import injections.appModule
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
@@ -36,7 +40,7 @@ class App : Application() {
             }
         }
 
-        Timber.plant(PersistentTree(get(), get()))
+        Timber.plant(LogTree(get()))
 
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())

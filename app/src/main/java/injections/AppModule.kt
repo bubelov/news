@@ -15,8 +15,6 @@ import common.AppViewModel
 import common.PreferencesRepository
 import sync.NewsApiSync
 import feeds.FeedsRepository
-import exceptions.AppExceptionsViewModel
-import exceptions.AppExceptionsRepository
 import entries.EntriesViewModel
 import entries.EntriesRepository
 import entry.EntryViewModel
@@ -26,11 +24,11 @@ import settings.SettingsViewModel
 import common.ConnectivityProbe
 import entries.EntriesSharedViewModel
 import entries.EntriesSupportingTextRepository
-import exception.AppExceptionViewModel
 import feeds.FeedsViewModel
 import feedsettings.FeedSettingsViewModel
-import logentries.LogEntriesRepository
-import logentries.LogEntriesViewModel
+import log.ExceptionViewModel
+import log.LogRepository
+import log.LogViewModel
 import org.koin.android.experimental.dsl.viewModel
 import org.koin.dsl.module
 import org.koin.experimental.builder.single
@@ -54,8 +52,7 @@ val appModule = module {
     single { get<Database>().entryImageQueries }
     single { get<Database>().entryEnclosureQueries }
     single { get<Database>().preferenceQueries }
-    single { get<Database>().loggedExceptionQueries }
-    single { get<Database>().logEntryQueries }
+    single { get<Database>().logQueries }
 
     single {
         val context = get<Context>()
@@ -78,8 +75,7 @@ val appModule = module {
     single<EntriesImagesRepository>()
     single<PodcastsRepository>()
     single<PreferencesRepository>()
-    single<AppExceptionsRepository>()
-    single<LogEntriesRepository>()
+    single<LogRepository>()
 
     viewModel<AppViewModel>()
     viewModel<AuthViewModel>()
@@ -88,10 +84,9 @@ val appModule = module {
     viewModel<EntryViewModel>()
     viewModel<SettingsViewModel>()
     viewModel<DirectAuthViewModel>()
-    viewModel<AppExceptionsViewModel>()
-    viewModel<AppExceptionViewModel>()
+    viewModel<ExceptionViewModel>()
     viewModel<FeedsViewModel>()
     viewModel<FeedSettingsViewModel>()
     viewModel<SearchViewModel>()
-    viewModel<LogEntriesViewModel>()
+    viewModel<LogViewModel>()
 }

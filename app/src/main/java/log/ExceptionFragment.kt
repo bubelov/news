@@ -1,4 +1,4 @@
-package exception
+package log
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,19 +8,19 @@ import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
-import co.appreactor.news.databinding.FragmentAppExceptionBinding
+import co.appreactor.news.databinding.FragmentExceptionBinding
 import common.AppFragment
 import org.koin.android.viewmodel.ext.android.viewModel
 
-class AppExceptionFragment : AppFragment() {
+class ExceptionFragment : AppFragment() {
 
     private val args by lazy {
-        AppExceptionFragmentArgs.fromBundle(requireArguments())
+        ExceptionFragmentArgs.fromBundle(requireArguments())
     }
 
-    private val model: AppExceptionViewModel by viewModel()
+    private val model: ExceptionViewModel by viewModel()
 
-    private var _binding: FragmentAppExceptionBinding? = null
+    private var _binding: FragmentExceptionBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -28,7 +28,7 @@ class AppExceptionFragment : AppFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentAppExceptionBinding.inflate(inflater, container, false)
+        _binding = FragmentExceptionBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -36,13 +36,13 @@ class AppExceptionFragment : AppFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         lifecycleScope.launchWhenResumed {
-            val exception = model.selectById(args.exceptionId) ?: return@launchWhenResumed
+            val log = model.selectById(args.logId) ?: return@launchWhenResumed
 
             toolbar.apply {
                 setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
                 setNavigationOnClickListener { findNavController().popBackStack() }
-                title = exception.exceptionClass
-                inflateMenu(R.menu.menu_logged_exception)
+                title = log.message
+                inflateMenu(R.menu.menu_exception)
 
                 setOnMenuItemClickListener { menuItem ->
                     when (menuItem.itemId) {
@@ -50,8 +50,8 @@ class AppExceptionFragment : AppFragment() {
                             val intent = Intent().apply {
                                 action = Intent.ACTION_SEND
                                 type = "text/plain"
-                                putExtra(Intent.EXTRA_SUBJECT, exception.exceptionClass)
-                                putExtra(Intent.EXTRA_TEXT, exception.stackTrace)
+                                putExtra(Intent.EXTRA_SUBJECT, log.message)
+                                putExtra(Intent.EXTRA_TEXT, log.stackTrace)
                             }
 
                             startActivity(Intent.createChooser(intent, ""))
@@ -62,7 +62,7 @@ class AppExceptionFragment : AppFragment() {
                 }
             }
 
-            binding.stackTrace.text = exception.stackTrace
+            binding.stackTrace.text = log.stackTrace
         }
     }
 

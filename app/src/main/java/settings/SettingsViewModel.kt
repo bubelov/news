@@ -3,7 +3,8 @@ package settings
 import androidx.lifecycle.ViewModel
 import auth.AuthRepository
 import co.appreactor.news.Database
-import common.*
+import common.Preferences
+import common.PreferencesRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 
@@ -27,7 +28,7 @@ class SettingsViewModel(
                 entryImageQueries.deleteAll()
                 entryImagesMetadataQueries.deleteAll()
                 feedQueries.deleteAll()
-                loggedExceptionQueries.deleteAll()
+                logQueries.deleteAll()
                 preferenceQueries.deleteAll()
             }
         }

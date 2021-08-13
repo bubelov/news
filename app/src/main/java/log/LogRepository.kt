@@ -1,20 +1,24 @@
-package logentries
+package log
 
-import db.LogEntry
-import db.LogEntryQueries
+import db.Log
+import db.LogQueries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class LogEntriesRepository(
-    private val db: LogEntryQueries,
+class LogRepository(
+    private val db: LogQueries,
 ) {
 
-    suspend fun insert(logEntry: LogEntry) = withContext(Dispatchers.IO) {
+    suspend fun insert(logEntry: Log) = withContext(Dispatchers.IO) {
         db.insert(logEntry)
     }
 
     suspend fun selectAll() = withContext(Dispatchers.IO) {
         db.selectAll().executeAsList()
+    }
+
+    suspend fun selectById(id: String) = withContext(Dispatchers.IO) {
+        db.selectById(id).executeAsOneOrNull()
     }
 
     suspend fun deleteAll() = withContext(Dispatchers.IO) {

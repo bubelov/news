@@ -3,11 +3,18 @@ package feeds
 import api.NewsApi
 import db.FeedQueries
 import db.feed
-import io.mockk.*
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.coVerifySequence
+import io.mockk.confirmVerified
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Test
-import java.util.*
+import java.net.URI
+import java.util.UUID
 
 class FeedsRepositoryTests {
 
@@ -32,7 +39,7 @@ class FeedsRepositoryTests {
     fun insertByUrl(): Unit = runBlocking {
         val feed = feed()
 
-        val feedUrl = "https://example.com/"
+        val feedUrl = URI.create("https://example.com/").toURL()
 
         coEvery { api.addFeed(feedUrl) } returns feed
 

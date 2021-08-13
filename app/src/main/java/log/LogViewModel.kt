@@ -1,11 +1,11 @@
-package logentries
+package log
 
 import androidx.lifecycle.ViewModel
-import db.LogEntry
+import db.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class LogEntriesViewModel(
-    private val repository: LogEntriesRepository
+class LogViewModel(
+    private val repository: LogRepository
 ) : ViewModel() {
 
     val state = MutableStateFlow<State>(State.Idle)
@@ -29,6 +29,6 @@ class LogEntriesViewModel(
     sealed class State {
         object Idle : State()
         object Loading : State()
-        data class Loaded(val items: List<LogEntry>) : State()
+        data class Loaded(val items: List<Log>) : State()
     }
 }

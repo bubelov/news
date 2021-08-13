@@ -1,22 +1,26 @@
-CREATE TABLE LogEntry (
+CREATE TABLE Log (
   id TEXT PRIMARY KEY,
   date TEXT NOT NULL,
   tag TEXT NOT NULL,
-  message TEXT NOT NULL
+  message TEXT NOT NULL,
+  stackTrace TEXT
 );
-
-CREATE INDEX idx_logentry_tag ON LogEntry(tag);
 
 insert:
 INSERT
-INTO LogEntry
+INTO Log
 VALUES ?;
 
 selectAll:
 SELECT *
-FROM LogEntry
+FROM Log
 ORDER BY date DESC;
+
+selectById:
+SELECT *
+FROM Log
+WHERE id = ?;
 
 deleteAll:
 DELETE
-FROM LogEntry;
+FROM Log;

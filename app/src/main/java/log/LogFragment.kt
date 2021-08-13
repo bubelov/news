@@ -1,4 +1,4 @@
-package logentries
+package log
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,26 +9,33 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import co.appreactor.news.R
-import co.appreactor.news.databinding.FragmentLogEntriesBinding
-import common.*
+import co.appreactor.news.databinding.FragmentLogBinding
+import common.AppFragment
+import common.ListAdapterDecoration
+import common.hide
+import common.show
 import kotlinx.coroutines.flow.collect
 import org.koin.android.viewmodel.ext.android.viewModel
 
-class LogEntriesFragment : AppFragment() {
+class LogFragment : AppFragment() {
 
-    private val model: LogEntriesViewModel by viewModel()
+    private val model: LogViewModel by viewModel()
 
-    private var _binding: FragmentLogEntriesBinding? = null
+    private var _binding: FragmentLogBinding? = null
     private val binding get() = _binding!!
 
-    private val adapter = LogEntriesAdapter()
+    private val adapter = LogAdapter {
+        findNavController().navigate(
+            LogFragmentDirections.actionLogFragmentToExceptionFragment(it.id)
+        )
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentLogEntriesBinding.inflate(inflater, container, false)
+        _binding = FragmentLogBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -54,7 +61,7 @@ class LogEntriesFragment : AppFragment() {
             list.apply {
                 setHasFixedSize(true)
                 layoutManager = LinearLayoutManager(requireContext())
-                adapter = this@LogEntriesFragment.adapter
+                adapter = this@LogFragment.adapter
                 addItemDecoration(ListAdapterDecoration(resources.getDimensionPixelSize(R.dimen.dp_8)))
             }
 
@@ -63,27 +70,23 @@ class LogEntriesFragment : AppFragment() {
             lifecycleScope.launchWhenResumed {
                 model.state.collect { state ->
                     when (state) {
-                        LogEntriesViewModel.State.Idle -> {
+                        is LogViewModel.State.Loaded -> {
+                            progress.hide()
 
-                        }
-
-                        LogEntriesViewModel.State.Loading -> {
-                            list.isVisible = false
-                            progress.show(animate = true)
-                            empty.hide()
-                        }
-
-                        is LogEntriesViewModel.State.Loaded -> {
                             if (state.items.isEmpty()) {
                                 list.hide()
-                                progress.hide()
                                 empty.show(animate = true)
                             } else {
                                 list.show()
                                 adapter.submitList(state.items)
-                                progress.hide()
                                 empty.hide()
                             }
+                        }
+
+                        else -> {
+                            list.isVisible = false
+                            progress.show(animate = true)
+                            empty.hide()
                         }
                     }
                 }

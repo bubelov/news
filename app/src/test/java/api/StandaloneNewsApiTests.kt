@@ -12,7 +12,6 @@ class StandaloneNewsApiTests {
         StandaloneNewsApi(
             feedQueries = mockk(),
             entryQueries = mockk(),
-            log = mockk(),
         )
     }
 }

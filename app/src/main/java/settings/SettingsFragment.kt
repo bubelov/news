@@ -15,7 +15,11 @@ import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.nextcloud.android.sso.AccountImporter
-import common.*
+import common.App
+import common.AppFragment
+import common.PreferencesRepository
+import common.app
+import common.showErrorDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -168,11 +172,7 @@ class SettingsFragment : AppFragment() {
             }
 
             viewLogEntries.setOnClickListener {
-                findNavController().navigate(SettingsFragmentDirections.actionSettingsFragmentToLogEntriesFragment())
-            }
-
-            viewExceptions.setOnClickListener {
-                findNavController().navigate(SettingsFragmentDirections.actionSettingsFragmentToExceptionsFragment())
+                findNavController().navigate(SettingsFragmentDirections.actionSettingsFragmentToLogFragment())
             }
 
             exportDatabase.setOnClickListener {

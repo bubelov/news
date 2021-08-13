@@ -11,9 +11,9 @@ import com.google.gson.GsonBuilder
 import com.nextcloud.android.sso.api.NextcloudAPI
 import com.nextcloud.android.sso.helper.SingleAccountHelper
 import common.PreferencesRepository
-import db.LogEntry
+import db.Log
 import kotlinx.coroutines.runBlocking
-import logentries.LogEntriesRepository
+import log.LogRepository
 import org.joda.time.DateTime
 import retrofit2.NextcloudRetrofitApiBuilder
 import timber.log.Timber
@@ -24,7 +24,7 @@ class NewsApiSwitcher(
     private val feedQueries: FeedQueries,
     private val entryQueries: EntryQueries,
     private val prefs: PreferencesRepository,
-    private val log: LogEntriesRepository,
+    private val log: LogRepository,
     private val context: Context,
 ) {
 
@@ -86,11 +86,12 @@ class NewsApiSwitcher(
 
     private fun log(message: String): Unit = runBlocking {
         log.insert(
-            LogEntry(
+            Log(
                 id = UUID.randomUUID().toString(),
                 date = DateTime.now().toString(),
                 tag = NewsApiSwitcher::class.java.simpleName,
                 message = message,
+                stackTrace = "",
             )
         )
     }
