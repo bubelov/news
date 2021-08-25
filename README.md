@@ -5,9 +5,6 @@
   <a href="https://f-droid.org/packages/co.appreactor.news/">
     <img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="80">
   </a>
-  <a href='https://play.google.com/store/apps/details?id=co.appreactor.news'>
-    <img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height="80"/>
-  </a>
 </p>
 
 📰 **Feed Reader** and 🎧 **Podcast Player** for **Nextcloud** ☁️ *(unofficial)*
@@ -43,15 +40,9 @@ The standalone mode is still work in progress, which means it's not reliable at 
 
 https://crwd.in/news-android
 
-## 🤚 Get in Touch
+## 💸 Fund the Project
 
-If you have some ideas or want to report an issue, you can join our Matrix Space:
-
-https://matrix.to/#/!zqCKnmEfsntESikAoN:matrix.org?via=matrix.org
-
-## 🪙 Support the Project
-
-Lightning Network
+Lightning Network is still in its early days, but it's already one of the easiest ways to support open source software. Distribution and payments are pretty much monopolized, leaving developers vulnurable to deplatforming, not to mention the exorbitant fees they chagre. LN fixes the payment side and F-Droid fixes distribution. I believe it's a good combo for an Android app.
 
 <img src="https://user-images.githubusercontent.com/1189245/121570237-e5b2f280-ca4b-11eb-8bd5-6633f3155b17.png" width=250 height=250/>
 
