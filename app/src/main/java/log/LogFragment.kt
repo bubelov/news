@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,6 +13,7 @@ import common.AppFragment
 import common.ListAdapterDecoration
 import common.hide
 import common.show
+import common.showErrorDialog
 import kotlinx.coroutines.flow.collect
 import org.koin.android.viewmodel.ext.android.viewModel
 
@@ -50,7 +50,7 @@ class LogFragment : AppFragment() {
 
             setOnMenuItemClickListener { menuItem ->
                 when (menuItem.itemId) {
-                    R.id.delete -> lifecycleScope.launchWhenResumed { model.deleteAllItems() }
+                    R.id.delete -> lifecycleScope.launchWhenResumed { model.deleteAll() }
                 }
 
                 true
@@ -70,6 +70,12 @@ class LogFragment : AppFragment() {
             lifecycleScope.launchWhenResumed {
                 model.state.collect { state ->
                     when (state) {
+                        is LogViewModel.State.Loading, LogViewModel.State.Deleting -> {
+                            list.hide()
+                            progress.show(animate = true)
+                            empty.hide()
+                        }
+
                         is LogViewModel.State.Loaded -> {
                             progress.hide()
 
@@ -83,10 +89,16 @@ class LogFragment : AppFragment() {
                             }
                         }
 
-                        else -> {
-                            list.isVisible = false
-                            progress.show(animate = true)
-                            empty.hide()
+                        is LogViewModel.State.FailedToLoad -> {
+                            showErrorDialog(state.reason) {
+                                model.reload()
+                            }
+                        }
+
+                        is LogViewModel.State.FailedToDelete -> {
+                            showErrorDialog(state.reason) {
+                                model.reload()
+                            }
                         }
                     }
                 }

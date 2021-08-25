@@ -16,29 +16,29 @@ class LogViewModelTests {
     private val model = LogViewModel(repository)
 
     @Test
-    fun `Should be idle by default`(): Unit = runBlocking {
-        assertEquals(LogViewModel.State.Idle, model.state.value)
+    fun `default state`(): Unit = runBlocking {
+        assertEquals(null, model.state.value)
     }
 
     @Test
-    fun `Should query items when view is ready`(): Unit = runBlocking {
+    fun `view ready`(): Unit = runBlocking {
         coEvery { repository.selectAll() } returns emptyList()
         model.onViewReady()
         assertTrue(model.state.value is LogViewModel.State.Loaded)
     }
 
-//    @Test
-//    fun `Should return error if can't query items`(): Unit = runBlocking {
-//        coEvery { repository.selectAll() } throws Exception()
-//        model.onViewReady()
-//        assertTrue(model.items.value is Result.Failure)
-//    }
+    @Test
+    fun `view ready + db error`(): Unit = runBlocking {
+        coEvery { repository.selectAll() } throws Exception()
+        model.onViewReady()
+        assertTrue(model.state.value is LogViewModel.State.FailedToLoad)
+    }
 
     @Test
-    fun `Calling deleteAllItems() should delete all items`(): Unit = runBlocking {
+    fun `delete all`(): Unit = runBlocking {
         coEvery { repository.selectAll() } returns emptyList()
 
-        model.deleteAllItems()
+        model.deleteAll()
 
         coVerifySequence {
             repository.deleteAll()

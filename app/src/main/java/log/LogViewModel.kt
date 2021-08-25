@@ -5,30 +5,44 @@ import db.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class LogViewModel(
-    private val repository: LogRepository
+    private val repo: LogRepository
 ) : ViewModel() {
 
-    val state = MutableStateFlow<State>(State.Idle)
+    val state = MutableStateFlow<State?>(null)
 
     suspend fun onViewReady() {
-        if (state.value == State.Idle) {
-            loadItems()
+        if (state.value == null) {
+            reload()
         }
     }
 
-    suspend fun deleteAllItems() {
-        repository.deleteAll()
-        loadItems()
+    suspend fun deleteAll() {
+        state.value = State.Deleting
+
+        runCatching {
+            repo.deleteAll()
+        }.onSuccess {
+            reload()
+        }.onFailure {
+            state.value = State.FailedToDelete(it.message ?: "")
+        }
     }
 
-    private suspend fun loadItems() {
+    suspend fun reload() {
         state.value = State.Loading
-        state.value = State.Loaded(repository.selectAll())
+
+        runCatching {
+            state.value = State.Loaded(repo.selectAll())
+        }.onFailure {
+            state.value = State.FailedToLoad(it.message ?: "")
+        }
     }
 
     sealed class State {
-        object Idle : State()
         object Loading : State()
         data class Loaded(val items: List<Log>) : State()
+        data class FailedToLoad(val reason: String) : State()
+        object Deleting : State()
+        data class FailedToDelete(val reason: String) : State()
     }
 }
