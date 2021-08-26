@@ -47,7 +47,7 @@ android {
 
     buildTypes {
         debug {
-            applicationIdSuffix ".dev"
+            applicationIdSuffix ".debug"
         }
 
         if (signingPropertiesFile.exists()) {
