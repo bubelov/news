@@ -19,13 +19,19 @@ import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentFeedsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
-import common.*
+import common.AppFragment
+import common.ListAdapterDecoration
+import common.hide
+import common.show
+import common.showDialog
+import common.showErrorDialog
+import common.showKeyboard
 import entries.EntriesFilter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.withContext
 import org.koin.android.viewmodel.ext.android.viewModel
-import timber.log.Timber
+import java.net.URI
 
 class FeedsFragment : AppFragment(lockDrawer = false) {
 
@@ -69,14 +75,11 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
                     .setTitle(getString(R.string.rename))
                     .setView(R.layout.dialog_rename_feed)
                     .setPositiveButton(R.string.rename) { dialogInterface, _ ->
+                        val dialog = dialogInterface as AlertDialog
+                        val title = dialog.findViewById<TextInputEditText>(R.id.title)!!
+
                         lifecycleScope.launchWhenResumed {
-                            runCatching {
-                                val dialog = dialogInterface as AlertDialog
-                                val title = dialog.findViewById<TextInputEditText>(R.id.title)!!
-                                model.renameFeed(feed.id, title.text.toString())
-                            }.onFailure {
-                                showErrorDialog(it)
-                            }
+                            model.rename(feed.id, title.text.toString())
                         }
                     }
                     .setNegativeButton(R.string.cancel, null)
@@ -91,13 +94,7 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
             }
 
             override fun onDeleteClick(feed: FeedsAdapterItem) {
-                lifecycleScope.launchWhenResumed {
-                    runCatching {
-                        model.deleteFeed(feed.id)
-                    }.onFailure {
-                        showErrorDialog(it)
-                    }
-                }
+                lifecycleScope.launchWhenResumed { model.delete(feed.id) }
             }
         })
 
@@ -112,13 +109,7 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
         lifecycleScope.launchWhenResumed {
             withContext(Dispatchers.IO) {
                 requireContext().contentResolver.openInputStream(uri)?.use {
-                    runCatching {
-                        model.importFeeds(it.bufferedReader().readText())
-                    }.onFailure {
-                        withContext(Dispatchers.Main) {
-                            showErrorDialog(it)
-                        }
-                    }
+                    model.addMany(it.bufferedReader().readText())
                 }
             }
         }
@@ -135,7 +126,7 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
         lifecycleScope.launchWhenResumed {
             withContext(Dispatchers.IO) {
                 requireContext().contentResolver.openOutputStream(uri)?.use {
-                    it.write(model.getFeedsOpml())
+                    it.write(model.exportAsOpml())
                 }
             }
         }
@@ -190,11 +181,7 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
                 })
             }
 
-            lifecycleScope.launchWhenResumed {
-                if (model.state.value is FeedsViewModel.State.Inactive) {
-                    model.loadFeeds()
-                }
-            }
+            lifecycleScope.launchWhenResumed { model.onViewReady() }
 
             lifecycleScope.launchWhenResumed {
                 model.state.collectLatest { state ->
@@ -204,36 +191,45 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
                     importOpml.hide()
                     fab.hide()
 
-                    Timber.d("State: ${state.javaClass.simpleName}")
-
                     when (state) {
-                        is FeedsViewModel.State.Inactive -> {
-
-                        }
-
                         FeedsViewModel.State.Loading -> {
                             progress.show(animate = true)
                         }
 
-                        is FeedsViewModel.State.ShowingFeeds -> {
-                            Timber.d("Got ${state.feeds.size} feeds")
+                        is FeedsViewModel.State.Loaded -> {
+                            state.result.onSuccess {
+                                if (it.isEmpty()) {
+                                    message.show(animate = true)
+                                    message.text = getString(R.string.you_have_no_feeds)
+                                    importOpml.show(animate = true)
+                                }
 
-                            if (state.feeds.isEmpty()) {
-                                message.show(animate = true)
-                                message.text = getString(R.string.you_have_no_feeds)
-
-                                importOpml.show(animate = true)
+                                list.show()
+                                adapter.submitList(it)
+                                fab.show()
+                            }.onFailure {
+                                showErrorDialog(it) {
+                                    model.reload()
+                                }
                             }
-
-                            list.show()
-                            adapter.submitList(state.feeds)
-
-                            fab.show()
                         }
 
-                        is FeedsViewModel.State.ImportingFeeds -> {
+                        is FeedsViewModel.State.AddingOne -> {
                             progress.show(animate = true)
+                        }
 
+                        is FeedsViewModel.State.AddedOne -> {
+                            state.result.onSuccess {
+                                model.reload()
+                            }.onFailure {
+                                showErrorDialog(it) {
+                                    model.reload()
+                                }
+                            }
+                        }
+
+                        is FeedsViewModel.State.AddingMany -> {
+                            progress.show(animate = true)
                             message.show(animate = true)
 
                             state.progress.collectLatest { progress ->
@@ -245,7 +241,15 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
                             }
                         }
 
-                        is FeedsViewModel.State.ShowingImportResult -> {
+                        is FeedsViewModel.State.AddedMany -> {
+                            if (!state.result.parsed) {
+                                showErrorDialog(state.result.errors.first()) {
+                                    model.reload()
+                                }
+
+                                return@collectLatest
+                            }
+
                             val message = buildString {
                                 append(getString(R.string.added_d, state.result.added))
                                 append("\n")
@@ -271,7 +275,35 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
                                 message = message,
                             ) {
                                 lifecycleScope.launchWhenResumed {
-                                    model.loadFeeds()
+                                    model.reload()
+                                }
+                            }
+                        }
+
+                        is FeedsViewModel.State.Renaming -> {
+                            progress.show(animate = true)
+                        }
+
+                        is FeedsViewModel.State.Renamed -> {
+                            state.result.onSuccess {
+                                model.reload()
+                            }.onFailure {
+                                showErrorDialog(it) {
+                                    model.reload()
+                                }
+                            }
+                        }
+
+                        is FeedsViewModel.State.Deleting -> {
+                            progress.show(animate = true)
+                        }
+
+                        is FeedsViewModel.State.Deleted -> {
+                            state.result.onSuccess {
+                                model.reload()
+                            }.onFailure {
+                                showErrorDialog(it) {
+                                    model.reload()
                                 }
                             }
                         }
@@ -289,16 +321,17 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
                     .setView(R.layout.dialog_add_feed)
                     .setPositiveButton(R.string.add) { dialogInterface, _ ->
                         val dialog = dialogInterface as AlertDialog
+                        val url = dialog.findViewById<TextInputEditText>(R.id.url)?.text.toString()
 
-                        lifecycleScope.launchWhenResumed {
-                            runCatching {
-                                dialog.findViewById<TextInputEditText>(R.id.url)?.apply {
-                                    model.createFeed(text.toString())
-                                }
-                            }.onFailure {
-                                showErrorDialog(it)
-                            }
+                        val parsedUrl = runCatching {
+                            URI.create(url).toURL()
+                        }.getOrElse {
+                            val e = Exception(getString(R.string.invalid_url_s, url))
+                            showErrorDialog(e)
+                            return@setPositiveButton
                         }
+
+                        lifecycleScope.launchWhenResumed { model.addOne(parsedUrl) }
                     }
                     .setNegativeButton(R.string.cancel, null)
                     .setOnDismissListener { hideKeyboard() }
@@ -311,14 +344,16 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
                         if (actionId == EditorInfo.IME_ACTION_DONE) {
                             alert.dismiss()
 
-                            lifecycleScope.launchWhenResumed {
-                                runCatching {
-                                    model.createFeed(text.toString())
-                                }.onFailure {
-                                    showErrorDialog(it)
-                                }
+                            val parsedUrl = runCatching {
+                                URI.create(text.toString()).toURL()
+                            }.getOrElse {
+                                val e =
+                                    Exception(getString(R.string.invalid_url_s, text.toString()))
+                                showErrorDialog(e)
+                                return@setOnEditorActionListener true
                             }
 
+                            lifecycleScope.launchWhenResumed { model.addOne(parsedUrl) }
                             return@setOnEditorActionListener true
                         }
 

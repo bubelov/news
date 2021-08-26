@@ -1,8 +1,6 @@
 package feeds
 
-import android.app.Application
 import androidx.lifecycle.ViewModel
-import co.appreactor.news.R
 import db.Feed
 import entries.EntriesRepository
 import kotlinx.coroutines.Dispatchers
@@ -14,57 +12,44 @@ import opml.exportOpml
 import opml.importOpml
 import timber.log.Timber
 import java.net.URI
+import java.net.URL
 import java.util.concurrent.atomic.AtomicInteger
 
 class FeedsViewModel(
-    private val feedsRepository: FeedsRepository,
-    private val entriesRepository: EntriesRepository,
-    private val app: Application,
+    private val feedsRepo: FeedsRepository,
+    private val entriesRepo: EntriesRepository,
 ) : ViewModel() {
 
-    val state = MutableStateFlow<State>(State.Inactive)
+    val state = MutableStateFlow<State?>(null)
 
-    suspend fun loadFeeds() {
-        state.value = State.Loading
-
-        state.value = State.ShowingFeeds(
-            feeds = feedsRepository.selectAll().map { it.toItem() },
-        )
+    suspend fun onViewReady() {
+        if (state.value == null) {
+            reload()
+        }
     }
 
-    suspend fun createFeed(urlString: String) = changeState {
+    suspend fun reload() = state.apply {
         value = State.Loading
-        val fullUrlString = if (urlString.startsWith("http")) urlString else "https://$urlString"
-        val url = runCatching { URI.create(fullUrlString).toURL() }
-            .getOrElse { throw Exception(app.getString(R.string.invalid_url_s, fullUrlString), it) }
-        feedsRepository.insertByFeedUrl(url)
-        loadFeeds()
+        value = State.Loaded(runCatching { feedsRepo.selectAll().map { it.toItem() } })
     }
 
-    suspend fun renameFeed(feedId: String, newTitle: String) = changeState {
-        value = State.Loading
-        feedsRepository.updateTitle(feedId, newTitle)
-        loadFeeds()
-    }
-
-    suspend fun deleteFeed(feedId: String) = changeState {
-        value = State.Loading
-        feedsRepository.deleteById(feedId)
-        entriesRepository.deleteByFeedId(feedId)
-        loadFeeds()
-    }
-
-    suspend fun getFeedsOpml(): ByteArray {
-        return exportOpml(feedsRepository.selectAll()).toByteArray()
-    }
-
-    suspend fun importFeeds(opmlDocument: String) = changeState {
-        value = State.Loading
+    suspend fun addMany(opmlDocument: String) = state.apply {
+        val progress = MutableStateFlow(ImportProgress(0, -1))
+        value = State.AddingMany(progress)
 
         val feeds = runCatching {
             importOpml(opmlDocument)
         }.getOrElse {
-            throw Exception("Can't parse OPML file: ${it.message}", it)
+            value = State.AddedMany(
+                ImportResult(
+                    parsed = false,
+                    added = -1,
+                    exists = -1,
+                    failed = -1,
+                    errors = listOf("Can't parse OPML file: ${it.message}"),
+                )
+            )
+            return@apply
         }
 
         val added = AtomicInteger()
@@ -72,16 +57,8 @@ class FeedsViewModel(
         val failed = AtomicInteger()
         val errors = mutableListOf<String>()
 
-        val progressFlow = MutableStateFlow(
-            FeedImportProgress(
-                imported = 0,
-                total = feeds.size,
-            )
-        )
-
-        value = State.ImportingFeeds(progressFlow)
-
-        val cachedFeeds = feedsRepository.selectAll()
+        progress.value = progress.value.copy(total = feeds.size)
+        val cachedFeeds = feedsRepo.selectAll()
 
         withContext(Dispatchers.IO) {
             feeds.chunked(10).forEach { chunk ->
@@ -90,7 +67,7 @@ class FeedsViewModel(
                         val cachedFeed = cachedFeeds.firstOrNull { it.selfLink == outline.xmlUrl }
 
                         if (cachedFeed != null) {
-                            feedsRepository.insertOrReplace(
+                            feedsRepo.insertOrReplace(
                                 cachedFeed.copy(
                                     openEntriesInBrowser = outline.openEntriesInBrowser,
                                     blockedWords = outline.blockedWords,
@@ -103,7 +80,7 @@ class FeedsViewModel(
                         }
 
                         runCatching {
-                            feedsRepository.insertByFeedUrl(
+                            feedsRepo.insertByFeedUrl(
                                 url = URI.create(outline.xmlUrl).toURL(),
                                 title = outline.text,
                             )
@@ -115,17 +92,17 @@ class FeedsViewModel(
                             failed.incrementAndGet()
                         }
 
-                        progressFlow.value = FeedImportProgress(
+                        progress.value = progress.value.copy(
                             imported = added.get() + exists.get() + failed.get(),
-                            total = feeds.size,
                         )
                     }
                 }.awaitAll()
             }
         }
 
-        value = State.ShowingImportResult(
-            FeedImportResult(
+        value = State.AddedMany(
+            ImportResult(
+                parsed = true,
                 added = added.get(),
                 exists = exists.get(),
                 failed = failed.get(),
@@ -134,15 +111,27 @@ class FeedsViewModel(
         )
     }
 
-    private suspend fun changeState(action: suspend MutableStateFlow<State>.() -> Unit) {
-        val initialState = state.value
+    suspend fun exportAsOpml(): ByteArray {
+        return exportOpml(feedsRepo.selectAll()).toByteArray()
+    }
 
-        runCatching {
-            action.invoke(state)
-        }.onFailure {
-            state.value = initialState
-            throw it
-        }
+    suspend fun addOne(url: URL) = state.apply {
+        value = State.AddingOne
+        value = State.AddedOne(runCatching { feedsRepo.insertByFeedUrl(url) })
+    }
+
+    suspend fun rename(feedId: String, newTitle: String) = state.apply {
+        value = State.Renaming
+        value = State.Renamed(runCatching { feedsRepo.updateTitle(feedId, newTitle) })
+    }
+
+    suspend fun delete(feedId: String) = state.apply {
+        value = State.Deleting
+
+        value = State.Deleted(runCatching {
+            feedsRepo.deleteById(feedId)
+            entriesRepo.deleteByFeedId(feedId)
+        })
     }
 
     private suspend fun Feed.toItem(): FeedsAdapterItem = FeedsAdapterItem(
@@ -150,23 +139,29 @@ class FeedsViewModel(
         title = title,
         selfLink = selfLink,
         alternateLink = alternateLink,
-        unreadCount = entriesRepository.getUnreadCount(id),
+        unreadCount = entriesRepo.getUnreadCount(id),
     )
 
     sealed class State {
-        object Inactive : State()
         object Loading : State()
-        data class ShowingFeeds(val feeds: List<FeedsAdapterItem>) : State()
-        data class ImportingFeeds(val progress: MutableStateFlow<FeedImportProgress>) : State()
-        data class ShowingImportResult(val result: FeedImportResult) : State()
+        data class Loaded(val result: Result<List<FeedsAdapterItem>>) : State()
+        object AddingOne : State()
+        data class AddedOne(val result: Result<Any>) : State()
+        data class AddingMany(val progress: MutableStateFlow<ImportProgress>) : State()
+        data class AddedMany(val result: ImportResult) : State()
+        object Renaming : State()
+        data class Renamed(val result: Result<Any>) : State()
+        object Deleting : State()
+        data class Deleted(val result: Result<Any>) : State()
     }
 
-    data class FeedImportProgress(
+    data class ImportProgress(
         val imported: Int,
         val total: Int,
     )
 
-    data class FeedImportResult(
+    data class ImportResult(
+        val parsed: Boolean,
         val added: Int,
         val exists: Int,
         val failed: Int,
