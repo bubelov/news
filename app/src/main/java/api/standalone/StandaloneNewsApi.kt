@@ -134,7 +134,7 @@ class StandaloneNewsApi(
                 parsedFeed.entries.getOrElse {
                     Timber.d("Failed to parse Atom entries for feed $feed")
                     return emptyList()
-                }.map { it.toEntry() }
+                }.map { it.toEntry(feed.id) }
             }
             is RssFeed -> {
                 parsedFeed.channel.items.getOrElse {
@@ -181,7 +181,7 @@ class StandaloneNewsApi(
         }
     }
 
-    private fun AtomEntry.toEntry() = Entry(
+    private fun AtomEntry.toEntry(feedId: String) = Entry(
         id = id,
         feedId = feedId,
         title = title,
