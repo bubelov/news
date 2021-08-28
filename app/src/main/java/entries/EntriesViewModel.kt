@@ -3,20 +3,27 @@ package entries
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import common.*
+import common.ConnectivityProbe
+import common.Preferences
+import common.PreferencesRepository
 import db.EntryWithoutSummary
 import feeds.FeedsRepository
 import db.Feed
 import common.PreferencesRepository.Companion.SORT_ORDER_ASCENDING
 import common.PreferencesRepository.Companion.SORT_ORDER_DESCENDING
+import common.formatDateTime
 import entriesimages.EntriesImagesRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import podcasts.PodcastsRepository
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
 import sync.NewsApiSync
 import sync.SyncResult
 import timber.log.Timber
-import java.util.*
 
 class EntriesViewModel(
     private val feedsRepository: FeedsRepository,
@@ -31,7 +38,7 @@ class EntriesViewModel(
 
     private lateinit var filter: EntriesFilter
 
-    val state = MutableStateFlow<State>(State.Inactive)
+    val state = MutableStateFlow<State?>(null)
 
     val openedEntry = MutableStateFlow<EntriesAdapterItem?>(null)
 
@@ -42,7 +49,7 @@ class EntriesViewModel(
             return
         }
 
-        if (state.value == State.Inactive) {
+        if (state.value == null) {
             val prefs = getPreferences()
 
             if (prefs.initialSyncCompleted) {
@@ -74,7 +81,7 @@ class EntriesViewModel(
     }
 
     suspend fun onRetry(sharedModel: EntriesSharedViewModel) {
-        state.value = State.Inactive
+        state.value = null
         onViewReady(filter, sharedModel)
     }
 
@@ -342,8 +349,6 @@ class EntriesViewModel(
     }
 
     sealed class State {
-
-        object Inactive : State()
 
         data class PerformingInitialSync(val message: Flow<String>) : State()
 

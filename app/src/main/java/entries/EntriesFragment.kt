@@ -478,10 +478,8 @@ class EntriesFragment : AppFragment(), Scrollable {
     private fun showListItems() = lifecycleScope.launchWhenResumed {
         binding.apply {
             model.state.collectLatest { state ->
-                Timber.d("State: ${state.javaClass.simpleName}")
-
                 when (state) {
-                    is EntriesViewModel.State.Inactive -> {
+                    null -> {
                         swipeRefresh.isRefreshing = false
                         listView.hide()
                         progress.hide()
