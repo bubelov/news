@@ -1,6 +1,8 @@
 package api
 
 import android.content.Context
+import api.miniflux.MinifluxApiAdapter
+import api.miniflux.MinifluxApiBuilder
 import api.nextcloud.DirectNextcloudNewsApiBuilder
 import api.nextcloud.NextcloudNewsApi
 import api.nextcloud.NextcloudNewsApiAdapter
@@ -32,6 +34,7 @@ class NewsApiSwitcher(
         when (authType) {
             PreferencesRepository.AUTH_TYPE_NEXTCLOUD_APP -> switchToAppBasedNextcloudApi()
             PreferencesRepository.AUTH_TYPE_NEXTCLOUD_DIRECT -> switchToDirectNextcloudApi()
+            PreferencesRepository.AUTH_TYPE_MINIFLUX -> switchToMinifluxApi()
             PreferencesRepository.AUTH_TYPE_STANDALONE -> switchToStandaloneApi()
             else -> throw Exception("Unknown auth type: $authType")
         }
@@ -75,6 +78,19 @@ class NewsApiSwitcher(
                     username = nextcloudServerUsername,
                     password = nextcloudServerPassword,
                     trustSelfSignedCerts = prefs.get().nextcloudServerTrustSelfSignedCerts,
+                )
+            )
+        }
+    }
+
+    private fun switchToMinifluxApi(): Unit = runBlocking {
+        prefs.get().apply {
+            wrapper.api = MinifluxApiAdapter(
+                MinifluxApiBuilder().build(
+                    url = minifluxServerUrl,
+                    username = minifluxServerUsername,
+                    password = minifluxServerPassword,
+                    trustSelfSignedCerts = prefs.get().minifluxServerTrustSelfSignedCerts,
                 )
             )
         }

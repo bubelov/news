@@ -31,10 +31,6 @@ class NewsApiWrapper : NewsApi {
         return api.getAllEntries()
     }
 
-    override suspend fun getBookmarkedEntries(): List<Entry> {
-        return api.getBookmarkedEntries()
-    }
-
     override suspend fun getNewAndUpdatedEntries(since: Instant): List<Entry> {
         return api.getNewAndUpdatedEntries(since)
     }

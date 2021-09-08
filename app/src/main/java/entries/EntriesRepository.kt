@@ -123,14 +123,15 @@ class EntriesRepository(
                 when (result) {
                     is GetEntriesResult.Loading -> {
                         emit(SyncProgress(result.entriesLoaded))
-                    }
 
-                    is GetEntriesResult.Success -> {
                         db.transaction {
-                            result.entries.forEach {
+                            result.currentBatch.forEach {
                                 db.insertOrReplace(it.postProcess())
                             }
                         }
+                    }
+
+                    is GetEntriesResult.Success -> {
                     }
                 }
             }

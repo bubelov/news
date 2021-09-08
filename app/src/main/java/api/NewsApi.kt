@@ -19,8 +19,6 @@ interface NewsApi {
 
     suspend fun getAllEntries(): Flow<GetEntriesResult>
 
-    suspend fun getBookmarkedEntries(): List<Entry>
-
     suspend fun getNewAndUpdatedEntries(since: Instant): List<Entry>
 
     suspend fun markAsOpened(entriesIds: List<String>, opened: Boolean)

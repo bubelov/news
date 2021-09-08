@@ -2,7 +2,7 @@ package auth
 
 import androidx.lifecycle.ViewModel
 import api.NewsApiSwitcher
-import api.nextcloud.DirectNextcloudNewsApiBuilder
+import api.miniflux.MinifluxApiBuilder
 import common.PreferencesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -18,20 +18,14 @@ class MinifluxAuthViewModel(
         password: String,
         trustSelfSignedCerts: Boolean,
     ) {
-        val api = DirectNextcloudNewsApiBuilder().build(
+        val api = MinifluxApiBuilder().build(
             serverUrl,
             username,
             password,
             trustSelfSignedCerts,
         )
 
-        withContext(Dispatchers.IO) {
-            val response = api.getFeedsRaw().execute()
-
-            if (!response.isSuccessful) {
-                throw Exception(response.message())
-            }
-        }
+        withContext(Dispatchers.IO) { api.getFeeds() }
     }
 
     suspend fun setServer(

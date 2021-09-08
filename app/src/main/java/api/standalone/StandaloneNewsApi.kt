@@ -88,11 +88,7 @@ class StandaloneNewsApi(
     }
 
     override suspend fun getAllEntries(): Flow<GetEntriesResult> {
-        return flowOf(GetEntriesResult.Success(emptyList()))
-    }
-
-    override suspend fun getBookmarkedEntries(): List<Entry> {
-        return emptyList()
+        return flowOf(GetEntriesResult.Success)
     }
 
     // TODO return updated entries

@@ -53,21 +53,19 @@ class FeedsRepository(
         val newFeeds = api.getFeeds().sortedBy { it.id }
         val cachedFeeds = selectAll().sortedBy { it.id }
 
-        if (newFeeds.map { it.id } != cachedFeeds.map { it.id }) {
-            db.transaction {
-                db.deleteAll()
+        db.transaction {
+            db.deleteAll()
 
-                newFeeds.forEach { feed ->
-                    val cachedFeed = cachedFeeds.find { it.id == feed.id }
+            newFeeds.forEach { feed ->
+                val cachedFeed = cachedFeeds.find { it.id == feed.id }
 
-                    db.insertOrReplace(
-                        feed.copy(
-                            openEntriesInBrowser = cachedFeed?.openEntriesInBrowser ?: false,
-                            blockedWords = cachedFeed?.blockedWords ?: "",
-                            showPreviewImages = cachedFeed?.showPreviewImages,
-                        )
+                db.insertOrReplace(
+                    feed.copy(
+                        openEntriesInBrowser = cachedFeed?.openEntriesInBrowser ?: false,
+                        blockedWords = cachedFeed?.blockedWords ?: "",
+                        showPreviewImages = cachedFeed?.showPreviewImages,
                     )
-                }
+                )
             }
         }
     }

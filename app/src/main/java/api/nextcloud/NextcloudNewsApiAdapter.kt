@@ -57,14 +57,14 @@ class NextcloudNewsApiAdapter(
     }
 
     override suspend fun getAllEntries(): Flow<GetEntriesResult> = flow {
-        emit(GetEntriesResult.Loading(0L))
+        emit(GetEntriesResult.Loading(0, emptyList()))
 
-        val fetchedEntries = mutableSetOf<ItemJson>()
+        var totalFetched = 0L
+        val currentBatch = mutableSetOf<ItemJson>()
         val batchSize = 250L
+        var oldestEntryId = 0L
 
         while (true) {
-            val oldestEntryId =
-                fetchedEntries.minOfOrNull { it.id ?: Long.MAX_VALUE }?.toLong() ?: 0L
             Timber.d("Oldest entry ID: $oldestEntryId")
 
             val response = try {
@@ -88,31 +88,22 @@ class NextcloudNewsApiAdapter(
                 val entries =
                     response.body()?.items ?: throw Exception("Can not parse server response")
                 Timber.d("Got ${entries.size} entries")
-                fetchedEntries += entries
-                Timber.d("Fetched ${fetchedEntries.size} entries so far")
-                emit(GetEntriesResult.Loading(fetchedEntries.size.toLong()))
+                currentBatch += entries
+                totalFetched += currentBatch.size
+                Timber.d("Fetched $totalFetched entries so far")
+                val validEntries = currentBatch.mapNotNull { it.toEntry() }
+                emit(GetEntriesResult.Loading(totalFetched, validEntries))
 
-                if (entries.size < batchSize) {
+                if (currentBatch.size < batchSize) {
                     break
+                } else {
+                    oldestEntryId = currentBatch.minOfOrNull { it.id ?: Long.MAX_VALUE }?.toLong() ?: 0L
+                    currentBatch.clear()
                 }
             }
         }
 
-        Timber.d("Got ${fetchedEntries.size} entries in total")
-        val validEntries = fetchedEntries.mapNotNull { it.toEntry() }
-        Timber.d("Of them, valid: ${validEntries.size}")
-        emit(GetEntriesResult.Success(validEntries))
-    }
-
-    override suspend fun getBookmarkedEntries(): List<Entry> {
-        val response = api.getStarredItems().execute()
-
-        if (!response.isSuccessful) {
-            throw response.toException()
-        } else {
-            return response.body()?.items?.mapNotNull { it.toEntry() }
-                ?: throw Exception("Can not parse server response")
-        }
+        emit(GetEntriesResult.Success)
     }
 
     override suspend fun getNewAndUpdatedEntries(since: Instant): List<Entry> {

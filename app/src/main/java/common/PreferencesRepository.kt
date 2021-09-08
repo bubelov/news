@@ -46,11 +46,11 @@ class PreferencesRepository(
                 }
 
                 it.find { it.key == MINIFLUX_SERVER_USERNAME }?.value?.apply {
-                    nextcloudServerUsername = this
+                    minifluxServerUsername = this
                 }
 
                 it.find { it.key == MINIFLUX_SERVER_PASSWORD }?.value?.apply {
-                    nextcloudServerPassword = this
+                    minifluxServerPassword = this
                 }
 
                 it.find { it.key == INITIAL_SYNC_COMPLETED }?.value?.apply {
@@ -111,6 +111,14 @@ class PreferencesRepository(
                     nextcloudServerTrustSelfSignedCerts
                 )
                 putString(NEXTCLOUD_SERVER_PASSWORD, nextcloudServerPassword)
+                putString(MINIFLUX_SERVER_URL, minifluxServerUrl)
+                putBoolean(
+                    MINIFLUX_SERVER_TRUST_SELF_SIGNED_CERTS,
+                    minifluxServerTrustSelfSignedCerts
+                )
+                putString(MINIFLUX_SERVER_USERNAME, minifluxServerUsername)
+                putString(MINIFLUX_SERVER_PASSWORD, minifluxServerPassword)
+
                 putBoolean(INITIAL_SYNC_COMPLETED, initialSyncCompleted)
                 putString(LAST_ENTRIES_SYNC_DATE_TIME, lastEntriesSyncDateTime)
                 putBoolean(SHOW_OPENED_ENTRIES, showOpenedEntries)
