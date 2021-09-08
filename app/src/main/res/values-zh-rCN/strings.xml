@@ -15,7 +15,7 @@
     <string name="cancel">取消</string>
     <string name="login">登录</string>
     <string name="direct_login_failed">无法连接到服务器。请确认您的登录信息正确。</string>
-    <string name="server_url_hint">https://mycloud.com</string>
+    <string name="server_url_hint">https://example.com</string>
     <string name="username">用户名</string>
     <string name="password">密码</string>
     <string name="news_list_is_empty">新闻列表是空的</string>
@@ -100,6 +100,8 @@
     <string name="nextcloud">Nextcloud</string>
     <string name="open">Open</string>
     <string name="close">Close</string>
+    <string name="miniflux_login">Miniflux Login</string>
+    <string name="login_with_miniflux">Login with Miniflux</string>
     <plurals name="d_hours">
         <item quantity="other">%d 小时</item>
     </plurals>

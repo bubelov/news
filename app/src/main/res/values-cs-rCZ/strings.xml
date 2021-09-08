@@ -15,7 +15,7 @@
     <string name="cancel">Zrušit</string>
     <string name="login">Přihlásit se</string>
     <string name="direct_login_failed">Nelze se připojit k serveru. Ujistěte se, že vaše přihlašovací údaje jsou správné.</string>
-    <string name="server_url_hint">https://mycloud.com</string>
+    <string name="server_url_hint">https://example.com</string>
     <string name="username">Uživatelské jméno</string>
     <string name="password">Heslo</string>
     <string name="news_list_is_empty">Seznam novinek je prázdný</string>
@@ -100,6 +100,8 @@
     <string name="nextcloud">Nextcloud</string>
     <string name="open">Open</string>
     <string name="close">Close</string>
+    <string name="miniflux_login">Miniflux Login</string>
+    <string name="login_with_miniflux">Login with Miniflux</string>
     <plurals name="d_hours">
         <item quantity="one">%d hodinu</item>
         <item quantity="few">%d hodina</item>

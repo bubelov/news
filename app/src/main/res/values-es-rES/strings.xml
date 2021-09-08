@@ -15,7 +15,7 @@
     <string name="cancel">Cancelar</string>
     <string name="login">Iniciar sesión</string>
     <string name="direct_login_failed">No se pudo conectar al servidor. Por favor, asegúrese de que su información de inicio de sesión es correcta.</string>
-    <string name="server_url_hint">https://mycloud.com</string>
+    <string name="server_url_hint">https://example.com</string>
     <string name="username">Usuario</string>
     <string name="password">Contraseña</string>
     <string name="news_list_is_empty">La lista está vacía</string>
@@ -100,6 +100,8 @@
     <string name="nextcloud">Nextcloud</string>
     <string name="open">Open</string>
     <string name="close">Close</string>
+    <string name="miniflux_login">Miniflux Login</string>
+    <string name="login_with_miniflux">Login with Miniflux</string>
     <plurals name="d_hours">
         <item quantity="one">%d horas</item>
         <item quantity="other">%d horas</item>

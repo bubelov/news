@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import java.util.*
 
 class PreferencesRepository(
     private val db: PreferenceQueries,
@@ -35,6 +34,22 @@ class PreferencesRepository(
                 }
 
                 it.find { it.key == NEXTCLOUD_SERVER_PASSWORD }?.value?.apply {
+                    nextcloudServerPassword = this
+                }
+
+                it.find { it.key == MINIFLUX_SERVER_URL }?.value?.apply {
+                    minifluxServerUrl = this
+                }
+
+                it.find { it.key == MINIFLUX_SERVER_TRUST_SELF_SIGNED_CERTS }?.value?.apply {
+                    minifluxServerTrustSelfSignedCerts = this.toBoolean()
+                }
+
+                it.find { it.key == MINIFLUX_SERVER_USERNAME }?.value?.apply {
+                    nextcloudServerUsername = this
+                }
+
+                it.find { it.key == MINIFLUX_SERVER_PASSWORD }?.value?.apply {
                     nextcloudServerPassword = this
                 }
 
@@ -128,7 +143,6 @@ class PreferencesRepository(
 
     companion object {
         const val AUTH_TYPE = "auth_type"
-        const val AUTH_TYPE_STANDALONE = "standalone"
         const val AUTH_TYPE_NEXTCLOUD_APP = "nextcloud_app"
         const val AUTH_TYPE_NEXTCLOUD_DIRECT = "nextcloud_direct"
         const val NEXTCLOUD_SERVER_URL = "nextcloud_server_url"
@@ -136,6 +150,12 @@ class PreferencesRepository(
             "nextcloud_server_trust_self_signed_certs"
         const val NEXTCLOUD_SERVER_USERNAME = "nextcloud_server_username"
         const val NEXTCLOUD_SERVER_PASSWORD = "nextcloud_server_password"
+        const val AUTH_TYPE_MINIFLUX = "miniflux"
+        const val MINIFLUX_SERVER_URL = "miniflux_server_url"
+        const val MINIFLUX_SERVER_TRUST_SELF_SIGNED_CERTS = "miniflux_server_trust_self_signed_certs"
+        const val MINIFLUX_SERVER_USERNAME = "miniflux_server_username"
+        const val MINIFLUX_SERVER_PASSWORD = "miniflux_server_password"
+        const val AUTH_TYPE_STANDALONE = "standalone"
 
         const val INITIAL_SYNC_COMPLETED = "initial_sync_completed"
         const val LAST_ENTRIES_SYNC_DATE_TIME = "last_entries_sync_date_time"

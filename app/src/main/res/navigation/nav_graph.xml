@@ -37,19 +37,24 @@
             app:destination="@id/directAuthFragment"
             app:popEnterAnim="@anim/fade_in"
             app:popExitAnim="@anim/fade_out" />
+        <action
+            android:id="@+id/action_authFragment_to_minifluxAuthFragment"
+            app:destination="@id/minifluxAuthFragment"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
     </fragment>
 
     <fragment
         android:id="@+id/directAuthFragment"
         android:name="auth.DirectAuthFragment"
         android:label="DirectAuthFragment"
-        tools:layout="@layout/fragment_direct_auth">
-        <action
-            android:id="@+id/action_directAuthFragment_to_entriesFragment"
-            app:destination="@id/entriesFragment"
-            app:popEnterAnim="@anim/fade_in"
-            app:popExitAnim="@anim/fade_out" />
-    </fragment>
+        tools:layout="@layout/fragment_direct_auth" />
+
+    <fragment
+        android:id="@+id/minifluxAuthFragment"
+        android:name="auth.MinifluxAuthFragment"
+        android:label="MinifluxAuthFragment"
+        tools:layout="@layout/fragment_miniflux_auth" />
 
     <fragment
         android:id="@+id/entriesFragment"

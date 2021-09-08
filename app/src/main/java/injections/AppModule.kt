@@ -8,6 +8,7 @@ import api.NewsApiWrapper
 import auth.AuthRepository
 import auth.AuthViewModel
 import auth.DirectAuthViewModel
+import auth.MinifluxAuthViewModel
 import co.appreactor.news.Database
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import common.App
@@ -89,4 +90,5 @@ val appModule = module {
     viewModel<FeedSettingsViewModel>()
     viewModel<SearchViewModel>()
     viewModel<LogViewModel>()
+    viewModel<MinifluxAuthViewModel>()
 }

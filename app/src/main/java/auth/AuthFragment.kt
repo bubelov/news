@@ -7,7 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
-import androidx.lifecycle.*
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentAuthBinding
@@ -17,7 +17,9 @@ import com.nextcloud.android.sso.AccountImporter.IAccountAccessGranted
 import com.nextcloud.android.sso.exceptions.SSOException
 import com.nextcloud.android.sso.helper.SingleAccountHelper
 import com.nextcloud.android.sso.ui.UiExceptionManager
-import common.*
+import common.AppFragment
+import common.PreferencesRepository
+import common.app
 import entries.EntriesFilter
 import kotlinx.coroutines.runBlocking
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -39,12 +41,17 @@ class AuthFragment : AppFragment(
     ): View? {
         return runBlocking {
             when (model.getAuthType()) {
-                PreferencesRepository.AUTH_TYPE_STANDALONE -> {
+                PreferencesRepository.AUTH_TYPE_MINIFLUX -> {
                     showNews()
                     null
                 }
 
                 PreferencesRepository.AUTH_TYPE_NEXTCLOUD_APP, PreferencesRepository.AUTH_TYPE_NEXTCLOUD_DIRECT -> {
+                    showNews()
+                    null
+                }
+
+                PreferencesRepository.AUTH_TYPE_STANDALONE -> {
                     showNews()
                     null
                 }
@@ -60,6 +67,14 @@ class AuthFragment : AppFragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.loginWithNextcloud.setOnClickListener {
+            showAccountPicker()
+        }
+
+        binding.loginWithMiniflux.setOnClickListener {
+            findNavController().navigate(R.id.action_authFragment_to_minifluxAuthFragment)
+        }
+
         binding.standaloneMode.setOnClickListener {
             lifecycleScope.launchWhenResumed {
                 model.setAuthType(PreferencesRepository.AUTH_TYPE_STANDALONE)
@@ -73,10 +88,6 @@ class AuthFragment : AppFragment(
 
                 showFeeds()
             }
-        }
-
-        binding.loginWithNextcloud.setOnClickListener {
-            showAccountPicker()
         }
     }
 

@@ -5,9 +5,14 @@ import java.util.concurrent.TimeUnit
 data class Preferences(
     var authType: String = "",
     var nextcloudServerUrl: String = "",
-    var nextcloudServerTrustSelfSignedCerts: Boolean = true,
+    var nextcloudServerTrustSelfSignedCerts: Boolean = false,
     var nextcloudServerUsername: String = "",
     var nextcloudServerPassword: String = "",
+    var minifluxServerUrl: String = "",
+    var minifluxServerTrustSelfSignedCerts: Boolean = false,
+    var minifluxServerUsername: String = "",
+    var minifluxServerPassword: String = "",
+
     var initialSyncCompleted: Boolean = false,
     var lastEntriesSyncDateTime: String = "",
     var showOpenedEntries: Boolean = false,
