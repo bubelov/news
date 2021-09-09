@@ -76,6 +76,14 @@ sqldelight {
     }
 }
 
+gradle.projectsEvaluated {
+    tasks.withType(Test) { task ->
+        task.afterTest { desc, result ->
+            println "test ${desc.className} ${desc.name} ... ${result.resultType}"
+        }
+    }
+}
+
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
     implementation "org.jetbrains.kotlin:kotlin-reflect"
