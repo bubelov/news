@@ -1,6 +1,9 @@
 package common
 
+import android.content.ActivityNotFoundException
 import android.content.DialogInterface
+import android.content.Intent
+import android.net.Uri
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -72,6 +75,23 @@ fun Fragment.showErrorDialog(
         lifecycleScope.launchWhenResumed {
             onDismissListener?.invoke()
         }
+    }
+}
+
+fun Fragment.openLink(
+    link: String
+) {
+    try {
+        startActivity(
+            Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse(link)
+            )
+        )
+    } catch (e: ActivityNotFoundException) {
+        showErrorDialog(getString(R.string.invalid_url_s, link))
+    } catch (e: Exception) {
+        showErrorDialog(e)
     }
 }
 

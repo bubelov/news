@@ -65,7 +65,7 @@ class EntriesFragment : AppFragment(), Scrollable {
                         model.openedEntry.value = item
 
                         if (feed.openEntriesInBrowser) {
-                            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(entry.link)))
+                            openLink(entry.link)
                         } else {
                             val action =
                                 EntriesFragmentDirections.actionEntriesFragmentToEntryFragment(item.id)
