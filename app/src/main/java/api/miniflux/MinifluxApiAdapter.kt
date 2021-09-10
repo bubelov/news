@@ -8,7 +8,6 @@ import db.Feed
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.joda.time.Instant
-import retrofit2.HttpException
 import timber.log.Timber
 import java.net.URL
 
@@ -17,12 +16,8 @@ class MinifluxApiAdapter(
 ) : NewsApi {
 
     override suspend fun addFeed(url: URL): Feed {
-        try {
-            val response = api.postFeed(PostFeedArgs(feed_url = url.toString(), category_id = 1))
-            return api.getFeed(response.feed_id).toFeed()!!
-        } catch (e: HttpException) {
-            throw MinifluxApiException.from(e)
-        }
+        val response = api.postFeed(PostFeedArgs(feed_url = url.toString(), category_id = 1))
+        return api.getFeed(response.feed_id).toFeed()!!
     }
 
     override suspend fun getFeeds(): List<Feed> {

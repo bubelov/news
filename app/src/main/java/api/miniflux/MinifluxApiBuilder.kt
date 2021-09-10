@@ -1,8 +1,12 @@
 package api.miniflux
 
 import co.appreactor.news.BuildConfig
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import common.trustSelfSignedCerts
-import okhttp3.*
+import okhttp3.Credentials
+import okhttp3.Interceptor
+import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -22,7 +26,18 @@ class MinifluxApiBuilder {
             it.proceed(request.newBuilder().header("Authorization", credential).build())
         }
 
-        val httpLoggingInterceptor = HttpLoggingInterceptor().apply {
+        val errorInterceptor = Interceptor {
+            val response = it.proceed(it.request())
+
+            if (!response.isSuccessful) {
+                val json = Gson().fromJson(response.body!!.string(), JsonObject::class.java)
+                throw MinifluxApiException(json["error_message"].asString)
+            }
+
+            response
+        }
+
+        val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = if (BuildConfig.DEBUG) {
                 HttpLoggingInterceptor.Level.BASIC
             } else {
@@ -34,7 +49,8 @@ class MinifluxApiBuilder {
 
         val clientBuilder = OkHttpClient.Builder()
             .addInterceptor(authenticatingInterceptor)
-            .addInterceptor(httpLoggingInterceptor)
+            .addInterceptor(loggingInterceptor)
+            .addInterceptor(errorInterceptor)
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(20, TimeUnit.SECONDS)
             .writeTimeout(20, TimeUnit.SECONDS)
