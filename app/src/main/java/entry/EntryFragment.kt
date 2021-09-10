@@ -104,15 +104,15 @@ class EntryFragment : AppFragment() {
                     summaryView.text = state.parsedContent
                     summaryView.movementMethod = LinkMovementMethod.getInstance()
                     progress.hide()
-                    fab.show()
 
-                    fab.setOnClickListener {
-                        startActivity(
-                            Intent(
-                                Intent.ACTION_VIEW,
-                                Uri.parse(state.entry.link)
-                            )
-                        )
+                    if (state.entry.link.isEmpty()) {
+                        fab.hide()
+                    } else {
+                        fab.show()
+
+                        fab.setOnClickListener {
+                            openLink(state.entry.link)
+                        }
                     }
                 }
 

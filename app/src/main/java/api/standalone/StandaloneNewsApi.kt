@@ -199,7 +199,7 @@ class StandaloneNewsApi(
         id = sha256("$feedId:$title:$description"),
         feedId = feedId,
         title = title ?: "",
-        link = link.toString(),
+        link = link?.toString() ?: "",
         published = (pubDate ?: Date()).toIsoString(),
         updated = (pubDate ?: Date()).toIsoString(),
         authorName = author ?: "",

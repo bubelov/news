@@ -19,13 +19,7 @@ import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentFeedsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
-import common.AppFragment
-import common.ListAdapterDecoration
-import common.hide
-import common.show
-import common.showDialog
-import common.showErrorDialog
-import common.showKeyboard
+import common.*
 import entries.EntriesFilter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -59,15 +53,11 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
             }
 
             override fun onOpenHtmlLinkClick(feed: FeedsAdapterItem) {
-                val intent = Intent(Intent.ACTION_VIEW)
-                intent.data = Uri.parse(feed.alternateLink)
-                startActivity(intent)
+                openLink(feed.alternateLink)
             }
 
             override fun openLinkClick(feed: FeedsAdapterItem) {
-                val intent = Intent(Intent.ACTION_VIEW)
-                intent.data = Uri.parse(feed.selfLink)
-                startActivity(intent)
+                openLink(feed.selfLink)
             }
 
             override fun onRenameClick(feed: FeedsAdapterItem) {

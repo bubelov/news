@@ -44,7 +44,7 @@ class SearchFragment : AppFragment() {
                     model.setRead(entry.id)
 
                     if (feed.openEntriesInBrowser) {
-                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(entry.link)))
+                        openLink(entry.link)
                     } else {
                         val action =
                             SearchFragmentDirections.actionSearchFragmentToEntryFragment(item.id)
