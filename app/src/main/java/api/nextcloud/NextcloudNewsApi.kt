@@ -2,7 +2,13 @@ package api.nextcloud
 
 import okhttp3.ResponseBody
 import retrofit2.Call
-import retrofit2.http.*
+import retrofit2.http.Body
+import retrofit2.http.DELETE
+import retrofit2.http.GET
+import retrofit2.http.POST
+import retrofit2.http.PUT
+import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface NextcloudNewsApi {
 
@@ -29,9 +35,6 @@ interface NextcloudNewsApi {
         @Query("batchSize") batchSize: Long,
         @Query("offset") offset: Long,
     ): Call<ItemsPayload>
-
-    @GET("items?type=2&getRead=true&batchSize=-1")
-    fun getStarredItems(): Call<ItemsPayload>
 
     @GET("items/updated?type=3")
     fun getNewAndUpdatedItems(

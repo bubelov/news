@@ -1,6 +1,5 @@
 package api.miniflux
 
-import api.GetEntriesResult
 import api.NewsApi
 import db.Entry
 import db.EntryWithoutSummary
@@ -32,9 +31,7 @@ class MinifluxApiAdapter(
         api.deleteFeed(feedId.toLong())
     }
 
-    override suspend fun getAllEntries(): Flow<GetEntriesResult> = flow {
-        emit(GetEntriesResult.Loading(0, emptyList()))
-
+    override suspend fun getEntries(): Flow<List<Entry>> = flow {
         var totalFetched = 0L
         val currentBatch = mutableSetOf<EntryJson>()
         val batchSize = 250L
@@ -51,8 +48,7 @@ class MinifluxApiAdapter(
             currentBatch += entries.entries
             totalFetched += currentBatch.size
             Timber.d("Fetched $totalFetched entries so far")
-            val validEntries = currentBatch.mapNotNull { it.toEntry() }
-            emit(GetEntriesResult.Loading(totalFetched, validEntries))
+            emit(currentBatch.mapNotNull { it.toEntry() })
 
             if (currentBatch.size < batchSize) {
                 break
@@ -61,15 +57,13 @@ class MinifluxApiAdapter(
                 currentBatch.clear()
             }
         }
-
-        emit(GetEntriesResult.Success)
     }
 
     override suspend fun getNewAndUpdatedEntries(since: Instant): List<Entry> {
         return api.getEntries(since.millis / 1000).entries.mapNotNull { it.toEntry() }
     }
 
-    override suspend fun markAsOpened(entriesIds: List<String>, opened: Boolean) {
+    override suspend fun markEntriesAsOpened(entriesIds: List<String>, opened: Boolean) {
         if (opened) {
             api.putEntryStatus(
                 PutStatusArgs(
@@ -87,7 +81,7 @@ class MinifluxApiAdapter(
         }
     }
 
-    override suspend fun markAsBookmarked(entries: List<EntryWithoutSummary>, bookmarked: Boolean) {
+    override suspend fun markEntriesAsBookmarked(entries: List<EntryWithoutSummary>, bookmarked: Boolean) {
         entries.forEach {
             api.putEntryBookmark(it.id.toLong())
         }

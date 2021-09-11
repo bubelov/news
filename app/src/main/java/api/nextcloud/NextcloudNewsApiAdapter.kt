@@ -1,6 +1,5 @@
 package api.nextcloud
 
-import api.GetEntriesResult
 import api.NewsApi
 import db.Entry
 import db.EntryWithoutSummary
@@ -56,9 +55,7 @@ class NextcloudNewsApiAdapter(
         }
     }
 
-    override suspend fun getAllEntries(): Flow<GetEntriesResult> = flow {
-        emit(GetEntriesResult.Loading(0, emptyList()))
-
+    override suspend fun getEntries(): Flow<List<Entry>> = flow {
         var totalFetched = 0L
         val currentBatch = mutableSetOf<ItemJson>()
         val batchSize = 250L
@@ -91,8 +88,7 @@ class NextcloudNewsApiAdapter(
                 currentBatch += entries
                 totalFetched += currentBatch.size
                 Timber.d("Fetched $totalFetched entries so far")
-                val validEntries = currentBatch.mapNotNull { it.toEntry() }
-                emit(GetEntriesResult.Loading(totalFetched, validEntries))
+                emit(currentBatch.mapNotNull { it.toEntry() })
 
                 if (currentBatch.size < batchSize) {
                     break
@@ -102,8 +98,6 @@ class NextcloudNewsApiAdapter(
                 }
             }
         }
-
-        emit(GetEntriesResult.Success)
     }
 
     override suspend fun getNewAndUpdatedEntries(since: Instant): List<Entry> {
@@ -117,7 +111,7 @@ class NextcloudNewsApiAdapter(
             ?: throw Exception("Can not parse server response")
     }
 
-    override suspend fun markAsOpened(entriesIds: List<String>, opened: Boolean) {
+    override suspend fun markEntriesAsOpened(entriesIds: List<String>, opened: Boolean) {
         val ids = entriesIds.map { it.toLong() }
 
         val response = if (opened) {
@@ -131,7 +125,7 @@ class NextcloudNewsApiAdapter(
         }
     }
 
-    override suspend fun markAsBookmarked(entries: List<EntryWithoutSummary>, bookmarked: Boolean) {
+    override suspend fun markEntriesAsBookmarked(entries: List<EntryWithoutSummary>, bookmarked: Boolean) {
         val args =
             PutStarredArgs(entries.map { PutStarredArgsItem(it.feedId.toLong(), it.guidHash) })
 

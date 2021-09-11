@@ -1,7 +1,6 @@
 package api.standalone
 
 import android.util.Base64
-import api.GetEntriesResult
 import api.NewsApi
 import co.appreactor.feedk.AtomEntry
 import co.appreactor.feedk.AtomFeed
@@ -87,8 +86,8 @@ class StandaloneNewsApi(
 
     }
 
-    override suspend fun getAllEntries(): Flow<GetEntriesResult> {
-        return flowOf(GetEntriesResult.Success)
+    override suspend fun getEntries(): Flow<List<Entry>> {
+        return flowOf(emptyList())
     }
 
     // TODO return updated entries
@@ -146,11 +145,11 @@ class StandaloneNewsApi(
         }
     }
 
-    override suspend fun markAsOpened(entriesIds: List<String>, opened: Boolean) {
+    override suspend fun markEntriesAsOpened(entriesIds: List<String>, opened: Boolean) {
 
     }
 
-    override suspend fun markAsBookmarked(entries: List<EntryWithoutSummary>, bookmarked: Boolean) {
+    override suspend fun markEntriesAsBookmarked(entries: List<EntryWithoutSummary>, bookmarked: Boolean) {
 
     }
 

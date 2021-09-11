@@ -17,11 +17,11 @@ interface NewsApi {
 
     suspend fun deleteFeed(feedId: String)
 
-    suspend fun getAllEntries(): Flow<GetEntriesResult>
+    suspend fun getEntries(): Flow<List<Entry>>
 
     suspend fun getNewAndUpdatedEntries(since: Instant): List<Entry>
 
-    suspend fun markAsOpened(entriesIds: List<String>, opened: Boolean)
+    suspend fun markEntriesAsOpened(entriesIds: List<String>, opened: Boolean)
 
-    suspend fun markAsBookmarked(entries: List<EntryWithoutSummary>, bookmarked: Boolean)
+    suspend fun markEntriesAsBookmarked(entries: List<EntryWithoutSummary>, bookmarked: Boolean)
 }

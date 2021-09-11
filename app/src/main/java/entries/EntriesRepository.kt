@@ -1,6 +1,5 @@
 package entries
 
-import api.GetEntriesResult
 import api.NewsApi
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
@@ -119,19 +118,16 @@ class EntriesRepository(
         emit(SyncProgress(0L))
 
         withContext(Dispatchers.IO) {
-            api.getAllEntries().collect { result ->
-                when (result) {
-                    is GetEntriesResult.Loading -> {
-                        emit(SyncProgress(result.entriesLoaded))
+            var entriesLoaded = 0L
+            emit(SyncProgress(entriesLoaded))
 
-                        db.transaction {
-                            result.currentBatch.forEach {
-                                db.insertOrReplace(it.postProcess())
-                            }
-                        }
-                    }
+            api.getEntries().collect { batch ->
+                entriesLoaded += batch.size
+                emit(SyncProgress(entriesLoaded))
 
-                    is GetEntriesResult.Success -> {
+                db.transaction {
+                    batch.forEach {
+                        db.insertOrReplace(it.postProcess())
                     }
                 }
             }
@@ -148,7 +144,7 @@ class EntriesRepository(
         val notSyncedOpenedEntries = notSyncedEntries.filter { it.opened }
 
         if (notSyncedOpenedEntries.isNotEmpty()) {
-            api.markAsOpened(
+            api.markEntriesAsOpened(
                 entriesIds = notSyncedOpenedEntries.map { it.id },
                 opened = true,
             )
@@ -163,7 +159,7 @@ class EntriesRepository(
         val notSyncedNotOpenedEntries = notSyncedEntries.filterNot { it.opened }
 
         if (notSyncedNotOpenedEntries.isNotEmpty()) {
-            api.markAsOpened(
+            api.markEntriesAsOpened(
                 entriesIds = notSyncedNotOpenedEntries.map { it.id },
                 opened = false,
             )
@@ -186,7 +182,7 @@ class EntriesRepository(
         val notSyncedBookmarkedEntries = notSyncedEntries.filter { it.bookmarked }
 
         if (notSyncedBookmarkedEntries.isNotEmpty()) {
-            api.markAsBookmarked(notSyncedBookmarkedEntries, true)
+            api.markEntriesAsBookmarked(notSyncedBookmarkedEntries, true)
 
             db.transaction {
                 notSyncedBookmarkedEntries.forEach {
@@ -198,7 +194,7 @@ class EntriesRepository(
         val notSyncedNotBookmarkedEntries = notSyncedEntries.filterNot { it.bookmarked }
 
         if (notSyncedNotBookmarkedEntries.isNotEmpty()) {
-            api.markAsBookmarked(notSyncedNotBookmarkedEntries, false)
+            api.markEntriesAsBookmarked(notSyncedNotBookmarkedEntries, false)
 
             db.transaction {
                 notSyncedNotBookmarkedEntries.forEach {

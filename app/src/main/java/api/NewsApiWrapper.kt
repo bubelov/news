@@ -27,19 +27,19 @@ class NewsApiWrapper : NewsApi {
         api.deleteFeed(feedId)
     }
 
-    override suspend fun getAllEntries(): Flow<GetEntriesResult> {
-        return api.getAllEntries()
+    override suspend fun getEntries(): Flow<List<Entry>> {
+        return api.getEntries()
     }
 
     override suspend fun getNewAndUpdatedEntries(since: Instant): List<Entry> {
         return api.getNewAndUpdatedEntries(since)
     }
 
-    override suspend fun markAsOpened(entriesIds: List<String>, opened: Boolean) {
-        api.markAsOpened(entriesIds, opened)
+    override suspend fun markEntriesAsOpened(entriesIds: List<String>, opened: Boolean) {
+        api.markEntriesAsOpened(entriesIds, opened)
     }
 
-    override suspend fun markAsBookmarked(entries: List<EntryWithoutSummary>, bookmarked: Boolean) {
-        api.markAsBookmarked(entries, bookmarked)
+    override suspend fun markEntriesAsBookmarked(entries: List<EntryWithoutSummary>, bookmarked: Boolean) {
+        api.markEntriesAsBookmarked(entries, bookmarked)
     }
 }
