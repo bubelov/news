@@ -36,6 +36,7 @@ interface MinifluxApi {
 
     @GET("entries?order=id&direction=desc")
     suspend fun getEntriesBeforeEntry(
+        @Query("status") status: String = "",
         @Query("before_entry_id") entryId: Long = 0,
         @Query("limit") limit: Long = 0,
     ): EntriesPayload

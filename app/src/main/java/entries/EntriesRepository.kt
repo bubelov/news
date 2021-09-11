@@ -121,7 +121,7 @@ class EntriesRepository(
             var entriesLoaded = 0L
             emit(SyncProgress(entriesLoaded))
 
-            api.getEntries().collect { batch ->
+            api.getEntries(false).collect { batch ->
                 entriesLoaded += batch.size
                 emit(SyncProgress(entriesLoaded))
 

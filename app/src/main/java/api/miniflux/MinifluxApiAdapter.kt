@@ -31,7 +31,7 @@ class MinifluxApiAdapter(
         api.deleteFeed(feedId.toLong())
     }
 
-    override suspend fun getEntries(): Flow<List<Entry>> = flow {
+    override suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Entry>> = flow {
         var totalFetched = 0L
         val currentBatch = mutableSetOf<EntryJson>()
         val batchSize = 250L
@@ -41,9 +41,11 @@ class MinifluxApiAdapter(
             Timber.d("Oldest entry ID: $oldestEntryId")
 
             val entries = api.getEntriesBeforeEntry(
+                status = if (includeReadEntries) "" else "unread",
                 entryId = oldestEntryId,
                 limit = batchSize,
             )
+
             Timber.d("Got ${entries.entries.size} entries")
             currentBatch += entries.entries
             totalFetched += currentBatch.size

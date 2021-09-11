@@ -17,7 +17,7 @@ interface NewsApi {
 
     suspend fun deleteFeed(feedId: String)
 
-    suspend fun getEntries(): Flow<List<Entry>>
+    suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Entry>>
 
     suspend fun getNewAndUpdatedEntries(since: Instant): List<Entry>
 

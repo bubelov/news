@@ -55,7 +55,7 @@ class NextcloudNewsApiAdapter(
         }
     }
 
-    override suspend fun getEntries(): Flow<List<Entry>> = flow {
+    override suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Entry>> = flow {
         var totalFetched = 0L
         val currentBatch = mutableSetOf<ItemJson>()
         val batchSize = 250L
@@ -66,6 +66,7 @@ class NextcloudNewsApiAdapter(
 
             val response = try {
                 api.getAllItems(
+                    getRead = includeReadEntries,
                     batchSize = batchSize,
                     offset = oldestEntryId
                 ).execute()

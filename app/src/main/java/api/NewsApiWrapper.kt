@@ -27,8 +27,8 @@ class NewsApiWrapper : NewsApi {
         api.deleteFeed(feedId)
     }
 
-    override suspend fun getEntries(): Flow<List<Entry>> {
-        return api.getEntries()
+    override suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Entry>> {
+        return api.getEntries(includeReadEntries)
     }
 
     override suspend fun getNewAndUpdatedEntries(since: Instant): List<Entry> {

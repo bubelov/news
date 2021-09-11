@@ -86,7 +86,7 @@ class StandaloneNewsApi(
 
     }
 
-    override suspend fun getEntries(): Flow<List<Entry>> {
+    override suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Entry>> {
         return flowOf(emptyList())
     }
 
