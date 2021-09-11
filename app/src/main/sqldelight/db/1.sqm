@@ -1,1 +1,83 @@
-ALTER TABLE EntryEnclosure ADD COLUMN cacheUri TEXT NOT NULL DEFAULT '';
+CREATE TABLE EntryEnclosure (
+  entryId TEXT PRIMARY KEY NOT NULL,
+  downloadPercent INTEGER,
+  cacheUri TEXT NOT NULL DEFAULT ''
+);
+
+CREATE TABLE Entry (
+  id TEXT PRIMARY KEY NOT NULL,
+  feedId TEXT NOT NULL,
+  title TEXT NOT NULL,
+  link TEXT NOT NULL,
+  published TEXT NOT NULL,
+  updated TEXT NOT NULL,
+  authorName TEXT NOT NULL,
+  content TEXT NOT NULL,
+  enclosureLink TEXT NOT NULL,
+  enclosureLinkType TEXT NOT NULL,
+
+  opened INTEGER AS Boolean NOT NULL,
+  openedSynced INTEGER AS Boolean NOT NULL,
+
+  bookmarked INTEGER AS Boolean NOT NULL,
+  bookmarkedSynced INTEGER AS Boolean NOT NULL,
+
+  guidHash TEXT NOT NULL
+);
+
+CREATE VIEW EntryWithoutSummary
+AS
+SELECT
+  id,
+  feedId,
+  title,
+  link,
+  published,
+  updated,
+  authorName,
+  enclosureLink,
+  enclosureLinkType,
+  opened,
+  openedSynced,
+  bookmarked,
+  bookmarkedSynced,
+  guidHash
+FROM Entry;
+
+CREATE TABLE EntryImage (
+  id TEXT NOT NULL PRIMARY KEY,
+  entryId TEXT NOT NULL,
+  url TEXT NOT NULL,
+  width INTEGER NOT NULL,
+  height INTEGER NOT NULL
+);
+
+CREATE TABLE EntryImagesMetadata (
+  entryId TEXT NOT NULL PRIMARY KEY,
+  previewImageProcessingStatus TEXT NOT NULL,
+  previewImageId TEXT,
+  summaryImagesProcessingStatus TEXT NOT NULL
+);
+
+CREATE TABLE Feed (
+  id TEXT PRIMARY KEY NOT NULL,
+  title TEXT NOT NULL,
+  selfLink TEXT NOT NULL,
+  alternateLink TEXT NOT NULL,
+  openEntriesInBrowser INTEGER AS Boolean NOT NULL DEFAULT 0,
+  blockedWords TEXT NOT NULL DEFAULT '',
+  showPreviewImages INTEGER AS Boolean
+);
+
+CREATE TABLE Log (
+  id TEXT PRIMARY KEY,
+  date TEXT NOT NULL,
+  tag TEXT NOT NULL,
+  message TEXT NOT NULL,
+  stackTrace TEXT
+);
+
+CREATE TABLE Preference (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);

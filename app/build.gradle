@@ -70,9 +70,9 @@ android {
 
 sqldelight {
     Database {
-        packageName = "co.appreactor.news"
         sourceFolders = ["sqldelight"]
-        schemaOutputDirectory = file("src/main/sqldelight/databases")
+        packageName = "db"
+        deriveSchemaFromMigrations = true
     }
 }
 

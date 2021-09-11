@@ -2,7 +2,7 @@ package settings
 
 import androidx.lifecycle.ViewModel
 import auth.AuthRepository
-import co.appreactor.news.Database
+import db.Database
 import common.Preferences
 import common.PreferencesRepository
 import kotlinx.coroutines.flow.first

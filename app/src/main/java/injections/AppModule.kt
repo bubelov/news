@@ -9,7 +9,7 @@ import auth.AuthRepository
 import auth.AuthViewModel
 import auth.DirectAuthViewModel
 import auth.MinifluxAuthViewModel
-import co.appreactor.news.Database
+import db.Database
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import common.App
 import common.AppViewModel
