@@ -15,7 +15,19 @@ class MinifluxApiAdapter(
 ) : NewsApi {
 
     override suspend fun addFeed(url: URL): Feed {
-        val response = api.postFeed(PostFeedArgs(feed_url = url.toString(), category_id = 1))
+        val categories = api.getCategories()
+
+        val category = categories.find { it.title.equals("All", ignoreCase = true) }
+            ?: categories.firstOrNull()
+            ?: throw Exception("You have no categories to place this feed into")
+
+        val response = api.postFeed(
+            PostFeedArgs(
+                feed_url = url.toString(),
+                category_id = category.id,
+            )
+        )
+
         return api.getFeed(response.feed_id).toFeed()!!
     }
 

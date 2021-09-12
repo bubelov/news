@@ -11,6 +11,9 @@ import retrofit2.http.Query
 
 interface MinifluxApi {
 
+    @GET("categories")
+    suspend fun getCategories(): List<CategoryJson>
+
     @POST("feeds")
     suspend fun postFeed(@Body args: PostFeedArgs): PostFeedResponse
 

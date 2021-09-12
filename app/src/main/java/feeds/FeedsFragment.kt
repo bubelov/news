@@ -199,7 +199,7 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
                                 fab.show()
                             }.onFailure {
                                 showErrorDialog(it) {
-                                    model.reload()
+                                    lifecycleScope.launchWhenResumed { model.reload() }
                                 }
                             }
                         }
@@ -210,10 +210,10 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
 
                         is FeedsViewModel.State.AddedOne -> {
                             state.result.onSuccess {
-                                model.reload()
+                                lifecycleScope.launchWhenResumed { model.reload() }
                             }.onFailure {
                                 showErrorDialog(it) {
-                                    model.reload()
+                                    lifecycleScope.launchWhenResumed { model.reload() }
                                 }
                             }
                         }
@@ -264,9 +264,7 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
                                 title = getString(R.string.import_title),
                                 message = message,
                             ) {
-                                lifecycleScope.launchWhenResumed {
-                                    model.reload()
-                                }
+                                lifecycleScope.launchWhenResumed { model.reload() }
                             }
                         }
 
@@ -276,10 +274,10 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
 
                         is FeedsViewModel.State.Renamed -> {
                             state.result.onSuccess {
-                                model.reload()
+                                lifecycleScope.launchWhenResumed { model.reload() }
                             }.onFailure {
                                 showErrorDialog(it) {
-                                    model.reload()
+                                    lifecycleScope.launchWhenResumed { model.reload() }
                                 }
                             }
                         }
@@ -290,10 +288,10 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
 
                         is FeedsViewModel.State.Deleted -> {
                             state.result.onSuccess {
-                                model.reload()
+                                lifecycleScope.launchWhenResumed { model.reload() }
                             }.onFailure {
                                 showErrorDialog(it) {
-                                    model.reload()
+                                    lifecycleScope.launchWhenResumed { model.reload() }
                                 }
                             }
                         }
