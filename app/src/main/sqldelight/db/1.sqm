@@ -77,7 +77,24 @@ CREATE TABLE Log (
   stackTrace TEXT
 );
 
-CREATE TABLE Preference (
-  key TEXT PRIMARY KEY,
-  value TEXT NOT NULL
+CREATE TABLE Conf (
+  authType TEXT NOT NULL DEFAULT "",
+  nextcloudServerUrl TEXT NOT NULL DEFAULT "",
+  nextcloudServerTrustSelfSignedCerts INTEGER AS Boolean NOT NULL DEFAULT 0,
+  nextcloudServerUsername TEXT NOT NULL DEFAULT "",
+  nextcloudServerPassword TEXT NOT NULL DEFAULT "",
+  minifluxServerUrl TEXT NOT NULL DEFAULT "",
+  minifluxServerTrustSelfSignedCerts INTEGER AS Boolean NOT NULL DEFAULT 0,
+  minifluxServerUsername TEXT NOT NULL DEFAULT "",
+  minifluxServerPassword TEXT NOT NULL DEFAULT "",
+  initialSyncCompleted INTEGER AS Boolean NOT NULL DEFAULT 0,
+  lastEntriesSyncDateTime TEXT NOT NULL DEFAULT "",
+  showOpenedEntries INTEGER AS Boolean NOT NULL DEFAULT 0,
+  sortOrder TEXT NOT NULL DEFAULT 'descending',
+  showPreviewImages INTEGER AS Boolean NOT NULL DEFAULT 1,
+  cropPreviewImages INTEGER AS Boolean NOT NULL DEFAULT 1,
+  markScrolledEntriesAsRead INTEGER AS Boolean NOT NULL DEFAULT 0,
+  syncOnStartup INTEGER AS Boolean NOT NULL DEFAULT 1,
+  syncInBackground INTEGER AS Boolean NOT NULL DEFAULT 1,
+  backgroundSyncIntervalMillis INTEGER NOT NULL DEFAULT 10800000
 );

@@ -17,11 +17,12 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.nextcloud.android.sso.AccountImporter
 import common.App
 import common.AppFragment
-import common.PreferencesRepository
+import common.ConfRepository
 import common.app
 import common.showErrorDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.koin.android.viewmodel.ext.android.viewModel
 import java.util.concurrent.TimeUnit
@@ -79,15 +80,15 @@ class SettingsFragment : AppFragment() {
             setTitle(R.string.settings)
         }
 
-        val prefs = model.getPreferences()
+        val conf = runBlocking { model.getConf() }
 
         binding.apply {
             syncInBackground.apply {
-                isChecked = prefs.syncInBackground
-                backgroundSyncIntervalPanel.isVisible = prefs.syncInBackground
+                isChecked = conf.syncInBackground
+                backgroundSyncIntervalPanel.isVisible = conf.syncInBackground
 
                 setOnCheckedChangeListener { _, isChecked ->
-                    model.savePreferences { syncInBackground = isChecked }
+                    runBlocking { model.saveConf(model.getConf().copy(syncInBackground = isChecked)) }
                     backgroundSyncIntervalPanel.isVisible = isChecked
                     app().setupBackgroundSync(override = true)
                 }
@@ -104,11 +105,14 @@ class SettingsFragment : AppFragment() {
 
                     text = resources.getQuantityString(R.plurals.d_hours, hours, hours)
                     val millis = TimeUnit.HOURS.toMillis(hours.toLong())
-                    isChecked = model.getPreferences().backgroundSyncIntervalMillis == millis
+                    isChecked = runBlocking { model.getConf().backgroundSyncIntervalMillis == millis }
 
                     setOnCheckedChangeListener { _, isChecked ->
                         if (isChecked) {
-                            model.savePreferences { backgroundSyncIntervalMillis = millis }
+                            runBlocking {
+                                model.saveConf(model.getConf().copy(backgroundSyncIntervalMillis = millis))
+                            }
+
                             app().setupBackgroundSync(override = true)
                             backgroundSyncInterval.text = text
                             dialog.dismiss()
@@ -127,47 +131,57 @@ class SettingsFragment : AppFragment() {
 
             backgroundSyncInterval.text = resources.getQuantityString(
                 R.plurals.d_hours,
-                TimeUnit.MILLISECONDS.toHours(prefs.backgroundSyncIntervalMillis).toInt(),
-                TimeUnit.MILLISECONDS.toHours(prefs.backgroundSyncIntervalMillis).toInt(),
+                TimeUnit.MILLISECONDS.toHours(conf.backgroundSyncIntervalMillis).toInt(),
+                TimeUnit.MILLISECONDS.toHours(conf.backgroundSyncIntervalMillis).toInt(),
             )
 
             syncOnStartup.apply {
-                isChecked = prefs.syncOnStartup
+                isChecked = conf.syncOnStartup
 
                 setOnCheckedChangeListener { _, isChecked ->
-                    model.savePreferences { syncOnStartup = isChecked }
+                    runBlocking {
+                        model.saveConf(model.getConf().copy(syncOnStartup = isChecked))
+                    }
                 }
             }
 
             showOpenedEntries.apply {
-                isChecked = prefs.showOpenedEntries
+                isChecked = conf.showOpenedEntries
 
                 setOnCheckedChangeListener { _, isChecked ->
-                    model.savePreferences { showOpenedEntries = isChecked }
+                    runBlocking {
+                        model.saveConf(model.getConf().copy(showOpenedEntries = isChecked))
+                    }
                 }
             }
 
             showPreviewImages.apply {
-                isChecked = prefs.showPreviewImages
+                isChecked = conf.showPreviewImages
 
                 setOnCheckedChangeListener { _, isChecked ->
-                    model.savePreferences { showPreviewImages = isChecked }
+                    runBlocking {
+                        model.saveConf(model.getConf().copy(showPreviewImages = isChecked))
+                    }
                 }
             }
 
             cropPreviewImages.apply {
-                isChecked = prefs.cropPreviewImages
+                isChecked = conf.cropPreviewImages
 
                 setOnCheckedChangeListener { _, isChecked ->
-                    model.savePreferences { cropPreviewImages = isChecked }
+                    runBlocking {
+                        model.saveConf(model.getConf().copy(cropPreviewImages = isChecked))
+                    }
                 }
             }
 
             markScrolledEntriesAsRead.apply {
-                isChecked = prefs.markScrolledEntriesAsRead
+                isChecked = conf.markScrolledEntriesAsRead
 
                 setOnCheckedChangeListener { _, isChecked ->
-                    model.savePreferences { markScrolledEntriesAsRead = isChecked }
+                    runBlocking {
+                        model.saveConf(model.getConf().copy(markScrolledEntriesAsRead = isChecked))
+                    }
                 }
             }
 
@@ -181,8 +195,8 @@ class SettingsFragment : AppFragment() {
 
             logOut.setOnClickListener {
                 lifecycleScope.launchWhenResumed {
-                    when (model.getPreferences().authType) {
-                        PreferencesRepository.AUTH_TYPE_STANDALONE -> {
+                    when (model.getConf().authType) {
+                        ConfRepository.AUTH_TYPE_STANDALONE -> {
                             MaterialAlertDialogBuilder(requireContext())
                                 .setMessage(R.string.delete_all_data_warning)
                                 .setPositiveButton(
@@ -211,8 +225,8 @@ class SettingsFragment : AppFragment() {
                 }
             }
 
-            when (prefs.authType) {
-                PreferencesRepository.AUTH_TYPE_STANDALONE -> {
+            when (conf.authType) {
+                ConfRepository.AUTH_TYPE_STANDALONE -> {
                     binding.logOutTitle.setText(R.string.delete_all_data)
                     binding.logOutSubtitle.isVisible = false
                 }

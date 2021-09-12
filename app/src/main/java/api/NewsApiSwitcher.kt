@@ -12,7 +12,7 @@ import db.FeedQueries
 import com.google.gson.GsonBuilder
 import com.nextcloud.android.sso.api.NextcloudAPI
 import com.nextcloud.android.sso.helper.SingleAccountHelper
-import common.PreferencesRepository
+import common.ConfRepository
 import db.Log
 import kotlinx.coroutines.runBlocking
 import log.LogRepository
@@ -25,17 +25,17 @@ class NewsApiSwitcher(
     private val wrapper: NewsApiWrapper,
     private val feedQueries: FeedQueries,
     private val entryQueries: EntryQueries,
-    private val prefs: PreferencesRepository,
+    private val prefs: ConfRepository,
     private val log: LogRepository,
     private val context: Context,
 ) {
 
     fun switch(authType: String) {
         when (authType) {
-            PreferencesRepository.AUTH_TYPE_NEXTCLOUD_APP -> switchToAppBasedNextcloudApi()
-            PreferencesRepository.AUTH_TYPE_NEXTCLOUD_DIRECT -> switchToDirectNextcloudApi()
-            PreferencesRepository.AUTH_TYPE_MINIFLUX -> switchToMinifluxApi()
-            PreferencesRepository.AUTH_TYPE_STANDALONE -> switchToStandaloneApi()
+            ConfRepository.AUTH_TYPE_NEXTCLOUD_APP -> switchToAppBasedNextcloudApi()
+            ConfRepository.AUTH_TYPE_NEXTCLOUD_DIRECT -> switchToDirectNextcloudApi()
+            ConfRepository.AUTH_TYPE_MINIFLUX -> switchToMinifluxApi()
+            ConfRepository.AUTH_TYPE_STANDALONE -> switchToStandaloneApi()
             else -> throw Exception("Unknown auth type: $authType")
         }
     }

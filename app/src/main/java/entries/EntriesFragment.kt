@@ -3,7 +3,6 @@ package entries
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
@@ -26,7 +25,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 import org.koin.android.viewmodel.ext.android.viewModel
-import timber.log.Timber
 
 class EntriesFragment : AppFragment(), Scrollable {
 
@@ -303,7 +301,7 @@ class EntriesFragment : AppFragment(), Scrollable {
         super.onDestroyView()
         _binding = null
 
-        if (runBlocking { model.getPreferences().markScrolledEntriesAsRead }) {
+        if (runBlocking { model.getConf().markScrolledEntriesAsRead }) {
             model.setRead(
                 entryIds = seenEntries.map { it.id },
                 read = true,
@@ -335,9 +333,9 @@ class EntriesFragment : AppFragment(), Scrollable {
         showOpenedEntriesMenuItem.isVisible = getShowReadEntriesButtonVisibility()
 
         lifecycleScope.launchWhenResumed {
-            val prefs = model.getPreferences()
+            val conf = model.getConf()
 
-            if (prefs.showOpenedEntries) {
+            if (conf.showOpenedEntries) {
                 showOpenedEntriesMenuItem.setIcon(R.drawable.ic_baseline_visibility_24)
                 showOpenedEntriesMenuItem.title = getString(R.string.hide_read_news)
                 touchHelper?.attachToRecyclerView(null)
@@ -351,8 +349,8 @@ class EntriesFragment : AppFragment(), Scrollable {
         showOpenedEntriesMenuItem.setOnMenuItemClickListener {
             lifecycleScope.launchWhenResumed {
                 adapter.submitList(null)
-                val prefs = model.getPreferences()
-                model.savePreferences { showOpenedEntries = !prefs.showOpenedEntries }
+                val conf = model.getConf()
+                model.saveConf(model.getConf().copy(showOpenedEntries = !conf.showOpenedEntries))
                 initShowReadEntriesButton()
             }
 
@@ -364,15 +362,15 @@ class EntriesFragment : AppFragment(), Scrollable {
         val sortOrderMenuItem = toolbar.menu.findItem(R.id.sort)
 
         lifecycleScope.launchWhenResumed {
-            val prefs = model.getPreferences()
+            val conf = model.getConf()
 
-            when (prefs.sortOrder) {
-                PreferencesRepository.SORT_ORDER_ASCENDING -> {
+            when (conf.sortOrder) {
+                ConfRepository.SORT_ORDER_ASCENDING -> {
                     sortOrderMenuItem.setIcon(R.drawable.ic_clock_forward)
                     sortOrderMenuItem.title = getString(R.string.show_newest_first)
                 }
 
-                PreferencesRepository.SORT_ORDER_DESCENDING -> {
+                ConfRepository.SORT_ORDER_DESCENDING -> {
                     sortOrderMenuItem.setIcon(R.drawable.ic_clock_back)
                     sortOrderMenuItem.title = getString(R.string.show_oldest_first)
                 }
@@ -383,15 +381,15 @@ class EntriesFragment : AppFragment(), Scrollable {
             lifecycleScope.launchWhenResumed {
                 adapter.submitList(null)
 
-                val preferences = model.getPreferences()
+                val conf = model.getConf()
 
-                val newSortOrder = when (preferences.sortOrder) {
-                    PreferencesRepository.SORT_ORDER_ASCENDING -> PreferencesRepository.SORT_ORDER_DESCENDING
-                    PreferencesRepository.SORT_ORDER_DESCENDING -> PreferencesRepository.SORT_ORDER_ASCENDING
+                val newSortOrder = when (conf.sortOrder) {
+                    ConfRepository.SORT_ORDER_ASCENDING -> ConfRepository.SORT_ORDER_DESCENDING
+                    ConfRepository.SORT_ORDER_DESCENDING -> ConfRepository.SORT_ORDER_ASCENDING
                     else -> throw Exception()
                 }
 
-                model.savePreferences { sortOrder = newSortOrder }
+                model.saveConf(conf.copy(sortOrder = newSortOrder))
                 initSortOrderButton()
             }
 
@@ -425,7 +423,7 @@ class EntriesFragment : AppFragment(), Scrollable {
         touchHelper?.attachToRecyclerView(binding.listView)
 
         lifecycleScope.launchWhenResumed {
-            if (model.getPreferences().markScrolledEntriesAsRead
+            if (model.getConf().markScrolledEntriesAsRead
                 && (args.filter is EntriesFilter.OnlyNotBookmarked || args.filter is EntriesFilter.OnlyFromFeed)
             ) {
                 markScrolledEntriesAsRead()

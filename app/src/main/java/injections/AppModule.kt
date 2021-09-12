@@ -13,7 +13,7 @@ import db.Database
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import common.App
 import common.AppViewModel
-import common.PreferencesRepository
+import common.ConfRepository
 import sync.NewsApiSync
 import feeds.FeedsRepository
 import entries.EntriesViewModel
@@ -52,7 +52,7 @@ val appModule = module {
     single { get<Database>().entryImagesMetadataQueries }
     single { get<Database>().entryImageQueries }
     single { get<Database>().entryEnclosureQueries }
-    single { get<Database>().preferenceQueries }
+    single { get<Database>().confQueries }
     single { get<Database>().logQueries }
 
     single {
@@ -75,7 +75,7 @@ val appModule = module {
     single<EntriesSupportingTextRepository>()
     single<EntriesImagesRepository>()
     single<PodcastsRepository>()
-    single<PreferencesRepository>()
+    single<ConfRepository>()
     single<LogRepository>()
 
     viewModel<AppViewModel>()

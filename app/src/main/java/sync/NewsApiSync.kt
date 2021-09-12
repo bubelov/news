@@ -1,7 +1,7 @@
 package sync
 
 import common.ConnectivityProbe
-import common.PreferencesRepository
+import common.ConfRepository
 import feeds.FeedsRepository
 import entries.EntriesRepository
 import kotlinx.coroutines.Dispatchers
@@ -16,7 +16,7 @@ import org.joda.time.Instant
 class NewsApiSync(
     private val feedsRepository: FeedsRepository,
     private val entriesRepository: EntriesRepository,
-    private val preferencesRepository: PreferencesRepository,
+    private val conf: ConfRepository,
     private val connectivityProbe: ConnectivityProbe,
 ) {
 
@@ -27,7 +27,7 @@ class NewsApiSync(
     suspend fun performInitialSync() {
         withContext(Dispatchers.IO) {
             mutex.withLock {
-                if (preferencesRepository.get().initialSyncCompleted) {
+                if (conf.get().initialSyncCompleted) {
                     return@withLock
                 }
 
@@ -49,12 +49,10 @@ class NewsApiSync(
                     feedsSync.await()
                     entriesSync.await()
 
-                    preferencesRepository.save {
-                        lastEntriesSyncDateTime = Instant.now().toString()
-                    }
+                    conf.save(conf.get().copy(lastEntriesSyncDateTime = Instant.now().toString()))
                 }.onSuccess {
                     syncMessage.value = ""
-                    preferencesRepository.save { initialSyncCompleted = true }
+                    conf.save(conf.get().copy(initialSyncCompleted = true))
                 }.onFailure {
                     syncMessage.value = ""
                     throw it
@@ -104,13 +102,11 @@ class NewsApiSync(
             if (syncNewAndUpdatedEntries) {
                 runCatching {
                     val newAndUpdatedEntries = entriesRepository.syncNewAndUpdated(
-                        lastEntriesSyncDateTime = preferencesRepository.get().lastEntriesSyncDateTime,
+                        lastEntriesSyncDateTime = conf.get().lastEntriesSyncDateTime,
                         feeds = feedsRepository.selectAll(),
                     )
 
-                    preferencesRepository.save {
-                        lastEntriesSyncDateTime = Instant.now().toString()
-                    }
+                    conf.save(conf.get().copy(lastEntriesSyncDateTime = Instant.now().toString()))
 
                     return SyncResult.Ok(newAndUpdatedEntries)
                 }.onFailure {

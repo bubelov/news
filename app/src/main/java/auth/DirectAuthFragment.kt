@@ -84,7 +84,7 @@ class DirectAuthFragment : AppFragment() {
                         binding.trustSelfSignedCerts.isChecked,
                     )
 
-                    model.setAuthType(PreferencesRepository.AUTH_TYPE_NEXTCLOUD_DIRECT)
+                    model.setAuthType(ConfRepository.AUTH_TYPE_NEXTCLOUD_DIRECT)
 
                     app().setupBackgroundSync(override = true)
 

@@ -18,7 +18,7 @@ import com.nextcloud.android.sso.exceptions.SSOException
 import com.nextcloud.android.sso.helper.SingleAccountHelper
 import com.nextcloud.android.sso.ui.UiExceptionManager
 import common.AppFragment
-import common.PreferencesRepository
+import common.ConfRepository
 import common.app
 import entries.EntriesFilter
 import kotlinx.coroutines.runBlocking
@@ -40,18 +40,18 @@ class AuthFragment : AppFragment(
         savedInstanceState: Bundle?
     ): View? {
         return runBlocking {
-            when (model.getAuthType()) {
-                PreferencesRepository.AUTH_TYPE_MINIFLUX -> {
+            when (model.getConf().authType) {
+                ConfRepository.AUTH_TYPE_MINIFLUX -> {
                     showNews()
                     null
                 }
 
-                PreferencesRepository.AUTH_TYPE_NEXTCLOUD_APP, PreferencesRepository.AUTH_TYPE_NEXTCLOUD_DIRECT -> {
+                ConfRepository.AUTH_TYPE_NEXTCLOUD_APP, ConfRepository.AUTH_TYPE_NEXTCLOUD_DIRECT -> {
                     showNews()
                     null
                 }
 
-                PreferencesRepository.AUTH_TYPE_STANDALONE -> {
+                ConfRepository.AUTH_TYPE_STANDALONE -> {
                     showNews()
                     null
                 }
@@ -77,12 +77,13 @@ class AuthFragment : AppFragment(
 
         binding.standaloneMode.setOnClickListener {
             lifecycleScope.launchWhenResumed {
-                model.setAuthType(PreferencesRepository.AUTH_TYPE_STANDALONE)
-
-                model.savePreferences {
-                    syncOnStartup = false
-                    backgroundSyncIntervalMillis = TimeUnit.HOURS.toMillis(12)
-                }
+                model.saveConf(
+                    model.getConf().copy(
+                        authType = ConfRepository.AUTH_TYPE_STANDALONE,
+                        syncOnStartup = false,
+                        backgroundSyncIntervalMillis = TimeUnit.HOURS.toMillis(12),
+                    )
+                )
 
                 app().setupBackgroundSync(override = true)
 
@@ -98,7 +99,7 @@ class AuthFragment : AppFragment(
         val onAccessGranted = IAccountAccessGranted { account ->
             runBlocking {
                 SingleAccountHelper.setCurrentAccount(context, account.name)
-                model.setAuthType(PreferencesRepository.AUTH_TYPE_NEXTCLOUD_APP)
+                model.saveConf(model.getConf().copy(authType = ConfRepository.AUTH_TYPE_NEXTCLOUD_APP))
                 app().setupBackgroundSync(override = true)
                 showNews()
             }

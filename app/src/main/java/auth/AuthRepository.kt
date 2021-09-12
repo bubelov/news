@@ -5,42 +5,45 @@ import android.content.res.Resources
 import co.appreactor.news.R
 import com.nextcloud.android.sso.exceptions.SSOException
 import com.nextcloud.android.sso.helper.SingleAccountHelper
-import common.Preferences
-import common.PreferencesRepository
+import common.ConfRepository
+import db.Conf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import timber.log.Timber
 
 class AuthRepository(
-    private val prefs: PreferencesRepository,
+    private val conf: ConfRepository,
     private val resources: Resources,
     private val context: Context,
 ) {
 
-    suspend fun account(): Flow<Account> = prefs.getAsFlow().map {
+    suspend fun account(): Flow<Account> = conf.getAsFlow().map {
         Account(
             title = it.accountTitle(),
             subtitle = it.accountSubtitle(),
         )
     }
 
-    private fun Preferences.accountTitle(): String {
+    private fun Conf.accountTitle(): String {
         return when (authType) {
-            PreferencesRepository.AUTH_TYPE_NEXTCLOUD_APP,
-            PreferencesRepository.AUTH_TYPE_NEXTCLOUD_DIRECT -> {
+            ConfRepository.AUTH_TYPE_NEXTCLOUD_APP,
+            ConfRepository.AUTH_TYPE_NEXTCLOUD_DIRECT -> {
                 resources.getString(R.string.nextcloud)
             }
-            PreferencesRepository.AUTH_TYPE_STANDALONE -> {
+            ConfRepository.AUTH_TYPE_MINIFLUX -> {
+                context.getString(R.string.miniflux)
+            }
+            ConfRepository.AUTH_TYPE_STANDALONE -> {
                 resources.getString(R.string.standalone_mode)
             }
             else -> ""
         }
     }
 
-    private fun Preferences.accountSubtitle(): String {
+    private fun Conf.accountSubtitle(): String {
         return when (authType) {
-            PreferencesRepository.AUTH_TYPE_NEXTCLOUD_APP,
-            PreferencesRepository.AUTH_TYPE_NEXTCLOUD_DIRECT -> {
+            ConfRepository.AUTH_TYPE_NEXTCLOUD_APP,
+            ConfRepository.AUTH_TYPE_NEXTCLOUD_DIRECT -> {
                 if (nextcloudServerUrl.isNotBlank()) {
                     val username = nextcloudServerUsername
                     "$username@${nextcloudServerUrl.replace("https://", "")}"
@@ -54,7 +57,11 @@ class AuthRepository(
                     }
                 }
             }
-            PreferencesRepository.AUTH_TYPE_STANDALONE -> {
+            ConfRepository.AUTH_TYPE_MINIFLUX -> {
+                val username = minifluxServerUsername
+                "$username@${minifluxServerUrl.replace("https://", "")}"
+            }
+            ConfRepository.AUTH_TYPE_STANDALONE -> {
                 ""
             }
             else -> ""

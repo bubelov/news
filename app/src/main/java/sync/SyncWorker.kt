@@ -13,7 +13,7 @@ import androidx.work.WorkerParameters
 import co.appreactor.news.R
 import common.App
 import common.AppActivity
-import common.PreferencesRepository
+import common.ConfRepository
 import entries.EntriesRepository
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
@@ -26,7 +26,7 @@ class SyncWorker(appContext: Context, workerParams: WorkerParameters) :
 
     private suspend fun doWorkAsync(): Result {
         val app = applicationContext as App
-        val prefs = app.get<PreferencesRepository>().get()
+        val prefs = app.get<ConfRepository>().get()
         val sync = app.get<NewsApiSync>()
         val entriesRepository = app.get<EntriesRepository>()
         Timber.d("Attempting background sync")

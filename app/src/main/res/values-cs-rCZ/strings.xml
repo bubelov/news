@@ -102,6 +102,7 @@
     <string name="close">Close</string>
     <string name="miniflux_login">Miniflux Login</string>
     <string name="login_with_miniflux">Login with Miniflux</string>
+    <string name="miniflux">Miniflux</string>
     <plurals name="d_hours">
         <item quantity="one">%d hodinu</item>
         <item quantity="few">%d hodina</item>

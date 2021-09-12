@@ -4,14 +4,14 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import common.ConnectivityProbe
-import common.Preferences
-import common.PreferencesRepository
+import common.ConfRepository
 import db.EntryWithoutSummary
 import feeds.FeedsRepository
 import db.Feed
-import common.PreferencesRepository.Companion.SORT_ORDER_ASCENDING
-import common.PreferencesRepository.Companion.SORT_ORDER_DESCENDING
+import common.ConfRepository.Companion.SORT_ORDER_ASCENDING
+import common.ConfRepository.Companion.SORT_ORDER_DESCENDING
 import common.formatDateTime
+import db.Conf
 import entriesimages.EntriesImagesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,7 +32,7 @@ class EntriesViewModel(
     private val entriesImagesRepository: EntriesImagesRepository,
     private val podcastsRepository: PodcastsRepository,
     private val newsApiSync: NewsApiSync,
-    private val preferencesRepository: PreferencesRepository,
+    private val conf: ConfRepository,
     private val connectivityProbe: ConnectivityProbe,
 ) : ViewModel() {
 
@@ -50,13 +50,13 @@ class EntriesViewModel(
         }
 
         if (state.value == null) {
-            val prefs = getPreferences()
+            val conf = getConf()
 
-            if (prefs.initialSyncCompleted) {
+            if (conf.initialSyncCompleted) {
                 reloadEntries()
 
                 if (filter is EntriesFilter.OnlyNotBookmarked
-                    && prefs.syncOnStartup
+                    && conf.syncOnStartup
                     && !sharedModel.syncedOnStartup
                 ) {
                     sharedModel.syncedOnStartup = true
@@ -124,11 +124,11 @@ class EntriesViewModel(
             state.value = State.LoadingEntries
         }
 
-        val prefs = getPreferences()
+        val conf = getConf()
 
         val unsortedEntries = when (val filter = filter) {
             is EntriesFilter.OnlyNotBookmarked -> {
-                if (prefs.showOpenedEntries) {
+                if (conf.showOpenedEntries) {
                     entriesRepository.selectAll()
                 } else {
                     entriesRepository.selectByRead(false)
@@ -142,7 +142,7 @@ class EntriesViewModel(
             is EntriesFilter.OnlyFromFeed -> {
                 val feedEntries = entriesRepository.selectByFeedId(filter.feedId)
 
-                if (prefs.showOpenedEntries) {
+                if (conf.showOpenedEntries) {
                     feedEntries
                 } else {
                     feedEntries.filter { !it.opened }
@@ -150,7 +150,7 @@ class EntriesViewModel(
             }
         }
 
-        val sortedEntries = when (prefs.sortOrder) {
+        val sortedEntries = when (conf.sortOrder) {
             SORT_ORDER_ASCENDING -> unsortedEntries.sortedBy { it.published }
             SORT_ORDER_DESCENDING -> unsortedEntries.sortedByDescending { it.published }
             else -> unsortedEntries
@@ -160,12 +160,12 @@ class EntriesViewModel(
 
         val result = sortedEntries.map {
             val feed = feeds.singleOrNull { feed -> feed.id == it.feedId }
-            it.toRow(feed, prefs.showPreviewImages, prefs.cropPreviewImages)
+            it.toRow(feed, conf.showPreviewImages, conf.cropPreviewImages)
         }
 
         state.value = State.ShowingEntries(
             entries = result,
-            includesUnread = prefs.showOpenedEntries || filter is EntriesFilter.OnlyBookmarked,
+            includesUnread = conf.showOpenedEntries || filter is EntriesFilter.OnlyBookmarked,
             showBackgroundProgress = false,
         )
     }
@@ -188,10 +188,10 @@ class EntriesViewModel(
         }
     }
 
-    suspend fun getPreferences() = preferencesRepository.get()
+    suspend fun getConf() = conf.get()
 
-    suspend fun savePreferences(action: Preferences.() -> Unit) {
-        preferencesRepository.save(action)
+    suspend fun saveConf(conf: Conf) {
+        this.conf.save(conf)
         reloadEntries()
     }
 

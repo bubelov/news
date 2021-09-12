@@ -3,20 +3,20 @@ package settings
 import androidx.lifecycle.ViewModel
 import auth.AuthRepository
 import db.Database
-import common.Preferences
-import common.PreferencesRepository
+import common.ConfRepository
+import db.Conf
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 
 class SettingsViewModel(
-    private val prefs: PreferencesRepository,
+    private val conf: ConfRepository,
     private val authRepository: AuthRepository,
     private val db: Database,
 ) : ViewModel() {
 
-    fun getPreferences() = runBlocking { prefs.get() }
+    suspend fun getConf() = conf.get()
 
-    fun savePreferences(action: Preferences.() -> Unit) = runBlocking { prefs.save(action) }
+    suspend fun saveConf(conf: Conf) = this.conf.save(conf)
 
     fun getAccountName(): String = runBlocking { authRepository.account().first().subtitle }
 
@@ -29,7 +29,7 @@ class SettingsViewModel(
                 entryImagesMetadataQueries.deleteAll()
                 feedQueries.deleteAll()
                 logQueries.deleteAll()
-                preferenceQueries.deleteAll()
+                confQueries.deleteAll()
             }
         }
     }

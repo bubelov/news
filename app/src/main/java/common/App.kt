@@ -32,7 +32,7 @@ class App : Application() {
         }
 
         runBlocking {
-            val authType = get<PreferencesRepository>().get().authType
+            val authType = get<ConfRepository>().get().authType
 
             if (authType.isNotBlank()) {
                 get<NewsApiSwitcher>().switch(authType)
@@ -55,7 +55,7 @@ class App : Application() {
 
     fun setupBackgroundSync(override: Boolean) {
         val workManager = WorkManager.getInstance(this)
-        val prefs = runBlocking { get<PreferencesRepository>().get() }
+        val prefs = runBlocking { get<ConfRepository>().get() }
 
         if (!prefs.syncInBackground) {
             workManager.cancelUniqueWork(SYNC_WORK_NAME)

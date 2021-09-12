@@ -3,14 +3,14 @@ package auth
 import androidx.lifecycle.ViewModel
 import api.NewsApiSwitcher
 import api.nextcloud.DirectNextcloudNewsApiBuilder
-import common.*
+import common.ConfRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 
 class DirectAuthViewModel(
     private val nextcloudApiSwitcher: NewsApiSwitcher,
-    private val preferencesRepository: PreferencesRepository,
+    private val conf: ConfRepository,
 ) : ViewModel() {
 
     suspend fun requestFeeds(
@@ -45,19 +45,19 @@ class DirectAuthViewModel(
         password: String,
         trustSelfSignedCerts: Boolean,
     ) {
-        preferencesRepository.save {
-            nextcloudServerUrl = serverUrl
-            nextcloudServerTrustSelfSignedCerts = trustSelfSignedCerts
-            nextcloudServerUsername = username
-            nextcloudServerPassword = password
-        }
+        val updatedConf = conf.get().copy(
+            nextcloudServerUrl = serverUrl,
+            nextcloudServerTrustSelfSignedCerts = trustSelfSignedCerts,
+            nextcloudServerUsername = username,
+            nextcloudServerPassword = password,
+        )
+
+        conf.save(updatedConf)
     }
 
     suspend fun setAuthType(newAuthType: String) {
-        preferencesRepository.save {
-            authType = newAuthType
-        }
-
+        val updatedConf = conf.get().copy(authType = newAuthType)
+        conf.save(updatedConf)
         nextcloudApiSwitcher.switch(newAuthType)
     }
 }

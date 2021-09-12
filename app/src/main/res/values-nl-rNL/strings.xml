@@ -102,6 +102,7 @@
     <string name="close">Sluit</string>
     <string name="miniflux_login">Miniflux Login</string>
     <string name="login_with_miniflux">Login with Miniflux</string>
+    <string name="miniflux">Miniflux</string>
     <plurals name="d_hours">
         <item quantity="one">%d uur</item>
         <item quantity="other">%d uren</item>

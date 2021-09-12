@@ -3,13 +3,13 @@ package auth
 import androidx.lifecycle.ViewModel
 import api.NewsApiSwitcher
 import api.miniflux.MinifluxApiBuilder
-import common.PreferencesRepository
+import common.ConfRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class MinifluxAuthViewModel(
     private val apiSwitcher: NewsApiSwitcher,
-    private val preferencesRepository: PreferencesRepository,
+    private val conf: ConfRepository,
 ) : ViewModel() {
 
     suspend fun requestFeeds(
@@ -34,19 +34,19 @@ class MinifluxAuthViewModel(
         password: String,
         trustSelfSignedCerts: Boolean,
     ) {
-        preferencesRepository.save {
-            minifluxServerUrl = serverUrl
-            minifluxServerTrustSelfSignedCerts = trustSelfSignedCerts
-            minifluxServerUsername = username
-            minifluxServerPassword = password
-        }
+        val updatedConf = conf.get().copy(
+            minifluxServerUrl = serverUrl,
+            minifluxServerTrustSelfSignedCerts = trustSelfSignedCerts,
+            minifluxServerUsername = username,
+            minifluxServerPassword = password,
+        )
+
+        conf.save(updatedConf)
     }
 
     suspend fun setAuthType(newAuthType: String) {
-        preferencesRepository.save {
-            authType = newAuthType
-        }
-
+        val updatedConf = conf.get().copy(authType = newAuthType)
+        conf.save(updatedConf)
         apiSwitcher.switch(newAuthType)
     }
 }

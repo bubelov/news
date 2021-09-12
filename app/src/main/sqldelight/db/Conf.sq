@@ -1,0 +1,21 @@
+insert:
+INSERT
+INTO Conf
+VALUES ?;
+
+insertDefault:
+INSERT
+INTO Conf
+(authType) VALUES ('');
+
+select:
+SELECT *
+FROM Conf;
+
+count:
+SELECT COUNT(*)
+FROM Conf;
+
+deleteAll:
+DELETE
+FROM Conf;

@@ -11,7 +11,7 @@ import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentMinifluxAuthBinding
 import common.AppFragment
-import common.PreferencesRepository
+import common.ConfRepository
 import common.app
 import common.showDialog
 import entries.EntriesFilter
@@ -87,7 +87,7 @@ class MinifluxAuthFragment : AppFragment() {
                         binding.trustSelfSignedCerts.isChecked,
                     )
 
-                    model.setAuthType(PreferencesRepository.AUTH_TYPE_MINIFLUX)
+                    model.setAuthType(ConfRepository.AUTH_TYPE_MINIFLUX)
 
                     app().setupBackgroundSync(override = true)
 

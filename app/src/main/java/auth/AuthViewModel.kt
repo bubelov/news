@@ -2,20 +2,22 @@ package auth
 
 import androidx.lifecycle.ViewModel
 import api.NewsApiSwitcher
-import common.Preferences
-import common.PreferencesRepository
+import common.ConfRepository
+import db.Conf
 
 class AuthViewModel(
     private val newsApiSwitcher: NewsApiSwitcher,
-    private val preferencesRepository: PreferencesRepository,
+    private val conf: ConfRepository,
 ) : ViewModel() {
 
-    suspend fun getAuthType() = preferencesRepository.get().authType
+    suspend fun getConf() = conf.get()
 
-    suspend fun setAuthType(newAuthType: String) {
-        preferencesRepository.save { authType = newAuthType }
-        newsApiSwitcher.switch(newAuthType)
+    suspend fun saveConf(conf: Conf) {
+        val oldConf = getConf()
+        this.conf.save(conf)
+
+        if (conf.authType != oldConf.authType) {
+            newsApiSwitcher.switch(conf.authType)
+        }
     }
-
-    suspend fun savePreferences(action: Preferences.() -> Unit) = preferencesRepository.save(action)
 }
