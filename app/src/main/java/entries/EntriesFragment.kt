@@ -502,7 +502,7 @@ class EntriesFragment : AppFragment(), Scrollable {
                         progress.hide()
                         message.hide()
                         retry.show(animate = true)
-                        showDialog(R.string.error, state.error.message ?: "")
+                        showErrorDialog(state.error)
                     }
 
                     EntriesViewModel.State.LoadingEntries -> {

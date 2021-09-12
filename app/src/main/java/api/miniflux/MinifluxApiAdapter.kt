@@ -67,7 +67,7 @@ class MinifluxApiAdapter(
             if (currentBatch.size < batchSize) {
                 break
             } else {
-                oldestEntryId = currentBatch.minOfOrNull { it.id ?: Long.MAX_VALUE }?.toLong() ?: 0L
+                oldestEntryId = currentBatch.minOfOrNull { it.id }?.toLong() ?: 0L
                 currentBatch.clear()
             }
         }
@@ -118,24 +118,19 @@ class MinifluxApiAdapter(
     }
 
     private fun EntryJson.toEntry(): Entry? {
-        if (id == null) return null
-        if (created_at == null) return null
-        if (published_at == null) return null
-        if (changed_at == null) return null
-        if (status == null) return null
-        if (starred == null) return null
+        val firstEnclosure = enclosures?.firstOrNull()
 
         return Entry(
             id = id.toString(),
-            feedId = feed_id?.toString() ?: "",
-            title = title ?: "Untitled",
-            link = url?.replace("http://", "https://") ?: "",
+            feedId = feed_id.toString(),
+            title = title,
+            link = url.replace("http://", "https://"),
             published = published_at,
             updated = changed_at,
-            authorName = author ?: "",
-            content = content ?: "No content",
-            enclosureLink = "",
-            enclosureLinkType = "",
+            authorName = author,
+            content = content,
+            enclosureLink = firstEnclosure?.url ?: "",
+            enclosureLinkType = firstEnclosure?.mime_type ?: "",
 
             opened = status == "read",
             openedSynced = true,
