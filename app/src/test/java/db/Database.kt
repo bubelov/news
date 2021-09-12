@@ -1,6 +1,5 @@
 package db
 
-import co.appreactor.news.Database
 import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
 
 fun database(): Database {

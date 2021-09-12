@@ -61,8 +61,12 @@ class MinifluxApiAdapter(
         }
     }
 
-    override suspend fun getNewAndUpdatedEntries(since: Instant): List<Entry> {
-        return api.getEntries(since.millis / 1000).entries.mapNotNull { it.toEntry() }
+    override suspend fun getNewAndUpdatedEntries(
+        maxEntryId: String?,
+        maxEntryUpdated: Instant?,
+        lastSync: Instant?,
+    ): List<Entry> {
+        return api.getEntriesAfterEntry(maxEntryId?.toLong() ?: 0).entries.mapNotNull { it.toEntry() }
     }
 
     override suspend fun markEntriesAsOpened(entriesIds: List<String>, opened: Boolean) {

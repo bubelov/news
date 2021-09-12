@@ -31,8 +31,12 @@ class NewsApiWrapper : NewsApi {
         return api.getEntries(includeReadEntries)
     }
 
-    override suspend fun getNewAndUpdatedEntries(since: Instant): List<Entry> {
-        return api.getNewAndUpdatedEntries(since)
+    override suspend fun getNewAndUpdatedEntries(
+        maxEntryId: String?,
+        maxEntryUpdated: Instant?,
+        lastSync: Instant?,
+    ): List<Entry> {
+        return api.getNewAndUpdatedEntries(maxEntryId, maxEntryUpdated, lastSync)
     }
 
     override suspend fun markEntriesAsOpened(entriesIds: List<String>, opened: Boolean) {

@@ -92,7 +92,9 @@ class StandaloneNewsApi(
 
     // TODO return updated entries
     override suspend fun getNewAndUpdatedEntries(
-        since: Instant,
+        maxEntryId: String?,
+        maxEntryUpdated: Instant?,
+        lastSync: Instant?,
     ): List<Entry> = withContext(Dispatchers.IO) {
         Timber.d("Fetching new and updated entries")
         val startTimestamp = System.currentTimeMillis()

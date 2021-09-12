@@ -101,8 +101,14 @@ class NextcloudNewsApiAdapter(
         }
     }
 
-    override suspend fun getNewAndUpdatedEntries(since: Instant): List<Entry> {
-        val response = api.getNewAndUpdatedItems(since.millis / 1000 + 1).execute()
+    override suspend fun getNewAndUpdatedEntries(
+        maxEntryId: String?,
+        maxEntryUpdated: Instant?,
+        lastSync: Instant?,
+    ): List<Entry> {
+        val lastModified = maxEntryUpdated ?: lastSync!!
+
+        val response = api.getNewAndUpdatedItems(lastModified.millis / 1000 + 1).execute()
 
         if (!response.isSuccessful) {
             throw response.toException()

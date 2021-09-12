@@ -85,6 +85,10 @@ FROM Entry
 WHERE feedId = :feedId
 AND opened = 0;
 
+selectMaxId:
+SELECT MAX(id)
+FROM Entry;
+
 selectMaxUpdaded:
 SELECT MAX(updated)
 FROM Entry;

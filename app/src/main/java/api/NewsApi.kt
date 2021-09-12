@@ -19,7 +19,11 @@ interface NewsApi {
 
     suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Entry>>
 
-    suspend fun getNewAndUpdatedEntries(since: Instant): List<Entry>
+    suspend fun getNewAndUpdatedEntries(
+        maxEntryId: String?,
+        maxEntryUpdated: Instant?,
+        lastSync: Instant?,
+    ): List<Entry>
 
     suspend fun markEntriesAsOpened(entriesIds: List<String>, opened: Boolean)
 

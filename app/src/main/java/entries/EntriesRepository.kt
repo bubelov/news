@@ -92,6 +92,10 @@ class EntriesRepository(
         db.selectUnreadCount(feedId).asFlow().mapToOne()
     }
 
+    private suspend fun getMaxId() = withContext(Dispatchers.IO) {
+        db.selectMaxId().executeAsOneOrNull()?.MAX
+    }
+
     private suspend fun getMaxUpdated() = withContext(Dispatchers.IO) {
         db.selectMaxUpdaded().executeAsOneOrNull()?.MAX
     }
@@ -208,14 +212,25 @@ class EntriesRepository(
         lastEntriesSyncDateTime: String,
         feeds: List<Feed>,
     ): Int = withContext(Dispatchers.IO) {
-        val threshold = getMaxUpdated() ?: lastEntriesSyncDateTime
-
-        if (threshold.isBlank()) {
-            throw Exception("Can not find any reference dates")
+        val lastSyncInstant = if (lastEntriesSyncDateTime.isNotBlank()) {
+            Instant.parse(lastEntriesSyncDateTime)
+        } else {
+            null
         }
 
-        val since = Instant.parse(threshold)
-        val entries = api.getNewAndUpdatedEntries(since)
+        val maxUpdated = getMaxUpdated()
+
+        val maxUpdatedInstant = if (maxUpdated != null) {
+            Instant.parse(maxUpdated)
+        } else {
+            null
+        }
+
+        val entries = api.getNewAndUpdatedEntries(
+            lastSync = lastSyncInstant,
+            maxEntryId = getMaxId(),
+            maxEntryUpdated = maxUpdatedInstant,
+        )
 
         db.transaction {
             entries.forEach { newEntry ->

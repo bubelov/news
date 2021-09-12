@@ -29,9 +29,9 @@ interface MinifluxApi {
     @DELETE("feeds/{id}")
     suspend fun deleteFeed(@Path("id") id: Long): Response<Unit>
 
-    @GET("entries?limit=100000&direction=asc")
-    suspend fun getEntries(
-        @Query("after") after: Long = 0,
+    @GET("entries")
+    suspend fun getEntriesAfterEntry(
+        @Query("after_entry_id") afterEntryId: Long = 0,
     ): EntriesPayload
 
     @GET("entries?order=id&direction=desc")
