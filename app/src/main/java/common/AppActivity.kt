@@ -124,7 +124,7 @@ class AppActivity : AppCompatActivity() {
         super.onStart()
         binding.bottomNavigation.setupWithNavController(navController)
 
-        binding.bottomNavigation.setOnNavigationItemReselectedListener {
+        binding.bottomNavigation.setOnItemReselectedListener {
             supportFragmentManager.fragments.forEach { fragment ->
                 if (fragment is NavHostFragment) {
                     fragment.childFragmentManager.fragments.forEach { childFragment ->
@@ -136,7 +136,7 @@ class AppActivity : AppCompatActivity() {
             }
         }
 
-        binding.bottomNavigation.setOnNavigationItemSelectedListener {
+        binding.bottomNavigation.setOnItemSelectedListener {
             val navigationView = binding.navigationView
 
             when (it.itemId) {

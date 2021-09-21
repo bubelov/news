@@ -85,8 +85,9 @@ gradle.projectsEvaluated {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib"
-    implementation "org.jetbrains.kotlin:kotlin-reflect"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$versions_kotlin"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$versions_kotlin"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$versions_coroutines"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$versions_coroutines"
 
     implementation "co.appreactor:feedk:$versions_feedk"

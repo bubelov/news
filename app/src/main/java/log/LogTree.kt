@@ -1,8 +1,9 @@
 package log
 
 import db.Log
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.joda.time.LocalDateTime
 import timber.log.Timber
@@ -12,16 +13,18 @@ import java.util.UUID
 
 class LogTree(
     private val log: LogRepository,
+    private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO + Job()),
 ) : Timber.Tree() {
 
-    @DelicateCoroutinesApi
     override fun log(
         priority: Int,
         tag: String?,
         message: String,
         t: Throwable?
     ) {
-        GlobalScope.launch { logAsync(tag, message, t) }
+        scope.launch {
+            logAsync(tag, message, t)
+        }
     }
 
     private suspend fun logAsync(
