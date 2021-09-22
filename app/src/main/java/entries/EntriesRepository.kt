@@ -13,8 +13,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
-import org.joda.time.Instant
 import timber.log.Timber
+import java.time.OffsetDateTime
 
 class EntriesRepository(
     private val api: NewsApi,
@@ -213,7 +213,7 @@ class EntriesRepository(
         feeds: List<Feed>,
     ): Int = withContext(Dispatchers.IO) {
         val lastSyncInstant = if (lastEntriesSyncDateTime.isNotBlank()) {
-            Instant.parse(lastEntriesSyncDateTime)
+            OffsetDateTime.parse(lastEntriesSyncDateTime)
         } else {
             null
         }
@@ -221,7 +221,7 @@ class EntriesRepository(
         val maxUpdated = getMaxUpdated()
 
         val maxUpdatedInstant = if (maxUpdated != null) {
-            Instant.parse(maxUpdated)
+            OffsetDateTime.parse(maxUpdated)
         } else {
             null
         }

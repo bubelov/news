@@ -1,8 +1,8 @@
 package common
 
-import org.joda.time.Instant
 import java.text.DateFormat
 import java.text.SimpleDateFormat
+import java.time.Instant
 import java.util.Date
 import java.util.Locale
 
@@ -11,7 +11,7 @@ private val SHORT = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat
 
 fun formatDateTime(dateTime: String): String {
     val instant = Instant.parse(dateTime)
-    return SHORT.format(Date(instant.millis))
+    return SHORT.format(Date(instant.toEpochMilli()))
 }
 
 fun Date.toIsoString(): String = ISO.format(this)

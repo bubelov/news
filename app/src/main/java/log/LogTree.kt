@@ -4,10 +4,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import org.joda.time.LocalDateTime
 import timber.log.Timber
 import java.io.PrintWriter
 import java.io.StringWriter
+import java.time.OffsetDateTime
 
 class LogTree(
     private val log: LogRepository,
@@ -31,7 +31,7 @@ class LogTree(
             }
 
             log.insert(
-                date = LocalDateTime.now().toString(),
+                date = OffsetDateTime.now().toString(),
                 level = priority.toLong(),
                 tag = tag ?: "",
                 message = message.lines().first(),

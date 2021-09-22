@@ -10,13 +10,16 @@ import entries.EntriesRepository
 import entries.EntriesSupportingTextRepository
 import feeds.FeedsRepository
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
-import org.joda.time.Instant
 import sync.NewsApiSync
 import sync.SyncResult
 import timber.log.Timber
 import java.text.DateFormat
+import java.time.Instant
 import java.util.Date
 
 class SearchViewModel(
@@ -95,7 +98,7 @@ class SearchViewModel(
             subtitle = lazy {
                 val instant = Instant.parse(published)
                 val format = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
-                (feed?.title ?: "Unknown feed") + " · " + format.format(Date(instant.millis))
+                (feed?.title ?: "Unknown feed") + " · " + format.format(Date(instant.toEpochMilli()))
             },
             podcast = false,
             podcastDownloadPercent = flowOf(),

@@ -4,8 +4,10 @@ import db.Entry
 import db.EntryWithoutSummary
 import db.Feed
 import kotlinx.coroutines.flow.Flow
-import org.joda.time.Instant
 import java.net.URL
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZonedDateTime
 
 interface NewsApi {
 
@@ -21,8 +23,8 @@ interface NewsApi {
 
     suspend fun getNewAndUpdatedEntries(
         maxEntryId: String?,
-        maxEntryUpdated: Instant?,
-        lastSync: Instant?,
+        maxEntryUpdated: OffsetDateTime?,
+        lastSync: OffsetDateTime?,
     ): List<Entry>
 
     suspend fun markEntriesAsOpened(entriesIds: List<String>, opened: Boolean)

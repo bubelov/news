@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import org.joda.time.Instant
+import java.time.Instant
 
 class NewsApiSync(
     private val feedsRepository: FeedsRepository,

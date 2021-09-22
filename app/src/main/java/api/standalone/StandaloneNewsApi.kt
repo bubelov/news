@@ -22,13 +22,13 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.joda.time.Instant
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import timber.log.Timber
 import java.net.URI
 import java.net.URL
 import java.security.MessageDigest
+import java.time.OffsetDateTime
 import java.util.Date
 
 typealias ParsedFeed = co.appreactor.feedk.Feed
@@ -93,8 +93,8 @@ class StandaloneNewsApi(
     // TODO return updated entries
     override suspend fun getNewAndUpdatedEntries(
         maxEntryId: String?,
-        maxEntryUpdated: Instant?,
-        lastSync: Instant?,
+        maxEntryUpdated: OffsetDateTime?,
+        lastSync: OffsetDateTime?,
     ): List<Entry> = withContext(Dispatchers.IO) {
         Timber.d("Fetching new and updated entries")
         val startTimestamp = System.currentTimeMillis()

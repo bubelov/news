@@ -6,13 +6,14 @@ import db.EntryWithoutSummary
 import db.Feed
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import org.joda.time.Instant
 import retrofit2.Response
 import timber.log.Timber
 import java.net.URL
+import java.time.Instant
+import java.time.OffsetDateTime
 
 class NextcloudNewsApiAdapter(
-    private val api: NextcloudNewsApi
+    private val api: NextcloudNewsApi,
 ) : NewsApi {
 
     override suspend fun addFeed(url: URL): Feed {
@@ -103,12 +104,12 @@ class NextcloudNewsApiAdapter(
 
     override suspend fun getNewAndUpdatedEntries(
         maxEntryId: String?,
-        maxEntryUpdated: Instant?,
-        lastSync: Instant?,
+        maxEntryUpdated: OffsetDateTime?,
+        lastSync: OffsetDateTime?,
     ): List<Entry> {
         val lastModified = maxEntryUpdated ?: lastSync!!
 
-        val response = api.getNewAndUpdatedItems(lastModified.millis / 1000 + 1).execute()
+        val response = api.getNewAndUpdatedItems(lastModified.toEpochSecond() + 1).execute()
 
         if (!response.isSuccessful) {
             throw response.toException()

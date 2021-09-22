@@ -6,9 +6,10 @@ import db.EntryWithoutSummary
 import db.Feed
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import org.joda.time.Instant
 import timber.log.Timber
 import java.net.URL
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
 
 class MinifluxApiAdapter(
     private val api: MinifluxApi,
@@ -75,8 +76,8 @@ class MinifluxApiAdapter(
 
     override suspend fun getNewAndUpdatedEntries(
         maxEntryId: String?,
-        maxEntryUpdated: Instant?,
-        lastSync: Instant?,
+        maxEntryUpdated: OffsetDateTime?,
+        lastSync: OffsetDateTime?,
     ): List<Entry> {
         return api.getEntriesAfterEntry(
             afterEntryId = maxEntryId?.toLong() ?: 0,

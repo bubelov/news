@@ -4,8 +4,8 @@ import android.annotation.SuppressLint
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.databinding.ListItemLogBinding
 import db.Log
-import org.joda.time.Instant
 import java.text.DateFormat
+import java.time.Instant
 import java.util.Date
 
 class LogViewHolder(
@@ -19,7 +19,7 @@ class LogViewHolder(
             primaryText.text = item.message
             val instant = Instant.parse(item.date)
             val format = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
-            val date = format.format(Date(instant.millis))
+            val date = format.format(Date(instant.toEpochMilli()))
 
             secondaryText.text = if (item.tag.isNotBlank()) {
                 "$date | ${item.tag}"
