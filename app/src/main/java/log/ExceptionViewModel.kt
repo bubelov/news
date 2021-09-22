@@ -6,5 +6,5 @@ class ExceptionViewModel(
     private val repository: LogRepository,
 ) : ViewModel() {
 
-    suspend fun selectById(id: String) = repository.selectById(id)
+    suspend fun selectById(id: Long) = repository.selectById(id)
 }

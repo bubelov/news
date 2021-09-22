@@ -1,6 +1,5 @@
 package log
 
-import db.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -9,7 +8,6 @@ import org.joda.time.LocalDateTime
 import timber.log.Timber
 import java.io.PrintWriter
 import java.io.StringWriter
-import java.util.UUID
 
 class LogTree(
     private val log: LogRepository,
@@ -23,32 +21,22 @@ class LogTree(
         t: Throwable?
     ) {
         scope.launch {
-            logAsync(tag, message, t)
-        }
-    }
+            val stackTrace = if (t == null) {
+                ""
+            } else {
+                val sw = StringWriter()
+                val pw = PrintWriter(sw)
+                t.printStackTrace(pw)
+                sw.toString()
+            }
 
-    private suspend fun logAsync(
-        tag: String?,
-        message: String,
-        t: Throwable?
-    ) {
-        val stackTrace = if (t == null) {
-            null
-        } else {
-            val sw = StringWriter()
-            val pw = PrintWriter(sw)
-            t.printStackTrace(pw)
-            sw.toString()
-        }
-
-        log.insert(
-            Log(
-                id = UUID.randomUUID().toString(),
+            log.insert(
                 date = LocalDateTime.now().toString(),
-                tag = tag ?: "untagged",
+                level = priority.toLong(),
+                tag = tag ?: "",
                 message = message.lines().first(),
                 stackTrace = stackTrace,
             )
-        )
+        }
     }
 }

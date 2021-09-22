@@ -19,12 +19,18 @@ class LogViewHolder(
             primaryText.text = item.message
             val instant = Instant.parse(item.date)
             val format = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
-            secondaryText.text = "${format.format(Date(instant.millis))} | ${item.tag}"
+            val date = format.format(Date(instant.millis))
 
-            if (item.stackTrace.isNullOrBlank()) {
-                root.setOnClickListener(null)
+            secondaryText.text = if (item.tag.isNotBlank()) {
+                "$date | ${item.tag}"
             } else {
+                date
+            }
+
+            if (item.stackTrace.isNotBlank()) {
                 root.setOnClickListener { callback.onClick(item) }
+            } else {
+                root.setOnClickListener(null)
             }
         }
     }

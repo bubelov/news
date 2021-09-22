@@ -1,7 +1,7 @@
 package log
 
+import db.Log
 import db.LogQueries
-import db.log
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
@@ -19,8 +19,25 @@ class LogRepositoryTests {
     @Test
     fun insert(): Unit = runBlocking {
         val item = log()
-        repository.insert(item)
-        verify { db.insert(item) }
+
+        repository.insert(
+            date = item.date,
+            level = item.level,
+            tag = item.tag,
+            message = item.message,
+            stackTrace = item.stackTrace,
+        )
+
+        verify {
+            db.insert(
+                date = item.date,
+                level = item.level,
+                tag = item.tag,
+                message = item.message,
+                stackTrace = item.stackTrace,
+            )
+        }
+
         confirmVerified(db)
     }
 
@@ -44,4 +61,13 @@ class LogRepositoryTests {
         verify { db.deleteAll() }
         confirmVerified(db)
     }
+
+    private fun log() = Log(
+        id = 0,
+        date = "",
+        level = 0,
+        tag = "",
+        message = "",
+        stackTrace = "",
+    )
 }

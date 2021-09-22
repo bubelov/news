@@ -1,6 +1,5 @@
 package log
 
-import db.Log
 import db.LogQueries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -9,15 +8,27 @@ class LogRepository(
     private val db: LogQueries,
 ) {
 
-    suspend fun insert(logEntry: Log) = withContext(Dispatchers.IO) {
-        db.insert(logEntry)
+    suspend fun insert(
+        date: String,
+        level: Long,
+        tag: String,
+        message: String,
+        stackTrace: String,
+    ) = withContext(Dispatchers.IO) {
+        db.insert(
+            date = date,
+            level = level,
+            tag = tag,
+            message = message,
+            stackTrace = stackTrace,
+        )
     }
 
     suspend fun selectAll() = withContext(Dispatchers.IO) {
         db.selectAll().executeAsList()
     }
 
-    suspend fun selectById(id: String) = withContext(Dispatchers.IO) {
+    suspend fun selectById(id: Long) = withContext(Dispatchers.IO) {
         db.selectById(id).executeAsOneOrNull()
     }
 

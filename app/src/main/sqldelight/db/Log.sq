@@ -1,7 +1,7 @@
 insert:
 INSERT
-INTO Log
-VALUES ?;
+INTO Log(date, level, tag, message, stackTrace)
+VALUES (?, ?, ?, ?, ?);
 
 selectAll:
 SELECT *
@@ -12,6 +12,9 @@ selectById:
 SELECT *
 FROM Log
 WHERE id = ?;
+
+selectLastInsertRowId:
+SELECT last_insert_rowid();
 
 deleteAll:
 DELETE

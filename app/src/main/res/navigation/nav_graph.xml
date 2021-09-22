@@ -161,7 +161,7 @@
         tools:layout="@layout/fragment_exception">
         <argument
             android:name="logId"
-            app:argType="string" />
+            app:argType="long" />
     </fragment>
 
     <fragment

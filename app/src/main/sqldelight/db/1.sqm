@@ -70,12 +70,15 @@ CREATE TABLE Feed (
 );
 
 CREATE TABLE Log (
-  id TEXT PRIMARY KEY,
+  id INTEGER PRIMARY KEY,
   date TEXT NOT NULL,
+  level INTEGER NOT NULL,
   tag TEXT NOT NULL,
   message TEXT NOT NULL,
-  stackTrace TEXT
+  stackTrace TEXT NOT NULL
 );
+
+CREATE INDEX idx_log_date ON Log(date);
 
 CREATE TABLE Conf (
   authType TEXT NOT NULL DEFAULT "",

@@ -13,20 +13,15 @@ import com.google.gson.GsonBuilder
 import com.nextcloud.android.sso.api.NextcloudAPI
 import com.nextcloud.android.sso.helper.SingleAccountHelper
 import common.ConfRepository
-import db.Log
 import kotlinx.coroutines.runBlocking
-import log.LogRepository
-import org.joda.time.DateTime
 import retrofit2.NextcloudRetrofitApiBuilder
 import timber.log.Timber
-import java.util.UUID
 
 class NewsApiSwitcher(
     private val wrapper: NewsApiWrapper,
     private val feedQueries: FeedQueries,
     private val entryQueries: EntryQueries,
     private val prefs: ConfRepository,
-    private val log: LogRepository,
     private val context: Context,
 ) {
 
@@ -46,12 +41,11 @@ class NewsApiSwitcher(
         val callback: NextcloudAPI.ApiConnectedListener =
             object : NextcloudAPI.ApiConnectedListener {
                 override fun onConnected() {
-                    log("Connected to Nextcloud app")
+                    Timber.d("Connected to Nextcloud app")
                 }
 
                 override fun onError(e: Exception) {
-                    log("Failed to connect to Nextcloud app")
-                    Timber.e(e)
+                    Timber.e(e, "Failed to connect to Nextcloud app")
                 }
             }
 
@@ -98,17 +92,5 @@ class NewsApiSwitcher(
 
     private fun switchToStandaloneApi() {
         wrapper.api = StandaloneNewsApi(feedQueries, entryQueries)
-    }
-
-    private fun log(message: String): Unit = runBlocking {
-        log.insert(
-            Log(
-                id = UUID.randomUUID().toString(),
-                date = DateTime.now().toString(),
-                tag = NewsApiSwitcher::class.java.simpleName,
-                message = message,
-                stackTrace = "",
-            )
-        )
     }
 }
