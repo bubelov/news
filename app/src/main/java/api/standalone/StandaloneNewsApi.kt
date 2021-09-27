@@ -7,7 +7,6 @@ import co.appreactor.feedk.AtomFeed
 import co.appreactor.feedk.RssFeed
 import co.appreactor.feedk.RssItem
 import co.appreactor.feedk.feed
-import common.toIsoString
 import common.trustSelfSignedCerts
 import db.Entry
 import db.EntryQueries
@@ -28,8 +27,10 @@ import timber.log.Timber
 import java.net.URI
 import java.net.URL
 import java.security.MessageDigest
+import java.text.SimpleDateFormat
 import java.time.OffsetDateTime
 import java.util.Date
+import java.util.Locale
 
 typealias ParsedFeed = co.appreactor.feedk.Feed
 
@@ -218,5 +219,11 @@ class StandaloneNewsApi(
         val digest = MessageDigest.getInstance("SHA-256")
         val hash = digest.digest(string.toByteArray())
         return Base64.encodeToString(hash, Base64.DEFAULT)
+    }
+
+    private fun Date.toIsoString(): String = ISO.format(this)
+
+    companion object {
+        private val ISO = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.US)
     }
 }

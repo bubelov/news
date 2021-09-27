@@ -10,7 +10,6 @@ import feeds.FeedsRepository
 import db.Feed
 import common.ConfRepository.Companion.SORT_ORDER_ASCENDING
 import common.ConfRepository.Companion.SORT_ORDER_DESCENDING
-import common.formatDateTime
 import db.Conf
 import entriesimages.EntriesImagesRepository
 import kotlinx.coroutines.flow.Flow
@@ -306,7 +305,7 @@ class EntriesViewModel(
             id = id,
             title = title,
             subtitle = lazy {
-                "${feed?.title ?: "Unknown feed"} · ${formatDateTime(published)}"
+                "${feed?.title ?: "Unknown feed"} · $published"
             },
             podcast = enclosureLinkType.startsWith("audio"),
             podcastDownloadPercent = flow {

@@ -1,12 +1,13 @@
 package entry
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.text.SpannableStringBuilder
 import android.text.method.LinkMovementMethod
-import android.text.style.*
+import android.text.style.BulletSpan
+import android.text.style.QuoteSpan
+import android.text.style.URLSpan
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -99,7 +100,7 @@ class EntryFragment : AppFragment() {
 
                     updateBookmarkedButton(state.entry.bookmarked)
                     title.text = state.entry.title
-                    date.text = formatDateTime(state.entry.published)
+                    date.text = state.entry.published
                     state.parsedContent.applyStyle(summaryView)
                     summaryView.text = state.parsedContent
                     summaryView.movementMethod = LinkMovementMethod.getInstance()

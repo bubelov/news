@@ -96,9 +96,7 @@ class SearchViewModel(
             id = id,
             title = title,
             subtitle = lazy {
-                val instant = Instant.parse(published)
-                val format = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
-                (feed?.title ?: "Unknown feed") + " · " + format.format(Date(instant.toEpochMilli()))
+                (feed?.title ?: "Unknown feed") + " · " + published
             },
             podcast = false,
             podcastDownloadPercent = flowOf(),
