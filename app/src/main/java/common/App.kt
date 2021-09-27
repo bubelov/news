@@ -10,15 +10,17 @@ import api.NewsApiSwitcher
 import co.appreactor.news.BuildConfig
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
-import log.LogTree
+import log.PersistentLogTree
 import injections.appModule
 import kotlinx.coroutines.runBlocking
+import log.LogRepository
 import org.koin.android.ext.android.get
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import sync.SyncWorker
 import timber.log.Timber
 import java.io.File
+import java.time.Duration
 import java.util.concurrent.TimeUnit
 
 class App : Application() {
@@ -31,6 +33,12 @@ class App : Application() {
             modules(appModule)
         }
 
+        Timber.plant(PersistentLogTree(get()))
+
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        }
+
         runBlocking {
             val authType = get<ConfRepository>().get().authType
 
@@ -38,12 +46,8 @@ class App : Application() {
                 get<NewsApiSwitcher>().switch(authType)
                 setupBackgroundSync(override = false)
             }
-        }
 
-        Timber.plant(LogTree(get()))
-
-        if (BuildConfig.DEBUG) {
-            Timber.plant(Timber.DebugTree())
+            get<LogRepository>().deleteOlderThan(Duration.ofDays(1))
         }
 
         val picasso = Picasso.Builder(this)

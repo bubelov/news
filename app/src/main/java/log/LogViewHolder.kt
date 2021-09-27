@@ -1,30 +1,27 @@
 package log
 
-import android.annotation.SuppressLint
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.databinding.ListItemLogBinding
 import db.Log
-import java.text.DateFormat
-import java.time.Instant
-import java.util.Date
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 
 class LogViewHolder(
     private val binding: ListItemLogBinding,
     private val callback: LogCallback,
+    private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"),
 ) : RecyclerView.ViewHolder(binding.root) {
 
-    @SuppressLint("SetTextI18n")
     fun bind(item: Log) {
         binding.apply {
             primaryText.text = item.message
-            val instant = Instant.parse(item.date)
-            val format = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
-            val date = format.format(Date(instant.toEpochMilli()))
+            val date = OffsetDateTime.parse(item.date)
+            val dateString = dateFormatter.format(date)
 
             secondaryText.text = if (item.tag.isNotBlank()) {
-                "$date | ${item.tag}"
+                "$dateString | ${item.tag}"
             } else {
-                date
+                dateString
             }
 
             if (item.stackTrace.isNotBlank()) {

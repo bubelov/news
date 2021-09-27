@@ -16,6 +16,15 @@ WHERE id = ?;
 selectLastInsertRowId:
 SELECT last_insert_rowid();
 
+selectCount:
+SELECT COUNT(*)
+FROM Log;
+
 deleteAll:
 DELETE
 FROM Log;
+
+deleteWhereDateLessThan:
+DELETE
+FROM Log
+WHERE date < :date;

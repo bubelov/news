@@ -9,7 +9,7 @@ import java.io.PrintWriter
 import java.io.StringWriter
 import java.time.OffsetDateTime
 
-class LogTree(
+class PersistentLogTree(
     private val log: LogRepository,
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO + Job()),
 ) : Timber.Tree() {
