@@ -24,5 +24,15 @@ jobs:
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
-    - name: Build with Gradle
-      run: ./gradlew buildDebug
+      
+    - name: Run unit tests
+      run: ./gradlew testDebugUnitTest
+
+    - name: Assemble APK
+      run: ./gradlew assembleDebug
+
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v2.2.0
+      with:
+        name: Debug APK
+        path: app/build/outputs/apk/debug/news-*.apk
