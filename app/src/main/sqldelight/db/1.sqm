@@ -1,3 +1,5 @@
+import java.time.OffsetDateTime;
+
 CREATE TABLE EntryEnclosure (
   entryId TEXT PRIMARY KEY NOT NULL,
   downloadPercent INTEGER,
@@ -9,8 +11,8 @@ CREATE TABLE Entry (
   feedId TEXT NOT NULL,
   title TEXT NOT NULL,
   link TEXT NOT NULL,
-  published TEXT NOT NULL,
-  updated TEXT NOT NULL,
+  published TEXT AS OffsetDateTime NOT NULL,
+  updated TEXT AS OffsetDateTime NOT NULL,
   authorName TEXT NOT NULL,
   content TEXT NOT NULL,
   enclosureLink TEXT NOT NULL,

@@ -23,6 +23,8 @@ import db.Entry
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 class EntryFragment : AppFragment() {
 
@@ -100,7 +102,8 @@ class EntryFragment : AppFragment() {
 
                     updateBookmarkedButton(state.entry.bookmarked)
                     title.text = state.entry.title
-                    date.text = state.entry.published
+                    val format = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
+                    date.text = format.format(state.entry.published)
                     state.parsedContent.applyStyle(summaryView)
                     summaryView.text = state.parsedContent
                     summaryView.movementMethod = LinkMovementMethod.getInstance()

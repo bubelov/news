@@ -23,6 +23,7 @@ import entriesimages.EntriesImagesRepository
 import podcasts.PodcastsRepository
 import settings.SettingsViewModel
 import common.ConnectivityProbe
+import db.entryAdapter
 import entries.EntriesSharedViewModel
 import entries.EntriesSupportingTextRepository
 import feeds.FeedsViewModel
@@ -39,11 +40,12 @@ val appModule = module {
 
     single {
         Database(
-            AndroidSqliteDriver(
+            driver = AndroidSqliteDriver(
                 schema = Database.Schema,
                 context = get(),
                 name = App.DB_FILE_NAME,
-            )
+            ),
+            EntryAdapter = entryAdapter()
         )
     }
 

@@ -3,6 +3,7 @@ package db
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import java.time.OffsetDateTime
 import java.util.*
 
 class EntryQueriesTests {
@@ -25,7 +26,11 @@ class EntryQueriesTests {
     fun selectAll() {
         val items = listOf(entry(), entry())
         items.forEach { db.insertOrReplace(it) }
-        Assert.assertEquals(items.map { it.withoutSummary() }, db.selectAll().executeAsList())
+
+        Assert.assertEquals(
+            items.map { it.withoutSummary() }.reversed(),
+            db.selectAll().executeAsList()
+        )
     }
 
     @Test
@@ -69,8 +74,8 @@ class EntryQueriesTests {
         ).executeAsList()
 
         Assert.assertEquals(
-            unreadOrBookmarked.map { it.id },
-            result.map { it.id },
+            unreadOrBookmarked.map { it.withoutSummary() }.reversed(),
+            result,
         )
     }
 
@@ -126,8 +131,8 @@ fun entry() = Entry(
     feedId = "",
     title = "",
     link = "",
-    published = "",
-    updated = "",
+    published = OffsetDateTime.now(),
+    updated = OffsetDateTime.now(),
     authorName = "",
     content = "",
     enclosureLink = "",
@@ -144,8 +149,8 @@ fun entryWithoutSummary() = EntryWithoutSummary(
     feedId = "",
     title = "",
     link = "",
-    published = "",
-    updated = "",
+    published = OffsetDateTime.now(),
+    updated = OffsetDateTime.now(),
     authorName = "",
     enclosureLink = "",
     enclosureLinkType = "",

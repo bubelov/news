@@ -17,7 +17,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import sync.SyncResult
 import timber.log.Timber
-import java.util.*
 
 class EntryViewModel(
     private val app: Application,

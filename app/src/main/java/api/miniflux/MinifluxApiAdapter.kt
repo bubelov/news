@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import timber.log.Timber
 import java.net.URL
-import java.time.LocalDateTime
 import java.time.OffsetDateTime
 
 class MinifluxApiAdapter(
@@ -129,8 +128,8 @@ class MinifluxApiAdapter(
             feedId = feed_id.toString(),
             title = title,
             link = url.replace("http://", "https://"),
-            published = published_at,
-            updated = changed_at,
+            published = OffsetDateTime.parse(published_at),
+            updated = OffsetDateTime.parse(changed_at),
             authorName = author,
             content = content,
             enclosureLink = firstEnclosure?.url ?: "",

@@ -23,6 +23,8 @@ import podcasts.PodcastsRepository
 import sync.NewsApiSync
 import sync.SyncResult
 import timber.log.Timber
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 class EntriesViewModel(
     private val feedsRepository: FeedsRepository,
@@ -305,7 +307,7 @@ class EntriesViewModel(
             id = id,
             title = title,
             subtitle = lazy {
-                "${feed?.title ?: "Unknown feed"} · $published"
+                "${feed?.title ?: "Unknown feed"} · ${DATE_TIME_FORMAT.format(published)}"
             },
             podcast = enclosureLinkType.startsWith("audio"),
             podcastDownloadPercent = flow {
@@ -360,5 +362,12 @@ class EntriesViewModel(
             val includesUnread: Boolean,
             val showBackgroundProgress: Boolean,
         ) : State()
+    }
+
+    companion object {
+        private val DATE_TIME_FORMAT = DateTimeFormatter.ofLocalizedDateTime(
+            FormatStyle.MEDIUM,
+            FormatStyle.SHORT,
+        )
     }
 }
