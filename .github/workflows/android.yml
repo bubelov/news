@@ -1,12 +1,10 @@
 name: Android CI
 
-on: [workflow_dispatch]
-
-#on:
-#  push:
-#    branches: [ master ]
-#  pull_request:
-#    branches: [ master ]
+on:
+ push:
+   branches: [ master ]
+ pull_request:
+   branches: [ master ]
 
 jobs:
   build:
@@ -34,5 +32,5 @@ jobs:
     - name: Upload APK artifact
       uses: actions/upload-artifact@v2.2.0
       with:
-        name: Debug APK
+        name: news-debug
         path: app/build/outputs/apk/debug/news-*.apk
