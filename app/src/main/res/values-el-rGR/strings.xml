@@ -103,6 +103,7 @@
     <string name="miniflux_login">Miniflux Login</string>
     <string name="login_with_miniflux">Login with Miniflux</string>
     <string name="miniflux">Miniflux</string>
+    <string name="opml_file_is_invalid">OPML file is invalid</string>
     <plurals name="d_hours">
         <item quantity="one">%d hour</item>
         <item quantity="other">%d hours</item>

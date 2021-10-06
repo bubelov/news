@@ -51,8 +51,11 @@ fun importOpml(xml: String): List<Outline> {
                         "${Symbols.NEWS_NAMESPACE_PREFIX}:${Symbols.SHOW_PREVIEW_IMAGES}"
                     ) ?: "null"
 
+                    val text = getAttributeValue(null, Symbols.TEXT)
+                        ?: throw Exception("OPML outline doesn't have a mandatory text attribute")
+
                     elements += Outline(
-                        text = getAttributeValue(null, Symbols.TEXT),
+                        text = text,
                         type = getAttributeValue(null, Symbols.TYPE),
                         xmlUrl = getAttributeValue(null, Symbols.XML_URL),
                         openEntriesInBrowser = getAttributeValue(

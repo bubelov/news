@@ -1,7 +1,5 @@
 package feeds
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -218,7 +216,7 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
                             }
                         }
 
-                        is FeedsViewModel.State.AddingMany -> {
+                        is FeedsViewModel.State.ImportingOpml -> {
                             progress.show(animate = true)
                             message.show(animate = true)
 
@@ -231,40 +229,48 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
                             }
                         }
 
-                        is FeedsViewModel.State.AddedMany -> {
-                            if (!state.result.parsed) {
-                                showErrorDialog(state.result.errors.first()) {
-                                    model.reload()
-                                }
+                        is FeedsViewModel.State.ImportedOpml -> {
+                            when (state.result) {
+                                is FeedsViewModel.OpmlImportResult.Imported -> {
+                                    val message = buildString {
+                                        append(getString(R.string.added_d, state.result.feedsAdded))
+                                        append("\n")
+                                        append(getString(R.string.exists_d, state.result.feedsUpdated))
+                                        append("\n")
+                                        append(getString(R.string.failed_d, state.result.feedsFailed))
 
-                                return@collectLatest
-                            }
+                                        if (state.result.errors.isNotEmpty()) {
+                                            append("\n\n")
+                                        }
 
-                            val message = buildString {
-                                append(getString(R.string.added_d, state.result.added))
-                                append("\n")
-                                append(getString(R.string.exists_d, state.result.exists))
-                                append("\n")
-                                append(getString(R.string.failed_d, state.result.failed))
+                                        state.result.errors.forEach {
+                                            append(it)
 
-                                if (state.result.errors.isNotEmpty()) {
-                                    append("\n\n")
-                                }
+                                            if (state.result.errors.last() != it) {
+                                                append("\n\n")
+                                            }
+                                        }
+                                    }
 
-                                state.result.errors.forEach {
-                                    append(it)
-
-                                    if (state.result.errors.last() != it) {
-                                        append("\n\n")
+                                    showDialog(
+                                        title = getString(R.string.import_title),
+                                        message = message,
+                                    ) {
+                                        lifecycleScope.launchWhenResumed { model.reload() }
                                     }
                                 }
-                            }
 
-                            showDialog(
-                                title = getString(R.string.import_title),
-                                message = message,
-                            ) {
-                                lifecycleScope.launchWhenResumed { model.reload() }
+                                is FeedsViewModel.OpmlImportResult.FailedToParse -> {
+                                    val message = buildString {
+                                        append(getString(R.string.opml_file_is_invalid))
+                                        append("\n\n")
+                                        append(state.result.reason)
+                                    }
+
+                                    showErrorDialog(message) {
+                                        model.reload()
+                                    }
+                                }
                             }
                         }
 

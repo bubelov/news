@@ -35,20 +35,12 @@ class FeedsViewModel(
 
     suspend fun addMany(opmlDocument: String) = state.apply {
         val progress = MutableStateFlow(ImportProgress(0, -1))
-        value = State.AddingMany(progress)
+        value = State.ImportingOpml(progress)
 
         val feeds = runCatching {
             importOpml(opmlDocument)
         }.getOrElse {
-            value = State.AddedMany(
-                ImportResult(
-                    parsed = false,
-                    added = -1,
-                    exists = -1,
-                    failed = -1,
-                    errors = listOf("Can't parse OPML file: ${it.message}"),
-                )
-            )
+            value = State.ImportedOpml(OpmlImportResult.FailedToParse(it.message ?: ""))
             return@apply
         }
 
@@ -100,12 +92,11 @@ class FeedsViewModel(
             }
         }
 
-        value = State.AddedMany(
-            ImportResult(
-                parsed = true,
-                added = added.get(),
-                exists = exists.get(),
-                failed = failed.get(),
+        value = State.ImportedOpml(
+            OpmlImportResult.Imported(
+                feedsAdded = added.get(),
+                feedsUpdated = exists.get(),
+                feedsFailed = failed.get(),
                 errors = errors,
             )
         )
@@ -147,8 +138,8 @@ class FeedsViewModel(
         data class Loaded(val result: Result<List<FeedsAdapterItem>>) : State()
         object AddingOne : State()
         data class AddedOne(val result: Result<Any>) : State()
-        data class AddingMany(val progress: MutableStateFlow<ImportProgress>) : State()
-        data class AddedMany(val result: ImportResult) : State()
+        data class ImportingOpml(val progress: MutableStateFlow<ImportProgress>) : State()
+        data class ImportedOpml(val result: OpmlImportResult) : State()
         object Renaming : State()
         data class Renamed(val result: Result<Any>) : State()
         object Deleting : State()
@@ -160,11 +151,14 @@ class FeedsViewModel(
         val total: Int,
     )
 
-    data class ImportResult(
-        val parsed: Boolean,
-        val added: Int,
-        val exists: Int,
-        val failed: Int,
-        val errors: List<String>,
-    )
+    sealed class OpmlImportResult {
+        data class FailedToParse(val reason: String) : OpmlImportResult()
+
+        data class Imported(
+            val feedsAdded: Int,
+            val feedsUpdated: Int,
+            val feedsFailed: Int,
+            val errors: List<String>,
+        ) : OpmlImportResult()
+    }
 }
