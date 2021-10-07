@@ -104,6 +104,8 @@
     <string name="login_with_miniflux">Login with Miniflux</string>
     <string name="miniflux">Miniflux</string>
     <string name="opml_file_is_invalid">OPML file is invalid</string>
+    <string name="stack_trace">Stack trace</string>
+    <string name="stack_trace_icon">Stack trace icon</string>
     <plurals name="d_hours">
         <item quantity="one">%d hour</item>
         <item quantity="few">%d hours</item>

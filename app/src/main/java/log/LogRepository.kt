@@ -40,15 +40,23 @@ class LogRepository(
     }
 
     suspend fun deleteOlderThan(duration: Duration) = withContext(Dispatchers.IO) {
-        Timber.d("Deleting old log rows")
         val now = OffsetDateTime.now()
         val threshold = now.minus(duration)
-        Timber.d("Now: $now, duration: $duration, threshold: $threshold")
         val rowsBeforeDeletion = db.selectCount().executeAsOne()
-        Timber.d("Rows before deletion: $rowsBeforeDeletion")
+        Timber.d(
+            "Preparing to delete old log rows (now = %s, duration = %s, threshold = %s, rowsBeforeDeletion = %s",
+            now,
+            duration,
+            threshold,
+            rowsBeforeDeletion,
+        )
         db.deleteWhereDateLessThan(threshold.toString())
         val rowsAfterDeletion = db.selectCount().executeAsOne()
-        Timber.d("Rows after deletion: $rowsAfterDeletion")
-        Timber.d("Deleted approximately ${rowsBeforeDeletion - rowsAfterDeletion} rows")
+        val rowsDeleted = rowsBeforeDeletion - rowsAfterDeletion
+        Timber.d(
+            "Deleted old log rows (rowsAfterDeletion = %s, rowsDeleted = %s)",
+            rowsAfterDeletion,
+            rowsDeleted,
+        )
     }
 }

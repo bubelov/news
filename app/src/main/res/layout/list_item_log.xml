@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/root"
@@ -8,33 +8,41 @@
     android:layout_height="wrap_content"
     android:background="?selectableItemBackground"
     android:clickable="true"
-    android:focusable="true"
-    android:orientation="vertical"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp">
+    android:padding="8dp"
+    android:focusable="true">
 
     <TextView
         android:id="@+id/primaryText"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
         android:textAppearance="?attr/textAppearanceSubtitle1"
-        app:layout_constraintEnd_toStartOf="@id/actions"
+        app:layout_constraintEnd_toStartOf="@id/trace"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/secondaryText"
         tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat." />
 
     <TextView
         android:id="@+id/secondaryText"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
         android:textAppearance="?attr/textAppearanceCaption"
-        app:layout_constraintEnd_toStartOf="@id/actions"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/trace"
         app:layout_constraintTop_toBottomOf="@id/primaryText"
+        app:layout_constraintBottom_toBottomOf="parent"
         tools:text="2021-04-09T20:19:37 | sync" />
 
-</LinearLayout>
+    <ImageView
+        android:id="@+id/trace"
+        android:layout_width="24dp"
+        android:layout_margin="8dp"
+        android:contentDescription="@string/stack_trace_icon"
+        android:layout_height="24dp"
+        android:layout_gravity="center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:src="@drawable/ic_read_more_24" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

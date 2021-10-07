@@ -82,6 +82,7 @@ class AuthFragment : AppFragment(
                         authType = ConfRepository.AUTH_TYPE_STANDALONE,
                         syncOnStartup = false,
                         backgroundSyncIntervalMillis = TimeUnit.HOURS.toMillis(12),
+                        initialSyncCompleted = true,
                     )
                 )
 

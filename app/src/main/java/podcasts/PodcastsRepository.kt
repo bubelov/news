@@ -21,7 +21,6 @@ import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
-import java.util.*
 
 class PodcastsRepository(
     private val entryEnclosureQueries: EntryEnclosureQueries,
@@ -89,7 +88,7 @@ class PodcastsRepository(
         var cacheUri: Uri? = null
 
         runCatching {
-            val fileName = "${UUID.randomUUID()}.${getExtension(entry.enclosureLinkType)}"
+            val fileName = "${java.util.UUID.randomUUID()}.${getExtension(entry.enclosureLinkType)}"
             val outputStream: OutputStream
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -186,8 +185,6 @@ class PodcastsRepository(
     }
 
     suspend fun deleteIncompleteDownloads() = withContext(Dispatchers.IO) {
-        Timber.d("Deleting incomplete downloads")
-
         entryEnclosureQueries.selectAll().executeAsList().forEach { metadata ->
             if (metadata.cacheUri.isEmpty()) {
                 Timber.d("Cache URI is empty, deleting metadata")

@@ -2,21 +2,28 @@ package entriesimages
 
 import android.graphics.Bitmap
 import android.graphics.Color
-import db.*
 import entries.EntriesRepository
 import com.squareup.picasso.Picasso
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import common.ConfRepository
-import kotlinx.coroutines.*
+import db.EntryImage
+import db.EntryImageQueries
+import db.EntryImagesMetadata
+import db.EntryImagesMetadataQueries
+import db.EntryWithoutSummary
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.jsoup.Jsoup
 import timber.log.Timber
-import java.util.*
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
@@ -39,8 +46,6 @@ class EntriesImagesRepository(
         .build()
 
     suspend fun syncPreviews() = withContext(Dispatchers.IO) {
-        Timber.d("Sync daemon started")
-
         confRepository.getAsFlow().collectLatest { prefs ->
             if (!prefs.showPreviewImages) {
                 return@collectLatest

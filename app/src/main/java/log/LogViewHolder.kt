@@ -1,5 +1,6 @@
 package log
 
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.databinding.ListItemLogBinding
 import db.Log
@@ -25,8 +26,10 @@ class LogViewHolder(
             }
 
             if (item.stackTrace.isNotBlank()) {
+                trace.isVisible = true
                 root.setOnClickListener { callback.onClick(item) }
             } else {
+                trace.isVisible = false
                 root.setOnClickListener(null)
             }
         }

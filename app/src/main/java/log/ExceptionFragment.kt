@@ -41,7 +41,7 @@ class ExceptionFragment : AppFragment() {
             toolbar.apply {
                 setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
                 setNavigationOnClickListener { findNavController().popBackStack() }
-                title = log.message
+                title = getString(R.string.stack_trace)
                 inflateMenu(R.menu.menu_exception)
 
                 setOnMenuItemClickListener { menuItem ->

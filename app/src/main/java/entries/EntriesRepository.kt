@@ -226,15 +226,11 @@ class EntriesRepository(
             null
         }
 
-        Timber.d("Max id before sync: ${getMaxId()}")
-
         val entries = api.getNewAndUpdatedEntries(
             lastSync = lastSyncInstant,
             maxEntryId = getMaxId(),
             maxEntryUpdated = maxUpdatedInstant,
         )
-
-        Timber.d("Max id in api response: ${entries.maxOfOrNull { it.id }}")
 
         db.transaction {
             entries.forEach { newEntry ->
@@ -242,8 +238,6 @@ class EntriesRepository(
                 db.insertOrReplace(newEntry.postProcess(feed))
             }
         }
-
-        Timber.d("Max id after sync: ${getMaxId()}")
 
         return@withContext entries.size
     }
