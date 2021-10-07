@@ -17,7 +17,14 @@ import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentFeedsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
-import common.*
+import common.AppFragment
+import common.ListAdapterDecoration
+import common.hide
+import common.openLink
+import common.show
+import common.showDialog
+import common.showErrorDialog
+import common.showKeyboard
 import entries.EntriesFilter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -76,7 +83,6 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
 
                 val title = dialog.findViewById<TextInputEditText>(R.id.title)!!
                 title.append(feed.title)
-                title.requestFocus()
 
                 requireContext().showKeyboard()
             }
@@ -330,8 +336,6 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
                     .setNegativeButton(R.string.cancel, null)
                     .setOnDismissListener { hideKeyboard() }
                     .show()
-
-                alert.findViewById<View>(R.id.urlLayout)?.requestFocus()
 
                 alert.findViewById<EditText>(R.id.url)?.apply {
                     setOnEditorActionListener { _, actionId, _ ->

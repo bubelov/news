@@ -14,7 +14,9 @@ import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentFeedSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
-import common.*
+import common.AppFragment
+import common.showErrorDialog
+import common.showKeyboard
 import org.koin.android.viewmodel.ext.android.viewModel
 
 class FeedSettingsFragment : AppFragment() {
@@ -90,7 +92,6 @@ class FeedSettingsFragment : AppFragment() {
                 val blockedWords = dialog.findViewById<TextInputEditText>(R.id.blockedWords)!!
                 val formattedBlockedWords = model.formatBlockedWords(blockedWords.text.toString())
                 model.setBlockedWords(feed.id, formattedBlockedWords)
-                blockedWords.requestFocus()
 
                 requireContext().showKeyboard()
             }

@@ -1,11 +1,7 @@
 package search
 
-import android.content.Intent
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.text.Editable
-import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,8 +12,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentSearchBinding
 import com.google.android.material.internal.TextWatcherAdapter
-import common.*
-import entries.*
+import common.AppFragment
+import common.CardListAdapterDecoration
+import common.hideKeyboard
+import common.openLink
+import common.screenWidth
+import common.showKeyboard
+import entries.EntriesAdapter
+import entries.EntriesAdapterCallback
+import entries.EntriesAdapterItem
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -128,16 +131,7 @@ class SearchFragment : AppFragment() {
             )
         )
 
-        val displayMetrics = DisplayMetrics()
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            requireContext().display?.getRealMetrics(displayMetrics)
-        } else {
-            @Suppress("DEPRECATION")
-            requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
-        }
-
-        adapter.screenWidth = displayMetrics.widthPixels
+        adapter.screenWidth = screenWidth()
 
         lifecycleScope.launch {
             model.searchResults.collect { results ->

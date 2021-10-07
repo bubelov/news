@@ -20,7 +20,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="m">
 
-        <activity android:name="common.AppActivity">
+        <activity
+            android:name="common.AppActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -33,5 +35,5 @@
         <package android:name="com.nextcloud.client" />
         <package android:name="com.nextcloud.android.beta" />
     </queries>
-    
+
 </manifest>

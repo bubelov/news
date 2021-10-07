@@ -3,9 +3,7 @@ package entries
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
-import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,9 +16,19 @@ import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentEntriesBinding
 import com.google.android.material.snackbar.Snackbar
-import common.*
+import common.AppFragment
+import common.CardListAdapterDecoration
+import common.ConfRepository
+import common.Scrollable
+import common.hide
+import common.openLink
+import common.screenWidth
+import common.show
+import common.showDialog
+import common.showErrorDialog
 import db.Entry
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.android.viewmodel.ext.android.sharedViewModel
@@ -96,16 +104,7 @@ class EntriesFragment : AppFragment(), Scrollable {
                 }
             }
         ).apply {
-            val displayMetrics = DisplayMetrics()
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                requireContext().display?.getRealMetrics(displayMetrics)
-            } else {
-                @Suppress("DEPRECATION")
-                requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
-            }
-
-            screenWidth = displayMetrics.widthPixels
+            screenWidth = screenWidth()
 
             registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
                 override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
