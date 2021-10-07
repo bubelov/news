@@ -148,7 +148,7 @@ class StandaloneNewsApi(
         }
     }
 
-    override suspend fun markEntriesAsOpened(entriesIds: List<String>, opened: Boolean) {
+    override suspend fun markEntriesAsRead(entriesIds: List<String>, read: Boolean) {
 
     }
 
@@ -190,10 +190,10 @@ class StandaloneNewsApi(
         content = content,
         enclosureLink = enclosureLink,
         enclosureLinkType = enclosureLinkType,
-        opened = false,
-        openedSynced = true,
+        read = false,
+        readSynced = true,
         bookmarked = false,
-        bookmarkedSynced = false,
+        bookmarkedSynced = true,
         guidHash = "",
     )
 
@@ -208,10 +208,10 @@ class StandaloneNewsApi(
         content = description ?: "",
         enclosureLink = enclosure?.url.toString(),
         enclosureLinkType = enclosure?.type ?: "",
-        opened = false,
-        openedSynced = true,
+        read = false,
+        readSynced = true,
         bookmarked = false,
-        bookmarkedSynced = false,
+        bookmarkedSynced = true,
         guidHash = "",
     )
 

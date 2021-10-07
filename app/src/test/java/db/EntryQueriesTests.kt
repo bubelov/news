@@ -4,7 +4,7 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import java.time.OffsetDateTime
-import java.util.*
+import java.util.UUID
 
 class EntryQueriesTests {
 
@@ -16,14 +16,14 @@ class EntryQueriesTests {
     }
 
     @Test
-    fun insertOrReplace() {
+    fun `insert or replace`() {
         val item = entry()
         db.insertOrReplace(item)
         Assert.assertEquals(item, db.selectById(item.id).executeAsOne())
     }
 
     @Test
-    fun selectAll() {
+    fun `select all`() {
         val items = listOf(entry(), entry())
         items.forEach { db.insertOrReplace(it) }
 
@@ -34,60 +34,138 @@ class EntryQueriesTests {
     }
 
     @Test
-    fun selectByReadAndBookmarked() {
-        val all = listOf(
-            entry().copy(opened = true, bookmarked = true),
-            entry().copy(opened = true, bookmarked = false),
-            entry().copy(opened = false, bookmarked = false),
+    fun `select by id`() {
+        val items = listOf(
+            db.insertOrReplace(),
+            db.insertOrReplace(),
+            db.insertOrReplace(),
         )
 
-        val unreadAndNotBookmarked = all.filter { !it.opened && !it.bookmarked }
-
-        all.forEach { db.insertOrReplace(it) }
-
-        val result = db.selectByReadAndBookmarked(
-            read = false,
-            bookmarked = false,
-        ).executeAsList()
-
         Assert.assertEquals(
-            unreadAndNotBookmarked.map { it.id },
-            result.map { it.id },
+            items[1],
+            db.selectById(items[1].id).executeAsOneOrNull(),
         )
     }
 
     @Test
-    fun selectByReadOrBookmarked() {
-        val all = listOf(
-            entry().copy(opened = true, bookmarked = true),
-            entry().copy(opened = true, bookmarked = false),
-            entry().copy(opened = false, bookmarked = false),
-        )
+    fun `select by feed id`() {
+        val feed1 = UUID.randomUUID().toString()
+        val feed2 = UUID.randomUUID().toString()
 
-        val unreadOrBookmarked = all.filter { !it.opened || it.bookmarked }
-
-        all.forEach { db.insertOrReplace(it) }
-
-        val result = db.selectByReadOrBookmarked(
-            read = false,
-            bookmarked = true,
-        ).executeAsList()
+        db.insertOrReplace(entry().copy(feedId = feed1))
+        db.insertOrReplace(entry().copy(feedId = feed1))
+        db.insertOrReplace(entry().copy(feedId = feed2))
 
         Assert.assertEquals(
-            unreadOrBookmarked.map { it.withoutSummary() }.reversed(),
-            result,
+            1,
+            db.selectByFeedId(feed2).executeAsList().size,
         )
     }
 
     @Test
-    fun updateReadByFeedId() {
+    fun `select by read and bookmarked`() {
+        val all = listOf(
+            entry().copy(read = true, bookmarked = true),
+            entry().copy(read = true, bookmarked = false),
+            entry().copy(read = false, bookmarked = false),
+        )
+
+        all.forEach { db.insertOrReplace(it) }
+
+        Assert.assertEquals(
+            all.filter { !it.read && !it.bookmarked }.map { it.withoutSummary() },
+            db.selectByReadAndBookmarked(read = false, bookmarked = false).executeAsList(),
+        )
+    }
+
+    @Test
+    fun `select by read or bookmarked`() {
+        val all = listOf(
+            entry().copy(read = true, bookmarked = true),
+            entry().copy(read = true, bookmarked = false),
+            entry().copy(read = false, bookmarked = false),
+        )
+
+        all.forEach { db.insertOrReplace(it) }
+
+        Assert.assertEquals(
+            all.filter { !it.read || it.bookmarked }.map { it.withoutSummary() }.reversed(),
+            db.selectByReadOrBookmarked(read = false, bookmarked = true).executeAsList(),
+        )
+    }
+
+    @Test
+    fun `select by read`() {
+        val all = listOf(
+            entry().copy(read = true),
+            entry().copy(read = true),
+            entry().copy(read = false),
+        )
+
+        all.forEach { db.insertOrReplace(it) }
+
+        Assert.assertEquals(
+            all.filter { it.read }.map { it.withoutSummary() }.sortedByDescending { it.published },
+            db.selectByRead(true).executeAsList(),
+        )
+
+        Assert.assertEquals(
+            all.filter { !it.read }.map { it.withoutSummary() }.sortedByDescending { it.published },
+            db.selectByRead(false).executeAsList(),
+        )
+    }
+
+    @Test
+    fun `select by read synced`() {
+        val all = listOf(
+            entry().copy(readSynced = true),
+            entry().copy(readSynced = false),
+            entry().copy(readSynced = true),
+        )
+
+        all.forEach { db.insertOrReplace(it) }
+
+        Assert.assertEquals(
+            all.filter { it.readSynced }.map { it.withoutSummary() }.sortedByDescending { it.published },
+            db.selectByReadSynced(true).executeAsList(),
+        )
+
+        Assert.assertEquals(
+            all.filter { !it.readSynced }.map { it.withoutSummary() }.sortedByDescending { it.published },
+            db.selectByReadSynced(false).executeAsList(),
+        )
+    }
+
+    @Test
+    fun `select by bookmarked`() {
+        val all = listOf(
+            entry().copy(bookmarked = true),
+            entry().copy(bookmarked = false),
+            entry().copy(bookmarked = false),
+        )
+
+        all.forEach { db.insertOrReplace(it) }
+
+        Assert.assertEquals(
+            all.filter { it.bookmarked }.map { it.withoutSummary() }.sortedByDescending { it.published },
+            db.selectByBookmarked(true).executeAsList(),
+        )
+
+        Assert.assertEquals(
+            all.filter { !it.bookmarked }.map { it.withoutSummary() }.sortedByDescending { it.published },
+            db.selectByBookmarked(false).executeAsList(),
+        )
+    }
+
+    @Test
+    fun `update read by feed id`() {
         val feedId = UUID.randomUUID().toString()
 
         val all = listOf(
-            entry().copy(feedId = feedId, opened = true),
-            entry().copy(opened = true),
-            entry().copy(feedId = feedId, opened = false),
-            entry().copy(opened = false),
+            entry().copy(feedId = feedId, read = true),
+            entry().copy(read = true),
+            entry().copy(feedId = feedId, read = false),
+            entry().copy(read = false),
         )
 
         db.apply {
@@ -96,21 +174,21 @@ class EntryQueriesTests {
             updateReadByFeedId(read = true, feedId = feedId)
 
             selectAll().executeAsList().apply {
-                Assert.assertEquals(1, filterNot { it.openedSynced }.size)
-                Assert.assertEquals(2, filter { it.feedId == feedId && it.opened }.size)
+                Assert.assertEquals(1, filter { !it.readSynced }.size)
+                Assert.assertEquals(2, filter { it.feedId == feedId && it.read }.size)
             }
         }
     }
 
     @Test
-    fun updateReadByBookmarked() {
+    fun `update read by bookmarked`() {
         val bookmarked = true
 
         val all = listOf(
-            entry().copy(bookmarked = true, opened = true),
-            entry().copy(opened = true),
-            entry().copy(bookmarked = true, opened = false),
-            entry().copy(opened = false),
+            entry().copy(bookmarked = true, read = true),
+            entry().copy(read = true),
+            entry().copy(bookmarked = true, read = false),
+            entry().copy(read = false),
         )
 
         db.apply {
@@ -119,11 +197,17 @@ class EntryQueriesTests {
             updateReadByBookmarked(read = true, bookmarked = bookmarked)
 
             selectAll().executeAsList().apply {
-                Assert.assertEquals(1, filterNot { it.openedSynced }.size)
-                Assert.assertEquals(2, filter { it.bookmarked && it.opened }.size)
+                Assert.assertEquals(1, filterNot { it.readSynced }.size)
+                Assert.assertEquals(2, filter { it.bookmarked && it.read }.size)
             }
         }
     }
+}
+
+fun EntryQueries.insertOrReplace(): Entry {
+    val entry = entry()
+    insertOrReplace(entry)
+    return entry
 }
 
 fun entry() = Entry(
@@ -137,8 +221,8 @@ fun entry() = Entry(
     content = "",
     enclosureLink = "",
     enclosureLinkType = "",
-    opened = false,
-    openedSynced = true,
+    read = false,
+    readSynced = true,
     bookmarked = false,
     bookmarkedSynced = true,
     guidHash = "",
@@ -154,8 +238,8 @@ fun entryWithoutSummary() = EntryWithoutSummary(
     authorName = "",
     enclosureLink = "",
     enclosureLinkType = "",
-    opened = false,
-    openedSynced = true,
+    read = false,
+    readSynced = true,
     bookmarked = false,
     bookmarkedSynced = true,
     guidHash = "",
@@ -171,8 +255,8 @@ fun Entry.withoutSummary() = EntryWithoutSummary(
     authorName = authorName,
     enclosureLink = enclosureLink,
     enclosureLinkType = enclosureLinkType,
-    opened = opened,
-    openedSynced = openedSynced,
+    read = read,
+    readSynced = readSynced,
     bookmarked = bookmarked,
     bookmarkedSynced = bookmarkedSynced,
     guidHash = guidHash,

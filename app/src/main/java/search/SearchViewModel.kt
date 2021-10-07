@@ -82,7 +82,7 @@ class SearchViewModel(
     fun getFeed(id: String) = feedsRepository.selectById(id)
 
     fun setRead(entryId: String) {
-        entriesRepository.setOpened(entryId, true)
+        entriesRepository.setRead(entryId, true)
 
         viewModelScope.launch {
             when (val r = sync.syncEntriesFlags()) {
@@ -113,7 +113,7 @@ class SearchViewModel(
                 )
             },
             cachedSupportingText = entriesSupportingTextRepository.getCachedSupportingText(this.id),
-            opened = MutableStateFlow(opened),
+            read = MutableStateFlow(read),
         )
     }
 }

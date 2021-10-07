@@ -161,7 +161,7 @@ class EntriesAdapterViewHolder(
             job?.cancel()
 
             primaryText.tag = scope.launchWhenResumed {
-                item.opened.collect {
+                item.read.collect {
                     primaryText.isEnabled = !it
                     secondaryText.isEnabled = !it
                     supportingText.isEnabled = !it

@@ -79,7 +79,7 @@ class NewsApiSync(
         mutex.withLock {
             if (syncEntriesFlags) {
                 runCatching {
-                    entriesRepository.syncOpenedEntries()
+                    entriesRepository.syncReadEntries()
                 }.onFailure {
                     return SyncResult.Err(Exception("Can't sync opened news", it))
                 }

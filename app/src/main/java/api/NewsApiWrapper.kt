@@ -40,8 +40,8 @@ class NewsApiWrapper : NewsApi {
         return api.getNewAndUpdatedEntries(maxEntryId, maxEntryUpdated, lastSync)
     }
 
-    override suspend fun markEntriesAsOpened(entriesIds: List<String>, opened: Boolean) {
-        api.markEntriesAsOpened(entriesIds, opened)
+    override suspend fun markEntriesAsRead(entriesIds: List<String>, read: Boolean) {
+        api.markEntriesAsRead(entriesIds, read)
     }
 
     override suspend fun markEntriesAsBookmarked(entries: List<EntryWithoutSummary>, bookmarked: Boolean) {

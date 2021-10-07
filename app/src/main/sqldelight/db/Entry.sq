@@ -21,25 +21,25 @@ WHERE feedId = ?;
 selectByReadAndBookmarked:
 SELECT *
 FROM EntryWithoutSummary
-WHERE opened = :read AND bookmarked = :bookmarked
+WHERE read = :read AND bookmarked = :bookmarked
 ORDER BY published DESC;
 
 selectByReadOrBookmarked:
 SELECT *
 FROM EntryWithoutSummary
-WHERE opened = :read OR bookmarked = :bookmarked
+WHERE read = :read OR bookmarked = :bookmarked
 ORDER BY published DESC;
 
 selectByRead:
 SELECT *
 FROM EntryWithoutSummary
-WHERE opened = ?
+WHERE read = ?
 ORDER BY published DESC;
 
-selectByOpenedSynced:
+selectByReadSynced:
 SELECT *
 FROM EntryWithoutSummary
-WHERE openedSynced = ?
+WHERE readSynced = ?
 ORDER BY published DESC;
 
 selectByBookmarked:
@@ -83,7 +83,7 @@ selectUnreadCount:
 SELECT COUNT(*)
 FROM Entry
 WHERE feedId = :feedId
-AND opened = 0;
+AND read = 0;
 
 selectMaxId:
 SELECT MAX(id + 0) FROM Entry;
@@ -94,22 +94,22 @@ FROM Entry;
 
 updateReadByFeedId:
 UPDATE Entry
-SET opened = :read, openedSynced = 0
-WHERE opened != :read AND feedId = ?;
+SET read = :read, readSynced = 0
+WHERE read != :read AND feedId = ?;
 
 updateReadByBookmarked:
 UPDATE Entry
-SET opened = :read, openedSynced = 0
-WHERE opened != :read AND bookmarked = ?;
+SET read = :read, readSynced = 0
+WHERE read != :read AND bookmarked = ?;
 
-updateOpened:
+updateRead:
 UPDATE Entry
-SET opened = ?
+SET read = ?
 WHERE id = ?;
 
-updateOpenedSynced:
+updateReadSynced:
 UPDATE Entry
-SET openedSynced = ?
+SET readSynced = ?
 WHERE id = ?;
 
 updateBookmarked:

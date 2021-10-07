@@ -18,8 +18,8 @@ CREATE TABLE Entry (
   enclosureLink TEXT NOT NULL,
   enclosureLinkType TEXT NOT NULL,
 
-  opened INTEGER AS Boolean NOT NULL,
-  openedSynced INTEGER AS Boolean NOT NULL,
+  read INTEGER AS Boolean NOT NULL,
+  readSynced INTEGER AS Boolean NOT NULL,
 
   bookmarked INTEGER AS Boolean NOT NULL,
   bookmarkedSynced INTEGER AS Boolean NOT NULL,
@@ -39,10 +39,13 @@ SELECT
   authorName,
   enclosureLink,
   enclosureLinkType,
-  opened,
-  openedSynced,
+
+  read,
+  readSynced,
+
   bookmarked,
   bookmarkedSynced,
+
   guidHash
 FROM Entry;
 
@@ -94,7 +97,7 @@ CREATE TABLE Conf (
   minifluxServerPassword TEXT NOT NULL DEFAULT "",
   initialSyncCompleted INTEGER AS Boolean NOT NULL DEFAULT 0,
   lastEntriesSyncDateTime TEXT NOT NULL DEFAULT "",
-  showOpenedEntries INTEGER AS Boolean NOT NULL DEFAULT 0,
+  showReadEntries INTEGER AS Boolean NOT NULL DEFAULT 0,
   sortOrder TEXT NOT NULL DEFAULT 'descending',
   showPreviewImages INTEGER AS Boolean NOT NULL DEFAULT 1,
   cropPreviewImages INTEGER AS Boolean NOT NULL DEFAULT 1,

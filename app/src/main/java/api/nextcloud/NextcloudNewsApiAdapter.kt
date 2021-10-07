@@ -119,10 +119,10 @@ class NextcloudNewsApiAdapter(
             ?: throw Exception("Can not parse server response")
     }
 
-    override suspend fun markEntriesAsOpened(entriesIds: List<String>, opened: Boolean) {
+    override suspend fun markEntriesAsRead(entriesIds: List<String>, read: Boolean) {
         val ids = entriesIds.map { it.toLong() }
 
-        val response = if (opened) {
+        val response = if (read) {
             api.putRead(PutReadArgs(ids))
         } else {
             api.putUnread(PutReadArgs(ids))
@@ -182,8 +182,8 @@ class NextcloudNewsApiAdapter(
             enclosureLink = enclosureLink?.replace("http://", "https://") ?: "",
             enclosureLinkType = enclosureMime ?: "",
 
-            opened = unread == false,
-            openedSynced = true,
+            read = !unread,
+            readSynced = true,
 
             bookmarked = starred,
             bookmarkedSynced = true,

@@ -5,9 +5,7 @@ import db.EntryWithoutSummary
 import db.Feed
 import kotlinx.coroutines.flow.Flow
 import java.net.URL
-import java.time.LocalDateTime
 import java.time.OffsetDateTime
-import java.time.ZonedDateTime
 
 interface NewsApi {
 
@@ -27,7 +25,7 @@ interface NewsApi {
         lastSync: OffsetDateTime?,
     ): List<Entry>
 
-    suspend fun markEntriesAsOpened(entriesIds: List<String>, opened: Boolean)
+    suspend fun markEntriesAsRead(entriesIds: List<String>, read: Boolean)
 
     suspend fun markEntriesAsBookmarked(entries: List<EntryWithoutSummary>, bookmarked: Boolean)
 }

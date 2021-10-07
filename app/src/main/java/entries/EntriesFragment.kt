@@ -335,7 +335,7 @@ class EntriesFragment : AppFragment(), Scrollable {
         lifecycleScope.launchWhenResumed {
             val conf = model.getConf()
 
-            if (conf.showOpenedEntries) {
+            if (conf.showReadEntries) {
                 showOpenedEntriesMenuItem.setIcon(R.drawable.ic_baseline_visibility_24)
                 showOpenedEntriesMenuItem.title = getString(R.string.hide_read_news)
                 touchHelper?.attachToRecyclerView(null)
@@ -350,7 +350,7 @@ class EntriesFragment : AppFragment(), Scrollable {
             lifecycleScope.launchWhenResumed {
                 adapter.submitList(null)
                 val conf = model.getConf()
-                model.saveConf(model.getConf().copy(showOpenedEntries = !conf.showOpenedEntries))
+                model.saveConf(model.getConf().copy(showReadEntries = !conf.showReadEntries))
                 initShowReadEntriesButton()
             }
 
@@ -464,8 +464,8 @@ class EntriesFragment : AppFragment(), Scrollable {
                 seenEntries.removeAll(seenItemsOutOfRange)
 
                 seenItemsOutOfRange.forEach {
-                    if (!it.opened.value) {
-                        it.opened.value = true
+                    if (!it.read.value) {
+                        it.read.value = true
                         model.setRead(listOf(it.id), true)
                     }
                 }

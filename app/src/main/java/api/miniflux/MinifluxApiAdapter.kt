@@ -84,8 +84,8 @@ class MinifluxApiAdapter(
         ).entries.mapNotNull { it.toEntry() }
     }
 
-    override suspend fun markEntriesAsOpened(entriesIds: List<String>, opened: Boolean) {
-        if (opened) {
+    override suspend fun markEntriesAsRead(entriesIds: List<String>, read: Boolean) {
+        if (read) {
             api.putEntryStatus(
                 PutStatusArgs(
                     entry_ids = entriesIds.map { it.toLong() },
@@ -135,8 +135,8 @@ class MinifluxApiAdapter(
             enclosureLink = firstEnclosure?.url ?: "",
             enclosureLinkType = firstEnclosure?.mime_type ?: "",
 
-            opened = status == "read",
-            openedSynced = true,
+            read = status == "read",
+            readSynced = true,
 
             bookmarked = starred,
             bookmarkedSynced = true,

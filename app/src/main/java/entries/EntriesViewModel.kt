@@ -88,7 +88,7 @@ class EntriesViewModel(
 
     fun reloadEntry(entry: EntriesAdapterItem) {
         val freshEntry = entriesRepository.selectById(entry.id) ?: return
-        entry.opened.value = freshEntry.opened
+        entry.read.value = freshEntry.read
 
         val currentState = state.value
 
@@ -101,7 +101,7 @@ class EntriesViewModel(
                 )
             }
 
-            if (freshEntry.opened && !currentState.includesUnread) {
+            if (freshEntry.read && !currentState.includesUnread) {
                 hideEntry()
             }
 
@@ -129,7 +129,7 @@ class EntriesViewModel(
 
         val unsortedEntries = when (val filter = filter) {
             is EntriesFilter.OnlyNotBookmarked -> {
-                if (conf.showOpenedEntries) {
+                if (conf.showReadEntries) {
                     entriesRepository.selectAll()
                 } else {
                     entriesRepository.selectByRead(false)
@@ -143,10 +143,10 @@ class EntriesViewModel(
             is EntriesFilter.OnlyFromFeed -> {
                 val feedEntries = entriesRepository.selectByFeedId(filter.feedId)
 
-                if (conf.showOpenedEntries) {
+                if (conf.showReadEntries) {
                     feedEntries
                 } else {
-                    feedEntries.filter { !it.opened }
+                    feedEntries.filter { !it.read }
                 }
             }
         }
@@ -166,7 +166,7 @@ class EntriesViewModel(
 
         state.value = State.ShowingEntries(
             entries = result,
-            includesUnread = conf.showOpenedEntries || filter is EntriesFilter.OnlyBookmarked,
+            includesUnread = conf.showReadEntries || filter is EntriesFilter.OnlyBookmarked,
             showBackgroundProgress = false,
         )
     }
@@ -220,7 +220,7 @@ class EntriesViewModel(
         entryIds: Collection<String>,
         read: Boolean,
     ) {
-        entryIds.forEach { entriesRepository.setOpened(it, read) }
+        entryIds.forEach { entriesRepository.setRead(it, read) }
 
         viewModelScope.launch {
             when (val r = newsApiSync.syncEntriesFlags()) {
@@ -345,7 +345,7 @@ class EntriesViewModel(
                 )
             },
             cachedSupportingText = entriesSupportingTextRepository.getCachedSupportingText(this.id),
-            opened = MutableStateFlow(opened),
+            read = MutableStateFlow(read),
         )
     }
 

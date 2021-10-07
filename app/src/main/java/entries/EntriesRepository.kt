@@ -66,11 +66,11 @@ class EntriesRepository(
         }
     }
 
-    fun setOpened(id: String, opened: Boolean) {
+    fun setRead(id: String, read: Boolean) {
         db.apply {
             transaction {
-                updateOpened(opened, id)
-                updateOpenedSynced(false, id)
+                updateRead(read, id)
+                updateReadSynced(false, id)
             }
         }
     }
@@ -138,39 +138,39 @@ class EntriesRepository(
         }
     }
 
-    suspend fun syncOpenedEntries() = withContext(Dispatchers.IO) {
-        val notSyncedEntries = db.selectByOpenedSynced(false).executeAsList()
+    suspend fun syncReadEntries() = withContext(Dispatchers.IO) {
+        val unsyncedEntries = db.selectByReadSynced(false).executeAsList()
 
-        if (notSyncedEntries.isEmpty()) {
+        if (unsyncedEntries.isEmpty()) {
             return@withContext
         }
 
-        val notSyncedOpenedEntries = notSyncedEntries.filter { it.opened }
+        val unsyncedReadEntries = unsyncedEntries.filter { it.read }
 
-        if (notSyncedOpenedEntries.isNotEmpty()) {
-            api.markEntriesAsOpened(
-                entriesIds = notSyncedOpenedEntries.map { it.id },
-                opened = true,
+        if (unsyncedReadEntries.isNotEmpty()) {
+            api.markEntriesAsRead(
+                entriesIds = unsyncedReadEntries.map { it.id },
+                read = false,
             )
 
             db.transaction {
-                notSyncedOpenedEntries.forEach {
-                    db.updateOpenedSynced(true, it.id)
+                unsyncedReadEntries.forEach {
+                    db.updateReadSynced(true, it.id)
                 }
             }
         }
 
-        val notSyncedNotOpenedEntries = notSyncedEntries.filterNot { it.opened }
+        val unsyncedUnreadEntries = unsyncedEntries.filter { !it.read }
 
-        if (notSyncedNotOpenedEntries.isNotEmpty()) {
-            api.markEntriesAsOpened(
-                entriesIds = notSyncedNotOpenedEntries.map { it.id },
-                opened = false,
+        if (unsyncedUnreadEntries.isNotEmpty()) {
+            api.markEntriesAsRead(
+                entriesIds = unsyncedUnreadEntries.map { it.id },
+                read = false,
             )
 
             db.transaction {
-                notSyncedNotOpenedEntries.forEach {
-                    db.updateOpenedSynced(true, it.id)
+                unsyncedUnreadEntries.forEach {
+                    db.updateReadSynced(true, it.id)
                 }
             }
         }
@@ -258,7 +258,7 @@ class EntriesRepository(
 
         feed?.blockedWords?.split(",")?.filter { it.isNotBlank() }?.forEach { word ->
             if (processedEntry.title.contains(word, ignoreCase = true)) {
-                processedEntry = processedEntry.copy(opened = true)
+                processedEntry = processedEntry.copy(read = true)
             }
         }
 

@@ -124,7 +124,7 @@ class EntriesRepositoryTests {
         val read = false
 
         val entries = listOf(
-            entryWithoutSummary().copy(opened = false),
+            entryWithoutSummary().copy(read = false),
         )
 
         every { db.selectByRead(read) } returns mockk {

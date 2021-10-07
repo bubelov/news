@@ -19,6 +19,6 @@ class EntriesAdapterDiffCallback : DiffUtil.ItemCallback<EntriesAdapterItem>() {
                 && oldItem.podcast == newItem.podcast
                 && oldItem.showImage == newItem.showImage
                 && oldItem.cropImage == newItem.cropImage
-                && oldItem.opened.value == newItem.opened.value
+                && oldItem.read.value == newItem.read.value
     }
 }

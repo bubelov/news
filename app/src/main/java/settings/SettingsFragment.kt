@@ -146,11 +146,11 @@ class SettingsFragment : AppFragment() {
             }
 
             showOpenedEntries.apply {
-                isChecked = conf.showOpenedEntries
+                isChecked = conf.showReadEntries
 
                 setOnCheckedChangeListener { _, isChecked ->
                     runBlocking {
-                        model.saveConf(model.getConf().copy(showOpenedEntries = isChecked))
+                        model.saveConf(model.getConf().copy(showReadEntries = isChecked))
                     }
                 }
             }
