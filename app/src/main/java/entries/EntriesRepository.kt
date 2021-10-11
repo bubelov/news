@@ -150,7 +150,7 @@ class EntriesRepository(
         if (unsyncedReadEntries.isNotEmpty()) {
             api.markEntriesAsRead(
                 entriesIds = unsyncedReadEntries.map { it.id },
-                read = false,
+                read = true,
             )
 
             db.transaction {
