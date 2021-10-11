@@ -28,9 +28,9 @@ import common.showKeyboard
 import entries.EntriesFilter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.android.viewmodel.ext.android.viewModel
-import java.net.URI
 
 class FeedsFragment : AppFragment(lockDrawer = false) {
 
@@ -322,16 +322,13 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
                     .setPositiveButton(R.string.add) { dialogInterface, _ ->
                         val dialog = dialogInterface as AlertDialog
                         val url = dialog.findViewById<TextInputEditText>(R.id.url)?.text.toString()
-
-                        val parsedUrl = runCatching {
-                            URI.create(url).toURL()
-                        }.getOrElse {
-                            val e = Exception(getString(R.string.invalid_url_s, url))
-                            showErrorDialog(e)
-                            return@setPositiveButton
+                        lifecycleScope.launch {
+                            runCatching {
+                                model.addFeed(url)
+                            }.onFailure {
+                                showErrorDialog(it)
+                            }
                         }
-
-                        lifecycleScope.launchWhenResumed { model.addOne(parsedUrl) }
                     }
                     .setNegativeButton(R.string.cancel, null)
                     .setOnDismissListener { hideKeyboard() }
@@ -342,16 +339,14 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
                         if (actionId == EditorInfo.IME_ACTION_DONE) {
                             alert.dismiss()
 
-                            val parsedUrl = runCatching {
-                                URI.create(text.toString()).toURL()
-                            }.getOrElse {
-                                val e =
-                                    Exception(getString(R.string.invalid_url_s, text.toString()))
-                                showErrorDialog(e)
-                                return@setOnEditorActionListener true
+                            lifecycleScope.launch {
+                                runCatching {
+                                    model.addFeed(text.toString())
+                                }.onFailure {
+                                    showErrorDialog(it)
+                                }
                             }
 
-                            lifecycleScope.launchWhenResumed { model.addOne(parsedUrl) }
                             return@setOnEditorActionListener true
                         }
 

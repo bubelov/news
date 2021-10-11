@@ -1,6 +1,8 @@
 package feeds
 
+import android.content.res.Resources
 import androidx.lifecycle.ViewModel
+import co.appreactor.news.R
 import db.Feed
 import entries.EntriesRepository
 import kotlinx.coroutines.Dispatchers
@@ -12,12 +14,12 @@ import opml.exportOpml
 import opml.importOpml
 import timber.log.Timber
 import java.net.URI
-import java.net.URL
 import java.util.concurrent.atomic.AtomicInteger
 
 class FeedsViewModel(
     private val feedsRepo: FeedsRepository,
     private val entriesRepo: EntriesRepository,
+    private val resources: Resources,
 ) : ViewModel() {
 
     val state = MutableStateFlow<State?>(null)
@@ -106,9 +108,21 @@ class FeedsViewModel(
         return exportOpml(feedsRepo.selectAll()).toByteArray()
     }
 
-    suspend fun addOne(url: URL) = state.apply {
-        value = State.AddingOne
-        value = State.AddedOne(runCatching { feedsRepo.insertByFeedUrl(url) })
+    suspend fun addFeed(url: String) {
+        val fullUrl = if (url.startsWith("http://") || !url.startsWith("https://")) "https://$url" else url
+
+        runCatching {
+            val parsedUrl = runCatching {
+                URI.create(fullUrl).toURL()
+            }.getOrElse {
+                throw Exception(resources.getString(R.string.invalid_url_s, fullUrl))
+            }
+
+            state.value = State.AddingOne
+            state.value = State.AddedOne(runCatching { feedsRepo.insertByFeedUrl(parsedUrl) })
+        }.onFailure {
+            state.value = State.AddedOne(Result.failure(it))
+        }
     }
 
     suspend fun rename(feedId: String, newTitle: String) = state.apply {
