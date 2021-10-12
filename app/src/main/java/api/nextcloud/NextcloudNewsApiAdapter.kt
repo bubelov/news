@@ -189,6 +189,7 @@ class NextcloudNewsApiAdapter(
             bookmarkedSynced = true,
 
             guidHash = guidHash ?: return null,
+            commentsUrl = "",
         )
     }
 

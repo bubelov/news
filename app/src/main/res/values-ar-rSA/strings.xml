@@ -107,6 +107,8 @@
     <string name="stack_trace">Stack trace</string>
     <string name="stack_trace_icon">Stack trace icon</string>
     <string name="feed_url">Feed URL</string>
+    <string name="comments">Comments</string>
+    <string name="view_comments">View comments</string>
     <plurals name="d_hours">
         <item quantity="zero">%d hours</item>
         <item quantity="one">%d hour</item>

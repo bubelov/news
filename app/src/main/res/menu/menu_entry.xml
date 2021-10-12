@@ -13,6 +13,14 @@
         tools:visible="true" />
 
     <item
+        android:id="@+id/comments"
+        android:icon="@drawable/ic_comment_24"
+        android:title="@string/view_comments"
+        android:visible="false"
+        app:showAsAction="ifRoom"
+        tools:visible="true" />
+
+    <item
         android:id="@+id/feedSettings"
         android:icon="@drawable/ic_baseline_settings_24"
         android:title="@string/open_feed_settings"

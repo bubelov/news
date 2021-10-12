@@ -142,6 +142,7 @@ class MinifluxApiAdapter(
             bookmarkedSynced = true,
 
             guidHash = "",
+            commentsUrl = comments_url,
         )
     }
 }

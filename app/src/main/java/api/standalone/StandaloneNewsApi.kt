@@ -195,6 +195,7 @@ class StandaloneNewsApi(
         bookmarked = false,
         bookmarkedSynced = true,
         guidHash = "",
+        commentsUrl = "",
     )
 
     private fun RssItem.toEntry(feedId: String) = Entry(
@@ -213,6 +214,7 @@ class StandaloneNewsApi(
         bookmarked = false,
         bookmarkedSynced = true,
         guidHash = "",
+        commentsUrl = "",
     )
 
     private fun sha256(string: String): String {

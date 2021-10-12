@@ -226,6 +226,7 @@ fun entry() = Entry(
     bookmarked = false,
     bookmarkedSynced = true,
     guidHash = "",
+    commentsUrl = "",
 )
 
 fun entryWithoutSummary() = EntryWithoutSummary(
@@ -243,6 +244,7 @@ fun entryWithoutSummary() = EntryWithoutSummary(
     bookmarked = false,
     bookmarkedSynced = true,
     guidHash = "",
+    commentsUrl = "",
 )
 
 fun Entry.withoutSummary() = EntryWithoutSummary(
@@ -260,4 +262,5 @@ fun Entry.withoutSummary() = EntryWithoutSummary(
     bookmarked = bookmarked,
     bookmarkedSynced = bookmarkedSynced,
     guidHash = guidHash,
+    commentsUrl = commentsUrl,
 )

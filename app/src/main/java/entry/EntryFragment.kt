@@ -13,6 +13,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.view.iterator
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -72,24 +73,28 @@ class EntryFragment : AppFragment() {
 
     private fun setState(state: EntryViewModel.State?) {
         binding.apply {
-            val menuItemBookmark = toolbar.menu.findItem(R.id.toggleBookmarked)
-            val menuItemFeedSettings = toolbar.menu.findItem(R.id.feedSettings)
-            val menuItemShare = toolbar.menu.findItem(R.id.share)
+            val menu = toolbar.menu
 
             when (state) {
                 EntryViewModel.State.Progress -> {
-                    menuItemBookmark.isVisible = false
-                    menuItemFeedSettings.isVisible = false
-                    menuItemShare.isVisible = false
+                    menu.iterator().forEach { it.isVisible = false }
                     contentContainer.hide()
                     progress.show(animate = true)
                     fab.hide()
                 }
 
                 is EntryViewModel.State.Success -> {
-                    menuItemBookmark.isVisible = true
-                    menuItemFeedSettings.isVisible = true
-                    menuItemShare.isVisible = true
+                    menu.findItem(R.id.toggleBookmarked).isVisible = true
+                    menu.findItem(R.id.comments).apply {
+                        isVisible = state.entry.commentsUrl.isNotBlank()
+                        setOnMenuItemClickListener {
+                            openLink(state.entry.commentsUrl)
+                            true
+                        }
+                    }
+                    menu.findItem(R.id.feedSettings).isVisible = true
+                    menu.findItem(R.id.share).isVisible = true
+
                     contentContainer.show(animate = true)
                     toolbar.title = state.feedTitle
 
@@ -121,9 +126,7 @@ class EntryFragment : AppFragment() {
                 }
 
                 is EntryViewModel.State.Error -> {
-                    menuItemBookmark.isVisible = false
-                    menuItemFeedSettings.isVisible = false
-                    menuItemShare.isVisible = false
+                    menu.iterator().forEach { it.isVisible = false }
                     contentContainer.hide()
                     showErrorDialog(state.message) { findNavController().popBackStack() }
                 }

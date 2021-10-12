@@ -6,6 +6,7 @@ data class EntryJson(
     val status: String,
     val title: String,
     val url: String,
+    val comments_url: String,
     val published_at: String,
     val created_at: String,
     val changed_at: String,

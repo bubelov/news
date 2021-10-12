@@ -24,7 +24,8 @@ CREATE TABLE Entry (
   bookmarked INTEGER AS Boolean NOT NULL,
   bookmarkedSynced INTEGER AS Boolean NOT NULL,
 
-  guidHash TEXT NOT NULL
+  guidHash TEXT NOT NULL,
+  commentsUrl TEXT NOT NULL
 );
 
 CREATE VIEW EntryWithoutSummary
@@ -46,7 +47,8 @@ SELECT
   bookmarked,
   bookmarkedSynced,
 
-  guidHash
+  guidHash,
+  commentsUrl
 FROM Entry;
 
 CREATE TABLE EntryImage (
