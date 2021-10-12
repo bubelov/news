@@ -45,6 +45,9 @@ interface MinifluxApi {
         @Query("limit") limit: Long = 0,
     ): EntriesPayload
 
+    @GET("entries?starred=1&limit=0")
+    suspend fun getStarredEntries(): EntriesPayload
+
     @PUT("entries")
     suspend fun putEntryStatus(@Body args: PutStatusArgs): Response<Unit>
 

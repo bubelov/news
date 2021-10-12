@@ -62,7 +62,7 @@ class MinifluxApiAdapter(
             currentBatch += entries.entries
             totalFetched += currentBatch.size
             Timber.d("Fetched $totalFetched entries so far")
-            emit(currentBatch.mapNotNull { it.toEntry() })
+            emit(currentBatch.map { it.toEntry() })
 
             if (currentBatch.size < batchSize) {
                 break
@@ -70,6 +70,17 @@ class MinifluxApiAdapter(
                 oldestEntryId = currentBatch.minOfOrNull { it.id }?.toLong() ?: 0L
                 currentBatch.clear()
             }
+        }
+
+        val starredEntries = api.getStarredEntries()
+        Timber.d("Fetched starred entries (count = ${starredEntries.entries.count()})")
+
+        if (starredEntries.entries.isNotEmpty()) {
+            currentBatch += starredEntries.entries
+            totalFetched += currentBatch.size
+            Timber.d("Fetched $totalFetched entries so far")
+            emit(currentBatch.map { it.toEntry() })
+            currentBatch.clear()
         }
     }
 
@@ -81,7 +92,7 @@ class MinifluxApiAdapter(
         return api.getEntriesAfterEntry(
             afterEntryId = maxEntryId?.toLong() ?: 0,
             limit = 0,
-        ).entries.mapNotNull { it.toEntry() }
+        ).entries.map { it.toEntry() }
     }
 
     override suspend fun markEntriesAsRead(entriesIds: List<String>, read: Boolean) {
@@ -120,7 +131,7 @@ class MinifluxApiAdapter(
         )
     }
 
-    private fun EntryJson.toEntry(): Entry? {
+    private fun EntryJson.toEntry(): Entry {
         val firstEnclosure = enclosures?.firstOrNull()
 
         return Entry(
