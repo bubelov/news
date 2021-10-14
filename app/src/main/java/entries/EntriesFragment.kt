@@ -33,6 +33,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.android.viewmodel.ext.android.sharedViewModel
 import org.koin.android.viewmodel.ext.android.viewModel
+import timber.log.Timber
 
 class EntriesFragment : AppFragment(), Scrollable {
 
@@ -207,7 +208,9 @@ class EntriesFragment : AppFragment(), Scrollable {
         }
     }
 
-    private lateinit var listLayoutManager: LinearLayoutManager
+//    private val listLayoutManager: LinearLayoutManager by lazy {
+//        LinearLayoutManager(requireContext())
+//    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -283,6 +286,10 @@ class EntriesFragment : AppFragment(), Scrollable {
         initShowReadEntriesButton()
         initSortOrderButton()
         initMarkAllAsReadButton()
+
+        lifecycleScope.launchWhenResumed {
+            model.state.collectLatest { displayState(it) }
+        }
     }
 
     override fun onResume() {
@@ -404,17 +411,16 @@ class EntriesFragment : AppFragment(), Scrollable {
     }
 
     private fun initListView() {
-        listLayoutManager = LinearLayoutManager(requireContext())
-
-        val listItemDecoration = CardListAdapterDecoration(
-            resources.getDimensionPixelSize(R.dimen.entries_cards_gap)
-        )
-
         binding.apply {
             listView.apply {
-                layoutManager = listLayoutManager
+                layoutManager = LinearLayoutManager(requireContext())
                 setHasFixedSize(true)
                 adapter = this@EntriesFragment.adapter
+
+                val listItemDecoration = CardListAdapterDecoration(
+                    resources.getDimensionPixelSize(R.dimen.entries_cards_gap)
+                )
+
                 addItemDecoration(listItemDecoration)
             }
         }
@@ -428,8 +434,6 @@ class EntriesFragment : AppFragment(), Scrollable {
                 markScrolledEntriesAsRead()
             }
         }
-
-        showListItems()
     }
 
     private fun markScrolledEntriesAsRead() = lifecycleScope.launchWhenResumed {
@@ -443,16 +447,18 @@ class EntriesFragment : AppFragment(), Scrollable {
                     return
                 }
 
-                if (listLayoutManager.findFirstVisibleItemPosition() == RecyclerView.NO_POSITION) {
+                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+
+                if (layoutManager.findFirstVisibleItemPosition() == RecyclerView.NO_POSITION) {
                     return
                 }
 
-                if (listLayoutManager.findLastVisibleItemPosition() == RecyclerView.NO_POSITION) {
+                if (layoutManager.findLastVisibleItemPosition() == RecyclerView.NO_POSITION) {
                     return
                 }
 
                 val visibleEntries =
-                    (listLayoutManager.findFirstVisibleItemPosition()..listLayoutManager.findLastVisibleItemPosition()).map {
+                    (layoutManager.findFirstVisibleItemPosition()..layoutManager.findLastVisibleItemPosition()).map {
                         adapter.currentList[it]
                     }
 
@@ -472,61 +478,59 @@ class EntriesFragment : AppFragment(), Scrollable {
         })
     }
 
-    private fun showListItems() = lifecycleScope.launchWhenResumed {
-        binding.apply {
-            model.state.collectLatest { state ->
-                when (state) {
-                    null -> {
-                        swipeRefresh.isRefreshing = false
-                        listView.hide()
-                        progress.hide()
-                        message.hide()
-                        retry.hide()
-                    }
+    private suspend fun displayState(state: EntriesViewModel.State?) = binding.apply {
+        Timber.d("Displaying state $state")
 
-                    is EntriesViewModel.State.PerformingInitialSync -> {
-                        swipeRefresh.isRefreshing = false
-                        listView.hide()
-                        progress.show(animate = true)
-                        message.show(animate = true)
-                        state.message.collect { message.text = it }
-                        retry.hide()
-                    }
+        when (state) {
+            null -> {
+                swipeRefresh.isRefreshing = false
+                listView.hide()
+                progress.hide()
+                message.hide()
+                retry.hide()
+            }
 
-                    is EntriesViewModel.State.FailedToSync -> {
-                        swipeRefresh.isRefreshing = false
-                        listView.hide()
-                        progress.hide()
-                        message.hide()
-                        retry.show(animate = true)
-                        showErrorDialog(state.error)
-                    }
+            is EntriesViewModel.State.PerformingInitialSync -> {
+                swipeRefresh.isRefreshing = false
+                listView.hide()
+                progress.show(animate = true)
+                message.show(animate = true)
+                state.message.collect { message.text = it }
+                retry.hide()
+            }
 
-                    EntriesViewModel.State.LoadingEntries -> {
-                        swipeRefresh.isRefreshing = false
-                        listView.hide()
-                        progress.show(animate = true)
-                        message.hide()
-                        retry.hide()
-                    }
+            is EntriesViewModel.State.FailedToSync -> {
+                swipeRefresh.isRefreshing = false
+                listView.hide()
+                progress.hide()
+                message.hide()
+                retry.show(animate = true)
+                showErrorDialog(state.error)
+            }
 
-                    is EntriesViewModel.State.ShowingEntries -> {
-                        swipeRefresh.isRefreshing = state.showBackgroundProgress
-                        listView.show()
-                        progress.hide()
+            EntriesViewModel.State.LoadingEntries -> {
+                swipeRefresh.isRefreshing = false
+                listView.hide()
+                progress.show(animate = true)
+                message.hide()
+                retry.hide()
+            }
 
-                        if (state.entries.isEmpty()) {
-                            message.text = getEmptyMessage(state.includesUnread)
-                            message.show(animate = true)
-                        } else {
-                            message.hide()
-                        }
+            is EntriesViewModel.State.ShowingEntries -> {
+                swipeRefresh.isRefreshing = state.showBackgroundProgress
+                listView.show()
+                progress.hide()
 
-                        retry.hide()
-                        seenEntries.clear()
-                        adapter.submitList(state.entries)
-                    }
+                if (state.entries.isEmpty()) {
+                    message.text = getEmptyMessage(state.includesUnread)
+                    message.show(animate = true)
+                } else {
+                    message.hide()
                 }
+
+                retry.hide()
+                seenEntries.clear()
+                adapter.submitList(state.entries)
             }
         }
     }

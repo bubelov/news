@@ -37,12 +37,13 @@ typealias ParsedFeed = co.appreactor.feedk.Feed
 class StandaloneNewsApi(
     private val feedQueries: FeedQueries,
     private val entryQueries: EntryQueries,
+    private val http: OkHttpClient = OkHttpClient.Builder().trustSelfSignedCerts().build(),
 ) : NewsApi {
 
-    private val http = OkHttpClient.Builder().trustSelfSignedCerts().build()
+    @Suppress("BlockingMethodInNonBlockingContext")
+    override suspend fun addFeed(url: URL): Feed = withContext(Dispatchers.IO) {
+        Timber.d("Adding feed (url = $url)")
 
-    override suspend fun addFeed(url: URL): Feed {
-        Timber.d("Trying to add feed with URL $url")
         val request = Request.Builder()
             .url(url)
             .build()
@@ -50,7 +51,7 @@ class StandaloneNewsApi(
         val response = http.newCall(request).execute()
 
         if (!response.isSuccessful) {
-            throw Exception("Response code: ${response.code}")
+            throw Exception("Cannot fetch feed (url = $url, code = ${response.code})")
         }
 
         val responseBody = response.body ?: throw Exception("Response has empty body")
@@ -69,9 +70,9 @@ class StandaloneNewsApi(
             }
 
             Timber.d("Feed elements found: ${feedElements.size}. Data: $feedElements")
-            return addFeed(URI.create(feedElements.first().attr("href")).toURL())
+            return@withContext addFeed(URI.create(feedElements.first().attr("href")).toURL())
         } else {
-            return feed(url).getOrThrow().toFeed(url)
+            return@withContext feed(url).getOrThrow().toFeed(url)
         }
     }
 

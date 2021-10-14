@@ -158,10 +158,11 @@ class EntriesViewModel(
         }
 
         val feeds = feedsRepository.selectAll()
+        val confFlow = this.conf.getAsFlow()
 
         val result = sortedEntries.map {
             val feed = feeds.singleOrNull { feed -> feed.id == it.feedId }
-            it.toRow(feed, conf.showPreviewImages, conf.cropPreviewImages)
+            it.toRow(feed, confFlow)
         }
 
         state.value = State.ShowingEntries(
@@ -300,8 +301,7 @@ class EntriesViewModel(
 
     private suspend fun EntryWithoutSummary.toRow(
         feed: Feed?,
-        showFeedImages: Boolean,
-        cropFeedImages: Boolean,
+        conf: Flow<Conf>,
     ): EntriesAdapterItem {
         return EntriesAdapterItem(
             id = id,
@@ -334,8 +334,6 @@ class EntriesViewModel(
                 }
 
             },
-            showImage = showFeedImages,
-            cropImage = cropFeedImages,
             supportingText = flow {
                 emit(
                     entriesSupportingTextRepository.getSupportingText(
@@ -346,6 +344,7 @@ class EntriesViewModel(
             },
             cachedSupportingText = entriesSupportingTextRepository.getCachedSupportingText(this.id),
             read = MutableStateFlow(read),
+            conf= conf,
         )
     }
 

@@ -2,6 +2,8 @@ package search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import common.ConfRepository
+import db.Conf
 import db.Entry
 import db.Feed
 import entries.EntriesAdapterItem
@@ -10,6 +12,7 @@ import entries.EntriesRepository
 import entries.EntriesSupportingTextRepository
 import feeds.FeedsRepository
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flow
@@ -18,15 +21,13 @@ import kotlinx.coroutines.launch
 import sync.NewsApiSync
 import sync.SyncResult
 import timber.log.Timber
-import java.text.DateFormat
-import java.time.Instant
-import java.util.Date
 
 class SearchViewModel(
     private val feedsRepository: FeedsRepository,
     private val entriesRepository: EntriesRepository,
     private val entriesSupportingTextRepository: EntriesSupportingTextRepository,
     private val sync: NewsApiSync,
+    private val conf: ConfRepository,
 ) : ViewModel() {
 
     val searchString = MutableStateFlow("")
@@ -65,10 +66,11 @@ class SearchViewModel(
             }
 
             val feeds = feedsRepository.selectAll()
+            val conf = this.conf.getAsFlow()
 
             val results = entries.map { entry ->
                 val feed = feeds.singleOrNull { feed -> feed.id == entry.feedId }
-                entry.toRow(feed)
+                entry.toRow(feed, conf)
             }
 
             showProgress.value = false
@@ -91,7 +93,7 @@ class SearchViewModel(
         }
     }
 
-    private suspend fun Entry.toRow(feed: Feed?): EntriesAdapterItem {
+    private suspend fun Entry.toRow(feed: Feed?, conf: Flow<Conf>): EntriesAdapterItem {
         return EntriesAdapterItem(
             id = id,
             title = title,
@@ -102,8 +104,6 @@ class SearchViewModel(
             podcastDownloadPercent = flowOf(),
             image = flowOf(),
             cachedImage = lazy { null },
-            showImage = false,
-            cropImage = false,
             supportingText = flow {
                 emit(
                     entriesSupportingTextRepository.getSupportingText(
@@ -114,6 +114,7 @@ class SearchViewModel(
             },
             cachedSupportingText = entriesSupportingTextRepository.getCachedSupportingText(this.id),
             read = MutableStateFlow(read),
+            conf = conf,
         )
     }
 }
