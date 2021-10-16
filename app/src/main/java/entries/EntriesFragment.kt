@@ -208,10 +208,6 @@ class EntriesFragment : AppFragment(), Scrollable {
         }
     }
 
-//    private val listLayoutManager: LinearLayoutManager by lazy {
-//        LinearLayoutManager(requireContext())
-//    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -295,10 +291,15 @@ class EntriesFragment : AppFragment(), Scrollable {
     override fun onResume() {
         super.onResume()
 
-        model.apply {
-            openedEntry.value?.let {
-                reloadEntry(it)
-                openedEntry.value = null
+        val openedEntry = model.openedEntry.value
+        Timber.d("Checking for previously opened entry (has_opened_entry = ${openedEntry != null})")
+
+        if (openedEntry != null) {
+            model.openedEntry.value = null
+
+            lifecycleScope.launchWhenResumed {
+                model.reloadEntry(openedEntry)
+                Timber.d("Reloaded opened entry (entry = $openedEntry)")
             }
         }
     }
@@ -479,7 +480,7 @@ class EntriesFragment : AppFragment(), Scrollable {
     }
 
     private suspend fun displayState(state: EntriesViewModel.State?) = binding.apply {
-        Timber.d("Displaying state $state")
+        Timber.d("Displaying state ${state?.javaClass?.simpleName}")
 
         when (state) {
             null -> {
@@ -517,6 +518,13 @@ class EntriesFragment : AppFragment(), Scrollable {
             }
 
             is EntriesViewModel.State.ShowingEntries -> {
+                Timber.d(
+                    "Showing entries (count = %s, includes_unread = %s, show_background_progress = %s)",
+                    state.entries.count(),
+                    state.includesUnread,
+                    state.showBackgroundProgress,
+                )
+
                 swipeRefresh.isRefreshing = state.showBackgroundProgress
                 listView.show()
                 progress.hide()

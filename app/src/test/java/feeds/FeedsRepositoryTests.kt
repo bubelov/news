@@ -12,23 +12,27 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
 import java.net.URI
 import java.util.UUID
 
 class FeedsRepositoryTests {
 
-    private val api = mockk<NewsApi>(relaxUnitFun = true)
+    private lateinit var db: FeedQueries
+    private lateinit var api: NewsApi
 
-    private val db = mockk<FeedQueries>(relaxUnitFun = true)
+    private lateinit var repository: FeedsRepository
 
-    private val repository = FeedsRepository(
-        db = db,
-        api = api,
-    )
+    @Before
+    fun setup() {
+        db = mockk(relaxUnitFun = true)
+        api = mockk(relaxUnitFun = true)
+        repository = FeedsRepository(api, db)
+    }
 
     @Test
-    fun insertOrReplace(): Unit = runBlocking {
+    fun `insert or replace`(): Unit = runBlocking {
         val feed = feed()
         repository.insertOrReplace(feed)
         verify { db.insertOrReplace(feed) }
@@ -36,7 +40,7 @@ class FeedsRepositoryTests {
     }
 
     @Test
-    fun insertByUrl(): Unit = runBlocking {
+    fun `insert by url`(): Unit = runBlocking {
         val feed = feed()
 
         val feedUrl = URI.create("https://example.com/").toURL()
@@ -54,7 +58,7 @@ class FeedsRepositoryTests {
     }
 
     @Test
-    fun selectAll(): Unit = runBlocking {
+    fun `select all`(): Unit = runBlocking {
         val feeds = listOf(feed(), feed())
 
         coEvery { db.selectAll() } returns mockk {
@@ -69,7 +73,7 @@ class FeedsRepositoryTests {
     }
 
     @Test
-    fun selectById(): Unit = runBlocking {
+    fun `select by id`(): Unit = runBlocking {
         val feed = feed()
 
         every { db.selectById(feed.id) } returns mockk {
@@ -84,7 +88,7 @@ class FeedsRepositoryTests {
     }
 
     @Test
-    fun updateTitle(): Unit = runBlocking {
+    fun `update title`(): Unit = runBlocking {
         val feed = feed()
 
         val newTitle = "  ${feed.title}_modified "
@@ -109,7 +113,7 @@ class FeedsRepositoryTests {
     }
 
     @Test
-    fun deleteById(): Unit = runBlocking {
+    fun `delete by id`(): Unit = runBlocking {
         val id = UUID.randomUUID().toString()
 
         repository.deleteById(id)

@@ -79,7 +79,7 @@ class SearchViewModel(
         }
     }
 
-    fun getEntry(id: String) = entriesRepository.selectById(id)
+    suspend fun getEntry(id: String) = entriesRepository.selectById(id)
 
     fun getFeed(id: String) = feedsRepository.selectById(id)
 

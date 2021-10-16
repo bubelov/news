@@ -25,8 +25,8 @@ class EntriesRepository(
         db.selectAll().executeAsList()
     }
 
-    fun selectById(entryId: String): Entry? {
-        return db.selectById(entryId).executeAsOneOrNull()
+    suspend fun selectById(entryId: String): Entry? = withContext(Dispatchers.IO) {
+        db.selectById(entryId).executeAsOneOrNull()
     }
 
     suspend fun selectByFeedId(feedId: String): List<EntryWithoutSummary> {

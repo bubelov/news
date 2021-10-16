@@ -54,8 +54,6 @@ class EntriesViewModel(
             val conf = getConf()
 
             if (conf.initialSyncCompleted) {
-                reloadEntries()
-
                 if (filter is EntriesFilter.OnlyNotBookmarked
                     && conf.syncOnStartup
                     && !sharedModel.syncedOnStartup
@@ -63,7 +61,15 @@ class EntriesViewModel(
                     sharedModel.syncedOnStartup = true
 
                     if (connectivityProbe.online) {
+                        state.value = State.ShowingEntries(
+                            entries = getCachedEntries(conf),
+                            includesUnread = conf.showReadEntries || filter is EntriesFilter.OnlyBookmarked,
+                            showBackgroundProgress = true,
+                        )
+
                         fetchEntriesFromApi()
+                    } else {
+                        reloadEntries(inBackground = false)
                     }
                 }
             } else {
@@ -86,11 +92,17 @@ class EntriesViewModel(
         onViewReady(filter, sharedModel)
     }
 
-    fun reloadEntry(entry: EntriesAdapterItem) {
+    suspend fun reloadEntry(entry: EntriesAdapterItem) {
         val freshEntry = entriesRepository.selectById(entry.id) ?: return
         entry.read.value = freshEntry.read
 
         val currentState = state.value
+
+        Timber.d(
+            "Trying to reload entry (entry = %s, current_state = %s)",
+            entry,
+            currentState?.javaClass?.simpleName,
+        )
 
         if (currentState is State.ShowingEntries) {
             val hideEntry = fun() {
@@ -112,21 +124,12 @@ class EntriesViewModel(
             if (!freshEntry.bookmarked && filter is EntriesFilter.OnlyBookmarked) {
                 hideEntry()
             }
+        } else {
+            Timber.w("Failed to reload entry")
         }
     }
 
-    private suspend fun reloadEntries(inBackground: Boolean = false) {
-        if (inBackground) {
-            state.value = when (val prevState = state.value) {
-                is State.ShowingEntries -> prevState.copy(showBackgroundProgress = true)
-                else -> State.LoadingEntries
-            }
-        } else {
-            state.value = State.LoadingEntries
-        }
-
-        val conf = getConf()
-
+    private suspend fun getCachedEntries(conf: Conf): List<EntriesAdapterItem> {
         val unsortedEntries = when (val filter = filter) {
             is EntriesFilter.OnlyNotBookmarked -> {
                 if (conf.showReadEntries) {
@@ -160,32 +163,46 @@ class EntriesViewModel(
         val feeds = feedsRepository.selectAll()
         val confFlow = this.conf.getAsFlow()
 
-        val result = sortedEntries.map {
+        return sortedEntries.map {
             val feed = feeds.singleOrNull { feed -> feed.id == it.feedId }
             it.toRow(feed, confFlow)
         }
+    }
+
+    private suspend fun reloadEntries(inBackground: Boolean = false) {
+        when (val prevState = state.value) {
+            is State.ShowingEntries -> {
+                if (inBackground && !prevState.showBackgroundProgress) {
+                    state.value = prevState.copy(showBackgroundProgress = true)
+                }
+            }
+            else -> state.value = State.LoadingEntries
+        }
+
+        val conf = getConf()
 
         state.value = State.ShowingEntries(
-            entries = result,
+            entries = getCachedEntries(conf),
             includesUnread = conf.showReadEntries || filter is EntriesFilter.OnlyBookmarked,
             showBackgroundProgress = false,
         )
     }
 
     suspend fun fetchEntriesFromApi() {
-        when (val prevState = state.value) {
-            is State.ShowingEntries -> {
-                state.value = prevState.copy(showBackgroundProgress = true)
+        val prevState = state.value
 
-                when (val res = newsApiSync.sync()) {
-                    is SyncResult.Ok -> {
-                        reloadEntries(inBackground = true)
-                    }
-                    is SyncResult.Err -> {
-                        state.value = prevState.copy()
-                        throw res.e
-                    }
-                }
+        if (prevState !is State.ShowingEntries) {
+            Timber.e("Tried to fetch new entries before loading cached entries")
+            return
+        }
+
+        when (val res = newsApiSync.sync()) {
+            is SyncResult.Ok -> {
+                reloadEntries(inBackground = true)
+            }
+            is SyncResult.Err -> {
+                state.value = prevState.copy(showBackgroundProgress = false)
+                throw res.e
             }
         }
     }
@@ -201,7 +218,7 @@ class EntriesViewModel(
         podcastsRepository.download(id)
     }
 
-    fun getEntry(id: String) = entriesRepository.selectById(id)
+    suspend fun getEntry(id: String) = entriesRepository.selectById(id)
 
     fun getCachedPodcastUri(entryId: String): Uri? {
         val enclosure = podcastsRepository.selectByEntryId(entryId) ?: return null
@@ -344,7 +361,7 @@ class EntriesViewModel(
             },
             cachedSupportingText = entriesSupportingTextRepository.getCachedSupportingText(this.id),
             read = MutableStateFlow(read),
-            conf= conf,
+            conf = conf,
         )
     }
 

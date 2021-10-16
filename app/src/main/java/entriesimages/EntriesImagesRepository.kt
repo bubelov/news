@@ -76,8 +76,6 @@ class EntriesImagesRepository(
     }
 
     private suspend fun syncPreview(entry: EntryWithoutSummary) = withContext(Dispatchers.IO) {
-        Timber.d("Syncing preview image for entry ${entry.id} ${entry.title}")
-
         val metadata = imagesMetadataQueries.selectByEntryId(entry.id).executeAsOneOrNull()
             ?: EntryImagesMetadata(
                 entryId = entry.id,
@@ -89,11 +87,9 @@ class EntriesImagesRepository(
             }
 
         if (metadata.previewImageProcessingStatus.isNotBlank()) {
-            Timber.d("Preview image already processed or processing, nothing to do here")
             return@withContext
         }
 
-        Timber.d("Starting processing")
         imagesMetadataQueries.insertOrReplace(metadata.copy(previewImageProcessingStatus = STATUS_PROCESSING))
 
         if (entry.link.isBlank()) {
@@ -108,7 +104,6 @@ class EntriesImagesRepository(
             entry.link
         }
 
-        Timber.d("Requesting $link")
         val request = httpClient.newCall(Request.Builder().url(link).build())
 
         val response = runCatching {
@@ -132,8 +127,6 @@ class EntriesImagesRepository(
             return@withContext
         }
 
-        Timber.d("Got HTML")
-
         val meta = Jsoup.parse(html).select("meta[property=\"og:image\"]").singleOrNull()
 
         var imageUrl = meta?.attr("content") ?: ""
@@ -142,8 +135,6 @@ class EntriesImagesRepository(
         if (imageUrl.startsWith("//")) {
             imageUrl = imageUrl.replaceFirst("//", "https://")
         }
-
-        Timber.d("Got image URL: $imageUrl")
 
         if (imageUrl.isBlank()) {
             imagesMetadataQueries.insertOrReplace(metadata.copy(previewImageProcessingStatus = STATUS_PROCESSED))
@@ -163,8 +154,6 @@ class EntriesImagesRepository(
             imagesMetadataQueries.insertOrReplace(metadata.copy(previewImageProcessingStatus = STATUS_PROCESSED))
             return@withContext
         }
-
-        Timber.d("All fine, saving preview image")
 
         imagesMetadataQueries.transaction {
             val image = EntryImage(

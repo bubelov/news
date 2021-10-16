@@ -5,6 +5,7 @@ import android.view.View
 import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
+import timber.log.Timber
 
 abstract class AppFragment(
     private val showToolbar: Boolean = true,
@@ -44,5 +45,10 @@ abstract class AppFragment(
             title = ""
             menu?.clear()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Timber.d("Resuming fragment (class = ${javaClass.simpleName})")
     }
 }
