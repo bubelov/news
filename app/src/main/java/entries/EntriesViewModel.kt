@@ -71,6 +71,8 @@ class EntriesViewModel(
                     } else {
                         reloadEntries(inBackground = false)
                     }
+                } else {
+                    reloadEntries(inBackground = false)
                 }
             } else {
                 sharedModel.syncedOnStartup = true
