@@ -6,7 +6,7 @@ import org.junit.Test
 import java.time.OffsetDateTime
 import java.util.UUID
 
-class EntryQueriesTests {
+class EntryQueriesTest {
 
     private lateinit var db: EntryQueries
 

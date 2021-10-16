@@ -1,20 +1,17 @@
-insert:
-INSERT
+insertOrReplace:
+INSERT OR REPLACE
 INTO Conf
 VALUES ?;
 
 insertDefault:
 INSERT
 INTO Conf
-(authType) VALUES ('');
+(id) VALUES (1);
 
 select:
 SELECT *
-FROM Conf;
-
-count:
-SELECT COUNT(*)
-FROM Conf;
+FROM Conf
+WHERE id = 1;
 
 deleteAll:
 DELETE

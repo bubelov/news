@@ -13,7 +13,7 @@ class ConfRepository(
 ) {
 
     suspend fun getAsFlow(): Flow<Conf> = withContext(Dispatchers.IO) {
-        if (db.count().executeAsOne() == 0L) {
+        if (db.select().executeAsOneOrNull() == null) {
             db.insertDefault()
         }
 
@@ -21,7 +21,7 @@ class ConfRepository(
     }
 
     suspend fun get() = withContext(Dispatchers.IO) {
-        if (db.count().executeAsOne() == 0L) {
+        if (db.select().executeAsOneOrNull() == null) {
             db.insertDefault()
         }
 
@@ -29,10 +29,7 @@ class ConfRepository(
     }
 
     suspend fun save(conf: Conf) = withContext(Dispatchers.IO) {
-        db.transaction {
-            db.deleteAll()
-            db.insert(conf)
-        }
+        db.insertOrReplace(conf)
     }
 
     companion object {
