@@ -34,3 +34,10 @@ jobs:
       with:
         name: news-debug
         path: app/build/outputs/apk/debug/news-*.apk
+        
+    - name: Create or update preview release
+      uses: elgohr/Github-Hub-Action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        args: release create preview
