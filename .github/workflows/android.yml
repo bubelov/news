@@ -40,6 +40,5 @@ jobs:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: "preview"
         prerelease: true
-        title: "Preview"
-        files: |
-          app/build/outputs/apk/debug/news-*.apk
+        title: "preview"
+        files: "app/build/outputs/apk/debug/news-*.apk"
