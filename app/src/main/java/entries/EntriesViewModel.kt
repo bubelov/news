@@ -12,6 +12,7 @@ import common.ConfRepository.Companion.SORT_ORDER_ASCENDING
 import common.ConfRepository.Companion.SORT_ORDER_DESCENDING
 import db.Conf
 import entriesimages.EntriesImagesRepository
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
@@ -98,36 +99,37 @@ class EntriesViewModel(
         val freshEntry = entriesRepository.selectById(entry.id) ?: return
         entry.read.value = freshEntry.read
 
-        val currentState = state.value
+        var currentState: State? = null
 
-        Timber.d(
-            "Trying to reload entry (entry = %s, current_state = %s)",
-            entry,
-            currentState?.javaClass?.simpleName,
-        )
+        while (currentState !is State.ShowingEntries) {
+            delay(100)
+            currentState = state.value
 
-        if (currentState is State.ShowingEntries) {
-            val hideEntry = fun() {
-                state.value = currentState.copy(
-                    entries = currentState.entries.toMutableList().apply {
-                        remove(entry)
-                    }
-                )
-            }
+            Timber.d(
+                "Trying to reload entry (entry = %s, current_state = %s)",
+                entry,
+                currentState?.javaClass?.simpleName,
+            )
+        }
 
-            if (freshEntry.read && !currentState.includesUnread) {
-                hideEntry()
-            }
+        val hideEntry = fun() {
+            state.value = currentState.copy(
+                entries = currentState.entries.toMutableList().apply {
+                    remove(entry)
+                }
+            )
+        }
 
-            if (freshEntry.bookmarked && filter is EntriesFilter.OnlyNotBookmarked) {
-                hideEntry()
-            }
+        if (freshEntry.read && !currentState.includesUnread) {
+            hideEntry()
+        }
 
-            if (!freshEntry.bookmarked && filter is EntriesFilter.OnlyBookmarked) {
-                hideEntry()
-            }
-        } else {
-            Timber.w("Failed to reload entry")
+        if (freshEntry.bookmarked && filter is EntriesFilter.OnlyNotBookmarked) {
+            hideEntry()
+        }
+
+        if (!freshEntry.bookmarked && filter is EntriesFilter.OnlyBookmarked) {
+            hideEntry()
         }
     }
 
