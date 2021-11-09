@@ -42,20 +42,14 @@ class EntriesViewModel(
 
     val state = MutableStateFlow<State?>(null)
 
-    val openedEntry = MutableStateFlow<EntriesAdapterItem?>(null)
-
-    suspend fun onViewReady(filter: EntriesFilter, sharedModel: EntriesSharedViewModel) {
+    suspend fun onViewCreated(filter: EntriesFilter, sharedModel: EntriesSharedViewModel) {
         this.filter = filter
-
-        if (state.value is State.FailedToSync) {
-            return
-        }
 
         if (state.value == null) {
             val conf = getConf()
 
             if (conf.initialSyncCompleted) {
-                if (filter is EntriesFilter.OnlyNotBookmarked
+                if (filter is EntriesFilter.NotBookmarked
                     && conf.syncOnStartup
                     && !sharedModel.syncedOnStartup
                 ) {
@@ -64,7 +58,7 @@ class EntriesViewModel(
                     if (connectivityProbe.online) {
                         state.value = State.ShowingEntries(
                             entries = getCachedEntries(conf),
-                            includesUnread = conf.showReadEntries || filter is EntriesFilter.OnlyBookmarked,
+                            includesUnread = conf.showReadEntries || filter is EntriesFilter.Bookmarked,
                             showBackgroundProgress = true,
                         )
 
@@ -84,7 +78,14 @@ class EntriesViewModel(
                     reloadEntries()
                 }.onFailure {
                     state.value = State.FailedToSync(it)
-                    return
+                }
+            }
+        } else {
+            if (state.value is State.ShowingEntries) {
+                runCatching {
+                    reloadEntries(inBackground = true)
+                }.onFailure {
+                    state.value = State.FailedToSync(it)
                 }
             }
         }
@@ -92,7 +93,7 @@ class EntriesViewModel(
 
     suspend fun onRetry(sharedModel: EntriesSharedViewModel) {
         state.value = null
-        onViewReady(filter, sharedModel)
+        onViewCreated(filter, sharedModel)
     }
 
     suspend fun reloadEntry(entry: EntriesAdapterItem) {
@@ -124,18 +125,18 @@ class EntriesViewModel(
             hideEntry()
         }
 
-        if (freshEntry.bookmarked && filter is EntriesFilter.OnlyNotBookmarked) {
+        if (freshEntry.bookmarked && filter is EntriesFilter.NotBookmarked) {
             hideEntry()
         }
 
-        if (!freshEntry.bookmarked && filter is EntriesFilter.OnlyBookmarked) {
+        if (!freshEntry.bookmarked && filter is EntriesFilter.Bookmarked) {
             hideEntry()
         }
     }
 
     private suspend fun getCachedEntries(conf: Conf): List<EntriesAdapterItem> {
         val unsortedEntries = when (val filter = filter) {
-            is EntriesFilter.OnlyNotBookmarked -> {
+            is EntriesFilter.NotBookmarked -> {
                 if (conf.showReadEntries) {
                     entriesRepository.selectAll()
                 } else {
@@ -143,11 +144,11 @@ class EntriesViewModel(
                 }.filterNot { it.bookmarked }
             }
 
-            is EntriesFilter.OnlyBookmarked -> {
+            is EntriesFilter.Bookmarked -> {
                 entriesRepository.getBookmarked().first()
             }
 
-            is EntriesFilter.OnlyFromFeed -> {
+            is EntriesFilter.BelongToFeed -> {
                 val feedEntries = entriesRepository.selectByFeedId(filter.feedId)
 
                 if (conf.showReadEntries) {
@@ -187,7 +188,7 @@ class EntriesViewModel(
 
         state.value = State.ShowingEntries(
             entries = getCachedEntries(conf),
-            includesUnread = conf.showReadEntries || filter is EntriesFilter.OnlyBookmarked,
+            includesUnread = conf.showReadEntries || filter is EntriesFilter.Bookmarked,
             showBackgroundProgress = false,
         )
     }
@@ -287,21 +288,21 @@ class EntriesViewModel(
 
     suspend fun markAllAsRead() {
         when (val filter = filter) {
-            is EntriesFilter.OnlyNotBookmarked -> {
+            is EntriesFilter.NotBookmarked -> {
                 entriesRepository.updateReadByBookmarked(
                     read = true,
                     bookmarked = false,
                 )
             }
 
-            is EntriesFilter.OnlyBookmarked -> {
+            is EntriesFilter.Bookmarked -> {
                 entriesRepository.updateReadByBookmarked(
                     read = true,
                     bookmarked = true,
                 )
             }
 
-            is EntriesFilter.OnlyFromFeed -> {
+            is EntriesFilter.BelongToFeed -> {
                 entriesRepository.updateReadByFeedId(
                     read = true,
                     feedId = filter.feedId,

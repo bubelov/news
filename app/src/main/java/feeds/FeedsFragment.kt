@@ -52,7 +52,7 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
             override fun onFeedClick(feed: FeedsAdapterItem) {
                 findNavController().navigate(
                     FeedsFragmentDirections.actionFeedsFragmentToFeedEntriesFragment(
-                        EntriesFilter.OnlyFromFeed(feedId = feed.id)
+                        EntriesFilter.BelongToFeed(feedId = feed.id)
                     )
                 )
             }

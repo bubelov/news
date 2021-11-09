@@ -69,7 +69,6 @@ class EntriesFragment : AppFragment(), Scrollable {
                         val feed = model.getFeed(entry.feedId) ?: return@launchWhenResumed
 
                         model.setRead(listOf(entry.id), true)
-                        model.openedEntry.value = item
 
                         if (feed.openEntriesInBrowser) {
                             openLink(entry.link)
@@ -110,7 +109,7 @@ class EntriesFragment : AppFragment(), Scrollable {
             registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
                 override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
                     if (positionStart == 0) {
-                        (binding.listView.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
+                        (binding.list.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
                             0,
                             0
                         )
@@ -122,7 +121,7 @@ class EntriesFragment : AppFragment(), Scrollable {
 
     private val touchHelper: ItemTouchHelper? by lazy {
         when (args.filter) {
-            EntriesFilter.OnlyNotBookmarked -> {
+            EntriesFilter.NotBookmarked -> {
                 ItemTouchHelper(object : SwipeHelper(
                     requireContext(),
                     R.drawable.ic_baseline_visibility_24,
@@ -157,7 +156,7 @@ class EntriesFragment : AppFragment(), Scrollable {
                 })
             }
 
-            EntriesFilter.OnlyBookmarked -> {
+            EntriesFilter.Bookmarked -> {
                 ItemTouchHelper(object : SwipeHelper(
                     requireContext(),
                     R.drawable.ic_baseline_bookmark_remove_24,
@@ -220,86 +219,17 @@ class EntriesFragment : AppFragment(), Scrollable {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        toolbar.apply {
-            setTitle(R.string.news)
-            inflateMenu(R.menu.menu_entries)
-        }
-
-        initListView()
+        initDrawer()
+        initToolbar()
+        initSwipeRefresh()
+        initList()
 
         lifecycleScope.launchWhenResumed {
             runCatching {
-                model.onViewReady(args.filter!!, sharedModel)
+                model.onViewCreated(args.filter!!, sharedModel)
+                model.state.collectLatest { displayState(it) }
             }.onFailure {
                 showErrorDialog(it)
-            }
-        }
-
-        binding.retry.setOnClickListener {
-            lifecycleScope.launchWhenResumed {
-                model.onRetry(sharedModel)
-            }
-        }
-
-        when (val filter = args.filter) {
-            is EntriesFilter.OnlyNotBookmarked -> {
-                isDrawerLocked = false
-                binding.swipeRefresh.setOnRefreshListener {
-                    lifecycleScope.launch {
-                        runCatching {
-                            model.fetchEntriesFromApi()
-                        }.onFailure {
-                            binding.swipeRefresh.isRefreshing = false
-                            showErrorDialog(it)
-                        }
-                    }
-                }
-            }
-
-            is EntriesFilter.OnlyBookmarked -> {
-                isDrawerLocked = false
-                toolbar.setTitle(R.string.bookmarks)
-                binding.swipeRefresh.isEnabled = false
-            }
-
-            is EntriesFilter.OnlyFromFeed -> {
-                binding.swipeRefresh.isEnabled = false
-
-                toolbar.setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
-
-                toolbar.setNavigationOnClickListener {
-                    findNavController().popBackStack()
-                }
-
-                lifecycleScope.launchWhenResumed {
-                    val feed = model.getFeed(filter.feedId)
-                    toolbar.title = feed?.title
-                }
-            }
-        }
-
-        initSearchButton()
-        initShowReadEntriesButton()
-        initSortOrderButton()
-        initMarkAllAsReadButton()
-
-        lifecycleScope.launchWhenResumed {
-            model.state.collectLatest { displayState(it) }
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        val openedEntry = model.openedEntry.value
-        Timber.d("Checking for previously opened entry (has_opened_entry = ${openedEntry != null})")
-
-        if (openedEntry != null) {
-            model.openedEntry.value = null
-
-            lifecycleScope.launchWhenResumed {
-                model.reloadEntry(openedEntry)
-                Timber.d("Reloaded opened entry (entry = $openedEntry)")
             }
         }
     }
@@ -319,7 +249,42 @@ class EntriesFragment : AppFragment(), Scrollable {
     }
 
     override fun scrollToTop() {
-        binding.listView.layoutManager?.scrollToPosition(0)
+        binding.list.layoutManager?.scrollToPosition(0)
+    }
+
+    private fun initDrawer() {
+        isDrawerLocked = args.filter is EntriesFilter.BelongToFeed
+    }
+
+    private fun initToolbar() = toolbar.apply {
+        inflateMenu(R.menu.menu_entries)
+
+        when (val filter = args.filter) {
+            EntriesFilter.Bookmarked -> {
+                setTitle(R.string.bookmarks)
+            }
+
+            EntriesFilter.NotBookmarked -> {
+                setTitle(R.string.news)
+            }
+
+            is EntriesFilter.BelongToFeed -> {
+                toolbar.setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
+
+                toolbar.setNavigationOnClickListener {
+                    findNavController().popBackStack()
+                }
+
+                lifecycleScope.launchWhenResumed {
+                    title = model.getFeed(filter.feedId)?.title
+                }
+            }
+        }
+
+        initSearchButton()
+        initShowReadEntriesButton()
+        initSortOrderButton()
+        initMarkAllAsReadButton()
     }
 
     private fun initSearchButton() {
@@ -349,7 +314,7 @@ class EntriesFragment : AppFragment(), Scrollable {
             } else {
                 showOpenedEntriesMenuItem.setIcon(R.drawable.ic_baseline_visibility_off_24)
                 showOpenedEntriesMenuItem.title = getString(R.string.show_read_news)
-                touchHelper?.attachToRecyclerView(binding.listView)
+                touchHelper?.attachToRecyclerView(binding.list)
             }
         }
 
@@ -411,9 +376,32 @@ class EntriesFragment : AppFragment(), Scrollable {
         }
     }
 
-    private fun initListView() {
+    private fun initSwipeRefresh() = binding.swipeRefresh.apply {
+        when (args.filter) {
+            is EntriesFilter.NotBookmarked -> {
+                isEnabled = true
+
+                setOnRefreshListener {
+                    lifecycleScope.launch {
+                        runCatching {
+                            model.fetchEntriesFromApi()
+                        }.onFailure {
+                            binding.swipeRefresh.isRefreshing = false
+                            showErrorDialog(it)
+                        }
+                    }
+                }
+            }
+
+            else -> {
+                binding.swipeRefresh.isEnabled = false
+            }
+        }
+    }
+
+    private fun initList() {
         binding.apply {
-            listView.apply {
+            list.apply {
                 layoutManager = LinearLayoutManager(requireContext())
                 setHasFixedSize(true)
                 adapter = this@EntriesFragment.adapter
@@ -426,11 +414,11 @@ class EntriesFragment : AppFragment(), Scrollable {
             }
         }
 
-        touchHelper?.attachToRecyclerView(binding.listView)
+        touchHelper?.attachToRecyclerView(binding.list)
 
         lifecycleScope.launchWhenResumed {
             if (model.getConf().markScrolledEntriesAsRead
-                && (args.filter is EntriesFilter.OnlyNotBookmarked || args.filter is EntriesFilter.OnlyFromFeed)
+                && (args.filter is EntriesFilter.NotBookmarked || args.filter is EntriesFilter.BelongToFeed)
             ) {
                 markScrolledEntriesAsRead()
             }
@@ -438,7 +426,7 @@ class EntriesFragment : AppFragment(), Scrollable {
     }
 
     private fun markScrolledEntriesAsRead() = lifecycleScope.launchWhenResumed {
-        binding.listView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        binding.list.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
 
             }
@@ -485,7 +473,7 @@ class EntriesFragment : AppFragment(), Scrollable {
         when (state) {
             null -> {
                 swipeRefresh.isRefreshing = false
-                listView.hide()
+                list.hide()
                 progress.hide()
                 message.hide()
                 retry.hide()
@@ -493,7 +481,7 @@ class EntriesFragment : AppFragment(), Scrollable {
 
             is EntriesViewModel.State.PerformingInitialSync -> {
                 swipeRefresh.isRefreshing = false
-                listView.hide()
+                list.hide()
                 progress.show(animate = true)
                 message.show(animate = true)
                 state.message.collect { message.text = it }
@@ -502,16 +490,21 @@ class EntriesFragment : AppFragment(), Scrollable {
 
             is EntriesViewModel.State.FailedToSync -> {
                 swipeRefresh.isRefreshing = false
-                listView.hide()
+                list.hide()
                 progress.hide()
                 message.hide()
                 retry.show(animate = true)
+                retry.setOnClickListener {
+                    lifecycleScope.launchWhenResumed {
+                        model.onRetry(sharedModel)
+                    }
+                }
                 showErrorDialog(state.error)
             }
 
             EntriesViewModel.State.LoadingEntries -> {
                 swipeRefresh.isRefreshing = false
-                listView.hide()
+                list.hide()
                 progress.show(animate = true)
                 message.hide()
                 retry.hide()
@@ -526,7 +519,7 @@ class EntriesFragment : AppFragment(), Scrollable {
                 )
 
                 swipeRefresh.isRefreshing = state.showBackgroundProgress
-                listView.show()
+                list.show()
                 progress.hide()
 
                 if (state.entries.isEmpty()) {
@@ -545,15 +538,15 @@ class EntriesFragment : AppFragment(), Scrollable {
 
     private fun getShowReadEntriesButtonVisibility(): Boolean {
         return when (args.filter!!) {
-            EntriesFilter.OnlyNotBookmarked -> true
-            EntriesFilter.OnlyBookmarked -> false
-            is EntriesFilter.OnlyFromFeed -> true
+            EntriesFilter.NotBookmarked -> true
+            EntriesFilter.Bookmarked -> false
+            is EntriesFilter.BelongToFeed -> true
         }
     }
 
     private fun getEmptyMessage(includesUnread: Boolean): String {
         return when (args.filter) {
-            is EntriesFilter.OnlyBookmarked -> getString(R.string.you_have_no_bookmarks)
+            is EntriesFilter.Bookmarked -> getString(R.string.you_have_no_bookmarks)
             else -> if (includesUnread) {
                 getString(R.string.news_list_is_empty)
             } else {

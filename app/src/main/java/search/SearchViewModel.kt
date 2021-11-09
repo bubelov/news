@@ -51,15 +51,15 @@ class SearchViewModel(
             showProgress.value = true
 
             val entries = when (filter) {
-                EntriesFilter.OnlyNotBookmarked -> {
+                EntriesFilter.NotBookmarked -> {
                     delay(1500)
                     entriesRepository.selectByQuery(query)
                 }
-                EntriesFilter.OnlyBookmarked -> entriesRepository.selectByQueryAndBookmarked(
+                EntriesFilter.Bookmarked -> entriesRepository.selectByQueryAndBookmarked(
                     query,
                     true,
                 )
-                is EntriesFilter.OnlyFromFeed -> entriesRepository.selectByQueryAndFeedId(
+                is EntriesFilter.BelongToFeed -> entriesRepository.selectByQueryAndFeedId(
                     query,
                     filter.feedId,
                 )

@@ -95,7 +95,7 @@ class MinifluxAuthFragment : AppFragment() {
                         popBackStack()
                         navigate(
                             R.id.entriesFragment,
-                            bundleOf(Pair("filter", EntriesFilter.OnlyNotBookmarked))
+                            bundleOf(Pair("filter", EntriesFilter.NotBookmarked))
                         )
                     }
                 }.onFailure {

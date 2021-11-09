@@ -35,13 +35,13 @@ class AppActivity : AppCompatActivity() {
     private val navListener = NavController.OnDestinationChangedListener { _, destination, args ->
         if (destination.id == R.id.entriesFragment) {
             val filter = args?.getParcelable<EntriesFilter>("filter")
-            binding.bottomNavigationDivider.isVisible = filter !is EntriesFilter.OnlyFromFeed
-            binding.bottomNavigation.isVisible = filter !is EntriesFilter.OnlyFromFeed
+            binding.bottomNavigationDivider.isVisible = filter !is EntriesFilter.BelongToFeed
+            binding.bottomNavigation.isVisible = filter !is EntriesFilter.BelongToFeed
             return@OnDestinationChangedListener
         }
 
         if (destination.id == R.id.bookmarksFragment) {
-            args!!.putParcelable("filter", EntriesFilter.OnlyBookmarked)
+            args!!.putParcelable("filter", EntriesFilter.Bookmarked)
         }
 
         val bottomNavigationIsVisible =
@@ -96,14 +96,14 @@ class AppActivity : AppCompatActivity() {
                 R.id.news -> {
                     navController.navigate(
                         R.id.entriesFragment,
-                        bundleOf(Pair("filter", EntriesFilter.OnlyNotBookmarked))
+                        bundleOf(Pair("filter", EntriesFilter.NotBookmarked))
                     )
                 }
 
                 R.id.bookmarks -> {
                     navController.navigate(
                         R.id.bookmarksFragment,
-                        bundleOf(Pair("filter", EntriesFilter.OnlyBookmarked))
+                        bundleOf(Pair("filter", EntriesFilter.Bookmarked))
                     )
                 }
 
@@ -145,7 +145,7 @@ class AppActivity : AppCompatActivity() {
 
                     navController.navigate(
                         R.id.entriesFragment,
-                        bundleOf(Pair("filter", EntriesFilter.OnlyNotBookmarked))
+                        bundleOf(Pair("filter", EntriesFilter.NotBookmarked))
                     )
                 }
 
@@ -154,7 +154,7 @@ class AppActivity : AppCompatActivity() {
 
                     navController.navigate(
                         R.id.bookmarksFragment,
-                        bundleOf(Pair("filter", EntriesFilter.OnlyBookmarked))
+                        bundleOf(Pair("filter", EntriesFilter.Bookmarked))
                     )
                 }
 

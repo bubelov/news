@@ -120,10 +120,10 @@ class SearchFragment : AppFragment() {
             }
         }
 
-        binding.listView.setHasFixedSize(true)
-        binding.listView.layoutManager = LinearLayoutManager(context)
-        binding.listView.adapter = adapter
-        binding.listView.addItemDecoration(
+        binding.list.setHasFixedSize(true)
+        binding.list.layoutManager = LinearLayoutManager(context)
+        binding.list.adapter = adapter
+        binding.list.addItemDecoration(
             CardListAdapterDecoration(
                 resources.getDimensionPixelSize(
                     R.dimen.entries_cards_gap

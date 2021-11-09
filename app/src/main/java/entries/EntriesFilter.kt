@@ -6,11 +6,11 @@ import kotlinx.parcelize.Parcelize
 sealed class EntriesFilter : Parcelable {
 
     @Parcelize
-    object OnlyNotBookmarked : EntriesFilter()
+    object Bookmarked : EntriesFilter()
 
     @Parcelize
-    object OnlyBookmarked : EntriesFilter()
+    object NotBookmarked : EntriesFilter()
 
     @Parcelize
-    data class OnlyFromFeed(val feedId: String) : EntriesFilter()
+    data class BelongToFeed(val feedId: String) : EntriesFilter()
 }
