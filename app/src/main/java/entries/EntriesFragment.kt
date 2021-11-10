@@ -228,6 +228,15 @@ class EntriesFragment : AppFragment(), Scrollable {
         lifecycleScope.launchWhenResumed {
             runCatching {
                 model.onViewCreated(args.filter!!, sharedModel)
+            }.onFailure {
+                if (it !is CancellationException) {
+                    showErrorDialog(it)
+                }
+            }
+        }
+
+        lifecycleScope.launchWhenResumed {
+            runCatching {
                 model.state.collectLatest { displayState(it) }
             }.onFailure {
                 if (it !is CancellationException) {
