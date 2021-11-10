@@ -5,17 +5,17 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <item
-        android:id="@+id/toggleBookmarked"
-        android:icon="@drawable/ic_baseline_bookmark_border_24"
-        android:title="@string/bookmark"
+        android:id="@+id/comments"
+        android:icon="@drawable/ic_comment_24"
+        android:title="@string/view_comments"
         android:visible="false"
         app:showAsAction="ifRoom"
         tools:visible="true" />
 
     <item
-        android:id="@+id/comments"
-        android:icon="@drawable/ic_comment_24"
-        android:title="@string/view_comments"
+        android:id="@+id/toggleBookmarked"
+        android:icon="@drawable/ic_baseline_bookmark_border_24"
+        android:title="@string/bookmark"
         android:visible="false"
         app:showAsAction="ifRoom"
         tools:visible="true" />
