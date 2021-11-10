@@ -29,7 +29,7 @@ class FeedsViewModelTests {
     @Test
     fun `view ready`(): Unit = runBlocking {
         coEvery { feedsRepo.selectAll() } returns emptyList()
-        model.onViewReady()
+        model.onViewCreated()
 
         model.state.value.apply {
             assertTrue(this is FeedsViewModel.State.Loaded && result.isSuccess)
@@ -39,7 +39,7 @@ class FeedsViewModelTests {
     @Test
     fun `view ready + db error`(): Unit = runBlocking {
         coEvery { feedsRepo.selectAll() } throws Exception()
-        model.onViewReady()
+        model.onViewCreated()
 
         model.state.value.apply {
             assertTrue(this is FeedsViewModel.State.Loaded && result.isFailure)

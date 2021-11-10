@@ -27,6 +27,7 @@ import common.show
 import common.showDialog
 import common.showErrorDialog
 import db.Entry
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -229,7 +230,9 @@ class EntriesFragment : AppFragment(), Scrollable {
                 model.onViewCreated(args.filter!!, sharedModel)
                 model.state.collectLatest { displayState(it) }
             }.onFailure {
-                showErrorDialog(it)
+                if (it !is CancellationException) {
+                    showErrorDialog(it)
+                }
             }
         }
     }

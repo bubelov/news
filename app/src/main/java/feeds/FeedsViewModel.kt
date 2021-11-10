@@ -24,7 +24,7 @@ class FeedsViewModel(
 
     val state = MutableStateFlow<State?>(null)
 
-    suspend fun onViewReady() {
+    suspend fun onViewCreated() {
         if (state.value == null) {
             reload()
         }
