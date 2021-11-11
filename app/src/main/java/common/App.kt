@@ -93,7 +93,7 @@ class App : Application() {
     }
 
     companion object {
-        const val DB_FILE_NAME = "news.db"
+        const val DB_FILE_NAME = "news-v2.db"
 
         private const val SYNC_WORK_NAME = "sync"
     }
