@@ -1,4 +1,4 @@
-# News for Nextcloud
+# News
 
 <p>
   <img src="https://f-droid.org/repo/icons-640/co.appreactor.news.13.png" alt="" height="80">
@@ -7,7 +7,9 @@
   </a>
 </p>
 
-📰 **Feed Reader** and 🎧 **Podcast Player** for **Nextcloud** ☁️ *(unofficial)*
+📰 **Feed Reader** and 🎧 **Podcast Player** for **Miniflux** and **Nextcloud**
+
+It also works witout any backend (**Standalone Mode**)
 
 ---
 
@@ -23,7 +25,7 @@
 ## ✨ Main Features:
 
 - Subscribe to your favorite RSS and Atom feeds
-- Sync with your personal Nextcloud News server
+- Sync with your personal Miniflux or Nextcloud server
 - Smooth and snappy user experience even on the older and cheaper devices
 - Built-in podcast fetcher which can be used with external players
 - Enhance your news feed with high-resolution preview images
