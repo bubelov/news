@@ -486,7 +486,7 @@ class EntriesFragment : AppFragment(), Scrollable {
             null -> {
                 swipeRefresh.isRefreshing = false
                 list.hide()
-                progress.hide()
+                progress.show(animate = true)
                 message.hide()
                 retry.hide()
             }
