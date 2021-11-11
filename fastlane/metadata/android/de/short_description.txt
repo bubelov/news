@@ -1,1 +1,1 @@
-Feed-Reader und Podcast-Player für Nextcloud (inoffiziell)
+Feed reader and podcast player for Miniflux and Nextcloud (unofficial)

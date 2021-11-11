@@ -3,7 +3,7 @@ ATTENZIONE: Questo non è un client ufficiale per Nextcloud News
 Funzioni principali:
 
 * Iscriviti ai tuoi feed RSS e Atom preferiti
-* Sincronizza col tuo server Nextcloud News personale
+* Sync with your personal Miniflux or Nextcloud server
 * Esperienza utente fluida e scattante anche sui dispositivi più vecchi ed economici
 * Esploratore di podcast integrato che può essere utilizzato con riproduttori esterni
 * Migliora il tuo feed delle novità con delle immagini di anteprima in alta definizione
