@@ -1,11 +1,14 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="BaseAppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <!-- overriden in v31/styles.xml by dynamic theme -->
+    <style name="ThemeColors" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/color_primary</item>
         <item name="colorPrimaryDark">@color/color_primary_dark</item>
         <item name="colorSecondary">@color/color_secondary</item>
         <item name="colorAccent">@color/color_accent</item>
+    </style>
 
+    <style name="BaseAppTheme" parent="ThemeColors">
         <item name="floatingActionButtonStyle">@style/FloatingActionButton</item>
 
         <item name="android:statusBarColor">@android:color/transparent</item>
@@ -17,7 +20,7 @@
         <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
     </style>
 
-    <style name="FloatingActionButton" parent="Widget.MaterialComponents.FloatingActionButton">
+    <style name="FloatingActionButton" parent="Widget.Material3.FloatingActionButton.Primary">
         <item name="backgroundTint">?colorPrimary</item>
         <item name="tint">?colorOnPrimary</item>
     </style>
