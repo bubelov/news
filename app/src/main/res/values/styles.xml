@@ -17,6 +17,8 @@
         <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
     </style>
 
+    <style name="AppBar" parent="@style/Widget.MaterialComponents.AppBarLayout.Surface" />
+
     <style name="FloatingActionButton" parent="Widget.MaterialComponents.FloatingActionButton">
         <item name="backgroundTint">?colorPrimary</item>
         <item name="tint">?colorOnPrimary</item>
