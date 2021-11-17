@@ -67,14 +67,18 @@ class AuthFragment : AppFragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.loginWithNextcloud.setOnClickListener {
-            showAccountPicker()
-        }
-
         binding.loginWithMiniflux.setOnClickListener {
             findNavController().navigate(R.id.action_authFragment_to_minifluxAuthFragment)
         }
 
+        binding.loginWithNextcloudApp.setOnClickListener {
+            showAccountPicker()
+        }
+
+        binding.loginWithNextcloud.setOnClickListener {
+            findNavController().navigate(R.id.action_authFragment_to_directAuthFragment)
+        }
+        
         binding.standaloneMode.setOnClickListener {
             lifecycleScope.launchWhenResumed {
                 model.saveConf(

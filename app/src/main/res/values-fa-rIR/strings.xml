@@ -109,6 +109,7 @@
     <string name="feed_url">پیوند خوراک</string>
     <string name="comments">نظرها</string>
     <string name="view_comments">نمایش نظرها</string>
+    <string name="login_with_nextcloud_app">Login with Nextcloud (app)</string>
     <plurals name="d_hours">
         <item quantity="one">%d ساعت</item>
         <item quantity="other">%d ساعت</item>

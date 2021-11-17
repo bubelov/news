@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">News</string>
-    <string name="login_with_nextcloud">Login with Nextcloud</string>
+    <string name="login_with_nextcloud">Login with Nextcloud (direct)</string>
     <string name="post_image">Post image</string>
     <string name="settings">Settings</string>
     <string name="news">News</string>
@@ -109,6 +109,7 @@
     <string name="feed_url">Feed URL</string>
     <string name="comments">Comments</string>
     <string name="view_comments">View comments</string>
+    <string name="login_with_nextcloud_app">Login with Nextcloud (app)</string>
     <plurals name="d_hours">
         <item quantity="other">%d hours</item>
     </plurals>
