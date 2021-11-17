@@ -6,9 +6,4 @@
         <item name="android:navigationBarColor">?colorSurface</item>
     </style>
 
-    <style name="FloatingActionButton" parent="Widget.MaterialComponents.FloatingActionButton">
-        <item name="backgroundTint">?colorSurface</item>
-        <item name="tint">?colorOnSurface</item>
-    </style>
-
 </resources>

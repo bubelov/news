@@ -3,8 +3,6 @@
 <resources>
 
     <style name="BaseAppTheme" parent="Theme.Material3.DynamicColors.DayNight">
-        <item name="floatingActionButtonStyle">@style/FloatingActionButton</item>
-
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
 
@@ -13,7 +11,5 @@
     </style>
 
     <style name="AppBar" parent="@style/Widget.Material3.AppBarLayout" />
-
-    <style name="FloatingActionButton" parent="Widget.Material3.FloatingActionButton.Primary" />
 
 </resources>

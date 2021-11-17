@@ -6,8 +6,6 @@
         <item name="colorSecondary">@color/color_secondary</item>
         <item name="colorAccent">@color/color_accent</item>
 
-        <item name="floatingActionButtonStyle">@style/FloatingActionButton</item>
-
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
@@ -18,11 +16,6 @@
     </style>
 
     <style name="AppBar" parent="@style/Widget.MaterialComponents.AppBarLayout.Surface" />
-
-    <style name="FloatingActionButton" parent="Widget.MaterialComponents.FloatingActionButton">
-        <item name="backgroundTint">?colorPrimary</item>
-        <item name="tint">?colorOnPrimary</item>
-    </style>
 
     <style name="Divider">
         <item name="android:layout_width">match_parent</item>
