@@ -271,7 +271,7 @@ class EntriesFragment : AppFragment(), Scrollable {
     private fun initToolbar() = toolbar.apply {
         inflateMenu(R.menu.menu_entries)
 
-        when (val filter = args.filter) {
+        when (val filter = args.filter!!) {
             EntriesFilter.Bookmarked -> {
                 setTitle(R.string.bookmarks)
             }

@@ -87,8 +87,10 @@ class SearchViewModel(
         entriesRepository.setRead(entryId, true)
 
         viewModelScope.launch {
-            when (val r = sync.syncEntriesFlags()) {
-                is SyncResult.Err -> Timber.e(r.e)
+            val syncResult = sync.syncEntriesFlags()
+
+            if (syncResult is SyncResult.Err) {
+                Timber.e(syncResult.e)
             }
         }
     }

@@ -145,7 +145,7 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
 
         lifecycleScope.launchWhenResumed {
             model.onViewCreated()
-            model.state.collectLatest { setState(it) }
+            model.state.collectLatest { setState(it ?: return@collectLatest) }
         }
     }
 
@@ -240,7 +240,7 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
         }
     }
 
-    private suspend fun setState(state: FeedsViewModel.State?) = binding.apply {
+    private suspend fun setState(state: FeedsViewModel.State) = binding.apply {
         list.hide()
         progress.hide()
         message.hide()

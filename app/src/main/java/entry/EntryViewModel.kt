@@ -73,8 +73,10 @@ class EntryViewModel(
         }
 
         viewModelScope.launch {
-            when (val r = newsApiSync.syncEntriesFlags()) {
-                is SyncResult.Err -> Timber.e(r.e)
+            val syncResult = newsApiSync.syncEntriesFlags()
+
+            if (syncResult is SyncResult.Err) {
+                Timber.e(syncResult.e)
             }
         }
     }

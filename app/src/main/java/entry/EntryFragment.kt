@@ -21,7 +21,7 @@ import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentEntryBinding
 import common.*
 import db.Entry
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
 import java.time.format.DateTimeFormatter
@@ -61,7 +61,7 @@ class EntryFragment : AppFragment() {
                     imageGetter = TextViewImageGetter(binding.summaryView, lifecycleScope),
                 )
 
-                model.state.collect { setState(it) }
+                model.state.collectLatest { setState(it ?: return@collectLatest) }
             }
         }
     }
@@ -71,7 +71,7 @@ class EntryFragment : AppFragment() {
         _binding = null
     }
 
-    private fun setState(state: EntryViewModel.State?) {
+    private fun setState(state: EntryViewModel.State) {
         binding.apply {
             val menu = toolbar.menu
 
@@ -107,7 +107,8 @@ class EntryFragment : AppFragment() {
 
                     updateBookmarkedButton(state.entry.bookmarked)
                     title.text = state.entry.title
-                    val format = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
+                    val format =
+                        DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
                     date.text = format.format(state.entry.published)
                     state.parsedContent.applyStyle(summaryView)
                     summaryView.text = state.parsedContent

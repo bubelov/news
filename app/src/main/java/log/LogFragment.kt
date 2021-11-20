@@ -70,7 +70,7 @@ class LogFragment : AppFragment() {
             lifecycleScope.launchWhenResumed {
                 model.state.collect { state ->
                     when (state) {
-                        is LogViewModel.State.Loading, LogViewModel.State.Deleting -> {
+                        null, is LogViewModel.State.Loading, LogViewModel.State.Deleting -> {
                             list.hide()
                             progress.show(animate = true)
                             empty.hide()

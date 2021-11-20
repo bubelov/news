@@ -246,10 +246,10 @@ class EntriesViewModel(
         entryIds.forEach { entriesRepository.setRead(it, read) }
 
         viewModelScope.launch {
-            when (val r = newsApiSync.syncEntriesFlags()) {
-                is SyncResult.Err -> {
-                    Timber.e(r.e)
-                }
+            val syncResult = newsApiSync.syncEntriesFlags()
+
+            if (syncResult is SyncResult.Err) {
+                Timber.e(syncResult.e)
             }
         }
     }
@@ -258,31 +258,31 @@ class EntriesViewModel(
         entriesRepository.setBookmarked(entryId, bookmarked)
 
         viewModelScope.launch {
-            when (val r = newsApiSync.syncEntriesFlags()) {
-                is SyncResult.Err -> {
-                    Timber.e(r.e)
-                }
+            val syncResult = newsApiSync.syncEntriesFlags()
+
+            if (syncResult is SyncResult.Err) {
+                Timber.e(syncResult.e)
             }
         }
     }
 
     fun show(entry: EntriesAdapterItem, entryIndex: Int) {
-        when (val state = state.value) {
-            is State.ShowingEntries -> {
-                this.state.value = state.copy(
-                    entries = state.entries.toMutableList().apply { add(entryIndex, entry) }
-                )
-            }
+        val state = state.value
+
+        if (state is State.ShowingEntries) {
+            this.state.value = state.copy(
+                entries = state.entries.toMutableList().apply { add(entryIndex, entry) }
+            )
         }
     }
 
     fun hide(entry: EntriesAdapterItem) {
-        when (val state = state.value) {
-            is State.ShowingEntries -> {
-                this.state.value = state.copy(
-                    entries = state.entries.toMutableList().apply { removeAll { it == entry } }
-                )
-            }
+        val state = state.value
+
+        if (state is State.ShowingEntries) {
+            this.state.value = state.copy(
+                entries = state.entries.toMutableList().apply { removeAll { it == entry } }
+            )
         }
     }
 
@@ -313,10 +313,10 @@ class EntriesViewModel(
         reloadEntries(inBackground = true)
 
         viewModelScope.launch {
-            when (val r = newsApiSync.syncEntriesFlags()) {
-                is SyncResult.Err -> {
-                    Timber.e(r.e)
-                }
+            val syncResult = newsApiSync.syncEntriesFlags()
+
+            if (syncResult is SyncResult.Err) {
+                Timber.e(syncResult.e)
             }
         }
     }
