@@ -15,8 +15,6 @@
         <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
     </style>
 
-    <style name="AppBar" parent="@style/Widget.MaterialComponents.AppBarLayout.Surface" />
-
     <style name="Divider">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">1dp</item>

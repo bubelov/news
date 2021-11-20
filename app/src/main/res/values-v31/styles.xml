@@ -10,6 +10,4 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="AppBar" parent="@style/Widget.Material3.AppBarLayout" />
-
 </resources>
