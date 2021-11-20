@@ -14,7 +14,7 @@ class MinifluxApiAdapter(
     private val api: MinifluxApi,
 ) : NewsApi {
 
-    override suspend fun addFeed(url: URL): Feed {
+    override suspend fun addFeed(url: URL): Result<Feed> = runCatching {
         val categories = api.getCategories()
 
         val category = categories.find { it.title.equals("All", ignoreCase = true) }
@@ -28,7 +28,7 @@ class MinifluxApiAdapter(
             )
         )
 
-        return api.getFeed(response.feed_id).toFeed()!!
+        api.getFeed(response.feed_id).toFeed()!!
     }
 
     override suspend fun getFeeds(): List<Feed> {
@@ -113,7 +113,10 @@ class MinifluxApiAdapter(
         }
     }
 
-    override suspend fun markEntriesAsBookmarked(entries: List<EntryWithoutSummary>, bookmarked: Boolean) {
+    override suspend fun markEntriesAsBookmarked(
+        entries: List<EntryWithoutSummary>,
+        bookmarked: Boolean,
+    ) {
         entries.forEach {
             api.putEntryBookmark(it.id.toLong())
         }

@@ -5,14 +5,13 @@ import db.EntryWithoutSummary
 import db.Feed
 import kotlinx.coroutines.flow.Flow
 import java.net.URL
-import java.time.LocalDateTime
 import java.time.OffsetDateTime
 
 class NewsApiWrapper : NewsApi {
 
     lateinit var api: NewsApi
 
-    override suspend fun addFeed(url: URL): Feed {
+    override suspend fun addFeed(url: URL): Result<Feed> {
         return api.addFeed(url)
     }
 
@@ -44,7 +43,10 @@ class NewsApiWrapper : NewsApi {
         api.markEntriesAsRead(entriesIds, read)
     }
 
-    override suspend fun markEntriesAsBookmarked(entries: List<EntryWithoutSummary>, bookmarked: Boolean) {
+    override suspend fun markEntriesAsBookmarked(
+        entries: List<EntryWithoutSummary>,
+        bookmarked: Boolean,
+    ) {
         api.markEntriesAsBookmarked(entries, bookmarked)
     }
 }

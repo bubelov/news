@@ -16,7 +16,7 @@ class NextcloudNewsApiAdapter(
     private val api: NextcloudNewsApi,
 ) : NewsApi {
 
-    override suspend fun addFeed(url: URL): Feed {
+    override suspend fun addFeed(url: URL): Result<Feed> = kotlin.runCatching {
         val response = api.postFeed(PostFeedArgs(url.toString(), 0)).execute()
 
         if (!response.isSuccessful) {
@@ -26,7 +26,7 @@ class NextcloudNewsApiAdapter(
         val feedJson =
             response.body()?.feeds?.single() ?: throw Exception("Can not parse server response")
 
-        return feedJson.toFeed() ?: throw Exception("Invalid server response")
+        feedJson.toFeed() ?: throw Exception("Invalid server response")
     }
 
     override suspend fun getFeeds(): List<Feed> {
@@ -95,7 +95,8 @@ class NextcloudNewsApiAdapter(
                 if (currentBatch.size < batchSize) {
                     break
                 } else {
-                    oldestEntryId = currentBatch.minOfOrNull { it.id ?: Long.MAX_VALUE }?.toLong() ?: 0L
+                    oldestEntryId =
+                        currentBatch.minOfOrNull { it.id ?: Long.MAX_VALUE }?.toLong() ?: 0L
                     currentBatch.clear()
                 }
             }
@@ -133,7 +134,10 @@ class NextcloudNewsApiAdapter(
         }
     }
 
-    override suspend fun markEntriesAsBookmarked(entries: List<EntryWithoutSummary>, bookmarked: Boolean) {
+    override suspend fun markEntriesAsBookmarked(
+        entries: List<EntryWithoutSummary>,
+        bookmarked: Boolean,
+    ) {
         val args =
             PutStarredArgs(entries.map { PutStarredArgsItem(it.feedId.toLong(), it.guidHash) })
 

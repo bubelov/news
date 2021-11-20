@@ -20,7 +20,7 @@ class FeedsRepository(
         url: URL,
         title: String? = null,
     ) = withContext(Dispatchers.IO) {
-        var feed = api.addFeed(url)
+        var feed = api.addFeed(url).getOrThrow()
 
         if (!title.isNullOrBlank()) {
             feed = feed.copy(title = title)

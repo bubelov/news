@@ -2,12 +2,7 @@ package api.standalone
 
 import android.util.Base64
 import api.NewsApi
-import co.appreactor.feedk.AtomEntry
-import co.appreactor.feedk.AtomFeed
-import co.appreactor.feedk.RssFeed
-import co.appreactor.feedk.RssItem
-import co.appreactor.feedk.feed
-import common.trustSelfSignedCerts
+import co.appreactor.feedk.*
 import db.Entry
 import db.EntryQueries
 import db.EntryWithoutSummary
@@ -19,11 +14,10 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import timber.log.Timber
+import java.net.HttpURLConnection
 import java.net.URI
 import java.net.URL
 import java.security.MessageDigest
@@ -37,28 +31,34 @@ typealias ParsedFeed = co.appreactor.feedk.Feed
 class StandaloneNewsApi(
     private val feedQueries: FeedQueries,
     private val entryQueries: EntryQueries,
-    private val http: OkHttpClient = OkHttpClient.Builder().trustSelfSignedCerts().build(),
 ) : NewsApi {
 
     @Suppress("BlockingMethodInNonBlockingContext")
-    override suspend fun addFeed(url: URL): Feed = withContext(Dispatchers.IO) {
+    override suspend fun addFeed(url: URL): Result<Feed> {
         Timber.d("Adding feed (url = $url)")
 
-        val request = Request.Builder()
-            .url(url)
-            .build()
-
-        val response = http.newCall(request).execute()
-
-        if (!response.isSuccessful) {
-            throw Exception("Cannot fetch feed (url = $url, code = ${response.code})")
+        val connection = runCatching {
+            url.openConnection() as HttpURLConnection
+        }.getOrElse {
+            return Result.failure(it)
         }
 
-        val responseBody = response.body ?: throw Exception("Response has empty body")
+        runCatching {
+            connection.connect()
+        }.getOrElse {
+            return Result.failure(it)
+        }
 
-        if (response.header("content-type")?.startsWith("text/html") == true) {
+        val httpResponseCode = connection.responseCode
+
+        if (httpResponseCode != 200) {
+            val e = Exception("Cannot fetch feed (url = $url, code = $httpResponseCode)")
+            return Result.failure(e)
+        }
+
+        if (connection.getHeaderField("content-type")?.startsWith("text/html") == true) {
             Timber.d("Got an HTML document, looking for feed links")
-            val html = Jsoup.parse(responseBody.string())
+            val html = Jsoup.parse(connection.inputStream.bufferedReader().readText())
 
             val feedElements = mutableListOf<Element>().apply {
                 addAll(html.select("link[type=\"application/rss+xml\"]"))
@@ -70,9 +70,29 @@ class StandaloneNewsApi(
             }
 
             Timber.d("Feed elements found: ${feedElements.size}. Data: $feedElements")
-            return@withContext addFeed(URI.create(feedElements.first().attr("href")).toURL())
+            return addFeed(URI.create(feedElements.first().attr("href")).toURL())
         } else {
-            return@withContext feed(url).getOrThrow().toFeed(url)
+            return when (val result = feed(url, connection)) {
+                is FeedResult.Success -> {
+                    Result.success(result.feed.toFeed(url))
+                }
+
+                is FeedResult.HttpConnectionFailure -> {
+                    Result.failure(Exception("HTTP connection failure"))
+                }
+
+                is FeedResult.HttpNotOk -> {
+                    Result.failure(Exception("Got HTTP response code ${result.responseCode} with message: ${result.message}"))
+                }
+
+                is FeedResult.ParserFailure -> {
+                    Result.failure(result.t)
+                }
+
+                FeedResult.UnknownFeedType -> {
+                    Result.failure(Exception("Unknown feed type"))
+                }
+            }
         }
     }
 
@@ -119,32 +139,51 @@ class StandaloneNewsApi(
         val url = runCatching {
             URI.create(feed.selfLink).toURL()
         }.getOrElse {
-            Timber.d("Failed to parse feed url for feed $feed")
+            Timber.e("Failed to parse feed url for feed $feed")
             return emptyList()
         }
 
-        val parsedFeed = feed(url).getOrElse {
-            Timber.d("Failed to parse feed $feed")
-            return emptyList()
-        }
-
-        return when (parsedFeed) {
-            is AtomFeed -> {
-                parsedFeed.entries.getOrElse {
-                    Timber.d("Failed to parse Atom entries for feed $feed")
-                    return emptyList()
-                }.map { it.toEntry(feed.id) }
-            }
-            is RssFeed -> {
-                parsedFeed.channel.items.getOrElse {
-                    Timber.d("Failed to parse RSS entries for feed $feed")
-                    return emptyList()
-                }.mapNotNull {
-                    it.getOrElse {
-                        Timber.d("Failed to parse RSS entry for feed $feed")
-                        null
+        return when (val result = feed(url)) {
+            is FeedResult.Success -> {
+                when (val parsedFeed = result.feed) {
+                    is AtomFeed -> {
+                        parsedFeed.entries.getOrElse {
+                            Timber.d("Failed to parse Atom entries for feed $feed")
+                            return emptyList()
+                        }.map { it.toEntry(feed.id) }
                     }
-                }.map { it.toEntry(feed.id) }
+                    is RssFeed -> {
+                        parsedFeed.channel.items.getOrElse {
+                            Timber.d("Failed to parse RSS entries for feed $feed")
+                            return emptyList()
+                        }.mapNotNull {
+                            it.getOrElse {
+                                Timber.d("Failed to parse RSS entry for feed $feed")
+                                null
+                            }
+                        }.map { it.toEntry(feed.id) }
+                    }
+                }
+            }
+
+            is FeedResult.HttpConnectionFailure -> {
+                Timber.e("HTTP connection failure (url = $url)")
+                emptyList()
+            }
+
+            is FeedResult.HttpNotOk -> {
+                Timber.e("Got HTTP response code ${result.responseCode} with message: ${result.message}")
+                emptyList()
+            }
+
+            is FeedResult.ParserFailure -> {
+                Timber.e(result.t, "Feed parser failure (url = $url)")
+                emptyList()
+            }
+
+            FeedResult.UnknownFeedType -> {
+                Timber.e("Unknown feed type (url = $url)")
+                emptyList()
             }
         }
     }
@@ -153,7 +192,10 @@ class StandaloneNewsApi(
 
     }
 
-    override suspend fun markEntriesAsBookmarked(entries: List<EntryWithoutSummary>, bookmarked: Boolean) {
+    override suspend fun markEntriesAsBookmarked(
+        entries: List<EntryWithoutSummary>,
+        bookmarked: Boolean
+    ) {
 
     }
 
