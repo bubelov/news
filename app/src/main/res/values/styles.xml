@@ -4,6 +4,7 @@
         <item name="colorPrimary">@color/color_primary</item>
         <item name="colorPrimaryDark">@color/color_primary_dark</item>
         <item name="colorSecondary">@color/color_secondary</item>
+        <item name="colorOnSecondary">@color/color_on_secondary</item>
         <item name="colorAccent">@color/color_accent</item>
 
         <item name="android:statusBarColor">@android:color/transparent</item>

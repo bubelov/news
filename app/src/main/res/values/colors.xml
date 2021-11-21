@@ -2,10 +2,9 @@
 
 <resources>
     <color name="color_primary">#2b90d9</color>
-    <color name="color_on_primary">@android:color/white</color>
-    <color name="color_primary_container">#0082c9</color>
     <color name="color_primary_dark">@color/color_primary</color>
     <color name="color_secondary">@color/color_primary</color>
+    <color name="color_on_secondary">@android:color/white</color>
     <color name="color_accent">@color/color_primary</color>
 
     <color name="divider">#15000000</color>
