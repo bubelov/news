@@ -69,7 +69,7 @@
         android:paddingEnd="6dp"
         android:paddingBottom="2dp"
         android:textAppearance="?attr/textAppearanceCaption"
-        android:textColor="@android:color/white"
+        android:textColor="?colorOnSecondary"
         tools:text="666" />
 
     <FrameLayout
