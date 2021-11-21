@@ -64,7 +64,6 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:contentDescription="@string/open_in_browser"
-        app:srcCompat="@drawable/ic_baseline_open_in_browser_24"
-        app:tint="@android:color/white" />
+        app:srcCompat="@drawable/ic_baseline_open_in_browser_24" />
 
 </FrameLayout>
