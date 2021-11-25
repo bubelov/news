@@ -2,11 +2,11 @@ package common
 
 import android.os.Bundle
 import android.view.View
+import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import co.appreactor.news.R
 import com.google.android.material.appbar.MaterialToolbar
 import timber.log.Timber
 
@@ -56,7 +56,7 @@ abstract class AppFragment(
     }
 
     protected fun MaterialToolbar.setupUpNavigation(hideKeyboard: Boolean = false) {
-        setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
+        navigationIcon = DrawerArrowDrawable(context).also { it.progress = 1f }
         setNavigationOnClickListener {
             if (hideKeyboard) requireContext().hideKeyboard(searchPanelText)
             findNavController().popBackStack()
