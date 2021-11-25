@@ -5,6 +5,9 @@ import android.view.View
 import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import co.appreactor.news.R
+import com.google.android.material.appbar.MaterialToolbar
 import timber.log.Timber
 
 abstract class AppFragment(
@@ -50,5 +53,13 @@ abstract class AppFragment(
     override fun onResume() {
         super.onResume()
         Timber.d("Resuming fragment (class = ${javaClass.simpleName})")
+    }
+
+    protected fun MaterialToolbar.setupUpNavigation(hideKeyboard: Boolean = false) {
+        setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
+        setNavigationOnClickListener {
+            if (hideKeyboard) requireContext().hideKeyboard(searchPanelText)
+            findNavController().popBackStack()
+        }
     }
 }

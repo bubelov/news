@@ -43,8 +43,7 @@ class LogFragment : AppFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         toolbar.apply {
-            setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
-            setNavigationOnClickListener { findNavController().popBackStack() }
+            setupUpNavigation()
             setTitle(R.string.event_log)
             inflateMenu(R.menu.menu_log_entries)
 

@@ -80,14 +80,7 @@ class SearchFragment : AppFragment() {
 
         searchPanel.isVisible = true
 
-        toolbar.apply {
-            setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
-
-            setNavigationOnClickListener {
-                requireContext().hideKeyboard(searchPanelText)
-                findNavController().popBackStack()
-            }
-        }
+        toolbar.setupUpNavigation(hideKeyboard = true)
 
         lifecycleScope.launch {
             model.searchString.collect {

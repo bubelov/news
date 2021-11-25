@@ -281,11 +281,7 @@ class EntriesFragment : AppFragment(), Scrollable {
             }
 
             is EntriesFilter.BelongToFeed -> {
-                toolbar.setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
-
-                toolbar.setNavigationOnClickListener {
-                    findNavController().popBackStack()
-                }
+                setupUpNavigation()
 
                 lifecycleScope.launchWhenResumed {
                     title = model.getFeed(filter.feedId)?.title

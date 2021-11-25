@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentExceptionBinding
 import common.AppFragment
@@ -39,8 +38,7 @@ class ExceptionFragment : AppFragment() {
             val log = model.selectById(args.logId) ?: return@launchWhenResumed
 
             toolbar.apply {
-                setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
-                setNavigationOnClickListener { findNavController().popBackStack() }
+                setupUpNavigation()
                 title = getString(R.string.stack_trace)
                 inflateMenu(R.menu.menu_exception)
 
