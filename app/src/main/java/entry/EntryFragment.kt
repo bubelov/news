@@ -49,8 +49,7 @@ class EntryFragment : AppFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         toolbar.apply {
-            setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
-            setNavigationOnClickListener { findNavController().popBackStack() }
+            setupUpNavigation()
             inflateMenu(R.menu.menu_entry)
         }
 

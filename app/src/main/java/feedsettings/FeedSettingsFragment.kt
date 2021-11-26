@@ -48,8 +48,7 @@ class FeedSettingsFragment : AppFragment() {
         }
 
         toolbar.apply {
-            setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
-            setNavigationOnClickListener { findNavController().popBackStack() }
+            setupUpNavigation()
             title = feed.title
         }
 
