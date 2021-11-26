@@ -38,7 +38,6 @@ class TextViewImageGetter(
                     Timber.e(it, "Failed to display image $source")
                 }
             }
-
         }
 
         return drawable
