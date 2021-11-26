@@ -8,6 +8,7 @@ import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.getSystemService
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import co.appreactor.news.R
@@ -106,8 +107,7 @@ class SyncWorker(appContext: Context, workerParams: WorkerParameters) :
             val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
                 description = descriptionText
             }
-            val notificationManager: NotificationManager =
-                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val notificationManager = context.getSystemService<NotificationManager>()!!
             notificationManager.createNotificationChannel(channel)
         }
     }

@@ -2,6 +2,7 @@ package injections
 
 import android.content.Context
 import android.net.ConnectivityManager
+import androidx.core.content.getSystemService
 import api.NewsApi
 import api.NewsApiSwitcher
 import api.NewsApiWrapper
@@ -59,8 +60,7 @@ val appModule = module {
 
     single {
         val context = get<Context>()
-        val connectivityManager =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val connectivityManager = context.getSystemService<ConnectivityManager>()!!
         NetworkMonitor(connectivityManager)
     }
 
