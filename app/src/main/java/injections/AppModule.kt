@@ -22,7 +22,7 @@ import entry.EntryViewModel
 import entriesimages.EntriesImagesRepository
 import podcasts.PodcastsRepository
 import settings.SettingsViewModel
-import common.ConnectivityProbe
+import common.NetworkMonitor
 import db.entryAdapter
 import entries.EntriesSharedViewModel
 import entries.EntriesSupportingTextRepository
@@ -61,7 +61,7 @@ val appModule = module {
         val context = get<Context>()
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        ConnectivityProbe(connectivityManager)
+        NetworkMonitor(connectivityManager)
     }
 
     single { get<Context>().resources }

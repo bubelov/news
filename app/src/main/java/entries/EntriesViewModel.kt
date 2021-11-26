@@ -3,7 +3,7 @@ package entries
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import common.ConnectivityProbe
+import common.NetworkMonitor
 import common.ConfRepository
 import db.EntryWithoutSummary
 import feeds.FeedsRepository
@@ -35,7 +35,7 @@ class EntriesViewModel(
     private val podcastsRepository: PodcastsRepository,
     private val newsApiSync: NewsApiSync,
     private val conf: ConfRepository,
-    private val connectivityProbe: ConnectivityProbe,
+    private val networkMonitor: NetworkMonitor,
 ) : ViewModel() {
 
     private lateinit var filter: EntriesFilter
@@ -55,7 +55,7 @@ class EntriesViewModel(
                 ) {
                     sharedModel.syncedOnStartup = true
 
-                    if (connectivityProbe.online) {
+                    if (networkMonitor.online) {
                         state.value = State.ShowingEntries(
                             entries = getCachedEntries(conf),
                             includesUnread = conf.showReadEntries || filter is EntriesFilter.Bookmarked,

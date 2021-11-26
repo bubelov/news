@@ -1,6 +1,6 @@
 package sync
 
-import common.ConnectivityProbe
+import common.NetworkMonitor
 import common.ConfRepository
 import feeds.FeedsRepository
 import entries.EntriesRepository
@@ -17,7 +17,7 @@ class NewsApiSync(
     private val feedsRepository: FeedsRepository,
     private val entriesRepository: EntriesRepository,
     private val conf: ConfRepository,
-    private val connectivityProbe: ConnectivityProbe,
+    private val networkMonitor: NetworkMonitor,
 ) {
 
     val syncMessage = MutableStateFlow("")
@@ -72,7 +72,7 @@ class NewsApiSync(
         syncEntriesFlags: Boolean = true,
         syncNewAndUpdatedEntries: Boolean = true,
     ): SyncResult {
-        if (!connectivityProbe.online) {
+        if (!networkMonitor.online) {
             return SyncResult.Err(Exception("Device is offline"))
         }
 
