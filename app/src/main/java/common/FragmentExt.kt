@@ -1,7 +1,6 @@
 package common
 
 import android.content.ActivityNotFoundException
-import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
@@ -9,6 +8,7 @@ import android.os.Build
 import android.util.DisplayMetrics
 import android.view.WindowManager
 import androidx.annotation.StringRes
+import androidx.core.content.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import co.appreactor.news.R
@@ -103,7 +103,7 @@ private fun Fragment.activity() = requireActivity() as AppActivity
 
 fun Fragment.screenWidth(): Int {
     return if (Build.VERSION.SDK_INT >= 31) {
-        val windowManager = requireContext().getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val windowManager = requireContext().getSystemService<WindowManager>()!!
         windowManager.currentWindowMetrics.bounds.width()
     } else if (Build.VERSION.SDK_INT >= 30) {
         val displayMetrics = DisplayMetrics()
