@@ -35,7 +35,6 @@ class AppActivity : AppCompatActivity() {
     private val navListener = NavController.OnDestinationChangedListener { _, destination, args ->
         if (destination.id == R.id.entriesFragment) {
             val filter = args?.getParcelable<EntriesFilter>("filter")
-            binding.bottomNavigationDivider.isVisible = filter !is EntriesFilter.BelongToFeed
             binding.bottomNavigation.isVisible = filter !is EntriesFilter.BelongToFeed
             return@OnDestinationChangedListener
         }
@@ -50,7 +49,6 @@ class AppActivity : AppCompatActivity() {
                     || destination.id == R.id.podcastsFragment
                     || destination.id == R.id.entriesFragment
 
-        binding.bottomNavigationDivider.isVisible = bottomNavigationIsVisible
         binding.bottomNavigation.isVisible = bottomNavigationIsVisible
     }
 

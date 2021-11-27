@@ -18,7 +18,14 @@ class EntriesAdapterViewHolder(
     private val callback: EntriesAdapterCallback,
 ) : RecyclerView.ViewHolder(binding.root) {
 
+    private var setStrokeAlpha = false
+
     fun bind(item: EntriesAdapterItem) = binding.apply {
+        if (!setStrokeAlpha) {
+            card.setStrokeColor(card.strokeColorStateList!!.withAlpha(32))
+            setStrokeAlpha = true
+        }
+
         val cardMargin = root.resources.getDimensionPixelSize(R.dimen.card_horizontal_margin)
 
         val cardHeightMin = root.resources.getDimensionPixelSize(R.dimen.card_height_min)

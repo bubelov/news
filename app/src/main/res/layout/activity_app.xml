@@ -19,8 +19,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?colorSurface"
-            android:fitsSystemWindows="true"
-            app:elevation="0dp">
+            android:fitsSystemWindows="true">
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
@@ -63,8 +62,6 @@
 
             </com.google.android.material.appbar.MaterialToolbar>
 
-            <View style="@style/Divider" />
-
         </com.google.android.material.appbar.AppBarLayout>
 
         <LinearLayout
@@ -80,10 +77,6 @@
                 android:layout_weight="1"
                 app:defaultNavHost="true"
                 app:navGraph="@navigation/nav_graph" />
-
-            <View
-                android:id="@+id/bottomNavigationDivider"
-                style="@style/Divider" />
 
             <com.google.android.material.bottomnavigation.BottomNavigationView
                 android:id="@+id/bottomNavigation"

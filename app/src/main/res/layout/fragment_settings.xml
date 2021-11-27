@@ -32,11 +32,6 @@
 
         </LinearLayout>
 
-        <View
-            style="@style/Divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp" />
-
         <FrameLayout
             android:id="@+id/backgroundSyncIntervalPanel"
             android:layout_width="match_parent"
@@ -68,12 +63,6 @@
 
             </LinearLayout>
 
-            <View
-                style="@style/Divider"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_gravity="bottom" />
-
         </FrameLayout>
 
         <LinearLayout
@@ -96,11 +85,6 @@
 
         </LinearLayout>
 
-        <View
-            style="@style/Divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp" />
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -120,11 +104,6 @@
                 android:textAppearance="?textAppearanceListItem" />
 
         </LinearLayout>
-
-        <View
-            style="@style/Divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -146,11 +125,6 @@
 
         </LinearLayout>
 
-        <View
-            style="@style/Divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp" />
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -170,11 +144,6 @@
                 android:textAppearance="?textAppearanceListItem" />
 
         </LinearLayout>
-
-        <View
-            style="@style/Divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -196,11 +165,6 @@
 
         </LinearLayout>
 
-        <View
-            style="@style/Divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp" />
-
         <LinearLayout
             android:id="@+id/viewLogEntries"
             android:layout_width="match_parent"
@@ -219,11 +183,6 @@
 
         </LinearLayout>
 
-        <View
-            style="@style/Divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp" />
-
         <LinearLayout
             android:id="@+id/exportDatabase"
             android:layout_width="match_parent"
@@ -241,11 +200,6 @@
                 android:textAppearance="?textAppearanceListItem" />
 
         </LinearLayout>
-
-        <View
-            style="@style/Divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp" />
 
         <LinearLayout
             android:id="@+id/logOut"
@@ -273,11 +227,6 @@
                 tools:text="foo@bar.com" />
 
         </LinearLayout>
-
-        <View
-            style="@style/Divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp" />
 
         <Space
             android:layout_width="match_parent"

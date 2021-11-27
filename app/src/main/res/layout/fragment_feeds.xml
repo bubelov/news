@@ -37,16 +37,13 @@
             android:textAppearance="?textAppearanceBody1"
             android:visibility="gone" />
 
-        <TextView
+        <Button
             android:id="@+id/importOpml"
+            style="?materialButtonOutlinedStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:clickable="true"
-            android:focusable="true"
             android:text="@string/import_feeds_from_opml_file"
-            android:textAppearance="?textAppearanceBody1"
-            android:textColor="?colorAccent"
             android:visibility="gone" />
 
     </LinearLayout>
