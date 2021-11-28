@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <resources>
     <string name="app_name">Nieuws</string>
     <string name="login_with_nextcloud">Login met Nextcloud</string>
@@ -26,8 +27,6 @@
     <string name="downloading">Downloaden</string>
     <string name="listen">Luisteren</string>
     <string name="crop_feed_images">Preview afbeeldingen bijsnijden</string>
-    <string name="exceptions">Uitzonderingen</string>
-    <string name="you_have_no_logged_exceptions">U hebt geen aangemelde uitzonderingen</string>
     <string name="feeds">Feeds</string>
     <string name="bookmarks">Bladwijzer</string>
     <string name="delete_all">Alles verwijderen</string>
@@ -35,7 +34,6 @@
     <string name="open_html_link">Open website</string>
     <string name="actions">Acties</string>
     <string name="delete">Verwijder</string>
-    <string name="add_feed_url_hint">Plak feed URL hier</string>
     <string name="add_feed">Feed toevoegen</string>
     <string name="add">Toevoegen</string>
     <string name="show_feed_images">Toon voorbeeld afbeeldingen</string>
@@ -57,7 +55,6 @@
     <string name="bookmarked">Gemarkeerd</string>
     <string name="search">Zoeken</string>
     <string name="clear_search_input">Verwijder zoekgeschiedenis</string>
-    <string name="no_results">Geen resultaten</string>
     <string name="you_have_no_apps_which_can_play_this_podcast">Je hebt geen apps die deze podcast kunnen spelen.</string>
     <string name="import_feeds_from_opml_file">Importeren van OPML bestand</string>
     <string name="export_feeds_to_opml_file">Exporteren naar OPML bestand</string>
@@ -84,9 +81,7 @@
     <string name="event_log_is_empty">Event logboek is leeg</string>
     <string name="event_log">Event logboek</string>
     <string name="view_event_log">Bekijk event logboek</string>
-    <string name="you_have_d_unread_news">Je hebt %1$d ongelezen nieuws</string>
     <string name="unread_news">Ongelezen nieuws</string>
-    <string name="view_exception_log">Bekijk uitzonderingslogboek</string>
     <string name="got_exception_of_class_s">Heb %1$s. Zie uitzonderingen in de logboek voor details</string>
     <string name="trust_self_signed_certificates">Vertrouwd zelfondertekend certificaats</string>
     <string name="you_have_no_feeds">Je hebt geen feeds</string>
@@ -107,11 +102,14 @@
     <string name="stack_trace">Stack trace</string>
     <string name="stack_trace_icon">Stack trace icon</string>
     <string name="feed_url">Feed URL</string>
-    <string name="comments">Comments</string>
     <string name="view_comments">View comments</string>
     <string name="login_with_nextcloud_app">Login with Nextcloud (app)</string>
     <plurals name="d_hours">
         <item quantity="one">%d uur</item>
         <item quantity="other">%d uren</item>
+    </plurals>
+    <plurals name="you_have_d_unread_news">
+        <item quantity="one">Je hebt %1$d ongelezen nieuws</item>
+        <item quantity="other">Je hebt %1$d ongelezen nieuws</item>
     </plurals>
 </resources>

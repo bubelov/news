@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <resources>
     <string name="app_name">Новости</string>
     <string name="login_with_nextcloud">Войти через Nextcloud</string>
@@ -26,8 +27,6 @@
     <string name="downloading">Скачивание</string>
     <string name="listen">Слушать</string>
     <string name="crop_feed_images">Обрезать изображения предпросмотра</string>
-    <string name="exceptions">Исключения</string>
-    <string name="you_have_no_logged_exceptions">У вас нет зарегистрированных исключений</string>
     <string name="feeds">Ленты</string>
     <string name="bookmarks">Закладки</string>
     <string name="delete_all">Удалить все</string>
@@ -35,7 +34,6 @@
     <string name="open_html_link">Открыть сайт</string>
     <string name="actions">Действия</string>
     <string name="delete">Удалить</string>
-    <string name="add_feed_url_hint">Вставьте URL ленты здесь</string>
     <string name="add_feed">Добавить ленту</string>
     <string name="add">Добавить</string>
     <string name="show_feed_images">Показать изображения предпросмотра</string>
@@ -57,7 +55,6 @@
     <string name="bookmarked">Добавлено в закладки</string>
     <string name="search">Поиск</string>
     <string name="clear_search_input">Очистить строку поиска</string>
-    <string name="no_results">Нет результатов</string>
     <string name="you_have_no_apps_which_can_play_this_podcast">У вас нет приложений, которые могли бы воспроизвести этот подкаст.</string>
     <string name="import_feeds_from_opml_file">Импорт из файла OPML</string>
     <string name="export_feeds_to_opml_file">Экспорт в файл OPML</string>
@@ -84,9 +81,7 @@
     <string name="event_log_is_empty">Журнал событий пуст</string>
     <string name="event_log">Журнал событий</string>
     <string name="view_event_log">Просмотр журнала событий</string>
-    <string name="you_have_d_unread_news">У вас %1$d непрочитанных новостей</string>
     <string name="unread_news">Непрочитанные новости</string>
-    <string name="view_exception_log">Просмотр журнала исключений</string>
     <string name="got_exception_of_class_s">%1$s получено. Подробности в журнале исключений</string>
     <string name="trust_self_signed_certificates">Доверять самоподписанным сертификатам</string>
     <string name="you_have_no_feeds">У вас нет лент</string>
@@ -107,7 +102,6 @@
     <string name="stack_trace">Stack trace</string>
     <string name="stack_trace_icon">Stack trace icon</string>
     <string name="feed_url">Feed URL</string>
-    <string name="comments">Comments</string>
     <string name="view_comments">View comments</string>
     <string name="login_with_nextcloud_app">Login with Nextcloud (app)</string>
     <plurals name="d_hours">
@@ -115,5 +109,11 @@
         <item quantity="few">%d часа</item>
         <item quantity="many">%d часов</item>
         <item quantity="other">%d часов</item>
+    </plurals>
+    <plurals name="you_have_d_unread_news">
+        <item quantity="one">У вас %1$d непрочитанных новостей</item>
+        <item quantity="few">У вас %1$d непрочитанных новостей</item>
+        <item quantity="many">У вас %1$d непрочитанных новостей</item>
+        <item quantity="other">У вас %1$d непрочитанных новостей</item>
     </plurals>
 </resources>

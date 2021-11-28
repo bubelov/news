@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <resources>
     <string name="app_name">News</string>
     <string name="login_with_nextcloud">Login with Nextcloud (direct)</string>
@@ -26,8 +27,6 @@
     <string name="downloading">Downloading</string>
     <string name="listen">Listen</string>
     <string name="crop_feed_images">Crop preview images</string>
-    <string name="exceptions">Exceptions</string>
-    <string name="you_have_no_logged_exceptions">You have no logged exceptions</string>
     <string name="feeds">Feeds</string>
     <string name="bookmarks">Bookmarks</string>
     <string name="delete_all">Delete all</string>
@@ -35,7 +34,6 @@
     <string name="open_html_link">Open website</string>
     <string name="actions">Actions</string>
     <string name="delete">Delete</string>
-    <string name="add_feed_url_hint">Paste feed URL here</string>
     <string name="add_feed">Add feed</string>
     <string name="add">Add</string>
     <string name="show_feed_images">Show preview images</string>
@@ -57,7 +55,6 @@
     <string name="bookmarked">Bookmarked</string>
     <string name="search">Search</string>
     <string name="clear_search_input">Clear search input</string>
-    <string name="no_results">No results</string>
     <string name="you_have_no_apps_which_can_play_this_podcast">You have no apps which can play this podcast.</string>
     <string name="import_feeds_from_opml_file">Import from OPML file</string>
     <string name="export_feeds_to_opml_file">Export to OPML file</string>
@@ -84,9 +81,7 @@
     <string name="event_log_is_empty">Event log is empty</string>
     <string name="event_log">Event log</string>
     <string name="view_event_log">View event log</string>
-    <string name="you_have_d_unread_news">You have %1$d unread news</string>
     <string name="unread_news">Unread news</string>
-    <string name="view_exception_log">View exception log</string>
     <string name="got_exception_of_class_s">Got %1$s. See exception log for details</string>
     <string name="trust_self_signed_certificates">Trust self-signed certificates</string>
     <string name="you_have_no_feeds">You have no feeds</string>
@@ -107,12 +102,16 @@
     <string name="stack_trace">Stack trace</string>
     <string name="stack_trace_icon">Stack trace icon</string>
     <string name="feed_url">Feed URL</string>
-    <string name="comments">Comments</string>
     <string name="view_comments">View comments</string>
     <string name="login_with_nextcloud_app">Login with Nextcloud (app)</string>
     <plurals name="d_hours">
         <item quantity="one">%d hour</item>
         <item quantity="few">%d hours</item>
         <item quantity="other">%d hours</item>
+    </plurals>
+    <plurals name="you_have_d_unread_news">
+        <item quantity="one">You have %1$d unread news</item>
+        <item quantity="few">You have %1$d unread news</item>
+        <item quantity="other">You have %1$d unread news</item>
     </plurals>
 </resources>

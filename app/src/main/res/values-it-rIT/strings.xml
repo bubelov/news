@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <resources>
     <string name="app_name">Notizie</string>
     <string name="login_with_nextcloud">Accedi con Nextcloud</string>
@@ -26,8 +27,6 @@
     <string name="downloading">Scaricamento</string>
     <string name="listen">Ascolta</string>
     <string name="crop_feed_images">Ritaglia le immagini di anteprima</string>
-    <string name="exceptions">Eccezioni</string>
-    <string name="you_have_no_logged_exceptions">Non è stata registrata alcuna eccezione</string>
     <string name="feeds">Feed</string>
     <string name="bookmarks">Segnalibri</string>
     <string name="delete_all">Elimina tutto</string>
@@ -35,7 +34,6 @@
     <string name="open_html_link">Apri il sito web</string>
     <string name="actions">Azioni</string>
     <string name="delete">Elimina</string>
-    <string name="add_feed_url_hint">Incolla l\'URL del feed qui</string>
     <string name="add_feed">Aggiungi feed</string>
     <string name="add">Aggiungi</string>
     <string name="show_feed_images">Mostra le immagini di anteprima</string>
@@ -57,7 +55,6 @@
     <string name="bookmarked">Aggiunto ai segnalibri</string>
     <string name="search">Ricerca</string>
     <string name="clear_search_input">Cancella la ricerca</string>
-    <string name="no_results">Nessun risultato</string>
     <string name="you_have_no_apps_which_can_play_this_podcast">Non possiedi nessuna app in grado di riprodurre questo podcast.</string>
     <string name="import_feeds_from_opml_file">Importa da un file OPML</string>
     <string name="export_feeds_to_opml_file">Esporta in un file OPML</string>
@@ -84,9 +81,7 @@
     <string name="event_log_is_empty">Il registro degli eventi è vuoto</string>
     <string name="event_log">Registro degli eventi</string>
     <string name="view_event_log">Visualizza il registro degli eventi</string>
-    <string name="you_have_d_unread_news">Hai %1$d notizie non lette</string>
     <string name="unread_news">Notizie non lette</string>
-    <string name="view_exception_log">Visualizza il registro delle eccezioni</string>
     <string name="got_exception_of_class_s">Ottenuto %1$s. Vedi il registro delle eccezioni per i dettagli</string>
     <string name="trust_self_signed_certificates">Accetta i certificati auto-firmati</string>
     <string name="you_have_no_feeds">Non hai fonti</string>
@@ -107,11 +102,14 @@
     <string name="stack_trace">Stack trace</string>
     <string name="stack_trace_icon">Stack trace icon</string>
     <string name="feed_url">Feed URL</string>
-    <string name="comments">Comments</string>
     <string name="view_comments">View comments</string>
     <string name="login_with_nextcloud_app">Login with Nextcloud (app)</string>
     <plurals name="d_hours">
         <item quantity="one">%d ora</item>
         <item quantity="other">%d ore</item>
+    </plurals>
+    <plurals name="you_have_d_unread_news">
+        <item quantity="one">Hai %1$d notizie non lette</item>
+        <item quantity="other">Hai %1$d notizie non lette</item>
     </plurals>
 </resources>

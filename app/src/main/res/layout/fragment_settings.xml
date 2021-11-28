@@ -32,38 +32,31 @@
 
         </LinearLayout>
 
-        <FrameLayout
-            android:id="@+id/backgroundSyncIntervalPanel"
+        <LinearLayout
+            android:id="@+id/backgroundSyncIntervalButton"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:background="?selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <LinearLayout
-                android:id="@+id/backgroundSyncIntervalButton"
-                android:layout_width="match_parent"
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="?selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:text="@string/background_sync_interval"
+                android:textAppearance="?textAppearanceListItem" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/background_sync_interval"
-                    android:textAppearance="?textAppearanceListItem" />
+            <TextView
+                android:id="@+id/backgroundSyncInterval"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:alpha="0.6"
+                android:textAppearance="?textAppearanceListItemSecondary"
+                tools:text="1 hour" />
 
-                <TextView
-                    android:id="@+id/backgroundSyncInterval"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:alpha="0.6"
-                    android:textAppearance="?textAppearanceListItemSecondary"
-                    tools:text="1 hour" />
-
-            </LinearLayout>
-
-        </FrameLayout>
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"

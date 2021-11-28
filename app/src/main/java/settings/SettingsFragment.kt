@@ -84,11 +84,15 @@ class SettingsFragment : AppFragment() {
         binding.apply {
             syncInBackground.apply {
                 isChecked = conf.syncInBackground
-                backgroundSyncIntervalPanel.isVisible = conf.syncInBackground
+                backgroundSyncInterval.isVisible = conf.syncInBackground
 
                 setOnCheckedChangeListener { _, isChecked ->
-                    runBlocking { model.saveConf(model.getConf().copy(syncInBackground = isChecked)) }
-                    backgroundSyncIntervalPanel.isVisible = isChecked
+                    runBlocking {
+                        model.saveConf(
+                            model.getConf().copy(syncInBackground = isChecked)
+                        )
+                    }
+                    backgroundSyncInterval.isVisible = isChecked
                     app().setupBackgroundSync(override = true)
                 }
             }
@@ -104,12 +108,15 @@ class SettingsFragment : AppFragment() {
 
                     text = resources.getQuantityString(R.plurals.d_hours, hours, hours)
                     val millis = TimeUnit.HOURS.toMillis(hours.toLong())
-                    isChecked = runBlocking { model.getConf().backgroundSyncIntervalMillis == millis }
+                    isChecked =
+                        runBlocking { model.getConf().backgroundSyncIntervalMillis == millis }
 
                     setOnCheckedChangeListener { _, isChecked ->
                         if (isChecked) {
                             runBlocking {
-                                model.saveConf(model.getConf().copy(backgroundSyncIntervalMillis = millis))
+                                model.saveConf(
+                                    model.getConf().copy(backgroundSyncIntervalMillis = millis)
+                                )
                             }
 
                             app().setupBackgroundSync(override = true)

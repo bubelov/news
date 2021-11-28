@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <resources>
     <string name="app_name">Noticias</string>
     <string name="login_with_nextcloud">Iniciar sesión con Nextcloud</string>
@@ -23,11 +24,9 @@
     <string name="field_is_empty">El campo está vacío</string>
     <string name="error">Error</string>
     <string name="download">Descargar</string>
-    <string name="downloading">Descargando...</string>
+    <string name="downloading">Descargando…</string>
     <string name="listen">Escuchar</string>
     <string name="crop_feed_images">Recortar imágenes de vista previa</string>
-    <string name="exceptions">Excepciones</string>
-    <string name="you_have_no_logged_exceptions">No tiene excepciones registradas</string>
     <string name="feeds">Feeds</string>
     <string name="bookmarks">Marcadores</string>
     <string name="delete_all">Eliminar todo</string>
@@ -35,7 +34,6 @@
     <string name="open_html_link">Abrir sitio web</string>
     <string name="actions">Acciones</string>
     <string name="delete">Eliminar</string>
-    <string name="add_feed_url_hint">Pegar URL del feed aquí</string>
     <string name="add_feed">Añadir feed</string>
     <string name="add">Añadir</string>
     <string name="show_feed_images">Mostrar imágenes de vista previa</string>
@@ -57,7 +55,6 @@
     <string name="bookmarked">Añadido a marcadores</string>
     <string name="search">Buscar</string>
     <string name="clear_search_input">Limpiar el historial de búsqueda</string>
-    <string name="no_results">No hay resultados</string>
     <string name="you_have_no_apps_which_can_play_this_podcast">No tienes aplicaciones que puedan reproducir este podcast.</string>
     <string name="import_feeds_from_opml_file">Importar desde un archivo OPML</string>
     <string name="export_feeds_to_opml_file">Exportar a archivo OPML</string>
@@ -80,19 +77,17 @@
     <string name="comma_separated">separado por coma</string>
     <string name="fetch_news_in_background">Sincronización en segundo plano</string>
     <string name="background_sync_interval">Intervalo de sincronización en segundo plano</string>
-    <string name="mark_all_as_read">Marcar todo como leido</string>
+    <string name="mark_all_as_read">Marcar todo como leído</string>
     <string name="event_log_is_empty">El registro de eventos está vacío</string>
     <string name="event_log">Registro de eventos</string>
     <string name="view_event_log">Ver registro de eventos</string>
-    <string name="you_have_d_unread_news">Tienes %1$d noticias sin leer</string>
     <string name="unread_news">Noticias no leídas</string>
-    <string name="view_exception_log">Ver registro de excepciones</string>
     <string name="got_exception_of_class_s">Obtuvo %1$s. Ver registro de excepciones para más detalles</string>
     <string name="trust_self_signed_certificates">Aceptar certificados autogenerados</string>
     <string name="you_have_no_feeds">No tienes feeds</string>
     <string name="export_database">Exportar base de datos</string>
     <string name="invalid_url_s">URL inválida: %1$s</string>
-    <string name="preview_images">Imagenes de vista previa</string>
+    <string name="preview_images">Imágenes de vista previa</string>
     <string name="show">Mostrar</string>
     <string name="hide">Ocultar</string>
     <string name="follow_settings">Seguir ajustes</string>
@@ -107,11 +102,14 @@
     <string name="stack_trace">Stack trace</string>
     <string name="stack_trace_icon">Stack trace icon</string>
     <string name="feed_url">Feed URL</string>
-    <string name="comments">Comments</string>
     <string name="view_comments">View comments</string>
     <string name="login_with_nextcloud_app">Login with Nextcloud (app)</string>
     <plurals name="d_hours">
         <item quantity="one">%d horas</item>
         <item quantity="other">%d horas</item>
+    </plurals>
+    <plurals name="you_have_d_unread_news">
+        <item quantity="one">Tienes %1$d noticias sin leer</item>
+        <item quantity="other">Tienes %1$d noticias sin leer</item>
     </plurals>
 </resources>

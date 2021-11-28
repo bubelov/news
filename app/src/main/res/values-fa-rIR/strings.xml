@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <resources>
     <string name="app_name">News</string>
     <string name="login_with_nextcloud">ورود با Nextcloud</string>
@@ -26,8 +27,6 @@
     <string name="downloading">در حال بارگیری</string>
     <string name="listen">شنیدن</string>
     <string name="crop_feed_images">برش تصویر پیش‌نمایش</string>
-    <string name="exceptions">استثناها</string>
-    <string name="you_have_no_logged_exceptions">استثنایی در سیاهه وارد نشده است</string>
     <string name="feeds">خوراک‌ها</string>
     <string name="bookmarks">نشانک‌ها</string>
     <string name="delete_all">حذف همه</string>
@@ -35,7 +34,6 @@
     <string name="open_html_link">باز کردن تارنما</string>
     <string name="actions">عمل‌ها</string>
     <string name="delete">حذف</string>
-    <string name="add_feed_url_hint">پیوند خوراک را اینجا قرار دهید</string>
     <string name="add_feed">افزودن خوراک</string>
     <string name="add">افزودن</string>
     <string name="show_feed_images">نمایش تصاویر پیش‌نمایش</string>
@@ -57,7 +55,6 @@
     <string name="bookmarked">نشانک‌شده</string>
     <string name="search">جستجو</string>
     <string name="clear_search_input">تمیز کردن ورودی جستجو</string>
-    <string name="no_results">هیچ‌نتیجه</string>
     <string name="you_have_no_apps_which_can_play_this_podcast">شما برنامه‌ای که بتواند این پادکست را پخش کنید ندارید.</string>
     <string name="import_feeds_from_opml_file">درون‌سازی از پروندهٔ OPML</string>
     <string name="export_feeds_to_opml_file">برون‌بری به پروندهٔ OPML</string>
@@ -84,9 +81,7 @@
     <string name="event_log_is_empty">سیاههٔ رویداد خالی است</string>
     <string name="event_log">سیاههٔ رویداد</string>
     <string name="view_event_log">نمایش سیاههٔ رویداد</string>
-    <string name="you_have_d_unread_news">شما %1$d خبر خوانده نشده دارید</string>
     <string name="unread_news">خبر خواهنده نشده</string>
-    <string name="view_exception_log">نمایش سیاههٔ استثناها</string>
     <string name="got_exception_of_class_s">%1$s دریافت شد. سیاههٔ استثناها را برای جزئیات مشاهده کنید</string>
     <string name="trust_self_signed_certificates">به گواهینامه‌های خودامضاشده اعتماد کن</string>
     <string name="you_have_no_feeds">شما خوراکی ندراید</string>
@@ -107,11 +102,14 @@
     <string name="stack_trace">دنبالهٔ پشته</string>
     <string name="stack_trace_icon">نمایهٔ دنبالهٔ پشته</string>
     <string name="feed_url">پیوند خوراک</string>
-    <string name="comments">نظرها</string>
     <string name="view_comments">نمایش نظرها</string>
     <string name="login_with_nextcloud_app">Login with Nextcloud (app)</string>
     <plurals name="d_hours">
         <item quantity="one">%d ساعت</item>
         <item quantity="other">%d ساعت</item>
+    </plurals>
+    <plurals name="you_have_d_unread_news">
+        <item quantity="one">شما %1$d خبر خوانده نشده دارید</item>
+        <item quantity="other">شما %1$d خبر خوانده نشده دارید</item>
     </plurals>
 </resources>

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <resources>
     <string name="app_name">新闻</string>
     <string name="login_with_nextcloud">使用 Nextcloud 登录</string>
@@ -26,8 +27,6 @@
     <string name="downloading">下载中</string>
     <string name="listen">收听</string>
     <string name="crop_feed_images">裁剪预览图像</string>
-    <string name="exceptions">异常</string>
-    <string name="you_have_no_logged_exceptions">您没有已记录的异常</string>
     <string name="feeds">订阅源</string>
     <string name="bookmarks">书签</string>
     <string name="delete_all">全部删除</string>
@@ -35,7 +34,6 @@
     <string name="open_html_link">打开网站</string>
     <string name="actions">操作</string>
     <string name="delete">删除</string>
-    <string name="add_feed_url_hint">在这里粘贴订阅源链接</string>
     <string name="add_feed">添加订阅源</string>
     <string name="add">添加</string>
     <string name="show_feed_images">显示预览图像</string>
@@ -57,7 +55,6 @@
     <string name="bookmarked">已收藏</string>
     <string name="search">搜索</string>
     <string name="clear_search_input">清除搜索结果</string>
-    <string name="no_results">无结果</string>
     <string name="you_have_no_apps_which_can_play_this_podcast">您没有可以播放此播客的应用。</string>
     <string name="import_feeds_from_opml_file">从 OPML 文件中导入</string>
     <string name="export_feeds_to_opml_file">导出至 OPML 文件</string>
@@ -84,9 +81,7 @@
     <string name="event_log_is_empty">事件日志为空</string>
     <string name="event_log">事件日志</string>
     <string name="view_event_log">查看事件日志</string>
-    <string name="you_have_d_unread_news">您有 %1$d 条未读新闻</string>
     <string name="unread_news">未读新闻</string>
-    <string name="view_exception_log">查看异常日志</string>
     <string name="got_exception_of_class_s">获取 %1$s。查看异常日志以了解详情</string>
     <string name="trust_self_signed_certificates">信任自签名证书</string>
     <string name="you_have_no_feeds">您没有订阅源</string>
@@ -107,10 +102,12 @@
     <string name="stack_trace">Stack trace</string>
     <string name="stack_trace_icon">Stack trace icon</string>
     <string name="feed_url">Feed URL</string>
-    <string name="comments">Comments</string>
     <string name="view_comments">View comments</string>
     <string name="login_with_nextcloud_app">Login with Nextcloud (app)</string>
     <plurals name="d_hours">
         <item quantity="other">%d 小时</item>
+    </plurals>
+    <plurals name="you_have_d_unread_news">
+        <item quantity="other">您有 %1$d 条未读新闻</item>
     </plurals>
 </resources>

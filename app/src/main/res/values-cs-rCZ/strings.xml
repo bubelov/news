@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <resources>
     <string name="app_name">Novinky</string>
     <string name="login_with_nextcloud">Přihlásit se přes Nextcloud</string>
@@ -26,8 +27,6 @@
     <string name="downloading">Stahování</string>
     <string name="listen">Poslouchat</string>
     <string name="crop_feed_images">Oříznout náhled obrázků</string>
-    <string name="exceptions">Výjimky</string>
-    <string name="you_have_no_logged_exceptions">Nemáte žádné zaznamenané výjimky</string>
     <string name="feeds">Kanály</string>
     <string name="bookmarks">Záložky</string>
     <string name="delete_all">Odstranit vše</string>
@@ -35,7 +34,6 @@
     <string name="open_html_link">Otevřít web</string>
     <string name="actions">Akce</string>
     <string name="delete">Vymazat</string>
-    <string name="add_feed_url_hint">Sem vložte URL kanálu</string>
     <string name="add_feed">Přidat kanál</string>
     <string name="add">Přidat</string>
     <string name="show_feed_images">Zobrazit náhledy obrázků</string>
@@ -57,7 +55,6 @@
     <string name="bookmarked">Založeno</string>
     <string name="search">Vyhledat</string>
     <string name="clear_search_input">Vymazat vstup vyhledávání</string>
-    <string name="no_results">Žádné výsledky</string>
     <string name="you_have_no_apps_which_can_play_this_podcast">Nemáte žádné aplikace, které by mohly přehrávat tento podcast.</string>
     <string name="import_feeds_from_opml_file">Importovat ze souboru OPML</string>
     <string name="export_feeds_to_opml_file">Exportovat do souboru OPML</string>
@@ -84,9 +81,7 @@
     <string name="event_log_is_empty">Záznam událostí je prázdný</string>
     <string name="event_log">Záznam událostí</string>
     <string name="view_event_log">Zobrazit seznam událostí</string>
-    <string name="you_have_d_unread_news">Máte %1$d nepřečtených zpráv</string>
     <string name="unread_news">Nepřečtené zprávy</string>
-    <string name="view_exception_log">Zobrazit seznam výjimek</string>
     <string name="got_exception_of_class_s">Máte %1$s. Podrobnosti naleznete v logu výjimek</string>
     <string name="trust_self_signed_certificates">Certifikát podepsaný sám sebou</string>
     <string name="you_have_no_feeds">Nemáte žádné kanály</string>
@@ -107,13 +102,16 @@
     <string name="stack_trace">Stack trace</string>
     <string name="stack_trace_icon">Stack trace icon</string>
     <string name="feed_url">Feed URL</string>
-    <string name="comments">Comments</string>
     <string name="view_comments">View comments</string>
     <string name="login_with_nextcloud_app">Login with Nextcloud (app)</string>
     <plurals name="d_hours">
         <item quantity="one">%d hodinu</item>
         <item quantity="few">%d hodina</item>
-        <item quantity="many">%d hodina</item>
         <item quantity="other">%d hodina</item>
+    </plurals>
+    <plurals name="you_have_d_unread_news">
+        <item quantity="one">Máte %1$d nepřečtených zpráv</item>
+        <item quantity="few">Máte %1$d nepřečtených zpráv</item>
+        <item quantity="other">Máte %1$d nepřečtených zpráv</item>
     </plurals>
 </resources>

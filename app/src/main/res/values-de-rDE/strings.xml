@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <resources>
     <string name="app_name">Nachrichten</string>
     <string name="login_with_nextcloud">Mit Nextcloud anmelden</string>
@@ -26,8 +27,6 @@
     <string name="downloading">Wird heruntergeladen</string>
     <string name="listen">Anhören</string>
     <string name="crop_feed_images">Vorschaubilder zuschneiden</string>
-    <string name="exceptions">Fehlermeldungen</string>
-    <string name="you_have_no_logged_exceptions">Du hast keine protokollierten Fehler</string>
     <string name="feeds">Feeds</string>
     <string name="bookmarks">Lesezeichen</string>
     <string name="delete_all">Alle löschen</string>
@@ -35,7 +34,6 @@
     <string name="open_html_link">Webseite öffnen</string>
     <string name="actions">Aktionen</string>
     <string name="delete">Löschen</string>
-    <string name="add_feed_url_hint">Feed-URL hier einfügen</string>
     <string name="add_feed">Feed hinzufügen</string>
     <string name="add">Hinzufügen</string>
     <string name="show_feed_images">Vorschaubilder anzeigen</string>
@@ -57,7 +55,6 @@
     <string name="bookmarked">Gespeichert</string>
     <string name="search">Suche</string>
     <string name="clear_search_input">Sucheingabe leeren</string>
-    <string name="no_results">Keine Ergebnisse</string>
     <string name="you_have_no_apps_which_can_play_this_podcast">Du hast keine Apps, die diesen Podcast abspielen können.</string>
     <string name="import_feeds_from_opml_file">Aus OPML-Datei importieren</string>
     <string name="export_feeds_to_opml_file">Als OPML-Datei exportieren</string>
@@ -84,9 +81,7 @@
     <string name="event_log_is_empty">Ereignisprotokoll ist leer</string>
     <string name="event_log">Ereignisprotokoll</string>
     <string name="view_event_log">Ereignisprotokoll anzeigen</string>
-    <string name="you_have_d_unread_news">Du hast %1$d ungelesene Nachrichten</string>
     <string name="unread_news">Ungelesene Artikel</string>
-    <string name="view_exception_log">Fehlerprotokoll anzeigen</string>
     <string name="got_exception_of_class_s">%1$s bekommen. Details findest du im Fehlerprotokoll</string>
     <string name="trust_self_signed_certificates">Selbstsignierten Zertifikaten vertrauen</string>
     <string name="you_have_no_feeds">Du hast keine Feeds</string>
@@ -107,11 +102,14 @@
     <string name="stack_trace">Stack trace</string>
     <string name="stack_trace_icon">Stack trace icon</string>
     <string name="feed_url">Feed URL</string>
-    <string name="comments">Comments</string>
     <string name="view_comments">View comments</string>
     <string name="login_with_nextcloud_app">Login with Nextcloud (app)</string>
     <plurals name="d_hours">
         <item quantity="one">%d Stunde</item>
         <item quantity="other">%d Stunden</item>
+    </plurals>
+    <plurals name="you_have_d_unread_news">
+        <item quantity="one">Du hast %1$d ungelesene Nachrichten</item>
+        <item quantity="other">Du hast %1$d ungelesene Nachrichten</item>
     </plurals>
 </resources>

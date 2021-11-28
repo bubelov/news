@@ -8,27 +8,29 @@ import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
 fun OkHttpClient.Builder.trustSelfSignedCerts(): OkHttpClient.Builder {
-    val trustManagers = arrayOf<TrustManager>(object : X509TrustManager {
-        @SuppressLint("TrustAllX509TrustManager")
-        @Throws(CertificateException::class)
-        override fun checkClientTrusted(
-            chain: Array<java.security.cert.X509Certificate>,
-            authType: String
-        ) {
-        }
+    val trustManagers = arrayOf<TrustManager>(
+        @SuppressLint("CustomX509TrustManager")
+        object : X509TrustManager {
+            @SuppressLint("TrustAllX509TrustManager")
+            @Throws(CertificateException::class)
+            override fun checkClientTrusted(
+                chain: Array<java.security.cert.X509Certificate>,
+                authType: String
+            ) {
+            }
 
-        @SuppressLint("TrustAllX509TrustManager")
-        @Throws(CertificateException::class)
-        override fun checkServerTrusted(
-            chain: Array<java.security.cert.X509Certificate>,
-            authType: String
-        ) {
-        }
+            @SuppressLint("TrustAllX509TrustManager")
+            @Throws(CertificateException::class)
+            override fun checkServerTrusted(
+                chain: Array<java.security.cert.X509Certificate>,
+                authType: String
+            ) {
+            }
 
-        override fun getAcceptedIssuers(): Array<java.security.cert.X509Certificate> {
-            return arrayOf()
-        }
-    })
+            override fun getAcceptedIssuers(): Array<java.security.cert.X509Certificate> {
+                return arrayOf()
+            }
+        })
 
     val sslContext = SSLContext.getInstance("SSL")
     sslContext.init(null, trustManagers, java.security.SecureRandom())

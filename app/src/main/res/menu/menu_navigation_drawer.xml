@@ -19,9 +19,7 @@
             android:title="@string/feeds" />
     </group>
 
-    <group
-        android:id="@+id/meta"
-        android:checkableBehavior="none">
+    <group android:checkableBehavior="none">
         <item
             android:id="@+id/settings"
             android:icon="@drawable/ic_baseline_settings_24"
