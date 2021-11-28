@@ -37,7 +37,7 @@ android {
 
     signingConfigs {
         if (signingPropertiesFile.exists()) {
-            getByName("play") {
+            create("release") {
                 val signingProperties = Properties()
                 signingProperties.load(FileInputStream(signingPropertiesFile))
                 storeFile = File(signingProperties["playKeystoreFile"] as String)
@@ -54,10 +54,10 @@ android {
         }
 
         if (signingPropertiesFile.exists()) {
-            getByName("play") {
+            release {
                 val signingProperties = Properties()
                 signingProperties.load(FileInputStream(signingPropertiesFile))
-                signingConfig = signingConfigs.getByName("play")
+                signingConfig = signingConfigs.getByName("release")
             }
         }
     }
@@ -67,7 +67,14 @@ android {
     }
 
     lint {
-        disable("VectorRaster", "VectorPath", "InvalidFragmentVersionForActivityResult", "MissingTranslation", "Range")
+        disable(
+            "VectorRaster",
+            "VectorPath",
+            "InvalidFragmentVersionForActivityResult",
+            "MissingTranslation",
+            "Range",
+            "LintError",
+        )
     }
 }
 
@@ -83,10 +90,13 @@ gradle.projectsEvaluated {
     tasks.withType<Test> {
         addTestListener(object : TestListener {
             override fun beforeSuite(suite: TestDescriptor) {}
+
             override fun beforeTest(testDescriptor: TestDescriptor) {}
+
             override fun afterTest(testDescriptor: TestDescriptor, result: TestResult) {
                 println("test ${testDescriptor.className} ${testDescriptor.name} ... ${result.resultType}")
             }
+
             override fun afterSuite(suite: TestDescriptor, result: TestResult) {}
         })
     }
