@@ -109,7 +109,7 @@
         <item quantity="other">%d ساعت</item>
     </plurals>
     <plurals name="you_have_d_unread_news">
-        <item quantity="one">شما d% خبر خوانده نشده دارید</item>
-        <item quantity="other">شما d% خبر خوانده نشده دارید</item>
+        <item quantity="one">شما %d خبر خوانده نشده دارید</item>
+        <item quantity="other">شما %d خبر خوانده نشده دارید</item>
     </plurals>
 </resources>
