@@ -28,7 +28,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/fetch_news_in_background"
-                android:textAppearance="?textAppearanceListItem" />
+                android:textSize="16sp" />
 
         </LinearLayout>
 
@@ -46,7 +46,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/background_sync_interval"
-                android:textAppearance="?textAppearanceListItem" />
+                android:textColor="?colorOnSurface"
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/backgroundSyncInterval"
@@ -74,7 +75,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/fetch_news_on_startup"
-                android:textAppearance="?textAppearanceListItem" />
+                android:textSize="16sp" />
 
         </LinearLayout>
 
@@ -94,7 +95,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/show_read_news"
-                android:textAppearance="?textAppearanceListItem" />
+                android:textSize="16sp" />
 
         </LinearLayout>
 
@@ -114,7 +115,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/show_feed_images"
-                android:textAppearance="?textAppearanceListItem" />
+                android:textSize="16sp" />
 
         </LinearLayout>
 
@@ -134,7 +135,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/crop_feed_images"
-                android:textAppearance="?textAppearanceListItem" />
+                android:textSize="16sp" />
 
         </LinearLayout>
 
@@ -154,7 +155,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/mark_scrolled_entries_as_read"
-                android:textAppearance="?textAppearanceListItem" />
+                android:textSize="16sp" />
 
         </LinearLayout>
 
@@ -172,7 +173,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/view_event_log"
-                android:textAppearance="?textAppearanceListItem" />
+                android:textColor="?colorOnSurface"
+                android:textSize="16sp" />
 
         </LinearLayout>
 
@@ -190,7 +192,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/export_database"
-                android:textAppearance="?textAppearanceListItem" />
+                android:textColor="?colorOnSurface"
+                android:textSize="16sp" />
 
         </LinearLayout>
 
@@ -209,7 +212,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/log_out"
-                android:textAppearance="?textAppearanceListItem" />
+                android:textColor="?colorOnSurface"
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/logOutSubtitle"

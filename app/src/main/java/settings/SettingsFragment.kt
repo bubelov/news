@@ -84,7 +84,7 @@ class SettingsFragment : AppFragment() {
         binding.apply {
             syncInBackground.apply {
                 isChecked = conf.syncInBackground
-                backgroundSyncInterval.isVisible = conf.syncInBackground
+                backgroundSyncIntervalButton.isVisible = conf.syncInBackground
 
                 setOnCheckedChangeListener { _, isChecked ->
                     runBlocking {
@@ -92,7 +92,7 @@ class SettingsFragment : AppFragment() {
                             model.getConf().copy(syncInBackground = isChecked)
                         )
                     }
-                    backgroundSyncInterval.isVisible = isChecked
+                    backgroundSyncIntervalButton.isVisible = isChecked
                     app().setupBackgroundSync(override = true)
                 }
             }
