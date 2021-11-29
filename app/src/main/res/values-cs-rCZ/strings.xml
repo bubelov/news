@@ -110,8 +110,8 @@
         <item quantity="other">%d hodina</item>
     </plurals>
     <plurals name="you_have_d_unread_news">
-        <item quantity="one">Máte %1$d nepřečtených zpráv</item>
-        <item quantity="few">Máte %1$d nepřečtených zpráv</item>
-        <item quantity="other">Máte %1$d nepřečtených zpráv</item>
+        <item quantity="one">Máte %d nepřečtených zpráv</item>
+        <item quantity="few">Máte %d nepřečtených zpráv</item>
+        <item quantity="other">Máte %d nepřečtených zpráv</item>
     </plurals>
 </resources>

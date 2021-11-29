@@ -113,11 +113,11 @@
         <item quantity="other">%d ساعات</item>
     </plurals>
     <plurals name="you_have_d_unread_news">
-        <item quantity="zero">لديك %1$d أخبار غير مقروءة</item>
-        <item quantity="one">لديك %1$d أخبار غير مقروءة</item>
-        <item quantity="two">لديك %1$d أخبار غير مقروءة</item>
-        <item quantity="few">لديك %1$d أخبار غير مقروءة</item>
-        <item quantity="many">لديك %1$d أخبار غير مقروءة</item>
-        <item quantity="other">لديك %1$d أخبار غير مقروءة</item>
+        <item quantity="zero">لديك d% أخبار غير مقروءة</item>
+        <item quantity="one">لديك d% أخبار غير مقروءة</item>
+        <item quantity="two">لديك d% أخبار غير مقروءة</item>
+        <item quantity="few">لديك d% أخبار غير مقروءة</item>
+        <item quantity="many">لديك d% أخبار غير مقروءة</item>
+        <item quantity="other">لديك d% أخبار غير مقروءة</item>
     </plurals>
 </resources>

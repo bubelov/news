@@ -108,6 +108,6 @@
         <item quantity="other">%d 小时</item>
     </plurals>
     <plurals name="you_have_d_unread_news">
-        <item quantity="other">您有 %1$d 条未读新闻</item>
+        <item quantity="other">您有 %d 条未读新闻</item>
     </plurals>
 </resources>

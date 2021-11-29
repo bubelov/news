@@ -85,8 +85,9 @@ class SyncWorker(appContext: Context, workerParams: WorkerParameters) :
             .setSmallIcon(R.drawable.ic_baseline_list_alt_24)
             .setContentTitle(context.getString(R.string.app_name))
             .setContentText(
-                context.resources.getQuantityText(
+                context.resources.getQuantityString(
                     R.plurals.you_have_d_unread_news,
+                    unreadEntries,
                     unreadEntries,
                 )
             )

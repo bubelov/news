@@ -111,9 +111,9 @@
         <item quantity="other">%d hours</item>
     </plurals>
     <plurals name="you_have_d_unread_news">
-        <item quantity="one">You have %1$d unread news</item>
-        <item quantity="few">You have %1$d unread news</item>
-        <item quantity="many">You have %1$d unread news</item>
-        <item quantity="other">You have %1$d unread news</item>
+        <item quantity="one">You have %d unread news</item>
+        <item quantity="few">You have %d unread news</item>
+        <item quantity="many">You have %d unread news</item>
+        <item quantity="other">You have %d unread news</item>
     </plurals>
 </resources>

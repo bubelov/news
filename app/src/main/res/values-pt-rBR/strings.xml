@@ -109,7 +109,7 @@
         <item quantity="other">%d horas</item>
     </plurals>
     <plurals name="you_have_d_unread_news">
-        <item quantity="one">Há %1$d notícias não lidas</item>
-        <item quantity="other">Há %1$d notícias não lidas</item>
+        <item quantity="one">Há %d notícias não lidas</item>
+        <item quantity="other">Há %d notícias não lidas</item>
     </plurals>
 </resources>

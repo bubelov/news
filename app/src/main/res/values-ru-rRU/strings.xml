@@ -111,9 +111,9 @@
         <item quantity="other">%d часов</item>
     </plurals>
     <plurals name="you_have_d_unread_news">
-        <item quantity="one">У вас %1$d непрочитанных новостей</item>
-        <item quantity="few">У вас %1$d непрочитанных новостей</item>
-        <item quantity="many">У вас %1$d непрочитанных новостей</item>
-        <item quantity="other">У вас %1$d непрочитанных новостей</item>
+        <item quantity="one">У вас %d непрочитанных новостей</item>
+        <item quantity="few">У вас %d непрочитанных новостей</item>
+        <item quantity="many">У вас %d непрочитанных новостей</item>
+        <item quantity="other">У вас %d непрочитанных новостей</item>
     </plurals>
 </resources>

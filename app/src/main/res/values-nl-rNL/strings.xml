@@ -109,7 +109,7 @@
         <item quantity="other">%d uren</item>
     </plurals>
     <plurals name="you_have_d_unread_news">
-        <item quantity="one">Je hebt %1$d ongelezen nieuws</item>
-        <item quantity="other">Je hebt %1$d ongelezen nieuws</item>
+        <item quantity="one">Je hebt %d ongelezen nieuws</item>
+        <item quantity="other">Je hebt %d ongelezen nieuws</item>
     </plurals>
 </resources>
