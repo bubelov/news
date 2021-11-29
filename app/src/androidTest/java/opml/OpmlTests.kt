@@ -3,8 +3,9 @@ package opml
 import db.Feed
 import org.junit.Assert
 import org.junit.Test
-import readFile
-import java.util.*
+import java.io.InputStream
+import java.nio.charset.Charset
+import java.util.UUID
 
 class OpmlTests {
 
@@ -65,5 +66,11 @@ class OpmlTests {
     fun readsMozillaOpml() {
         val elements = importOpml(readFile("mozilla.opml"))
         Assert.assertEquals(2, elements.size)
+    }
+
+    private fun readFile(path: String) = javaClass.getResourceAsStream(path)!!.readTextAndClose()
+
+    private fun InputStream.readTextAndClose(charset: Charset = Charsets.UTF_8): String {
+        return this.bufferedReader(charset).use { it.readText() }
     }
 }

@@ -73,7 +73,6 @@ android {
             "InvalidFragmentVersionForActivityResult",
             "MissingTranslation",
             "Range",
-            "LintError",
         )
     }
 }
