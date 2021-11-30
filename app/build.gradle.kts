@@ -129,7 +129,7 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor")
 
     implementation("com.github.nextcloud:Android-SingleSignOn:0.6.0")
-    implementation("com.google.android.material:material:1.5.0-beta01")
+    implementation("com.google.android.material:material:1.6.0-alpha01")
     implementation("com.squareup.picasso:picasso:2.71828")
     implementation("io.insert-koin:koin-android:2.2.3")
     implementation("io.insert-koin:koin-android-ext:2.2.3")
