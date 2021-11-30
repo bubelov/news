@@ -72,7 +72,6 @@ android {
             "VectorPath",
             "InvalidFragmentVersionForActivityResult",
             "MissingTranslation",
-            "Range",
         )
     }
 }

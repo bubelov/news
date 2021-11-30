@@ -225,10 +225,12 @@ class PodcastsRepository(
                     }
 
                     Timber.d("Found enclosure with URI: $uri")
-                    Timber.d("Name: ${cursor.getString(cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME))}")
+                    val displayNameIndex =
+                        cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME)
+                    Timber.d("Name: ${cursor.getString(displayNameIndex)}")
 
-                    val pending =
-                        cursor.getInt(cursor.getColumnIndex(MediaStore.MediaColumns.IS_PENDING))
+                    val isPendingIndex = cursor.getColumnIndex(MediaStore.MediaColumns.IS_PENDING)
+                    val pending = cursor.getInt(isPendingIndex)
                     Timber.d("Pending: $pending")
 
                     if (pending == 1) {
