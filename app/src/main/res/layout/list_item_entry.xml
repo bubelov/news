@@ -72,16 +72,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
-            android:gravity="center_vertical"
+            android:gravity="end|center_vertical"
             android:orientation="horizontal"
             tools:visibility="visible">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/downloadPodcast"
-                style="?attr/borderlessButtonStyle"
+                style="?materialButtonOutlinedStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
+                android:layout_marginHorizontal="16dp"
                 android:text="@string/download"
                 android:visibility="gone"
                 app:icon="@drawable/ic_baseline_save_alt_24" />
@@ -98,10 +98,10 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/playPodcast"
-                style="?attr/borderlessButtonStyle"
+                style="?materialButtonOutlinedStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
+                android:layout_marginHorizontal="16dp"
                 android:text="@string/listen"
                 android:visibility="visible"
                 app:icon="@drawable/ic_baseline_headset_24" />

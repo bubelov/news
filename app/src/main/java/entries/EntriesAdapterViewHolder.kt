@@ -23,6 +23,8 @@ class EntriesAdapterViewHolder(
     fun bind(item: EntriesAdapterItem) = binding.apply {
         if (!setStrokeAlpha) {
             card.setStrokeColor(card.strokeColorStateList!!.withAlpha(32))
+            downloadPodcast.strokeColor = downloadPodcast.strokeColor.withAlpha(32)
+            playPodcast.strokeColor = playPodcast.strokeColor.withAlpha(32)
             setStrokeAlpha = true
         }
 
