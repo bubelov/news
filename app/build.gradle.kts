@@ -65,15 +65,6 @@ android {
     buildFeatures {
         viewBinding = true
     }
-
-    lint {
-        disable(
-            "VectorRaster",
-            "VectorPath",
-            "InvalidFragmentVersionForActivityResult",
-            "MissingTranslation",
-        )
-    }
 }
 
 sqldelight {
