@@ -104,6 +104,8 @@
     <string name="feed_url">Feed URL</string>
     <string name="view_comments">View comments</string>
     <string name="login_with_nextcloud_app">Login with Nextcloud (app)</string>
+    <string name="standalone_mode_no_beta">Standalone mode</string>
+    <string name="beta">⚠ BETA ⚠</string>
     <plurals name="d_hours">
         <item quantity="one">%d час</item>
         <item quantity="few">%d часа</item>

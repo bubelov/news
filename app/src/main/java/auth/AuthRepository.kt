@@ -31,10 +31,10 @@ class AuthRepository(
                 resources.getString(R.string.nextcloud)
             }
             ConfRepository.AUTH_TYPE_MINIFLUX -> {
-                context.getString(R.string.miniflux)
+                resources.getString(R.string.miniflux)
             }
             ConfRepository.AUTH_TYPE_STANDALONE -> {
-                resources.getString(R.string.standalone_mode)
+                resources.getString(R.string.standalone_mode_no_beta)
             }
             else -> ""
         }
@@ -62,7 +62,7 @@ class AuthRepository(
                 "$username@${minifluxServerUrl.replace("https://", "")}"
             }
             ConfRepository.AUTH_TYPE_STANDALONE -> {
-                ""
+                resources.getString(R.string.beta)
             }
             else -> ""
         }
