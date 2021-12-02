@@ -6,7 +6,7 @@ import db.Feed
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import java.util.*
+import java.util.Collections
 import kotlin.math.min
 
 class EntriesSupportingTextRepository(
@@ -19,50 +19,52 @@ class EntriesSupportingTextRepository(
 
     private val cache = Collections.synchronizedMap(mutableMapOf<String, String>())
 
-    suspend fun getSupportingText(entryId: String, feed: Feed?): String = withContext(Dispatchers.IO) {
-        val cachedSummary = cache[entryId]
+    suspend fun getSupportingText(entryId: String, feed: Feed?): String =
+        withContext(Dispatchers.IO) {
+            val cachedSummary = cache[entryId]
 
-        if (cachedSummary != null) {
-            return@withContext cachedSummary
-        }
-
-        val entry = entriesRepository.selectById(entryId)
-
-        if (entry == null || entry.content.isBlank()) {
-            cache[entryId] = ""
-            return@withContext ""
-        }
-
-        val summary = runCatching {
-            if (feed?.selfLink?.startsWith("https://news.ycombinator.com") == true) {
-                return@runCatching ""
+            if (cachedSummary != null) {
+                return@withContext cachedSummary
             }
 
-            val parsedBody = HtmlCompat.fromHtml(entry.content, HtmlCompat.FROM_HTML_MODE_COMPACT)
+            val entry = entriesRepository.selectById(entryId)
 
-            if (parsedBody is SpannableStringBuilder) {
-                parsedBody.clearSpans()
+            if (entry == null || entry.content.isBlank()) {
+                cache[entryId] = ""
+                return@withContext ""
             }
 
-            buildString {
-                val untrimmedBeginning = parsedBody.substring(
-                    0,
-                    min(parsedBody.length - 1, SUMMARY_MAX_LENGTH)
-                )
-
-                append(untrimmedBeginning.replace("\uFFFC", "").trim())
-
-                if (untrimmedBeginning.length == SUMMARY_MAX_LENGTH) {
-                    append("…")
+            val summary = runCatching {
+                if (feed?.selfLink?.startsWith("https://news.ycombinator.com") == true) {
+                    return@runCatching ""
                 }
-            }.replace("\n", " ")
-        }.onFailure {
-            Timber.e(it)
-        }.getOrDefault("")
 
-        cache[entryId] = summary
-        summary
-    }
+                val parsedBody =
+                    HtmlCompat.fromHtml(entry.content, HtmlCompat.FROM_HTML_MODE_COMPACT)
+
+                if (parsedBody is SpannableStringBuilder) {
+                    parsedBody.clearSpans()
+                }
+
+                buildString {
+                    val untrimmedBeginning = parsedBody.substring(
+                        0,
+                        min(parsedBody.length, SUMMARY_MAX_LENGTH)
+                    )
+
+                    append(untrimmedBeginning.replace("\uFFFC", "").trim())
+
+                    if (untrimmedBeginning.length == SUMMARY_MAX_LENGTH) {
+                        append("…")
+                    }
+                }.replace("\n", " ")
+            }.onFailure {
+                Timber.e(it)
+            }.getOrDefault("")
+
+            cache[entryId] = summary
+            summary
+        }
 
     fun getCachedSupportingText(entryId: String) = cache[entryId]
 }
