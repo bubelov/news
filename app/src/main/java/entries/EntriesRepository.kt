@@ -245,8 +245,8 @@ class EntriesRepository(
     private fun Entry.postProcess(feed: Feed? = null): Entry {
         var processedEntry = this
 
-        if (content.toByteArray().size / 1024 > 100) {
-            Timber.d("Entry content is larger than 100 KiB ($link)")
+        if (content.toByteArray().size / 1024 > 250) {
+            Timber.d("Entry content is larger than 250 KiB ($link)")
             processedEntry = processedEntry.copy(content = "Content is too large")
         }
 
