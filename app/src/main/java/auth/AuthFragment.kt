@@ -1,6 +1,7 @@
 package auth
 
 import android.content.Intent
+import android.graphics.drawable.Animatable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -95,6 +96,11 @@ class AuthFragment : AppFragment(
                 showFeeds()
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        (binding.icon.drawable as? Animatable)?.start()
     }
 
     @Suppress("DEPRECATION")
