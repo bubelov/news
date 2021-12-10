@@ -80,7 +80,7 @@ class SearchFragment : AppFragment() {
 
         searchPanel.isVisible = true
 
-        toolbar.setupUpNavigation(hideKeyboard = true)
+        toolbar?.setupUpNavigation(hideKeyboard = true)
 
         lifecycleScope.launch {
             model.searchString.collect {

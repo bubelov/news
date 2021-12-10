@@ -154,7 +154,7 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
         _binding = null
     }
 
-    private fun initToolbar() = toolbar.apply {
+    private fun initToolbar() = toolbar?.apply {
         setTitle(R.string.feeds)
         inflateMenu(R.menu.menu_feeds)
 

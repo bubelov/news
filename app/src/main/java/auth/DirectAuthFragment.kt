@@ -10,7 +10,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentDirectAuthBinding
-import common.*
+import common.AppFragment
+import common.ConfRepository
+import common.app
+import common.showDialog
 import entries.EntriesFilter
 import org.koin.android.viewmodel.ext.android.viewModel
 import timber.log.Timber
@@ -34,7 +37,7 @@ class DirectAuthFragment : AppFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        toolbar.apply {
+        toolbar?.apply {
             setupUpNavigation()
             setTitle(R.string.nextcloud_login)
         }

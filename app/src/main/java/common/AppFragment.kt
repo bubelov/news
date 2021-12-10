@@ -15,7 +15,13 @@ abstract class AppFragment(
     private val lockDrawer: Boolean = true,
 ) : Fragment() {
 
-    protected val toolbar by lazy { activity.binding.toolbar }
+    protected val toolbar by lazy {
+        if (getActivity() is AppActivity) {
+            activity.binding.toolbar
+        } else {
+            null
+        }
+    }
 
     protected val searchPanel by lazy { activity.binding.searchPanel }
 
@@ -38,11 +44,15 @@ abstract class AppFragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        if (getActivity() !is AppActivity) {
+            return
+        }
+
         isDrawerLocked = lockDrawer
 
         appBarLayout.isVisible = showToolbar
 
-        toolbar.apply {
+        toolbar?.apply {
             setNavigationOnClickListener { drawer.open() }
             drawerToggle.syncState()
             title = ""

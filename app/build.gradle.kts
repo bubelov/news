@@ -101,7 +101,9 @@ dependencies {
     implementation("co.appreactor:feedk:0.1.4")
 
     implementation("androidx.core:core-ktx:1.7.0")
-    implementation("androidx.fragment:fragment-ktx:1.4.0")
+    val fragmentVersion = "1.4.0"
+    implementation("androidx.fragment:fragment-ktx:$fragmentVersion")
+    debugImplementation("androidx.fragment:fragment-testing:$fragmentVersion")
     implementation("androidx.lifecycle:lifecycle-common-java8:2.4.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0")
@@ -133,6 +135,25 @@ dependencies {
     testImplementation("io.mockk:mockk:1.12.0")
     testImplementation("com.squareup.sqldelight:sqlite-driver:1.5.1")
 
+    // Core library
+    androidTestImplementation("androidx.test:core:1.4.0")
+
+    // AndroidJUnitRunner and JUnit Rules
     androidTestImplementation("androidx.test:runner:1.4.0")
     androidTestImplementation("androidx.test:rules:1.4.0")
+
+    // Assertions
+    androidTestImplementation("androidx.test.ext:junit:1.1.3")
+    androidTestImplementation("androidx.test.ext:truth:1.4.0")
+    androidTestImplementation("com.google.truth:truth:1.0.1")
+
+    // Espresso dependencies
+    val espressoVersion = "3.4.0"
+    androidTestImplementation("androidx.test.espresso:espresso-core:$espressoVersion")
+    androidTestImplementation("androidx.test.espresso:espresso-contrib:$espressoVersion")
+    androidTestImplementation("androidx.test.espresso:espresso-intents:$espressoVersion")
+    androidTestImplementation("androidx.test.espresso:espresso-accessibility:$espressoVersion")
+    androidTestImplementation("androidx.test.espresso:espresso-web:$espressoVersion")
+    androidTestImplementation("androidx.test.espresso.idling:idling-concurrent:$espressoVersion")
+    androidTestImplementation("androidx.test.espresso:espresso-idling-resource:$espressoVersion")
 }

@@ -37,7 +37,7 @@ class ExceptionFragment : AppFragment() {
         lifecycleScope.launchWhenResumed {
             val log = model.selectById(args.logId) ?: return@launchWhenResumed
 
-            toolbar.apply {
+            toolbar?.apply {
                 setupUpNavigation()
                 title = getString(R.string.stack_trace)
                 inflateMenu(R.menu.menu_exception)

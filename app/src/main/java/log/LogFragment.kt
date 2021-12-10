@@ -42,7 +42,7 @@ class LogFragment : AppFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        toolbar.apply {
+        toolbar?.apply {
             setupUpNavigation()
             setTitle(R.string.event_log)
             inflateMenu(R.menu.menu_log_entries)

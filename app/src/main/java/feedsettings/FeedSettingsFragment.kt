@@ -47,7 +47,7 @@ class FeedSettingsFragment : AppFragment() {
             return
         }
 
-        toolbar.apply {
+        toolbar?.apply {
             setupUpNavigation()
             title = feed.title
         }

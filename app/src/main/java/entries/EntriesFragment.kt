@@ -268,7 +268,7 @@ class EntriesFragment : AppFragment(), Scrollable {
         isDrawerLocked = args.filter is EntriesFilter.BelongToFeed
     }
 
-    private fun initToolbar() = toolbar.apply {
+    private fun initToolbar() = toolbar?.apply {
         inflateMenu(R.menu.menu_entries)
 
         when (val filter = args.filter!!) {
@@ -296,9 +296,9 @@ class EntriesFragment : AppFragment(), Scrollable {
     }
 
     private fun initSearchButton() {
-        val searchMenuItem = toolbar.menu.findItem(R.id.search)
+        val searchMenuItem = toolbar?.menu?.findItem(R.id.search)
 
-        searchMenuItem.setOnMenuItemClickListener {
+        searchMenuItem?.setOnMenuItemClickListener {
             findNavController().navigate(
                 EntriesFragmentDirections.actionEntriesFragmentToSearchFragment(
                     args.filter!!
@@ -309,24 +309,24 @@ class EntriesFragment : AppFragment(), Scrollable {
     }
 
     private fun initShowReadEntriesButton() {
-        val showOpenedEntriesMenuItem = toolbar.menu.findItem(R.id.showOpenedEntries)
-        showOpenedEntriesMenuItem.isVisible = getShowReadEntriesButtonVisibility()
+        val showOpenedEntriesMenuItem = toolbar?.menu?.findItem(R.id.showOpenedEntries)
+        showOpenedEntriesMenuItem?.isVisible = getShowReadEntriesButtonVisibility()
 
         lifecycleScope.launchWhenResumed {
             val conf = model.getConf()
 
             if (conf.showReadEntries) {
-                showOpenedEntriesMenuItem.setIcon(R.drawable.ic_baseline_visibility_24)
-                showOpenedEntriesMenuItem.title = getString(R.string.hide_read_news)
+                showOpenedEntriesMenuItem?.setIcon(R.drawable.ic_baseline_visibility_24)
+                showOpenedEntriesMenuItem?.title = getString(R.string.hide_read_news)
                 touchHelper?.attachToRecyclerView(null)
             } else {
-                showOpenedEntriesMenuItem.setIcon(R.drawable.ic_baseline_visibility_off_24)
-                showOpenedEntriesMenuItem.title = getString(R.string.show_read_news)
+                showOpenedEntriesMenuItem?.setIcon(R.drawable.ic_baseline_visibility_off_24)
+                showOpenedEntriesMenuItem?.title = getString(R.string.show_read_news)
                 touchHelper?.attachToRecyclerView(binding.list)
             }
         }
 
-        showOpenedEntriesMenuItem.setOnMenuItemClickListener {
+        showOpenedEntriesMenuItem?.setOnMenuItemClickListener {
             lifecycleScope.launchWhenResumed {
                 adapter.submitList(null)
                 val conf = model.getConf()
@@ -339,25 +339,25 @@ class EntriesFragment : AppFragment(), Scrollable {
     }
 
     private fun initSortOrderButton() {
-        val sortOrderMenuItem = toolbar.menu.findItem(R.id.sort)
+        val sortOrderMenuItem = toolbar?.menu?.findItem(R.id.sort)
 
         lifecycleScope.launchWhenResumed {
             val conf = model.getConf()
 
             when (conf.sortOrder) {
                 ConfRepository.SORT_ORDER_ASCENDING -> {
-                    sortOrderMenuItem.setIcon(R.drawable.ic_clock_forward)
-                    sortOrderMenuItem.title = getString(R.string.show_newest_first)
+                    sortOrderMenuItem?.setIcon(R.drawable.ic_clock_forward)
+                    sortOrderMenuItem?.title = getString(R.string.show_newest_first)
                 }
 
                 ConfRepository.SORT_ORDER_DESCENDING -> {
-                    sortOrderMenuItem.setIcon(R.drawable.ic_clock_back)
-                    sortOrderMenuItem.title = getString(R.string.show_oldest_first)
+                    sortOrderMenuItem?.setIcon(R.drawable.ic_clock_back)
+                    sortOrderMenuItem?.title = getString(R.string.show_oldest_first)
                 }
             }
         }
 
-        sortOrderMenuItem.setOnMenuItemClickListener {
+        sortOrderMenuItem?.setOnMenuItemClickListener {
             lifecycleScope.launchWhenResumed {
                 adapter.submitList(null)
 
@@ -378,7 +378,7 @@ class EntriesFragment : AppFragment(), Scrollable {
     }
 
     private fun initMarkAllAsReadButton() {
-        toolbar.menu.findItem(R.id.markAllAsRead)?.setOnMenuItemClickListener {
+        toolbar?.menu?.findItem(R.id.markAllAsRead)?.setOnMenuItemClickListener {
             lifecycleScope.launchWhenResumed { model.markAllAsRead() }
             true
         }

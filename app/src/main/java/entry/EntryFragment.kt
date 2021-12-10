@@ -19,7 +19,11 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentEntryBinding
-import common.*
+import common.AppFragment
+import common.hide
+import common.openLink
+import common.show
+import common.showErrorDialog
 import db.Entry
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -48,7 +52,7 @@ class EntryFragment : AppFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        toolbar.apply {
+        toolbar?.apply {
             setupUpNavigation()
             inflateMenu(R.menu.menu_entry)
         }
@@ -72,32 +76,32 @@ class EntryFragment : AppFragment() {
 
     private fun setState(state: EntryViewModel.State) {
         binding.apply {
-            val menu = toolbar.menu
+            val menu = toolbar?.menu
 
             when (state) {
                 EntryViewModel.State.Progress -> {
-                    menu.iterator().forEach { it.isVisible = false }
+                    menu?.iterator()?.forEach { it.isVisible = false }
                     contentContainer.hide()
                     progress.show(animate = true)
                     fab.hide()
                 }
 
                 is EntryViewModel.State.Success -> {
-                    menu.findItem(R.id.toggleBookmarked).isVisible = true
-                    menu.findItem(R.id.comments).apply {
+                    menu?.findItem(R.id.toggleBookmarked)?.isVisible = true
+                    menu?.findItem(R.id.comments)?.apply {
                         isVisible = state.entry.commentsUrl.isNotBlank()
                         setOnMenuItemClickListener {
                             openLink(state.entry.commentsUrl)
                             true
                         }
                     }
-                    menu.findItem(R.id.feedSettings).isVisible = true
-                    menu.findItem(R.id.share).isVisible = true
+                    menu?.findItem(R.id.feedSettings)?.isVisible = true
+                    menu?.findItem(R.id.share)?.isVisible = true
 
                     contentContainer.show(animate = true)
-                    toolbar.title = state.feedTitle
+                    toolbar?.title = state.feedTitle
 
-                    toolbar.setOnMenuItemClickListener {
+                    toolbar?.setOnMenuItemClickListener {
                         onMenuItemClick(
                             menuItem = it,
                             entry = state.entry
@@ -126,7 +130,7 @@ class EntryFragment : AppFragment() {
                 }
 
                 is EntryViewModel.State.Error -> {
-                    menu.iterator().forEach { it.isVisible = false }
+                    menu?.iterator()?.forEach { it.isVisible = false }
                     contentContainer.hide()
                     showErrorDialog(state.message) { findNavController().popBackStack() }
                 }
@@ -174,7 +178,7 @@ class EntryFragment : AppFragment() {
     }
 
     private fun updateBookmarkedButton(bookmarked: Boolean) {
-        toolbar.menu.findItem(R.id.toggleBookmarked).apply {
+        toolbar?.menu?.findItem(R.id.toggleBookmarked)?.apply {
             if (bookmarked) {
                 setIcon(R.drawable.ic_baseline_bookmark_24)
                 setTitle(R.string.remove_bookmark)
