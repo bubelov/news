@@ -30,14 +30,22 @@ abstract class AppFragment(
     protected val searchPanelClearButton by lazy { activity.binding.searchPanelClearButton }
 
     protected var isDrawerLocked: Boolean
-        get() = drawer.getDrawerLockMode(drawer) == DrawerLayout.LOCK_MODE_LOCKED_CLOSED
-        set(value) = drawer.setDrawerLockMode(if (value) DrawerLayout.LOCK_MODE_LOCKED_CLOSED else DrawerLayout.LOCK_MODE_UNLOCKED)
+        get() = drawer?.getDrawerLockMode(drawer!!) == DrawerLayout.LOCK_MODE_LOCKED_CLOSED
+        set(value) {
+            drawer?.setDrawerLockMode(if (value) DrawerLayout.LOCK_MODE_LOCKED_CLOSED else DrawerLayout.LOCK_MODE_UNLOCKED)
+        }
 
     private val activity by lazy { requireActivity() as AppActivity }
 
     private val appBarLayout by lazy { activity.binding.appBarLayout }
 
-    private val drawer by lazy { activity.binding.drawerLayout }
+    private val drawer by lazy {
+        if (getActivity() is AppActivity) {
+            activity.binding.drawerLayout
+        } else {
+            null
+        }
+    }
 
     private val drawerToggle by lazy { activity.drawerToggle }
 
@@ -53,7 +61,7 @@ abstract class AppFragment(
         appBarLayout.isVisible = showToolbar
 
         toolbar?.apply {
-            setNavigationOnClickListener { drawer.open() }
+            setNavigationOnClickListener { drawer?.open() }
             drawerToggle.syncState()
             title = ""
             menu?.clear()
