@@ -104,8 +104,8 @@
     <string name="feed_url">عنوان URL الموجز</string>
     <string name="view_comments">عرض التعليقات</string>
     <string name="login_with_nextcloud_app">تسجيل الدخول باستخدام Nextcloud (التطبيق)</string>
-    <string name="standalone_mode_no_beta">Standalone mode</string>
-    <string name="beta">⚠ BETA ⚠</string>
+    <string name="standalone_mode_no_beta">وضع مستقل</string>
+    <string name="beta">⚠ الإصدار بيتا ⚠</string>
     <plurals name="d_hours">
         <item quantity="zero">%d ساعات</item>
         <item quantity="one">%d ساعة</item>
