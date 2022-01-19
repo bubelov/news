@@ -4,6 +4,10 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="android:windowSplashScreenAnimatedIcon" tools:targetApi="s">
+            @drawable/ic_animated_splash
+        </item>
+        <item name="android:windowSplashScreenAnimationDuration" tools:targetApi="s">1000</item>
     </style>
 
     <style name="AppTheme" parent="BaseAppTheme">
