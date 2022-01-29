@@ -63,6 +63,12 @@ class OpmlTests {
     }
 
     @Test
+    fun readNestedOpml() {
+        val elements = importOpml(readFile("nested.opml"))
+        Assert.assertEquals(6, elements.size)
+    }
+
+    @Test
     fun readsMozillaOpml() {
         val elements = importOpml(readFile("mozilla.opml"))
         Assert.assertEquals(2, elements.size)

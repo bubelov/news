@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opml version="1.1">
+  <head>
+    <title>
+      Feeder
+    </title>
+  </head>
+  <body>
+    <outline title="the morning paper" text="the morning paper" type="rss" xmlUrl="https://blog.acolyer.org/feed/"/>
+    <outline title="The Monday Kickoff" text="The Monday Kickoff" type="rss" xmlUrl="https://mondaykickoff.com/feed/"/>
+    <outline title="Plain-text" text="Plain-text">
+      <outline title="The Plain Text Project" text="The Plain Text Project" type="rss" xmlUrl="https://plaintextproject.online/feed.xml"/>
+    </outline>
+    <outline title="Tech" text="Tech">
+      <outline title="Daniel Lemire&apos;s blog" text="Daniel Lemire&apos;s blog" type="rss" xmlUrl="https://lemire.me/blog/feed/"/>
+      <outline title="nipafx" text="nipafx" type="rss" xmlUrl="https://nipafx.dev/feed.xml"/>
+    </outline>
+    <outline title="Trivia" text="Trivia">
+      <outline title="Futility Closet" text="Futility Closet" type="rss" xmlUrl="http://feeds.feedburner.com/FutilityCloset"/>
+    </outline>
+  </body>
+</opml>

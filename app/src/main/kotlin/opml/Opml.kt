@@ -2,9 +2,10 @@ package opml
 
 import android.util.Xml
 import db.Feed
+import org.w3c.dom.Element
+import org.w3c.dom.Node
+import org.w3c.dom.NodeList
 import org.xml.sax.InputSource
-import org.xmlpull.v1.XmlPullParser
-import org.xmlpull.v1.XmlPullParserFactory
 import java.io.StringReader
 import java.io.StringWriter
 import javax.xml.parsers.DocumentBuilderFactory
@@ -31,55 +32,29 @@ private object Symbols {
 }
 
 fun importOpml(xml: String): List<Outline> {
-    val elements = mutableListOf<Outline>()
+    val documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+    val document = documentBuilder.parse(xml.byteInputStream())
+    val outlines = document.getElementsByTagName("outline").elements()
+    val leafOutlines = outlines.filter { !it.hasChildNodes() }
 
-    val parser = XmlPullParserFactory.newInstance().newPullParser().apply {
-        setInput(StringReader(xml))
+    return leafOutlines.map {
+        val showPreviewImages =
+            it.getAttribute("${Symbols.NEWS_NAMESPACE_PREFIX}:${Symbols.SHOW_PREVIEW_IMAGES}")
+
+        Outline(
+            text = it.getAttribute(Symbols.TEXT),
+            type = it.getAttribute(Symbols.TYPE),
+            xmlUrl = it.getAttribute(Symbols.XML_URL),
+            openEntriesInBrowser = it.getAttribute("${Symbols.NEWS_NAMESPACE_PREFIX}:${Symbols.OPEN_ENTRIES_IN_BROWSER}")
+                .toBoolean(),
+            blockedWords = it.getAttribute("${Symbols.NEWS_NAMESPACE_PREFIX}:${Symbols.BLOCKED_WORDS}"),
+            showPreviewImages = when (showPreviewImages) {
+                "true" -> true
+                "false" -> false
+                else -> null
+            },
+        )
     }
-
-    var eventType = parser.eventType
-    var insideOpml = false
-
-    while (eventType != XmlPullParser.END_DOCUMENT) {
-        if (eventType == XmlPullParser.START_TAG) {
-            if (parser.name == Symbols.OPML) {
-                insideOpml = true
-            } else if (insideOpml && parser.name == Symbols.OUTLINE) {
-                parser.apply {
-                    val showPreviewImagesString = getAttributeValue(
-                        null,
-                        "${Symbols.NEWS_NAMESPACE_PREFIX}:${Symbols.SHOW_PREVIEW_IMAGES}"
-                    ) ?: "null"
-
-                    val text = getAttributeValue(null, Symbols.TEXT)
-                        ?: throw Exception("OPML outline doesn't have a mandatory text attribute")
-
-                    elements += Outline(
-                        text = text,
-                        type = getAttributeValue(null, Symbols.TYPE),
-                        xmlUrl = getAttributeValue(null, Symbols.XML_URL),
-                        openEntriesInBrowser = getAttributeValue(
-                            null,
-                            "${Symbols.NEWS_NAMESPACE_PREFIX}:${Symbols.OPEN_ENTRIES_IN_BROWSER}"
-                        )?.toBoolean() ?: false,
-                        blockedWords = getAttributeValue(
-                            null,
-                            "${Symbols.NEWS_NAMESPACE_PREFIX}:${Symbols.BLOCKED_WORDS}"
-                        ) ?: "",
-                        showPreviewImages = when (showPreviewImagesString) {
-                            "true" -> true
-                            "false" -> false
-                            else -> null
-                        },
-                    )
-                }
-            }
-        }
-
-        eventType = parser.next()
-    }
-
-    return elements
 }
 
 fun exportOpml(feeds: List<Feed>): String {
@@ -141,4 +116,18 @@ private fun prettify(xml: String): String {
     }
 
     return result.toString().replaceFirst("<opml", "\n\n<opml")
+}
+
+private fun NodeList.elements(): List<Element> {
+    val list = mutableListOf<Element>()
+
+    for (i in 0 until length) {
+        val item = item(i)
+
+        if (item.nodeType == Node.ELEMENT_NODE) {
+            list += item(i) as Element
+        }
+    }
+
+    return list
 }
