@@ -66,6 +66,14 @@ class EntryFragment : AppFragment() {
 
                 model.state.collectLatest { setState(it ?: return@collectLatest) }
             }
+
+            scrollView.setOnScrollChangeListener { _, _, _, _, _ ->
+                if (scrollView.canScrollVertically(1)) {
+                    fab.show()
+                } else {
+                    fab.hide()
+                }
+            }
         }
     }
 
