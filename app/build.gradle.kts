@@ -18,8 +18,8 @@ android {
         applicationId = "co.appreactor.news"
         minSdk = 26
         targetSdk = 31
-        versionCode = 18
-        versionName = "0.3.2"
+        versionCode = 19
+        versionName = "0.3.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         setProperty("archivesBaseName", "news-$versionName")
