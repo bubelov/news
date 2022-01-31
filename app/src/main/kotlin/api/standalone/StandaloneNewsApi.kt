@@ -60,7 +60,7 @@ class StandaloneNewsApi(
             Timber.d("Got an HTML document, looking for feed links")
             val html = Jsoup.parse(connection.inputStream.bufferedReader().readText())
 
-            val feedElements = mutableListOf<Element>().apply {
+            val feedElements = buildList {
                 addAll(html.select("link[type=\"application/rss+xml\"]"))
                 addAll(html.select("link[type=\"application/atom+xml\"]"))
             }
