@@ -34,7 +34,8 @@ private object Symbols {
 fun importOpml(xml: String): List<Outline> {
     val documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
     val document = documentBuilder.parse(xml.byteInputStream())
-    val outlines = document.getElementsByTagName("outline").elements()
+    val outlines = document.getElementsByTagName("outline")
+        .let { (0 until it.length).filterIsInstance<Element>() }
     val leafOutlines = outlines.filter { !it.hasChildNodes() }
 
     return leafOutlines.map {
@@ -116,18 +117,4 @@ private fun prettify(xml: String): String {
     }
 
     return result.toString().replaceFirst("<opml", "\n\n<opml")
-}
-
-private fun NodeList.elements(): List<Element> {
-    val list = mutableListOf<Element>()
-
-    for (i in 0 until length) {
-        val item = item(i)
-
-        if (item.nodeType == Node.ELEMENT_NODE) {
-            list += item(i) as Element
-        }
-    }
-
-    return list
 }
