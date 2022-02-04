@@ -3,8 +3,6 @@ package opml
 import android.util.Xml
 import db.Feed
 import org.w3c.dom.Element
-import org.w3c.dom.Node
-import org.w3c.dom.NodeList
 import org.xml.sax.InputSource
 import java.io.StringReader
 import java.io.StringWriter
@@ -34,8 +32,12 @@ private object Symbols {
 fun importOpml(xml: String): List<Outline> {
     val documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
     val document = documentBuilder.parse(xml.byteInputStream())
-    val outlines = document.getElementsByTagName("outline")
-        .let { (0 until it.length).filterIsInstance<Element>() }
+
+    val outlines = buildList {
+        val nodes = document.getElementsByTagName("outline")
+        addAll((0 until nodes.length).map { nodes.item(it) }.filterIsInstance<Element>())
+    }
+
     val leafOutlines = outlines.filter { !it.hasChildNodes() }
 
     return leafOutlines.map {
