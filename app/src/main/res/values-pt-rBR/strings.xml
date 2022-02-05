@@ -29,7 +29,6 @@
     <string name="crop_feed_images">Cortar imagens de pré-visualização</string>
     <string name="feeds">Feeds</string>
     <string name="bookmarks">Favoritos</string>
-    <string name="delete_all">Excluir tudo</string>
     <string name="open_xml_link">Abrir endereço do feed</string>
     <string name="open_html_link">Abrir o site</string>
     <string name="actions">Ações</string>
@@ -78,9 +77,6 @@
     <string name="fetch_news_in_background">Sincronização em segundo plano</string>
     <string name="background_sync_interval">Intervalo de sinc. em segundo plano</string>
     <string name="mark_all_as_read">Marcar tudo como lido</string>
-    <string name="event_log_is_empty">Nenhum registro de eventos</string>
-    <string name="event_log">Registro de eventos</string>
-    <string name="view_event_log">Ver registro de eventos</string>
     <string name="unread_news">Notícias não lidas</string>
     <string name="got_exception_of_class_s">Tem %1$s. Veja o log de exceções para detalhes</string>
     <string name="trust_self_signed_certificates">Confie nos certificados auto-assinados</string>
@@ -99,8 +95,6 @@
     <string name="login_with_miniflux">Acessar via Miniflux</string>
     <string name="miniflux">Miniflux</string>
     <string name="opml_file_is_invalid">O arquivo OPML está inválido</string>
-    <string name="stack_trace">Stack trace</string>
-    <string name="stack_trace_icon">Ícone do Stack trace</string>
     <string name="feed_url">A URL do feed</string>
     <string name="view_comments">Ver comentários</string>
     <string name="login_with_nextcloud_app">Acessar via Nextcloud (app)</string>

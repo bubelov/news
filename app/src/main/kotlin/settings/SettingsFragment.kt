@@ -191,10 +191,6 @@ class SettingsFragment : AppFragment() {
                 }
             }
 
-            viewLogEntries.setOnClickListener {
-                findNavController().navigate(SettingsFragmentDirections.actionSettingsFragmentToLogFragment())
-            }
-
             exportDatabase.setOnClickListener {
                 exportDatabaseLauncher.launch("news.db")
             }

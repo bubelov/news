@@ -160,25 +160,6 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/viewLogEntries"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?selectableItemBackground"
-            android:clickable="true"
-            android:focusable="true"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/view_event_log"
-                android:textColor="?colorOnSurface"
-                android:textSize="16sp" />
-
-        </LinearLayout>
-
-        <LinearLayout
             android:id="@+id/exportDatabase"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

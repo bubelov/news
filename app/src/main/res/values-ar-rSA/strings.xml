@@ -29,7 +29,6 @@
     <string name="crop_feed_images">تصغير صور المعاينة</string>
     <string name="feeds">مواجز</string>
     <string name="bookmarks">العلامات المرجعية</string>
-    <string name="delete_all">مسح الكل</string>
     <string name="open_xml_link">افتح الموجز</string>
     <string name="open_html_link">افتح الموقع</string>
     <string name="actions">الاجراءات</string>
@@ -78,9 +77,6 @@
     <string name="fetch_news_in_background">التزامن في الخلفية</string>
     <string name="background_sync_interval">فترة التزامن في الخلفية</string>
     <string name="mark_all_as_read">تعليم الكل كمقروء</string>
-    <string name="event_log_is_empty">سجل الأحداث فارغ</string>
-    <string name="event_log">سجل الأحداث</string>
-    <string name="view_event_log">عرض سجل الأحداث</string>
     <string name="unread_news">أخبار غير مقروءة</string>
     <string name="got_exception_of_class_s">حصلت %1$s. راجع سجل الاستثناء للحصول على التفاصيل</string>
     <string name="trust_self_signed_certificates">الثقة بالشهادات الموقعة ذاتيا</string>
@@ -99,8 +95,6 @@
     <string name="login_with_miniflux">تسجيل الدخول باستخدام Miniflux</string>
     <string name="miniflux">Miniflux</string>
     <string name="opml_file_is_invalid">ملف OPML غير صالح</string>
-    <string name="stack_trace">تتبع المكدس</string>
-    <string name="stack_trace_icon">أيقونة تتبع المكدس </string>
     <string name="feed_url">عنوان URL الموجز</string>
     <string name="view_comments">عرض التعليقات</string>
     <string name="login_with_nextcloud_app">تسجيل الدخول باستخدام Nextcloud (التطبيق)</string>

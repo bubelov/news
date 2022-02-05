@@ -29,9 +29,6 @@ import entries.EntriesSharedViewModel
 import entries.EntriesSupportingTextRepository
 import feeds.FeedsViewModel
 import feedsettings.FeedSettingsViewModel
-import log.ExceptionViewModel
-import log.LogRepository
-import log.LogViewModel
 import org.koin.android.experimental.dsl.viewModel
 import org.koin.dsl.module
 import org.koin.experimental.builder.single
@@ -56,7 +53,6 @@ val appModule = module {
     single { get<Database>().entryImageQueries }
     single { get<Database>().entryEnclosureQueries }
     single { get<Database>().confQueries }
-    single { get<Database>().logQueries }
 
     single {
         val context = get<Context>()
@@ -78,7 +74,6 @@ val appModule = module {
     single<EntriesImagesRepository>()
     single<PodcastsRepository>()
     single<ConfRepository>()
-    single<LogRepository>()
 
     viewModel<AppViewModel>()
     viewModel<AuthViewModel>()
@@ -87,10 +82,8 @@ val appModule = module {
     viewModel<EntryViewModel>()
     viewModel<SettingsViewModel>()
     viewModel<DirectAuthViewModel>()
-    viewModel<ExceptionViewModel>()
     viewModel<FeedsViewModel>()
     viewModel<FeedSettingsViewModel>()
     viewModel<SearchViewModel>()
-    viewModel<LogViewModel>()
     viewModel<MinifluxAuthViewModel>()
 }

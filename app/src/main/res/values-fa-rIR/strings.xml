@@ -29,7 +29,6 @@
     <string name="crop_feed_images">برش تصویر پیش‌نمایش</string>
     <string name="feeds">خوراک‌ها</string>
     <string name="bookmarks">نشانک‌ها</string>
-    <string name="delete_all">حذف همه</string>
     <string name="open_xml_link">باز کردن خوراک</string>
     <string name="open_html_link">باز کردن تارنما</string>
     <string name="actions">عمل‌ها</string>
@@ -78,9 +77,6 @@
     <string name="fetch_news_in_background">به‌روزرسانی در پیش‌زمینه</string>
     <string name="background_sync_interval">فواصل به‌روزرسانی پیش‌زمینه‌ای</string>
     <string name="mark_all_as_read">نشان‌گذاری همه به‌عنوان خوانده شده</string>
-    <string name="event_log_is_empty">سیاههٔ رویداد خالی است</string>
-    <string name="event_log">سیاههٔ رویداد</string>
-    <string name="view_event_log">نمایش سیاههٔ رویداد</string>
     <string name="unread_news">خبر خواهنده نشده</string>
     <string name="got_exception_of_class_s">%1$s دریافت شد. سیاههٔ استثناها را برای جزئیات مشاهده کنید</string>
     <string name="trust_self_signed_certificates">به گواهینامه‌های خودامضاشده اعتماد کن</string>
@@ -99,8 +95,6 @@
     <string name="login_with_miniflux">ورود با Miniflux</string>
     <string name="miniflux">Miniflux</string>
     <string name="opml_file_is_invalid">پرونده OPML نامعتبر است</string>
-    <string name="stack_trace">دنبالهٔ پشته</string>
-    <string name="stack_trace_icon">نمایهٔ دنبالهٔ پشته</string>
     <string name="feed_url">پیوند خوراک</string>
     <string name="view_comments">نمایش نظرها</string>
     <string name="login_with_nextcloud_app">Login with Nextcloud (app)</string>

@@ -134,35 +134,7 @@
         android:id="@+id/settingsFragment"
         android:name="settings.SettingsFragment"
         android:label="SettingsFragment"
-        tools:layout="@layout/fragment_settings">
-        <action
-            android:id="@+id/action_settingsFragment_to_logFragment"
-            app:destination="@id/logFragment"
-            app:popEnterAnim="@anim/fade_in"
-            app:popExitAnim="@anim/fade_out" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/logFragment"
-        android:name="log.LogFragment"
-        android:label="LogFragment"
-        tools:layout="@layout/fragment_log">
-        <action
-            android:id="@+id/action_logFragment_to_exceptionFragment"
-            app:destination="@id/exceptionFragment"
-            app:popEnterAnim="@anim/fade_in"
-            app:popExitAnim="@anim/fade_out" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/exceptionFragment"
-        android:name="log.ExceptionFragment"
-        android:label="ExceptionFragment"
-        tools:layout="@layout/fragment_exception">
-        <argument
-            android:name="logId"
-            app:argType="long" />
-    </fragment>
+        tools:layout="@layout/fragment_settings"/>
 
     <fragment
         android:id="@+id/searchFragment"

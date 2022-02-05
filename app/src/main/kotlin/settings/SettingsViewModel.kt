@@ -28,7 +28,6 @@ class SettingsViewModel(
                 entryImageQueries.deleteAll()
                 entryImagesMetadataQueries.deleteAll()
                 feedQueries.deleteAll()
-                logQueries.deleteAll()
                 confQueries.deleteAll()
             }
         }
