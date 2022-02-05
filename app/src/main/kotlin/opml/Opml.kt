@@ -1,10 +1,7 @@
 package opml
 
-import android.util.Xml
 import db.Feed
 import org.w3c.dom.Element
-import org.xml.sax.InputSource
-import java.io.StringReader
 import java.io.StringWriter
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.OutputKeys
@@ -23,7 +20,7 @@ private object Symbols {
     const val TYPE = "type"
     const val XML_URL = "xmlUrl"
     const val NEWS_NAMESPACE_PREFIX = "news"
-    const val NEWS_NAMESPACE = "https://appreactor.co/news"
+    const val NEWS_NAMESPACE_URL = "https://appreactor.co/news"
     const val OPEN_ENTRIES_IN_BROWSER = "openEntriesInBrowser"
     const val BLOCKED_WORDS = "blockedWords"
     const val SHOW_PREVIEW_IMAGES = "showPreviewImages"
@@ -61,56 +58,56 @@ fun importOpml(xml: String): List<Outline> {
 }
 
 fun exportOpml(feeds: List<Feed>): String {
-    val result = StringWriter()
+    val builderFactory = DocumentBuilderFactory.newInstance().apply { isNamespaceAware = true }
+    val document = builderFactory.newDocumentBuilder().newDocument()
 
-    Xml.newSerializer().apply {
-        setOutput(result)
+    val opmlElement = document.createElement(Symbols.OPML).apply {
+        setAttribute(
+            "xmlns:${Symbols.NEWS_NAMESPACE_PREFIX}",
+            Symbols.NEWS_NAMESPACE_URL,
+        )
 
-        startDocument("UTF-8", true)
-        setPrefix(Symbols.NEWS_NAMESPACE_PREFIX, Symbols.NEWS_NAMESPACE)
-        startTag(null, Symbols.OPML)
-        attribute(null, Symbols.VERSION, "2.0")
-
-        startTag(null, Symbols.HEAD)
-        startTag(null, Symbols.TITLE)
-        text("Subscriptions")
-        endTag(null, Symbols.TITLE)
-        endTag(null, Symbols.HEAD)
-
-        startTag(null, Symbols.BODY)
-
-        feeds.forEach { feed ->
-            startTag(null, Symbols.OUTLINE)
-            attribute(null, Symbols.TEXT, feed.title)
-            attribute(null, Symbols.TYPE, "rss")
-            attribute(null, Symbols.XML_URL, feed.selfLink)
-            attribute(
-                Symbols.NEWS_NAMESPACE,
-                Symbols.OPEN_ENTRIES_IN_BROWSER,
-                feed.openEntriesInBrowser.toString()
-            )
-            attribute(Symbols.NEWS_NAMESPACE, Symbols.BLOCKED_WORDS, feed.blockedWords)
-            attribute(
-                Symbols.NEWS_NAMESPACE,
-                Symbols.SHOW_PREVIEW_IMAGES,
-                feed.showPreviewImages.toString()
-            )
-            endTag(null, Symbols.OUTLINE)
-        }
-
-        endTag(null, Symbols.BODY)
-        endTag(null, Symbols.OPML)
-        endDocument()
+        setAttribute(Symbols.VERSION, "2.0")
     }
 
-    return prettify(result.toString())
-}
+    document.appendChild(opmlElement)
 
-private fun prettify(xml: String): String {
+    val headElement = document.createElement(Symbols.HEAD)
+    opmlElement.appendChild(headElement)
+
+    val titleElement = document.createElement(Symbols.TITLE).apply {
+        textContent = "Subscriptions"
+    }
+
+    headElement.appendChild(titleElement)
+
+    val bodyElement = document.createElement(Symbols.BODY)
+    opmlElement.appendChild(bodyElement)
+
+    feeds.forEach { feed ->
+        bodyElement.appendChild(document.createElement(Symbols.OUTLINE).apply {
+            setAttribute(Symbols.TEXT, feed.title)
+            setAttribute(Symbols.TYPE, "rss")
+            setAttribute(Symbols.XML_URL, feed.selfLink)
+
+            setAttribute(
+                "${Symbols.NEWS_NAMESPACE_PREFIX}:${Symbols.OPEN_ENTRIES_IN_BROWSER}",
+                feed.openEntriesInBrowser.toString(),
+            )
+
+            setAttribute(
+                "${Symbols.NEWS_NAMESPACE_PREFIX}:${Symbols.BLOCKED_WORDS}",
+                feed.blockedWords,
+            )
+
+            setAttribute(
+                "${Symbols.NEWS_NAMESPACE_PREFIX}:${Symbols.SHOW_PREVIEW_IMAGES}",
+                feed.showPreviewImages.toString(),
+            )
+        })
+    }
+
     val result = StringWriter()
-
-    val builder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-    val document = builder.parse(InputSource(StringReader(xml)))
 
     TransformerFactory.newInstance().newTransformer().apply {
         setOutputProperty(OutputKeys.INDENT, "yes")
@@ -118,5 +115,5 @@ private fun prettify(xml: String): String {
         transform(DOMSource(document), StreamResult(result))
     }
 
-    return result.toString().replaceFirst("<opml", "\n\n<opml")
+    return result.toString()
 }
