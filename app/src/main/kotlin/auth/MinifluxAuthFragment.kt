@@ -100,7 +100,7 @@ class MinifluxAuthFragment : AppFragment() {
                 }.onFailure {
                     binding.progress.isVisible = false
                     Timber.e(it)
-                    showDialog(
+                    requireContext().showDialog(
                         R.string.error,
                         it.message ?: getString(R.string.direct_login_failed)
                     )

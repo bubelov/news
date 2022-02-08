@@ -15,8 +15,10 @@ import com.google.android.material.internal.TextWatcherAdapter
 import common.AppFragment
 import common.CardListAdapterDecoration
 import common.hideKeyboard
+import common.openCachedPodcast
 import common.openLink
 import common.screenWidth
+import common.showErrorDialog
 import common.showKeyboard
 import entries.EntriesAdapter
 import entries.EntriesAdapterCallback
@@ -44,7 +46,7 @@ class SearchFragment : AppFragment() {
                     val entry = model.getEntry(item.id) ?: return@launchWhenResumed
                     val feed = model.getFeed(entry.feedId) ?: return@launchWhenResumed
 
-                    model.setRead(entry.id)
+                    model.setRead(listOf(entry.id), true)
 
                     if (feed.openEntriesInBrowser) {
                         openLink(entry.link)
@@ -57,11 +59,30 @@ class SearchFragment : AppFragment() {
             }
 
             override fun onDownloadPodcastClick(item: EntriesAdapterItem) {
-
+                lifecycleScope.launchWhenResumed {
+                    runCatching {
+                        model.downloadPodcast(item.id)
+                    }.onFailure {
+                        showErrorDialog(it)
+                    }
+                }
             }
 
             override fun onPlayPodcastClick(item: EntriesAdapterItem) {
+                lifecycleScope.launch {
+                    runCatching {
+                        val entry = model.getEntry(item.id) ?: return@launch
+                        model.setRead(listOf(entry.id), true)
+                        model.reloadEntry(item)
 
+                        openCachedPodcast(
+                            cacheUri = model.getCachedPodcastUri(entry.id),
+                            enclosureLinkType = entry.enclosureLinkType,
+                        )
+                    }.onFailure {
+                        showErrorDialog(it)
+                    }
+                }
             }
         }
     )

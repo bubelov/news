@@ -21,12 +21,11 @@ import common.CardListAdapterDecoration
 import common.ConfRepository
 import common.Scrollable
 import common.hide
+import common.openCachedPodcast
 import common.openLink
 import common.screenWidth
 import common.show
-import common.showDialog
 import common.showErrorDialog
-import db.Entry
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
@@ -97,7 +96,10 @@ class EntriesFragment : AppFragment(), Scrollable {
                             val entry = model.getEntry(item.id) ?: return@launch
                             model.setRead(listOf(entry.id), true)
                             model.reloadEntry(item)
-                            requireContext().openCachedPodcast(entry)
+                            openCachedPodcast(
+                                cacheUri = model.getCachedPodcastUri(entry.id),
+                                enclosureLinkType = entry.enclosureLinkType,
+                            )
                         }.onFailure {
                             showErrorDialog(it)
                         }
@@ -559,34 +561,6 @@ class EntriesFragment : AppFragment(), Scrollable {
                 getString(R.string.news_list_is_empty)
             } else {
                 getString(R.string.you_have_no_unread_news)
-            }
-        }
-    }
-
-    private fun Context.openCachedPodcast(entry: Entry) {
-        val cacheUri = model.getCachedPodcastUri(entryId = entry.id)
-
-        if (cacheUri == null) {
-            showErrorDialog(Exception("Can't find cache URI for podcast entry ${entry.id}"))
-            return
-        }
-
-        val intent = Intent().apply {
-            action = Intent.ACTION_VIEW
-            data = cacheUri
-            setDataAndType(cacheUri, entry.enclosureLinkType)
-        }
-
-        runCatching {
-            startActivity(intent)
-        }.onFailure {
-            if (it is ActivityNotFoundException) {
-                showDialog(
-                    R.string.error,
-                    R.string.you_have_no_apps_which_can_play_this_podcast
-                )
-            } else {
-                showErrorDialog(it)
             }
         }
     }

@@ -330,7 +330,7 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
                             }
                         }
 
-                        showDialog(
+                        requireContext().showDialog(
                             title = getString(R.string.import_title),
                             message = message,
                         ) {

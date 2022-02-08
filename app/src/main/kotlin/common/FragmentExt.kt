@@ -1,60 +1,18 @@
 package common
 
 import android.content.ActivityNotFoundException
-import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.util.DisplayMetrics
 import android.view.WindowManager
-import androidx.annotation.StringRes
 import androidx.core.content.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import co.appreactor.news.R
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import timber.log.Timber
 
 fun Fragment.app() = requireContext().applicationContext as App
-
-fun Fragment.showDialog(
-    @StringRes titleId: Int,
-    @StringRes messageId: Int,
-    onDismissListener: DialogInterface.OnDismissListener? = null,
-) {
-    MaterialAlertDialogBuilder(requireContext())
-        .setTitle(titleId)
-        .setMessage(messageId)
-        .setPositiveButton(android.R.string.ok, null)
-        .setOnDismissListener(onDismissListener)
-        .show()
-}
-
-fun Fragment.showDialog(
-    @StringRes titleId: Int,
-    message: String,
-    onDismissListener: DialogInterface.OnDismissListener? = null,
-) {
-    MaterialAlertDialogBuilder(requireContext())
-        .setTitle(titleId)
-        .setMessage(message)
-        .setPositiveButton(android.R.string.ok, null)
-        .setOnDismissListener(onDismissListener)
-        .show()
-}
-
-fun Fragment.showDialog(
-    title: String,
-    message: String,
-    onDismissListener: DialogInterface.OnDismissListener? = null,
-) {
-    MaterialAlertDialogBuilder(requireContext())
-        .setTitle(title)
-        .setMessage(message)
-        .setPositiveButton(android.R.string.ok, null)
-        .setOnDismissListener(onDismissListener)
-        .show()
-}
 
 fun Fragment.showErrorDialog(
     t: Throwable,
@@ -64,7 +22,7 @@ fun Fragment.showErrorDialog(
 
     val message = t.message ?: getString(R.string.got_exception_of_class_s, t.javaClass.simpleName)
 
-    showDialog(R.string.error, message) {
+    requireContext().showDialog(R.string.error, message) {
         lifecycleScope.launchWhenResumed {
             onDismissListener?.invoke()
         }
@@ -75,7 +33,7 @@ fun Fragment.showErrorDialog(
     message: String,
     onDismissListener: (suspend () -> Unit)? = null,
 ) {
-    showDialog(R.string.error, message) {
+    requireContext().showDialog(R.string.error, message) {
         lifecycleScope.launchWhenResumed {
             onDismissListener?.invoke()
         }
@@ -99,21 +57,49 @@ fun Fragment.openLink(
     }
 }
 
-private fun Fragment.activity() = requireActivity() as AppActivity
-
 fun Fragment.screenWidth(): Int {
-    return if (Build.VERSION.SDK_INT >= 31) {
-        val windowManager = requireContext().getSystemService<WindowManager>()!!
-        windowManager.currentWindowMetrics.bounds.width()
-    } else if (Build.VERSION.SDK_INT >= 30) {
-        val displayMetrics = DisplayMetrics()
-        @Suppress("DEPRECATION")
-        requireContext().display?.getRealMetrics(displayMetrics)
-        displayMetrics.widthPixels
-    } else {
-        val displayMetrics = DisplayMetrics()
-        @Suppress("DEPRECATION")
-        requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
-        displayMetrics.widthPixels
+    return when {
+        Build.VERSION.SDK_INT >= 31 -> {
+            val windowManager = requireContext().getSystemService<WindowManager>()!!
+            windowManager.currentWindowMetrics.bounds.width()
+        }
+        Build.VERSION.SDK_INT >= 30 -> {
+            val displayMetrics = DisplayMetrics()
+            @Suppress("DEPRECATION")
+            requireContext().display?.getRealMetrics(displayMetrics)
+            displayMetrics.widthPixels
+        }
+        else -> {
+            val displayMetrics = DisplayMetrics()
+            @Suppress("DEPRECATION")
+            requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
+            displayMetrics.widthPixels
+        }
+    }
+}
+
+fun Fragment.openCachedPodcast(cacheUri: Uri?, enclosureLinkType: String) {
+    if (cacheUri == null) {
+        showErrorDialog(Exception("Can't find podcast audio file"))
+        return
+    }
+
+    val intent = Intent().apply {
+        action = Intent.ACTION_VIEW
+        data = cacheUri
+        setDataAndType(cacheUri, enclosureLinkType)
+    }
+
+    runCatching {
+        startActivity(intent)
+    }.onFailure {
+        if (it is ActivityNotFoundException) {
+            requireContext().showDialog(
+                R.string.error,
+                R.string.you_have_no_apps_which_can_play_this_podcast
+            )
+        } else {
+            showErrorDialog(it)
+        }
     }
 }

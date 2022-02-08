@@ -1,5 +1,6 @@
 package search
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import common.ConfRepository
@@ -14,10 +15,13 @@ import feeds.FeedsRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import podcasts.PodcastsRepository
 import sync.NewsApiSync
 import sync.SyncResult
 import timber.log.Timber
@@ -26,6 +30,7 @@ class SearchViewModel(
     private val feedsRepository: FeedsRepository,
     private val entriesRepository: EntriesRepository,
     private val entriesSupportingTextRepository: EntriesSupportingTextRepository,
+    private val podcastsRepository: PodcastsRepository,
     private val sync: NewsApiSync,
     private val conf: ConfRepository,
 ) : ViewModel() {
@@ -83,8 +88,11 @@ class SearchViewModel(
 
     fun getFeed(id: String) = feedsRepository.selectById(id)
 
-    fun setRead(entryId: String) {
-        entriesRepository.setRead(entryId, true)
+    fun setRead(
+        entryIds: Collection<String>,
+        read: Boolean,
+    ) {
+        entryIds.forEach { entriesRepository.setRead(it, read) }
 
         viewModelScope.launch {
             val syncResult = sync.syncEntriesFlags()
@@ -95,6 +103,28 @@ class SearchViewModel(
         }
     }
 
+    suspend fun downloadPodcast(id: String) {
+        podcastsRepository.download(id)
+    }
+
+    suspend fun reloadEntry(entry: EntriesAdapterItem) {
+        searchResults.first().filter { it == entry }.forEach {
+            it.read.value = entriesRepository.selectById(it.id)?.read ?: false
+        }
+    }
+
+    fun getCachedPodcastUri(entryId: String): Uri? {
+        val enclosure = podcastsRepository.selectByEntryId(entryId) ?: return null
+
+        val uri = runCatching {
+            Uri.parse(enclosure.cacheUri)
+        }.onFailure {
+            Timber.e(it)
+        }
+
+        return uri.getOrNull()
+    }
+
     private suspend fun Entry.toRow(feed: Feed?, conf: Flow<Conf>): EntriesAdapterItem {
         return EntriesAdapterItem(
             id = id,
@@ -102,8 +132,12 @@ class SearchViewModel(
             subtitle = lazy {
                 (feed?.title ?: "Unknown feed") + " · " + published
             },
-            podcast = false,
-            podcastDownloadPercent = flowOf(),
+            podcast = enclosureLinkType.startsWith("audio"),
+            podcastDownloadPercent = flow {
+                podcastsRepository.getDownloadProgress(this@toRow.id).collect {
+                    emit(it)
+                }
+            },
             image = flowOf(),
             cachedImage = lazy { null },
             supportingText = flow {
