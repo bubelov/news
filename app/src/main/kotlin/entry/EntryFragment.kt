@@ -61,7 +61,8 @@ class EntryFragment : AppFragment() {
             viewLifecycleOwner.lifecycleScope.launch {
                 model.onViewCreated(
                     entryId = args.entryId,
-                    imageGetter = TextViewImageGetter(binding.summaryView, lifecycleScope),
+                    summaryView = binding.summaryView,
+                    lifecycleScope = lifecycleScope,
                 )
 
                 model.state.collectLatest { setState(it ?: return@collectLatest) }

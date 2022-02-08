@@ -3,7 +3,9 @@ package entry
 import android.app.Application
 import android.text.Html
 import android.text.SpannableStringBuilder
+import android.widget.TextView
 import androidx.core.text.HtmlCompat
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.appreactor.news.R
@@ -15,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import sync.SyncResult
 import timber.log.Timber
 
@@ -29,7 +32,8 @@ class EntryViewModel(
 
     suspend fun onViewCreated(
         entryId: String,
-        imageGetter: Html.ImageGetter
+        summaryView: TextView,
+        lifecycleScope: LifecycleCoroutineScope,
     ) = withContext(Dispatchers.IO) {
         if (state.value != null) {
             return@withContext
@@ -57,7 +61,14 @@ class EntryViewModel(
             state.value = State.Success(
                 feedTitle = feed.title,
                 entry = entry,
-                parsedContent = parseEntryContent(entry.content, imageGetter),
+                parsedContent = parseEntryContent(
+                    entry.content,
+                    TextViewImageGetter(
+                        textView = summaryView,
+                        scope = lifecycleScope,
+                        baseUrl = entry.link.toHttpUrlOrNull(),
+                    ),
+                ),
             )
         }.onFailure {
             state.value = State.Error(it.message ?: "")
