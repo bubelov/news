@@ -1,6 +1,7 @@
 package common
 
 import android.app.Application
+import android.content.Intent
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
@@ -18,7 +19,10 @@ import org.koin.core.context.startKoin
 import sync.SyncWorker
 import timber.log.Timber
 import java.io.File
+import java.io.PrintWriter
+import java.io.StringWriter
 import java.util.concurrent.TimeUnit
+import kotlin.system.exitProcess
 
 class App : Application() {
 
@@ -48,6 +52,33 @@ class App : Application() {
             .build()
 
         Picasso.setSingletonInstance(picasso)
+
+        if (BuildConfig.DEBUG) {
+            val oldHandler = Thread.getDefaultUncaughtExceptionHandler()
+
+            Thread.setDefaultUncaughtExceptionHandler { t, e ->
+                runCatching {
+                    val sw = StringWriter()
+                    e.printStackTrace(PrintWriter(sw))
+
+                    val intent = Intent(Intent.ACTION_SEND).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        putExtra(Intent.EXTRA_TEXT, sw.toString())
+                        type = "text/plain"
+                    }
+
+                    startActivity(intent)
+                }.onFailure {
+                    it.printStackTrace()
+                }
+
+                if (oldHandler != null) {
+                    oldHandler.uncaughtException(t, e)
+                } else {
+                    exitProcess(1)
+                }
+            }
+        }
     }
 
     fun setupBackgroundSync(override: Boolean) {
