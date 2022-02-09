@@ -70,7 +70,14 @@ class StandaloneNewsApi(
             }
 
             Timber.d("Feed elements found: ${feedElements.size}. Data: $feedElements")
-            return addFeed(URI.create(feedElements.first().attr("href")).toURL())
+            val href = feedElements.first().attr("href")
+            val absolute = !href.startsWith("/")
+
+            return if (absolute) {
+                addFeed(URI.create(href).toURL())
+            } else {
+                addFeed(URI.create("$url$href").toURL())
+            }
         } else {
             return when (val result = feed(url, connection)) {
                 is FeedResult.Success -> {
