@@ -32,8 +32,11 @@ class MinifluxApiBuilder {
             if (!response.isSuccessful) {
                 val json = Gson().fromJson(response.body!!.string(), JsonObject::class.java)
 
-                val errorMessage = json["error_message"]?.asString
-                    ?: "HTTP request ${it.request().url} failed with response code ${response.code}"
+                val errorMessage = if (json != null && json.has("error_message")) {
+                    json["error_message"].asString
+                } else {
+                    "HTTP request ${it.request().url} failed with response code ${response.code}"
+                }
 
                 throw MinifluxApiException(errorMessage)
             }
