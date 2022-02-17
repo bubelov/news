@@ -1,6 +1,0 @@
-files:
-  - source: strings.xml
-    translation: '%original_path%/%original_file_name%'
-    content_segmentation: 0
-    translatable_elements:
-      - '*'
