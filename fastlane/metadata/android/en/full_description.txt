@@ -1,4 +1,4 @@
-NOTE: This is NOT an official Nextcloud News client
+NOTE: This is NOT an official Nextcloud News client, but Nextcloud is fully supported
 
 Main Features:
 
@@ -8,6 +8,5 @@ Main Features:
 * Built-in podcast fetcher which can be used with external players
 * Enhance your news feed with high-resolution preview images
 * Enjoy modern and minimalistic Material Design
-* Both light and dark color schemes are supported
+* Both light and dark themes are supported
 * This is an open source app which respects your privacy
-

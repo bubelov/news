@@ -1,4 +1,4 @@
-NOTE: Dies ist KEIN offizieller Nextcloud News Client
+NOTE: This is NOT an official Nextcloud News client, but Nextcloud is fully supported
 
 Wichtigste Eigenschaften:
 

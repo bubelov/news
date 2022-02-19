@@ -1,4 +1,4 @@
-ATTENZIONE: Questo non è un client ufficiale per Nextcloud News
+NOTE: This is NOT an official Nextcloud News client, but Nextcloud is fully supported
 
 Funzioni principali:
 
@@ -10,4 +10,3 @@ Funzioni principali:
 * Goditi un Material Design moderno e minimale
 * Supporta entrambi i temi chiaro e scuro
 * Questa è un'applicazione open source che rispetta la tua privacy
-
