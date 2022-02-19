@@ -40,11 +40,10 @@ The standalone mode is still work in progress, which means it's not reliable at 
 
 ## 🌍 Translators Needed
 
-- [Afrikaans (af) in South Africa (ZA)](app/src/main/res/values-af-rZA/strings.xml)
-- [Arabic (ar) in Saudi Arabia (SA)](/app/src/main/res/values-ar-rSA/strings.xml)
-- [Catalan (ca) in Spain (ES)](/app/src/main/res/values-ca-rES/strings.xml)
-- [Chinese (zh) in China (CN)](/app/src/main/res/values-zh-rCN/strings.xml)
-- [Chinese (zh) in Taiwan (TW)](/app/src/main/res/values-zh-rTW/strings.xml)
+- [Afrikaans](app/src/main/res/values-af/strings.xml)
+- [Arabic](/app/src/main/res/values-ar/strings.xml)
+- [Catalan](/app/src/main/res/values-ca/strings.xml)
+- [Chinese](/app/src/main/res/values-zh/strings.xml)
 - [Czech (cs in Czech Republic (CZ))](/app/src/main/res/values-cs-rCZ/strings.xml)
 - [Danish (da)](/app/src/main/res/values-da-rDK/strings.xml)
 - [Dutch (nl)](/app/src/main/res/values-nl-rNL/strings.xml)
@@ -71,6 +70,8 @@ The standalone mode is still work in progress, which means it's not reliable at 
 - [Turkish (tr)](/app/src/main/res/values-tr-rTR/strings.xml)
 - [Ukrainian (uk)](/app/src/main/res/values-uk-rUA/strings.xml)
 - [Vietnamese (vi)](/app/src/main/res/values-vi-rVN/strings.xml)
+
+Didn't find your language or regional dialect? Open an issue and we'll add it.
 
 ## 💸 Fund the Project
 
