@@ -9,6 +9,19 @@ fun entryAdapter() = Entry.Adapter(
 )
 
 private fun offsetDateTimeAdapter() = object : ColumnAdapter<OffsetDateTime, String> {
-    override fun decode(databaseValue: String) = OffsetDateTime.parse(databaseValue)
+    override fun decode(databaseValue: String): OffsetDateTime {
+        try {
+            val value = OffsetDateTime.parse(databaseValue)
+
+            if (value != null) {
+                return value
+            } else {
+                throw IllegalArgumentException("Invalid date format: $databaseValue")
+            }
+        } catch (e: Exception) {
+            throw IllegalArgumentException("Invalid date format: $databaseValue")
+        }
+    }
+
     override fun encode(value: OffsetDateTime) = value.toString()
 }
