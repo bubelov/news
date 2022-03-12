@@ -112,6 +112,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.2")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    implementation("androidx.browser:browser:1.4.0")
 
     val workVersion = "2.7.1"
     implementation("androidx.work:work-runtime-ktx:$workVersion")

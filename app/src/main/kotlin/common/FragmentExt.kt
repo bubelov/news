@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Build
 import android.util.DisplayMetrics
 import android.view.WindowManager
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -41,17 +42,15 @@ fun Fragment.showErrorDialog(
 }
 
 fun Fragment.openLink(
-    link: String
+    link: Uri,
+    useBuiltInBrowser: Boolean,
 ) {
     try {
-        startActivity(
-            Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse(link)
-            )
-        )
-    } catch (e: ActivityNotFoundException) {
-        showErrorDialog(getString(R.string.invalid_url_s, link))
+        if (useBuiltInBrowser) {
+            CustomTabsIntent.Builder().build().launchUrl(requireContext(), link)
+        } else {
+            startActivity(Intent(Intent.ACTION_VIEW, link))
+        }
     } catch (e: Exception) {
         showErrorDialog(e)
     }

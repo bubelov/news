@@ -1,6 +1,7 @@
 package entry
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.text.SpannableStringBuilder
@@ -100,7 +101,14 @@ class EntryFragment : AppFragment() {
                     menu?.findItem(R.id.comments)?.apply {
                         isVisible = state.entry.commentsUrl.isNotBlank()
                         setOnMenuItemClickListener {
-                            openLink(state.entry.commentsUrl)
+                            val link = runCatching {
+                                Uri.parse(state.entry.commentsUrl)
+                            }.getOrElse {
+                                showErrorDialog(it)
+                                return@setOnMenuItemClickListener true
+                            }
+
+                            openLink(link, false)
                             true
                         }
                     }
@@ -133,7 +141,14 @@ class EntryFragment : AppFragment() {
                         fab.show()
 
                         fab.setOnClickListener {
-                            openLink(state.entry.link)
+                            val link = kotlin.runCatching {
+                                Uri.parse(state.entry.link)
+                            }.getOrElse {
+                                showErrorDialog(it)
+                                return@setOnClickListener
+                            }
+
+                            openLink(link, false)
                         }
                     }
                 }

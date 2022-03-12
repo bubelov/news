@@ -1,8 +1,6 @@
 package entries
 
-import android.content.ActivityNotFoundException
-import android.content.Context
-import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -71,7 +69,14 @@ class EntriesFragment : AppFragment(), Scrollable {
                         model.setRead(listOf(entry.id), true)
 
                         if (feed.openEntriesInBrowser) {
-                            openLink(entry.link)
+                            val link = runCatching {
+                                Uri.parse(entry.link)
+                            }.getOrElse {
+                                showErrorDialog(it)
+                                return@launchWhenResumed
+                            }
+
+                            openLink(link, false)
                         } else {
                             val action =
                                 EntriesFragmentDirections.actionEntriesFragmentToEntryFragment(item.id)

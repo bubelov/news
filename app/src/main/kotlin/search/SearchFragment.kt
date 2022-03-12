@@ -1,5 +1,6 @@
 package search
 
+import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.view.LayoutInflater
@@ -49,7 +50,14 @@ class SearchFragment : AppFragment() {
                     model.setRead(listOf(entry.id), true)
 
                     if (feed.openEntriesInBrowser) {
-                        openLink(entry.link)
+                        val link = runCatching {
+                            Uri.parse(entry.link)
+                        }.getOrElse {
+                            showErrorDialog(it)
+                            return@launchWhenResumed
+                        }
+
+                        openLink(link, false)
                     } else {
                         val action =
                             SearchFragmentDirections.actionSearchFragmentToEntryFragment(item.id)

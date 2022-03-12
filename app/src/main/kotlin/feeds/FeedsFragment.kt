@@ -1,5 +1,6 @@
 package feeds
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -58,11 +59,25 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
             }
 
             override fun onOpenHtmlLinkClick(feed: FeedsAdapterItem) {
-                openLink(feed.alternateLink)
+                val link = runCatching {
+                    Uri.parse(feed.alternateLink)
+                }.getOrElse {
+                    showErrorDialog(it)
+                    return
+                }
+
+                openLink(link, false)
             }
 
             override fun openLinkClick(feed: FeedsAdapterItem) {
-                openLink(feed.selfLink)
+                val link = runCatching {
+                    Uri.parse(feed.selfLink)
+                }.getOrElse {
+                    showErrorDialog(it)
+                    return
+                }
+
+                openLink(link, false)
             }
 
             override fun onRenameClick(feed: FeedsAdapterItem) {
