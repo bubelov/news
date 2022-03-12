@@ -29,7 +29,29 @@ class ConfRepository(
     }
 
     suspend fun save(conf: Conf) = withContext(Dispatchers.IO) {
-        db.insertOrReplace(conf)
+        db.insertOrReplace(
+            id = conf.id,
+            authType = conf.authType,
+            nextcloudServerUrl = conf.nextcloudServerUrl,
+            nextcloudServerTrustSelfSignedCerts = conf.nextcloudServerTrustSelfSignedCerts,
+            nextcloudServerUsername = conf.nextcloudServerUsername,
+            nextcloudServerPassword = conf.nextcloudServerPassword,
+            minifluxServerUrl = conf.minifluxServerUrl,
+            minifluxServerTrustSelfSignedCerts = conf.minifluxServerTrustSelfSignedCerts,
+            minifluxServerUsername = conf.minifluxServerUsername,
+            minifluxServerPassword = conf.minifluxServerPassword,
+            initialSyncCompleted = conf.initialSyncCompleted,
+            lastEntriesSyncDateTime = conf.lastEntriesSyncDateTime,
+            showReadEntries = conf.showReadEntries,
+            sortOrder = conf.sortOrder,
+            showPreviewImages = conf.showPreviewImages,
+            cropPreviewImages = conf.cropPreviewImages,
+            markScrolledEntriesAsRead = conf.markScrolledEntriesAsRead,
+            syncOnStartup = conf.syncOnStartup,
+            syncInBackground = conf.syncInBackground,
+            backgroundSyncIntervalMillis = conf.backgroundSyncIntervalMillis,
+            useBuiltInBrowser = conf.useBuiltInBrowser,
+        )
     }
 
     companion object {

@@ -191,6 +191,16 @@ class SettingsFragment : AppFragment() {
                 }
             }
 
+            useBuiltInBrowser.apply {
+                isChecked = conf.useBuiltInBrowser
+
+                setOnCheckedChangeListener { _, isChecked ->
+                    runBlocking {
+                        model.saveConf(model.getConf().copy(useBuiltInBrowser = isChecked))
+                    }
+                }
+            }
+
             exportDatabase.setOnClickListener {
                 exportDatabaseLauncher.launch("news.db")
             }

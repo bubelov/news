@@ -130,8 +130,8 @@ dependencies {
     implementation("io.insert-koin:koin-android:2.2.3")
     implementation("io.insert-koin:koin-android-ext:2.2.3")
     implementation("io.insert-koin:koin-android-viewmodel:2.2.3")
-    implementation("com.squareup.sqldelight:android-driver:1.5.1")
-    implementation("com.squareup.sqldelight:coroutines-extensions:1.5.1")
+    implementation("com.squareup.sqldelight:android-driver:1.5.3")
+    implementation("com.squareup.sqldelight:coroutines-extensions:1.5.3")
     implementation("com.jakewharton.timber:timber:5.0.1")
     implementation("org.jsoup:jsoup:1.14.2")
 

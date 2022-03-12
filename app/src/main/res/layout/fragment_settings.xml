@@ -160,6 +160,26 @@
         </LinearLayout>
 
         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true"
+            android:orientation="vertical"
+            android:paddingStart="16dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="8dp">
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/useBuiltInBrowser"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/use_built_in_browser"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/exportDatabase"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

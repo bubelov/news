@@ -100,6 +100,7 @@
     <string name="login_with_nextcloud_app">Login with Nextcloud (app)</string>
     <string name="standalone_mode_no_beta">Standalone mode</string>
     <string name="beta">⚠ BETA ⚠</string>
+    <string name="use_built_in_browser">Use built-in browser</string>
     <plurals name="d_hours">
         <item quantity="one">%d hour</item>
         <item quantity="other">%d hours</item>
