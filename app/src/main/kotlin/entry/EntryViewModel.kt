@@ -9,6 +9,8 @@ import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.appreactor.news.R
+import common.ConfRepository
+import db.Conf
 import feeds.FeedsRepository
 import sync.NewsApiSync
 import db.Entry
@@ -25,16 +27,21 @@ class EntryViewModel(
     private val app: Application,
     private val feedsRepository: FeedsRepository,
     private val entriesRepository: EntriesRepository,
+    private val confRepository: ConfRepository,
     private val newsApiSync: NewsApiSync,
 ) : ViewModel() {
 
     val state = MutableStateFlow<State?>(null)
+
+    lateinit var conf: Conf
 
     suspend fun onViewCreated(
         entryId: String,
         summaryView: TextView,
         lifecycleScope: LifecycleCoroutineScope,
     ) = withContext(Dispatchers.IO) {
+        conf = confRepository.get()
+
         if (state.value != null) {
             return@withContext
         }

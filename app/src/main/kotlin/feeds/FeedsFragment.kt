@@ -66,7 +66,7 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
                     return
                 }
 
-                openLink(link, false)
+                openLink(link, model.conf.useBuiltInBrowser)
             }
 
             override fun openLinkClick(feed: FeedsAdapterItem) {
@@ -77,7 +77,7 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
                     return
                 }
 
-                openLink(link, false)
+                openLink(link, model.conf.useBuiltInBrowser)
             }
 
             override fun onRenameClick(feed: FeedsAdapterItem) {

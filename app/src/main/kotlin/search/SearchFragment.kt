@@ -57,7 +57,7 @@ class SearchFragment : AppFragment() {
                             return@launchWhenResumed
                         }
 
-                        openLink(link, false)
+                        openLink(link, model.getConf().useBuiltInBrowser)
                     } else {
                         val action =
                             SearchFragmentDirections.actionSearchFragmentToEntryFragment(item.id)

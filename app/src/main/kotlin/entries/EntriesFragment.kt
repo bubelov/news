@@ -76,7 +76,7 @@ class EntriesFragment : AppFragment(), Scrollable {
                                 return@launchWhenResumed
                             }
 
-                            openLink(link, false)
+                            openLink(link, model.getConf().useBuiltInBrowser)
                         } else {
                             val action =
                                 EntriesFragmentDirections.actionEntriesFragmentToEntryFragment(item.id)

@@ -108,7 +108,7 @@ class EntryFragment : AppFragment() {
                                 return@setOnMenuItemClickListener true
                             }
 
-                            openLink(link, false)
+                            openLink(link, model.conf.useBuiltInBrowser)
                             true
                         }
                     }
@@ -148,7 +148,7 @@ class EntryFragment : AppFragment() {
                                 return@setOnClickListener
                             }
 
-                            openLink(link, false)
+                            openLink(link, model.conf.useBuiltInBrowser)
                         }
                     }
                 }

@@ -125,6 +125,8 @@ class SearchViewModel(
         return uri.getOrNull()
     }
 
+    suspend fun getConf() = conf.get()
+
     private suspend fun Entry.toRow(feed: Feed?, conf: Flow<Conf>): EntriesAdapterItem {
         return EntriesAdapterItem(
             id = id,

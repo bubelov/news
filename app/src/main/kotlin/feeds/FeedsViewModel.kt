@@ -3,6 +3,8 @@ package feeds
 import android.content.res.Resources
 import androidx.lifecycle.ViewModel
 import co.appreactor.news.R
+import common.ConfRepository
+import db.Conf
 import db.Feed
 import entries.EntriesRepository
 import kotlinx.coroutines.Dispatchers
@@ -19,12 +21,17 @@ import java.util.concurrent.atomic.AtomicInteger
 class FeedsViewModel(
     private val feedsRepo: FeedsRepository,
     private val entriesRepo: EntriesRepository,
+    private val confRepository: ConfRepository,
     private val resources: Resources,
 ) : ViewModel() {
 
     val state = MutableStateFlow<State?>(null)
 
+    lateinit var conf: Conf
+
     suspend fun onViewCreated() {
+        conf = confRepository.get()
+
         if (state.value == null) {
             reload()
         }
@@ -109,7 +116,8 @@ class FeedsViewModel(
     }
 
     suspend fun addFeed(url: String) {
-        val fullUrl = if (url.startsWith("http://") || !url.startsWith("https://")) "https://$url" else url
+        val fullUrl =
+            if (url.startsWith("http://") || !url.startsWith("https://")) "https://$url" else url
 
         runCatching {
             val parsedUrl = runCatching {
