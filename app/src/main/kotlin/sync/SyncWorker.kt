@@ -19,8 +19,10 @@ import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
 import timber.log.Timber
 
-class SyncWorker(appContext: Context, workerParams: WorkerParameters) :
-    Worker(appContext, workerParams) {
+class SyncWorker(
+    context: Context,
+    workerParams: WorkerParameters
+) : Worker(context, workerParams) {
 
     override fun doWork() = runBlocking { doWorkAsync() }
 
@@ -29,10 +31,8 @@ class SyncWorker(appContext: Context, workerParams: WorkerParameters) :
         val prefs = app.get<ConfRepository>().get()
         val sync = app.get<NewsApiSync>()
         val entriesRepository = app.get<EntriesRepository>()
-        Timber.d("Attempting background sync")
 
         if (!prefs.initialSyncCompleted) {
-            Timber.d("Initial sync isn't completed yet. Will retry later")
             return Result.retry()
         }
 
