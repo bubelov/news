@@ -1,6 +1,7 @@
 package feeds
 
 import android.content.res.Resources
+import common.ConfRepository
 import entries.EntriesRepository
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -13,11 +14,13 @@ class FeedsViewModelTests {
 
     private val feedsRepo = mockk<FeedsRepository>(relaxed = true)
     private val entriesRepo = mockk<EntriesRepository>(relaxed = true)
+    private val confRepo = mockk<ConfRepository>(relaxed = true)
     private val resources = mockk<Resources>(relaxed = true)
 
     private val model = FeedsViewModel(
         feedsRepo = feedsRepo,
         entriesRepo = entriesRepo,
+        confRepository = confRepo,
         resources = resources,
     )
 

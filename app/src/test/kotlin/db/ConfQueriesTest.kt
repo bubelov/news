@@ -1,5 +1,7 @@
 package db
 
+import common.ConfRepository
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -17,7 +19,7 @@ class ConfQueriesTest {
         db.insertDefault()
         val conf = db.select().executeAsOne()
         val changedConf = conf.copy(authType = "test")
-        db.insertOrReplace(changedConf)
+        runBlocking { ConfRepository(db).save(changedConf) }
         Assert.assertEquals(changedConf, db.select().executeAsOne())
     }
 
@@ -64,4 +66,5 @@ fun defaultConf() = Conf(
     syncOnStartup = true,
     syncInBackground = true,
     backgroundSyncIntervalMillis = 10800000,
+    useBuiltInBrowser = true,
 )
