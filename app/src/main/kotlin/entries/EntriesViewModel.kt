@@ -240,10 +240,16 @@ class EntriesViewModel(
     fun getFeed(id: String) = feedsRepository.selectById(id)
 
     fun setRead(
-        entryIds: Collection<String>,
+        items: Collection<EntriesAdapterItem>,
         read: Boolean,
     ) {
-        entryIds.forEach { entriesRepository.setRead(it, read) }
+        items.forEach { entriesRepository.setRead(it.id, read) }
+
+        val conf = runBlocking { conf.get() }
+
+        if (!conf.showReadEntries) {
+            items.forEach { hide(it) }
+        }
 
         viewModelScope.launch {
             val syncResult = newsApiSync.syncEntriesFlags()

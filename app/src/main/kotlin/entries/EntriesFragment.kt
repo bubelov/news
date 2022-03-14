@@ -66,7 +66,11 @@ class EntriesFragment : AppFragment(), Scrollable {
                         val entry = model.getEntry(item.id) ?: return@launchWhenResumed
                         val feed = model.getFeed(entry.feedId) ?: return@launchWhenResumed
 
-                        model.setRead(listOf(entry.id), true)
+                        model.setRead(listOf(item), true)
+
+                        if (!model.getConf().showReadEntries) {
+                            model.hide(item)
+                        }
 
                         if (feed.openEntriesInBrowser) {
                             val link = runCatching {
@@ -99,7 +103,7 @@ class EntriesFragment : AppFragment(), Scrollable {
                     lifecycleScope.launch {
                         runCatching {
                             val entry = model.getEntry(item.id) ?: return@launch
-                            model.setRead(listOf(entry.id), true)
+                            model.setRead(listOf(item), true)
                             model.reloadEntry(item)
                             openCachedPodcast(
                                 cacheUri = model.getCachedPodcastUri(entry.id),
@@ -145,8 +149,8 @@ class EntriesFragment : AppFragment(), Scrollable {
                                     entry = entry,
                                     entryIndex = entryIndex,
                                     actionText = R.string.marked_as_read,
-                                    action = { model.setRead(listOf(entry.id), true) },
-                                    undoAction = { model.setRead(listOf(entry.id), false) }
+                                    action = { model.setRead(listOf(entry), true) },
+                                    undoAction = { model.setRead(listOf(entry), false) }
                                 )
                             }
 
@@ -181,11 +185,11 @@ class EntriesFragment : AppFragment(), Scrollable {
                                     entryIndex = entryIndex,
                                     actionText = R.string.removed_from_bookmarks,
                                     action = {
-                                        model.setRead(listOf(entry.id), true)
+                                        model.setRead(listOf(entry), true)
                                         model.setBookmarked(entry.id, false)
                                     },
                                     undoAction = {
-                                        model.setRead(listOf(entry.id), false)
+                                        model.setRead(listOf(entry), false)
                                         model.setBookmarked(entry.id, true)
                                     }
                                 )
@@ -197,11 +201,11 @@ class EntriesFragment : AppFragment(), Scrollable {
                                     entryIndex = entryIndex,
                                     actionText = R.string.removed_from_bookmarks,
                                     action = {
-                                        model.setRead(listOf(entry.id), true)
+                                        model.setRead(listOf(entry), true)
                                         model.setBookmarked(entry.id, false)
                                     },
                                     undoAction = {
-                                        model.setRead(listOf(entry.id), false)
+                                        model.setRead(listOf(entry), false)
                                         model.setBookmarked(entry.id, true)
                                     }
                                 )
@@ -259,7 +263,7 @@ class EntriesFragment : AppFragment(), Scrollable {
 
         if (runBlocking { model.getConf().markScrolledEntriesAsRead }) {
             model.setRead(
-                entryIds = seenEntries.map { it.id },
+                items = seenEntries,
                 read = true,
             )
 
@@ -475,7 +479,7 @@ class EntriesFragment : AppFragment(), Scrollable {
                 seenItemsOutOfRange.forEach {
                     if (!it.read.value) {
                         it.read.value = true
-                        model.setRead(listOf(it.id), true)
+                        model.setRead(listOf(it), true)
                     }
                 }
             }
