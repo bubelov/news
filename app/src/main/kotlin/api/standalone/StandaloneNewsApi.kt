@@ -2,7 +2,13 @@ package api.standalone
 
 import android.util.Base64
 import api.NewsApi
-import co.appreactor.feedk.*
+import co.appreactor.feedk.AtomEntry
+import co.appreactor.feedk.AtomFeed
+import co.appreactor.feedk.FeedResult
+import co.appreactor.feedk.RssFeed
+import co.appreactor.feedk.RssItem
+import co.appreactor.feedk.RssItemGuid
+import co.appreactor.feedk.feed
 import db.Entry
 import db.EntryQueries
 import db.EntryWithoutSummary
@@ -15,7 +21,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
-import org.jsoup.nodes.Element
 import timber.log.Timber
 import java.net.HttpURLConnection
 import java.net.URI
@@ -146,13 +151,20 @@ class StandaloneNewsApi(
         val url = runCatching {
             URI.create(feed.selfLink).toURL()
         }.getOrElse {
-            Timber.e("Failed to parse feed url for feed $feed")
+            Timber.e(it, "Failed to parse feed url for feed $feed")
             return emptyList()
         }
 
-        return when (val result = feed(url)) {
+        val feedResult = runCatching {
+            feed(url)
+        }.getOrElse {
+            Timber.e(it, "Failed to fetch feed $feed")
+            return emptyList()
+        }
+
+        return when (feedResult) {
             is FeedResult.Success -> {
-                when (val parsedFeed = result.feed) {
+                when (val parsedFeed = feedResult.feed) {
                     is AtomFeed -> {
                         parsedFeed.entries.getOrElse {
                             Timber.d("Failed to parse Atom entries for feed $feed")
@@ -179,12 +191,12 @@ class StandaloneNewsApi(
             }
 
             is FeedResult.HttpNotOk -> {
-                Timber.e("Got HTTP response code ${result.responseCode} with message: ${result.message}")
+                Timber.e("Got HTTP response code ${feedResult.responseCode} with message: ${feedResult.message}")
                 emptyList()
             }
 
             is FeedResult.ParserFailure -> {
-                Timber.e(result.t, "Feed parser failure (url = $url)")
+                Timber.e(feedResult.t, "Feed parser failure (url = $url)")
                 emptyList()
             }
 
@@ -248,24 +260,37 @@ class StandaloneNewsApi(
         commentsUrl = "",
     )
 
-    private fun RssItem.toEntry(feedId: String) = Entry(
-        id = sha256("$feedId:$title:$description"),
-        feedId = feedId,
-        title = title ?: "",
-        link = link?.toString() ?: "",
-        published = OffsetDateTime.parse((pubDate ?: Date()).toIsoString()),
-        updated = OffsetDateTime.parse((pubDate ?: Date()).toIsoString()),
-        authorName = author ?: "",
-        content = description ?: "",
-        enclosureLink = enclosure?.url.toString(),
-        enclosureLinkType = enclosure?.type ?: "",
-        read = false,
-        readSynced = true,
-        bookmarked = false,
-        bookmarkedSynced = true,
-        guidHash = "",
-        commentsUrl = "",
-    )
+    private fun RssItem.toEntry(feedId: String): Entry {
+        val id = when (val guid = guid) {
+            is RssItemGuid.StringGuid -> "guid:${guid.value}"
+            is RssItemGuid.UrlGuid -> "guid:${guid.value}"
+            else -> {
+                val feedIdComponent = "feed-id:$feedId"
+                val titleHashComponent = "title-sha256:${sha256(title ?: "")}"
+                val descriptionHashComponent = "description-sha256:${sha256(description ?: "")}"
+                "$feedIdComponent,$titleHashComponent,$descriptionHashComponent"
+            }
+        }
+
+        return Entry(
+            id = id,
+            feedId = feedId,
+            title = title ?: "",
+            link = link?.toString() ?: "",
+            published = OffsetDateTime.parse((pubDate ?: Date()).toIsoString()),
+            updated = OffsetDateTime.parse((pubDate ?: Date()).toIsoString()),
+            authorName = author ?: "",
+            content = description ?: "",
+            enclosureLink = enclosure?.url.toString(),
+            enclosureLinkType = enclosure?.type ?: "",
+            read = false,
+            readSynced = true,
+            bookmarked = false,
+            bookmarkedSynced = true,
+            guidHash = "",
+            commentsUrl = "",
+        )
+    }
 
     private fun sha256(string: String): String {
         val digest = MessageDigest.getInstance("SHA-256")
