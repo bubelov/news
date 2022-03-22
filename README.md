@@ -9,7 +9,7 @@
 
 📰 Feed Reader and 🎧 Podcast Player for Android
 
-Using a server is optional and it currently it supports the following servers:
+Using a server is optional. Here is the list of supported backends:
 
 - Miniflux
 - Nextcloud
