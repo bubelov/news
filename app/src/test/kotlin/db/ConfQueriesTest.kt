@@ -2,9 +2,10 @@ package db
 
 import common.ConfRepository
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 class ConfQueriesTest {
     private lateinit var db: ConfQueries
@@ -20,28 +21,28 @@ class ConfQueriesTest {
         val conf = db.select().executeAsOne()
         val changedConf = conf.copy(authType = "test")
         runBlocking { ConfRepository(db).save(changedConf) }
-        Assert.assertEquals(changedConf, db.select().executeAsOne())
+        assertEquals(changedConf, db.select().executeAsOne())
     }
 
     @Test
     fun `insert default`() {
         db.insertDefault()
         val conf = db.select().executeAsOne()
-        Assert.assertEquals(defaultConf(), conf)
+        assertEquals(defaultConf(), conf)
     }
 
     @Test
     fun select() {
         db.insertDefault()
         val conf = db.select().executeAsOne()
-        Assert.assertEquals(conf, db.select().executeAsOne())
+        assertEquals(conf, db.select().executeAsOne())
     }
 
     @Test
     fun `delete all`() {
         db.insertDefault()
         db.deleteAll()
-        Assert.assertNull(db.select().executeAsOneOrNull())
+        assertNull(db.select().executeAsOneOrNull())
     }
 }
 

@@ -1,11 +1,13 @@
 package opml
 
 import db.Feed
-import org.junit.Assert
 import org.junit.Test
 import java.io.InputStream
 import java.nio.charset.Charset
 import java.util.UUID
+import kotlin.test.assertContentEquals
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class OpmlTests {
 
@@ -39,7 +41,7 @@ class OpmlTests {
     @Test
     fun readsSampleDocument() {
         val elements = importOpml(readFile("sample.opml"))
-        Assert.assertArrayEquals(sampleElements.toTypedArray(), elements.toTypedArray())
+        assertContentEquals(sampleElements, elements)
     }
 
     @Test
@@ -58,20 +60,20 @@ class OpmlTests {
 
         val opml = exportOpml(feeds)
         val elements = importOpml(opml)
-        Assert.assertTrue(opml.lines().size > 1)
-        Assert.assertArrayEquals(sampleElements.toTypedArray(), elements.toTypedArray())
+        assertTrue(opml.lines().size > 1)
+        assertContentEquals(sampleElements.toTypedArray(), elements.toTypedArray())
     }
 
     @Test
     fun readNestedOpml() {
         val elements = importOpml(readFile("nested.opml"))
-        Assert.assertEquals(6, elements.size)
+        assertEquals(6, elements.size)
     }
 
     @Test
     fun readsMozillaOpml() {
         val elements = importOpml(readFile("mozilla.opml"))
-        Assert.assertEquals(2, elements.size)
+        assertEquals(2, elements.size)
     }
 
     private fun readFile(path: String) = javaClass.getResourceAsStream(path)!!.readTextAndClose()

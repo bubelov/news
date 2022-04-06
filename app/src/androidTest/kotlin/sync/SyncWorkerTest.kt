@@ -9,6 +9,7 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import kotlin.test.assertIs
 
 @RunWith(AndroidJUnit4::class)
 class SyncWorkerTest {
@@ -26,6 +27,6 @@ class SyncWorkerTest {
         val workerBuilder = TestWorkerBuilder.from(targetContext, SyncWorker::class.java)
         val worker = workerBuilder.build()
         val result = worker.doWork()
-        Assert.assertTrue(result is ListenableWorker.Result.Retry)
+        assertIs<ListenableWorker.Result.Retry>(result)
     }
 }
