@@ -101,6 +101,7 @@
     <string name="standalone_mode_no_beta">Standalone mode</string>
     <string name="beta">⚠ BETA ⚠</string>
     <string name="use_built_in_browser">Use built-in browser</string>
+    <string name="show_preview_text">Show preview text</string>
     <plurals name="d_hours">
         <item quantity="one">%d hour</item>
         <item quantity="two">%d hours</item>

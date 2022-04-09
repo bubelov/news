@@ -181,6 +181,16 @@ class SettingsFragment : AppFragment() {
                 }
             }
 
+            showPreviewText.apply {
+                isChecked = conf.showPreviewText
+
+                setOnCheckedChangeListener { _, isChecked ->
+                    runBlocking {
+                        model.saveConf(model.getConf().copy(showPreviewText = isChecked))
+                    }
+                }
+            }
+
             markScrolledEntriesAsRead.apply {
                 isChecked = conf.markScrolledEntriesAsRead
 

@@ -101,6 +101,7 @@
     <string name="standalone_mode_no_beta">独立模式</string>
     <string name="beta">⚠ 测试版 ⚠</string>
     <string name="use_built_in_browser">使用内置浏览器</string>
+    <string name="show_preview_text">Show preview text</string>
     <plurals name="d_hours">
         <item quantity="other">%d 小时</item>
     </plurals>

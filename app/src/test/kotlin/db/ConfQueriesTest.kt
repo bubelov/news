@@ -68,4 +68,5 @@ fun defaultConf() = Conf(
     syncInBackground = true,
     backgroundSyncIntervalMillis = 10800000,
     useBuiltInBrowser = true,
+    showPreviewText = true,
 )

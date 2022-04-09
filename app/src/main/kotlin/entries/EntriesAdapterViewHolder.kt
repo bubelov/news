@@ -9,7 +9,6 @@ import db.EntryImage
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.collect
 
 class EntriesAdapterViewHolder(
     private val binding: ListItemEntryBinding,
@@ -109,25 +108,27 @@ class EntriesAdapterViewHolder(
                         }
                     }
                 }
-            }
-        }
 
-        primaryText.text = item.title.trim()
-        primaryText.isVisible = primaryText.length() > 0
-        secondaryText.text = item.subtitle.value
+                primaryText.text = item.title.trim()
+                primaryText.isVisible = primaryText.length() > 0
+                secondaryText.text = item.subtitle.value
 
-        supportingText.isVisible = false
-        supportingText.tag = item
+                supportingText.isVisible = false
+                supportingText.tag = item
 
-        if (!item.cachedSupportingText.isNullOrBlank()) {
-            supportingText.isVisible = true
-            supportingText.text = item.cachedSupportingText
-        } else {
-            scope.launchWhenResumed {
-                item.supportingText.collect { text ->
-                    if (supportingText.tag == item && text.isNotBlank()) {
+                if (conf.showPreviewText) {
+                    if (!item.cachedSupportingText.isNullOrBlank()) {
                         supportingText.isVisible = true
-                        supportingText.text = text
+                        supportingText.text = item.cachedSupportingText
+                    } else {
+                        scope.launchWhenResumed {
+                            item.supportingText.collect { text ->
+                                if (supportingText.tag == item && text.isNotBlank()) {
+                                    supportingText.isVisible = true
+                                    supportingText.text = text
+                                }
+                            }
+                        }
                     }
                 }
             }

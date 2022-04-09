@@ -1,7 +1,7 @@
 insertOrReplace:
 INSERT OR REPLACE
-INTO Conf (id, authType, nextcloudServerUrl, nextcloudServerTrustSelfSignedCerts, nextcloudServerUsername, nextcloudServerPassword, minifluxServerUrl, minifluxServerTrustSelfSignedCerts, minifluxServerUsername, minifluxServerPassword, initialSyncCompleted, lastEntriesSyncDateTime, showReadEntries, sortOrder, showPreviewImages, cropPreviewImages, markScrolledEntriesAsRead, syncOnStartup, syncInBackground, backgroundSyncIntervalMillis, useBuiltInBrowser)
-VALUES (:id, :authType, :nextcloudServerUrl, :nextcloudServerTrustSelfSignedCerts, :nextcloudServerUsername, :nextcloudServerPassword, :minifluxServerUrl, :minifluxServerTrustSelfSignedCerts, :minifluxServerUsername, :minifluxServerPassword, :initialSyncCompleted, :lastEntriesSyncDateTime, :showReadEntries, :sortOrder, :showPreviewImages, :cropPreviewImages, :markScrolledEntriesAsRead, :syncOnStartup, :syncInBackground, :backgroundSyncIntervalMillis, :useBuiltInBrowser);
+INTO Conf (id, authType, nextcloudServerUrl, nextcloudServerTrustSelfSignedCerts, nextcloudServerUsername, nextcloudServerPassword, minifluxServerUrl, minifluxServerTrustSelfSignedCerts, minifluxServerUsername, minifluxServerPassword, initialSyncCompleted, lastEntriesSyncDateTime, showReadEntries, sortOrder, showPreviewImages, cropPreviewImages, markScrolledEntriesAsRead, syncOnStartup, syncInBackground, backgroundSyncIntervalMillis, useBuiltInBrowser, showPreviewText)
+VALUES (:id, :authType, :nextcloudServerUrl, :nextcloudServerTrustSelfSignedCerts, :nextcloudServerUsername, :nextcloudServerPassword, :minifluxServerUrl, :minifluxServerTrustSelfSignedCerts, :minifluxServerUsername, :minifluxServerPassword, :initialSyncCompleted, :lastEntriesSyncDateTime, :showReadEntries, :sortOrder, :showPreviewImages, :cropPreviewImages, :markScrolledEntriesAsRead, :syncOnStartup, :syncInBackground, :backgroundSyncIntervalMillis, :useBuiltInBrowser, :showPreviewText);
 
 insertDefault:
 INSERT

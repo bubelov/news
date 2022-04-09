@@ -51,6 +51,7 @@ class ConfRepository(
             syncInBackground = conf.syncInBackground,
             backgroundSyncIntervalMillis = conf.backgroundSyncIntervalMillis,
             useBuiltInBrowser = conf.useBuiltInBrowser,
+            showPreviewText = conf.showPreviewText,
         )
     }
 
