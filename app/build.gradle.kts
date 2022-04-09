@@ -148,6 +148,8 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.1.3")
     androidTestImplementation("androidx.test.ext:truth:1.4.0")
     androidTestImplementation("com.google.truth:truth:1.0.1")
+    androidTestImplementation(kotlin("test"))
+    testImplementation(kotlin("test"))
 
     // Espresso dependencies
     val espressoVersion = "3.4.0"

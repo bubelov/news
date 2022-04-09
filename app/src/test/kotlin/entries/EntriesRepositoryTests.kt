@@ -5,10 +5,10 @@ import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import db.*
 import io.mockk.*
+import kotlin.test.assertEquals
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert
 import org.junit.Test
 
 class EntriesRepositoryTests {
@@ -30,7 +30,7 @@ class EntriesRepositoryTests {
             every { executeAsList() } returns entries
         }
 
-        Assert.assertEquals(entries, repository.selectAll())
+        assertEquals(entries, repository.selectAll())
 
         verify { db.selectAll() }
 
@@ -48,7 +48,7 @@ class EntriesRepositoryTests {
             every { executeAsOneOrNull() } returns entry
         }
 
-        Assert.assertEquals(entry, repository.selectById(entry.id))
+        assertEquals(entry, repository.selectById(entry.id))
 
         verify { db.selectById(entry.id) }
 
@@ -67,7 +67,7 @@ class EntriesRepositoryTests {
             every { executeAsList() } returns entries
         }
 
-        Assert.assertEquals(entries, repository.selectByFeedId(feedId))
+        assertEquals(entries, repository.selectByFeedId(feedId))
 
         verify { db.selectByFeedId(feedId) }
 
@@ -88,7 +88,7 @@ class EntriesRepositoryTests {
             every { executeAsList() } returns entries
         }
 
-        Assert.assertEquals(entries, repository.selectByReadAndBookmarked(read, bookmarked))
+        assertEquals(entries, repository.selectByReadAndBookmarked(read, bookmarked))
 
         verify { db.selectByReadAndBookmarked(read, bookmarked) }
 
@@ -112,7 +112,7 @@ class EntriesRepositoryTests {
             }
         }
 
-        Assert.assertEquals(entries, repository.selectByReadOrBookmarked(read, bookmarked).first())
+        assertEquals(entries, repository.selectByReadOrBookmarked(read, bookmarked).first())
 
         verify { db.selectByReadOrBookmarked(read, bookmarked) }
 
@@ -131,7 +131,7 @@ class EntriesRepositoryTests {
             every { executeAsList() } returns entries
         }
 
-        Assert.assertEquals(entries, repository.selectByRead(read))
+        assertEquals(entries, repository.selectByRead(read))
 
         verify { db.selectByRead(read) }
 

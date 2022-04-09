@@ -37,7 +37,7 @@ class StandaloneNewsApiTests {
 //        every { response.isSuccessful } returns false
 //        every { response.code } returns 404
 //
-//        Assert.assertThrows(Exception::class.java) {
+//        assertFails {
 //            runBlocking { api.addFeed(url) }
 //        }
 //    }

@@ -10,8 +10,8 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlin.test.assertEquals
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import java.net.URI
@@ -65,7 +65,7 @@ class FeedsRepositoryTests {
             every { executeAsList() } returns feeds
         }
 
-        Assert.assertEquals(feeds, repository.selectAll())
+        assertEquals(feeds, repository.selectAll())
 
         coVerify { db.selectAll() }
 
@@ -80,7 +80,7 @@ class FeedsRepositoryTests {
             every { executeAsOneOrNull() } returns feed
         }
 
-        Assert.assertEquals(feed, repository.selectById(feed.id))
+        assertEquals(feed, repository.selectById(feed.id))
 
         verify { db.selectById(feed.id) }
 

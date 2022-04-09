@@ -5,9 +5,9 @@ import db.*
 import entries.EntriesRepository
 import io.mockk.*
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert
 import org.junit.Test
 import java.util.*
+import kotlin.test.assertEquals
 
 class PodcastsRepositoryTests {
 
@@ -31,7 +31,7 @@ class PodcastsRepositoryTests {
             every { executeAsOneOrNull() } returns enclosure
         }
 
-        Assert.assertEquals(enclosure, repository.selectByEntryId(enclosure.entryId))
+        assertEquals(enclosure, repository.selectByEntryId(enclosure.entryId))
 
         verify { entryEnclosureQueries.selectByEntryId(enclosure.entryId) }
 
