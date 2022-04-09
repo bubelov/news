@@ -339,7 +339,6 @@ class EntriesFragment : AppFragment(), Scrollable {
 
         showOpenedEntriesMenuItem?.setOnMenuItemClickListener {
             lifecycleScope.launchWhenResumed {
-                adapter.submitList(null)
                 val conf = model.getConf()
                 model.saveConf(model.getConf().copy(showReadEntries = !conf.showReadEntries))
                 initShowReadEntriesButton()
