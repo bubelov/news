@@ -131,7 +131,7 @@ dependencies {
     implementation("org.jsoup:jsoup:1.14.2")
 
     testImplementation("junit:junit:4.13.2")
-    testImplementation("io.mockk:mockk:1.12.0")
+    testImplementation("io.mockk:mockk:1.12.3")
     testImplementation("com.squareup.sqldelight:sqlite-driver:1.5.1")
 
     // Core library
