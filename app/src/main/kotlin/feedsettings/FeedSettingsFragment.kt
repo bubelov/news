@@ -17,7 +17,7 @@ import com.google.android.material.textfield.TextInputEditText
 import common.AppFragment
 import common.showErrorDialog
 import common.showKeyboard
-import org.koin.android.viewmodel.ext.android.viewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class FeedSettingsFragment : AppFragment() {
 

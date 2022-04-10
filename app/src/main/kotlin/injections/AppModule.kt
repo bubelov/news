@@ -12,6 +12,7 @@ import auth.DirectAuthViewModel
 import auth.MinifluxAuthViewModel
 import db.Database
 import com.squareup.sqldelight.android.AndroidSqliteDriver
+import com.squareup.sqldelight.db.SqlDriver
 import common.App
 import common.AppViewModel
 import common.ConfRepository
@@ -29,23 +30,21 @@ import entries.EntriesSharedViewModel
 import entries.EntriesSupportingTextRepository
 import feeds.FeedsViewModel
 import feedsettings.FeedSettingsViewModel
-import org.koin.android.experimental.dsl.viewModel
+import org.koin.androidx.viewmodel.dsl.viewModelOf
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
-import org.koin.experimental.builder.single
 import search.SearchViewModel
 
 val appModule = module {
 
-    single {
-        Database(
-            driver = AndroidSqliteDriver(
-                schema = Database.Schema,
-                context = get(),
-                name = App.DB_FILE_NAME,
-            ),
-            EntryAdapter = entryAdapter()
-        )
+    single { get<Context>().resources }
+
+    single { Database(driver = get(), EntryAdapter = get()) }
+    single { Database.Schema }
+    single<SqlDriver> {
+        AndroidSqliteDriver(schema = get(), context = get(), name = App.DB_FILE_NAME)
     }
+    single { entryAdapter() }
 
     single { get<Database>().feedQueries }
     single { get<Database>().entryQueries }
@@ -54,36 +53,31 @@ val appModule = module {
     single { get<Database>().entryEnclosureQueries }
     single { get<Database>().confQueries }
 
-    single {
-        val context = get<Context>()
-        val connectivityManager = context.getSystemService<ConnectivityManager>()!!
-        NetworkMonitor(connectivityManager)
-    }
-
-    single { get<Context>().resources }
+    singleOf(::NetworkMonitor)
+    single { get<Context>().getSystemService<ConnectivityManager>()!! }
 
     single<NewsApi> { NewsApiWrapper() }
     single { get<NewsApi>() as NewsApiWrapper }
-    single<NewsApiSwitcher>()
-    single<NewsApiSync>()
+    singleOf(::NewsApiSwitcher)
+    singleOf(::NewsApiSync)
 
-    single<AuthRepository>()
-    single<FeedsRepository>()
-    single<EntriesRepository>()
-    single<EntriesSupportingTextRepository>()
-    single<EntriesImagesRepository>()
-    single<PodcastsRepository>()
-    single<ConfRepository>()
+    singleOf(::AuthRepository)
+    singleOf(::FeedsRepository)
+    singleOf(::EntriesRepository)
+    singleOf(::EntriesSupportingTextRepository)
+    singleOf(::EntriesImagesRepository)
+    singleOf(::PodcastsRepository)
+    singleOf(::ConfRepository)
 
-    viewModel<AppViewModel>()
-    viewModel<AuthViewModel>()
-    viewModel<EntriesViewModel>()
-    viewModel<EntriesSharedViewModel>()
-    viewModel<EntryViewModel>()
-    viewModel<SettingsViewModel>()
-    viewModel<DirectAuthViewModel>()
-    viewModel<FeedsViewModel>()
-    viewModel<FeedSettingsViewModel>()
-    viewModel<SearchViewModel>()
-    viewModel<MinifluxAuthViewModel>()
+    viewModelOf(::AppViewModel)
+    viewModelOf(::AuthViewModel)
+    viewModelOf(::EntriesViewModel)
+    viewModelOf(::EntriesSharedViewModel)
+    viewModelOf(::EntryViewModel)
+    viewModelOf(::SettingsViewModel)
+    viewModelOf(::DirectAuthViewModel)
+    viewModelOf(::FeedsViewModel)
+    viewModelOf(::FeedSettingsViewModel)
+    viewModelOf(::SearchViewModel)
+    viewModelOf(::MinifluxAuthViewModel)
 }

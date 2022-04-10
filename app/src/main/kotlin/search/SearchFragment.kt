@@ -24,9 +24,8 @@ import common.showKeyboard
 import entries.EntriesAdapter
 import entries.EntriesAdapterCallback
 import entries.EntriesAdapterItem
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import org.koin.android.viewmodel.ext.android.viewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SearchFragment : AppFragment() {
 

@@ -16,9 +16,8 @@ import co.appreactor.news.databinding.ActivityAppBinding
 import entries.EntriesFilter
 import podcasts.PodcastsRepository
 import entriesimages.EntriesImagesRepository
-import kotlinx.coroutines.flow.collect
 import org.koin.android.ext.android.get
-import org.koin.android.viewmodel.ext.android.viewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class AppActivity : AppCompatActivity() {
 

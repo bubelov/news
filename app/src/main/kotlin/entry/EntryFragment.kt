@@ -28,7 +28,7 @@ import common.showErrorDialog
 import db.Entry
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.koin.android.viewmodel.ext.android.viewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 

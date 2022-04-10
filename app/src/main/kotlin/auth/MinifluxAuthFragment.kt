@@ -15,7 +15,7 @@ import common.ConfRepository
 import common.app
 import common.showDialog
 import entries.EntriesFilter
-import org.koin.android.viewmodel.ext.android.viewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
 
 class MinifluxAuthFragment : AppFragment() {

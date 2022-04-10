@@ -23,7 +23,7 @@ import common.ConfRepository
 import common.app
 import entries.EntriesFilter
 import kotlinx.coroutines.runBlocking
-import org.koin.android.viewmodel.ext.android.viewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.concurrent.TimeUnit
 
 class AuthFragment : AppFragment(
