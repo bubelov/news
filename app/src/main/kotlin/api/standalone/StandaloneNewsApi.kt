@@ -20,6 +20,8 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withContext
+import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.jsoup.Jsoup
 import timber.log.Timber
 import java.net.HttpURLConnection
@@ -39,11 +41,13 @@ class StandaloneNewsApi(
 ) : NewsApi {
 
     @Suppress("BlockingMethodInNonBlockingContext")
-    override suspend fun addFeed(url: URL): Result<Feed> {
+    override suspend fun addFeed(url: HttpUrl): Result<Feed> {
         Timber.d("Adding feed (url = $url)")
 
+        val oldUrl = url.toUrl()
+
         val connection = runCatching {
-            url.openConnection() as HttpURLConnection
+            oldUrl.openConnection() as HttpURLConnection
         }.getOrElse {
             return Result.failure(it)
         }
@@ -79,14 +83,14 @@ class StandaloneNewsApi(
             val absolute = !href.startsWith("/")
 
             return if (absolute) {
-                addFeed(URI.create(href).toURL())
+                addFeed(href.toHttpUrl())
             } else {
-                addFeed(URI.create("$url$href").toURL())
+                addFeed("$oldUrl$href".toHttpUrl())
             }
         } else {
-            return when (val result = feed(url, connection)) {
+            return when (val result = feed(oldUrl, connection)) {
                 is FeedResult.Success -> {
-                    Result.success(result.feed.toFeed(url))
+                    Result.success(result.feed.toFeed(oldUrl))
                 }
 
                 is FeedResult.HttpConnectionFailure -> {

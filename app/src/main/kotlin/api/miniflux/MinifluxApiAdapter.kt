@@ -6,15 +6,15 @@ import db.EntryWithoutSummary
 import db.Feed
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import okhttp3.HttpUrl
 import timber.log.Timber
-import java.net.URL
 import java.time.OffsetDateTime
 
 class MinifluxApiAdapter(
     private val api: MinifluxApi,
 ) : NewsApi {
 
-    override suspend fun addFeed(url: URL): Result<Feed> = runCatching {
+    override suspend fun addFeed(url: HttpUrl): Result<Feed> = runCatching {
         val categories = api.getCategories()
 
         val category = categories.find { it.title.equals("All", ignoreCase = true) }

@@ -12,10 +12,10 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import opml.exportOpml
 import opml.importOpml
 import timber.log.Timber
-import java.net.URI
 import java.util.concurrent.atomic.AtomicInteger
 
 class FeedsViewModel(
@@ -82,7 +82,7 @@ class FeedsViewModel(
 
                         runCatching {
                             feedsRepo.insertByFeedUrl(
-                                url = URI.create(outline.xmlUrl).toURL(),
+                                url = outline.xmlUrl.toHttpUrl(),
                                 title = outline.text,
                             )
                         }.onSuccess {
@@ -121,7 +121,7 @@ class FeedsViewModel(
 
         runCatching {
             val parsedUrl = runCatching {
-                URI.create(fullUrl).toURL()
+                fullUrl.toHttpUrl()
             }.getOrElse {
                 throw Exception(resources.getString(R.string.invalid_url_s, fullUrl))
             }

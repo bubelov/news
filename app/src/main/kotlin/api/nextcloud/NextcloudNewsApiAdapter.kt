@@ -6,9 +6,9 @@ import db.EntryWithoutSummary
 import db.Feed
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import okhttp3.HttpUrl
 import retrofit2.Response
 import timber.log.Timber
-import java.net.URL
 import java.time.Instant
 import java.time.OffsetDateTime
 
@@ -16,7 +16,7 @@ class NextcloudNewsApiAdapter(
     private val api: NextcloudNewsApi,
 ) : NewsApi {
 
-    override suspend fun addFeed(url: URL): Result<Feed> = kotlin.runCatching {
+    override suspend fun addFeed(url: HttpUrl): Result<Feed> = kotlin.runCatching {
         val response = api.postFeed(PostFeedArgs(url.toString(), 0)).execute()
 
         if (!response.isSuccessful) {

@@ -4,12 +4,12 @@ import db.Entry
 import db.EntryWithoutSummary
 import db.Feed
 import kotlinx.coroutines.flow.Flow
-import java.net.URL
+import okhttp3.HttpUrl
 import java.time.OffsetDateTime
 
 interface NewsApi {
 
-    suspend fun addFeed(url: URL): Result<Feed>
+    suspend fun addFeed(url: HttpUrl): Result<Feed>
 
     suspend fun getFeeds(): List<Feed>
 

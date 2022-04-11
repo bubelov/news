@@ -5,7 +5,7 @@ import db.Feed
 import db.FeedQueries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.net.URL
+import okhttp3.HttpUrl
 
 class FeedsRepository(
     private val api: NewsApi,
@@ -17,7 +17,7 @@ class FeedsRepository(
     }
 
     suspend fun insertByFeedUrl(
-        url: URL,
+        url: HttpUrl,
         title: String? = null,
     ) = withContext(Dispatchers.IO) {
         var feed = api.addFeed(url).getOrThrow()

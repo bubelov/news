@@ -12,9 +12,9 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlin.test.assertEquals
 import kotlinx.coroutines.runBlocking
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.junit.Before
 import org.junit.Test
-import java.net.URI
 import java.util.UUID
 
 class FeedsRepositoryTests {
@@ -43,7 +43,7 @@ class FeedsRepositoryTests {
     fun `insert by url`(): Unit = runBlocking {
         val feed = feed()
 
-        val feedUrl = URI.create("https://example.com/").toURL()
+        val feedUrl = "https://example.com/".toHttpUrl()
 
         coEvery { api.addFeed(feedUrl) } returns Result.success(feed)
 
