@@ -117,16 +117,18 @@ dependencies {
 
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("com.squareup.okhttp3:okhttp-bom:4.9.1")
+
+    implementation(platform("com.squareup.okhttp3:okhttp-bom:4.9.3"))
     implementation("com.squareup.okhttp3:okhttp")
     implementation("com.squareup.okhttp3:logging-interceptor")
+
+    implementation("com.squareup.sqldelight:android-driver:1.5.3")
+    implementation("com.squareup.sqldelight:coroutines-extensions:1.5.3")
 
     implementation("com.github.nextcloud:Android-SingleSignOn:0.6.0")
     implementation("com.google.android.material:material:1.6.0-beta01")
     implementation("com.squareup.picasso:picasso:2.71828")
     implementation("io.insert-koin:koin-android:3.2.0-beta-1")
-    implementation("com.squareup.sqldelight:android-driver:1.5.3")
-    implementation("com.squareup.sqldelight:coroutines-extensions:1.5.3")
     implementation("com.jakewharton.timber:timber:5.0.1")
     implementation("org.jsoup:jsoup:1.14.2")
 
