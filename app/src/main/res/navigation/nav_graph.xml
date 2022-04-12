@@ -134,7 +134,15 @@
         android:id="@+id/settingsFragment"
         android:name="settings.SettingsFragment"
         android:label="SettingsFragment"
-        tools:layout="@layout/fragment_settings"/>
+        tools:layout="@layout/fragment_settings">
+
+        <action
+            android:id="@+id/action_settingsFragment_to_enclosuresFragment"
+            app:destination="@id/enclosuresFragment"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+
+    </fragment>
 
     <fragment
         android:id="@+id/searchFragment"
@@ -161,5 +169,11 @@
             android:name="feedId"
             app:argType="string" />
     </fragment>
+
+    <fragment
+        android:id="@+id/enclosuresFragment"
+        android:name="enclosures.EnclosuresFragment"
+        android:label="EnclosuresFragment"
+        tools:layout="@layout/fragment_enclosures" />
 
 </navigation>

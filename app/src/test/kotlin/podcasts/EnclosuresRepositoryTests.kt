@@ -1,15 +1,20 @@
 package podcasts
 
 import android.content.Context
-import db.*
+import db.EntryEnclosure
+import db.EntryEnclosureQueries
 import entries.EntriesRepository
-import io.mockk.*
+import enclosures.EnclosuresRepository
+import io.mockk.confirmVerified
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
-import java.util.*
+import java.util.UUID
 import kotlin.test.assertEquals
 
-class PodcastsRepositoryTests {
+class EnclosuresRepositoryTests {
 
     private val entriesRepository = mockk<EntriesRepository>()
 
@@ -17,7 +22,7 @@ class PodcastsRepositoryTests {
 
     private val entryEnclosureQueries = mockk<EntryEnclosureQueries>()
 
-    private val repository = PodcastsRepository(
+    private val repository = EnclosuresRepository(
         entriesRepository = entriesRepository,
         context = context,
         entryEnclosureQueries = entryEnclosureQueries,

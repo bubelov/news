@@ -1,4 +1,4 @@
-package podcasts
+package enclosures
 
 import android.content.ContentValues
 import android.content.Context
@@ -22,7 +22,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
 
-class PodcastsRepository(
+class EnclosuresRepository(
     private val entryEnclosureQueries: EntryEnclosureQueries,
     private val entriesRepository: EntriesRepository,
     private val context: Context,
@@ -45,7 +45,7 @@ class PodcastsRepository(
         val entry = entriesRepository.selectById(entryId)
 
         if (entry == null) {
-            entryEnclosureQueries.deleteWhere(entryId = entryId)
+            entryEnclosureQueries.deleteByEntryId(entryId)
             return@withContext
         }
 
@@ -74,14 +74,14 @@ class PodcastsRepository(
         val response = httpClient.newCall(request).execute()
 
         if (!response.isSuccessful) {
-            entryEnclosureQueries.deleteWhere(entryId = entryId)
+            entryEnclosureQueries.deleteByEntryId(entryId)
             return@withContext
         }
 
         val responseBody = response.body
 
         if (responseBody == null) {
-            entryEnclosureQueries.deleteWhere(entryId = entryId)
+            entryEnclosureQueries.deleteByEntryId(entryId)
             return@withContext
         }
 
@@ -172,7 +172,7 @@ class PodcastsRepository(
         }.onFailure {
             Timber.e("Fail")
 
-            entryEnclosureQueries.deleteWhere(entryId = entryId)
+            entryEnclosureQueries.deleteByEntryId(entryId)
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 cacheUri?.let { uri ->
@@ -188,7 +188,7 @@ class PodcastsRepository(
         entryEnclosureQueries.selectAll().executeAsList().forEach { metadata ->
             if (metadata.cacheUri.isEmpty()) {
                 Timber.d("Cache URI is empty, deleting metadata")
-                entryEnclosureQueries.deleteWhere(entryId = metadata.entryId)
+                entryEnclosureQueries.deleteByEntryId(metadata.entryId)
                 return@forEach
             }
 
@@ -198,7 +198,7 @@ class PodcastsRepository(
 
                 if (uri.toString().contains(context.packageName)) {
                     Timber.d("URI contains ${context.packageName}, deleting metadata")
-                    entryEnclosureQueries.deleteWhere(entryId = metadata.entryId)
+                    entryEnclosureQueries.deleteByEntryId(metadata.entryId)
                 }
 
                 val cursor = context.contentResolver.query(
@@ -214,13 +214,13 @@ class PodcastsRepository(
 
                 if (cursor == null) {
                     Timber.d("Didn't find enclosure with URI: $uri")
-                    entryEnclosureQueries.deleteWhere(entryId = metadata.entryId)
+                    entryEnclosureQueries.deleteByEntryId(metadata.entryId)
                 }
 
                 cursor?.use {
                     if (!it.moveToFirst()) {
                         Timber.d("Didn't find enclosure with URI: $uri")
-                        entryEnclosureQueries.deleteWhere(entryId = metadata.entryId)
+                        entryEnclosureQueries.deleteByEntryId(metadata.entryId)
                         return@use
                     }
 
@@ -235,7 +235,7 @@ class PodcastsRepository(
 
                     if (pending == 1) {
                         Timber.d("Found pending enclosure, deleting metadata")
-                        entryEnclosureQueries.deleteWhere(entryId = metadata.entryId)
+                        entryEnclosureQueries.deleteByEntryId(metadata.entryId)
                     } else {
                         Timber.d("Enclosure is in sync with metadata")
                     }
@@ -245,10 +245,20 @@ class PodcastsRepository(
 
                 if (file.exists() && metadata.downloadPercent != null && metadata.downloadPercent != 100L) {
                     file.delete()
-                    entryEnclosureQueries.deleteWhere(entryId = metadata.entryId)
+                    entryEnclosureQueries.deleteByEntryId(metadata.entryId)
                 }
             }
         }
+    }
+
+    suspend fun deleteFromCache(enclosure: EntryEnclosure) = withContext(Dispatchers.IO) {
+        val file = File(enclosure.cacheUri)
+
+        if (file.exists()) {
+            file.delete()
+        }
+
+        entryEnclosureQueries.deleteByEntryId(enclosure.entryId)
     }
 
     private fun getExtension(mime: String): String {

@@ -102,6 +102,8 @@
     <string name="beta">⚠ BETA ⚠</string>
     <string name="use_built_in_browser">Use built-in browser</string>
     <string name="show_preview_text">Show preview text</string>
+    <string name="enclosures">Enclosures</string>
+    <string name="manage_enclosures">Manage enclosures</string>
     <plurals name="d_hours">
         <item quantity="one">%d uur</item>
         <item quantity="other">%d uren</item>

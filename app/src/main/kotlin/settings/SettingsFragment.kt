@@ -211,6 +211,10 @@ class SettingsFragment : AppFragment() {
                 }
             }
 
+            manageEnclosures.setOnClickListener {
+                findNavController().navigate(R.id.action_settingsFragment_to_enclosuresFragment)
+            }
+
             exportDatabase.setOnClickListener {
                 exportDatabaseLauncher.launch("news.db")
             }

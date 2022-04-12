@@ -285,7 +285,7 @@ class StandaloneNewsApi(
             updated = OffsetDateTime.parse((pubDate ?: Date()).toIsoString()),
             authorName = author ?: "",
             content = description ?: "",
-            enclosureLink = enclosure?.url.toString(),
+            enclosureLink = enclosure?.url?.toString() ?: "",
             enclosureLinkType = enclosure?.type ?: "",
             read = false,
             readSynced = true,

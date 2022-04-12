@@ -22,7 +22,7 @@ import entries.EntriesViewModel
 import entries.EntriesRepository
 import entry.EntryViewModel
 import entriesimages.EntriesImagesRepository
-import podcasts.PodcastsRepository
+import enclosures.EnclosuresRepository
 import settings.SettingsViewModel
 import common.NetworkMonitor
 import db.entryAdapter
@@ -34,6 +34,7 @@ import org.koin.androidx.viewmodel.dsl.viewModelOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 import search.SearchViewModel
+import enclosures.EnclosuresModel
 
 val appModule = module {
 
@@ -66,7 +67,7 @@ val appModule = module {
     singleOf(::EntriesRepository)
     singleOf(::EntriesSupportingTextRepository)
     singleOf(::EntriesImagesRepository)
-    singleOf(::PodcastsRepository)
+    singleOf(::EnclosuresRepository)
     singleOf(::ConfRepository)
 
     viewModelOf(::AppViewModel)
@@ -80,4 +81,5 @@ val appModule = module {
     viewModelOf(::FeedSettingsViewModel)
     viewModelOf(::SearchViewModel)
     viewModelOf(::MinifluxAuthViewModel)
+    viewModelOf(::EnclosuresModel)
 }

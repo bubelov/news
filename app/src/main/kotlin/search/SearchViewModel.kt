@@ -15,13 +15,12 @@ import feeds.FeedsRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
-import podcasts.PodcastsRepository
+import enclosures.EnclosuresRepository
 import sync.NewsApiSync
 import sync.SyncResult
 import timber.log.Timber
@@ -30,7 +29,7 @@ class SearchViewModel(
     private val feedsRepository: FeedsRepository,
     private val entriesRepository: EntriesRepository,
     private val entriesSupportingTextRepository: EntriesSupportingTextRepository,
-    private val podcastsRepository: PodcastsRepository,
+    private val enclosuresRepository: EnclosuresRepository,
     private val sync: NewsApiSync,
     private val conf: ConfRepository,
 ) : ViewModel() {
@@ -104,7 +103,7 @@ class SearchViewModel(
     }
 
     suspend fun downloadPodcast(id: String) {
-        podcastsRepository.download(id)
+        enclosuresRepository.download(id)
     }
 
     suspend fun reloadEntry(entry: EntriesAdapterItem) {
@@ -114,7 +113,7 @@ class SearchViewModel(
     }
 
     fun getCachedPodcastUri(entryId: String): Uri? {
-        val enclosure = podcastsRepository.selectByEntryId(entryId) ?: return null
+        val enclosure = enclosuresRepository.selectByEntryId(entryId) ?: return null
 
         val uri = runCatching {
             Uri.parse(enclosure.cacheUri)
@@ -136,7 +135,7 @@ class SearchViewModel(
             },
             podcast = enclosureLinkType.startsWith("audio"),
             podcastDownloadPercent = flow {
-                podcastsRepository.getDownloadProgress(this@toRow.id).collect {
+                enclosuresRepository.getDownloadProgress(this@toRow.id).collect {
                     emit(it)
                 }
             },
