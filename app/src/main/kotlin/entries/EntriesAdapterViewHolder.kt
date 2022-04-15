@@ -1,19 +1,16 @@
 package entries
 
 import androidx.core.view.isVisible
-import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
 import co.appreactor.news.databinding.ListItemEntryBinding
 import db.EntryImage
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
-import kotlinx.coroutines.Job
 
 class EntriesAdapterViewHolder(
     private val binding: ListItemEntryBinding,
     private val screenWidth: Int,
-    private val scope: LifecycleCoroutineScope,
     private val callback: EntriesAdapterCallback,
 ) : RecyclerView.ViewHolder(binding.root) {
 
@@ -37,128 +34,92 @@ class EntriesAdapterViewHolder(
         imageProgress.isVisible = false
         imageView.tag = item
 
-        scope.launchWhenResumed {
-            item.conf.collect { conf ->
-                if (conf.showPreviewImages) {
-                    val handleImage = fun(image: EntryImage?) {
-                        if (
-                            imageView.tag != item
-                            || imageView.drawable != null
-                            || image == null
-                            || image.url.isBlank()
-                            || image.width == 0L
-                            || image.height == 0L
-                        ) {
-                            return
-                        }
+        val handleImage = fun(image: EntryImage?) {
+            if (
+                imageView.tag != item
+                || imageView.drawable != null
+                || image == null
+                || image.url.isBlank()
+                || image.width == 0L
+                || image.height == 0L
+            ) {
+                return
+            }
 
-                        imageView.isVisible = true
-                        imageProgress.isVisible = true
+            imageView.isVisible = true
+            imageProgress.isVisible = true
 
-                        val targetHeight =
-                            ((screenWidth - cardMargin) * (image.height.toDouble() / image.width.toDouble()))
+            val targetHeight =
+                ((screenWidth - cardMargin) * (image.height.toDouble() / image.width.toDouble()))
 
-                        if (conf.cropPreviewImages) {
-                            var croppedHeight = targetHeight.toInt()
+            if (item.cropImage) {
+                var croppedHeight = targetHeight.toInt()
 
-                            if (croppedHeight < cardHeightMin) {
-                                croppedHeight = cardHeightMin
-                            }
-
-                            if (croppedHeight > cardHeightMax) {
-                                croppedHeight = cardHeightMax
-                            }
-
-                            if (imageView.height != croppedHeight) {
-                                imageView.layoutParams.height = croppedHeight
-                            }
-                        } else {
-                            if (imageView.height != targetHeight.toInt()) {
-                                imageView.layoutParams.height = targetHeight.toInt()
-                            }
-                        }
-
-                        val picassoRequestCreator =
-                            Picasso.get().load(if (image.url.isBlank()) null else image.url)
-
-                        if (image.width > 0) {
-                            picassoRequestCreator.resize(image.width.toInt(), 0)
-                        }
-
-                        picassoRequestCreator.into(imageView, object : Callback {
-                            override fun onSuccess() {
-                                imageProgress.isVisible = false
-                                imageProgress.isVisible = false
-                            }
-
-                            override fun onError(e: Exception) {
-                                imageView.isVisible = false
-                                imageProgress.isVisible = false
-                            }
-                        })
-                    }
-
-                    if (item.cachedImage.value != null) {
-                        handleImage(item.cachedImage.value)
-                    } else {
-                        scope.launchWhenResumed {
-                            item.image.collect {
-                                handleImage(it)
-                            }
-                        }
-                    }
+                if (croppedHeight < cardHeightMin) {
+                    croppedHeight = cardHeightMin
                 }
 
-                primaryText.text = item.title.trim()
-                primaryText.isVisible = primaryText.length() > 0
-                secondaryText.text = item.subtitle.value
+                if (croppedHeight > cardHeightMax) {
+                    croppedHeight = cardHeightMax
+                }
 
-                supportingText.isVisible = false
-                supportingText.tag = item
-
-                if (conf.showPreviewText) {
-                    if (!item.cachedSupportingText.isNullOrBlank()) {
-                        supportingText.isVisible = true
-                        supportingText.text = item.cachedSupportingText
-                    } else {
-                        scope.launchWhenResumed {
-                            item.supportingText.collect { text ->
-                                if (supportingText.tag == item && text.isNotBlank()) {
-                                    supportingText.isVisible = true
-                                    supportingText.text = text
-                                }
-                            }
-                        }
-                    }
+                if (imageView.height != croppedHeight) {
+                    imageView.layoutParams.height = croppedHeight
+                }
+            } else {
+                if (imageView.height != targetHeight.toInt()) {
+                    imageView.layoutParams.height = targetHeight.toInt()
                 }
             }
+
+            val picassoRequestCreator =
+                Picasso.get().load(if (image.url.isBlank()) null else image.url)
+
+            if (image.width > 0) {
+                picassoRequestCreator.resize(image.width.toInt(), 0)
+            }
+
+            picassoRequestCreator.into(imageView, object : Callback {
+                override fun onSuccess() {
+                    imageProgress.isVisible = false
+                    imageProgress.isVisible = false
+                }
+
+                override fun onError(e: Exception) {
+                    imageView.isVisible = false
+                    imageProgress.isVisible = false
+                }
+            })
         }
+
+        if (item.image != null) {
+            handleImage(item.image)
+        }
+
+        primaryText.text = item.title.trim()
+        primaryText.isVisible = primaryText.length() > 0
+        secondaryText.text = item.subtitle
+
+        supportingText.isVisible = item.supportingText.isNotBlank()
+        supportingText.text = item.supportingText
 
         podcastPanel.isVisible = false
         podcastPanel.tag = item
 
         if (item.podcast) {
-            scope.launchWhenResumed {
-                item.podcastDownloadPercent.collect { progress ->
-                    if (podcastPanel.tag != item) {
-                        return@collect
-                    }
+            podcastPanel.isVisible = true
 
-                    podcastPanel.isVisible = true
-
-                    if (progress == null) {
-                        downloadPodcast.isVisible = true
-                        downloadingPodcast.isVisible = false
-                        downloadPodcastProgress.isVisible = false
-                        playPodcast.isVisible = false
-                    } else {
-                        downloadPodcast.isVisible = false
-                        downloadingPodcast.isVisible = progress != 100L
-                        downloadPodcastProgress.isVisible = progress != 100L
-                        downloadPodcastProgress.progress = progress.toInt()
-                        playPodcast.isVisible = progress == 100L
-                    }
-                }
+            if (item.podcastDownloadPercent == null) {
+                downloadPodcast.isVisible = true
+                downloadingPodcast.isVisible = false
+                downloadPodcastProgress.isVisible = false
+                playPodcast.isVisible = false
+            } else {
+                downloadPodcast.isVisible = false
+                downloadingPodcast.isVisible = item.podcastDownloadPercent != 100L
+                downloadPodcastProgress.isVisible = item.podcastDownloadPercent != 100L
+                downloadPodcastProgress.progress = item.podcastDownloadPercent.toInt()
+                playPodcast.isVisible = item.podcastDownloadPercent == 100L
             }
 
             downloadPodcast.setOnClickListener {
@@ -170,16 +131,9 @@ class EntriesAdapterViewHolder(
             }
         }
 
-        val job: Job? = primaryText.tag as Job?
-        job?.cancel()
-
-        primaryText.tag = scope.launchWhenResumed {
-            item.read.collect {
-                primaryText.isEnabled = !it
-                secondaryText.isEnabled = !it
-                supportingText.isEnabled = !it
-            }
-        }
+        primaryText.isEnabled = !item.read
+        secondaryText.isEnabled = !item.read
+        supportingText.isEnabled = !item.read
 
         root.setOnClickListener {
             callback.onItemClick(item)

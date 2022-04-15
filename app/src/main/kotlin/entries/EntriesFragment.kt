@@ -58,18 +58,13 @@ class EntriesFragment : AppFragment(), Scrollable {
 
     private val adapter by lazy {
         EntriesAdapter(
-            scope = lifecycleScope,
             callback = object : EntriesAdapterCallback {
                 override fun onItemClick(item: EntriesAdapterItem) {
                     lifecycleScope.launchWhenResumed {
+                        model.setRead(listOf(item.id), true)
+
                         val entry = model.getEntry(item.id) ?: return@launchWhenResumed
                         val feed = model.getFeed(entry.feedId) ?: return@launchWhenResumed
-
-                        model.setRead(listOf(item), true)
-
-                        if (!model.getConf().showReadEntries) {
-                            model.hide(item)
-                        }
 
                         if (feed.openEntriesInBrowser) {
                             val link = runCatching {
@@ -102,8 +97,7 @@ class EntriesFragment : AppFragment(), Scrollable {
                     lifecycleScope.launch {
                         runCatching {
                             val entry = model.getEntry(item.id) ?: return@launch
-                            model.setRead(listOf(item), true)
-                            model.reloadEntry(item)
+                            model.setRead(listOf(entry.id), true)
                             openCachedPodcast(
                                 cacheUri = model.getCachedPodcastUri(entry.id),
                                 enclosureLinkType = entry.enclosureLinkType,
@@ -148,8 +142,12 @@ class EntriesFragment : AppFragment(), Scrollable {
                                     entry = entry,
                                     entryIndex = entryIndex,
                                     actionText = R.string.marked_as_read,
-                                    action = { model.setRead(listOf(entry), true) },
-                                    undoAction = { model.setRead(listOf(entry), false) }
+                                    action = {
+                                        model.setRead(listOf(entry.id), true)
+                                    },
+                                    undoAction = {
+                                        model.setRead(listOf(entry.id), false)
+                                    }
                                 )
                             }
 
@@ -158,8 +156,12 @@ class EntriesFragment : AppFragment(), Scrollable {
                                     entry = entry,
                                     entryIndex = entryIndex,
                                     actionText = R.string.bookmarked,
-                                    action = { model.setBookmarked(entry.id, true) },
-                                    undoAction = { model.setBookmarked(entry.id, false) }
+                                    action = {
+                                        model.setBookmarked(entry.id, true)
+                                    },
+                                    undoAction = {
+                                        model.setBookmarked(entry.id, false)
+                                    }
                                 )
                             }
                         }
@@ -184,11 +186,9 @@ class EntriesFragment : AppFragment(), Scrollable {
                                     entryIndex = entryIndex,
                                     actionText = R.string.removed_from_bookmarks,
                                     action = {
-                                        model.setRead(listOf(entry), true)
                                         model.setBookmarked(entry.id, false)
                                     },
                                     undoAction = {
-                                        model.setRead(listOf(entry), false)
                                         model.setBookmarked(entry.id, true)
                                     }
                                 )
@@ -200,11 +200,9 @@ class EntriesFragment : AppFragment(), Scrollable {
                                     entryIndex = entryIndex,
                                     actionText = R.string.removed_from_bookmarks,
                                     action = {
-                                        model.setRead(listOf(entry), true)
                                         model.setBookmarked(entry.id, false)
                                     },
                                     undoAction = {
-                                        model.setRead(listOf(entry), false)
                                         model.setBookmarked(entry.id, true)
                                     }
                                 )
@@ -215,6 +213,18 @@ class EntriesFragment : AppFragment(), Scrollable {
             }
 
             else -> null
+        }
+    }
+
+    init {
+        lifecycleScope.launchWhenResumed {
+            runCatching {
+                model.state.collectLatest { displayState(it) }
+            }.onFailure {
+                if (it !is CancellationException) {
+                    showErrorDialog(it)
+                }
+            }
         }
     }
 
@@ -245,14 +255,8 @@ class EntriesFragment : AppFragment(), Scrollable {
             }
         }
 
-        lifecycleScope.launchWhenResumed {
-            runCatching {
-                model.state.collectLatest { displayState(it) }
-            }.onFailure {
-                if (it !is CancellationException) {
-                    showErrorDialog(it)
-                }
-            }
+        lifecycleScope.launch {
+            displayState(model.state.value)
         }
     }
 
@@ -262,7 +266,7 @@ class EntriesFragment : AppFragment(), Scrollable {
 
         if (runBlocking { model.getConf().markScrolledEntriesAsRead }) {
             model.setRead(
-                items = seenEntries,
+                entryIds = seenEntries.map { it.id },
                 read = true,
             )
 
@@ -420,7 +424,6 @@ class EntriesFragment : AppFragment(), Scrollable {
         binding.apply {
             list.apply {
                 layoutManager = LinearLayoutManager(requireContext())
-                setHasFixedSize(true)
                 adapter = this@EntriesFragment.adapter
 
                 val listItemDecoration = CardListAdapterDecoration(
@@ -437,12 +440,12 @@ class EntriesFragment : AppFragment(), Scrollable {
             if (model.getConf().markScrolledEntriesAsRead
                 && (args.filter is EntriesFilter.NotBookmarked || args.filter is EntriesFilter.BelongToFeed)
             ) {
-                markScrolledEntriesAsRead()
+                trackSeenEntries()
             }
         }
     }
 
-    private fun markScrolledEntriesAsRead() = lifecycleScope.launchWhenResumed {
+    private fun trackSeenEntries() = lifecycleScope.launchWhenResumed {
         binding.list.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
 
@@ -469,17 +472,6 @@ class EntriesFragment : AppFragment(), Scrollable {
                     }
 
                 seenEntries.addAll(visibleEntries)
-
-                val seenItemsOutOfRange =
-                    seenEntries.filterNot { visibleEntries.contains(it) }
-                seenEntries.removeAll(seenItemsOutOfRange)
-
-                seenItemsOutOfRange.forEach {
-                    if (!it.read.value) {
-                        it.read.value = true
-                        model.setRead(listOf(it), true)
-                    }
-                }
             }
         })
     }

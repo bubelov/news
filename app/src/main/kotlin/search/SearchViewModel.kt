@@ -4,7 +4,6 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import common.ConfRepository
-import db.Conf
 import db.Entry
 import db.Feed
 import entries.EntriesAdapterItem
@@ -13,14 +12,11 @@ import entries.EntriesRepository
 import entries.EntriesSupportingTextRepository
 import feeds.FeedsRepository
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import enclosures.EnclosuresRepository
+import kotlinx.coroutines.flow.first
 import sync.NewsApiSync
 import sync.SyncResult
 import timber.log.Timber
@@ -70,11 +66,10 @@ class SearchViewModel(
             }
 
             val feeds = feedsRepository.selectAll()
-            val conf = this.conf.getAsFlow()
 
             val results = entries.map { entry ->
                 val feed = feeds.singleOrNull { feed -> feed.id == entry.feedId }
-                entry.toRow(feed, conf)
+                entry.toRow(feed)
             }
 
             showProgress.value = false
@@ -106,12 +101,6 @@ class SearchViewModel(
         enclosuresRepository.download(id)
     }
 
-    suspend fun reloadEntry(entry: EntriesAdapterItem) {
-        searchResults.first().filter { it == entry }.forEach {
-            it.read.value = entriesRepository.selectById(it.id)?.read ?: false
-        }
-    }
-
     fun getCachedPodcastUri(entryId: String): Uri? {
         val enclosure = enclosuresRepository.selectByEntryId(entryId) ?: return null
 
@@ -126,32 +115,18 @@ class SearchViewModel(
 
     suspend fun getConf() = conf.get()
 
-    private suspend fun Entry.toRow(feed: Feed?, conf: Flow<Conf>): EntriesAdapterItem {
+    private suspend fun Entry.toRow(feed: Feed?): EntriesAdapterItem {
         return EntriesAdapterItem(
             id = id,
+            image = null,
+            cropImage = false,
             title = title,
-            subtitle = lazy {
-                (feed?.title ?: "Unknown feed") + " · " + published
-            },
+            subtitle = (feed?.title ?: "Unknown feed") + " · " + published,
+            supportingText = entriesSupportingTextRepository.getSupportingText(this@toRow.id, feed),
             podcast = enclosureLinkType.startsWith("audio"),
-            podcastDownloadPercent = flow {
-                enclosuresRepository.getDownloadProgress(this@toRow.id).collect {
-                    emit(it)
-                }
-            },
-            image = flowOf(),
-            cachedImage = lazy { null },
-            supportingText = flow {
-                emit(
-                    entriesSupportingTextRepository.getSupportingText(
-                        this@toRow.id,
-                        feed
-                    )
-                )
-            },
-            cachedSupportingText = entriesSupportingTextRepository.getCachedSupportingText(this.id),
-            read = MutableStateFlow(read),
-            conf = conf,
+            podcastDownloadPercent = enclosuresRepository.getDownloadProgress(this@toRow.id)
+                .first(),
+            read = read,
         )
     }
 }

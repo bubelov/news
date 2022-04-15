@@ -15,8 +15,13 @@ class EntriesAdapterDiffCallback : DiffUtil.ItemCallback<EntriesAdapterItem>() {
         oldItem: EntriesAdapterItem,
         newItem: EntriesAdapterItem,
     ): Boolean {
-        return oldItem.title == newItem.title
+        return oldItem.image == newItem.image
+                && oldItem.cropImage == newItem.cropImage
+                && oldItem.title == newItem.title
+                && oldItem.subtitle == newItem.subtitle
+                && oldItem.supportingText == newItem.supportingText
                 && oldItem.podcast == newItem.podcast
-                && oldItem.read.value == newItem.read.value
+                && oldItem.podcastDownloadPercent == newItem.podcastDownloadPercent
+                && oldItem.read == newItem.read
     }
 }

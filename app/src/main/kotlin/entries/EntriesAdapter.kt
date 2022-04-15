@@ -2,13 +2,11 @@ package entries
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.ListAdapter
 import co.appreactor.news.databinding.ListItemEntryBinding
 
 class EntriesAdapter(
     var screenWidth: Int = 0,
-    private val scope: LifecycleCoroutineScope,
     private val callback: EntriesAdapterCallback,
 ) : ListAdapter<EntriesAdapterItem, EntriesAdapterViewHolder>(EntriesAdapterDiffCallback()) {
 
@@ -19,7 +17,7 @@ class EntriesAdapter(
             false
         )
 
-        return EntriesAdapterViewHolder(binding, screenWidth, scope, callback)
+        return EntriesAdapterViewHolder(binding, screenWidth, callback)
     }
 
     override fun onBindViewHolder(holder: EntriesAdapterViewHolder, position: Int) {

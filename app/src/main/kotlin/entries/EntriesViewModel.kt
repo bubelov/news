@@ -11,14 +11,12 @@ import db.Feed
 import common.ConfRepository.Companion.SORT_ORDER_ASCENDING
 import common.ConfRepository.Companion.SORT_ORDER_DESCENDING
 import db.Conf
+import db.EntryImage
 import entriesimages.EntriesImagesRepository
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import enclosures.EnclosuresRepository
 import sync.NewsApiSync
 import sync.SyncResult
@@ -63,27 +61,50 @@ class EntriesViewModel(
 
                         fetchEntriesFromApi()
                     } else {
-                        reloadEntries(inBackground = false)
+                        state.value = State.ShowingEntries(
+                            entries = getCachedEntries(conf),
+                            includesUnread = conf.showReadEntries || filter is EntriesFilter.Bookmarked,
+                            showBackgroundProgress = false,
+                        )
                     }
                 } else {
-                    reloadEntries(inBackground = false)
+                    state.value = State.ShowingEntries(
+                        entries = getCachedEntries(conf),
+                        includesUnread = conf.showReadEntries || filter is EntriesFilter.Bookmarked,
+                        showBackgroundProgress = false,
+                    )
                 }
             } else {
                 sharedModel.syncedOnStartup = true
 
                 runCatching {
+                    Timber.d("Changing state!!!")
                     state.value = State.PerformingInitialSync(newsApiSync.syncMessage)
                     newsApiSync.performInitialSync()
-                    reloadEntries()
+
+                    Timber.d("Changing state!!!")
+                    state.value = State.ShowingEntries(
+                        entries = getCachedEntries(conf),
+                        includesUnread = conf.showReadEntries || filter is EntriesFilter.Bookmarked,
+                        showBackgroundProgress = false,
+                    )
                 }.onFailure {
+                    Timber.d("Changing state!!!")
                     state.value = State.FailedToSync(it)
                 }
             }
         } else {
             if (state.value is State.ShowingEntries) {
                 runCatching {
-                    reloadEntries(inBackground = true)
+                    val conf = getConf()
+
+                    state.value = State.ShowingEntries(
+                        entries = getCachedEntries(conf),
+                        includesUnread = conf.showReadEntries || filter is EntriesFilter.Bookmarked,
+                        showBackgroundProgress = false,
+                    )
                 }.onFailure {
+                    Timber.d("Changing state!!!")
                     state.value = State.FailedToSync(it)
                 }
             }
@@ -93,44 +114,6 @@ class EntriesViewModel(
     suspend fun onRetry(sharedModel: EntriesSharedViewModel) {
         state.value = null
         onViewCreated(filter, sharedModel)
-    }
-
-    suspend fun reloadEntry(entry: EntriesAdapterItem) {
-        val freshEntry = entriesRepository.selectById(entry.id) ?: return
-        entry.read.value = freshEntry.read
-
-        var currentState: State? = null
-
-        while (currentState !is State.ShowingEntries) {
-            delay(100)
-            currentState = state.value
-
-            Timber.d(
-                "Trying to reload entry (entry = %s, current_state = %s)",
-                entry,
-                currentState?.javaClass?.simpleName,
-            )
-        }
-
-        val hideEntry = fun() {
-            state.value = currentState.copy(
-                entries = currentState.entries.toMutableList().apply {
-                    remove(entry)
-                }
-            )
-        }
-
-        if (freshEntry.read && !currentState.includesUnread) {
-            hideEntry()
-        }
-
-        if (freshEntry.bookmarked && filter is EntriesFilter.NotBookmarked) {
-            hideEntry()
-        }
-
-        if (!freshEntry.bookmarked && filter is EntriesFilter.Bookmarked) {
-            hideEntry()
-        }
     }
 
     private suspend fun getCachedEntries(conf: Conf): List<EntriesAdapterItem> {
@@ -165,47 +148,27 @@ class EntriesViewModel(
         }
 
         val feeds = feedsRepository.selectAll()
-        val confFlow = this.conf.getAsFlow()
 
         return sortedEntries.map {
             val feed = feeds.singleOrNull { feed -> feed.id == it.feedId }
-            it.toRow(feed, confFlow)
+            it.toRow(feed, conf)
         }
-    }
-
-    private suspend fun reloadEntries(inBackground: Boolean = false) {
-        when (val prevState = state.value) {
-            is State.ShowingEntries -> {
-                if (inBackground && !prevState.showBackgroundProgress) {
-                    state.value = prevState.copy(showBackgroundProgress = true)
-                }
-            }
-            else -> state.value = State.LoadingEntries
-        }
-
-        val conf = getConf()
-
-        state.value = State.ShowingEntries(
-            entries = getCachedEntries(conf),
-            includesUnread = conf.showReadEntries || filter is EntriesFilter.Bookmarked,
-            showBackgroundProgress = false,
-        )
     }
 
     suspend fun fetchEntriesFromApi() {
-        val prevState = state.value
-
-        if (prevState !is State.ShowingEntries) {
-            Timber.e("Tried to fetch new entries before loading cached entries")
-            return
-        }
-
         when (val res = newsApiSync.sync()) {
             is SyncResult.Ok -> {
-                reloadEntries(inBackground = true)
+                if (state.value is State.ShowingEntries) {
+                    val conf = getConf()
+
+                    state.value = State.ShowingEntries(
+                        entries = getCachedEntries(conf),
+                        includesUnread = conf.showReadEntries || filter is EntriesFilter.Bookmarked,
+                        showBackgroundProgress = false,
+                    )
+                }
             }
             is SyncResult.Err -> {
-                state.value = prevState.copy(showBackgroundProgress = false)
                 throw res.e
             }
         }
@@ -215,7 +178,14 @@ class EntriesViewModel(
 
     suspend fun saveConf(conf: Conf) {
         this.conf.save(conf)
-        reloadEntries()
+
+        if (state.value is State.ShowingEntries) {
+            state.value = State.ShowingEntries(
+                entries = getCachedEntries(conf),
+                includesUnread = conf.showReadEntries || filter is EntriesFilter.Bookmarked,
+                showBackgroundProgress = false,
+            )
+        }
     }
 
     suspend fun downloadPodcast(id: String) {
@@ -239,16 +209,10 @@ class EntriesViewModel(
     fun getFeed(id: String) = feedsRepository.selectById(id)
 
     fun setRead(
-        items: Collection<EntriesAdapterItem>,
+        entryIds: Collection<String>,
         read: Boolean,
     ) {
-        items.forEach { entriesRepository.setRead(it.id, read) }
-
-        val conf = runBlocking { conf.get() }
-
-        if (!conf.showReadEntries) {
-            items.forEach { hide(it) }
-        }
+        entryIds.forEach { entriesRepository.setRead(it, read) }
 
         viewModelScope.launch {
             val syncResult = newsApiSync.syncEntriesFlags()
@@ -315,7 +279,15 @@ class EntriesViewModel(
             }
         }
 
-        reloadEntries(inBackground = true)
+        if (state.value is State.ShowingEntries) {
+            val conf = getConf()
+
+            state.value = State.ShowingEntries(
+                entries = getCachedEntries(conf),
+                includesUnread = conf.showReadEntries || filter is EntriesFilter.Bookmarked,
+                showBackgroundProgress = false,
+            )
+        }
 
         viewModelScope.launch {
             val syncResult = newsApiSync.syncEntriesFlags()
@@ -328,50 +300,31 @@ class EntriesViewModel(
 
     private suspend fun EntryWithoutSummary.toRow(
         feed: Feed?,
-        conf: Flow<Conf>,
+        conf: Conf,
     ): EntriesAdapterItem {
+        val image: EntryImage? = if (conf.showPreviewImages) {
+            entriesImagesRepository.getPreviewImage(this@toRow.id).first()
+        } else {
+            null
+        }
+
+        val supportingText = if (conf.showPreviewText) {
+            entriesSupportingTextRepository.getSupportingText(this@toRow.id, feed)
+        } else {
+            ""
+        }
+
         return EntriesAdapterItem(
             id = id,
+            image = image,
+            cropImage = conf.cropPreviewImages,
             title = title,
-            subtitle = lazy {
-                "${feed?.title ?: "Unknown feed"} · ${DATE_TIME_FORMAT.format(published)}"
-            },
+            subtitle = "${feed?.title ?: "Unknown feed"} · ${DATE_TIME_FORMAT.format(published)}",
+            supportingText = supportingText,
             podcast = enclosureLinkType.startsWith("audio"),
-            podcastDownloadPercent = flow {
-                enclosuresRepository.getDownloadProgress(this@toRow.id).collect {
-                    emit(it)
-                }
-            },
-            image = flow {
-                if (feed?.showPreviewImages == false) {
-                    return@flow
-                }
-
-                entriesImagesRepository.getPreviewImage(this@toRow.id).collect {
-                    emit(it)
-                }
-            },
-            cachedImage = lazy {
-                runBlocking {
-                    if (feed?.showPreviewImages == false) {
-                        null
-                    } else {
-                        entriesImagesRepository.getPreviewImage(this@toRow.id).first()
-                    }
-                }
-
-            },
-            supportingText = flow {
-                emit(
-                    entriesSupportingTextRepository.getSupportingText(
-                        this@toRow.id,
-                        feed
-                    )
-                )
-            },
-            cachedSupportingText = entriesSupportingTextRepository.getCachedSupportingText(this.id),
-            read = MutableStateFlow(read),
-            conf = conf,
+            podcastDownloadPercent = enclosuresRepository.getDownloadProgress(this@toRow.id)
+                .first(),
+            read = read,
         )
     }
 

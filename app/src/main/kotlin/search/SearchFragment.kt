@@ -39,7 +39,6 @@ class SearchFragment : AppFragment() {
     private val binding get() = _binding!!
 
     private val adapter = EntriesAdapter(
-        scope = lifecycleScope,
         callback = object : EntriesAdapterCallback {
             override fun onItemClick(item: EntriesAdapterItem) {
                 lifecycleScope.launchWhenResumed {
@@ -80,7 +79,6 @@ class SearchFragment : AppFragment() {
                     runCatching {
                         val entry = model.getEntry(item.id) ?: return@launch
                         model.setRead(listOf(entry.id), true)
-                        model.reloadEntry(item)
 
                         openCachedPodcast(
                             cacheUri = model.getCachedPodcastUri(entry.id),
