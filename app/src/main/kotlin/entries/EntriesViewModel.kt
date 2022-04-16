@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import enclosures.EnclosuresRepository
+import kotlinx.coroutines.flow.collectLatest
 import sync.NewsApiSync
 import sync.SyncResult
 import timber.log.Timber
@@ -38,6 +39,21 @@ class EntriesViewModel(
     private lateinit var filter: EntriesFilter
 
     val state = MutableStateFlow<State?>(null)
+
+    init {
+        viewModelScope.launch {
+            entriesImagesRepository.selectAll().collectLatest {
+                val currentState = state.value
+
+                if (currentState is State.ShowingEntries) {
+                    state.compareAndSet(
+                        currentState,
+                        currentState.copy(entries = getCachedEntries(getConf())),
+                    )
+                }
+            }
+        }
+    }
 
     suspend fun onViewCreated(filter: EntriesFilter, sharedModel: EntriesSharedViewModel) {
         this.filter = filter
@@ -78,18 +94,15 @@ class EntriesViewModel(
                 sharedModel.syncedOnStartup = true
 
                 runCatching {
-                    Timber.d("Changing state!!!")
                     state.value = State.PerformingInitialSync(newsApiSync.syncMessage)
                     newsApiSync.performInitialSync()
 
-                    Timber.d("Changing state!!!")
                     state.value = State.ShowingEntries(
                         entries = getCachedEntries(conf),
                         includesUnread = conf.showReadEntries || filter is EntriesFilter.Bookmarked,
                         showBackgroundProgress = false,
                     )
                 }.onFailure {
-                    Timber.d("Changing state!!!")
                     state.value = State.FailedToSync(it)
                 }
             }
