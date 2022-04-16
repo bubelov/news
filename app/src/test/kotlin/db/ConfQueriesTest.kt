@@ -17,56 +17,31 @@ class ConfQueriesTest {
 
     @Test
     fun `insert or replace`() {
-        db.insertDefault()
-        val conf = db.select().executeAsOne()
-        val changedConf = conf.copy(authType = "test")
-        runBlocking { ConfRepository(db).save(changedConf) }
-        assertEquals(changedConf, db.select().executeAsOne())
+        runBlocking { ConfRepository(db).insert(ConfRepository.DEFAULT_CONF) }
+        val oldConf = db.select().executeAsOne()
+        val newConf = oldConf.copy(authType = "test")
+        runBlocking { ConfRepository(db).insert(newConf) }
+        assertEquals(newConf, db.select().executeAsOne())
     }
 
     @Test
     fun `insert default`() {
-        db.insertDefault()
+        runBlocking { ConfRepository(db).insert(ConfRepository.DEFAULT_CONF) }
         val conf = db.select().executeAsOne()
-        assertEquals(defaultConf(), conf)
+        assertEquals(ConfRepository.DEFAULT_CONF, conf)
     }
 
     @Test
     fun select() {
-        db.insertDefault()
+        runBlocking { ConfRepository(db).insert(ConfRepository.DEFAULT_CONF) }
         val conf = db.select().executeAsOne()
         assertEquals(conf, db.select().executeAsOne())
     }
 
     @Test
     fun `delete all`() {
-        db.insertDefault()
-        db.deleteAll()
+        runBlocking { ConfRepository(db).insert(ConfRepository.DEFAULT_CONF) }
+        db.delete()
         assertNull(db.select().executeAsOneOrNull())
     }
 }
-
-fun defaultConf() = Conf(
-    id = 1,
-    authType = "",
-    nextcloudServerUrl = "",
-    nextcloudServerTrustSelfSignedCerts = false,
-    nextcloudServerUsername = "",
-    nextcloudServerPassword = "",
-    minifluxServerUrl = "",
-    minifluxServerTrustSelfSignedCerts = false,
-    minifluxServerUsername = "",
-    minifluxServerPassword = "",
-    initialSyncCompleted = false,
-    lastEntriesSyncDateTime = "",
-    showReadEntries = false,
-    sortOrder = "descending",
-    showPreviewImages = true,
-    cropPreviewImages = true,
-    markScrolledEntriesAsRead = false,
-    syncOnStartup = true,
-    syncInBackground = true,
-    backgroundSyncIntervalMillis = 10800000,
-    useBuiltInBrowser = true,
-    showPreviewText = true,
-)

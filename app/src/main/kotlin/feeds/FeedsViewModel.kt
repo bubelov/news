@@ -11,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import opml.exportOpml
@@ -21,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger
 class FeedsViewModel(
     private val feedsRepo: FeedsRepository,
     private val entriesRepo: EntriesRepository,
-    private val confRepository: ConfRepository,
+    private val confRepo: ConfRepository,
     private val resources: Resources,
 ) : ViewModel() {
 
@@ -30,7 +31,7 @@ class FeedsViewModel(
     lateinit var conf: Conf
 
     suspend fun onViewCreated() {
-        conf = confRepository.get()
+        conf = confRepo.select().first()
 
         if (state.value == null) {
             reload()

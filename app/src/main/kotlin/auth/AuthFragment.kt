@@ -22,6 +22,7 @@ import common.AppFragment
 import common.ConfRepository
 import common.app
 import entries.EntriesFilter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.concurrent.TimeUnit
@@ -41,7 +42,7 @@ class AuthFragment : AppFragment(
         savedInstanceState: Bundle?
     ): View? {
         return runBlocking {
-            when (model.getConf().authType) {
+            when (model.getConf().first().authType) {
                 ConfRepository.AUTH_TYPE_MINIFLUX -> {
                     showNews()
                     null
@@ -79,11 +80,11 @@ class AuthFragment : AppFragment(
         binding.loginWithNextcloud.setOnClickListener {
             findNavController().navigate(R.id.action_authFragment_to_directAuthFragment)
         }
-        
+
         binding.standaloneMode.setOnClickListener {
             lifecycleScope.launchWhenResumed {
                 model.saveConf(
-                    model.getConf().copy(
+                    model.getConf().first().copy(
                         authType = ConfRepository.AUTH_TYPE_STANDALONE,
                         syncOnStartup = false,
                         backgroundSyncIntervalMillis = TimeUnit.HOURS.toMillis(12),
@@ -110,7 +111,9 @@ class AuthFragment : AppFragment(
         val onAccessGranted = IAccountAccessGranted { account ->
             runBlocking {
                 SingleAccountHelper.setCurrentAccount(context, account.name)
-                model.saveConf(model.getConf().copy(authType = ConfRepository.AUTH_TYPE_NEXTCLOUD_APP))
+                model.saveConf(
+                    model.getConf().first().copy(authType = ConfRepository.AUTH_TYPE_NEXTCLOUD_APP)
+                )
                 app().setupBackgroundSync(override = true)
                 showNews()
             }

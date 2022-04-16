@@ -12,6 +12,7 @@ import co.appreactor.news.BuildConfig
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import injections.appModule
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
 import org.koin.android.ext.koin.androidContext
@@ -39,7 +40,7 @@ class App : Application() {
         }
 
         runBlocking {
-            val authType = get<ConfRepository>().get().authType
+            val authType = get<ConfRepository>().select().first().authType
 
             if (authType.isNotBlank()) {
                 get<NewsApiSwitcher>().switch(authType)
@@ -83,14 +84,14 @@ class App : Application() {
 
     fun setupBackgroundSync(override: Boolean) {
         val workManager = WorkManager.getInstance(this)
-        val prefs = runBlocking { get<ConfRepository>().get() }
+        val conf = runBlocking { get<ConfRepository>().select().first() }
 
-        if (!prefs.syncInBackground) {
+        if (!conf.syncInBackground) {
             workManager.cancelUniqueWork(SYNC_WORK_NAME)
             return
         }
 
-        if (prefs.syncInBackground) {
+        if (conf.syncInBackground) {
             val policy = if (override) {
                 ExistingPeriodicWorkPolicy.REPLACE
             } else {
@@ -102,7 +103,7 @@ class App : Application() {
                 .build()
 
             val periodicSyncRequest = PeriodicWorkRequestBuilder<SyncWorker>(
-                repeatInterval = prefs.backgroundSyncIntervalMillis,
+                repeatInterval = conf.backgroundSyncIntervalMillis,
                 repeatIntervalTimeUnit = TimeUnit.MILLISECONDS,
             )
                 .setConstraints(constraints)

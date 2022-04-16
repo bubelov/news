@@ -17,6 +17,7 @@ import db.Entry
 import entries.EntriesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
@@ -27,7 +28,7 @@ class EntryViewModel(
     private val app: Application,
     private val feedsRepository: FeedsRepository,
     private val entriesRepository: EntriesRepository,
-    private val confRepository: ConfRepository,
+    private val confRepo: ConfRepository,
     private val newsApiSync: NewsApiSync,
 ) : ViewModel() {
 
@@ -40,7 +41,7 @@ class EntryViewModel(
         summaryView: TextView,
         lifecycleScope: LifecycleCoroutineScope,
     ) = withContext(Dispatchers.IO) {
-        conf = confRepository.get()
+        conf = confRepo.select().first()
 
         if (state.value != null) {
             return@withContext

@@ -48,7 +48,7 @@ class EntriesImagesRepository(
     fun selectAll() = imageQueries.selectAll().asFlow()
 
     suspend fun syncPreviews() = withContext(Dispatchers.IO) {
-        confRepository.getAsFlow().collectLatest { prefs ->
+        confRepository.select().collectLatest { prefs ->
             if (!prefs.showPreviewImages) {
                 return@collectLatest
             }

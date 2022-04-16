@@ -5,6 +5,7 @@ import common.ConfRepository
 import entries.EntriesRepository
 import io.mockk.coEvery
 import io.mockk.mockk
+import kotlinx.coroutines.flow.flowOf
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
@@ -20,7 +21,7 @@ class FeedsViewModelTests {
     private val model = FeedsViewModel(
         feedsRepo = feedsRepo,
         entriesRepo = entriesRepo,
-        confRepository = confRepo,
+        confRepo = confRepo,
         resources = resources,
     )
 
@@ -31,6 +32,7 @@ class FeedsViewModelTests {
 
     @Test
     fun `view ready`(): Unit = runBlocking {
+        coEvery { confRepo.select() } returns flowOf(ConfRepository.DEFAULT_CONF)
         coEvery { feedsRepo.selectAll() } returns emptyList()
         model.onViewCreated()
 
@@ -41,6 +43,7 @@ class FeedsViewModelTests {
 
     @Test
     fun `view ready + db error`(): Unit = runBlocking {
+        coEvery { confRepo.select() } returns flowOf(ConfRepository.DEFAULT_CONF)
         coEvery { feedsRepo.selectAll() } throws Exception()
         model.onViewCreated()
 

@@ -17,7 +17,7 @@ class AuthRepository(
     private val context: Context,
 ) {
 
-    suspend fun account(): Flow<Account> = conf.getAsFlow().map {
+    fun account(): Flow<Account> = conf.select().map {
         Account(
             title = it.accountTitle(),
             subtitle = it.accountSubtitle(),

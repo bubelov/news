@@ -13,6 +13,7 @@ import com.google.gson.GsonBuilder
 import com.nextcloud.android.sso.api.NextcloudAPI
 import com.nextcloud.android.sso.helper.SingleAccountHelper
 import common.ConfRepository
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import retrofit2.NextcloudRetrofitApiBuilder
 import timber.log.Timber
@@ -21,7 +22,7 @@ class NewsApiSwitcher(
     private val wrapper: NewsApiWrapper,
     private val feedQueries: FeedQueries,
     private val entryQueries: EntryQueries,
-    private val prefs: ConfRepository,
+    private val confRepo: ConfRepository,
     private val context: Context,
 ) {
 
@@ -65,29 +66,29 @@ class NewsApiSwitcher(
     }
 
     private fun switchToDirectNextcloudApi(): Unit = runBlocking {
-        prefs.get().apply {
-            wrapper.api = NextcloudNewsApiAdapter(
-                DirectNextcloudNewsApiBuilder().build(
-                    url = nextcloudServerUrl,
-                    username = nextcloudServerUsername,
-                    password = nextcloudServerPassword,
-                    trustSelfSignedCerts = prefs.get().nextcloudServerTrustSelfSignedCerts,
-                )
+        val conf = confRepo.select().first()
+
+        wrapper.api = NextcloudNewsApiAdapter(
+            DirectNextcloudNewsApiBuilder().build(
+                url = conf.nextcloudServerUrl,
+                username = conf.nextcloudServerUsername,
+                password = conf.nextcloudServerPassword,
+                trustSelfSignedCerts = conf.nextcloudServerTrustSelfSignedCerts,
             )
-        }
+        )
     }
 
     private fun switchToMinifluxApi(): Unit = runBlocking {
-        prefs.get().apply {
-            wrapper.api = MinifluxApiAdapter(
-                MinifluxApiBuilder().build(
-                    url = minifluxServerUrl,
-                    username = minifluxServerUsername,
-                    password = minifluxServerPassword,
-                    trustSelfSignedCerts = prefs.get().minifluxServerTrustSelfSignedCerts,
-                )
+        val conf = confRepo.select().first()
+
+        wrapper.api = MinifluxApiAdapter(
+            MinifluxApiBuilder().build(
+                url = conf.minifluxServerUrl,
+                username = conf.minifluxServerUsername,
+                password = conf.minifluxServerPassword,
+                trustSelfSignedCerts = conf.minifluxServerTrustSelfSignedCerts,
             )
-        }
+        )
     }
 
     private fun switchToStandaloneApi() {

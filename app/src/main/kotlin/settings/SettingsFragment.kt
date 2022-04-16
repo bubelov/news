@@ -21,6 +21,7 @@ import common.ConfRepository
 import common.app
 import common.showErrorDialog
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -79,7 +80,7 @@ class SettingsFragment : AppFragment() {
             setTitle(R.string.settings)
         }
 
-        val conf = runBlocking { model.getConf() }
+        val conf = runBlocking { model.getConf().first() }
 
         binding.apply {
             syncInBackground.apply {
@@ -89,7 +90,7 @@ class SettingsFragment : AppFragment() {
                 setOnCheckedChangeListener { _, isChecked ->
                     runBlocking {
                         model.saveConf(
-                            model.getConf().copy(syncInBackground = isChecked)
+                            model.getConf().first().copy(syncInBackground = isChecked)
                         )
                     }
                     backgroundSyncIntervalButton.isVisible = isChecked
@@ -109,13 +110,13 @@ class SettingsFragment : AppFragment() {
                     text = resources.getQuantityString(R.plurals.d_hours, hours, hours)
                     val millis = TimeUnit.HOURS.toMillis(hours.toLong())
                     isChecked =
-                        runBlocking { model.getConf().backgroundSyncIntervalMillis == millis }
+                        runBlocking { model.getConf().first().backgroundSyncIntervalMillis == millis }
 
                     setOnCheckedChangeListener { _, isChecked ->
                         if (isChecked) {
                             runBlocking {
                                 model.saveConf(
-                                    model.getConf().copy(backgroundSyncIntervalMillis = millis)
+                                    model.getConf().first().copy(backgroundSyncIntervalMillis = millis)
                                 )
                             }
 
@@ -146,7 +147,7 @@ class SettingsFragment : AppFragment() {
 
                 setOnCheckedChangeListener { _, isChecked ->
                     runBlocking {
-                        model.saveConf(model.getConf().copy(syncOnStartup = isChecked))
+                        model.saveConf(model.getConf().first().copy(syncOnStartup = isChecked))
                     }
                 }
             }
@@ -156,7 +157,7 @@ class SettingsFragment : AppFragment() {
 
                 setOnCheckedChangeListener { _, isChecked ->
                     runBlocking {
-                        model.saveConf(model.getConf().copy(showReadEntries = isChecked))
+                        model.saveConf(model.getConf().first().copy(showReadEntries = isChecked))
                     }
                 }
             }
@@ -166,7 +167,7 @@ class SettingsFragment : AppFragment() {
 
                 setOnCheckedChangeListener { _, isChecked ->
                     runBlocking {
-                        model.saveConf(model.getConf().copy(showPreviewImages = isChecked))
+                        model.saveConf(model.getConf().first().copy(showPreviewImages = isChecked))
                     }
                 }
             }
@@ -176,7 +177,7 @@ class SettingsFragment : AppFragment() {
 
                 setOnCheckedChangeListener { _, isChecked ->
                     runBlocking {
-                        model.saveConf(model.getConf().copy(cropPreviewImages = isChecked))
+                        model.saveConf(model.getConf().first().copy(cropPreviewImages = isChecked))
                     }
                 }
             }
@@ -186,7 +187,7 @@ class SettingsFragment : AppFragment() {
 
                 setOnCheckedChangeListener { _, isChecked ->
                     runBlocking {
-                        model.saveConf(model.getConf().copy(showPreviewText = isChecked))
+                        model.saveConf(model.getConf().first().copy(showPreviewText = isChecked))
                     }
                 }
             }
@@ -196,7 +197,7 @@ class SettingsFragment : AppFragment() {
 
                 setOnCheckedChangeListener { _, isChecked ->
                     runBlocking {
-                        model.saveConf(model.getConf().copy(markScrolledEntriesAsRead = isChecked))
+                        model.saveConf(model.getConf().first().copy(markScrolledEntriesAsRead = isChecked))
                     }
                 }
             }
@@ -206,7 +207,7 @@ class SettingsFragment : AppFragment() {
 
                 setOnCheckedChangeListener { _, isChecked ->
                     runBlocking {
-                        model.saveConf(model.getConf().copy(useBuiltInBrowser = isChecked))
+                        model.saveConf(model.getConf().first().copy(useBuiltInBrowser = isChecked))
                     }
                 }
             }
@@ -221,7 +222,7 @@ class SettingsFragment : AppFragment() {
 
             logOut.setOnClickListener {
                 lifecycleScope.launchWhenResumed {
-                    when (model.getConf().authType) {
+                    when (model.getConf().first().authType) {
                         ConfRepository.AUTH_TYPE_STANDALONE -> {
                             MaterialAlertDialogBuilder(requireContext())
                                 .setMessage(R.string.delete_all_data_warning)

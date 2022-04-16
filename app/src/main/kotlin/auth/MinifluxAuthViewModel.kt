@@ -5,11 +5,12 @@ import api.NewsApiSwitcher
 import api.miniflux.MinifluxApiBuilder
 import common.ConfRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
 class MinifluxAuthViewModel(
     private val apiSwitcher: NewsApiSwitcher,
-    private val conf: ConfRepository,
+    private val confRepo: ConfRepository,
 ) : ViewModel() {
 
     suspend fun requestFeeds(
@@ -34,19 +35,19 @@ class MinifluxAuthViewModel(
         password: String,
         trustSelfSignedCerts: Boolean,
     ) {
-        val updatedConf = conf.get().copy(
+        val newConf = confRepo.select().first().copy(
             minifluxServerUrl = serverUrl,
             minifluxServerTrustSelfSignedCerts = trustSelfSignedCerts,
             minifluxServerUsername = username,
             minifluxServerPassword = password,
         )
 
-        conf.save(updatedConf)
+        confRepo.insert(newConf)
     }
 
     suspend fun setAuthType(newAuthType: String) {
-        val updatedConf = conf.get().copy(authType = newAuthType)
-        conf.save(updatedConf)
+        val newConf = confRepo.select().first().copy(authType = newAuthType)
+        confRepo.insert(newConf)
         apiSwitcher.switch(newAuthType)
     }
 }

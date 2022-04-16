@@ -24,8 +24,10 @@ import common.openLink
 import common.screenWidth
 import common.show
 import common.showErrorDialog
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
@@ -74,7 +76,7 @@ class EntriesFragment : AppFragment(), Scrollable {
                                 return@launchWhenResumed
                             }
 
-                            openLink(link, model.getConf().useBuiltInBrowser)
+                            openLink(link, model.getConf().first().useBuiltInBrowser)
                         } else {
                             val action =
                                 EntriesFragmentDirections.actionEntriesFragmentToEntryFragment(item.id)
@@ -216,15 +218,32 @@ class EntriesFragment : AppFragment(), Scrollable {
         }
     }
 
-    init {
-        lifecycleScope.launchWhenResumed {
-            runCatching {
-                model.state.collectLatest { displayState(it) }
-            }.onFailure {
-                if (it !is CancellationException) {
-                    showErrorDialog(it)
-                }
+    private val trackingListener = object : RecyclerView.OnScrollListener() {
+        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+
+        }
+
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            if (recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE) {
+                return
             }
+
+            val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+
+            if (layoutManager.findFirstVisibleItemPosition() == RecyclerView.NO_POSITION) {
+                return
+            }
+
+            if (layoutManager.findLastVisibleItemPosition() == RecyclerView.NO_POSITION) {
+                return
+            }
+
+            val visibleEntries =
+                (layoutManager.findFirstVisibleItemPosition()..layoutManager.findLastVisibleItemPosition()).map {
+                    adapter.currentList[it]
+                }
+
+            seenEntries.addAll(visibleEntries)
         }
     }
 
@@ -245,26 +264,20 @@ class EntriesFragment : AppFragment(), Scrollable {
         initSwipeRefresh()
         initList()
 
-        lifecycleScope.launchWhenResumed {
-            runCatching {
-                model.onViewCreated(args.filter!!, sharedModel)
-            }.onFailure {
-                if (it !is CancellationException) {
-                    showErrorDialog(it)
-                }
-            }
-        }
+        model.state
+            .onStart { model.onViewCreated(args.filter!!, sharedModel) }
+            .launchIn(viewLifecycleOwner.lifecycleScope)
 
-        lifecycleScope.launch {
-            displayState(model.state.value)
-        }
+        model.state
+            .onEach { displayState(it) }
+            .launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
 
-        if (runBlocking { model.getConf().markScrolledEntriesAsRead }) {
+        if (runBlocking { model.getConf().first().markScrolledEntriesAsRead }) {
             model.setRead(
                 entryIds = seenEntries.map { it.id },
                 read = true,
@@ -327,7 +340,7 @@ class EntriesFragment : AppFragment(), Scrollable {
         showOpenedEntriesMenuItem?.isVisible = getShowReadEntriesButtonVisibility()
 
         lifecycleScope.launchWhenResumed {
-            val conf = model.getConf()
+            val conf = model.getConf().first()
 
             if (conf.showReadEntries) {
                 showOpenedEntriesMenuItem?.setIcon(R.drawable.ic_baseline_visibility_24)
@@ -342,8 +355,8 @@ class EntriesFragment : AppFragment(), Scrollable {
 
         showOpenedEntriesMenuItem?.setOnMenuItemClickListener {
             lifecycleScope.launchWhenResumed {
-                val conf = model.getConf()
-                model.saveConf(model.getConf().copy(showReadEntries = !conf.showReadEntries))
+                val conf = model.getConf().first()
+                model.saveConf(conf.copy(showReadEntries = !conf.showReadEntries))
                 initShowReadEntriesButton()
             }
 
@@ -352,42 +365,33 @@ class EntriesFragment : AppFragment(), Scrollable {
     }
 
     private fun initSortOrderButton() {
-        val sortOrderMenuItem = toolbar?.menu?.findItem(R.id.sort)
+        val sortOrderMenuItem = toolbar?.menu?.findItem(R.id.sort) ?: return
 
-        lifecycleScope.launchWhenResumed {
-            val conf = model.getConf()
-
+        model.getConf().onEach { conf ->
             when (conf.sortOrder) {
                 ConfRepository.SORT_ORDER_ASCENDING -> {
-                    sortOrderMenuItem?.setIcon(R.drawable.ic_clock_forward)
-                    sortOrderMenuItem?.title = getString(R.string.show_newest_first)
+                    sortOrderMenuItem.setIcon(R.drawable.ic_clock_forward)
+                    sortOrderMenuItem.title = getString(R.string.show_newest_first)
                 }
 
                 ConfRepository.SORT_ORDER_DESCENDING -> {
-                    sortOrderMenuItem?.setIcon(R.drawable.ic_clock_back)
-                    sortOrderMenuItem?.title = getString(R.string.show_oldest_first)
+                    sortOrderMenuItem.setIcon(R.drawable.ic_clock_back)
+                    sortOrderMenuItem.title = getString(R.string.show_oldest_first)
                 }
             }
-        }
 
-        sortOrderMenuItem?.setOnMenuItemClickListener {
-            lifecycleScope.launchWhenResumed {
-                adapter.submitList(null)
-
-                val conf = model.getConf()
-
+            sortOrderMenuItem.setOnMenuItemClickListener {
                 val newSortOrder = when (conf.sortOrder) {
                     ConfRepository.SORT_ORDER_ASCENDING -> ConfRepository.SORT_ORDER_DESCENDING
                     ConfRepository.SORT_ORDER_DESCENDING -> ConfRepository.SORT_ORDER_ASCENDING
                     else -> throw Exception()
                 }
 
-                model.saveConf(conf.copy(sortOrder = newSortOrder))
-                initSortOrderButton()
-            }
+                lifecycleScope.launch { model.saveConf(conf.copy(sortOrder = newSortOrder)) }
 
-            true
-        }
+                true
+            }
+        }.launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
     private fun initMarkAllAsReadButton() {
@@ -436,44 +440,16 @@ class EntriesFragment : AppFragment(), Scrollable {
 
         touchHelper?.attachToRecyclerView(binding.list)
 
-        lifecycleScope.launchWhenResumed {
-            if (model.getConf().markScrolledEntriesAsRead
+        model.getConf().onEach {
+            if (
+                it.markScrolledEntriesAsRead
                 && (args.filter is EntriesFilter.NotBookmarked || args.filter is EntriesFilter.BelongToFeed)
             ) {
-                trackSeenEntries()
+                binding.list.addOnScrollListener(trackingListener)
+            } else {
+                binding.list.removeOnScrollListener(trackingListener)
             }
-        }
-    }
-
-    private fun trackSeenEntries() = lifecycleScope.launchWhenResumed {
-        binding.list.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-
-            }
-
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                if (recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE) {
-                    return
-                }
-
-                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
-
-                if (layoutManager.findFirstVisibleItemPosition() == RecyclerView.NO_POSITION) {
-                    return
-                }
-
-                if (layoutManager.findLastVisibleItemPosition() == RecyclerView.NO_POSITION) {
-                    return
-                }
-
-                val visibleEntries =
-                    (layoutManager.findFirstVisibleItemPosition()..layoutManager.findLastVisibleItemPosition()).map {
-                        adapter.currentList[it]
-                    }
-
-                seenEntries.addAll(visibleEntries)
-            }
-        })
+        }.launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
     private suspend fun displayState(state: EntriesViewModel.State?) = binding.apply {

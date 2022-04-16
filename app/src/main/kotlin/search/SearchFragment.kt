@@ -24,6 +24,7 @@ import common.showKeyboard
 import entries.EntriesAdapter
 import entries.EntriesAdapterCallback
 import entries.EntriesAdapterItem
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -55,7 +56,7 @@ class SearchFragment : AppFragment() {
                             return@launchWhenResumed
                         }
 
-                        openLink(link, model.getConf().useBuiltInBrowser)
+                        openLink(link, model.getConf().first().useBuiltInBrowser)
                     } else {
                         val action =
                             SearchFragmentDirections.actionSearchFragmentToEntryFragment(item.id)

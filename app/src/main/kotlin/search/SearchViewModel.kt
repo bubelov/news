@@ -27,7 +27,7 @@ class SearchViewModel(
     private val entriesSupportingTextRepository: EntriesSupportingTextRepository,
     private val enclosuresRepository: EnclosuresRepository,
     private val sync: NewsApiSync,
-    private val conf: ConfRepository,
+    private val confRepo: ConfRepository,
 ) : ViewModel() {
 
     val searchString = MutableStateFlow("")
@@ -113,7 +113,7 @@ class SearchViewModel(
         return uri.getOrNull()
     }
 
-    suspend fun getConf() = conf.get()
+    fun getConf() = confRepo.select()
 
     private suspend fun Entry.toRow(feed: Feed?): EntriesAdapterItem {
         return EntriesAdapterItem(

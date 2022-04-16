@@ -7,7 +7,7 @@ import entries.EntriesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -16,7 +16,7 @@ import java.time.Instant
 class NewsApiSync(
     private val feedsRepository: FeedsRepository,
     private val entriesRepository: EntriesRepository,
-    private val conf: ConfRepository,
+    private val confRepo: ConfRepository,
     private val networkMonitor: NetworkMonitor,
 ) {
 
@@ -27,7 +27,7 @@ class NewsApiSync(
     suspend fun performInitialSync() {
         withContext(Dispatchers.IO) {
             mutex.withLock {
-                if (conf.get().initialSyncCompleted) {
+                if (confRepo.select().first().initialSyncCompleted) {
                     return@withLock
                 }
 
@@ -49,10 +49,13 @@ class NewsApiSync(
                     feedsSync.await()
                     entriesSync.await()
 
-                    conf.save(conf.get().copy(lastEntriesSyncDateTime = Instant.now().toString()))
+                    confRepo.insert(
+                        confRepo.select().first()
+                            .copy(lastEntriesSyncDateTime = Instant.now().toString())
+                    )
                 }.onSuccess {
                     syncMessage.value = ""
-                    conf.save(conf.get().copy(initialSyncCompleted = true))
+                    confRepo.insert(confRepo.select().first().copy(initialSyncCompleted = true))
                 }.onFailure {
                     syncMessage.value = ""
                     throw it
@@ -102,11 +105,14 @@ class NewsApiSync(
             if (syncNewAndUpdatedEntries) {
                 runCatching {
                     val newAndUpdatedEntries = entriesRepository.syncNewAndUpdated(
-                        lastEntriesSyncDateTime = conf.get().lastEntriesSyncDateTime,
+                        lastEntriesSyncDateTime = confRepo.select().first().lastEntriesSyncDateTime,
                         feeds = feedsRepository.selectAll(),
                     )
 
-                    conf.save(conf.get().copy(lastEntriesSyncDateTime = Instant.now().toString()))
+                    confRepo.insert(
+                        confRepo.select().first()
+                            .copy(lastEntriesSyncDateTime = Instant.now().toString())
+                    )
 
                     return SyncResult.Ok(newAndUpdatedEntries)
                 }.onFailure {

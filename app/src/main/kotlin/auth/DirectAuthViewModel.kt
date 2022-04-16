@@ -5,12 +5,13 @@ import api.NewsApiSwitcher
 import api.nextcloud.DirectNextcloudNewsApiBuilder
 import common.ConfRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 
 class DirectAuthViewModel(
     private val nextcloudApiSwitcher: NewsApiSwitcher,
-    private val conf: ConfRepository,
+    private val confRepo: ConfRepository,
 ) : ViewModel() {
 
     suspend fun requestFeeds(
@@ -45,19 +46,19 @@ class DirectAuthViewModel(
         password: String,
         trustSelfSignedCerts: Boolean,
     ) {
-        val updatedConf = conf.get().copy(
+        val newConf = confRepo.select().first().copy(
             nextcloudServerUrl = serverUrl,
             nextcloudServerTrustSelfSignedCerts = trustSelfSignedCerts,
             nextcloudServerUsername = username,
             nextcloudServerPassword = password,
         )
 
-        conf.save(updatedConf)
+        confRepo.insert(newConf)
     }
 
     suspend fun setAuthType(newAuthType: String) {
-        val updatedConf = conf.get().copy(authType = newAuthType)
-        conf.save(updatedConf)
+        val newConf = confRepo.select().first().copy(authType = newAuthType)
+        confRepo.insert(newConf)
         nextcloudApiSwitcher.switch(newAuthType)
     }
 }

@@ -15,6 +15,7 @@ import common.App
 import common.AppActivity
 import common.ConfRepository
 import entries.EntriesRepository
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
 import timber.log.Timber
@@ -28,11 +29,11 @@ class SyncWorker(
 
     private suspend fun doWorkAsync(): Result {
         val app = applicationContext as App
-        val prefs = app.get<ConfRepository>().get()
+        val conf = app.get<ConfRepository>().select().first()
         val sync = app.get<NewsApiSync>()
         val entriesRepository = app.get<EntriesRepository>()
 
-        if (!prefs.initialSyncCompleted) {
+        if (!conf.initialSyncCompleted) {
             return Result.retry()
         }
 

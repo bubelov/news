@@ -9,14 +9,14 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 
 class SettingsViewModel(
-    private val conf: ConfRepository,
+    private val confRepo: ConfRepository,
     private val authRepository: AuthRepository,
     private val db: Database,
 ) : ViewModel() {
 
-    suspend fun getConf() = conf.get()
+    fun getConf() = confRepo.select()
 
-    suspend fun saveConf(conf: Conf) = this.conf.save(conf)
+    suspend fun saveConf(conf: Conf) = this.confRepo.insert(conf)
 
     fun getAccountName(): String = runBlocking { authRepository.account().first().subtitle }
 
@@ -28,7 +28,7 @@ class SettingsViewModel(
                 entryImageQueries.deleteAll()
                 entryImagesMetadataQueries.deleteAll()
                 feedQueries.deleteAll()
-                confQueries.deleteAll()
+                confQueries.delete()
             }
         }
     }

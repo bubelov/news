@@ -32,7 +32,7 @@ class EntriesViewModel(
     private val entriesImagesRepository: EntriesImagesRepository,
     private val enclosuresRepository: EnclosuresRepository,
     private val newsApiSync: NewsApiSync,
-    private val conf: ConfRepository,
+    private val confRepo: ConfRepository,
     private val networkMonitor: NetworkMonitor,
 ) : ViewModel() {
 
@@ -48,7 +48,7 @@ class EntriesViewModel(
                 if (currentState is State.ShowingEntries) {
                     state.compareAndSet(
                         currentState,
-                        currentState.copy(entries = getCachedEntries(getConf())),
+                        currentState.copy(entries = getCachedEntries(getConf().first())),
                     )
                 }
             }
@@ -59,7 +59,7 @@ class EntriesViewModel(
         this.filter = filter
 
         if (state.value == null) {
-            val conf = getConf()
+            val conf = getConf().first()
 
             if (conf.initialSyncCompleted) {
                 if (filter is EntriesFilter.NotBookmarked
@@ -109,7 +109,7 @@ class EntriesViewModel(
         } else {
             if (state.value is State.ShowingEntries) {
                 runCatching {
-                    val conf = getConf()
+                    val conf = getConf().first()
 
                     state.value = State.ShowingEntries(
                         entries = getCachedEntries(conf),
@@ -117,7 +117,6 @@ class EntriesViewModel(
                         showBackgroundProgress = false,
                     )
                 }.onFailure {
-                    Timber.d("Changing state!!!")
                     state.value = State.FailedToSync(it)
                 }
             }
@@ -172,7 +171,7 @@ class EntriesViewModel(
         when (val res = newsApiSync.sync()) {
             is SyncResult.Ok -> {
                 if (state.value is State.ShowingEntries) {
-                    val conf = getConf()
+                    val conf = getConf().first()
 
                     state.value = State.ShowingEntries(
                         entries = getCachedEntries(conf),
@@ -187,10 +186,10 @@ class EntriesViewModel(
         }
     }
 
-    suspend fun getConf() = conf.get()
+    fun getConf() = confRepo.select()
 
     suspend fun saveConf(conf: Conf) {
-        this.conf.save(conf)
+        this.confRepo.insert(conf)
 
         if (state.value is State.ShowingEntries) {
             state.value = State.ShowingEntries(
@@ -293,7 +292,7 @@ class EntriesViewModel(
         }
 
         if (state.value is State.ShowingEntries) {
-            val conf = getConf()
+            val conf = getConf().first()
 
             state.value = State.ShowingEntries(
                 entries = getCachedEntries(conf),

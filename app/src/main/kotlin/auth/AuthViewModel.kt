@@ -4,20 +4,21 @@ import androidx.lifecycle.ViewModel
 import api.NewsApiSwitcher
 import common.ConfRepository
 import db.Conf
+import kotlinx.coroutines.flow.first
 
 class AuthViewModel(
     private val newsApiSwitcher: NewsApiSwitcher,
-    private val conf: ConfRepository,
+    private val confRepo: ConfRepository,
 ) : ViewModel() {
 
-    suspend fun getConf() = conf.get()
+    fun getConf() = confRepo.select()
 
-    suspend fun saveConf(conf: Conf) {
-        val oldConf = getConf()
-        this.conf.save(conf)
+    suspend fun saveConf(newConf: Conf) {
+        val oldConf = getConf().first()
+        confRepo.insert(newConf)
 
-        if (conf.authType != oldConf.authType) {
-            newsApiSwitcher.switch(conf.authType)
+        if (newConf.authType != oldConf.authType) {
+            newsApiSwitcher.switch(newConf.authType)
         }
     }
 }

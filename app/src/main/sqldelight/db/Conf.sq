@@ -1,18 +1,12 @@
-insertOrReplace:
+insert:
 INSERT OR REPLACE
-INTO Conf (id, authType, nextcloudServerUrl, nextcloudServerTrustSelfSignedCerts, nextcloudServerUsername, nextcloudServerPassword, minifluxServerUrl, minifluxServerTrustSelfSignedCerts, minifluxServerUsername, minifluxServerPassword, initialSyncCompleted, lastEntriesSyncDateTime, showReadEntries, sortOrder, showPreviewImages, cropPreviewImages, markScrolledEntriesAsRead, syncOnStartup, syncInBackground, backgroundSyncIntervalMillis, useBuiltInBrowser, showPreviewText)
-VALUES (:id, :authType, :nextcloudServerUrl, :nextcloudServerTrustSelfSignedCerts, :nextcloudServerUsername, :nextcloudServerPassword, :minifluxServerUrl, :minifluxServerTrustSelfSignedCerts, :minifluxServerUsername, :minifluxServerPassword, :initialSyncCompleted, :lastEntriesSyncDateTime, :showReadEntries, :sortOrder, :showPreviewImages, :cropPreviewImages, :markScrolledEntriesAsRead, :syncOnStartup, :syncInBackground, :backgroundSyncIntervalMillis, :useBuiltInBrowser, :showPreviewText);
-
-insertDefault:
-INSERT
-INTO Conf
-(id) VALUES (1);
+INTO Conf (authType, nextcloudServerUrl, nextcloudServerTrustSelfSignedCerts, nextcloudServerUsername, nextcloudServerPassword, minifluxServerUrl, minifluxServerTrustSelfSignedCerts, minifluxServerUsername, minifluxServerPassword, initialSyncCompleted, lastEntriesSyncDateTime, showReadEntries, sortOrder, showPreviewImages, cropPreviewImages, markScrolledEntriesAsRead, syncOnStartup, syncInBackground, backgroundSyncIntervalMillis, useBuiltInBrowser, showPreviewText)
+VALUES (:authType, :nextcloudServerUrl, :nextcloudServerTrustSelfSignedCerts, :nextcloudServerUsername, :nextcloudServerPassword, :minifluxServerUrl, :minifluxServerTrustSelfSignedCerts, :minifluxServerUsername, :minifluxServerPassword, :initialSyncCompleted, :lastEntriesSyncDateTime, :showReadEntries, :sortOrder, :showPreviewImages, :cropPreviewImages, :markScrolledEntriesAsRead, :syncOnStartup, :syncInBackground, :backgroundSyncIntervalMillis, :useBuiltInBrowser, :showPreviewText);
 
 select:
 SELECT *
-FROM Conf
-WHERE id = 1;
+FROM Conf;
 
-deleteAll:
+delete:
 DELETE
 FROM Conf;
