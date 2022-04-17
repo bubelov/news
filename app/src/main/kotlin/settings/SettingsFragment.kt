@@ -272,8 +272,11 @@ class SettingsFragment : AppFragment() {
         lifecycleScope.launch {
             AccountImporter.clearAllAuthTokens(context)
             model.logOut()
-            findNavController().popBackStack(R.id.entriesFragment, true)
-            findNavController().navigate(NavGraphDirections.actionGlobalToAuthFragment())
+
+            findNavController().apply {
+                while (popBackStack()) { popBackStack() }
+                navigate(NavGraphDirections.actionGlobalToAuthFragment())
+            }
         }
     }
 }

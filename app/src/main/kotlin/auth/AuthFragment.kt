@@ -118,10 +118,7 @@ class AuthFragment : AppFragment(
 
         runBlocking {
             val conf = model.selectConf().first()
-
-            model.upsertConf(
-                conf.copy(authType = ConfRepository.AUTH_TYPE_NEXTCLOUD_APP)
-            )
+            model.upsertConf(conf.copy(authType = ConfRepository.AUTH_TYPE_NEXTCLOUD_APP))
         }
 
         app().setupBackgroundSync(override = true)
