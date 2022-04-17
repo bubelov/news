@@ -42,12 +42,12 @@ class MinifluxAuthViewModel(
             minifluxServerPassword = password,
         )
 
-        confRepo.insert(newConf)
+        confRepo.upsert(newConf)
     }
 
     suspend fun setAuthType(newAuthType: String) {
         val newConf = confRepo.select().first().copy(authType = newAuthType)
-        confRepo.insert(newConf)
+        confRepo.upsert(newConf)
         apiSwitcher.switch(newAuthType)
     }
 }

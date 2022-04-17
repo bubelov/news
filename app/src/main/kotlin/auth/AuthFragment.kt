@@ -12,11 +12,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentAuthBinding
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.nextcloud.android.sso.AccountImporter
-import com.nextcloud.android.sso.AccountImporter.IAccountAccessGranted
 import com.nextcloud.android.sso.exceptions.SSOException
 import com.nextcloud.android.sso.helper.SingleAccountHelper
+import com.nextcloud.android.sso.model.SingleSignOnAccount
 import com.nextcloud.android.sso.ui.UiExceptionManager
 import common.AppFragment
 import common.ConfRepository
@@ -41,28 +40,14 @@ class AuthFragment : AppFragment(
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return runBlocking {
-            when (model.getConf().first().authType) {
-                ConfRepository.AUTH_TYPE_MINIFLUX -> {
-                    showNews()
-                    null
-                }
+        val conf = runBlocking { model.selectConf().first() }
 
-                ConfRepository.AUTH_TYPE_NEXTCLOUD_APP, ConfRepository.AUTH_TYPE_NEXTCLOUD_DIRECT -> {
-                    showNews()
-                    null
-                }
-
-                ConfRepository.AUTH_TYPE_STANDALONE -> {
-                    showNews()
-                    null
-                }
-
-                else -> {
-                    _binding = FragmentAuthBinding.inflate(inflater, container, false)
-                    binding.root
-                }
-            }
+        return if (conf.authType.isBlank()) {
+            _binding = FragmentAuthBinding.inflate(inflater, container, false)
+            binding.root
+        } else {
+            navigateToEntriesFragment()
+            null
         }
     }
 
@@ -77,14 +62,14 @@ class AuthFragment : AppFragment(
             showAccountPicker()
         }
 
-        binding.loginWithNextcloud.setOnClickListener {
+        binding.loginWithNextcloudServer.setOnClickListener {
             findNavController().navigate(R.id.action_authFragment_to_directAuthFragment)
         }
 
         binding.standaloneMode.setOnClickListener {
             lifecycleScope.launchWhenResumed {
-                model.saveConf(
-                    model.getConf().first().copy(
+                model.upsertConf(
+                    model.selectConf().first().copy(
                         authType = ConfRepository.AUTH_TYPE_STANDALONE,
                         syncOnStartup = false,
                         backgroundSyncIntervalMillis = TimeUnit.HOURS.toMillis(12),
@@ -94,7 +79,7 @@ class AuthFragment : AppFragment(
 
                 app().setupBackgroundSync(override = true)
 
-                showFeeds()
+                navigateToFeedsFragment()
             }
         }
     }
@@ -104,34 +89,21 @@ class AuthFragment : AppFragment(
         (binding.icon.drawable as? Animatable)?.start()
     }
 
+    @Deprecated("Deprecated in Java")
     @Suppress("DEPRECATION")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        val onAccessGranted = IAccountAccessGranted { account ->
-            runBlocking {
-                SingleAccountHelper.setCurrentAccount(context, account.name)
-                model.saveConf(
-                    model.getConf().first().copy(authType = ConfRepository.AUTH_TYPE_NEXTCLOUD_APP)
-                )
-                app().setupBackgroundSync(override = true)
-                showNews()
-            }
-        }
-
         when (resultCode) {
-            AppCompatActivity.RESULT_CANCELED -> {
-                binding.loginWithNextcloud.isEnabled = true
-            }
+            AppCompatActivity.RESULT_CANCELED -> setButtonsEnabled(true)
 
             else -> {
                 AccountImporter.onActivityResult(
                     requestCode,
                     resultCode,
                     data,
-                    this,
-                    onAccessGranted
-                )
+                    this
+                ) { onNextcloudAccountAccessGranted(it) }
             }
         }
     }
@@ -141,31 +113,44 @@ class AuthFragment : AppFragment(
         _binding = null
     }
 
+    private fun onNextcloudAccountAccessGranted(account: SingleSignOnAccount) {
+        SingleAccountHelper.setCurrentAccount(context, account.name)
+
+        runBlocking {
+            val conf = model.selectConf().first()
+
+            model.upsertConf(
+                conf.copy(authType = ConfRepository.AUTH_TYPE_NEXTCLOUD_APP)
+            )
+        }
+
+        app().setupBackgroundSync(override = true)
+
+        navigateToEntriesFragment()
+    }
+
     private fun showAccountPicker() {
-        binding.loginWithNextcloud.isEnabled = false
+        setButtonsEnabled(false)
 
         try {
             AccountImporter.pickNewAccount(this)
         } catch (e: Exception) {
             if (e is SSOException) {
-                UiExceptionManager.showDialogForException(
-                    context, e
-                ) { _, _ ->
-                    MaterialAlertDialogBuilder(requireContext())
-                        .setMessage(R.string.do_you_want_to_connect_to_nextcloud)
-                        .setPositiveButton(R.string.yes) { _, _ ->
-                            findNavController().navigate(R.id.action_authFragment_to_directAuthFragment)
-                        }
-                        .setNegativeButton(R.string.no, null)
-                        .show()
-                }
+                UiExceptionManager.showDialogForException(context, e)
             }
 
-            binding.loginWithNextcloud.isEnabled = true
+            setButtonsEnabled(true)
         }
     }
 
-    private fun showNews() {
+    private fun setButtonsEnabled(enabled: Boolean) {
+        binding.loginWithMiniflux.isEnabled = enabled
+        binding.loginWithNextcloudApp.isEnabled = enabled
+        binding.loginWithNextcloudServer.isEnabled = enabled
+        binding.standaloneMode.isEnabled = enabled
+    }
+
+    private fun navigateToEntriesFragment() {
         findNavController().apply {
             popBackStack()
             navigate(
@@ -175,7 +160,7 @@ class AuthFragment : AppFragment(
         }
     }
 
-    private fun showFeeds() {
+    private fun navigateToFeedsFragment() {
         findNavController().apply {
             popBackStack()
             navigate(R.id.feedsFragment)

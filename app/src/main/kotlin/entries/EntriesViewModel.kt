@@ -189,7 +189,7 @@ class EntriesViewModel(
     fun getConf() = confRepo.select()
 
     suspend fun saveConf(conf: Conf) {
-        this.confRepo.insert(conf)
+        this.confRepo.upsert(conf)
 
         if (state.value is State.ShowingEntries) {
             state.value = State.ShowingEntries(

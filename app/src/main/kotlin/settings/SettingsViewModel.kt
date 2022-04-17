@@ -16,7 +16,7 @@ class SettingsViewModel(
 
     fun getConf() = confRepo.select()
 
-    suspend fun saveConf(conf: Conf) = this.confRepo.insert(conf)
+    suspend fun saveConf(conf: Conf) = this.confRepo.upsert(conf)
 
     fun getAccountName(): String = runBlocking { authRepository.account().first().subtitle }
 

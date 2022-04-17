@@ -17,30 +17,30 @@ class ConfQueriesTest {
 
     @Test
     fun `insert or replace`() {
-        runBlocking { ConfRepository(db).insert(ConfRepository.DEFAULT_CONF) }
+        runBlocking { ConfRepository(db).upsert(ConfRepository.DEFAULT_CONF) }
         val oldConf = db.select().executeAsOne()
         val newConf = oldConf.copy(authType = "test")
-        runBlocking { ConfRepository(db).insert(newConf) }
+        runBlocking { ConfRepository(db).upsert(newConf) }
         assertEquals(newConf, db.select().executeAsOne())
     }
 
     @Test
     fun `insert default`() {
-        runBlocking { ConfRepository(db).insert(ConfRepository.DEFAULT_CONF) }
+        runBlocking { ConfRepository(db).upsert(ConfRepository.DEFAULT_CONF) }
         val conf = db.select().executeAsOne()
         assertEquals(ConfRepository.DEFAULT_CONF, conf)
     }
 
     @Test
     fun select() {
-        runBlocking { ConfRepository(db).insert(ConfRepository.DEFAULT_CONF) }
+        runBlocking { ConfRepository(db).upsert(ConfRepository.DEFAULT_CONF) }
         val conf = db.select().executeAsOne()
         assertEquals(conf, db.select().executeAsOne())
     }
 
     @Test
     fun `delete all`() {
-        runBlocking { ConfRepository(db).insert(ConfRepository.DEFAULT_CONF) }
+        runBlocking { ConfRepository(db).upsert(ConfRepository.DEFAULT_CONF) }
         db.delete()
         assertNull(db.select().executeAsOneOrNull())
     }

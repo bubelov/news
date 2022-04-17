@@ -53,12 +53,12 @@ class DirectAuthViewModel(
             nextcloudServerPassword = password,
         )
 
-        confRepo.insert(newConf)
+        confRepo.upsert(newConf)
     }
 
     suspend fun setAuthType(newAuthType: String) {
         val newConf = confRepo.select().first().copy(authType = newAuthType)
-        confRepo.insert(newConf)
+        confRepo.upsert(newConf)
         nextcloudApiSwitcher.switch(newAuthType)
     }
 }

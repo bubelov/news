@@ -49,13 +49,13 @@ class NewsApiSync(
                     feedsSync.await()
                     entriesSync.await()
 
-                    confRepo.insert(
+                    confRepo.upsert(
                         confRepo.select().first()
                             .copy(lastEntriesSyncDateTime = Instant.now().toString())
                     )
                 }.onSuccess {
                     syncMessage.value = ""
-                    confRepo.insert(confRepo.select().first().copy(initialSyncCompleted = true))
+                    confRepo.upsert(confRepo.select().first().copy(initialSyncCompleted = true))
                 }.onFailure {
                     syncMessage.value = ""
                     throw it
@@ -109,7 +109,7 @@ class NewsApiSync(
                         feeds = feedsRepository.selectAll(),
                     )
 
-                    confRepo.insert(
+                    confRepo.upsert(
                         confRepo.select().first()
                             .copy(lastEntriesSyncDateTime = Instant.now().toString())
                     )

@@ -13,7 +13,7 @@ class ConfRepository(
 
     fun select() = db.select().asFlow().mapToOneOrDefault(DEFAULT_CONF, Dispatchers.IO)
 
-    suspend fun insert(conf: Conf) = withContext(Dispatchers.IO) {
+    suspend fun upsert(conf: Conf) = withContext(Dispatchers.IO) {
         db.transaction {
             db.delete()
 
