@@ -18,7 +18,7 @@ import common.AppViewModel
 import common.ConfRepository
 import sync.NewsApiSync
 import feeds.FeedsRepository
-import entries.EntriesViewModel
+import entries.EntriesModel
 import entries.EntriesRepository
 import entry.EntryViewModel
 import entriesimages.EntriesImagesRepository
@@ -72,7 +72,7 @@ val appModule = module {
 
     viewModelOf(::AppViewModel)
     viewModelOf(::AuthViewModel)
-    viewModelOf(::EntriesViewModel)
+    viewModelOf(::EntriesModel)
     viewModelOf(::EntriesSharedViewModel)
     viewModelOf(::EntryViewModel)
     viewModelOf(::SettingsViewModel)

@@ -25,7 +25,7 @@ import timber.log.Timber
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-class EntriesViewModel(
+class EntriesModel(
     private val feedsRepository: FeedsRepository,
     private val entriesRepository: EntriesRepository,
     private val entriesSupportingTextRepository: EntriesSupportingTextRepository,
@@ -43,13 +43,11 @@ class EntriesViewModel(
     init {
         viewModelScope.launch {
             entriesImagesRepository.selectAll().collectLatest {
-                val currentState = state.value
-
-                if (currentState is State.ShowingEntries) {
-                    state.compareAndSet(
-                        currentState,
-                        currentState.copy(entries = getCachedEntries(getConf().first())),
-                    )
+                state.update { state ->
+                    when (state) {
+                        is State.ShowingEntries -> state.copy(entries = getCachedEntries())
+                        else -> state
+                    }
                 }
             }
         }
@@ -68,27 +66,42 @@ class EntriesViewModel(
                 ) {
                     sharedModel.syncedOnStartup = true
 
-                    if (networkMonitor.online) {
-                        state.value = State.ShowingEntries(
-                            entries = getCachedEntries(conf),
-                            includesUnread = conf.showReadEntries || filter is EntriesFilter.Bookmarked,
-                            showBackgroundProgress = true,
-                        )
+                    state.update { State.LoadingEntries }
 
-                        fetchEntriesFromApi()
-                    } else {
-                        state.value = State.ShowingEntries(
-                            entries = getCachedEntries(conf),
-                            includesUnread = conf.showReadEntries || filter is EntriesFilter.Bookmarked,
+                    state.update {
+                        State.ShowingEntries(
+                            entries = getCachedEntries(),
                             showBackgroundProgress = false,
                         )
                     }
+
+                    if (networkMonitor.online) {
+                        state.update {
+                            when (it) {
+                                is State.ShowingEntries -> it.copy(showBackgroundProgress = true)
+                                else -> it
+                            }
+                        }
+
+                        val syncResult = newsApiSync.sync()
+                        if (syncResult is SyncResult.Err) throw syncResult.e
+
+                        state.update {
+                            State.ShowingEntries(
+                                entries = getCachedEntries(),
+                                showBackgroundProgress = false,
+                            )
+                        }
+                    }
                 } else {
-                    state.value = State.ShowingEntries(
-                        entries = getCachedEntries(conf),
-                        includesUnread = conf.showReadEntries || filter is EntriesFilter.Bookmarked,
-                        showBackgroundProgress = false,
-                    )
+                    state.update { State.LoadingEntries }
+
+                    state.update {
+                        State.ShowingEntries(
+                            entries = getCachedEntries(),
+                            showBackgroundProgress = false,
+                        )
+                    }
                 }
             } else {
                 sharedModel.syncedOnStartup = true
@@ -100,8 +113,7 @@ class EntriesViewModel(
 
                     state.update {
                         State.ShowingEntries(
-                            entries = getCachedEntries(conf),
-                            includesUnread = conf.showReadEntries || filter is EntriesFilter.Bookmarked,
+                            entries = getCachedEntries(),
                             showBackgroundProgress = false,
                         )
                     }
@@ -110,28 +122,23 @@ class EntriesViewModel(
                 }
             }
         } else {
-            if (state.value is State.ShowingEntries) {
-                runCatching {
-                    val conf = getConf().first()
-
-                    state.value = State.ShowingEntries(
-                        entries = getCachedEntries(conf),
-                        includesUnread = conf.showReadEntries || filter is EntriesFilter.Bookmarked,
-                        showBackgroundProgress = false,
-                    )
-                }.onFailure {
-                    state.value = State.FailedToSync(it)
-                }
+            state.update {
+                State.ShowingEntries(
+                    entries = getCachedEntries(),
+                    showBackgroundProgress = false,
+                )
             }
         }
     }
 
     suspend fun onRetry(sharedModel: EntriesSharedViewModel) {
-        state.value = null
+        state.update { null }
         onViewCreated(filter, sharedModel)
     }
 
-    private suspend fun getCachedEntries(conf: Conf): List<EntriesAdapterItem> {
+    private suspend fun getCachedEntries(): List<EntriesAdapterItem> {
+        val conf = getConf().first()
+
         val unsortedEntries = when (val filter = filter) {
             is EntriesFilter.NotBookmarked -> {
                 if (conf.showReadEntries) {
@@ -170,22 +177,15 @@ class EntriesViewModel(
         }
     }
 
-    suspend fun fetchEntriesFromApi() {
-        when (val res = newsApiSync.sync()) {
-            is SyncResult.Ok -> {
-                if (state.value is State.ShowingEntries) {
-                    val conf = getConf().first()
+    suspend fun onPullRefresh() {
+        val syncResult = newsApiSync.sync()
+        if (syncResult is SyncResult.Err) throw syncResult.e
 
-                    state.value = State.ShowingEntries(
-                        entries = getCachedEntries(conf),
-                        includesUnread = conf.showReadEntries || filter is EntriesFilter.Bookmarked,
-                        showBackgroundProgress = false,
-                    )
-                }
-            }
-            is SyncResult.Err -> {
-                throw res.e
-            }
+        state.update {
+            State.ShowingEntries(
+                entries = getCachedEntries(),
+                showBackgroundProgress = false,
+            )
         }
     }
 
@@ -194,12 +194,11 @@ class EntriesViewModel(
     suspend fun saveConf(conf: Conf) {
         this.confRepo.upsert(conf)
 
-        if (state.value is State.ShowingEntries) {
-            state.value = State.ShowingEntries(
-                entries = getCachedEntries(conf),
-                includesUnread = conf.showReadEntries || filter is EntriesFilter.Bookmarked,
-                showBackgroundProgress = false,
-            )
+        state.update { state ->
+            when (state) {
+                is State.ShowingEntries -> state.copy(entries = getCachedEntries())
+                else -> state
+            }
         }
     }
 
@@ -251,22 +250,25 @@ class EntriesViewModel(
     }
 
     fun show(entry: EntriesAdapterItem, entryIndex: Int) {
-        val state = state.value
-
-        if (state is State.ShowingEntries) {
-            this.state.value = state.copy(
-                entries = state.entries.toMutableList().apply { add(entryIndex, entry) }
-            )
+        state.update { state ->
+            when (state) {
+                is State.ShowingEntries -> state.copy(
+                    entries = state.entries.toMutableList().apply { add(entryIndex, entry) }
+                )
+                else -> state
+            }
         }
     }
 
     fun hide(entry: EntriesAdapterItem) {
-        val state = state.value
+        state.update { state ->
+            when (state) {
+                is State.ShowingEntries -> state.copy(
+                    entries = state.entries.toMutableList().apply { removeAll { it == entry } }
+                )
 
-        if (state is State.ShowingEntries) {
-            this.state.value = state.copy(
-                entries = state.entries.toMutableList().apply { removeAll { it == entry } }
-            )
+                else -> state
+            }
         }
     }
 
@@ -295,13 +297,12 @@ class EntriesViewModel(
         }
 
         if (state.value is State.ShowingEntries) {
-            val conf = getConf().first()
-
-            state.value = State.ShowingEntries(
-                entries = getCachedEntries(conf),
-                includesUnread = conf.showReadEntries || filter is EntriesFilter.Bookmarked,
-                showBackgroundProgress = false,
-            )
+            state.update {
+                State.ShowingEntries(
+                    entries = getCachedEntries(),
+                    showBackgroundProgress = false,
+                )
+            }
         }
 
         viewModelScope.launch {
@@ -347,13 +348,12 @@ class EntriesViewModel(
 
         data class PerformingInitialSync(val message: String) : State()
 
-        data class FailedToSync(val error: Throwable) : State()
+        data class FailedToSync(val cause: Throwable) : State()
 
         object LoadingEntries : State()
 
         data class ShowingEntries(
             val entries: List<EntriesAdapterItem>,
-            val includesUnread: Boolean,
             val showBackgroundProgress: Boolean,
         ) : State()
     }

@@ -47,7 +47,7 @@ class EntriesFragment : AppFragment(), Scrollable {
         EntriesFragmentArgs.fromBundle(requireArguments())
     }
 
-    private val model: EntriesViewModel by viewModel()
+    private val model: EntriesModel by viewModel()
     private val sharedModel: EntriesSharedViewModel by sharedViewModel()
 
     private var _binding: FragmentEntriesBinding? = null
@@ -416,11 +416,12 @@ class EntriesFragment : AppFragment(), Scrollable {
                 setOnRefreshListener {
                     lifecycleScope.launch {
                         runCatching {
-                            model.fetchEntriesFromApi()
+                            model.onPullRefresh()
                         }.onFailure {
-                            binding.swipeRefresh.isRefreshing = false
-                            showErrorDialog(it)
+                            lifecycleScope.launchWhenResumed { showErrorDialog(it) }
                         }
+
+                        binding.swipeRefresh.isRefreshing = false
                     }
                 }
             }
@@ -459,19 +460,19 @@ class EntriesFragment : AppFragment(), Scrollable {
         }.launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
-    private suspend fun displayState(state: EntriesViewModel.State?) = binding.apply {
+    private suspend fun displayState(state: EntriesModel.State?) = binding.apply {
         Timber.d("Displaying state ${state?.javaClass?.simpleName}")
 
         when (state) {
             null -> {
                 swipeRefresh.isRefreshing = false
                 list.hide()
-                progress.show(animate = true)
+                progress.hide()
                 message.hide()
                 retry.hide()
             }
 
-            is EntriesViewModel.State.PerformingInitialSync -> {
+            is EntriesModel.State.PerformingInitialSync -> {
                 swipeRefresh.isRefreshing = false
                 list.hide()
                 progress.show(animate = true)
@@ -480,7 +481,7 @@ class EntriesFragment : AppFragment(), Scrollable {
                 retry.hide()
             }
 
-            is EntriesViewModel.State.FailedToSync -> {
+            is EntriesModel.State.FailedToSync -> {
                 swipeRefresh.isRefreshing = false
                 list.hide()
                 progress.hide()
@@ -491,10 +492,10 @@ class EntriesFragment : AppFragment(), Scrollable {
                         model.onRetry(sharedModel)
                     }
                 }
-                showErrorDialog(state.error)
+                showErrorDialog(state.cause)
             }
 
-            EntriesViewModel.State.LoadingEntries -> {
+            EntriesModel.State.LoadingEntries -> {
                 swipeRefresh.isRefreshing = false
                 list.hide()
                 progress.show(animate = true)
@@ -502,11 +503,10 @@ class EntriesFragment : AppFragment(), Scrollable {
                 retry.hide()
             }
 
-            is EntriesViewModel.State.ShowingEntries -> {
+            is EntriesModel.State.ShowingEntries -> {
                 Timber.d(
-                    "Showing entries (count = %s, includes_unread = %s, show_background_progress = %s)",
+                    "Showing entries (count = %s, show_background_progress = %s)",
                     state.entries.count(),
-                    state.includesUnread,
                     state.showBackgroundProgress,
                 )
 
@@ -515,7 +515,7 @@ class EntriesFragment : AppFragment(), Scrollable {
                 progress.hide()
 
                 if (state.entries.isEmpty()) {
-                    message.text = getEmptyMessage(state.includesUnread)
+                    message.text = getEmptyMessage()
                     message.show(animate = true)
                 } else {
                     message.hide()
@@ -536,14 +536,10 @@ class EntriesFragment : AppFragment(), Scrollable {
         }
     }
 
-    private fun getEmptyMessage(includesUnread: Boolean): String {
+    private fun getEmptyMessage(): String {
         return when (args.filter) {
             is EntriesFilter.Bookmarked -> getString(R.string.you_have_no_bookmarks)
-            else -> if (includesUnread) {
-                getString(R.string.news_list_is_empty)
-            } else {
-                getString(R.string.you_have_no_unread_news)
-            }
+            else -> getString(R.string.news_list_is_empty)
         }
     }
 
