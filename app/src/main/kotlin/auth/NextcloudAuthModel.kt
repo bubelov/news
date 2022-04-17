@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 
-class DirectAuthViewModel(
+class NextcloudAuthModel(
     private val nextcloudApiSwitcher: NewsApiSwitcher,
     private val confRepo: ConfRepository,
 ) : ViewModel() {

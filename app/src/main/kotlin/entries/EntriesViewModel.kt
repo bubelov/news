@@ -13,12 +13,12 @@ import common.ConfRepository.Companion.SORT_ORDER_DESCENDING
 import db.Conf
 import db.EntryImage
 import entriesimages.EntriesImagesRepository
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import enclosures.EnclosuresRepository
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import sync.NewsApiSync
 import sync.SyncResult
 import timber.log.Timber
@@ -94,16 +94,19 @@ class EntriesViewModel(
                 sharedModel.syncedOnStartup = true
 
                 runCatching {
-                    state.value = State.PerformingInitialSync(newsApiSync.syncMessage)
+                    state.update { State.PerformingInitialSync("") }
+
                     newsApiSync.performInitialSync()
 
-                    state.value = State.ShowingEntries(
-                        entries = getCachedEntries(conf),
-                        includesUnread = conf.showReadEntries || filter is EntriesFilter.Bookmarked,
-                        showBackgroundProgress = false,
-                    )
-                }.onFailure {
-                    state.value = State.FailedToSync(it)
+                    state.update {
+                        State.ShowingEntries(
+                            entries = getCachedEntries(conf),
+                            includesUnread = conf.showReadEntries || filter is EntriesFilter.Bookmarked,
+                            showBackgroundProgress = false,
+                        )
+                    }
+                }.onFailure { cause ->
+                    state.update { State.FailedToSync(cause) }
                 }
             }
         } else {
@@ -342,7 +345,7 @@ class EntriesViewModel(
 
     sealed class State {
 
-        data class PerformingInitialSync(val message: Flow<String>) : State()
+        data class PerformingInitialSync(val message: String) : State()
 
         data class FailedToSync(val error: Throwable) : State()
 

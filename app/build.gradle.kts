@@ -126,7 +126,7 @@ dependencies {
     implementation("com.squareup.sqldelight:coroutines-extensions:1.5.3")
 
     implementation("com.github.nextcloud:Android-SingleSignOn:0.6.1")
-    implementation("com.google.android.material:material:1.6.0-beta01")
+    implementation("com.google.android.material:material:1.7.0-alpha01")
     implementation("com.squareup.picasso:picasso:2.71828")
     implementation("io.insert-koin:koin-android:3.2.0-beta-1")
     implementation("com.jakewharton.timber:timber:5.0.1")

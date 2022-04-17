@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -42,7 +43,7 @@ class NewsApiSync(
                                 message += "\n Got ${progress.itemsSynced} items so far"
                             }
 
-                            syncMessage.value = message
+                            syncMessage.update { message }
                         }
                     }
 
@@ -54,10 +55,10 @@ class NewsApiSync(
                             .copy(lastEntriesSyncDateTime = Instant.now().toString())
                     )
                 }.onSuccess {
-                    syncMessage.value = ""
+                    syncMessage.update { "" }
                     confRepo.upsert(confRepo.select().first().copy(initialSyncCompleted = true))
                 }.onFailure {
-                    syncMessage.value = ""
+                    syncMessage.update { "" }
                     throw it
                 }
             }

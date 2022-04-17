@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
@@ -20,7 +19,6 @@ import com.nextcloud.android.sso.ui.UiExceptionManager
 import common.AppFragment
 import common.ConfRepository
 import common.app
-import entries.EntriesFilter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -46,7 +44,7 @@ class AuthFragment : AppFragment(
             _binding = FragmentAuthBinding.inflate(inflater, container, false)
             binding.root
         } else {
-            navigateToEntriesFragment()
+            findNavController().navigate(R.id.action_authFragment_to_entriesFragment)
             null
         }
     }
@@ -79,7 +77,7 @@ class AuthFragment : AppFragment(
 
                 app().setupBackgroundSync(override = true)
 
-                navigateToFeedsFragment()
+                findNavController().navigate(R.id.action_authFragment_to_entriesFragment)
             }
         }
     }
@@ -123,7 +121,7 @@ class AuthFragment : AppFragment(
 
         app().setupBackgroundSync(override = true)
 
-        navigateToEntriesFragment()
+        findNavController().navigate(R.id.action_authFragment_to_entriesFragment)
     }
 
     private fun showAccountPicker() {
@@ -145,22 +143,5 @@ class AuthFragment : AppFragment(
         binding.loginWithNextcloudApp.isEnabled = enabled
         binding.loginWithNextcloudServer.isEnabled = enabled
         binding.standaloneMode.isEnabled = enabled
-    }
-
-    private fun navigateToEntriesFragment() {
-        findNavController().apply {
-            popBackStack()
-            navigate(
-                R.id.entriesFragment,
-                bundleOf(Pair("filter", EntriesFilter.NotBookmarked))
-            )
-        }
-    }
-
-    private fun navigateToFeedsFragment() {
-        findNavController().apply {
-            popBackStack()
-            navigate(R.id.feedsFragment)
-        }
     }
 }

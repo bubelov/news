@@ -37,6 +37,13 @@ import timber.log.Timber
 class EntriesFragment : AppFragment(), Scrollable {
 
     private val args by lazy {
+        val args = requireArguments()
+
+        // Default filter
+        if (args["filter"] == null) {
+            args.putParcelable("filter", EntriesFilter.NotBookmarked)
+        }
+
         EntriesFragmentArgs.fromBundle(requireArguments())
     }
 
@@ -469,7 +476,7 @@ class EntriesFragment : AppFragment(), Scrollable {
                 list.hide()
                 progress.show(animate = true)
                 message.show(animate = true)
-                state.message.collect { message.text = it }
+                message.text = state.message
                 retry.hide()
             }
 

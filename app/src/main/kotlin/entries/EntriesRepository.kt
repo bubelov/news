@@ -10,7 +10,6 @@ import db.EntryWithoutSummary
 import db.Feed
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -121,18 +120,16 @@ class EntriesRepository(
     suspend fun syncAll(): Flow<SyncProgress> = flow {
         emit(SyncProgress(0L))
 
-        withContext(Dispatchers.IO) {
-            var entriesLoaded = 0L
+        var entriesLoaded = 0L
+        emit(SyncProgress(entriesLoaded))
+
+        api.getEntries(false).collect { batch ->
+            entriesLoaded += batch.size
             emit(SyncProgress(entriesLoaded))
 
-            api.getEntries(false).collect { batch ->
-                entriesLoaded += batch.size
-                emit(SyncProgress(entriesLoaded))
-
-                db.transaction {
-                    batch.forEach {
-                        db.insertOrReplace(it.postProcess())
-                    }
+            db.transaction {
+                batch.forEach {
+                    db.insertOrReplace(it.postProcess())
                 }
             }
         }

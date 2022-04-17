@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -14,7 +13,6 @@ import common.AppFragment
 import common.ConfRepository
 import common.app
 import common.showDialog
-import entries.EntriesFilter
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
 
@@ -90,13 +88,7 @@ class MinifluxAuthFragment : AppFragment() {
 
                     app().setupBackgroundSync(override = true)
 
-                    findNavController().apply {
-                        popBackStack()
-                        navigate(
-                            R.id.entriesFragment,
-                            bundleOf(Pair("filter", EntriesFilter.NotBookmarked))
-                        )
-                    }
+                    findNavController().navigate(R.id.action_minifluxAuthFragment_to_entriesFragment)
                 }.onFailure {
                     binding.progress.isVisible = false
                     Timber.e(it)

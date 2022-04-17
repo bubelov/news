@@ -8,7 +8,7 @@ import api.NewsApiSwitcher
 import api.NewsApiWrapper
 import auth.AuthRepository
 import auth.AuthViewModel
-import auth.DirectAuthViewModel
+import auth.NextcloudAuthModel
 import auth.MinifluxAuthViewModel
 import db.Database
 import com.squareup.sqldelight.android.AndroidSqliteDriver
@@ -76,7 +76,7 @@ val appModule = module {
     viewModelOf(::EntriesSharedViewModel)
     viewModelOf(::EntryViewModel)
     viewModelOf(::SettingsViewModel)
-    viewModelOf(::DirectAuthViewModel)
+    viewModelOf(::NextcloudAuthModel)
     viewModelOf(::FeedsViewModel)
     viewModelOf(::FeedSettingsViewModel)
     viewModelOf(::SearchViewModel)
