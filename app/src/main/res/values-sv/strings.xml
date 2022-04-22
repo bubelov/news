@@ -45,9 +45,6 @@
     <string name="delete_all_data_warning">Detta kommer nollställa appen och ta bort all data.</string>
     <string name="standalone_mode">Självständigt lägt (beta)</string>
     <string name="open_in_browser">Öppna i webbläsare</string>
-    <string name="do_you_want_to_connect_to_nextcloud">Vill du ansluta till din NextCloud server manuellt?</string>
-    <string name="yes">Ja</string>
-    <string name="no">Nej</string>
     <string name="show_newest_first">Visa nyaste först</string>
     <string name="show_oldest_first">Visa äldsta först</string>
     <string name="marked_as_read">Markera läst</string>
@@ -59,7 +56,6 @@
     <string name="export_feeds_to_opml_file">Exportera flöde till OPML-fil</string>
     <string name="undo">Ångra</string>
     <string name="retry">Retry</string>
-    <string name="you_have_no_unread_news">Du har inga olästa nyheter</string>
     <string name="importing_feeds_n_of_n">Importerar feeds (%1$d of %2$d)</string>
     <string name="mark_scrolled_entries_as_read">Markera nyheter som lästa när du scrollar ner</string>
     <string name="import_title">Import</string>

@@ -45,9 +45,6 @@
     <string name="delete_all_data_warning">Deze actie zal de app resetten en alle gegevens verwijderen.</string>
     <string name="standalone_mode">Alleenstaande modus (bèta)</string>
     <string name="open_in_browser">Openen in browser</string>
-    <string name="do_you_want_to_connect_to_nextcloud">Wilt u handmatig verbinding maken met uw Nextcloud server?</string>
-    <string name="yes">Ja</string>
-    <string name="no">Nee</string>
     <string name="show_newest_first">Toon nieuwste eerst</string>
     <string name="show_oldest_first">Toon oudste eerst</string>
     <string name="marked_as_read">Markeren als gelezen</string>
@@ -59,7 +56,6 @@
     <string name="export_feeds_to_opml_file">Exporteren naar OPML bestand</string>
     <string name="undo">Ongedaan maken</string>
     <string name="retry">Opnieuw proberen</string>
-    <string name="you_have_no_unread_news">Je hebt geen ongelezen nieuws</string>
     <string name="importing_feeds_n_of_n">Importeren feeds (%1$d of %2$d)</string>
     <string name="mark_scrolled_entries_as_read">Markeer gescrolde items als gelezen</string>
     <string name="import_title">Import</string>
