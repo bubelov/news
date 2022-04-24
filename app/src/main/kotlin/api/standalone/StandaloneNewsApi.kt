@@ -4,6 +4,7 @@ import android.util.Base64
 import api.NewsApi
 import co.appreactor.feedk.AtomEntry
 import co.appreactor.feedk.AtomFeed
+import co.appreactor.feedk.AtomLinkRel
 import co.appreactor.feedk.FeedResult
 import co.appreactor.feedk.RssFeed
 import co.appreactor.feedk.RssItem
@@ -22,11 +23,10 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import org.jsoup.Jsoup
 import timber.log.Timber
-import java.net.HttpURLConnection
-import java.net.URI
-import java.net.URL
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.time.OffsetDateTime
@@ -40,73 +40,63 @@ class StandaloneNewsApi(
     private val entryQueries: EntryQueries,
 ) : NewsApi {
 
-    @Suppress("BlockingMethodInNonBlockingContext")
+    private val httpClient = OkHttpClient()
+
     override suspend fun addFeed(url: HttpUrl): Result<Feed> {
-        Timber.d("Adding feed (url = $url)")
-
-        val oldUrl = url.toUrl()
-
-        val connection = runCatching {
-            oldUrl.openConnection() as HttpURLConnection
-        }.getOrElse {
-            return Result.failure(it)
-        }
+        val request = Request.Builder().url(url).build()
 
         runCatching {
-            connection.connect()
+            httpClient.newCall(request).execute()
         }.getOrElse {
             return Result.failure(it)
-        }
-
-        val httpResponseCode = connection.responseCode
-
-        if (httpResponseCode != 200) {
-            val e = Exception("Cannot fetch feed (url = $url, code = $httpResponseCode)")
-            return Result.failure(e)
-        }
-
-        if (connection.getHeaderField("content-type")?.startsWith("text/html") == true) {
-            Timber.d("Got an HTML document, looking for feed links")
-            val html = Jsoup.parse(connection.inputStream.bufferedReader().readText())
-
-            val feedElements = buildList {
-                addAll(html.select("link[type=\"application/rss+xml\"]"))
-                addAll(html.select("link[type=\"application/atom+xml\"]"))
+        }.use { response ->
+            if (!response.isSuccessful) {
+                return Result.failure(Exception("Cannot fetch feed (url = $url, code = $response)"))
             }
 
-            if (feedElements.isEmpty()) {
-                throw Exception("Cannot find feeds for $url")
-            }
+            val contentType = response.header("content-type") ?: ""
 
-            Timber.d("Feed elements found: ${feedElements.size}. Data: $feedElements")
-            val href = feedElements.first().attr("href")
-            val absolute = !href.startsWith("/")
+            if (contentType.startsWith("text/html")) {
+                val html = Jsoup.parse(response.body!!.string())
 
-            return if (absolute) {
-                addFeed(href.toHttpUrl())
+                val feedElements = buildList {
+                    addAll(html.select("link[type=\"application/rss+xml\"]"))
+                    addAll(html.select("link[type=\"application/atom+xml\"]"))
+                }
+
+                if (feedElements.isEmpty()) {
+                    return Result.failure(Exception("Cannot find feed links in HTML page (url = $url)"))
+                }
+
+                val href = feedElements.first().attr("href")
+                val absolute = !href.startsWith("/")
+
+                return if (absolute) {
+                    addFeed(href.toHttpUrl())
+                } else {
+                    addFeed("$url$href".toHttpUrl())
+                }
             } else {
-                addFeed("$oldUrl$href".toHttpUrl())
-            }
-        } else {
-            return when (val result = feed(oldUrl, connection)) {
-                is FeedResult.Success -> {
-                    Result.success(result.feed.toFeed(oldUrl))
-                }
+                return when (val result = feed(response.body!!.byteStream(), contentType)) {
+                    is FeedResult.Success -> {
+                        Result.success(result.feed.toFeed(url))
+                    }
 
-                is FeedResult.HttpConnectionFailure -> {
-                    Result.failure(Exception("HTTP connection failure"))
-                }
+                    is FeedResult.UnsupportedMediaType -> {
+                        Result.failure(Exception("Unsupported media type: ${result.mediaType}"))
+                    }
 
-                is FeedResult.HttpNotOk -> {
-                    Result.failure(Exception("Got HTTP response code ${result.responseCode} with message: ${result.message}"))
-                }
+                    is FeedResult.UnsupportedFeedType -> {
+                        Result.failure(Exception("Unsupported feed type"))
+                    }
 
-                is FeedResult.ParserFailure -> {
-                    Result.failure(result.t)
-                }
+                    is FeedResult.IOError -> {
+                        Result.failure(result.cause)
+                    }
 
-                FeedResult.UnknownFeedType -> {
-                    Result.failure(Exception("Unknown feed type"))
+                    is FeedResult.ParserError -> {
+                        Result.failure(result.cause)
+                    }
                 }
             }
         }
@@ -152,61 +142,56 @@ class StandaloneNewsApi(
     }
 
     private fun fetchEntries(feed: Feed): List<Entry> {
-        val url = runCatching {
-            URI.create(feed.selfLink).toURL()
+        val url = feed.selfLink.toHttpUrl()
+
+        val request = Request.Builder().url(url).build()
+
+        val response = runCatching {
+            httpClient.newCall(request).execute()
         }.getOrElse {
-            Timber.e(it, "Failed to parse feed url for feed $feed")
             return emptyList()
         }
 
-        val feedResult = runCatching {
-            feed(url)
-        }.getOrElse {
-            Timber.e(it, "Failed to fetch feed $feed")
-            return emptyList()
-        }
+        response.use {
+            if (!response.isSuccessful) return emptyList()
 
-        return when (feedResult) {
-            is FeedResult.Success -> {
-                when (val parsedFeed = feedResult.feed) {
-                    is AtomFeed -> {
-                        parsedFeed.entries.getOrElse {
-                            Timber.d("Failed to parse Atom entries for feed $feed")
-                            return emptyList()
-                        }.map { it.toEntry(feed.id) }
-                    }
-                    is RssFeed -> {
-                        parsedFeed.channel.items.getOrElse {
-                            Timber.d("Failed to parse RSS entries for feed $feed")
-                            return emptyList()
-                        }.mapNotNull {
-                            it.getOrElse {
-                                Timber.d("Failed to parse RSS entry for feed $feed")
-                                null
-                            }
-                        }.map { it.toEntry(feed.id) }
+            val feedResult = runCatching {
+                feed(response.body!!.byteStream(), response.header("content-type") ?: "")
+            }.getOrElse {
+                return emptyList()
+            }
+
+            return when (feedResult) {
+                is FeedResult.Success -> {
+                    when (val parsedFeed = feedResult.feed) {
+                        is AtomFeed -> {
+                            parsedFeed.entries.getOrElse {
+                                return emptyList()
+                            }.map { it.toEntry(feed.id) }
+                        }
+                        is RssFeed -> {
+                            parsedFeed.channel.items.getOrElse {
+                                return emptyList()
+                            }.mapNotNull { it.getOrNull() }.map { it.toEntry(feed.id) }
+                        }
                     }
                 }
-            }
 
-            is FeedResult.HttpConnectionFailure -> {
-                Timber.e("HTTP connection failure (url = $url)")
-                emptyList()
-            }
+                is FeedResult.UnsupportedMediaType -> {
+                    emptyList()
+                }
 
-            is FeedResult.HttpNotOk -> {
-                Timber.e("Got HTTP response code ${feedResult.responseCode} with message: ${feedResult.message}")
-                emptyList()
-            }
+                is FeedResult.UnsupportedFeedType -> {
+                    emptyList()
+                }
 
-            is FeedResult.ParserFailure -> {
-                Timber.e(feedResult.t, "Feed parser failure (url = $url)")
-                emptyList()
-            }
+                is FeedResult.IOError -> {
+                    emptyList()
+                }
 
-            FeedResult.UnknownFeedType -> {
-                Timber.e("Unknown feed type (url = $url)")
-                emptyList()
+                is FeedResult.ParserError -> {
+                    emptyList()
+                }
             }
         }
     }
@@ -222,22 +207,27 @@ class StandaloneNewsApi(
 
     }
 
-    private fun ParsedFeed.toFeed(feedUrl: URL): Feed {
+    private fun ParsedFeed.toFeed(feedUrl: HttpUrl): Feed {
         return when (this) {
-            is AtomFeed -> Feed(
-                id = selfLink,
-                title = title,
-                selfLink = selfLink,
-                alternateLink = alternateLink,
-                openEntriesInBrowser = false,
-                blockedWords = "",
-                showPreviewImages = null,
-            )
+            is AtomFeed -> {
+                val selfLink = links.single { it.rel == AtomLinkRel.Self }
+                val alternateLink = links.single { it.rel == AtomLinkRel.Alternate }
+
+                Feed(
+                    id = selfLink.href,
+                    title = title,
+                    selfLink = selfLink.href,
+                    alternateLink = alternateLink.href,
+                    openEntriesInBrowser = false,
+                    blockedWords = "",
+                    showPreviewImages = null,
+                )
+            }
             is RssFeed -> Feed(
-                id = channel.link.toString(),
+                id = channel.link,
                 title = channel.title,
                 selfLink = feedUrl.toString(),
-                alternateLink = channel.link.toString(),
+                alternateLink = channel.link,
                 openEntriesInBrowser = false,
                 blockedWords = "",
                 showPreviewImages = null,
@@ -245,24 +235,29 @@ class StandaloneNewsApi(
         }
     }
 
-    private fun AtomEntry.toEntry(feedId: String) = Entry(
-        id = id,
-        feedId = feedId,
-        title = title,
-        link = link,
-        published = OffsetDateTime.parse(published),
-        updated = OffsetDateTime.parse(updated),
-        authorName = authorName,
-        content = content,
-        enclosureLink = enclosureLink,
-        enclosureLinkType = enclosureLinkType,
-        read = false,
-        readSynced = true,
-        bookmarked = false,
-        bookmarkedSynced = true,
-        guidHash = "",
-        commentsUrl = "",
-    )
+    private fun AtomEntry.toEntry(feedId: String): Entry {
+        val alternateLink = links.firstOrNull { it.rel == AtomLinkRel.Alternate }
+        val enclosureLink = links.firstOrNull { it.rel == AtomLinkRel.Enclosure }
+
+        return Entry(
+            id = id,
+            feedId = feedId,
+            title = title,
+            link = alternateLink?.href ?: "",
+            published = OffsetDateTime.parse(published),
+            updated = OffsetDateTime.parse(updated),
+            authorName = authorName,
+            content = content,
+            enclosureLink = enclosureLink?.href ?: "",
+            enclosureLinkType = enclosureLink?.type ?: "",
+            read = false,
+            readSynced = true,
+            bookmarked = false,
+            bookmarkedSynced = true,
+            guidHash = "",
+            commentsUrl = "",
+        )
+    }
 
     private fun RssItem.toEntry(feedId: String): Entry {
         val id = when (val guid = guid) {
