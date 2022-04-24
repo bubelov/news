@@ -23,10 +23,25 @@
         <activity
             android:name="common.AppActivity"
             android:exported="true">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="https" />
+                <data android:host="*" />
+                <data android:pathPattern=".*\\.xml" />
+                <data android:pathPattern=".*\\.rss" />
+                <data android:pathPattern=".*\\.atom" />
+            </intent-filter>
+
         </activity>
 
     </application>

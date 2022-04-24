@@ -44,7 +44,16 @@ class AuthFragment : AppFragment(
             _binding = FragmentAuthBinding.inflate(inflater, container, false)
             binding.root
         } else {
-            findNavController().navigate(R.id.action_authFragment_to_entriesFragment)
+            val intent = requireActivity().intent
+            val sharedFeedUrl = (intent?.dataString ?: intent?.getStringExtra(Intent.EXTRA_TEXT))?.trim()
+
+            if (sharedFeedUrl.isNullOrBlank()) {
+                findNavController().navigate(R.id.action_authFragment_to_entriesFragment)
+            } else {
+                val directions = AuthFragmentDirections.actionAuthFragmentToFeedsFragment(sharedFeedUrl)
+                findNavController().navigate(directions)
+            }
+
             null
         }
     }

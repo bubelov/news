@@ -162,6 +162,18 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
             model.onViewCreated()
             model.state.collectLatest { setState(it ?: return@collectLatest) }
         }
+
+        val args = FeedsFragmentArgs.fromBundle(requireArguments())
+
+        if (args.url.isNotBlank()) {
+            lifecycleScope.launch {
+                runCatching {
+                    model.addFeed(args.url)
+                }.onFailure {
+                    showErrorDialog(it)
+                }
+            }
+        }
     }
 
     override fun onDestroyView() {
