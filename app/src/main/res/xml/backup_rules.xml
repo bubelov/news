@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <full-backup-content>
-    <include domain="database" path="news.db"/>
+    <include domain="database" path="news-v2.db"/>
     <include domain="sharedpref" path="single-sign-on.xml"/>
 </full-backup-content>

@@ -118,6 +118,7 @@ class App : Application() {
     }
 
     companion object {
+        // When updating, should also update backup_rules.xml
         const val DB_FILE_NAME = "news-v2.db"
 
         private const val SYNC_WORK_NAME = "sync"

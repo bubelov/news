@@ -6,6 +6,7 @@ import androidx.work.ListenableWorker
 import androidx.work.testing.TestWorkerBuilder
 import common.App
 import common.ConfRepository
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
@@ -27,7 +28,7 @@ class SyncWorkerTest {
     @Test
     fun retryIfInitialSyncIncomplete() {
         val confRepo = app.get<ConfRepository>()
-        runBlocking { confRepo.save(confRepo.get().copy(initialSyncCompleted = false)) }
+        runBlocking { confRepo.upsert(confRepo.select().first().copy(initialSyncCompleted = false)) }
         val workerBuilder = TestWorkerBuilder.from(app, SyncWorker::class.java)
         val worker = workerBuilder.build()
         val result = worker.doWork()
