@@ -196,7 +196,7 @@ class EntriesModel(
 
         state.update { state ->
             when (state) {
-                is State.ShowingEntries -> state.copy(entries = getCachedEntries())
+                is State.ShowingEntries -> state.copy(entries = getCachedEntries(), scrollToTop = true)
                 else -> state
             }
         }
@@ -355,6 +355,7 @@ class EntriesModel(
         data class ShowingEntries(
             val entries: List<EntriesAdapterItem>,
             val showBackgroundProgress: Boolean,
+            val scrollToTop: Boolean = false,
         ) : State()
     }
 

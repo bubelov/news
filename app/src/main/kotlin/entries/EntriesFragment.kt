@@ -394,7 +394,9 @@ class EntriesFragment : AppFragment(), Scrollable {
                     else -> throw Exception()
                 }
 
-                lifecycleScope.launch { model.saveConf(conf.copy(sortOrder = newSortOrder)) }
+                lifecycleScope.launch {
+                    model.saveConf(conf.copy(sortOrder = newSortOrder))
+                }
 
                 true
             }
@@ -523,7 +525,7 @@ class EntriesFragment : AppFragment(), Scrollable {
 
                 retry.hide()
                 seenEntries.clear()
-                adapter.submitList(state.entries)
+                adapter.submitList(state.entries) { if (state.scrollToTop) scrollToTop() }
             }
         }
     }
