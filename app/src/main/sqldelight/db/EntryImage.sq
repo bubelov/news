@@ -1,6 +1,6 @@
 insertOrReplace:
 INSERT OR REPLACE
-INTO EntryImage
+INTO EntryImage(id, entryId, url, width, height)
 VALUES ?;
 
 selectAll:

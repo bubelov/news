@@ -1,6 +1,6 @@
 insertOrReplace:
 INSERT OR REPLACE
-INTO Entry
+INTO Entry(id, feedId, title, link, published, updated, authorName, contentType, contentSrc, contentText, enclosureLink, enclosureLinkType, read, readSynced, bookmarked, bookmarkedSynced, guidHash, commentsUrl)
 VALUES ?;
 
 selectAll:
@@ -58,21 +58,21 @@ selectByQuery:
 SELECT *
 FROM Entry
 WHERE UPPER(title) LIKE '%' || UPPER(:query) || '%'
-OR UPPER(content) LIKE '%' || UPPER(:query) || '%'
+OR UPPER(contentText) LIKE '%' || UPPER(:query) || '%'
 ORDER BY published DESC;
 
 selectByQueryAndBookmarked:
 SELECT *
 FROM Entry
 WHERE bookmarked = :bookmarked
-AND (UPPER(title) LIKE '%' || UPPER(:query) || '%'OR UPPER(content) LIKE '%' || UPPER(:query) || '%')
+AND (UPPER(title) LIKE '%' || UPPER(:query) || '%'OR UPPER(contentText) LIKE '%' || UPPER(:query) || '%')
 ORDER BY published DESC;
 
 selectByQueryAndFeedId:
 SELECT *
 FROM Entry
 WHERE feedId = :feedId
-AND (UPPER(title) LIKE '%' || UPPER(:query) || '%'OR UPPER(content) LIKE '%' || UPPER(:query) || '%')
+AND (UPPER(title) LIKE '%' || UPPER(:query) || '%'OR UPPER(contentText) LIKE '%' || UPPER(:query) || '%')
 ORDER BY published DESC;
 
 selectCount:
@@ -95,12 +95,12 @@ FROM Entry;
 updateReadByFeedId:
 UPDATE Entry
 SET read = :read, readSynced = 0
-WHERE read != :read AND feedId = ?;
+WHERE read != :read AND feedId = :feedId;
 
 updateReadByBookmarked:
 UPDATE Entry
 SET read = :read, readSynced = 0
-WHERE read != :read AND bookmarked = ?;
+WHERE read != :read AND bookmarked = :bookmarked;
 
 updateRead:
 UPDATE Entry

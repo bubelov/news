@@ -242,9 +242,9 @@ class EntriesRepository(
     private fun Entry.postProcess(feed: Feed? = null): Entry {
         var processedEntry = this
 
-        if (content.toByteArray().size / 1024 > 250) {
+        if (contentText.toByteArray().size / 1024 > 250) {
             Timber.d("Entry content is larger than 250 KiB ($link)")
-            processedEntry = processedEntry.copy(content = "Content is too large")
+            processedEntry = processedEntry.copy(contentText = "Content is too large")
         }
 
         feed?.blockedWords?.split(",")?.filter { it.isNotBlank() }?.forEach { word ->

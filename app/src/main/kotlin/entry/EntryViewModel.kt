@@ -70,7 +70,7 @@ class EntryViewModel(
                 feedTitle = feed.title,
                 entry = entry,
                 parsedContent = parseEntryContent(
-                    entry.content,
+                    entry.contentText,
                     TextViewImageGetter(
                         textView = summaryView,
                         scope = lifecycleScope,

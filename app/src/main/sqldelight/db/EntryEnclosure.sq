@@ -1,6 +1,6 @@
 insertOrReplace:
 INSERT OR REPLACE
-INTO EntryEnclosure
+INTO EntryEnclosure(entryId, downloadPercent, cacheUri)
 VALUES ?;
 
 selectAll:

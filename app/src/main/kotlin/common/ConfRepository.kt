@@ -16,30 +16,7 @@ class ConfRepository(
     suspend fun upsert(conf: Conf) = withContext(Dispatchers.IO) {
         db.transaction {
             db.delete()
-
-            db.insert(
-                authType = conf.authType,
-                nextcloudServerUrl = conf.nextcloudServerUrl,
-                nextcloudServerTrustSelfSignedCerts = conf.nextcloudServerTrustSelfSignedCerts,
-                nextcloudServerUsername = conf.nextcloudServerUsername,
-                nextcloudServerPassword = conf.nextcloudServerPassword,
-                minifluxServerUrl = conf.minifluxServerUrl,
-                minifluxServerTrustSelfSignedCerts = conf.minifluxServerTrustSelfSignedCerts,
-                minifluxServerUsername = conf.minifluxServerUsername,
-                minifluxServerPassword = conf.minifluxServerPassword,
-                initialSyncCompleted = conf.initialSyncCompleted,
-                lastEntriesSyncDateTime = conf.lastEntriesSyncDateTime,
-                showReadEntries = conf.showReadEntries,
-                sortOrder = conf.sortOrder,
-                showPreviewImages = conf.showPreviewImages,
-                cropPreviewImages = conf.cropPreviewImages,
-                markScrolledEntriesAsRead = conf.markScrolledEntriesAsRead,
-                syncOnStartup = conf.syncOnStartup,
-                syncInBackground = conf.syncInBackground,
-                backgroundSyncIntervalMillis = conf.backgroundSyncIntervalMillis,
-                useBuiltInBrowser = conf.useBuiltInBrowser,
-                showPreviewText = conf.showPreviewText,
-            )
+            db.insert(conf)
         }
     }
 

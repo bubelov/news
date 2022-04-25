@@ -182,7 +182,9 @@ class NextcloudNewsApiAdapter(
             published = OffsetDateTime.parse(published),
             updated = OffsetDateTime.parse(updated),
             authorName = author ?: "",
-            content = body ?: "No content",
+            contentType = "html",
+            contentSrc = "",
+            contentText = body ?: "",
             enclosureLink = enclosureLink?.replace("http://", "https://") ?: "",
             enclosureLinkType = enclosureMime ?: "",
 

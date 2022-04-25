@@ -32,7 +32,9 @@ CREATE TABLE Entry (
   published TEXT AS OffsetDateTime NOT NULL,
   updated TEXT AS OffsetDateTime NOT NULL,
   authorName TEXT NOT NULL,
-  content TEXT NOT NULL,
+  contentType TEXT NOT NULL,
+  contentSrc TEXT NOT NULL,
+  contentText TEXT NOT NULL,
   enclosureLink TEXT NOT NULL,
   enclosureLinkType TEXT NOT NULL,
 

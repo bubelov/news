@@ -115,7 +115,7 @@ dependencies {
 
     // Feed parser
     // Used in standalone mode
-    implementation("co.appreactor:feedk:0.2.1")
+    implementation("co.appreactor:feedk:0.2.2")
 
     // Retrofit turns HTTP APIs into Java interfaces
     // Used to communicate with remote backends

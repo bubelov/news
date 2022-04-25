@@ -145,7 +145,9 @@ class MinifluxApiAdapter(
             published = OffsetDateTime.parse(published_at),
             updated = OffsetDateTime.parse(changed_at),
             authorName = author,
-            content = content,
+            contentType = "html",
+            contentSrc = "",
+            contentText = content,
             enclosureLink = firstEnclosure?.url ?: "",
             enclosureLinkType = firstEnclosure?.mime_type ?: "",
 

@@ -1,6 +1,6 @@
 insertOrReplace:
 INSERT OR REPLACE
-INTO EntryImagesMetadata
+INTO EntryImagesMetadata(entryId, previewImageProcessingStatus, previewImageId, summaryImagesProcessingStatus)
 VALUES ?;
 
 selectByEntryId:

@@ -1,7 +1,7 @@
 insert:
 INSERT OR REPLACE
 INTO Conf (authType, nextcloudServerUrl, nextcloudServerTrustSelfSignedCerts, nextcloudServerUsername, nextcloudServerPassword, minifluxServerUrl, minifluxServerTrustSelfSignedCerts, minifluxServerUsername, minifluxServerPassword, initialSyncCompleted, lastEntriesSyncDateTime, showReadEntries, sortOrder, showPreviewImages, cropPreviewImages, markScrolledEntriesAsRead, syncOnStartup, syncInBackground, backgroundSyncIntervalMillis, useBuiltInBrowser, showPreviewText)
-VALUES (:authType, :nextcloudServerUrl, :nextcloudServerTrustSelfSignedCerts, :nextcloudServerUsername, :nextcloudServerPassword, :minifluxServerUrl, :minifluxServerTrustSelfSignedCerts, :minifluxServerUsername, :minifluxServerPassword, :initialSyncCompleted, :lastEntriesSyncDateTime, :showReadEntries, :sortOrder, :showPreviewImages, :cropPreviewImages, :markScrolledEntriesAsRead, :syncOnStartup, :syncInBackground, :backgroundSyncIntervalMillis, :useBuiltInBrowser, :showPreviewText);
+VALUES ?;
 
 select:
 SELECT *
