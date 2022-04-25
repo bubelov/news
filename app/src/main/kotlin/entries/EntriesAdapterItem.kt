@@ -1,10 +1,10 @@
 package entries
 
-import db.EntryImage
-
 data class EntriesAdapterItem(
     val id: String,
-    val image: EntryImage?,
+    val ogImageUrl: String,
+    val ogImageWidth: Long,
+    val ogImageHeight: Long,
     val cropImage: Boolean,
     val title: String,
     val subtitle: String,

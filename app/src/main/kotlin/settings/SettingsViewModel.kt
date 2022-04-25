@@ -23,12 +23,10 @@ class SettingsViewModel(
     fun logOut() {
         db.apply {
             transaction {
+                confQueries.delete()
                 entryQueries.deleteAll()
                 entryEnclosureQueries.deleteAll()
-                entryImageQueries.deleteAll()
-                entryImagesMetadataQueries.deleteAll()
                 feedQueries.deleteAll()
-                confQueries.delete()
             }
         }
     }

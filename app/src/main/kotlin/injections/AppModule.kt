@@ -49,8 +49,6 @@ val appModule = module {
 
     single { get<Database>().feedQueries }
     single { get<Database>().entryQueries }
-    single { get<Database>().entryImagesMetadataQueries }
-    single { get<Database>().entryImageQueries }
     single { get<Database>().entryEnclosureQueries }
     single { get<Database>().confQueries }
 

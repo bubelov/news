@@ -196,6 +196,11 @@ class NextcloudNewsApiAdapter(
 
             guidHash = guidHash ?: return null,
             commentsUrl = "",
+
+            ogImageChecked = false,
+            ogImageUrl = "",
+            ogImageWidth = 0,
+            ogImageHeight = 0,
         )
     }
 

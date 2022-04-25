@@ -45,7 +45,12 @@ CREATE TABLE Entry (
   bookmarkedSynced INTEGER AS Boolean NOT NULL,
 
   guidHash TEXT NOT NULL,
-  commentsUrl TEXT NOT NULL
+  commentsUrl TEXT NOT NULL,
+
+  ogImageChecked INTEGER AS Boolean NOT NULL,
+  ogImageUrl TEXT NOT NULL,
+  ogImageWidth INTEGER NOT NULL,
+  ogImageHeight INTEGER NOT NULL
 );
 
 CREATE VIEW EntryWithoutSummary
@@ -68,28 +73,18 @@ SELECT
   bookmarkedSynced,
 
   guidHash,
-  commentsUrl
+  commentsUrl,
+
+  ogImageChecked,
+  ogImageUrl,
+  ogImageWidth,
+  ogImageHeight
 FROM Entry;
 
 CREATE TABLE EntryEnclosure (
   entryId TEXT PRIMARY KEY NOT NULL,
   downloadPercent INTEGER,
   cacheUri TEXT NOT NULL DEFAULT ''
-);
-
-CREATE TABLE EntryImage (
-  id TEXT NOT NULL PRIMARY KEY,
-  entryId TEXT NOT NULL,
-  url TEXT NOT NULL,
-  width INTEGER NOT NULL,
-  height INTEGER NOT NULL
-);
-
-CREATE TABLE EntryImagesMetadata (
-  entryId TEXT NOT NULL PRIMARY KEY,
-  previewImageProcessingStatus TEXT NOT NULL,
-  previewImageId TEXT,
-  summaryImagesProcessingStatus TEXT NOT NULL
 );
 
 CREATE TABLE Feed (

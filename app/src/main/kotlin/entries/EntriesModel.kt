@@ -11,7 +11,6 @@ import db.Feed
 import common.ConfRepository.Companion.SORT_ORDER_ASCENDING
 import common.ConfRepository.Companion.SORT_ORDER_DESCENDING
 import db.Conf
-import db.EntryImage
 import entriesimages.EntriesImagesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -42,7 +41,7 @@ class EntriesModel(
 
     init {
         viewModelScope.launch {
-            entriesImagesRepository.selectAll().collectLatest {
+            entriesImagesRepository.lastOgImageUrl.collectLatest {
                 state.update { state ->
                     when (state) {
                         is State.ShowingEntries -> state.copy(entries = getCachedEntries())
@@ -318,10 +317,10 @@ class EntriesModel(
         feed: Feed?,
         conf: Conf,
     ): EntriesAdapterItem {
-        val image: EntryImage? = if (conf.showPreviewImages) {
-            entriesImagesRepository.getPreviewImage(this@toRow.id).first()
+        val ogImageUrl = if (conf.showPreviewImages) {
+            ogImageUrl
         } else {
-            null
+            ""
         }
 
         val supportingText = if (conf.showPreviewText) {
@@ -332,7 +331,9 @@ class EntriesModel(
 
         return EntriesAdapterItem(
             id = id,
-            image = image,
+            ogImageUrl = ogImageUrl,
+            ogImageWidth = ogImageWidth,
+            ogImageHeight = ogImageHeight,
             cropImage = conf.cropPreviewImages,
             title = title,
             subtitle = "${feed?.title ?: "Unknown feed"} · ${DATE_TIME_FORMAT.format(published)}",

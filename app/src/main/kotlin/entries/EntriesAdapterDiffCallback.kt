@@ -15,7 +15,9 @@ class EntriesAdapterDiffCallback : DiffUtil.ItemCallback<EntriesAdapterItem>() {
         oldItem: EntriesAdapterItem,
         newItem: EntriesAdapterItem,
     ): Boolean {
-        return oldItem.image == newItem.image
+        return oldItem.ogImageUrl == newItem.ogImageUrl
+                && oldItem.ogImageWidth == newItem.ogImageWidth
+                && oldItem.ogImageHeight == newItem.ogImageHeight
                 && oldItem.cropImage == newItem.cropImage
                 && oldItem.title == newItem.title
                 && oldItem.subtitle == newItem.subtitle

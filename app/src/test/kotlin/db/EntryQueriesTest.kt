@@ -229,6 +229,10 @@ fun entry() = Entry(
     bookmarkedSynced = true,
     guidHash = "",
     commentsUrl = "",
+    ogImageChecked = true,
+    ogImageUrl = "",
+    ogImageWidth = 0,
+    ogImageHeight = 0,
 )
 
 fun entryWithoutSummary() = EntryWithoutSummary(
@@ -247,6 +251,10 @@ fun entryWithoutSummary() = EntryWithoutSummary(
     bookmarkedSynced = true,
     guidHash = "",
     commentsUrl = "",
+    ogImageChecked = true,
+    ogImageUrl = "",
+    ogImageWidth = 0,
+    ogImageHeight = 0,
 )
 
 fun Entry.withoutSummary() = EntryWithoutSummary(
@@ -265,4 +273,8 @@ fun Entry.withoutSummary() = EntryWithoutSummary(
     bookmarkedSynced = bookmarkedSynced,
     guidHash = guidHash,
     commentsUrl = commentsUrl,
+    ogImageChecked = true,
+    ogImageUrl = "",
+    ogImageWidth = 0,
+    ogImageHeight = 0,
 )

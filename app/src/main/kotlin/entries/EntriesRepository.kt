@@ -87,6 +87,14 @@ class EntriesRepository(
         }
     }
 
+    fun setOgImageChecked(id: String, checked: Boolean) {
+        db.updateOgImageChecked(checked, id)
+    }
+
+    fun setOgImage(url: String, width: Long, height: Long, id: String) {
+        db.updateOgImage(url, width, height, id)
+    }
+
     suspend fun getUnreadCount(feedId: String) = withContext(Dispatchers.IO) {
         db.selectUnreadCount(feedId).asFlow().mapToOne()
     }

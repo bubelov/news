@@ -258,6 +258,10 @@ class StandaloneNewsApi(
             bookmarkedSynced = true,
             guidHash = "",
             commentsUrl = "",
+            ogImageChecked = false,
+            ogImageUrl = "",
+            ogImageWidth = 0,
+            ogImageHeight = 0,
         )
     }
 
@@ -292,6 +296,10 @@ class StandaloneNewsApi(
             bookmarkedSynced = true,
             guidHash = "",
             commentsUrl = "",
+            ogImageChecked = false,
+            ogImageUrl = "",
+            ogImageWidth = 0,
+            ogImageHeight = 0,
         )
     }
 

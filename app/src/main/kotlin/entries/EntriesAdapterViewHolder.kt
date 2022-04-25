@@ -4,7 +4,6 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
 import co.appreactor.news.databinding.ListItemEntryBinding
-import db.EntryImage
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 
@@ -24,6 +23,7 @@ class EntriesAdapterViewHolder(
             setStrokeAlpha = true
         }
 
+        println(screenWidth)
         val cardMargin = root.resources.getDimensionPixelSize(R.dimen.card_horizontal_margin)
 
         val cardHeightMin = root.resources.getDimensionPixelSize(R.dimen.card_height_min)
@@ -34,14 +34,13 @@ class EntriesAdapterViewHolder(
         imageProgress.isVisible = false
         imageView.tag = item
 
-        val handleImage = fun(image: EntryImage?) {
+        val handleImage = fun(url: String, width: Long, height: Long) {
             if (
                 imageView.tag != item
                 || imageView.drawable != null
-                || image == null
-                || image.url.isBlank()
-                || image.width == 0L
-                || image.height == 0L
+                || url.isBlank()
+                || width == 0L
+                || height == 0L
             ) {
                 return
             }
@@ -50,7 +49,7 @@ class EntriesAdapterViewHolder(
             imageProgress.isVisible = true
 
             val targetHeight =
-                ((screenWidth - cardMargin) * (image.height.toDouble() / image.width.toDouble()))
+                ((screenWidth - cardMargin) * (height.toDouble() / width.toDouble()))
 
             if (item.cropImage) {
                 var croppedHeight = targetHeight.toInt()
@@ -72,11 +71,10 @@ class EntriesAdapterViewHolder(
                 }
             }
 
-            val picassoRequestCreator =
-                Picasso.get().load(if (image.url.isBlank()) null else image.url)
+            val picassoRequestCreator = Picasso.get().load(url)
 
-            if (image.width > 0) {
-                picassoRequestCreator.resize(image.width.toInt(), 0)
+            if (width > 0) {
+                picassoRequestCreator.resize(width.toInt(), 0)
             }
 
             picassoRequestCreator.into(imageView, object : Callback {
@@ -92,8 +90,8 @@ class EntriesAdapterViewHolder(
             })
         }
 
-        if (item.image != null) {
-            handleImage(item.image)
+        if (item.ogImageUrl.isNotBlank()) {
+            handleImage(item.ogImageUrl, item.ogImageWidth, item.ogImageHeight)
         }
 
         primaryText.text = item.title.trim()

@@ -159,6 +159,11 @@ class MinifluxApiAdapter(
 
             guidHash = "",
             commentsUrl = comments_url,
+
+            ogImageChecked = false,
+            ogImageUrl = "",
+            ogImageWidth = 0,
+            ogImageHeight = 0,
         )
     }
 }

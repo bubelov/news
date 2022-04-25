@@ -4,48 +4,35 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import entries.EntriesRepository
 import com.squareup.picasso.Picasso
-import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToList
-import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import common.ConfRepository
-import db.EntryImage
-import db.EntryImageQueries
-import db.EntryImagesMetadata
-import db.EntryImagesMetadataQueries
 import db.EntryWithoutSummary
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.jsoup.Jsoup
-import timber.log.Timber
-import java.util.UUID
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
 class EntriesImagesRepository(
-    private val imagesMetadataQueries: EntryImagesMetadataQueries,
-    private val imageQueries: EntryImageQueries,
     private val entriesRepository: EntriesRepository,
     private val confRepository: ConfRepository,
 ) {
 
     companion object {
         const val MAX_WIDTH = 1080
-
-        const val STATUS_PROCESSING = "processing"
-        const val STATUS_PROCESSED = "processed"
     }
 
     private val httpClient = OkHttpClient.Builder()
         .callTimeout(10, TimeUnit.SECONDS)
         .build()
 
-    fun selectAll() = imageQueries.selectAll().asFlow()
+    val lastOgImageUrl = MutableStateFlow("")
 
     suspend fun syncPreviews() = withContext(Dispatchers.IO) {
         confRepository.select().collectLatest { prefs ->
@@ -64,39 +51,13 @@ class EntriesImagesRepository(
         }
     }
 
-    suspend fun getPreviewImage(entryId: String) = withContext(Dispatchers.IO) {
-        combine(
-            imagesMetadataQueries.selectByEntryId(entryId).asFlow().mapToOneOrNull(),
-            imageQueries.selectByEntryId(entryId).asFlow().mapToList(),
-        ) { metadata, images ->
-            if (metadata == null || metadata.previewImageProcessingStatus != STATUS_PROCESSED) {
-                null
-            } else {
-                images.singleOrNull { it.id == metadata.previewImageId }
-            }
-        }
-    }
-
     private suspend fun syncPreview(entry: EntryWithoutSummary) = withContext(Dispatchers.IO) {
-        val metadata = imagesMetadataQueries.selectByEntryId(entry.id).executeAsOneOrNull()
-            ?: EntryImagesMetadata(
-                entryId = entry.id,
-                previewImageProcessingStatus = "",
-                previewImageId = null,
-                summaryImagesProcessingStatus = "",
-            ).apply {
-                imagesMetadataQueries.insertOrReplace(this)
-            }
-
-        if (metadata.previewImageProcessingStatus.isNotBlank()) {
+        if (entry.ogImageChecked) {
             return@withContext
         }
 
-        imagesMetadataQueries.insertOrReplace(metadata.copy(previewImageProcessingStatus = STATUS_PROCESSING))
-
         if (entry.link.isBlank()) {
-            Timber.d("Link is blank, nothing to process")
-            imagesMetadataQueries.insertOrReplace(metadata.copy(previewImageProcessingStatus = STATUS_PROCESSED))
+            entriesRepository.setOgImageChecked(entry.id, true)
             return@withContext
         }
 
@@ -111,21 +72,19 @@ class EntriesImagesRepository(
         val response = runCatching {
             request.execute()
         }.getOrElse {
-            it.log("Cannot fetch URL for feed item\nItem: ${entry.id} (${entry.title})\nURL: $link")
-            imagesMetadataQueries.insertOrReplace(metadata.copy(previewImageProcessingStatus = STATUS_PROCESSED))
+            entriesRepository.setOgImageChecked(entry.id, true)
             return@withContext
         }
 
         if (!response.isSuccessful) {
-            Timber.d("Invalid response code ${response.code} for item ${entry.id} (${entry.title}")
+            entriesRepository.setOgImageChecked(entry.id, true)
             return@withContext
         }
 
         val html = runCatching {
             response.body!!.string()
         }.getOrElse {
-            it.log("Cannot fetch response body for feed item ${entry.id} (${entry.title})")
-            imagesMetadataQueries.insertOrReplace(metadata.copy(previewImageProcessingStatus = STATUS_PROCESSED))
+            entriesRepository.setOgImageChecked(entry.id, true)
             return@withContext
         }
 
@@ -139,46 +98,25 @@ class EntriesImagesRepository(
         }
 
         if (imageUrl.isBlank()) {
-            imagesMetadataQueries.insertOrReplace(metadata.copy(previewImageProcessingStatus = STATUS_PROCESSED))
+            entriesRepository.setOgImageChecked(entry.id, true)
             return@withContext
         }
 
         val bitmap = kotlin.runCatching {
             Picasso.get().load(imageUrl).resize(MAX_WIDTH, 0).onlyScaleDown().get()
         }.getOrElse {
-            it.log("Cannot download image by URL $imageUrl")
-            imagesMetadataQueries.insertOrReplace(metadata.copy(previewImageProcessingStatus = STATUS_PROCESSED))
+            entriesRepository.setOgImageChecked(entry.id, true)
             return@withContext
         }
 
         if (bitmap.hasTransparentAngles() || bitmap.looksLikeSingleColor()) {
-            Timber.d("Image is corrupted")
-            imagesMetadataQueries.insertOrReplace(metadata.copy(previewImageProcessingStatus = STATUS_PROCESSED))
+            entriesRepository.setOgImageChecked(entry.id, true)
             return@withContext
         }
 
-        imagesMetadataQueries.transaction {
-            val image = EntryImage(
-                id = UUID.randomUUID().toString(),
-                entryId = entry.id,
-                url = imageUrl,
-                width = bitmap.width.toLong(),
-                height = bitmap.height.toLong(),
-            )
-
-            imageQueries.insertOrReplace(image)
-
-            imagesMetadataQueries.insertOrReplace(
-                metadata.copy(
-                    previewImageId = image.id,
-                    previewImageProcessingStatus = STATUS_PROCESSED,
-                )
-            )
-        }
-    }
-
-    private fun Throwable.log(message: String) {
-        Timber.e(ImageProcessingException(message, this))
+        entriesRepository.setOgImageChecked(entry.id, true)
+        entriesRepository.setOgImage(imageUrl, bitmap.width.toLong(), bitmap.height.toLong(), entry.id)
+        lastOgImageUrl.update { imageUrl }
     }
 
     private fun Bitmap.hasTransparentAngles(): Boolean {

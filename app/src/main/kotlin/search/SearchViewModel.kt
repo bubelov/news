@@ -118,7 +118,9 @@ class SearchViewModel(
     private suspend fun Entry.toRow(feed: Feed?): EntriesAdapterItem {
         return EntriesAdapterItem(
             id = id,
-            image = null,
+            ogImageUrl = "",
+            ogImageWidth = 0,
+            ogImageHeight = 0,
             cropImage = false,
             title = title,
             subtitle = (feed?.title ?: "Unknown feed") + " · " + published,
