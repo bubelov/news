@@ -1,9 +1,27 @@
 import java.time.OffsetDateTime;
 
-CREATE TABLE EntryEnclosure (
-  entryId TEXT PRIMARY KEY NOT NULL,
-  downloadPercent INTEGER,
-  cacheUri TEXT NOT NULL DEFAULT ''
+CREATE TABLE Conf (
+  authType TEXT NOT NULL DEFAULT "",
+  nextcloudServerUrl TEXT NOT NULL DEFAULT "",
+  nextcloudServerTrustSelfSignedCerts INTEGER AS Boolean NOT NULL DEFAULT 0,
+  nextcloudServerUsername TEXT NOT NULL DEFAULT "",
+  nextcloudServerPassword TEXT NOT NULL DEFAULT "",
+  minifluxServerUrl TEXT NOT NULL DEFAULT "",
+  minifluxServerTrustSelfSignedCerts INTEGER AS Boolean NOT NULL DEFAULT 0,
+  minifluxServerUsername TEXT NOT NULL DEFAULT "",
+  minifluxServerPassword TEXT NOT NULL DEFAULT "",
+  initialSyncCompleted INTEGER AS Boolean NOT NULL DEFAULT 0,
+  lastEntriesSyncDateTime TEXT NOT NULL DEFAULT "",
+  showReadEntries INTEGER AS Boolean NOT NULL DEFAULT 0,
+  sortOrder TEXT NOT NULL DEFAULT 'descending',
+  showPreviewImages INTEGER AS Boolean NOT NULL DEFAULT 1,
+  cropPreviewImages INTEGER AS Boolean NOT NULL DEFAULT 1,
+  markScrolledEntriesAsRead INTEGER AS Boolean NOT NULL DEFAULT 0,
+  syncOnStartup INTEGER AS Boolean NOT NULL DEFAULT 1,
+  syncInBackground INTEGER AS Boolean NOT NULL DEFAULT 1,
+  backgroundSyncIntervalMillis INTEGER NOT NULL DEFAULT 10800000,
+  useBuiltInBrowser INTEGER AS Boolean NOT NULL DEFAULT 1,
+  showPreviewText INTEGER AS Boolean NOT NULL DEFAULT 1
 );
 
 CREATE TABLE Entry (
@@ -51,6 +69,12 @@ SELECT
   commentsUrl
 FROM Entry;
 
+CREATE TABLE EntryEnclosure (
+  entryId TEXT PRIMARY KEY NOT NULL,
+  downloadPercent INTEGER,
+  cacheUri TEXT NOT NULL DEFAULT ''
+);
+
 CREATE TABLE EntryImage (
   id TEXT NOT NULL PRIMARY KEY,
   entryId TEXT NOT NULL,
@@ -74,37 +98,4 @@ CREATE TABLE Feed (
   openEntriesInBrowser INTEGER AS Boolean NOT NULL DEFAULT 0,
   blockedWords TEXT NOT NULL DEFAULT '',
   showPreviewImages INTEGER AS Boolean
-);
-
-CREATE TABLE Log (
-  id INTEGER PRIMARY KEY,
-  date TEXT NOT NULL,
-  level INTEGER NOT NULL,
-  tag TEXT NOT NULL,
-  message TEXT NOT NULL,
-  stackTrace TEXT NOT NULL
-);
-
-CREATE INDEX idx_log_date ON Log(date);
-
-CREATE TABLE Conf (
-  authType TEXT NOT NULL DEFAULT "",
-  nextcloudServerUrl TEXT NOT NULL DEFAULT "",
-  nextcloudServerTrustSelfSignedCerts INTEGER AS Boolean NOT NULL DEFAULT 0,
-  nextcloudServerUsername TEXT NOT NULL DEFAULT "",
-  nextcloudServerPassword TEXT NOT NULL DEFAULT "",
-  minifluxServerUrl TEXT NOT NULL DEFAULT "",
-  minifluxServerTrustSelfSignedCerts INTEGER AS Boolean NOT NULL DEFAULT 0,
-  minifluxServerUsername TEXT NOT NULL DEFAULT "",
-  minifluxServerPassword TEXT NOT NULL DEFAULT "",
-  initialSyncCompleted INTEGER AS Boolean NOT NULL DEFAULT 0,
-  lastEntriesSyncDateTime TEXT NOT NULL DEFAULT "",
-  showReadEntries INTEGER AS Boolean NOT NULL DEFAULT 0,
-  sortOrder TEXT NOT NULL DEFAULT 'descending',
-  showPreviewImages INTEGER AS Boolean NOT NULL DEFAULT 1,
-  cropPreviewImages INTEGER AS Boolean NOT NULL DEFAULT 1,
-  markScrolledEntriesAsRead INTEGER AS Boolean NOT NULL DEFAULT 0,
-  syncOnStartup INTEGER AS Boolean NOT NULL DEFAULT 1,
-  syncInBackground INTEGER AS Boolean NOT NULL DEFAULT 1,
-  backgroundSyncIntervalMillis INTEGER NOT NULL DEFAULT 10800000
 );
