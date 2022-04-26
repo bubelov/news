@@ -228,6 +228,15 @@ class EntriesModel(
         entryIds.forEach { entriesRepository.setRead(it, read) }
 
         viewModelScope.launch {
+            state.update { state ->
+                when (state) {
+                    is State.ShowingEntries -> state.copy(entries = getCachedEntries())
+                    else -> state
+                }
+            }
+        }
+
+        viewModelScope.launch {
             val syncResult = newsApiSync.syncEntriesFlags()
 
             if (syncResult is SyncResult.Err) {
