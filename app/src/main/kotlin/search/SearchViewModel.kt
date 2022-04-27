@@ -18,7 +18,6 @@ import kotlinx.coroutines.launch
 import enclosures.EnclosuresRepository
 import kotlinx.coroutines.flow.first
 import sync.NewsApiSync
-import sync.SyncResult
 import timber.log.Timber
 
 class SearchViewModel(
@@ -89,11 +88,11 @@ class SearchViewModel(
         entryIds.forEach { entriesRepository.setRead(it, read) }
 
         viewModelScope.launch {
-            val syncResult = sync.syncEntriesFlags()
-
-            if (syncResult is SyncResult.Err) {
-                Timber.e(syncResult.e)
-            }
+            sync.sync(NewsApiSync.SyncArgs(
+                syncFeeds = false,
+                syncFlags = true,
+                syncEntries = false,
+            ))
         }
     }
 

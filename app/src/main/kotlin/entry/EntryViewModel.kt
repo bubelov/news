@@ -21,8 +21,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import sync.SyncResult
-import timber.log.Timber
 
 class EntryViewModel(
     private val app: Application,
@@ -92,11 +90,11 @@ class EntryViewModel(
         }
 
         viewModelScope.launch {
-            val syncResult = newsApiSync.syncEntriesFlags()
-
-            if (syncResult is SyncResult.Err) {
-                Timber.e(syncResult.e)
-            }
+            newsApiSync.sync(NewsApiSync.SyncArgs(
+                syncFeeds = false,
+                syncFlags = true,
+                syncEntries = false,
+            ))
         }
     }
 

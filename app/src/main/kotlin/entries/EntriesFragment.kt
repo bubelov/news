@@ -28,11 +28,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import timber.log.Timber
 
 class EntriesFragment : AppFragment(), Scrollable {
 
@@ -48,7 +47,6 @@ class EntriesFragment : AppFragment(), Scrollable {
     }
 
     private val model: EntriesModel by viewModel()
-    private val sharedModel: EntriesSharedViewModel by sharedViewModel()
 
     private var _binding: FragmentEntriesBinding? = null
     private val binding get() = _binding!!
@@ -142,35 +140,22 @@ class EntriesFragment : AppFragment(), Scrollable {
                     R.drawable.ic_baseline_bookmark_add_24,
                 ) {
                     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                        val entryIndex = viewHolder.bindingAdapterPosition
                         val entry = adapter.currentList[viewHolder.bindingAdapterPosition]
 
                         when (direction) {
                             ItemTouchHelper.LEFT -> {
-                                dismissEntry(
-                                    entry = entry,
-                                    entryIndex = entryIndex,
+                                showSnackbar(
                                     actionText = R.string.marked_as_read,
-                                    action = {
-                                        model.setRead(listOf(entry.id), true)
-                                    },
-                                    undoAction = {
-                                        model.setRead(listOf(entry.id), false)
-                                    }
+                                    action = { model.setRead(listOf(entry.id), true) },
+                                    undoAction = { model.setRead(listOf(entry.id), false) }
                                 )
                             }
 
                             ItemTouchHelper.RIGHT -> {
-                                dismissEntry(
-                                    entry = entry,
-                                    entryIndex = entryIndex,
+                                showSnackbar(
                                     actionText = R.string.bookmarked,
-                                    action = {
-                                        model.setBookmarked(entry.id, true)
-                                    },
-                                    undoAction = {
-                                        model.setBookmarked(entry.id, false)
-                                    }
+                                    action = { model.setBookmarked(entry.id, true) },
+                                    undoAction = { model.setBookmarked(entry.id, false) }
                                 )
                             }
                         }
@@ -185,35 +170,22 @@ class EntriesFragment : AppFragment(), Scrollable {
                     R.drawable.ic_baseline_bookmark_remove_24,
                 ) {
                     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                        val entryIndex = viewHolder.bindingAdapterPosition
                         val entry = adapter.currentList[viewHolder.bindingAdapterPosition]
 
                         when (direction) {
                             ItemTouchHelper.LEFT -> {
-                                dismissEntry(
-                                    entry = entry,
-                                    entryIndex = entryIndex,
+                                showSnackbar(
                                     actionText = R.string.removed_from_bookmarks,
-                                    action = {
-                                        model.setBookmarked(entry.id, false)
-                                    },
-                                    undoAction = {
-                                        model.setBookmarked(entry.id, true)
-                                    }
+                                    action = { model.setBookmarked(entry.id, false) },
+                                    undoAction = { model.setBookmarked(entry.id, true) },
                                 )
                             }
 
                             ItemTouchHelper.RIGHT -> {
-                                dismissEntry(
-                                    entry = entry,
-                                    entryIndex = entryIndex,
+                                showSnackbar(
                                     actionText = R.string.removed_from_bookmarks,
-                                    action = {
-                                        model.setBookmarked(entry.id, false)
-                                    },
-                                    undoAction = {
-                                        model.setBookmarked(entry.id, true)
-                                    }
+                                    action = { model.setBookmarked(entry.id, false) },
+                                    undoAction = { model.setBookmarked(entry.id, true) },
                                 )
                             }
                         }
@@ -272,7 +244,7 @@ class EntriesFragment : AppFragment(), Scrollable {
         initList()
 
         model.state
-            .onStart { model.onViewCreated(args.filter!!, sharedModel) }
+            .onStart { model.filter.update { args.filter!! } }
             .launchIn(viewLifecycleOwner.lifecycleScope)
 
         model.state
@@ -287,7 +259,7 @@ class EntriesFragment : AppFragment(), Scrollable {
         if (runBlocking { model.getConf().first().markScrolledEntriesAsRead }) {
             model.setRead(
                 entryIds = seenEntries.map { it.id },
-                read = true,
+                value = true,
             )
 
             seenEntries.clear()
@@ -388,16 +360,7 @@ class EntriesFragment : AppFragment(), Scrollable {
             }
 
             sortOrderMenuItem.setOnMenuItemClickListener {
-                val newSortOrder = when (conf.sortOrder) {
-                    ConfRepository.SORT_ORDER_ASCENDING -> ConfRepository.SORT_ORDER_DESCENDING
-                    ConfRepository.SORT_ORDER_DESCENDING -> ConfRepository.SORT_ORDER_ASCENDING
-                    else -> throw Exception()
-                }
-
-                lifecycleScope.launch {
-                    model.saveConf(conf.copy(sortOrder = newSortOrder))
-                }
-
+                model.changeSortOrder()
                 true
             }
         }.launchIn(viewLifecycleOwner.lifecycleScope)
@@ -463,8 +426,6 @@ class EntriesFragment : AppFragment(), Scrollable {
     }
 
     private suspend fun displayState(state: EntriesModel.State?) = binding.apply {
-        Timber.d("Displaying state ${state?.javaClass?.simpleName}")
-
         when (state) {
             null -> {
                 swipeRefresh.isRefreshing = false
@@ -474,7 +435,7 @@ class EntriesFragment : AppFragment(), Scrollable {
                 retry.hide()
             }
 
-            is EntriesModel.State.PerformingInitialSync -> {
+            is EntriesModel.State.InitialSync -> {
                 swipeRefresh.isRefreshing = false
                 list.hide()
                 progress.show(animate = true)
@@ -491,13 +452,13 @@ class EntriesFragment : AppFragment(), Scrollable {
                 retry.show(animate = true)
                 retry.setOnClickListener {
                     lifecycleScope.launchWhenResumed {
-                        model.onRetry(sharedModel)
+                        model.onRetry()
                     }
                 }
                 showErrorDialog(state.cause)
             }
 
-            EntriesModel.State.LoadingEntries -> {
+            EntriesModel.State.LoadingCachedEntries -> {
                 swipeRefresh.isRefreshing = false
                 list.hide()
                 progress.show(animate = true)
@@ -505,13 +466,7 @@ class EntriesFragment : AppFragment(), Scrollable {
                 retry.hide()
             }
 
-            is EntriesModel.State.ShowingEntries -> {
-                Timber.d(
-                    "Showing entries (count = %s, show_background_progress = %s)",
-                    state.entries.count(),
-                    state.showBackgroundProgress,
-                )
-
+            is EntriesModel.State.ShowingCachedEntries -> {
                 swipeRefresh.isRefreshing = state.showBackgroundProgress
                 list.show()
                 progress.hide()
@@ -545,9 +500,7 @@ class EntriesFragment : AppFragment(), Scrollable {
         }
     }
 
-    private fun dismissEntry(
-        entry: EntriesAdapterItem,
-        entryIndex: Int,
+    private fun showSnackbar(
         @StringRes actionText: Int,
         action: (() -> Unit),
         undoAction: (() -> Unit),
@@ -556,13 +509,11 @@ class EntriesFragment : AppFragment(), Scrollable {
             snackbar.apply {
                 setText(actionText)
                 setAction(R.string.undo) {
-                    model.show(entry, entryIndex)
                     undoAction.invoke()
                 }
             }.show()
 
             model.apply {
-                hide(entry)
                 action.invoke()
             }
         }.onFailure {

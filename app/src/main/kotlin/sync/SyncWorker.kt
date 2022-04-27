@@ -20,10 +20,7 @@ import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
 import timber.log.Timber
 
-class SyncWorker(
-    context: Context,
-    workerParams: WorkerParameters
-) : Worker(context, workerParams) {
+class SyncWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
 
     override fun doWork() = runBlocking { doWorkAsync() }
 
@@ -37,14 +34,8 @@ class SyncWorker(
             return Result.retry()
         }
 
-        val syncResult = sync.sync(
-            syncFeeds = true,
-            syncEntriesFlags = true,
-            syncNewAndUpdatedEntries = true,
-        )
-
-        when (syncResult) {
-            is SyncResult.Ok -> {
+        when (val syncResult = sync.sync()) {
+            is SyncResult.Success -> {
                 Timber.d("Got ${syncResult.newAndUpdatedEntries} new and updated entries")
 
                 if (syncResult.newAndUpdatedEntries > 0) {
@@ -62,8 +53,8 @@ class SyncWorker(
                     }
                 }
             }
-            is SyncResult.Err -> {
-                Timber.e(syncResult.e, "Background sync failed (${syncResult.e.message})")
+            is SyncResult.Failure -> {
+                Timber.e(syncResult.cause, "Background sync failed (${syncResult.cause.message})")
                 return Result.failure()
             }
         }

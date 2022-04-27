@@ -1,6 +1,8 @@
 package feeds
 
 import api.NewsApi
+import com.squareup.sqldelight.runtime.coroutines.asFlow
+import com.squareup.sqldelight.runtime.coroutines.mapToList
 import db.Feed
 import db.FeedQueries
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +30,8 @@ class FeedsRepository(
 
         db.insertOrReplace(feed)
     }
+
+    fun selectAllAsync() = db.selectAll().asFlow().mapToList(Dispatchers.IO)
 
     suspend fun selectAll() = withContext(Dispatchers.IO) {
         db.selectAll().executeAsList()

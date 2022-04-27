@@ -11,6 +11,7 @@ import db.Feed
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.time.OffsetDateTime
@@ -19,6 +20,8 @@ class EntriesRepository(
     private val api: NewsApi,
     private val db: EntryQueries,
 ) {
+
+    fun selectAllAsync() = db.selectAll().asFlow().map { it.executeAsList() }
 
     suspend fun selectAll(): List<EntryWithoutSummary> = withContext(Dispatchers.IO) {
         db.selectAll().executeAsList()
@@ -120,6 +123,8 @@ class EntriesRepository(
         withContext(Dispatchers.IO) {
             db.selectByQueryAndFeedId(feedId, query).executeAsList()
         }
+
+    fun selectCount() = db.selectCount().asFlow().mapToOne()
 
     fun deleteByFeedId(feedId: String) {
         db.deleteByFeedId(feedId)

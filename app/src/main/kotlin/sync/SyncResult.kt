@@ -1,6 +1,6 @@
 package sync
 
 sealed class SyncResult {
-    class Ok(val newAndUpdatedEntries: Int) : SyncResult()
-    class Err(val e: Exception) : SyncResult()
+    class Success(val newAndUpdatedEntries: Int) : SyncResult()
+    class Failure(val cause: Exception) : SyncResult()
 }

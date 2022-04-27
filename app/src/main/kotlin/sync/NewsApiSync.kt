@@ -1,127 +1,114 @@
 package sync
 
-import common.NetworkMonitor
 import common.ConfRepository
 import feeds.FeedsRepository
 import entries.EntriesRepository
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import java.time.Instant
 
 class NewsApiSync(
-    private val feedsRepository: FeedsRepository,
-    private val entriesRepository: EntriesRepository,
     private val confRepo: ConfRepository,
-    private val networkMonitor: NetworkMonitor,
+    private val feedsRepo: FeedsRepository,
+    private val entriesRepo: EntriesRepository,
 ) {
 
-    val syncMessage = MutableStateFlow("")
-
-    private val mutex = Mutex()
-
-    suspend fun performInitialSync() {
-        withContext(Dispatchers.IO) {
-            mutex.withLock {
-                if (confRepo.select().first().initialSyncCompleted) {
-                    return@withLock
-                }
-
-                runCatching {
-                    val feedsSync = async { feedsRepository.sync() }
-
-                    val entriesSync = async {
-                        entriesRepository.syncAll().collect { progress ->
-                            var message = "Fetching news"
-
-                            if (progress.itemsSynced > 0) {
-                                message += "\n Got ${progress.itemsSynced} items so far"
-                            }
-
-                            syncMessage.update { message }
-                        }
-                    }
-
-                    feedsSync.await()
-                    entriesSync.await()
-
-                    confRepo.upsert(
-                        confRepo.select().first()
-                            .copy(lastEntriesSyncDateTime = Instant.now().toString())
-                    )
-                }.onSuccess {
-                    syncMessage.update { "" }
-                    confRepo.upsert(confRepo.select().first().copy(initialSyncCompleted = true))
-                }.onFailure {
-                    syncMessage.update { "" }
-                    throw it
-                }
-            }
-        }
+    sealed class State {
+        object Idle : State()
+        data class InitialSync(val message: String = "") : State()
+        data class FollowUpSync(val args: SyncArgs) : State()
     }
 
-    suspend fun syncEntriesFlags() = sync(
-        syncFeeds = false,
-        syncEntriesFlags = true,
-        syncNewAndUpdatedEntries = false,
+    data class SyncArgs(
+        val syncFeeds: Boolean = true,
+        val syncFlags: Boolean = true,
+        val syncEntries: Boolean = true,
     )
 
-    suspend fun sync(
-        syncFeeds: Boolean = true,
-        syncEntriesFlags: Boolean = true,
-        syncNewAndUpdatedEntries: Boolean = true,
-    ): SyncResult {
-        if (!networkMonitor.online) {
-            return SyncResult.Err(Exception("Device is offline"))
+    private val _state = MutableStateFlow<State>(State.Idle)
+    val state = _state.asStateFlow()
+
+    suspend fun sync(args: SyncArgs = SyncArgs()): SyncResult {
+        if (_state.value != State.Idle) {
+            return SyncResult.Failure(Exception("Already syncing"))
         }
 
-        mutex.withLock {
-            if (syncEntriesFlags) {
+        val conf = confRepo.select().first()
+
+        if (!conf.initialSyncCompleted) {
+            _state.update { State.InitialSync() }
+
+            feedsRepo.sync()
+
+            entriesRepo.syncAll().collect { progress ->
+                var message = "Fetching news"
+
+                if (progress.itemsSynced > 0) {
+                    message += "\n Got ${progress.itemsSynced} items so far"
+                }
+
+                _state.update { State.InitialSync(message) }
+            }
+
+            confRepo.upsert(
+                confRepo.select().first().copy(
+                    initialSyncCompleted = true,
+                    lastEntriesSyncDateTime = Instant.now().toString(),
+                )
+            )
+
+            _state.update { State.Idle }
+            return SyncResult.Success(0)
+        } else {
+            _state.update { State.FollowUpSync(args) }
+
+            if (args.syncFlags) {
                 runCatching {
-                    entriesRepository.syncReadEntries()
+                    entriesRepo.syncReadEntries()
                 }.onFailure {
-                    return SyncResult.Err(Exception("Can't sync opened news", it))
+                    return SyncResult.Failure(Exception("Failed to sync read news", it))
                 }
 
                 runCatching {
-                    entriesRepository.syncBookmarkedEntries()
+                    entriesRepo.syncBookmarkedEntries()
                 }.onFailure {
-                    return SyncResult.Err(Exception("Can't sync bookmarks", it))
+                    return SyncResult.Failure(Exception("Failed to sync bookmarks", it))
                 }
             }
 
-            if (syncFeeds) {
+            if (args.syncFeeds) {
                 runCatching {
-                    feedsRepository.sync()
+                    feedsRepo.sync()
                 }.onFailure {
-                    return SyncResult.Err(Exception("Can't sync feeds", it))
+                    return SyncResult.Failure(Exception("Failed to sync feeds", it))
                 }
             }
 
-            if (syncNewAndUpdatedEntries) {
+            return if (args.syncEntries) {
                 runCatching {
-                    val newAndUpdatedEntries = entriesRepository.syncNewAndUpdated(
+                    val newAndUpdatedEntries = entriesRepo.syncNewAndUpdated(
                         lastEntriesSyncDateTime = confRepo.select().first().lastEntriesSyncDateTime,
-                        feeds = feedsRepository.selectAll(),
+                        feeds = feedsRepo.selectAll(),
                     )
 
                     confRepo.upsert(
-                        confRepo.select().first()
-                            .copy(lastEntriesSyncDateTime = Instant.now().toString())
+                        confRepo.select().first().copy(
+                            lastEntriesSyncDateTime = Instant.now().toString(),
+                        )
                     )
 
-                    return SyncResult.Ok(newAndUpdatedEntries)
-                }.onFailure {
-                    return SyncResult.Err(Exception("Can't sync new and updated entries", it))
+                    _state.update { State.Idle }
+                    SyncResult.Success(newAndUpdatedEntries)
+                }.getOrElse {
+                    _state.update { State.Idle }
+                    return SyncResult.Failure(Exception("Failed to sync new and updated entries", it))
                 }
+            } else {
+                _state.update { State.Idle }
+                SyncResult.Success(0)
             }
         }
-
-        return SyncResult.Ok(0)
     }
 }

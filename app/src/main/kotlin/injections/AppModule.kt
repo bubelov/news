@@ -26,7 +26,6 @@ import enclosures.EnclosuresRepository
 import settings.SettingsViewModel
 import common.NetworkMonitor
 import db.entryAdapter
-import entries.EntriesSharedViewModel
 import entries.EntriesSupportingTextRepository
 import feeds.FeedsViewModel
 import feedsettings.FeedSettingsViewModel
@@ -71,7 +70,6 @@ val appModule = module {
     viewModelOf(::AppViewModel)
     viewModelOf(::AuthViewModel)
     viewModelOf(::EntriesModel)
-    viewModelOf(::EntriesSharedViewModel)
     viewModelOf(::EntryViewModel)
     viewModelOf(::SettingsViewModel)
     viewModelOf(::NextcloudAuthModel)

@@ -3,156 +3,112 @@ package entries
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import common.NetworkMonitor
 import common.ConfRepository
-import db.EntryWithoutSummary
-import feeds.FeedsRepository
-import db.Feed
 import common.ConfRepository.Companion.SORT_ORDER_ASCENDING
 import common.ConfRepository.Companion.SORT_ORDER_DESCENDING
 import db.Conf
-import entriesimages.EntriesImagesRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
+import db.EntryWithoutSummary
+import db.Feed
 import enclosures.EnclosuresRepository
-import kotlinx.coroutines.flow.collectLatest
+import feeds.FeedsRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import sync.NewsApiSync
 import sync.SyncResult
-import timber.log.Timber
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 class EntriesModel(
-    private val feedsRepository: FeedsRepository,
-    private val entriesRepository: EntriesRepository,
-    private val entriesSupportingTextRepository: EntriesSupportingTextRepository,
-    private val entriesImagesRepository: EntriesImagesRepository,
-    private val enclosuresRepository: EnclosuresRepository,
-    private val newsApiSync: NewsApiSync,
     private val confRepo: ConfRepository,
-    private val networkMonitor: NetworkMonitor,
+    private val feedsRepo: FeedsRepository,
+    private val entriesRepo: EntriesRepository,
+    private val newsApiSync: NewsApiSync,
+    private val enclosuresRepo: EnclosuresRepository,
 ) : ViewModel() {
 
-    private lateinit var filter: EntriesFilter
+    val filter = MutableStateFlow<EntriesFilter?>(null)
 
-    val state = MutableStateFlow<State?>(null)
+    private val _state = MutableStateFlow<State?>(null)
+    val state = _state.asStateFlow()
+
+    private var syncedOnStartup = false
+
+    private var scrollToTopNextTime = false
 
     init {
-        viewModelScope.launch {
-            entriesImagesRepository.lastOgImageUrl.collectLatest {
-                state.update { state ->
-                    when (state) {
-                        is State.ShowingEntries -> state.copy(entries = getCachedEntries())
-                        else -> state
-                    }
+        filter.onEach { filter ->
+            if (filter == null) {
+                return@onEach
+            }
+
+            _state.update { State.LoadingCachedEntries }
+
+            confRepo.select().first().apply {
+                if (!initialSyncCompleted || (syncOnStartup && !syncedOnStartup)) {
+                    syncedOnStartup = true
+                    viewModelScope.launch { newsApiSync.sync() }
                 }
             }
-        }
-    }
 
-    suspend fun onViewCreated(filter: EntriesFilter, sharedModel: EntriesSharedViewModel) {
-        this.filter = filter
-
-        if (state.value == null) {
-            val conf = getConf().first()
-
-            if (conf.initialSyncCompleted) {
-                if (filter is EntriesFilter.NotBookmarked
-                    && conf.syncOnStartup
-                    && !sharedModel.syncedOnStartup
-                ) {
-                    sharedModel.syncedOnStartup = true
-
-                    state.update { State.LoadingEntries }
-
-                    state.update {
-                        State.ShowingEntries(
-                            entries = getCachedEntries(),
-                            showBackgroundProgress = false,
-                        )
-                    }
-
-                    if (networkMonitor.online) {
-                        state.update {
-                            when (it) {
-                                is State.ShowingEntries -> it.copy(showBackgroundProgress = true)
-                                else -> it
-                            }
+            combine(
+                confRepo.select(),
+                feedsRepo.selectAllAsync(),
+                entriesRepo.selectCount(),
+                newsApiSync.state,
+            ) { conf, feeds, _, syncState ->
+                when (syncState) {
+                    is NewsApiSync.State.InitialSync -> State.InitialSync(syncState.message)
+                    else -> {
+                        val showBgProgress = when (syncState) {
+                            is NewsApiSync.State.Idle -> false
+                            is NewsApiSync.State.InitialSync -> false
+                            is NewsApiSync.State.FollowUpSync -> syncState.args.syncEntries
                         }
 
-                        val syncResult = newsApiSync.sync()
-                        if (syncResult is SyncResult.Err) throw syncResult.e
+                        val scrollToTop = scrollToTopNextTime
+                        scrollToTopNextTime = false
 
-                        state.update {
-                            State.ShowingEntries(
-                                entries = getCachedEntries(),
-                                showBackgroundProgress = false,
-                            )
-                        }
-                    }
-                } else {
-                    state.update { State.LoadingEntries }
-
-                    state.update {
-                        State.ShowingEntries(
-                            entries = getCachedEntries(),
-                            showBackgroundProgress = false,
+                        State.ShowingCachedEntries(
+                            entries = selectEntries(filter, conf, feeds),
+                            showBackgroundProgress = showBgProgress,
+                            scrollToTop = scrollToTop,
                         )
                     }
                 }
-            } else {
-                sharedModel.syncedOnStartup = true
-
-                runCatching {
-                    state.update { State.PerformingInitialSync("") }
-
-                    newsApiSync.performInitialSync()
-
-                    state.update {
-                        State.ShowingEntries(
-                            entries = getCachedEntries(),
-                            showBackgroundProgress = false,
-                        )
-                    }
-                }.onFailure { cause ->
-                    state.update { State.FailedToSync(cause) }
-                }
-            }
-        } else {
-            state.update {
-                State.ShowingEntries(
-                    entries = getCachedEntries(),
-                    showBackgroundProgress = false,
-                )
-            }
-        }
+            }.collect { state -> _state.update { state } }
+        }.launchIn(viewModelScope)
     }
 
-    suspend fun onRetry(sharedModel: EntriesSharedViewModel) {
-        state.update { null }
-        onViewCreated(filter, sharedModel)
+    suspend fun onRetry() {
+        viewModelScope.launch { newsApiSync.sync() }
     }
 
-    private suspend fun getCachedEntries(): List<EntriesAdapterItem> {
-        val conf = getConf().first()
-
-        val unsortedEntries = when (val filter = filter) {
+    private suspend fun selectEntries(
+        filter: EntriesFilter,
+        conf: Conf,
+        feeds: List<Feed>
+    ): List<EntriesAdapterItem> {
+        val unsortedEntries = when (filter) {
             is EntriesFilter.NotBookmarked -> {
                 if (conf.showReadEntries) {
-                    entriesRepository.selectAll()
+                    entriesRepo.selectAll()
                 } else {
-                    entriesRepository.selectByRead(false)
+                    entriesRepo.selectByRead(false)
                 }.filterNot { it.bookmarked }
             }
 
             is EntriesFilter.Bookmarked -> {
-                entriesRepository.getBookmarked().first()
+                entriesRepo.getBookmarked().first()
             }
 
             is EntriesFilter.BelongToFeed -> {
-                val feedEntries = entriesRepository.selectByFeedId(filter.feedId)
+                val feedEntries = entriesRepo.selectByFeedId(filter.feedId)
 
                 if (conf.showReadEntries) {
                     feedEntries
@@ -168,8 +124,6 @@ class EntriesModel(
             else -> unsortedEntries
         }
 
-        val feeds = feedsRepository.selectAll()
-
         return sortedEntries.map {
             val feed = feeds.singleOrNull { feed -> feed.id == it.feedId }
             it.toRow(feed, conf)
@@ -178,162 +132,117 @@ class EntriesModel(
 
     suspend fun onPullRefresh() {
         val syncResult = newsApiSync.sync()
-        if (syncResult is SyncResult.Err) throw syncResult.e
-
-        state.update {
-            State.ShowingEntries(
-                entries = getCachedEntries(),
-                showBackgroundProgress = false,
-            )
-        }
+        if (syncResult is SyncResult.Failure) throw syncResult.cause
     }
 
     fun getConf() = confRepo.select()
 
     suspend fun saveConf(conf: Conf) {
         this.confRepo.upsert(conf)
+    }
 
-        state.update { state ->
-            when (state) {
-                is State.ShowingEntries -> state.copy(entries = getCachedEntries(), scrollToTop = true)
-                else -> state
+    fun changeSortOrder() {
+        viewModelScope.launch {
+            val conf = confRepo.select().first()
+
+            val newSortOrder = when (conf.sortOrder) {
+                SORT_ORDER_ASCENDING -> SORT_ORDER_DESCENDING
+                SORT_ORDER_DESCENDING -> SORT_ORDER_ASCENDING
+                else -> throw Exception()
             }
+
+            scrollToTopNextTime = true
+            confRepo.upsert(conf.copy(sortOrder = newSortOrder))
         }
     }
 
     suspend fun downloadPodcast(id: String) {
-        enclosuresRepository.download(id)
+        enclosuresRepo.download(id)
     }
 
-    suspend fun getEntry(id: String) = entriesRepository.selectById(id)
+    fun getFeed(id: String) = feedsRepo.selectById(id)
+
+    suspend fun getEntry(id: String) = entriesRepo.selectById(id)
 
     fun getCachedPodcastUri(entryId: String): Uri? {
-        val enclosure = enclosuresRepository.selectByEntryId(entryId) ?: return null
+        val enclosure = enclosuresRepo.selectByEntryId(entryId) ?: return null
 
         val uri = runCatching {
             Uri.parse(enclosure.cacheUri)
-        }.onFailure {
-            Timber.e(it)
         }
 
         return uri.getOrNull()
     }
 
-    fun getFeed(id: String) = feedsRepository.selectById(id)
-
-    fun setRead(
-        entryIds: Collection<String>,
-        read: Boolean,
-    ) {
-        entryIds.forEach { entriesRepository.setRead(it, read) }
-
+    fun setRead(entryIds: Collection<String>, value: Boolean) {
+        entryIds.forEach { entriesRepo.setRead(it, value) }
         viewModelScope.launch {
-            state.update { state ->
-                when (state) {
-                    is State.ShowingEntries -> state.copy(entries = getCachedEntries())
-                    else -> state
-                }
-            }
-        }
-
-        viewModelScope.launch {
-            val syncResult = newsApiSync.syncEntriesFlags()
-
-            if (syncResult is SyncResult.Err) {
-                Timber.e(syncResult.e)
-            }
+            newsApiSync.sync(
+                NewsApiSync.SyncArgs(
+                    syncFeeds = false,
+                    syncFlags = true,
+                    syncEntries = false,
+                )
+            )
         }
     }
 
     fun setBookmarked(entryId: String, bookmarked: Boolean) {
-        entriesRepository.setBookmarked(entryId, bookmarked)
-
+        entriesRepo.setBookmarked(entryId, bookmarked)
         viewModelScope.launch {
-            val syncResult = newsApiSync.syncEntriesFlags()
-
-            if (syncResult is SyncResult.Err) {
-                Timber.e(syncResult.e)
-            }
-        }
-    }
-
-    fun show(entry: EntriesAdapterItem, entryIndex: Int) {
-        state.update { state ->
-            when (state) {
-                is State.ShowingEntries -> state.copy(
-                    entries = state.entries.toMutableList().apply { add(entryIndex, entry) }
+            newsApiSync.sync(
+                NewsApiSync.SyncArgs(
+                    syncFeeds = false,
+                    syncFlags = true,
+                    syncEntries = false,
                 )
-                else -> state
-            }
-        }
-    }
-
-    fun hide(entry: EntriesAdapterItem) {
-        state.update { state ->
-            when (state) {
-                is State.ShowingEntries -> state.copy(
-                    entries = state.entries.toMutableList().apply { removeAll { it == entry } }
-                )
-
-                else -> state
-            }
+            )
         }
     }
 
     suspend fun markAllAsRead() {
-        when (val filter = filter) {
+        when (val filter = filter.value) {
+            null -> {}
+
             is EntriesFilter.NotBookmarked -> {
-                entriesRepository.updateReadByBookmarked(
+                entriesRepo.updateReadByBookmarked(
                     read = true,
                     bookmarked = false,
                 )
             }
 
             is EntriesFilter.Bookmarked -> {
-                entriesRepository.updateReadByBookmarked(
+                entriesRepo.updateReadByBookmarked(
                     read = true,
                     bookmarked = true,
                 )
             }
 
             is EntriesFilter.BelongToFeed -> {
-                entriesRepository.updateReadByFeedId(
+                entriesRepo.updateReadByFeedId(
                     read = true,
                     feedId = filter.feedId,
                 )
             }
         }
 
-        if (state.value is State.ShowingEntries) {
-            state.update {
-                State.ShowingEntries(
-                    entries = getCachedEntries(),
-                    showBackgroundProgress = false,
-                )
-            }
-        }
-
         viewModelScope.launch {
-            val syncResult = newsApiSync.syncEntriesFlags()
-
-            if (syncResult is SyncResult.Err) {
-                Timber.e(syncResult.e)
-            }
+            newsApiSync.sync(
+                NewsApiSync.SyncArgs(
+                    syncFeeds = false,
+                    syncFlags = true,
+                    syncEntries = false,
+                )
+            )
         }
     }
 
-    private suspend fun EntryWithoutSummary.toRow(
+    private fun EntryWithoutSummary.toRow(
         feed: Feed?,
         conf: Conf,
     ): EntriesAdapterItem {
         val ogImageUrl = if (conf.showPreviewImages) {
             ogImageUrl
-        } else {
-            ""
-        }
-
-        val supportingText = if (conf.showPreviewText) {
-            entriesSupportingTextRepository.getSupportingText(this@toRow.id, feed)
         } else {
             ""
         }
@@ -346,27 +255,26 @@ class EntriesModel(
             cropImage = conf.cropPreviewImages,
             title = title,
             subtitle = "${feed?.title ?: "Unknown feed"} · ${DATE_TIME_FORMAT.format(published)}",
-            supportingText = supportingText,
+            supportingText = "",
             podcast = enclosureLinkType.startsWith("audio"),
-            podcastDownloadPercent = enclosuresRepository.getDownloadProgress(this@toRow.id)
-                .first(),
+            podcastDownloadPercent = null,
             read = read,
         )
     }
 
     sealed class State {
 
-        data class PerformingInitialSync(val message: String) : State()
+        data class InitialSync(val message: String) : State()
 
-        data class FailedToSync(val cause: Throwable) : State()
+        object LoadingCachedEntries : State()
 
-        object LoadingEntries : State()
-
-        data class ShowingEntries(
+        data class ShowingCachedEntries(
             val entries: List<EntriesAdapterItem>,
             val showBackgroundProgress: Boolean,
             val scrollToTop: Boolean = false,
         ) : State()
+
+        data class FailedToSync(val cause: Throwable) : State()
     }
 
     companion object {

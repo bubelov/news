@@ -100,7 +100,6 @@ dependencies {
     implementation("androidx.core:core-ktx:1.7.0")
     val fragmentVer = "1.4.1"
     implementation("androidx.fragment:fragment-ktx:$fragmentVer")
-    debugImplementation("androidx.fragment:fragment-testing:$fragmentVer")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1")
     val navVer = "2.4.2"
     implementation("androidx.navigation:navigation-fragment-ktx:$navVer")
@@ -111,7 +110,6 @@ dependencies {
     implementation("androidx.browser:browser:1.4.0")
     val workVer = "2.7.1"
     implementation("androidx.work:work-runtime-ktx:$workVer")
-    androidTestImplementation("androidx.work:work-testing:$workVer")
 
     // Feed parser
     // Used in standalone mode
@@ -131,7 +129,6 @@ dependencies {
     val sqlDelightVer = "1.5.3"
     implementation("com.squareup.sqldelight:coroutines-extensions:$sqlDelightVer")
     implementation("com.squareup.sqldelight:android-driver:$sqlDelightVer")
-    testImplementation("com.squareup.sqldelight:sqlite-driver:$sqlDelightVer")
 
     implementation("com.github.nextcloud:Android-SingleSignOn:0.6.1")
     implementation("com.google.android.material:material:1.7.0-alpha01")
@@ -144,6 +141,9 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation("junit:junit:4.13.2")
     testImplementation("io.mockk:mockk:1.12.3")
+
+    debugImplementation("androidx.fragment:fragment-testing:$fragmentVer")
+    testImplementation("com.squareup.sqldelight:sqlite-driver:$sqlDelightVer")
 
     // Core instrumented testing dependencies
     androidTestImplementation(kotlin("test"))
@@ -167,4 +167,6 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-web:$espressoVer")
     androidTestImplementation("androidx.test.espresso.idling:idling-concurrent:$espressoVer")
     androidTestImplementation("androidx.test.espresso:espresso-idling-resource:$espressoVer")
+
+    androidTestImplementation("androidx.work:work-testing:$workVer")
 }
