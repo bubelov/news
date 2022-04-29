@@ -1,6 +1,5 @@
 package entries
 
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -20,7 +19,7 @@ import common.ConfRepository
 import common.Scrollable
 import common.hide
 import common.openCachedPodcast
-import common.openLink
+import common.openUrl
 import common.screenWidth
 import common.show
 import common.showErrorDialog
@@ -74,17 +73,9 @@ class EntriesFragment : AppFragment(), Scrollable {
                         val feed = model.getFeed(entry.feedId) ?: return@launchWhenResumed
 
                         if (feed.openEntriesInBrowser) {
-                            val link = runCatching {
-                                Uri.parse(entry.link)
-                            }.getOrElse {
-                                showErrorDialog(it)
-                                return@launchWhenResumed
-                            }
-
-                            openLink(link, model.getConf().first().useBuiltInBrowser)
+                            openUrl(entry.link, model.getConf().first().useBuiltInBrowser)
                         } else {
-                            val action =
-                                EntriesFragmentDirections.actionEntriesFragmentToEntryFragment(item.id)
+                            val action = EntriesFragmentDirections.actionEntriesFragmentToEntryFragment(item.id)
                             findNavController().navigate(action)
                         }
                     }

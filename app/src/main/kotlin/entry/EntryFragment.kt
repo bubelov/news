@@ -1,7 +1,6 @@
 package entry
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.text.SpannableStringBuilder
@@ -22,7 +21,7 @@ import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentEntryBinding
 import common.AppFragment
 import common.hide
-import common.openLink
+import common.openUrl
 import common.show
 import common.showErrorDialog
 import db.Entry
@@ -101,14 +100,7 @@ class EntryFragment : AppFragment() {
                     menu?.findItem(R.id.comments)?.apply {
                         isVisible = state.entry.commentsUrl.isNotBlank()
                         setOnMenuItemClickListener {
-                            val link = runCatching {
-                                Uri.parse(state.entry.commentsUrl)
-                            }.getOrElse {
-                                showErrorDialog(it)
-                                return@setOnMenuItemClickListener true
-                            }
-
-                            openLink(link, model.conf.useBuiltInBrowser)
+                            openUrl(state.entry.commentsUrl, model.conf.useBuiltInBrowser)
                             true
                         }
                     }
@@ -139,17 +131,7 @@ class EntryFragment : AppFragment() {
                         fab.hide()
                     } else {
                         fab.show()
-
-                        fab.setOnClickListener {
-                            val link = kotlin.runCatching {
-                                Uri.parse(state.entry.link)
-                            }.getOrElse {
-                                showErrorDialog(it)
-                                return@setOnClickListener
-                            }
-
-                            openLink(link, model.conf.useBuiltInBrowser)
-                        }
+                        fab.setOnClickListener { openUrl(state.entry.link, model.conf.useBuiltInBrowser) }
                     }
                 }
 

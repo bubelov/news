@@ -58,7 +58,7 @@ class EntriesModel(
 
             combine(
                 confRepo.select(),
-                feedsRepo.selectAllAsync(),
+                feedsRepo.selectAll(),
                 entriesRepo.selectCount(),
                 newsApiSync.state,
             ) { conf, feeds, _, syncState ->
@@ -160,7 +160,7 @@ class EntriesModel(
         enclosuresRepo.download(id)
     }
 
-    fun getFeed(id: String) = feedsRepo.selectById(id)
+    suspend fun getFeed(id: String) = feedsRepo.selectById(id)
 
     suspend fun getEntry(id: String) = entriesRepo.selectById(id)
 

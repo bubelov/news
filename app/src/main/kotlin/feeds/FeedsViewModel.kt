@@ -2,6 +2,7 @@ package feeds
 
 import android.content.res.Resources
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import co.appreactor.news.R
 import common.ConfRepository
 import db.Conf
@@ -12,6 +13,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import opml.exportOpml
@@ -40,7 +42,7 @@ class FeedsViewModel(
 
     suspend fun reload() = state.apply {
         value = State.Loading
-        value = State.Loaded(runCatching { feedsRepo.selectAll().map { it.toItem() } })
+        value = State.Loaded(runCatching { feedsRepo.selectAll().first().map { it.toItem() } })
     }
 
     suspend fun addMany(opmlDocument: String) = state.apply {
@@ -60,7 +62,7 @@ class FeedsViewModel(
         val errors = mutableListOf<String>()
 
         progress.value = progress.value.copy(total = feeds.size)
-        val cachedFeeds = feedsRepo.selectAll()
+        val cachedFeeds = feedsRepo.selectAll().first()
 
         withContext(Dispatchers.IO) {
             feeds.chunked(10).forEach { chunk ->
@@ -113,7 +115,7 @@ class FeedsViewModel(
     }
 
     suspend fun exportAsOpml(): ByteArray {
-        return exportOpml(feedsRepo.selectAll()).toByteArray()
+        return exportOpml(feedsRepo.selectAll().first()).toByteArray()
     }
 
     suspend fun addFeed(url: String) {
@@ -134,31 +136,29 @@ class FeedsViewModel(
         }
     }
 
-    suspend fun rename(feedId: String, newTitle: String) = state.apply {
-        value = State.Renaming
-        value = State.Renamed(runCatching { feedsRepo.updateTitle(feedId, newTitle) })
+    fun rename(feedId: String, newTitle: String) {
+        viewModelScope.launch { feedsRepo.updateTitle(feedId, newTitle) }
     }
 
-    suspend fun delete(feedId: String) = state.apply {
-        value = State.Deleting
-
-        value = State.Deleted(runCatching {
-            feedsRepo.deleteById(feedId)
+    fun delete(feedId: String) {
+        viewModelScope.launch {
             entriesRepo.deleteByFeedId(feedId)
-        })
+            feedsRepo.deleteById(feedId)
+
+        }
     }
 
-    private suspend fun Feed.toItem(): FeedsAdapterItem = FeedsAdapterItem(
+    private suspend fun Feed.toItem() = FeedsAdapter.Item(
         id = id,
         title = title,
         selfLink = selfLink,
         alternateLink = alternateLink,
-        unreadCount = entriesRepo.getUnreadCount(id),
+        unreadCount = entriesRepo.getUnreadCount(id).first(),
     )
 
     sealed class State {
         object Loading : State()
-        data class Loaded(val result: Result<List<FeedsAdapterItem>>) : State()
+        data class Loaded(val result: Result<List<FeedsAdapter.Item>>) : State()
         object AddingOne : State()
         data class AddedOne(val result: Result<Any>) : State()
         data class ImportingOpml(val progress: MutableStateFlow<ImportProgress>) : State()

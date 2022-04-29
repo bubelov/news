@@ -2,6 +2,7 @@ package feeds
 
 import android.content.res.Resources
 import common.ConfRepository
+import db.database
 import entries.EntriesRepository
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -32,8 +33,15 @@ class FeedsViewModelTests {
 
     @Test
     fun `view ready`(): Unit = runBlocking {
-        coEvery { confRepo.select() } returns flowOf(ConfRepository.DEFAULT_CONF)
-        coEvery { feedsRepo.selectAll() } returns emptyList()
+        val db = database()
+
+        val model = FeedsViewModel(
+            feedsRepo = FeedsRepository(feedQueries = db.feedQueries, entryQueries = db.entryQueries, api = mockk()),
+            entriesRepo = EntriesRepository(api = mockk(), db = db.entryQueries),
+            confRepo = ConfRepository(db.confQueries),
+            resources = mockk(),
+        )
+
         model.onViewCreated()
 
         model.state.value.apply {

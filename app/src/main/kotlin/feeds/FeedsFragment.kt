@@ -1,6 +1,5 @@
 package feeds
 
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -21,7 +20,7 @@ import com.google.android.material.textfield.TextInputEditText
 import common.AppFragment
 import common.ListAdapterDecoration
 import common.hide
-import common.openLink
+import common.openUrl
 import common.show
 import common.showDialog
 import common.showErrorDialog
@@ -40,72 +39,54 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
     private var _binding: FragmentFeedsBinding? = null
     private val binding get() = _binding!!
 
-    private val adapter =
-        FeedsAdapter(scope = lifecycleScope, callback = object : FeedsAdapterCallback {
-            override fun onSettingsClick(feed: FeedsAdapterItem) {
-                findNavController().navigate(
-                    FeedsFragmentDirections.actionFeedsFragmentToFeedSettingsFragment(
-                        feedId = feed.id,
-                    )
+    private val adapter = FeedsAdapter(callback = object : FeedsAdapter.Callback {
+        override fun onClick(item: FeedsAdapter.Item) {
+            findNavController().navigate(
+                FeedsFragmentDirections.actionFeedsFragmentToFeedEntriesFragment(
+                    EntriesFilter.BelongToFeed(feedId = item.id)
                 )
-            }
+            )
+        }
 
-            override fun onFeedClick(feed: FeedsAdapterItem) {
-                findNavController().navigate(
-                    FeedsFragmentDirections.actionFeedsFragmentToFeedEntriesFragment(
-                        EntriesFilter.BelongToFeed(feedId = feed.id)
-                    )
+        override fun onSettingsClick(item: FeedsAdapter.Item) {
+            findNavController().navigate(
+                FeedsFragmentDirections.actionFeedsFragmentToFeedSettingsFragment(
+                    feedId = item.id,
                 )
-            }
+            )
+        }
 
-            override fun onOpenHtmlLinkClick(feed: FeedsAdapterItem) {
-                val link = runCatching {
-                    Uri.parse(feed.alternateLink)
-                }.getOrElse {
-                    showErrorDialog(it)
-                    return
+        override fun onOpenSelfLinkClick(item: FeedsAdapter.Item) {
+            openUrl(item.selfLink, model.conf.useBuiltInBrowser)
+        }
+
+        override fun onOpenAlternateLinkClick(item: FeedsAdapter.Item) {
+            openUrl(item.alternateLink, model.conf.useBuiltInBrowser)
+        }
+
+        override fun onRenameClick(item: FeedsAdapter.Item) {
+            val dialog = MaterialAlertDialogBuilder(requireContext())
+                .setTitle(getString(R.string.rename))
+                .setView(R.layout.dialog_rename_feed)
+                .setPositiveButton(R.string.rename) { dialogInterface, _ ->
+                    val dialog = dialogInterface as AlertDialog
+                    val title = dialog.findViewById<TextInputEditText>(R.id.title)!!
+                    model.rename(item.id, title.text.toString())
                 }
+                .setNegativeButton(R.string.cancel, null)
+                .setOnDismissListener { hideKeyboard() }
+                .show()
 
-                openLink(link, model.conf.useBuiltInBrowser)
-            }
+            val title = dialog.findViewById<TextInputEditText>(R.id.title)!!
+            title.append(item.title)
 
-            override fun openLinkClick(feed: FeedsAdapterItem) {
-                val link = runCatching {
-                    Uri.parse(feed.selfLink)
-                }.getOrElse {
-                    showErrorDialog(it)
-                    return
-                }
+            requireContext().showKeyboard()
+        }
 
-                openLink(link, model.conf.useBuiltInBrowser)
-            }
-
-            override fun onRenameClick(feed: FeedsAdapterItem) {
-                val dialog = MaterialAlertDialogBuilder(requireContext())
-                    .setTitle(getString(R.string.rename))
-                    .setView(R.layout.dialog_rename_feed)
-                    .setPositiveButton(R.string.rename) { dialogInterface, _ ->
-                        val dialog = dialogInterface as AlertDialog
-                        val title = dialog.findViewById<TextInputEditText>(R.id.title)!!
-
-                        lifecycleScope.launchWhenResumed {
-                            model.rename(feed.id, title.text.toString())
-                        }
-                    }
-                    .setNegativeButton(R.string.cancel, null)
-                    .setOnDismissListener { hideKeyboard() }
-                    .show()
-
-                val title = dialog.findViewById<TextInputEditText>(R.id.title)!!
-                title.append(feed.title)
-
-                requireContext().showKeyboard()
-            }
-
-            override fun onDeleteClick(feed: FeedsAdapterItem) {
-                lifecycleScope.launchWhenResumed { model.delete(feed.id) }
-            }
-        })
+        override fun onDeleteClick(item: FeedsAdapter.Item) {
+            model.delete(item.id)
+        }
+    })
 
     @Suppress("BlockingMethodInNonBlockingContext")
     private val importFeedsLauncher = registerForActivityResult(

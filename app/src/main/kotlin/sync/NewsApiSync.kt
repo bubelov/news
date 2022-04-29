@@ -90,7 +90,7 @@ class NewsApiSync(
                 runCatching {
                     val newAndUpdatedEntries = entriesRepo.syncNewAndUpdated(
                         lastEntriesSyncDateTime = confRepo.select().first().lastEntriesSyncDateTime,
-                        feeds = feedsRepo.selectAll(),
+                        feeds = feedsRepo.selectAll().first(),
                     )
 
                     confRepo.upsert(

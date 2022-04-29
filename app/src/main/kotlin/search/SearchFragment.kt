@@ -1,6 +1,5 @@
 package search
 
-import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.view.LayoutInflater
@@ -17,7 +16,7 @@ import common.AppFragment
 import common.CardListAdapterDecoration
 import common.hideKeyboard
 import common.openCachedPodcast
-import common.openLink
+import common.openUrl
 import common.screenWidth
 import common.showErrorDialog
 import common.showKeyboard
@@ -49,14 +48,7 @@ class SearchFragment : AppFragment() {
                     model.setRead(listOf(entry.id), true)
 
                     if (feed.openEntriesInBrowser) {
-                        val link = runCatching {
-                            Uri.parse(entry.link)
-                        }.getOrElse {
-                            showErrorDialog(it)
-                            return@launchWhenResumed
-                        }
-
-                        openLink(link, model.getConf().first().useBuiltInBrowser)
+                        openUrl(entry.link, model.getConf().first().useBuiltInBrowser)
                     } else {
                         val action =
                             SearchFragmentDirections.actionSearchFragmentToEntryFragment(item.id)

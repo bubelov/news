@@ -41,15 +41,22 @@ fun Fragment.showErrorDialog(
     }
 }
 
-fun Fragment.openLink(
-    link: Uri,
+fun Fragment.openUrl(
+    url: String,
     useBuiltInBrowser: Boolean,
 ) {
+    val uri = runCatching {
+        Uri.parse(url)
+    }.getOrElse {
+        showErrorDialog(it)
+        return
+    }
+
     try {
         if (useBuiltInBrowser) {
-            CustomTabsIntent.Builder().build().launchUrl(requireContext(), link)
+            CustomTabsIntent.Builder().build().launchUrl(requireContext(), uri)
         } else {
-            startActivity(Intent(Intent.ACTION_VIEW, link))
+            startActivity(Intent(Intent.ACTION_VIEW, uri))
         }
     } catch (e: Exception) {
         showErrorDialog(e)

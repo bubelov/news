@@ -64,7 +64,7 @@ class SearchViewModel(
                 )
             }
 
-            val feeds = feedsRepository.selectAll()
+            val feeds = feedsRepository.selectAll().first()
 
             val results = entries.map { entry ->
                 val feed = feeds.singleOrNull { feed -> feed.id == entry.feedId }
@@ -79,7 +79,7 @@ class SearchViewModel(
 
     suspend fun getEntry(id: String) = entriesRepository.selectById(id)
 
-    fun getFeed(id: String) = feedsRepository.selectById(id)
+    suspend fun getFeed(id: String) = feedsRepository.selectById(id)
 
     fun setRead(
         entryIds: Collection<String>,

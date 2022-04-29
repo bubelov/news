@@ -42,19 +42,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/primaryText"
             tools:text="Secondary text" />
-
-        <TextView
-            android:id="@+id/errorText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:textAppearance="?attr/textAppearanceCaption"
-            android:textColor="?colorError"
-            app:layout_constraintEnd_toStartOf="@id/actions"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/secondaryText"
-            tools:text="Secondary text" />
     </LinearLayout>
 
     <TextView

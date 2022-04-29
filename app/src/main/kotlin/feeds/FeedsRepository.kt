@@ -3,73 +3,99 @@ package feeds
 import api.NewsApi
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
+import db.EntryQueries
 import db.Feed
 import db.FeedQueries
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl
 
 class FeedsRepository(
+    private val feedQueries: FeedQueries,
+    private val entryQueries: EntryQueries,
     private val api: NewsApi,
-    private val db: FeedQueries,
 ) {
 
-    fun insertOrReplace(feed: Feed) {
-        db.insertOrReplace(feed)
-    }
-
-    suspend fun insertByFeedUrl(
-        url: HttpUrl,
-        title: String? = null,
-    ) = withContext(Dispatchers.IO) {
-        var feed = api.addFeed(url).getOrThrow()
-
-        if (!title.isNullOrBlank()) {
-            feed = feed.copy(title = title)
+    suspend fun insertOrReplace(feed: Feed) {
+        withContext(Dispatchers.Default) {
+            feedQueries.insertOrReplace(feed)
         }
-
-        db.insertOrReplace(feed)
     }
 
-    fun selectAllAsync() = db.selectAll().asFlow().mapToList(Dispatchers.IO)
+    suspend fun insertByFeedUrl(url: HttpUrl, title: String? = null) {
+        withContext(Dispatchers.Default) {
+            var feed = withContext(Dispatchers.IO) {
+                api.addFeed(url).getOrThrow()
+            }
 
-    suspend fun selectAll() = withContext(Dispatchers.IO) {
-        db.selectAll().executeAsList()
+            if (!title.isNullOrBlank()) {
+                feed = feed.copy(title = title)
+            }
+
+            feedQueries.insertOrReplace(feed)
+        }
     }
 
-    fun selectById(id: String): Feed? {
-        return db.selectById(id).executeAsOneOrNull()
+    fun selectAll(): Flow<List<Feed>> {
+        return feedQueries.selectAll().asFlow().mapToList()
     }
 
-    suspend fun updateTitle(feedId: String, newTitle: String) = withContext(Dispatchers.IO) {
+    suspend fun selectById(id: String): Feed? {
+        return withContext(Dispatchers.Default) {
+            feedQueries.selectById(id).executeAsOneOrNull()
+        }
+    }
+
+    suspend fun updateTitle(feedId: String, newTitle: String) {
         val feed = selectById(feedId) ?: throw Exception("Cannot find feed $feedId in cache")
         val trimmedNewTitle = newTitle.trim()
-        api.updateFeedTitle(feedId, trimmedNewTitle)
-        db.insertOrReplace(feed.copy(title = trimmedNewTitle))
+
+        withContext(Dispatchers.IO) {
+            api.updateFeedTitle(feedId, trimmedNewTitle)
+        }
+
+        withContext(Dispatchers.Default) {
+            feedQueries.insertOrReplace(feed.copy(title = trimmedNewTitle))
+        }
     }
 
-    suspend fun deleteById(id: String) = withContext(Dispatchers.IO) {
-        api.deleteFeed(id)
-        db.deleteById(id)
+    suspend fun deleteById(id: String) {
+        withContext(Dispatchers.IO) {
+            api.deleteFeed(id)
+        }
+
+        withContext(Dispatchers.Default) {
+            feedQueries.transaction {
+                feedQueries.deleteById(id)
+                entryQueries.deleteByFeedId(id)
+            }
+        }
     }
 
-    suspend fun sync() = withContext(Dispatchers.IO) {
-        val newFeeds = api.getFeeds().sortedBy { it.id }
-        val cachedFeeds = selectAll().sortedBy { it.id }
+    suspend fun sync() {
+        val newFeeds = withContext(Dispatchers.IO) {
+            api.getFeeds().sortedBy { it.id }
+        }
 
-        db.transaction {
-            db.deleteAll()
+        withContext(Dispatchers.Default) {
+            val cachedFeeds = selectAll().first().sortedBy { it.id }
 
-            newFeeds.forEach { feed ->
-                val cachedFeed = cachedFeeds.find { it.id == feed.id }
+            feedQueries.transaction {
+                feedQueries.deleteAll()
 
-                db.insertOrReplace(
-                    feed.copy(
-                        openEntriesInBrowser = cachedFeed?.openEntriesInBrowser ?: false,
-                        blockedWords = cachedFeed?.blockedWords ?: "",
-                        showPreviewImages = cachedFeed?.showPreviewImages,
+                newFeeds.forEach { feed ->
+                    val cachedFeed = cachedFeeds.find { it.id == feed.id }
+
+                    feedQueries.insertOrReplace(
+                        feed.copy(
+                            openEntriesInBrowser = cachedFeed?.openEntriesInBrowser ?: false,
+                            blockedWords = cachedFeed?.blockedWords ?: "",
+                            showPreviewImages = cachedFeed?.showPreviewImages,
+                        )
                     )
-                )
+                }
             }
         }
     }
