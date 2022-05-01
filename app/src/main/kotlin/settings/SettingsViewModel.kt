@@ -1,7 +1,7 @@
 package settings
 
 import androidx.lifecycle.ViewModel
-import auth.AuthRepository
+import auth.AccountsRepository
 import db.Database
 import common.ConfRepository
 import db.Conf
@@ -10,7 +10,7 @@ import kotlinx.coroutines.runBlocking
 
 class SettingsViewModel(
     private val confRepo: ConfRepository,
-    private val authRepository: AuthRepository,
+    private val accountsRepository: AccountsRepository,
     private val db: Database,
 ) : ViewModel() {
 
@@ -18,7 +18,7 @@ class SettingsViewModel(
 
     suspend fun saveConf(conf: Conf) = this.confRepo.upsert(conf)
 
-    fun getAccountName(): String = runBlocking { authRepository.account().first().subtitle }
+    fun getAccountName(): String = runBlocking { accountsRepository.account().first().subtitle }
 
     fun logOut() {
         db.apply {

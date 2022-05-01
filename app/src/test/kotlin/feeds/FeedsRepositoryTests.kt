@@ -73,7 +73,7 @@ class FeedsRepositoryTests {
 
         val feeds = listOf(feed(), feed())
         feeds.forEach { db.feedQueries.insertOrReplace(it) }
-        assertEquals(feeds, repository.selectAll().first())
+        assertEquals(feeds.sortedBy { it.title }, repository.selectAll().first())
     }
 
     @Test

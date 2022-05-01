@@ -100,8 +100,8 @@ class SearchViewModel(
         enclosuresRepository.download(id)
     }
 
-    fun getCachedPodcastUri(entryId: String): Uri? {
-        val enclosure = enclosuresRepository.selectByEntryId(entryId) ?: return null
+    suspend fun getCachedPodcastUri(entryId: String): Uri? {
+        val enclosure = enclosuresRepository.selectByEntryId(entryId).first() ?: return null
 
         val uri = runCatching {
             Uri.parse(enclosure.cacheUri)

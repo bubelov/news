@@ -1,27 +1,33 @@
 package auth
 
 import android.content.Context
-import android.content.res.Resources
 import co.appreactor.news.R
 import com.nextcloud.android.sso.exceptions.SSOException
 import com.nextcloud.android.sso.helper.SingleAccountHelper
+import com.squareup.sqldelight.runtime.coroutines.asFlow
+import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import common.ConfRepository
 import db.Conf
+import db.ConfQueries
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import timber.log.Timber
+import kotlinx.coroutines.withContext
 
-class AuthRepository(
-    private val conf: ConfRepository,
-    private val resources: Resources,
+class AccountsRepository(
+    private val confQueries: ConfQueries,
     private val context: Context,
 ) {
 
-    fun account(): Flow<Account> = conf.select().map {
-        Account(
-            title = it.accountTitle(),
-            subtitle = it.accountSubtitle(),
-        )
+    private val resources = context.resources
+
+    fun account(): Flow<Account> {
+        return confQueries.select().asFlow().mapToOneOrNull().map {
+            Account(
+                title = it?.accountTitle() ?: "",
+                subtitle = it?.accountSubtitle() ?: "",
+            )
+        }
     }
 
     private fun Conf.accountTitle(): String {
@@ -40,7 +46,7 @@ class AuthRepository(
         }
     }
 
-    private fun Conf.accountSubtitle(): String {
+    private suspend fun Conf.accountSubtitle(): String {
         return when (authType) {
             ConfRepository.AUTH_TYPE_NEXTCLOUD_APP,
             ConfRepository.AUTH_TYPE_NEXTCLOUD_DIRECT -> {
@@ -49,10 +55,12 @@ class AuthRepository(
                     "$username@${nextcloudServerUrl.replace("https://", "")}"
                 } else {
                     try {
-                        val account = SingleAccountHelper.getCurrentSingleSignOnAccount(context)
+                        val account = withContext(Dispatchers.Default) {
+                            SingleAccountHelper.getCurrentSingleSignOnAccount(context)
+                        }
+
                         account.name
                     } catch (e: SSOException) {
-                        Timber.e(e)
                         "unknown"
                     }
                 }
@@ -67,9 +75,4 @@ class AuthRepository(
             else -> ""
         }
     }
-
-    data class Account(
-        val title: String,
-        val subtitle: String,
-    )
 }

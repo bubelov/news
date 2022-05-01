@@ -1,11 +1,11 @@
 package common
 
 import androidx.lifecycle.ViewModel
-import auth.AuthRepository
+import auth.AccountsRepository
 
 class AppViewModel(
-    private val authRepository: AuthRepository,
+    private val accountsRepository: AccountsRepository,
 ) : ViewModel() {
 
-    suspend fun account() = authRepository.account()
+    fun account() = accountsRepository.account()
 }

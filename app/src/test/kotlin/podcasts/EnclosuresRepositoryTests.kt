@@ -1,14 +1,10 @@
 package podcasts
 
-import android.content.Context
 import db.EntryEnclosure
-import db.EntryEnclosureQueries
-import entries.EntriesRepository
+import db.database
 import enclosures.EnclosuresRepository
-import io.mockk.confirmVerified
-import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import java.util.UUID
@@ -16,31 +12,23 @@ import kotlin.test.assertEquals
 
 class EnclosuresRepositoryTests {
 
-    private val entriesRepository = mockk<EntriesRepository>()
-
-    private val context = mockk<Context>()
-
-    private val entryEnclosureQueries = mockk<EntryEnclosureQueries>()
-
-    private val repository = EnclosuresRepository(
-        entriesRepository = entriesRepository,
-        context = context,
-        entryEnclosureQueries = entryEnclosureQueries,
-    )
-
     @Test
     fun selectByEntryId(): Unit = runBlocking {
-        val enclosure = entryEnclosure().copy(entryId = UUID.randomUUID().toString())
+        val db = database()
 
-        every { entryEnclosureQueries.selectByEntryId(enclosure.entryId) } returns mockk {
-            every { executeAsOneOrNull() } returns enclosure
+        val repo = EnclosuresRepository(
+            entryEnclosureQueries = db.entryEnclosureQueries,
+            entriesRepo = mockk(),
+            context = mockk(),
+        )
+
+        val enclosures = buildList {
+            repeat(5) { add(entryEnclosure().copy(entryId = UUID.randomUUID().toString())) }
         }
 
-        assertEquals(enclosure, repository.selectByEntryId(enclosure.entryId))
+        enclosures.forEach { db.entryEnclosureQueries.insertOrReplace(it) }
 
-        verify { entryEnclosureQueries.selectByEntryId(enclosure.entryId) }
-
-        confirmVerified(entryEnclosureQueries)
+        assertEquals(enclosures.first(), repo.selectByEntryId(enclosures.first().entryId).first())
     }
 
     private fun entryEnclosure() = EntryEnclosure(

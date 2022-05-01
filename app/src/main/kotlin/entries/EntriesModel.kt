@@ -97,7 +97,7 @@ class EntriesModel(
         val unsortedEntries = when (filter) {
             is EntriesFilter.NotBookmarked -> {
                 if (conf.showReadEntries) {
-                    entriesRepo.selectAll()
+                    entriesRepo.selectAll().first()
                 } else {
                     entriesRepo.selectByRead(false)
                 }.filterNot { it.bookmarked }
@@ -164,8 +164,8 @@ class EntriesModel(
 
     suspend fun getEntry(id: String) = entriesRepo.selectById(id)
 
-    fun getCachedPodcastUri(entryId: String): Uri? {
-        val enclosure = enclosuresRepo.selectByEntryId(entryId) ?: return null
+    suspend fun getCachedPodcastUri(entryId: String): Uri? {
+        val enclosure = enclosuresRepo.selectByEntryId(entryId).first() ?: return null
 
         val uri = runCatching {
             Uri.parse(enclosure.cacheUri)

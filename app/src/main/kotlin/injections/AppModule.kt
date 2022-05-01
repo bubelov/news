@@ -6,7 +6,7 @@ import androidx.core.content.getSystemService
 import api.NewsApi
 import api.NewsApiSwitcher
 import api.NewsApiWrapper
-import auth.AuthRepository
+import auth.AccountsRepository
 import auth.AuthViewModel
 import auth.NextcloudAuthModel
 import auth.MinifluxAuthViewModel
@@ -59,7 +59,7 @@ val appModule = module {
     singleOf(::NewsApiSwitcher)
     singleOf(::NewsApiSync)
 
-    singleOf(::AuthRepository)
+    singleOf(::AccountsRepository)
     singleOf(::FeedsRepository)
     singleOf(::EntriesRepository)
     singleOf(::EntriesSupportingTextRepository)

@@ -2,6 +2,7 @@ package enclosures
 
 import androidx.lifecycle.ViewModel
 import entries.EntriesRepository
+import kotlinx.coroutines.flow.first
 import okhttp3.HttpUrl.Companion.toHttpUrl
 
 class EnclosuresModel(
@@ -10,20 +11,20 @@ class EnclosuresModel(
 ) : ViewModel() {
 
     suspend fun getEnclosures(): List<EnclosuresAdapter.Item> {
-        val entriesWithEnclosures = entriesRepo.selectAll().filter { it.enclosureLink.isNotBlank() }
+        val entriesWithEnclosures = entriesRepo.selectAll().first().filter { it.enclosureLink.isNotBlank() }
 
         return entriesWithEnclosures.map {
             EnclosuresAdapter.Item(
                 entryId = it.id,
                 title = it.title,
                 url = it.enclosureLink.toHttpUrl(),
-                downloaded = enclosuresRepo.selectByEntryId(it.id)?.downloadPercent == 100L,
+                downloaded = enclosuresRepo.selectByEntryId(it.id).first()?.downloadPercent == 100L,
             )
         }
     }
 
     suspend fun deleteEnclosure(entryId: String) {
-        val enclosure = enclosuresRepo.selectByEntryId(entryId) ?: return
+        val enclosure = enclosuresRepo.selectByEntryId(entryId).first() ?: return
         enclosuresRepo.deleteFromCache(enclosure)
     }
 }

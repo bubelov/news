@@ -11,12 +11,14 @@ class ConfRepository(
     private val db: ConfQueries,
 ) {
 
-    fun select() = db.select().asFlow().mapToOneOrDefault(DEFAULT_CONF, Dispatchers.IO)
+    fun select() = db.select().asFlow().mapToOneOrDefault(DEFAULT_CONF)
 
-    suspend fun upsert(conf: Conf) = withContext(Dispatchers.IO) {
-        db.transaction {
-            db.delete()
-            db.insert(conf)
+    suspend fun upsert(conf: Conf) {
+        withContext(Dispatchers.Default) {
+            db.transaction {
+                db.delete()
+                db.insert(conf)
+            }
         }
     }
 

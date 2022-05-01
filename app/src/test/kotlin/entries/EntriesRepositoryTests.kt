@@ -3,8 +3,17 @@ package entries
 import api.NewsApi
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
-import db.*
-import io.mockk.*
+import db.Entry
+import db.EntryQueries
+import db.EntryWithoutSummary
+import db.database
+import db.entry
+import db.entryWithoutSummary
+import io.mockk.confirmVerified
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.verify
 import kotlin.test.assertEquals
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
@@ -24,20 +33,17 @@ class EntriesRepositoryTests {
 
     @Test
     fun selectAll(): Unit = runBlocking {
-        val entries = listOf(entryWithoutSummary())
+        val entryQueries = database().entryQueries
 
-        every { db.selectAll() } returns mockk {
-            every { executeAsList() } returns entries
-        }
-
-        assertEquals(entries, repository.selectAll())
-
-        verify { db.selectAll() }
-
-        confirmVerified(
-            api,
-            db,
+        val repo = EntriesRepository(
+            api = mockk(),
+            db = entryQueries,
         )
+
+        val entries = listOf(entryWithoutSummary())
+        entries.forEach { entryQueries.insertOrReplace(it.toEntry()) }
+
+        assertEquals(entries, repo.selectAll().first())
     }
 
     @Test
@@ -136,5 +142,32 @@ class EntriesRepositoryTests {
         verify { db.selectByRead(read) }
 
         confirmVerified(db)
+    }
+
+    private fun EntryWithoutSummary.toEntry(): Entry {
+        return Entry(
+            id = id,
+            feedId = feedId,
+            title = title,
+            link = link,
+            published = published,
+            updated = updated,
+            authorName = authorName,
+            contentType = "",
+            contentSrc = "",
+            contentText = "",
+            enclosureLink = enclosureLink,
+            enclosureLinkType = enclosureLinkType,
+            read = read,
+            readSynced = readSynced,
+            bookmarked = bookmarked,
+            bookmarkedSynced = bookmarkedSynced,
+            guidHash = guidHash,
+            commentsUrl = commentsUrl,
+            ogImageChecked = ogImageChecked,
+            ogImageUrl = ogImageUrl,
+            ogImageWidth = ogImageWidth,
+            ogImageHeight = ogImageHeight,
+        )
     }
 }

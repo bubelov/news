@@ -129,7 +129,7 @@ WHERE id = ?;
 
 updateOgImage:
 UPDATE Entry
-SET ogImageUrl = ?, ogImageWidth = ?, ogImageHeight = ?
+SET ogImageUrl = ?, ogImageWidth = ?, ogImageHeight = ?, ogImageChecked = 1
 WHERE id = ?;
 
 deleteAll:
