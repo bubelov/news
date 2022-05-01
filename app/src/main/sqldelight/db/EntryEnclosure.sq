@@ -14,13 +14,13 @@ WHERE entryId = ?;
 
 setDowloadPercent:
 UPDATE EntryEnclosure
-SET downloadPercent = :downloadPercent
-WHERE entryId = :entryId;
+SET downloadPercent = ?
+WHERE entryId = ?;
 
 setCacheUri:
 UPDATE EntryEnclosure
-SET cacheUri = :cacheUri
-WHERE entryId = :entryId;
+SET cacheUri = ?
+WHERE entryId = ?;
 
 deleteAll:
 DELETE

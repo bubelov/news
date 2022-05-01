@@ -21,13 +21,13 @@ WHERE feedId = ?;
 selectByReadAndBookmarked:
 SELECT *
 FROM EntryWithoutSummary
-WHERE read = :read AND bookmarked = :bookmarked
+WHERE read = ? AND bookmarked = ?
 ORDER BY published DESC;
 
 selectByReadOrBookmarked:
 SELECT *
 FROM EntryWithoutSummary
-WHERE read = :read OR bookmarked = :bookmarked
+WHERE read = ? OR bookmarked = ?
 ORDER BY published DESC;
 
 selectByRead:
@@ -82,7 +82,7 @@ FROM Entry;
 selectUnreadCount:
 SELECT COUNT(*)
 FROM Entry
-WHERE feedId = :feedId
+WHERE feedId = ?
 AND read = 0;
 
 selectMaxId:
