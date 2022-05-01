@@ -69,7 +69,7 @@ class EntriesFragment : AppFragment(), Scrollable {
                     lifecycleScope.launchWhenResumed {
                         model.setRead(listOf(item.id), true)
 
-                        val entry = model.getEntry(item.id) ?: return@launchWhenResumed
+                        val entry = model.getEntry(item.id).first() ?: return@launchWhenResumed
                         val feed = model.getFeed(entry.feedId) ?: return@launchWhenResumed
 
                         if (feed.openEntriesInBrowser) {
@@ -94,7 +94,7 @@ class EntriesFragment : AppFragment(), Scrollable {
                 override fun onPlayPodcastClick(item: EntriesAdapterItem) {
                     lifecycleScope.launch {
                         runCatching {
-                            val entry = model.getEntry(item.id) ?: return@launch
+                            val entry = model.getEntry(item.id).first() ?: return@launch
                             model.setRead(listOf(entry.id), true)
                             openCachedPodcast(
                                 cacheUri = model.getCachedPodcastUri(entry.id),

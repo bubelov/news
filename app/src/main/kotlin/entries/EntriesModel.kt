@@ -162,7 +162,7 @@ class EntriesModel(
 
     suspend fun getFeed(id: String) = feedsRepo.selectById(id)
 
-    suspend fun getEntry(id: String) = entriesRepo.selectById(id)
+    fun getEntry(id: String) = entriesRepo.selectById(id)
 
     suspend fun getCachedPodcastUri(entryId: String): Uri? {
         val enclosure = enclosuresRepo.selectByEntryId(entryId).first() ?: return null

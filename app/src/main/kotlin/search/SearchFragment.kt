@@ -42,7 +42,7 @@ class SearchFragment : AppFragment() {
         callback = object : EntriesAdapterCallback {
             override fun onItemClick(item: EntriesAdapterItem) {
                 lifecycleScope.launchWhenResumed {
-                    val entry = model.getEntry(item.id) ?: return@launchWhenResumed
+                    val entry = model.getEntry(item.id).first() ?: return@launchWhenResumed
                     val feed = model.getFeed(entry.feedId) ?: return@launchWhenResumed
 
                     model.setRead(listOf(entry.id), true)
@@ -70,7 +70,7 @@ class SearchFragment : AppFragment() {
             override fun onPlayPodcastClick(item: EntriesAdapterItem) {
                 lifecycleScope.launch {
                     runCatching {
-                        val entry = model.getEntry(item.id) ?: return@launch
+                        val entry = model.getEntry(item.id).first() ?: return@launch
                         model.setRead(listOf(entry.id), true)
 
                         openCachedPodcast(

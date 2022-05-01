@@ -14,6 +14,7 @@ import com.squareup.sqldelight.runtime.coroutines.mapToOneNotNull
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType
@@ -49,7 +50,7 @@ class EnclosuresRepository(
 
     suspend fun download(entryId: String) {
         withContext(Dispatchers.Default) {
-            val entry = entriesRepo.selectById(entryId)
+            val entry = entriesRepo.selectById(entryId).first()
 
             if (entry == null) {
                 entryEnclosureQueries.deleteByEntryId(entryId)

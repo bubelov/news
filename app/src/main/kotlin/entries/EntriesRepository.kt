@@ -4,6 +4,7 @@ import api.NewsApi
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOne
+import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import db.Entry
 import db.EntryQueries
 import db.EntryWithoutSummary
@@ -24,8 +25,8 @@ class EntriesRepository(
         return db.selectAll().asFlow().mapToList()
     }
 
-    suspend fun selectById(entryId: String): Entry? = withContext(Dispatchers.IO) {
-        db.selectById(entryId).executeAsOneOrNull()
+    fun selectById(entryId: String): Flow<Entry?> {
+        return db.selectById(entryId).asFlow().mapToOneOrNull()
     }
 
     suspend fun selectByFeedId(feedId: String): List<EntryWithoutSummary> {

@@ -48,17 +48,19 @@ class EntriesRepositoryTests {
 
     @Test
     fun selectById(): Unit = runBlocking {
-        val entry = entry()
+        val db = database()
 
-        every { db.selectById(entry.id) } returns mockk {
-            every { executeAsOneOrNull() } returns entry
-        }
+        val repo = EntriesRepository(
+            api = mockk(),
+            db = db.entryQueries,
+        )
 
-        assertEquals(entry, repository.selectById(entry.id))
+        val entries = listOf(entry(), entry(), entry())
+        entries.forEach { db.entryQueries.insertOrReplace(it) }
 
-        verify { db.selectById(entry.id) }
+        val randomEntry = entries.random()
 
-        confirmVerified(db)
+        assertEquals(randomEntry, repo.selectById(randomEntry.id).first())
     }
 
     @Test

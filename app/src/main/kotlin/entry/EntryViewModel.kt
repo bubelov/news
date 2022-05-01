@@ -48,7 +48,7 @@ class EntryViewModel(
         state.value = State.Progress
 
         runCatching {
-            val entry = entriesRepository.selectById(entryId)
+            val entry = entriesRepository.selectById(entryId).first()
 
             if (entry == null) {
                 val message = app.getString(R.string.cannot_find_entry_with_id_s, entryId)
@@ -90,11 +90,13 @@ class EntryViewModel(
         }
 
         viewModelScope.launch {
-            newsApiSync.sync(NewsApiSync.SyncArgs(
-                syncFeeds = false,
-                syncFlags = true,
-                syncEntries = false,
-            ))
+            newsApiSync.sync(
+                NewsApiSync.SyncArgs(
+                    syncFeeds = false,
+                    syncFlags = true,
+                    syncEntries = false,
+                )
+            )
         }
     }
 
