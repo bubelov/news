@@ -108,7 +108,7 @@ class EntriesModel(
             }
 
             is EntriesFilter.BelongToFeed -> {
-                val feedEntries = entriesRepo.selectByFeedId(filter.feedId)
+                val feedEntries = entriesRepo.selectByFeedId(filter.feedId).first()
 
                 if (conf.showReadEntries) {
                     feedEntries

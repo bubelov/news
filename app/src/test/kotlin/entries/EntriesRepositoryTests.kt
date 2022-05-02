@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
+import java.util.UUID
 
 class EntriesRepositoryTests {
 
@@ -65,21 +66,25 @@ class EntriesRepositoryTests {
 
     @Test
     fun selectByFeedId(): Unit = runBlocking {
-        val entries = listOf(
-            entryWithoutSummary(),
+        val db = database()
+
+        val repo = EntriesRepository(
+            api = mockk(),
+            db = db.entryQueries,
         )
 
-        val feedId = entries.first().feedId
+        val feedId = UUID.randomUUID().toString()
 
-        every { db.selectByFeedId(feedId) } returns mockk {
-            every { executeAsList() } returns entries
-        }
+        val entries = listOf(
+            entryWithoutSummary().copy(feedId = UUID.randomUUID().toString()),
+            entryWithoutSummary().copy(feedId = feedId),
+            entryWithoutSummary().copy(feedId = feedId),
+            entryWithoutSummary().copy(feedId = UUID.randomUUID().toString()),
+        )
 
-        assertEquals(entries, repository.selectByFeedId(feedId))
+        entries.forEach { db.entryQueries.insertOrReplace(it.toEntry()) }
 
-        verify { db.selectByFeedId(feedId) }
-
-        confirmVerified(db)
+        assertEquals(entries.filter { it.feedId == feedId }, repo.selectByFeedId(feedId).first())
     }
 
     @Test

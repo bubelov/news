@@ -29,10 +29,8 @@ class EntriesRepository(
         return db.selectById(entryId).asFlow().mapToOneOrNull()
     }
 
-    suspend fun selectByFeedId(feedId: String): List<EntryWithoutSummary> {
-        return withContext(Dispatchers.IO) {
-            db.selectByFeedId(feedId).executeAsList()
-        }
+    fun selectByFeedId(feedId: String): Flow<List<EntryWithoutSummary>> {
+        return db.selectByFeedId(feedId).asFlow().mapToList()
     }
 
     suspend fun selectByReadAndBookmarked(
