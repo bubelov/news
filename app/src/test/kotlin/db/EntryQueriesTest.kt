@@ -278,3 +278,30 @@ fun Entry.withoutSummary() = EntryWithoutSummary(
     ogImageWidth = 0,
     ogImageHeight = 0,
 )
+
+fun EntryWithoutSummary.toEntry(): Entry {
+    return Entry(
+        id = id,
+        feedId = feedId,
+        title = title,
+        link = link,
+        published = published,
+        updated = updated,
+        authorName = authorName,
+        contentType = "",
+        contentSrc = "",
+        contentText = "",
+        enclosureLink = enclosureLink,
+        enclosureLinkType = enclosureLinkType,
+        read = read,
+        readSynced = readSynced,
+        bookmarked = bookmarked,
+        bookmarkedSynced = bookmarkedSynced,
+        guidHash = guidHash,
+        commentsUrl = commentsUrl,
+        ogImageChecked = ogImageChecked,
+        ogImageUrl = ogImageUrl,
+        ogImageWidth = ogImageWidth,
+        ogImageHeight = ogImageHeight,
+    )
+}

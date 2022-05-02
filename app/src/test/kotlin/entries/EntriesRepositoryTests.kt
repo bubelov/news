@@ -1,16 +1,10 @@
 package entries
 
-import api.NewsApi
-import db.Entry
-import db.EntryQueries
-import db.EntryWithoutSummary
 import db.database
 import db.entry
 import db.entryWithoutSummary
-import io.mockk.confirmVerified
-import io.mockk.every
+import db.toEntry
 import io.mockk.mockk
-import io.mockk.verify
 import kotlin.test.assertEquals
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -19,26 +13,17 @@ import java.util.UUID
 
 class EntriesRepositoryTests {
 
-    private val api = mockk<NewsApi>()
-
-    private val db = mockk<EntryQueries>()
-
-    private val repository = EntriesRepository(
-        api = api,
-        db = db,
-    )
-
     @Test
     fun selectAll(): Unit = runBlocking {
-        val entryQueries = database().entryQueries
+        val db = database()
 
         val repo = EntriesRepository(
             api = mockk(),
-            db = entryQueries,
+            db = db.entryQueries,
         )
 
         val entries = listOf(entryWithoutSummary())
-        entries.forEach { entryQueries.insertOrReplace(it.toEntry()) }
+        entries.forEach { db.entryQueries.insertOrReplace(it.toEntry()) }
 
         assertEquals(entries, repo.selectAll().first())
     }
@@ -187,33 +172,6 @@ class EntriesRepositoryTests {
         assertEquals(
             entries.filter { !it.read },
             repo.selectByRead(false).first(),
-        )
-    }
-
-    private fun EntryWithoutSummary.toEntry(): Entry {
-        return Entry(
-            id = id,
-            feedId = feedId,
-            title = title,
-            link = link,
-            published = published,
-            updated = updated,
-            authorName = authorName,
-            contentType = "",
-            contentSrc = "",
-            contentText = "",
-            enclosureLink = enclosureLink,
-            enclosureLinkType = enclosureLinkType,
-            read = read,
-            readSynced = readSynced,
-            bookmarked = bookmarked,
-            bookmarkedSynced = bookmarkedSynced,
-            guidHash = guidHash,
-            commentsUrl = commentsUrl,
-            ogImageChecked = ogImageChecked,
-            ogImageUrl = ogImageUrl,
-            ogImageWidth = ogImageWidth,
-            ogImageHeight = ogImageHeight,
         )
     }
 }

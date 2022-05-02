@@ -175,8 +175,9 @@ class EntriesModel(
     }
 
     fun setRead(entryIds: Collection<String>, value: Boolean) {
-        entryIds.forEach { entriesRepo.setRead(it, value) }
         viewModelScope.launch {
+            entryIds.forEach { entriesRepo.setRead(it, value, false) }
+
             newsApiSync.sync(
                 NewsApiSync.SyncArgs(
                     syncFeeds = false,
@@ -188,8 +189,9 @@ class EntriesModel(
     }
 
     fun setBookmarked(entryId: String, bookmarked: Boolean) {
-        entriesRepo.setBookmarked(entryId, bookmarked)
         viewModelScope.launch {
+            entriesRepo.setBookmarked(entryId, bookmarked, false)
+
             newsApiSync.sync(
                 NewsApiSync.SyncArgs(
                     syncFeeds = false,

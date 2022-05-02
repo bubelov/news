@@ -52,16 +52,16 @@ class SearchViewModel(
             val entries = when (filter) {
                 EntriesFilter.NotBookmarked -> {
                     delay(1500)
-                    entriesRepository.selectByQuery(query)
+                    entriesRepository.selectByQuery(query).first()
                 }
                 EntriesFilter.Bookmarked -> entriesRepository.selectByQueryAndBookmarked(
                     query,
                     true,
-                )
+                ).first()
                 is EntriesFilter.BelongToFeed -> entriesRepository.selectByQueryAndFeedId(
                     query,
                     filter.feedId,
-                )
+                ).first()
             }
 
             val feeds = feedsRepository.selectAll().first()
@@ -85,14 +85,16 @@ class SearchViewModel(
         entryIds: Collection<String>,
         read: Boolean,
     ) {
-        entryIds.forEach { entriesRepository.setRead(it, read) }
-
         viewModelScope.launch {
-            sync.sync(NewsApiSync.SyncArgs(
-                syncFeeds = false,
-                syncFlags = true,
-                syncEntries = false,
-            ))
+            entryIds.forEach { entriesRepository.setRead(it, read, false) }
+
+            sync.sync(
+                NewsApiSync.SyncArgs(
+                    syncFeeds = false,
+                    syncFlags = true,
+                    syncEntries = false,
+                )
+            )
         }
     }
 

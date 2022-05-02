@@ -102,9 +102,9 @@ UPDATE Entry
 SET read = :read, readSynced = 0
 WHERE read != :read AND bookmarked = :bookmarked;
 
-updateRead:
+updateReadAndReadSynced:
 UPDATE Entry
-SET read = ?
+SET read = ?, readSynced = ?
 WHERE id = ?;
 
 updateReadSynced:
@@ -112,9 +112,9 @@ UPDATE Entry
 SET readSynced = ?
 WHERE id = ?;
 
-updateBookmarked:
+updateBookmarkedAndBookmaredSynced:
 UPDATE Entry
-SET bookmarked = ?
+SET bookmarked = ?, bookmarkedSynced = ?
 WHERE id = ?;
 
 updateBookmarkedSynced:

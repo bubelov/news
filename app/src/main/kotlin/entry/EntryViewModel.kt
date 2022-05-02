@@ -85,7 +85,7 @@ class EntryViewModel(
         val prevState = state.value
 
         if (prevState is State.Success) {
-            entriesRepository.setBookmarked(entryId, bookmarked)
+            viewModelScope.launch { entriesRepository.setBookmarked(entryId, bookmarked, false) }
             state.value = prevState.copy(entry = prevState.entry.copy(bookmarked = bookmarked))
         }
 
