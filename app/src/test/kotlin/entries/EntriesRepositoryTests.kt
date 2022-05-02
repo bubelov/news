@@ -163,21 +163,31 @@ class EntriesRepositoryTests {
 
     @Test
     fun selectByRead(): Unit = runBlocking {
-        val read = false
+        val db = database()
 
-        val entries = listOf(
-            entryWithoutSummary().copy(read = false),
+        val repo = EntriesRepository(
+            api = mockk(),
+            db = db.entryQueries,
         )
 
-        every { db.selectByRead(read) } returns mockk {
-            every { executeAsList() } returns entries
-        }
+        val entries = listOf(
+            entryWithoutSummary().copy(read = true),
+            entryWithoutSummary().copy(read = false),
+            entryWithoutSummary().copy(read = false),
+            entryWithoutSummary().copy(read = false),
+        ).sortedByDescending { it.published }
 
-        assertEquals(entries, repository.selectByRead(read))
+        entries.forEach { db.entryQueries.insertOrReplace(it.toEntry()) }
 
-        verify { db.selectByRead(read) }
+        assertEquals(
+            entries.filter { it.read },
+            repo.selectByRead(true).first(),
+        )
 
-        confirmVerified(db)
+        assertEquals(
+            entries.filter { !it.read },
+            repo.selectByRead(false).first(),
+        )
     }
 
     private fun EntryWithoutSummary.toEntry(): Entry {

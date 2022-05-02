@@ -99,7 +99,7 @@ class EntriesModel(
                 if (conf.showReadEntries) {
                     entriesRepo.selectAll().first()
                 } else {
-                    entriesRepo.selectByRead(false)
+                    entriesRepo.selectByRead(false).first()
                 }.filterNot { it.bookmarked }
             }
 

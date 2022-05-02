@@ -13,7 +13,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 import java.time.OffsetDateTime
 
 class EntriesRepository(
@@ -47,8 +46,8 @@ class EntriesRepository(
         return db.selectByReadOrBookmarked(read, bookmarked).asFlow().mapToList()
     }
 
-    suspend fun selectByRead(read: Boolean) = withContext(Dispatchers.IO) {
-        db.selectByRead(read).executeAsList()
+    fun selectByRead(read: Boolean): Flow<List<EntryWithoutSummary>> {
+        return db.selectByRead(read).asFlow().mapToList()
     }
 
     suspend fun updateReadByFeedId(read: Boolean, feedId: String) = withContext(Dispatchers.IO) {
@@ -252,7 +251,6 @@ class EntriesRepository(
         var processedEntry = this
 
         if (contentText.toByteArray().size / 1024 > 250) {
-            Timber.d("Entry content is larger than 250 KiB ($link)")
             processedEntry = processedEntry.copy(contentText = "Content is too large")
         }
 
