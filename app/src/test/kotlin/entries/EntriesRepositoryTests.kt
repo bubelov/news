@@ -1,8 +1,6 @@
 package entries
 
 import api.NewsApi
-import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToList
 import db.Entry
 import db.EntryQueries
 import db.EntryWithoutSummary
@@ -12,11 +10,9 @@ import db.entryWithoutSummary
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
 import io.mockk.verify
 import kotlin.test.assertEquals
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import java.util.UUID
@@ -89,47 +85,80 @@ class EntriesRepositoryTests {
 
     @Test
     fun selectByReadAndBookmarked(): Unit = runBlocking {
-        val read = false
-        val bookmarked = true
+        val db = database()
 
-        val entries = listOf(
-            entryWithoutSummary(),
-            entryWithoutSummary(),
+        val repo = EntriesRepository(
+            api = mockk(),
+            db = db.entryQueries,
         )
 
-        every { db.selectByReadAndBookmarked(read, bookmarked) } returns mockk {
-            every { executeAsList() } returns entries
-        }
+        val entries = listOf(
+            entryWithoutSummary().copy(read = true, bookmarked = true),
+            entryWithoutSummary().copy(read = true, bookmarked = false),
+            entryWithoutSummary().copy(read = false, bookmarked = true),
+            entryWithoutSummary().copy(read = false, bookmarked = false),
+        )
 
-        assertEquals(entries, repository.selectByReadAndBookmarked(read, bookmarked))
+        entries.forEach { db.entryQueries.insertOrReplace(it.toEntry()) }
 
-        verify { db.selectByReadAndBookmarked(read, bookmarked) }
+        assertEquals(
+            entries.filter { it.read && it.bookmarked },
+            repo.selectByReadAndBookmarked(read = true, bookmarked = true).first(),
+        )
 
-        confirmVerified(db)
+        assertEquals(
+            entries.filter { it.read && !it.bookmarked },
+            repo.selectByReadAndBookmarked(read = true, bookmarked = false).first(),
+        )
+
+        assertEquals(
+            entries.filter { !it.read && it.bookmarked },
+            repo.selectByReadAndBookmarked(read = false, bookmarked = true).first(),
+        )
+
+        assertEquals(
+            entries.filter { !it.read && !it.bookmarked },
+            repo.selectByReadAndBookmarked(read = false, bookmarked = false).first(),
+        )
     }
 
     @Test
     fun selectByReadOrBookmarked(): Unit = runBlocking {
-        val read = false
-        val bookmarked = true
+        val db = database()
 
-        val entries = listOf(
-            entryWithoutSummary(),
+        val repo = EntriesRepository(
+            api = mockk(),
+            db = db.entryQueries,
         )
 
-        mockkStatic("com.squareup.sqldelight.runtime.coroutines.FlowQuery")
+        val entries = listOf(
+            entryWithoutSummary().copy(read = true, bookmarked = true),
+            entryWithoutSummary().copy(read = true, bookmarked = false),
+            entryWithoutSummary().copy(read = false, bookmarked = true),
+            entryWithoutSummary().copy(read = false, bookmarked = false),
+        ).sortedByDescending { it.published }
 
-        every { db.selectByReadOrBookmarked(read, bookmarked) } returns mockk {
-            every { asFlow() } returns mockk {
-                every { mapToList() } returns flowOf(entries)
-            }
-        }
+        entries.forEach { db.entryQueries.insertOrReplace(it.toEntry()) }
 
-        assertEquals(entries, repository.selectByReadOrBookmarked(read, bookmarked).first())
+        assertEquals(
+            entries.filter { it.read || it.bookmarked },
+            repo.selectByReadOrBookmarked(read = true, bookmarked = true).first(),
+        )
 
-        verify { db.selectByReadOrBookmarked(read, bookmarked) }
+        assertEquals(
+            entries.filter { it.read || !it.bookmarked },
+            repo.selectByReadOrBookmarked(read = true, bookmarked = false).first(),
+        )
 
-        confirmVerified(db)
+        assertEquals(
+            entries.filter { !it.read || it.bookmarked },
+            repo.selectByReadOrBookmarked(read = false, bookmarked = true).first(),
+        )
+
+        assertEquals(
+            entries.filter { !it.read || !it.bookmarked },
+            repo.selectByReadOrBookmarked(read = false, bookmarked = false).first(),
+        )
     }
 
     @Test

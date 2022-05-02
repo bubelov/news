@@ -33,18 +33,18 @@ class EntriesRepository(
         return db.selectByFeedId(feedId).asFlow().mapToList()
     }
 
-    suspend fun selectByReadAndBookmarked(
+    fun selectByReadAndBookmarked(
         read: Boolean,
         bookmarked: Boolean,
-    ) = withContext(Dispatchers.IO) {
-        db.selectByReadAndBookmarked(read, bookmarked).executeAsList()
+    ): Flow<List<EntryWithoutSummary>> {
+        return db.selectByReadAndBookmarked(read, bookmarked).asFlow().mapToList()
     }
 
-    suspend fun selectByReadOrBookmarked(
+    fun selectByReadOrBookmarked(
         read: Boolean,
         bookmarked: Boolean,
-    ) = withContext(Dispatchers.IO) {
-        db.selectByReadOrBookmarked(read, bookmarked).asFlow().mapToList()
+    ): Flow<List<EntryWithoutSummary>> {
+        return db.selectByReadOrBookmarked(read, bookmarked).asFlow().mapToList()
     }
 
     suspend fun selectByRead(read: Boolean) = withContext(Dispatchers.IO) {

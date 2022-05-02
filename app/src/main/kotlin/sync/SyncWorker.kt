@@ -18,7 +18,6 @@ import entries.EntriesRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
-import timber.log.Timber
 
 class SyncWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
 
@@ -36,30 +35,24 @@ class SyncWorker(context: Context, workerParams: WorkerParameters) : Worker(cont
 
         when (val syncResult = sync.sync()) {
             is SyncResult.Success -> {
-                Timber.d("Got ${syncResult.newAndUpdatedEntries} new and updated entries")
-
                 if (syncResult.newAndUpdatedEntries > 0) {
                     runCatching {
                         val unreadEntries = entriesRepository.selectByReadAndBookmarked(
                             read = false,
                             bookmarked = false,
-                        ).size
+                        ).first().size
 
                         if (unreadEntries > 0) {
                             showUnreadEntriesNotification(unreadEntries, app)
                         }
-                    }.onFailure {
-                        Timber.e(it, "Failed to show unread entries notification (${it.message})")
                     }
                 }
             }
             is SyncResult.Failure -> {
-                Timber.e(syncResult.cause, "Background sync failed (${syncResult.cause.message})")
                 return Result.failure()
             }
         }
 
-        Timber.d("Finished background sync")
         return Result.success()
     }
 
