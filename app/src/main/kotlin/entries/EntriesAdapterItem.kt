@@ -8,7 +8,7 @@ data class EntriesAdapterItem(
     val cropImage: Boolean,
     val title: String,
     val subtitle: String,
-    val supportingText: String,
+    val summary: String,
     val podcast: Boolean,
     val podcastDownloadPercent: Long?,
     var read: Boolean,

@@ -26,7 +26,7 @@ import enclosures.EnclosuresRepository
 import settings.SettingsViewModel
 import common.NetworkMonitor
 import db.entryAdapter
-import entries.EntriesSupportingTextRepository
+import entries.EntriesSummaryRepository
 import feeds.FeedsViewModel
 import feedsettings.FeedSettingsViewModel
 import org.koin.androidx.viewmodel.dsl.viewModelOf
@@ -62,7 +62,7 @@ val appModule = module {
     singleOf(::AccountsRepository)
     singleOf(::FeedsRepository)
     singleOf(::EntriesRepository)
-    singleOf(::EntriesSupportingTextRepository)
+    singleOf(::EntriesSummaryRepository)
     singleOf(::EntriesImagesRepository)
     singleOf(::EnclosuresRepository)
     singleOf(::ConfRepository)

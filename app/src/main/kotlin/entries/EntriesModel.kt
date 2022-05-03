@@ -28,8 +28,9 @@ class EntriesModel(
     private val confRepo: ConfRepository,
     private val feedsRepo: FeedsRepository,
     private val entriesRepo: EntriesRepository,
-    private val newsApiSync: NewsApiSync,
     private val enclosuresRepo: EnclosuresRepository,
+    private val entrySummaryRepo: EntriesSummaryRepository,
+    private val newsApiSync: NewsApiSync,
 ) : ViewModel() {
 
     val filter = MutableStateFlow<EntriesFilter?>(null)
@@ -239,7 +240,7 @@ class EntriesModel(
         }
     }
 
-    private fun EntryWithoutContent.toRow(
+    private suspend fun EntryWithoutContent.toRow(
         feed: Feed?,
         conf: Conf,
     ): EntriesAdapterItem {
@@ -257,7 +258,7 @@ class EntriesModel(
             cropImage = conf.cropPreviewImages,
             title = title,
             subtitle = "${feed?.title ?: "Unknown feed"} · ${DATE_TIME_FORMAT.format(published)}",
-            supportingText = "",
+            summary = entrySummaryRepo.getSummary(id, feed),
             podcast = enclosureLinkType.startsWith("audio"),
             podcastDownloadPercent = null,
             read = read,

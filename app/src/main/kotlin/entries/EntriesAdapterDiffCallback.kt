@@ -21,7 +21,7 @@ class EntriesAdapterDiffCallback : DiffUtil.ItemCallback<EntriesAdapterItem>() {
                 && oldItem.cropImage == newItem.cropImage
                 && oldItem.title == newItem.title
                 && oldItem.subtitle == newItem.subtitle
-                && oldItem.supportingText == newItem.supportingText
+                && oldItem.summary == newItem.summary
                 && oldItem.podcast == newItem.podcast
                 && oldItem.podcastDownloadPercent == newItem.podcastDownloadPercent
                 && oldItem.read == newItem.read

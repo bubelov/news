@@ -98,8 +98,8 @@ class EntriesAdapterViewHolder(
         primaryText.isVisible = primaryText.length() > 0
         secondaryText.text = item.subtitle
 
-        supportingText.isVisible = item.supportingText.isNotBlank()
-        supportingText.text = item.supportingText
+        supportingText.isVisible = item.summary.isNotBlank()
+        supportingText.text = item.summary
 
         podcastPanel.isVisible = false
         podcastPanel.tag = item

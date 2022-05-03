@@ -234,7 +234,7 @@ class EntriesRepository(
         lastEntriesSyncDateTime: String,
         feeds: List<Feed>,
     ): Int {
-        return withContext(Dispatchers.Main) {
+        return withContext(Dispatchers.Default) {
             val lastSyncInstant = if (lastEntriesSyncDateTime.isNotBlank()) {
                 OffsetDateTime.parse(lastEntriesSyncDateTime)
             } else {

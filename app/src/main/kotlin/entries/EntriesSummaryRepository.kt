@@ -2,16 +2,16 @@ package entries
 
 import android.text.SpannableStringBuilder
 import androidx.core.text.HtmlCompat
+import db.EntryQueries
 import db.Feed
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.util.Collections
 import kotlin.math.min
 
-class EntriesSupportingTextRepository(
-    private val entriesRepository: EntriesRepository,
+class EntriesSummaryRepository(
+    private val entryQueries: EntryQueries,
 ) {
 
     companion object {
@@ -20,15 +20,15 @@ class EntriesSupportingTextRepository(
 
     private val cache = Collections.synchronizedMap(mutableMapOf<String, String>())
 
-    suspend fun getSupportingText(entryId: String, feed: Feed?): String =
-        withContext(Dispatchers.IO) {
+    suspend fun getSummary(entryId: String, feed: Feed?): String =
+        withContext(Dispatchers.Default) {
             val cachedSummary = cache[entryId]
 
             if (cachedSummary != null) {
                 return@withContext cachedSummary
             }
 
-            val entry = entriesRepository.selectById(entryId).first()
+            val entry = entryQueries.selectById(entryId).executeAsOneOrNull()
 
             if (entry == null || entry.contentText.isBlank()) {
                 cache[entryId] = ""
@@ -66,6 +66,4 @@ class EntriesSupportingTextRepository(
             cache[entryId] = summary
             summary
         }
-
-    fun getCachedSupportingText(entryId: String) = cache[entryId]
 }

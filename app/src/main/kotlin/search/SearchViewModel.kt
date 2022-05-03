@@ -9,7 +9,7 @@ import db.Feed
 import entries.EntriesAdapterItem
 import entries.EntriesFilter
 import entries.EntriesRepository
-import entries.EntriesSupportingTextRepository
+import entries.EntriesSummaryRepository
 import feeds.FeedsRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,12 +21,12 @@ import sync.NewsApiSync
 import timber.log.Timber
 
 class SearchViewModel(
-    private val feedsRepository: FeedsRepository,
-    private val entriesRepository: EntriesRepository,
-    private val entriesSupportingTextRepository: EntriesSupportingTextRepository,
-    private val enclosuresRepository: EnclosuresRepository,
-    private val sync: NewsApiSync,
+    private val feedsRepo: FeedsRepository,
+    private val entriesRepo: EntriesRepository,
+    private val entriesSummaryRepo: EntriesSummaryRepository,
+    private val enclosuresRepo: EnclosuresRepository,
     private val confRepo: ConfRepository,
+    private val sync: NewsApiSync,
 ) : ViewModel() {
 
     val searchString = MutableStateFlow("")
@@ -52,19 +52,19 @@ class SearchViewModel(
             val entries = when (filter) {
                 EntriesFilter.NotBookmarked -> {
                     delay(1500)
-                    entriesRepository.selectByQuery(query).first()
+                    entriesRepo.selectByQuery(query).first()
                 }
-                EntriesFilter.Bookmarked -> entriesRepository.selectByQueryAndBookmarked(
+                EntriesFilter.Bookmarked -> entriesRepo.selectByQueryAndBookmarked(
                     query,
                     true,
                 ).first()
-                is EntriesFilter.BelongToFeed -> entriesRepository.selectByQueryAndFeedId(
+                is EntriesFilter.BelongToFeed -> entriesRepo.selectByQueryAndFeedId(
                     query,
                     filter.feedId,
                 ).first()
             }
 
-            val feeds = feedsRepository.selectAll().first()
+            val feeds = feedsRepo.selectAll().first()
 
             val results = entries.map { entry ->
                 val feed = feeds.singleOrNull { feed -> feed.id == entry.feedId }
@@ -77,16 +77,16 @@ class SearchViewModel(
         }
     }
 
-    fun getEntry(id: String) = entriesRepository.selectById(id)
+    fun getEntry(id: String) = entriesRepo.selectById(id)
 
-    suspend fun getFeed(id: String) = feedsRepository.selectById(id)
+    suspend fun getFeed(id: String) = feedsRepo.selectById(id)
 
     fun setRead(
         entryIds: Collection<String>,
         read: Boolean,
     ) {
         viewModelScope.launch {
-            entryIds.forEach { entriesRepository.setRead(it, read, false) }
+            entryIds.forEach { entriesRepo.setRead(it, read, false) }
 
             sync.sync(
                 NewsApiSync.SyncArgs(
@@ -99,11 +99,11 @@ class SearchViewModel(
     }
 
     suspend fun downloadPodcast(id: String) {
-        enclosuresRepository.download(id)
+        enclosuresRepo.download(id)
     }
 
     suspend fun getCachedPodcastUri(entryId: String): Uri? {
-        val enclosure = enclosuresRepository.selectByEntryId(entryId).first() ?: return null
+        val enclosure = enclosuresRepo.selectByEntryId(entryId).first() ?: return null
 
         val uri = runCatching {
             Uri.parse(enclosure.cacheUri)
@@ -125,9 +125,9 @@ class SearchViewModel(
             cropImage = false,
             title = title,
             subtitle = (feed?.title ?: "Unknown feed") + " · " + published,
-            supportingText = entriesSupportingTextRepository.getSupportingText(this@toRow.id, feed),
+            summary = entriesSummaryRepo.getSummary(this@toRow.id, feed),
             podcast = enclosureLinkType.startsWith("audio"),
-            podcastDownloadPercent = enclosuresRepository.getDownloadProgress(this@toRow.id)
+            podcastDownloadPercent = enclosuresRepo.getDownloadProgress(this@toRow.id)
                 .first(),
             read = read,
         )
