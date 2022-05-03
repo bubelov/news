@@ -70,7 +70,7 @@ class EntriesFragment : AppFragment(), Scrollable {
                         model.setRead(listOf(item.id), true)
 
                         val entry = model.getEntry(item.id).first() ?: return@launchWhenResumed
-                        val feed = model.getFeed(entry.feedId) ?: return@launchWhenResumed
+                        val feed = model.getFeed(entry.feedId).first() ?: return@launchWhenResumed
 
                         if (feed.openEntriesInBrowser) {
                             openUrl(entry.link, model.getConf().first().useBuiltInBrowser)
@@ -281,7 +281,7 @@ class EntriesFragment : AppFragment(), Scrollable {
                 setupUpNavigation()
 
                 lifecycleScope.launchWhenResumed {
-                    title = model.getFeed(filter.feedId)?.title
+                    title = model.getFeed(filter.feedId).first()?.title
                 }
             }
         }

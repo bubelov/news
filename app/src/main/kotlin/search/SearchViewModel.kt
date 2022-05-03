@@ -79,7 +79,7 @@ class SearchViewModel(
 
     fun getEntry(id: String) = entriesRepo.selectById(id)
 
-    suspend fun getFeed(id: String) = feedsRepo.selectById(id)
+    fun getFeed(id: String) = feedsRepo.selectById(id)
 
     fun setRead(
         entryIds: Collection<String>,

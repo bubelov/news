@@ -3,6 +3,7 @@ package feeds
 import api.NewsApi
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
+import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import db.EntryQueries
 import db.Feed
 import db.FeedQueries
@@ -26,9 +27,7 @@ class FeedsRepository(
 
     suspend fun insertByFeedUrl(url: HttpUrl, title: String? = null) {
         withContext(Dispatchers.Default) {
-            var feed = withContext(Dispatchers.IO) {
-                api.addFeed(url).getOrThrow()
-            }
+            var feed = api.addFeed(url).getOrThrow()
 
             if (!title.isNullOrBlank()) {
                 feed = feed.copy(title = title)
@@ -42,31 +41,24 @@ class FeedsRepository(
         return feedQueries.selectAll().asFlow().mapToList()
     }
 
-    suspend fun selectById(id: String): Feed? {
-        return withContext(Dispatchers.Default) {
-            feedQueries.selectById(id).executeAsOneOrNull()
-        }
+    fun selectById(id: String): Flow<Feed?> {
+        return feedQueries.selectById(id).asFlow().mapToOneOrNull()
     }
 
     suspend fun updateTitle(feedId: String, newTitle: String) {
-        val feed = selectById(feedId) ?: throw Exception("Cannot find feed $feedId in cache")
-        val trimmedNewTitle = newTitle.trim()
-
-        withContext(Dispatchers.IO) {
-            api.updateFeedTitle(feedId, trimmedNewTitle)
-        }
-
         withContext(Dispatchers.Default) {
+            val feed = feedQueries.selectById(feedId).executeAsOneOrNull()
+                ?: throw Exception("Cannot find feed $feedId in cache")
+            val trimmedNewTitle = newTitle.trim()
+            api.updateFeedTitle(feedId, trimmedNewTitle)
             feedQueries.insertOrReplace(feed.copy(title = trimmedNewTitle))
         }
     }
 
     suspend fun deleteById(id: String) {
-        withContext(Dispatchers.IO) {
-            api.deleteFeed(id)
-        }
-
         withContext(Dispatchers.Default) {
+            api.deleteFeed(id)
+
             feedQueries.transaction {
                 feedQueries.deleteById(id)
                 entryQueries.deleteByFeedId(id)
@@ -75,11 +67,8 @@ class FeedsRepository(
     }
 
     suspend fun sync() {
-        val newFeeds = withContext(Dispatchers.IO) {
-            api.getFeeds().sortedBy { it.id }
-        }
-
         withContext(Dispatchers.Default) {
+            val newFeeds = api.getFeeds().sortedBy { it.id }
             val cachedFeeds = selectAll().first().sortedBy { it.id }
 
             feedQueries.transaction {

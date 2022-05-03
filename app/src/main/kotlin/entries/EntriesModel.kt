@@ -161,7 +161,7 @@ class EntriesModel(
         enclosuresRepo.download(id)
     }
 
-    suspend fun getFeed(id: String) = feedsRepo.selectById(id)
+    fun getFeed(id: String) = feedsRepo.selectById(id)
 
     fun getEntry(id: String) = entriesRepo.selectById(id)
 

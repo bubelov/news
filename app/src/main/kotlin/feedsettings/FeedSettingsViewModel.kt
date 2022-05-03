@@ -3,23 +3,24 @@ package feedsettings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import feeds.FeedsRepository
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class FeedSettingsViewModel(
     private val feedsRepository: FeedsRepository,
 ) : ViewModel() {
 
-    suspend fun getFeed(id: String) = feedsRepository.selectById(id)
+    fun getFeed(id: String) = feedsRepository.selectById(id)
 
     fun setOpenEntriesInBrowser(feedId: String, openEntriesInBrowser: Boolean) {
         viewModelScope.launch {
-            val feed = getFeed(feedId) ?: return@launch
+            val feed = getFeed(feedId).first() ?: return@launch
             feedsRepository.insertOrReplace(feed.copy(openEntriesInBrowser = openEntriesInBrowser))
         }
     }
 
     suspend fun setShowPreviewImages(feedId: String, value: Boolean?) {
-        val feed = getFeed(feedId) ?: return
+        val feed = getFeed(feedId).first() ?: return
         feedsRepository.insertOrReplace(feed.copy(showPreviewImages = value))
     }
 
@@ -40,7 +41,7 @@ class FeedSettingsViewModel(
 
     fun setBlockedWords(feedId: String, blockedWords: String) {
         viewModelScope.launch {
-            val feed = getFeed(feedId) ?: return@launch
+            val feed = getFeed(feedId).first() ?: return@launch
             feedsRepository.insertOrReplace(feed.copy(blockedWords = blockedWords))
         }
     }

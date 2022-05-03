@@ -1,64 +1,66 @@
 package feeds
 
 import api.NewsApi
-import db.EntryQueries
-import db.FeedQueries
 import db.database
 import db.feed
 import io.mockk.coEvery
-import io.mockk.coVerifySequence
+import io.mockk.coVerify
 import io.mockk.confirmVerified
-import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.flow.first
 import kotlin.test.assertEquals
 import kotlinx.coroutines.runBlocking
 import okhttp3.HttpUrl.Companion.toHttpUrl
-import org.junit.Before
-import org.junit.Test
-import java.util.UUID
+import kotlin.test.Test
+import kotlin.test.assertTrue
 
 class FeedsRepositoryTests {
 
-    private lateinit var feedQueries: FeedQueries
-    private lateinit var entryQueries: EntryQueries
-    private lateinit var api: NewsApi
-
-    private lateinit var repository: FeedsRepository
-
-    @Before
-    fun setup() {
-        feedQueries = mockk(relaxUnitFun = true)
-        entryQueries = mockk(relaxUnitFun = true)
-        api = mockk(relaxUnitFun = true)
-        repository = FeedsRepository(feedQueries, entryQueries, api)
-    }
-
     @Test
     fun `insert or replace`(): Unit = runBlocking {
+        val db = database()
+
+        val repo = FeedsRepository(
+            feedQueries = db.feedQueries,
+            entryQueries = db.entryQueries,
+            api = mockk(),
+        )
+
         val feed = feed()
-        repository.insertOrReplace(feed)
-        verify { feedQueries.insertOrReplace(feed) }
-        confirmVerified(feedQueries)
+        repo.insertOrReplace(feed)
+
+        assertEquals(
+            expected = feed,
+            actual = db.feedQueries.selectAll().executeAsList().single(),
+        )
     }
 
     @Test
     fun `insert by url`(): Unit = runBlocking {
+        val feedUrl = "https://example.com/".toHttpUrl()
         val feed = feed()
 
-        val feedUrl = "https://example.com/".toHttpUrl()
+        val db = database()
 
-        coEvery { api.addFeed(feedUrl) } returns Result.success(feed)
-
-        repository.insertByFeedUrl(feedUrl)
-
-        coVerifySequence {
-            api.addFeed(feedUrl)
-            feedQueries.insertOrReplace(feed)
+        val api: NewsApi = mockk<NewsApi>().apply {
+            coEvery { addFeed(feedUrl) } returns Result.success(feed)
         }
 
-        confirmVerified(api, feedQueries)
+        val repo = FeedsRepository(
+            feedQueries = db.feedQueries,
+            entryQueries = db.entryQueries,
+            api = api,
+        )
+
+        repo.insertByFeedUrl(feedUrl)
+
+        assertEquals(
+            expected = feed,
+            actual = db.feedQueries.selectAll().executeAsList().single(),
+        )
+
+        coVerify { api.addFeed(feedUrl) }
+        confirmVerified(api)
     }
 
     @Test
@@ -78,55 +80,74 @@ class FeedsRepositoryTests {
 
     @Test
     fun `select by id`(): Unit = runBlocking {
-        val feed = feed()
+        val db = database()
 
-        every { feedQueries.selectById(feed.id) } returns mockk {
-            every { executeAsOneOrNull() } returns feed
-        }
+        val repo = FeedsRepository(
+            feedQueries = db.feedQueries,
+            entryQueries = db.entryQueries,
+            api = mockk(),
+        )
 
-        assertEquals(feed, repository.selectById(feed.id))
+        val feeds = listOf(feed(), feed(), feed())
+        feeds.forEach { db.feedQueries.insertOrReplace(it) }
 
-        verify { feedQueries.selectById(feed.id) }
+        val randomFeed = feeds.random()
 
-        confirmVerified(feedQueries)
+        assertEquals(randomFeed, repo.selectById(randomFeed.id).first())
     }
 
     @Test
     fun `update title`(): Unit = runBlocking {
         val feed = feed()
-
         val newTitle = "  ${feed.title}_modified "
         val trimmedNewTitle = newTitle.trim()
 
-        every { feedQueries.selectById(feed.id) } returns mockk {
-            every { executeAsOneOrNull() } returns feed
+        val db = database()
+
+        val api: NewsApi = mockk<NewsApi>().apply {
+            coEvery { updateFeedTitle(feed.id, trimmedNewTitle) } returns Unit
         }
 
-        repository.updateTitle(
+        val repo = FeedsRepository(
+            feedQueries = db.feedQueries,
+            entryQueries = db.entryQueries,
+            api = api,
+        )
+
+        db.feedQueries.insertOrReplace(feed)
+
+        repo.updateTitle(
             feedId = feed.id,
             newTitle = newTitle,
         )
 
-        coVerifySequence {
-            feedQueries.selectById(feed.id)
-            api.updateFeedTitle(feed.id, trimmedNewTitle)
-            feedQueries.insertOrReplace(feed.copy(title = trimmedNewTitle))
-        }
-
-        confirmVerified(api, feedQueries)
+        assertEquals(
+            expected = feed.copy(title = trimmedNewTitle),
+            actual = repo.selectAll().first().single(),
+        )
     }
 
     @Test
     fun `delete by id`(): Unit = runBlocking {
-        val id = UUID.randomUUID().toString()
+        val feeds = listOf(feed(), feed(), feed())
+        val randomFeed = feeds.random()
 
-        repository.deleteById(id)
+        val db = database()
 
-        coVerifySequence {
-            api.deleteFeed(id)
-            feedQueries.transaction(false, any())
+        val api: NewsApi = mockk<NewsApi>().apply {
+            coEvery { deleteFeed(randomFeed.id) } returns Unit
         }
 
-        confirmVerified(api, feedQueries)
+        val repo = FeedsRepository(
+            feedQueries = db.feedQueries,
+            entryQueries = db.entryQueries,
+            api = api,
+        )
+
+        feeds.forEach { db.feedQueries.insertOrReplace(it) }
+
+        repo.deleteById(randomFeed.id)
+
+        assertTrue { !db.feedQueries.selectAll().executeAsList().contains(randomFeed) }
     }
 }

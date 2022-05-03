@@ -56,7 +56,7 @@ class EntryViewModel(
                 return@withContext
             }
 
-            val feed = feedsRepository.selectById(entry.feedId)
+            val feed = feedsRepository.selectById(entry.feedId).first()
 
             if (feed == null) {
                 val message = app.getString(R.string.cannot_find_feed_with_id_s, entry.feedId)

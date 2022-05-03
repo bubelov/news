@@ -43,7 +43,7 @@ class SearchFragment : AppFragment() {
             override fun onItemClick(item: EntriesAdapterItem) {
                 lifecycleScope.launchWhenResumed {
                     val entry = model.getEntry(item.id).first() ?: return@launchWhenResumed
-                    val feed = model.getFeed(entry.feedId) ?: return@launchWhenResumed
+                    val feed = model.getFeed(entry.feedId).first() ?: return@launchWhenResumed
 
                     model.setRead(listOf(entry.id), true)
 

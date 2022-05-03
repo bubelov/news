@@ -17,6 +17,7 @@ import com.google.android.material.textfield.TextInputEditText
 import common.AppFragment
 import common.showErrorDialog
 import common.showKeyboard
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -43,7 +44,7 @@ class FeedSettingsFragment : AppFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         viewLifecycleOwner.lifecycleScope.launch {
-            val feed = model.getFeed(args.feedId)
+            val feed = model.getFeed(args.feedId).first()
 
             if (feed == null) {
                 findNavController().popBackStack()
@@ -108,7 +109,7 @@ class FeedSettingsFragment : AppFragment() {
 
     private fun updatePreviewImagesPanel() {
         viewLifecycleOwner.lifecycleScope.launch {
-            val feed = model.getFeed(args.feedId)!!
+            val feed = model.getFeed(args.feedId).first()!!
 
             binding.showPreviewImages.text = when (feed.showPreviewImages) {
                 true -> getString(R.string.show)
