@@ -1,7 +1,7 @@
 package api
 
 import db.Entry
-import db.EntryWithoutSummary
+import db.EntryWithoutContent
 import db.Feed
 import kotlinx.coroutines.flow.Flow
 import okhttp3.HttpUrl
@@ -27,5 +27,5 @@ interface NewsApi {
 
     suspend fun markEntriesAsRead(entriesIds: List<String>, read: Boolean)
 
-    suspend fun markEntriesAsBookmarked(entries: List<EntryWithoutSummary>, bookmarked: Boolean)
+    suspend fun markEntriesAsBookmarked(entries: List<EntryWithoutContent>, bookmarked: Boolean)
 }

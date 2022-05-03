@@ -5,7 +5,7 @@ VALUES ?;
 
 selectAll:
 SELECT *
-FROM EntryWithoutSummary
+FROM EntryWithoutContent
 ORDER BY published DESC;
 
 selectById:
@@ -15,42 +15,42 @@ WHERE id = ?;
 
 selectByFeedId:
 SELECT *
-FROM EntryWithoutSummary
+FROM EntryWithoutContent
 WHERE feedId = ?;
 
 selectByReadAndBookmarked:
 SELECT *
-FROM EntryWithoutSummary
+FROM EntryWithoutContent
 WHERE read = ? AND bookmarked = ?
 ORDER BY published DESC;
 
 selectByReadOrBookmarked:
 SELECT *
-FROM EntryWithoutSummary
+FROM EntryWithoutContent
 WHERE read = ? OR bookmarked = ?
 ORDER BY published DESC;
 
 selectByRead:
 SELECT *
-FROM EntryWithoutSummary
+FROM EntryWithoutContent
 WHERE read = ?
 ORDER BY published DESC;
 
 selectByReadSynced:
 SELECT *
-FROM EntryWithoutSummary
+FROM EntryWithoutContent
 WHERE readSynced = ?
 ORDER BY published DESC;
 
 selectByBookmarked:
 SELECT *
-FROM EntryWithoutSummary
+FROM EntryWithoutContent
 WHERE bookmarked = ?
 ORDER BY published DESC;
 
 selectByBookmarkedSynced:
 SELECT *
-FROM EntryWithoutSummary
+FROM EntryWithoutContent
 WHERE bookmarkedSynced = ?
 ORDER BY published DESC;
 

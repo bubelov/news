@@ -53,7 +53,7 @@ CREATE TABLE Entry (
   ogImageHeight INTEGER NOT NULL
 );
 
-CREATE VIEW EntryWithoutSummary
+CREATE VIEW EntryWithoutContent
 AS
 SELECT
   id,

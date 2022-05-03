@@ -7,7 +7,7 @@ import com.squareup.sqldelight.runtime.coroutines.mapToOne
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import db.Entry
 import db.EntryQueries
-import db.EntryWithoutSummary
+import db.EntryWithoutContent
 import db.Feed
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -22,7 +22,7 @@ class EntriesRepository(
     private val db: EntryQueries,
 ) {
 
-    fun selectAll(): Flow<List<EntryWithoutSummary>> {
+    fun selectAll(): Flow<List<EntryWithoutContent>> {
         return db.selectAll().asFlow().mapToList()
     }
 
@@ -30,25 +30,25 @@ class EntriesRepository(
         return db.selectById(entryId).asFlow().mapToOneOrNull()
     }
 
-    fun selectByFeedId(feedId: String): Flow<List<EntryWithoutSummary>> {
+    fun selectByFeedId(feedId: String): Flow<List<EntryWithoutContent>> {
         return db.selectByFeedId(feedId).asFlow().mapToList()
     }
 
     fun selectByReadAndBookmarked(
         read: Boolean,
         bookmarked: Boolean,
-    ): Flow<List<EntryWithoutSummary>> {
+    ): Flow<List<EntryWithoutContent>> {
         return db.selectByReadAndBookmarked(read, bookmarked).asFlow().mapToList()
     }
 
     fun selectByReadOrBookmarked(
         read: Boolean,
         bookmarked: Boolean,
-    ): Flow<List<EntryWithoutSummary>> {
+    ): Flow<List<EntryWithoutContent>> {
         return db.selectByReadOrBookmarked(read, bookmarked).asFlow().mapToList()
     }
 
-    fun selectByRead(read: Boolean): Flow<List<EntryWithoutSummary>> {
+    fun selectByRead(read: Boolean): Flow<List<EntryWithoutContent>> {
         return db.selectByRead(read).asFlow().mapToList()
     }
 
@@ -74,7 +74,7 @@ class EntriesRepository(
         }
     }
 
-    fun getBookmarked(): Flow<List<EntryWithoutSummary>> {
+    fun getBookmarked(): Flow<List<EntryWithoutContent>> {
         return db.selectByBookmarked(true).asFlow().mapToList()
     }
 

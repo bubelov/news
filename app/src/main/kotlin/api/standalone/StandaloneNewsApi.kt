@@ -12,7 +12,7 @@ import co.appreactor.feedk.RssItemGuid
 import co.appreactor.feedk.feed
 import db.Entry
 import db.EntryQueries
-import db.EntryWithoutSummary
+import db.EntryWithoutContent
 import db.Feed
 import db.FeedQueries
 import kotlinx.coroutines.Dispatchers
@@ -201,7 +201,7 @@ class StandaloneNewsApi(
     }
 
     override suspend fun markEntriesAsBookmarked(
-        entries: List<EntryWithoutSummary>,
+        entries: List<EntryWithoutContent>,
         bookmarked: Boolean
     ) {
 

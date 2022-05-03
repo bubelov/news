@@ -2,7 +2,7 @@ package entries
 
 import db.database
 import db.entry
-import db.entryWithoutSummary
+import db.entryWithoutContent
 import db.toEntry
 import io.mockk.mockk
 import kotlin.test.assertEquals
@@ -22,7 +22,7 @@ class EntriesRepositoryTests {
             db = db.entryQueries,
         )
 
-        val entries = listOf(entryWithoutSummary())
+        val entries = listOf(entryWithoutContent())
         entries.forEach { db.entryQueries.insertOrReplace(it.toEntry()) }
 
         assertEquals(entries, repo.selectAll().first())
@@ -57,10 +57,10 @@ class EntriesRepositoryTests {
         val feedId = UUID.randomUUID().toString()
 
         val entries = listOf(
-            entryWithoutSummary().copy(feedId = UUID.randomUUID().toString()),
-            entryWithoutSummary().copy(feedId = feedId),
-            entryWithoutSummary().copy(feedId = feedId),
-            entryWithoutSummary().copy(feedId = UUID.randomUUID().toString()),
+            entryWithoutContent().copy(feedId = UUID.randomUUID().toString()),
+            entryWithoutContent().copy(feedId = feedId),
+            entryWithoutContent().copy(feedId = feedId),
+            entryWithoutContent().copy(feedId = UUID.randomUUID().toString()),
         )
 
         entries.forEach { db.entryQueries.insertOrReplace(it.toEntry()) }
@@ -78,10 +78,10 @@ class EntriesRepositoryTests {
         )
 
         val entries = listOf(
-            entryWithoutSummary().copy(read = true, bookmarked = true),
-            entryWithoutSummary().copy(read = true, bookmarked = false),
-            entryWithoutSummary().copy(read = false, bookmarked = true),
-            entryWithoutSummary().copy(read = false, bookmarked = false),
+            entryWithoutContent().copy(read = true, bookmarked = true),
+            entryWithoutContent().copy(read = true, bookmarked = false),
+            entryWithoutContent().copy(read = false, bookmarked = true),
+            entryWithoutContent().copy(read = false, bookmarked = false),
         )
 
         entries.forEach { db.entryQueries.insertOrReplace(it.toEntry()) }
@@ -117,10 +117,10 @@ class EntriesRepositoryTests {
         )
 
         val entries = listOf(
-            entryWithoutSummary().copy(read = true, bookmarked = true),
-            entryWithoutSummary().copy(read = true, bookmarked = false),
-            entryWithoutSummary().copy(read = false, bookmarked = true),
-            entryWithoutSummary().copy(read = false, bookmarked = false),
+            entryWithoutContent().copy(read = true, bookmarked = true),
+            entryWithoutContent().copy(read = true, bookmarked = false),
+            entryWithoutContent().copy(read = false, bookmarked = true),
+            entryWithoutContent().copy(read = false, bookmarked = false),
         ).sortedByDescending { it.published }
 
         entries.forEach { db.entryQueries.insertOrReplace(it.toEntry()) }
@@ -156,10 +156,10 @@ class EntriesRepositoryTests {
         )
 
         val entries = listOf(
-            entryWithoutSummary().copy(read = true),
-            entryWithoutSummary().copy(read = false),
-            entryWithoutSummary().copy(read = false),
-            entryWithoutSummary().copy(read = false),
+            entryWithoutContent().copy(read = true),
+            entryWithoutContent().copy(read = false),
+            entryWithoutContent().copy(read = false),
+            entryWithoutContent().copy(read = false),
         ).sortedByDescending { it.published }
 
         entries.forEach { db.entryQueries.insertOrReplace(it.toEntry()) }

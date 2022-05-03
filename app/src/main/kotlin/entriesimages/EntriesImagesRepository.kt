@@ -5,7 +5,7 @@ import android.graphics.Color
 import entries.EntriesRepository
 import com.squareup.picasso.Picasso
 import common.ConfRepository
-import db.EntryWithoutSummary
+import db.EntryWithoutContent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -49,7 +49,7 @@ class EntriesImagesRepository(
         }
     }
 
-    private suspend fun syncPreview(entry: EntryWithoutSummary) {
+    private suspend fun syncPreview(entry: EntryWithoutContent) {
         withContext(Dispatchers.Default) {
             if (entry.ogImageChecked) {
                 return@withContext

@@ -1,7 +1,7 @@
 package api
 
 import db.Entry
-import db.EntryWithoutSummary
+import db.EntryWithoutContent
 import db.Feed
 import kotlinx.coroutines.flow.Flow
 import okhttp3.HttpUrl
@@ -44,7 +44,7 @@ class NewsApiWrapper : NewsApi {
     }
 
     override suspend fun markEntriesAsBookmarked(
-        entries: List<EntryWithoutSummary>,
+        entries: List<EntryWithoutContent>,
         bookmarked: Boolean,
     ) {
         api.markEntriesAsBookmarked(entries, bookmarked)

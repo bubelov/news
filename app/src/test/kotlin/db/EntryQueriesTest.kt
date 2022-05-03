@@ -28,7 +28,7 @@ class EntryQueriesTest {
         items.forEach { db.insertOrReplace(it) }
 
         assertEquals(
-            items.map { it.withoutSummary() }.reversed(),
+            items.map { it.withoutContent() }.reversed(),
             db.selectAll().executeAsList()
         )
     }
@@ -73,7 +73,7 @@ class EntryQueriesTest {
         all.forEach { db.insertOrReplace(it) }
 
         assertEquals(
-            all.filter { !it.read && !it.bookmarked }.map { it.withoutSummary() },
+            all.filter { !it.read && !it.bookmarked }.map { it.withoutContent() },
             db.selectByReadAndBookmarked(read = false, bookmarked = false).executeAsList(),
         )
     }
@@ -89,7 +89,7 @@ class EntryQueriesTest {
         all.forEach { db.insertOrReplace(it) }
 
         assertEquals(
-            all.filter { !it.read || it.bookmarked }.map { it.withoutSummary() }.reversed(),
+            all.filter { !it.read || it.bookmarked }.map { it.withoutContent() }.reversed(),
             db.selectByReadOrBookmarked(read = false, bookmarked = true).executeAsList(),
         )
     }
@@ -105,12 +105,12 @@ class EntryQueriesTest {
         all.forEach { db.insertOrReplace(it) }
 
         assertEquals(
-            all.filter { it.read }.map { it.withoutSummary() }.sortedByDescending { it.published },
+            all.filter { it.read }.map { it.withoutContent() }.sortedByDescending { it.published },
             db.selectByRead(true).executeAsList(),
         )
 
         assertEquals(
-            all.filter { !it.read }.map { it.withoutSummary() }.sortedByDescending { it.published },
+            all.filter { !it.read }.map { it.withoutContent() }.sortedByDescending { it.published },
             db.selectByRead(false).executeAsList(),
         )
     }
@@ -126,12 +126,12 @@ class EntryQueriesTest {
         all.forEach { db.insertOrReplace(it) }
 
         assertEquals(
-            all.filter { it.readSynced }.map { it.withoutSummary() }.sortedByDescending { it.published },
+            all.filter { it.readSynced }.map { it.withoutContent() }.sortedByDescending { it.published },
             db.selectByReadSynced(true).executeAsList(),
         )
 
         assertEquals(
-            all.filter { !it.readSynced }.map { it.withoutSummary() }.sortedByDescending { it.published },
+            all.filter { !it.readSynced }.map { it.withoutContent() }.sortedByDescending { it.published },
             db.selectByReadSynced(false).executeAsList(),
         )
     }
@@ -147,12 +147,12 @@ class EntryQueriesTest {
         all.forEach { db.insertOrReplace(it) }
 
         assertEquals(
-            all.filter { it.bookmarked }.map { it.withoutSummary() }.sortedByDescending { it.published },
+            all.filter { it.bookmarked }.map { it.withoutContent() }.sortedByDescending { it.published },
             db.selectByBookmarked(true).executeAsList(),
         )
 
         assertEquals(
-            all.filter { !it.bookmarked }.map { it.withoutSummary() }.sortedByDescending { it.published },
+            all.filter { !it.bookmarked }.map { it.withoutContent() }.sortedByDescending { it.published },
             db.selectByBookmarked(false).executeAsList(),
         )
     }
@@ -235,7 +235,7 @@ fun entry() = Entry(
     ogImageHeight = 0,
 )
 
-fun entryWithoutSummary() = EntryWithoutSummary(
+fun entryWithoutContent() = EntryWithoutContent(
     id = UUID.randomUUID().toString(),
     feedId = "",
     title = "",
@@ -257,7 +257,7 @@ fun entryWithoutSummary() = EntryWithoutSummary(
     ogImageHeight = 0,
 )
 
-fun Entry.withoutSummary() = EntryWithoutSummary(
+fun Entry.withoutContent() = EntryWithoutContent(
     id = id,
     feedId = feedId,
     title = title,
@@ -279,7 +279,7 @@ fun Entry.withoutSummary() = EntryWithoutSummary(
     ogImageHeight = 0,
 )
 
-fun EntryWithoutSummary.toEntry(): Entry {
+fun EntryWithoutContent.toEntry(): Entry {
     return Entry(
         id = id,
         feedId = feedId,

@@ -2,7 +2,7 @@ package api.nextcloud
 
 import api.NewsApi
 import db.Entry
-import db.EntryWithoutSummary
+import db.EntryWithoutContent
 import db.Feed
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -135,7 +135,7 @@ class NextcloudNewsApiAdapter(
     }
 
     override suspend fun markEntriesAsBookmarked(
-        entries: List<EntryWithoutSummary>,
+        entries: List<EntryWithoutContent>,
         bookmarked: Boolean,
     ) {
         val args =

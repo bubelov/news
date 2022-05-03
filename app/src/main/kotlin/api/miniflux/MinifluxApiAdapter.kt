@@ -2,7 +2,7 @@ package api.miniflux
 
 import api.NewsApi
 import db.Entry
-import db.EntryWithoutSummary
+import db.EntryWithoutContent
 import db.Feed
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -114,7 +114,7 @@ class MinifluxApiAdapter(
     }
 
     override suspend fun markEntriesAsBookmarked(
-        entries: List<EntryWithoutSummary>,
+        entries: List<EntryWithoutContent>,
         bookmarked: Boolean,
     ) {
         entries.forEach {

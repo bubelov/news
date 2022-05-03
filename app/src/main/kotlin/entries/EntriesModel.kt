@@ -7,7 +7,7 @@ import common.ConfRepository
 import common.ConfRepository.Companion.SORT_ORDER_ASCENDING
 import common.ConfRepository.Companion.SORT_ORDER_DESCENDING
 import db.Conf
-import db.EntryWithoutSummary
+import db.EntryWithoutContent
 import db.Feed
 import enclosures.EnclosuresRepository
 import feeds.FeedsRepository
@@ -239,7 +239,7 @@ class EntriesModel(
         }
     }
 
-    private fun EntryWithoutSummary.toRow(
+    private fun EntryWithoutContent.toRow(
         feed: Feed?,
         conf: Conf,
     ): EntriesAdapterItem {
