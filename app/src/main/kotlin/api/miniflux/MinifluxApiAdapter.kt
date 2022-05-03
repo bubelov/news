@@ -7,7 +7,6 @@ import db.Feed
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import okhttp3.HttpUrl
-import timber.log.Timber
 import java.time.OffsetDateTime
 
 class MinifluxApiAdapter(
@@ -50,18 +49,14 @@ class MinifluxApiAdapter(
         var oldestEntryId = Long.MAX_VALUE
 
         while (true) {
-            Timber.d("Oldest entry ID: $oldestEntryId")
-
             val entries = api.getEntriesBeforeEntry(
                 status = if (includeReadEntries) "" else "unread",
                 entryId = oldestEntryId,
                 limit = batchSize,
             )
 
-            Timber.d("Got ${entries.entries.size} entries")
             currentBatch += entries.entries
             totalFetched += currentBatch.size
-            Timber.d("Fetched $totalFetched entries so far")
             emit(currentBatch.map { it.toEntry() })
 
             if (currentBatch.size < batchSize) {
@@ -73,12 +68,10 @@ class MinifluxApiAdapter(
         }
 
         val starredEntries = api.getStarredEntries()
-        Timber.d("Fetched starred entries (count = ${starredEntries.entries.count()})")
 
         if (starredEntries.entries.isNotEmpty()) {
             currentBatch += starredEntries.entries
             totalFetched += currentBatch.size
-            Timber.d("Fetched $totalFetched entries so far")
             emit(currentBatch.map { it.toEntry() })
             currentBatch.clear()
         }

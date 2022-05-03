@@ -18,7 +18,6 @@ import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import opml.exportOpml
 import opml.importOpml
-import timber.log.Timber
 import java.util.concurrent.atomic.AtomicInteger
 
 class FeedsViewModel(
@@ -92,7 +91,6 @@ class FeedsViewModel(
                             added.incrementAndGet()
                         }.onFailure {
                             errors += "Failed to import feed ${outline.xmlUrl}\nReason: ${it.message}"
-                            Timber.e(it)
                             failed.incrementAndGet()
                         }
 

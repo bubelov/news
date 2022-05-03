@@ -26,7 +26,6 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.jsoup.Jsoup
-import timber.log.Timber
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.time.OffsetDateTime
@@ -124,8 +123,6 @@ class StandaloneNewsApi(
         maxEntryUpdated: OffsetDateTime?,
         lastSync: OffsetDateTime?,
     ): List<Entry> = withContext(Dispatchers.IO) {
-        Timber.d("Fetching new and updated entries")
-        val startTimestamp = System.currentTimeMillis()
         val entries = mutableListOf<Entry>()
 
         feedQueries.selectAll().executeAsList().chunked(10).forEach { chunk ->
@@ -136,8 +133,6 @@ class StandaloneNewsApi(
             entryQueries.selectById(it.id).executeAsOneOrNull() != null
         }
 
-        val totalTimeMillis = System.currentTimeMillis() - startTimestamp
-        Timber.d("Fetched new and updated entries in $totalTimeMillis ms")
         return@withContext entries
     }
 

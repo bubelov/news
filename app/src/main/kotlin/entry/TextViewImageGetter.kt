@@ -5,12 +5,10 @@ import android.text.Html
 import android.widget.TextView
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.squareup.picasso.Picasso
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import timber.log.Timber
 
 class TextViewImageGetter(
     private val textView: TextView,
@@ -23,7 +21,6 @@ class TextViewImageGetter(
         val width = textView.width
 
         if (width == 0) {
-            Timber.e(Exception("Entry text view has zero width"))
             return drawable
         }
 
@@ -49,10 +46,6 @@ class TextViewImageGetter(
                         .resize(width, 0)
                         .onlyScaleDown()
                         .into(drawable)
-                }
-            }.onFailure {
-                if (it !is CancellationException) {
-                    Timber.e(it, "Failed to display image $source")
                 }
             }
         }

@@ -18,7 +18,6 @@ import org.koin.android.ext.android.get
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import sync.SyncWorker
-import timber.log.Timber
 import java.io.File
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -33,10 +32,6 @@ class App : Application() {
         startKoin {
             androidContext(this@App)
             modules(appModule)
-        }
-
-        if (BuildConfig.DEBUG) {
-            Timber.plant(Timber.DebugTree())
         }
 
         runBlocking {
@@ -91,30 +86,28 @@ class App : Application() {
             return
         }
 
-        if (conf.syncInBackground) {
-            val policy = if (override) {
-                ExistingPeriodicWorkPolicy.REPLACE
-            } else {
-                ExistingPeriodicWorkPolicy.KEEP
-            }
-
-            val constraints = Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.UNMETERED)
-                .build()
-
-            val periodicSyncRequest = PeriodicWorkRequestBuilder<SyncWorker>(
-                repeatInterval = conf.backgroundSyncIntervalMillis,
-                repeatIntervalTimeUnit = TimeUnit.MILLISECONDS,
-            )
-                .setConstraints(constraints)
-                .build()
-
-            WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-                SYNC_WORK_NAME,
-                policy,
-                periodicSyncRequest,
-            )
+        val policy = if (override) {
+            ExistingPeriodicWorkPolicy.REPLACE
+        } else {
+            ExistingPeriodicWorkPolicy.KEEP
         }
+
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.UNMETERED)
+            .build()
+
+        val periodicSyncRequest = PeriodicWorkRequestBuilder<SyncWorker>(
+            repeatInterval = conf.backgroundSyncIntervalMillis,
+            repeatIntervalTimeUnit = TimeUnit.MILLISECONDS,
+        )
+            .setConstraints(constraints)
+            .build()
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            SYNC_WORK_NAME,
+            policy,
+            periodicSyncRequest,
+        )
     }
 
     companion object {

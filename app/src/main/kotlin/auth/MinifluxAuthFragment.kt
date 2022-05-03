@@ -14,7 +14,6 @@ import common.ConfRepository
 import common.app
 import common.showDialog
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import timber.log.Timber
 
 class MinifluxAuthFragment : AppFragment() {
 
@@ -91,7 +90,7 @@ class MinifluxAuthFragment : AppFragment() {
                     findNavController().navigate(R.id.action_minifluxAuthFragment_to_entriesFragment)
                 }.onFailure {
                     binding.progress.isVisible = false
-                    Timber.e(it)
+
                     requireContext().showDialog(
                         R.string.error,
                         it.message ?: getString(R.string.direct_login_failed)

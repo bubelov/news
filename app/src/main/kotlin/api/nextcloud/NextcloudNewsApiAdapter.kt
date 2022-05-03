@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import okhttp3.HttpUrl
 import retrofit2.Response
-import timber.log.Timber
 import java.time.Instant
 import java.time.OffsetDateTime
 
@@ -63,8 +62,6 @@ class NextcloudNewsApiAdapter(
         var oldestEntryId = 0L
 
         while (true) {
-            Timber.d("Oldest entry ID: $oldestEntryId")
-
             val response = try {
                 api.getAllItems(
                     getRead = includeReadEntries,
@@ -86,10 +83,8 @@ class NextcloudNewsApiAdapter(
             } else {
                 val entries =
                     response.body()?.items ?: throw Exception("Can not parse server response")
-                Timber.d("Got ${entries.size} entries")
                 currentBatch += entries
                 totalFetched += currentBatch.size
-                Timber.d("Fetched $totalFetched entries so far")
                 emit(currentBatch.mapNotNull { it.toEntry() })
 
                 if (currentBatch.size < batchSize) {

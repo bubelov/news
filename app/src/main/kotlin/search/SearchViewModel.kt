@@ -18,7 +18,6 @@ import kotlinx.coroutines.launch
 import enclosures.EnclosuresRepository
 import kotlinx.coroutines.flow.first
 import sync.NewsApiSync
-import timber.log.Timber
 
 class SearchViewModel(
     private val feedsRepo: FeedsRepository,
@@ -107,8 +106,6 @@ class SearchViewModel(
 
         val uri = runCatching {
             Uri.parse(enclosure.cacheUri)
-        }.onFailure {
-            Timber.e(it)
         }
 
         return uri.getOrNull()

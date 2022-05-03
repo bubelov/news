@@ -11,7 +11,6 @@ import androidx.core.content.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import co.appreactor.news.R
-import timber.log.Timber
 
 fun Fragment.app() = requireContext().applicationContext as App
 
@@ -19,8 +18,6 @@ fun Fragment.showErrorDialog(
     t: Throwable,
     onDismissListener: (suspend () -> Unit)? = null,
 ) {
-    Timber.e(t)
-
     val message = t.message ?: getString(R.string.got_exception_of_class_s, t.javaClass.simpleName)
 
     requireContext().showDialog(R.string.error, message) {

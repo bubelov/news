@@ -16,7 +16,6 @@ import common.ConfRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import retrofit2.NextcloudRetrofitApiBuilder
-import timber.log.Timber
 
 class NewsApiSwitcher(
     private val wrapper: NewsApiWrapper,
@@ -41,13 +40,8 @@ class NewsApiSwitcher(
 
         val callback: NextcloudAPI.ApiConnectedListener =
             object : NextcloudAPI.ApiConnectedListener {
-                override fun onConnected() {
-                    Timber.d("Connected to Nextcloud app")
-                }
-
-                override fun onError(e: Exception) {
-                    Timber.e(e, "Failed to connect to Nextcloud app")
-                }
+                override fun onConnected() {}
+                override fun onError(e: Exception) {}
             }
 
         val nextcloudApi = NextcloudAPI(

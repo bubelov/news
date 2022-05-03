@@ -6,7 +6,6 @@ import db.EntryQueries
 import db.Feed
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 import java.util.Collections
 import kotlin.math.min
 
@@ -59,8 +58,6 @@ class EntriesSummaryRepository(
                         append("…")
                     }
                 }.replace("\n", " ")
-            }.onFailure {
-                Timber.e(it)
             }.getOrDefault("")
 
             cache[entryId] = summary
