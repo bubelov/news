@@ -83,9 +83,11 @@ class FeedsViewModel(
                         }
 
                         runCatching {
-                            feedsRepo.insertByFeedUrl(
-                                url = outline.xmlUrl.toHttpUrl(),
-                                title = outline.text,
+                            val feed = feedsRepo.insertByUrl(outline.xmlUrl.toHttpUrl())
+
+                            feedsRepo.updateTitle(
+                                feedId = feed.id,
+                                newTitle = outline.text,
                             )
                         }.onSuccess {
                             added.incrementAndGet()
@@ -128,7 +130,7 @@ class FeedsViewModel(
             }
 
             state.value = State.AddingOne
-            state.value = State.AddedOne(runCatching { feedsRepo.insertByFeedUrl(parsedUrl) })
+            state.value = State.AddedOne(runCatching { feedsRepo.insertByUrl(parsedUrl) })
         }.onFailure {
             state.value = State.AddedOne(Result.failure(it))
         }

@@ -25,15 +25,11 @@ class FeedsRepository(
         }
     }
 
-    suspend fun insertByFeedUrl(url: HttpUrl, title: String? = null) {
-        withContext(Dispatchers.Default) {
-            var feed = api.addFeed(url).getOrThrow()
-
-            if (!title.isNullOrBlank()) {
-                feed = feed.copy(title = title)
-            }
-
+    suspend fun insertByUrl(url: HttpUrl): Feed {
+        return withContext(Dispatchers.Default) {
+            val feed = api.addFeed(url).getOrThrow()
             feedQueries.insertOrReplace(feed)
+            feed
         }
     }
 

@@ -1,64 +1,65 @@
 package db
 
-import org.junit.Before
-import org.junit.Test
 import java.util.UUID
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class FeedQueriesTest {
 
-    lateinit var db: FeedQueries
+    private lateinit var queries: FeedQueries
 
-    @Before
+    @BeforeTest
     fun setup() {
-        db = database().feedQueries
+        queries = database().feedQueries
     }
 
     @Test
-    fun `insert or replace`() {
-        val feed = db.insertOrReplace()
-        assertEquals(feed, db.selectAll().executeAsList().single())
-        db.insertOrReplace(feed)
-        assertEquals(feed, db.selectAll().executeAsList().single())
+    fun insertOrReplace() {
+        val feed = feed()
+        queries.insertOrReplace(feed)
+        assertEquals(feed, queries.selectAll().executeAsOne())
+        queries.insertOrReplace(feed)
+        assertEquals(feed, queries.selectAll().executeAsOne())
     }
 
     @Test
-    fun `select all`() {
-        val rows = listOf(db.insertOrReplace(), db.insertOrReplace(), db.insertOrReplace())
-        assertEquals(rows.sortedBy { it.title }, db.selectAll().executeAsList())
+    fun selectAll() {
+        val feeds = listOf(feed(), feed(), feed())
+        feeds.forEach { queries.insertOrReplace(it) }
+        assertEquals(feeds.sortedBy { it.title }, queries.selectAll().executeAsList())
     }
 
     @Test
-    fun `select by id`() {
-        val row = db.insertOrReplace()
-        assertEquals(row, db.selectById(row.id).executeAsOne())
+    fun selectById() {
+        val feeds = listOf(feed(), feed(), feed())
+        feeds.forEach { queries.insertOrReplace(it) }
+        val randomFeed = feeds.random()
+        assertEquals(randomFeed, queries.selectById(randomFeed.id).executeAsOne())
     }
 
     @Test
-    fun `delete all`() {
-        repeat(3) { db.insertOrReplace() }
-        db.deleteAll()
-        assertTrue(db.selectAll().executeAsList().isEmpty())
+    fun deleteAll() {
+        val feeds = listOf(feed(), feed(), feed())
+        feeds.forEach { queries.insertOrReplace(it) }
+        queries.deleteAll()
+        assertTrue(queries.selectAll().executeAsList().isEmpty())
     }
 
     @Test
-    fun `delete by id`() {
-        val rows = mutableListOf(db.insertOrReplace(), db.insertOrReplace(), db.insertOrReplace())
-        db.deleteById(rows.removeAt(1).id)
-        assertEquals(rows.sortedBy { it.title }, db.selectAll().executeAsList())
+    fun deleteById() {
+        val feeds = listOf(feed(), feed(), feed())
+        feeds.forEach { queries.insertOrReplace(it) }
+        val randomFeed = feeds.random()
+        queries.deleteById(randomFeed.id)
+        assertTrue { queries.selectById(randomFeed.id).executeAsOneOrNull() == null }
     }
-}
-
-fun FeedQueries.insertOrReplace(): Feed {
-    val feed = feed()
-    insertOrReplace(feed)
-    return feed
 }
 
 fun feed() = Feed(
     id = UUID.randomUUID().toString(),
-    title = UUID.randomUUID().toString(),
+    title = "",
     selfLink = "",
     alternateLink = "",
     openEntriesInBrowser = false,
