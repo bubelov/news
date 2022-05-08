@@ -127,11 +127,13 @@ class EntryFragment : AppFragment() {
                     summaryView.movementMethod = LinkMovementMethod.getInstance()
                     progress.hide()
 
-                    if (state.entry.link.isEmpty()) {
+                    val altLink = state.entry.links.firstOrNull { it.rel == "alternate" }
+
+                    if (altLink == null) {
                         fab.hide()
                     } else {
                         fab.show()
-                        fab.setOnClickListener { openUrl(state.entry.link, model.conf.useBuiltInBrowser) }
+                        fab.setOnClickListener { openUrl(altLink.href, model.conf.useBuiltInBrowser) }
                     }
                 }
 
@@ -168,11 +170,13 @@ class EntryFragment : AppFragment() {
             }
 
             R.id.share -> {
+                val altLink = entry.links.firstOrNull { it.rel == "alternate" }
+
                 val intent = Intent().apply {
                     action = Intent.ACTION_SEND
                     type = "text/plain"
                     putExtra(Intent.EXTRA_SUBJECT, entry.title)
-                    putExtra(Intent.EXTRA_TEXT, entry.link)
+                    putExtra(Intent.EXTRA_TEXT, altLink?.href)
                 }
 
                 startActivity(Intent.createChooser(intent, ""))

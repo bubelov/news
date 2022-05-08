@@ -55,18 +55,14 @@ class EntriesImagesRepository(
                 return@withContext
             }
 
-            if (entry.link.isBlank()) {
+            val htmlLink = entry.links.firstOrNull { it.type == "text/html" }
+
+            if (htmlLink == null) {
                 entriesRepo.setOgImageChecked(entry.id, true)
                 return@withContext
             }
-
-            val link = if (entry.link.startsWith("http:")) {
-                entry.link.replaceFirst("http:", "https:")
-            } else {
-                entry.link
-            }
-
-            val request = httpClient.newCall(Request.Builder().url(link).build())
+            
+            val request = httpClient.newCall(Request.Builder().url(htmlLink.href).build())
 
             val response = runCatching {
                 request.execute()

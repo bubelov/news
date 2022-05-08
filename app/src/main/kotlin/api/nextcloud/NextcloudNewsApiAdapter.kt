@@ -4,6 +4,7 @@ import api.NewsApi
 import db.Entry
 import db.EntryWithoutContent
 import db.Feed
+import db.Link
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import okhttp3.HttpUrl
@@ -169,19 +170,39 @@ class NextcloudNewsApiAdapter(
         val published = Instant.ofEpochSecond(pubDate).toString()
         val updated = Instant.ofEpochSecond(lastModified).toString()
 
+        val links = mutableListOf<Link>()
+
+        links += Link(
+            href = url ?: "",
+            rel = "alternate",
+            type = "text/html",
+            hreflang = "",
+            title = "",
+            length = null,
+        )
+
+        if (!enclosureLink.isNullOrBlank()) {
+            links += Link(
+                href = url ?: "",
+                rel = "enclosure",
+                type = enclosureMime ?: "",
+                hreflang = "",
+                title = "",
+                length = null,
+            )
+        }
+
         return Entry(
             id = id.toString(),
             feedId = feedId?.toString() ?: "",
             title = title ?: "Untitled",
-            link = url?.replace("http://", "https://") ?: "",
+            links = links,
             published = OffsetDateTime.parse(published),
             updated = OffsetDateTime.parse(updated),
             authorName = author ?: "",
             contentType = "html",
             contentSrc = "",
             contentText = body ?: "",
-            enclosureLink = enclosureLink?.replace("http://", "https://") ?: "",
-            enclosureLinkType = enclosureMime ?: "",
 
             read = !unread,
             readSynced = true,

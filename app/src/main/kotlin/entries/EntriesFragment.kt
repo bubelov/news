@@ -73,7 +73,10 @@ class EntriesFragment : AppFragment(), Scrollable {
                         val feed = model.getFeed(entry.feedId).first() ?: return@launchWhenResumed
 
                         if (feed.openEntriesInBrowser) {
-                            openUrl(entry.link, model.getConf().first().useBuiltInBrowser)
+                            openUrl(
+                                url = entry.links.first { it.rel == "alternate" }.href,
+                                useBuiltInBrowser = model.getConf().first().useBuiltInBrowser,
+                            )
                         } else {
                             val action = EntriesFragmentDirections.actionEntriesFragmentToEntryFragment(item.id)
                             findNavController().navigate(action)
@@ -95,10 +98,12 @@ class EntriesFragment : AppFragment(), Scrollable {
                     lifecycleScope.launch {
                         runCatching {
                             val entry = model.getEntry(item.id).first() ?: return@launch
+                            val enclosureLink = entry.links.first { it.rel == "enclosure" }
                             model.setRead(listOf(entry.id), true)
+
                             openCachedPodcast(
                                 cacheUri = model.getCachedPodcastUri(entry.id),
-                                enclosureLinkType = entry.enclosureLinkType,
+                                enclosureLinkType = enclosureLink.type,
                             )
                         }.onFailure {
                             showErrorDialog(it)

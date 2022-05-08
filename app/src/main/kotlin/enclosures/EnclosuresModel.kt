@@ -11,16 +11,18 @@ class EnclosuresModel(
 ) : ViewModel() {
 
     suspend fun getEnclosures(): List<EnclosuresAdapter.Item> {
-        val entriesWithEnclosures = entriesRepo.selectAll().first().filter { it.enclosureLink.isNotBlank() }
-
-        return entriesWithEnclosures.map {
-            EnclosuresAdapter.Item(
-                entryId = it.id,
-                title = it.title,
-                url = it.enclosureLink.toHttpUrl(),
-                downloaded = enclosuresRepo.selectByEntryId(it.id).first()?.downloadPercent == 100L,
-            )
-        }
+        return entriesRepo.selectAll().first().map { entry ->
+            entry.links
+                .filter { it.rel == "enclosure" }
+                .map {
+                    EnclosuresAdapter.Item(
+                        entryId = entry.id,
+                        title = it.title,
+                        url = it.href.toHttpUrl(),
+                        downloaded = enclosuresRepo.selectByEntryId(entry.id).first()?.downloadPercent == 100L,
+                    )
+                }
+        }.flatten()
     }
 
     suspend fun deleteEnclosure(entryId: String) {

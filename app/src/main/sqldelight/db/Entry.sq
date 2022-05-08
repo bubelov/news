@@ -1,6 +1,6 @@
 insertOrReplace:
 INSERT OR REPLACE
-INTO Entry(id, feedId, title, link, published, updated, authorName, contentType, contentSrc, contentText, enclosureLink, enclosureLinkType, read, readSynced, bookmarked, bookmarkedSynced, guidHash, commentsUrl, ogImageChecked, ogImageUrl, ogImageWidth, ogImageHeight)
+INTO Entry(id, feedId, title, links, published, updated, authorName, contentType, contentSrc, contentText, read, readSynced, bookmarked, bookmarkedSynced, guidHash, commentsUrl, ogImageChecked, ogImageUrl, ogImageWidth, ogImageHeight)
 VALUES ?;
 
 selectAll:

@@ -48,7 +48,10 @@ class SearchFragment : AppFragment() {
                     model.setRead(listOf(entry.id), true)
 
                     if (feed.openEntriesInBrowser) {
-                        openUrl(entry.link, model.getConf().first().useBuiltInBrowser)
+                        openUrl(
+                            url = entry.links.first { it.rel == "alternate" }.href,
+                            useBuiltInBrowser = model.getConf().first().useBuiltInBrowser
+                        )
                     } else {
                         val action =
                             SearchFragmentDirections.actionSearchFragmentToEntryFragment(item.id)
@@ -75,7 +78,7 @@ class SearchFragment : AppFragment() {
 
                         openCachedPodcast(
                             cacheUri = model.getCachedPodcastUri(entry.id),
-                            enclosureLinkType = entry.enclosureLinkType,
+                            enclosureLinkType = entry.links.first { it.rel == "enclosure" }.type,
                         )
                     }.onFailure {
                         showErrorDialog(it)

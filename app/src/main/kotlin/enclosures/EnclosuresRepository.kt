@@ -57,9 +57,7 @@ class EnclosuresRepository(
                 return@withContext
             }
 
-            if (entry.enclosureLink.isBlank()) {
-                return@withContext
-            }
+            val firstEnclosureLink = entry.links.firstOrNull { it.rel == "enclosure" } ?: return@withContext
 
             val existingEnclosure = entryEnclosureQueries.selectByEntryId(entryId).executeAsOneOrNull()
 
@@ -76,7 +74,7 @@ class EnclosuresRepository(
             entryEnclosureQueries.insertOrReplace(enclosure)
 
             val request = Request.Builder()
-                .url(entry.enclosureLink)
+                .url(firstEnclosureLink.href)
                 .build()
 
             val response = httpClient.newCall(request).execute()
@@ -89,7 +87,7 @@ class EnclosuresRepository(
             var cacheUri: Uri? = null
 
             runCatching {
-                val mediaType = entry.enclosureLinkType.toMediaType()
+                val mediaType = firstEnclosureLink.type.toMediaType()
                 val fileExtension = mediaType.fileExtension()
                 val fileName = "${java.util.UUID.randomUUID()}.$fileExtension"
                 val outputStream: OutputStream
@@ -99,7 +97,7 @@ class EnclosuresRepository(
                         MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                         ContentValues().apply {
                             put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-                            put(MediaStore.MediaColumns.MIME_TYPE, entry.enclosureLinkType)
+                            put(MediaStore.MediaColumns.MIME_TYPE, firstEnclosureLink.type)
                             put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PODCASTS)
                             put(MediaStore.MediaColumns.IS_PENDING, true)
                         }

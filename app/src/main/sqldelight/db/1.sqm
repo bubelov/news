@@ -1,4 +1,6 @@
+import db.Link;
 import java.time.OffsetDateTime;
+import kotlin.collections.List;
 
 CREATE TABLE Conf (
   authType TEXT NOT NULL DEFAULT "",
@@ -28,15 +30,13 @@ CREATE TABLE Entry (
   id TEXT PRIMARY KEY NOT NULL,
   feedId TEXT NOT NULL,
   title TEXT NOT NULL,
-  link TEXT NOT NULL,
+  links TEXT AS List<Link> NOT NULL,
   published TEXT AS OffsetDateTime NOT NULL,
   updated TEXT AS OffsetDateTime NOT NULL,
   authorName TEXT NOT NULL,
   contentType TEXT NOT NULL,
   contentSrc TEXT NOT NULL,
   contentText TEXT NOT NULL,
-  enclosureLink TEXT NOT NULL,
-  enclosureLinkType TEXT NOT NULL,
 
   read INTEGER AS Boolean NOT NULL,
   readSynced INTEGER AS Boolean NOT NULL,
@@ -59,12 +59,10 @@ SELECT
   id,
   feedId,
   title,
-  link,
+  links,
   published,
   updated,
   authorName,
-  enclosureLink,
-  enclosureLinkType,
 
   read,
   readSynced,

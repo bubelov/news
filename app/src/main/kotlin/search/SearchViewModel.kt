@@ -123,7 +123,7 @@ class SearchViewModel(
             title = title,
             subtitle = (feed?.title ?: "Unknown feed") + " · " + published,
             summary = entriesSummaryRepo.getSummary(this@toRow.id, feed),
-            podcast = enclosureLinkType.startsWith("audio"),
+            podcast = links.firstOrNull { it.rel == "enclosure" }?.type?.startsWith("audio") ?: false,
             podcastDownloadPercent = enclosuresRepo.getDownloadProgress(this@toRow.id)
                 .first(),
             read = read,

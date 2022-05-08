@@ -4,6 +4,7 @@ import api.NewsApi
 import db.Entry
 import db.EntryWithoutContent
 import db.Feed
+import db.Link
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import okhttp3.HttpUrl
@@ -128,21 +129,39 @@ class MinifluxApiAdapter(
     }
 
     private fun EntryJson.toEntry(): Entry {
-        val firstEnclosure = enclosures?.firstOrNull()
+        val links = mutableListOf<Link>()
+
+        links += Link(
+            href = url,
+            rel = "alternate",
+            type = "text/html",
+            hreflang = "",
+            title = "",
+            length = null,
+        )
+
+        enclosures?.forEach {
+            links += Link(
+                href = it.url,
+                rel = "enclosure",
+                type = it.mime_type,
+                hreflang = "",
+                title = "",
+                length = it.size,
+            )
+        }
 
         return Entry(
             id = id.toString(),
             feedId = feed_id.toString(),
             title = title,
-            link = url.replace("http://", "https://"),
+            links = links,
             published = OffsetDateTime.parse(published_at),
             updated = OffsetDateTime.parse(changed_at),
             authorName = author,
             contentType = "html",
             contentSrc = "",
             contentText = content,
-            enclosureLink = firstEnclosure?.url ?: "",
-            enclosureLinkType = firstEnclosure?.mime_type ?: "",
 
             read = status == "read",
             readSynced = true,

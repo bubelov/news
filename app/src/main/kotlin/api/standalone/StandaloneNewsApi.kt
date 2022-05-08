@@ -4,6 +4,7 @@ import android.util.Base64
 import api.NewsApi
 import co.appreactor.feedk.AtomEntry
 import co.appreactor.feedk.AtomFeed
+import co.appreactor.feedk.AtomLink
 import co.appreactor.feedk.AtomLinkRel
 import co.appreactor.feedk.FeedResult
 import co.appreactor.feedk.RssFeed
@@ -15,6 +16,7 @@ import db.EntryQueries
 import db.EntryWithoutContent
 import db.Feed
 import db.FeedQueries
+import db.Link
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -230,23 +232,29 @@ class StandaloneNewsApi(
         }
     }
 
-    private fun AtomEntry.toEntry(feedId: String): Entry {
-        val alternateLink = links.firstOrNull { it.rel == AtomLinkRel.Alternate }
-        val enclosureLink = links.firstOrNull { it.rel == AtomLinkRel.Enclosure }
+    private fun AtomLink.toLink(): Link {
+        return Link(
+            href = href,
+            rel = rel.toString().lowercase(),
+            type = type,
+            hreflang = hreflang,
+            title = title,
+            length = length,
+        )
+    }
 
+    private fun AtomEntry.toEntry(feedId: String): Entry {
         return Entry(
             id = id,
             feedId = feedId,
             title = title,
-            link = alternateLink?.href ?: "",
+            links = links.map { it.toLink() },
             published = OffsetDateTime.parse(published),
             updated = OffsetDateTime.parse(updated),
             authorName = authorName,
             contentType = content.type.toString(),
             contentSrc = content.src,
             contentText = content.text,
-            enclosureLink = enclosureLink?.href ?: "",
-            enclosureLinkType = enclosureLink?.type ?: "",
             read = false,
             readSynced = true,
             bookmarked = false,
@@ -272,19 +280,41 @@ class StandaloneNewsApi(
             }
         }
 
+        val links = mutableListOf<Link>()
+
+        if (!link.isNullOrBlank()) {
+            links += Link(
+                href = link ?: "",
+                rel = "alternate",
+                type = "text/html",
+                hreflang = "",
+                title = "",
+                length = null,
+            )
+        }
+
+        if (enclosure != null) {
+            links += Link(
+                href = enclosure!!.url.toString(),
+                rel = "enclosure",
+                type = enclosure!!.type,
+                hreflang = "",
+                title = "",
+                length = enclosure!!.length,
+            )
+        }
+
         return Entry(
             id = id,
             feedId = feedId,
             title = title ?: "",
-            link = link ?: "",
+            links = links,
             published = OffsetDateTime.parse((pubDate ?: Date()).toIsoString()),
             updated = OffsetDateTime.parse((pubDate ?: Date()).toIsoString()),
             authorName = author ?: "",
             contentType = "html",
             contentSrc = "",
             contentText = description ?: "",
-            enclosureLink = enclosure?.url?.toString() ?: "",
-            enclosureLinkType = enclosure?.type ?: "",
             read = false,
             readSynced = true,
             bookmarked = false,

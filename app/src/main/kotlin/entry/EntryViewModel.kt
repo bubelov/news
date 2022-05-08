@@ -64,6 +64,8 @@ class EntryViewModel(
                 return@withContext
             }
 
+            val altLink = entry.links.firstOrNull { it.rel == "alternate" }
+
             state.value = State.Success(
                 feedTitle = feed.title,
                 entry = entry,
@@ -72,7 +74,7 @@ class EntryViewModel(
                     TextViewImageGetter(
                         textView = summaryView,
                         scope = lifecycleScope,
-                        baseUrl = entry.link.toHttpUrlOrNull(),
+                        baseUrl = altLink?.href?.toHttpUrlOrNull(),
                     ),
                 ),
             )

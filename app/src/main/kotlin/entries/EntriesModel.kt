@@ -259,7 +259,7 @@ class EntriesModel(
             title = title,
             subtitle = "${feed?.title ?: "Unknown feed"} · ${DATE_TIME_FORMAT.format(published)}",
             summary = entrySummaryRepo.getSummary(id, feed),
-            podcast = enclosureLinkType.startsWith("audio"),
+            podcast = links.firstOrNull { it.rel == "enclosure" }?.type?.startsWith("audio") ?: false,
             podcastDownloadPercent = null,
             read = read,
         )
