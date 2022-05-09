@@ -27,7 +27,9 @@ import common.showErrorDialog
 import common.showKeyboard
 import entries.EntriesFilter
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -57,11 +59,19 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
         }
 
         override fun onOpenSelfLinkClick(item: FeedsAdapter.Item) {
-            openUrl(item.selfLink, model.conf.useBuiltInBrowser)
+            val state = model.state.value
+
+            if (state is FeedsViewModel.State.Loaded) {
+                openUrl(item.selfLink, state.conf.useBuiltInBrowser)
+            }
         }
 
         override fun onOpenAlternateLinkClick(item: FeedsAdapter.Item) {
-            openUrl(item.alternateLink, model.conf.useBuiltInBrowser)
+            val state = model.state.value
+
+            if (state is FeedsViewModel.State.Loaded) {
+                openUrl(item.alternateLink, state.conf.useBuiltInBrowser)
+            }
         }
 
         override fun onRenameClick(item: FeedsAdapter.Item) {
@@ -88,7 +98,6 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
         }
     })
 
-    @Suppress("BlockingMethodInNonBlockingContext")
     private val importFeedsLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri ->
@@ -96,11 +105,50 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
             return@registerForActivityResult
         }
 
-        lifecycleScope.launchWhenResumed {
-            withContext(Dispatchers.IO) {
-                requireContext().contentResolver.openInputStream(uri)?.use {
-                    model.addMany(it.bufferedReader().readText())
+        viewLifecycleOwner.lifecycleScope.launch {
+            runCatching {
+                val result = withContext(Dispatchers.Default) {
+                    requireContext().contentResolver.openInputStream(uri)!!.use { inputStream ->
+                        model.importOpml(inputStream.bufferedReader().readText())
+                    }
                 }
+
+                val message = buildString {
+                    append(getString(R.string.added_d, result.feedsAdded))
+                    append("\n")
+                    append(
+                        getString(
+                            R.string.exists_d,
+                            result.feedsUpdated,
+                        )
+                    )
+                    append("\n")
+                    append(
+                        getString(
+                            R.string.failed_d,
+                            result.feedsFailed,
+                        )
+                    )
+
+                    if (result.errors.isNotEmpty()) {
+                        append("\n\n")
+                    }
+
+                    result.errors.forEach {
+                        append(it)
+
+                        if (result.errors.last() != it) {
+                            append("\n\n")
+                        }
+                    }
+                }
+
+                requireContext().showDialog(
+                    title = getString(R.string.import_title),
+                    message = message,
+                )
+            }.onFailure {
+                showErrorDialog(it)
             }
         }
     }
@@ -139,15 +187,15 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
         initImportButton()
         initFab()
 
-        lifecycleScope.launchWhenResumed {
-            model.onViewCreated()
-            model.state.collectLatest { setState(it ?: return@collectLatest) }
-        }
+        model.state
+            .onEach { setState(it ?: return@onEach) }
+            .catch { showErrorDialog(it) }
+            .launchIn(viewLifecycleOwner.lifecycleScope)
 
         val args = FeedsFragmentArgs.fromBundle(requireArguments())
 
         if (args.url.isNotBlank()) {
-            lifecycleScope.launch {
+            viewLifecycleOwner.lifecycleScope.launch {
                 runCatching {
                     model.addFeed(args.url)
                 }.onFailure {
@@ -212,7 +260,7 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
                 .setPositiveButton(R.string.add) { dialogInterface, _ ->
                     val dialog = dialogInterface as AlertDialog
                     val url = dialog.findViewById<TextInputEditText>(R.id.url)?.text.toString()
-                    lifecycleScope.launch {
+                    viewLifecycleOwner.lifecycleScope.launch {
                         runCatching {
                             model.addFeed(url)
                         }.onFailure {
@@ -229,7 +277,7 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
                     if (actionId == EditorInfo.IME_ACTION_DONE) {
                         alert.dismiss()
 
-                        lifecycleScope.launch {
+                        viewLifecycleOwner.lifecycleScope.launch {
                             runCatching {
                                 model.addFeed(text.toString())
                             }.onFailure {
@@ -248,7 +296,7 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
         }
     }
 
-    private suspend fun setState(state: FeedsViewModel.State) = binding.apply {
+    private fun setState(state: FeedsViewModel.State) = binding.apply {
         list.hide()
         progress.hide()
         message.hide()
@@ -261,131 +309,26 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
             }
 
             is FeedsViewModel.State.Loaded -> {
-                state.result.onSuccess {
-                    if (it.isEmpty()) {
-                        message.show(animate = true)
-                        message.text = getString(R.string.you_have_no_feeds)
-                        importOpml.show(animate = true)
-                    }
-
-                    list.show()
-                    adapter.submitList(it)
-                    fab.show()
-                }.onFailure {
-                    showErrorDialog(it) {
-                        lifecycleScope.launchWhenResumed { model.reload() }
-                    }
+                if (state.feeds.isEmpty()) {
+                    message.show(animate = true)
+                    message.text = getString(R.string.you_have_no_feeds)
+                    importOpml.show(animate = true)
                 }
-            }
 
-            is FeedsViewModel.State.AddingOne -> {
-                progress.show(animate = true)
-            }
-
-            is FeedsViewModel.State.AddedOne -> {
-                state.result.onSuccess {
-                    lifecycleScope.launchWhenResumed { model.reload() }
-                }.onFailure {
-                    showErrorDialog(it) {
-                        lifecycleScope.launchWhenResumed { model.reload() }
-                    }
-                }
+                list.show()
+                adapter.submitList(state.feeds)
+                fab.show()
             }
 
             is FeedsViewModel.State.ImportingOpml -> {
                 progress.show(animate = true)
                 message.show(animate = true)
 
-                state.progress.collectLatest { progress ->
-                    message.text = getString(
-                        R.string.importing_feeds_n_of_n,
-                        progress.imported,
-                        progress.total,
-                    )
-                }
-            }
-
-            is FeedsViewModel.State.ImportedOpml -> {
-                when (state.result) {
-                    is FeedsViewModel.OpmlImportResult.Imported -> {
-                        val message = buildString {
-                            append(getString(R.string.added_d, state.result.feedsAdded))
-                            append("\n")
-                            append(
-                                getString(
-                                    R.string.exists_d,
-                                    state.result.feedsUpdated
-                                )
-                            )
-                            append("\n")
-                            append(
-                                getString(
-                                    R.string.failed_d,
-                                    state.result.feedsFailed
-                                )
-                            )
-
-                            if (state.result.errors.isNotEmpty()) {
-                                append("\n\n")
-                            }
-
-                            state.result.errors.forEach {
-                                append(it)
-
-                                if (state.result.errors.last() != it) {
-                                    append("\n\n")
-                                }
-                            }
-                        }
-
-                        requireContext().showDialog(
-                            title = getString(R.string.import_title),
-                            message = message,
-                        ) {
-                            lifecycleScope.launchWhenResumed { model.reload() }
-                        }
-                    }
-
-                    is FeedsViewModel.OpmlImportResult.FailedToParse -> {
-                        val message = buildString {
-                            append(getString(R.string.opml_file_is_invalid))
-                            append("\n\n")
-                            append(state.result.reason)
-                        }
-
-                        showErrorDialog(message) {
-                            model.reload()
-                        }
-                    }
-                }
-            }
-
-            is FeedsViewModel.State.Renaming -> {
-                progress.show(animate = true)
-            }
-
-            is FeedsViewModel.State.Renamed -> {
-                state.result.onSuccess {
-                    lifecycleScope.launchWhenResumed { model.reload() }
-                }.onFailure {
-                    showErrorDialog(it) {
-                        lifecycleScope.launchWhenResumed { model.reload() }
-                    }
-                }
-            }
-
-            is FeedsViewModel.State.Deleting -> {
-                progress.show(animate = true)
-            }
-
-            is FeedsViewModel.State.Deleted -> {
-                state.result.onSuccess {
-                    lifecycleScope.launchWhenResumed { model.reload() }
-                }.onFailure {
-                    showErrorDialog(it) {
-                        lifecycleScope.launchWhenResumed { model.reload() }
-                    }
-                }
+                message.text = getString(
+                    R.string.importing_feeds_n_of_n,
+                    state.progress.imported,
+                    state.progress.total,
+                )
             }
         }
     }

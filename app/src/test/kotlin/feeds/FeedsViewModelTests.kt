@@ -1,62 +1,59 @@
 package feeds
 
-import android.content.res.Resources
 import common.ConfRepository
-import db.database
-import entries.EntriesRepository
-import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flowOf
-import kotlin.test.assertEquals
+import kotlinx.coroutines.newSingleThreadContext
 import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 
 class FeedsViewModelTests {
 
-    private val feedsRepo = mockk<FeedsRepository>(relaxed = true)
-    private val entriesRepo = mockk<EntriesRepository>(relaxed = true)
-    private val confRepo = mockk<ConfRepository>(relaxed = true)
-    private val resources = mockk<Resources>(relaxed = true)
+    private val mainThreadSurrogate = newSingleThreadContext("UI thread")
 
-    private val model = FeedsViewModel(
-        feedsRepo = feedsRepo,
-        entriesRepo = entriesRepo,
-        confRepo = confRepo,
-        resources = resources,
-    )
+    @Before
+    fun beforeEachTest() {
+        Dispatchers.setMain(mainThreadSurrogate)
+    }
 
-    @Test
-    fun `default state`(): Unit = runBlocking {
-        assertEquals(null, model.state.value)
+    @After
+    fun afterEachTest() {
+        Dispatchers.resetMain() // reset the main dispatcher to the original Main dispatcher
+        mainThreadSurrogate.close()
     }
 
     @Test
-    fun `view ready`(): Unit = runBlocking {
-        val db = database()
+    fun `init`(): Unit = runBlocking {
+        val feedsRepo = mockk<FeedsRepository> {
+            every { selectAll() } returns flowOf(emptyList())
+        }
+
+        val confRepo = mockk<ConfRepository> {
+            every { select() } returns flowOf(ConfRepository.DEFAULT_CONF)
+        }
 
         val model = FeedsViewModel(
-            feedsRepo = FeedsRepository(feedQueries = db.feedQueries, entryQueries = db.entryQueries, api = mockk()),
-            entriesRepo = EntriesRepository(api = mockk(), db = db.entryQueries),
-            confRepo = ConfRepository(db.confQueries),
-            resources = mockk(),
+            feedsRepo = feedsRepo,
+            entriesRepo = mockk(),
+            confRepo = confRepo,
         )
 
-        model.onViewCreated()
+        var attempts = 0
 
-        model.state.value.apply {
-            assertTrue(this is FeedsViewModel.State.Loaded && result.isSuccess)
-        }
-    }
-
-    @Test
-    fun `view ready + db error`(): Unit = runBlocking {
-        coEvery { confRepo.select() } returns flowOf(ConfRepository.DEFAULT_CONF)
-        coEvery { feedsRepo.selectAll() } throws Exception()
-        model.onViewCreated()
-
-        model.state.value.apply {
-            assertTrue(this is FeedsViewModel.State.Loaded && result.isFailure)
+        while (model.state.value !is FeedsViewModel.State.Loaded) {
+            if (attempts++ > 100) {
+                assertTrue { false }
+            } else {
+                delay(10)
+            }
         }
     }
 }

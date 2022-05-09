@@ -32,7 +32,6 @@ android {
 
     kotlinOptions {
         jvmTarget = "11"
-        allWarningsAsErrors = true
     }
 
     signingConfigs {
@@ -138,6 +137,7 @@ dependencies {
 
     // Common testing dependencies
     testImplementation(kotlin("test"))
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.1")
     testImplementation("junit:junit:4.13.2")
     testImplementation("io.mockk:mockk:1.12.3")
 

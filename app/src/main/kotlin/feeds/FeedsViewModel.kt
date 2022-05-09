@@ -1,9 +1,7 @@
 package feeds
 
-import android.content.res.Resources
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import co.appreactor.news.R
 import common.ConfRepository
 import db.Conf
 import db.Feed
@@ -11,128 +9,156 @@ import entries.EntriesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import opml.exportOpml
-import opml.importOpml
 import java.util.concurrent.atomic.AtomicInteger
 
 class FeedsViewModel(
     private val feedsRepo: FeedsRepository,
     private val entriesRepo: EntriesRepository,
-    private val confRepo: ConfRepository,
-    private val resources: Resources,
+    confRepo: ConfRepository,
 ) : ViewModel() {
 
-    val state = MutableStateFlow<State?>(null)
+    private val _state = MutableStateFlow<State?>(null)
+    val state = _state.asStateFlow()
 
-    lateinit var conf: Conf
+    private val showProgress = MutableStateFlow(false)
+    private val opmlImportProgress = MutableStateFlow<OpmlImportProgress?>(null)
 
-    suspend fun onViewCreated() {
-        conf = confRepo.select().first()
+    init {
+        _state.update { State.Loading }
 
-        if (state.value == null) {
-            reload()
-        }
-    }
-
-    suspend fun reload() = state.apply {
-        value = State.Loading
-        value = State.Loaded(runCatching { feedsRepo.selectAll().first().map { it.toItem() } })
-    }
-
-    suspend fun addMany(opmlDocument: String) = state.apply {
-        val progress = MutableStateFlow(ImportProgress(0, -1))
-        value = State.ImportingOpml(progress)
-
-        val feeds = runCatching {
-            importOpml(opmlDocument)
-        }.getOrElse {
-            value = State.ImportedOpml(OpmlImportResult.FailedToParse(it.message ?: ""))
-            return@apply
-        }
-
-        val added = AtomicInteger()
-        val exists = AtomicInteger()
-        val failed = AtomicInteger()
-        val errors = mutableListOf<String>()
-
-        progress.value = progress.value.copy(total = feeds.size)
-        val cachedFeeds = feedsRepo.selectAll().first()
-
-        withContext(Dispatchers.IO) {
-            feeds.chunked(10).forEach { chunk ->
-                chunk.map { outline ->
-                    async {
-                        val cachedFeed = cachedFeeds.firstOrNull { it.selfLink == outline.xmlUrl }
-
-                        if (cachedFeed != null) {
-                            feedsRepo.insertOrReplace(
-                                cachedFeed.copy(
-                                    openEntriesInBrowser = outline.openEntriesInBrowser,
-                                    blockedWords = outline.blockedWords,
-                                    showPreviewImages = outline.showPreviewImages,
-                                )
-                            )
-
-                            exists.incrementAndGet()
-                            return@async
-                        }
-
-                        runCatching {
-                            val feed = feedsRepo.insertByUrl(outline.xmlUrl.toHttpUrl())
-
-                            feedsRepo.updateTitle(
-                                feedId = feed.id,
-                                newTitle = outline.text,
-                            )
-                        }.onSuccess {
-                            added.incrementAndGet()
-                        }.onFailure {
-                            errors += "Failed to import feed ${outline.xmlUrl}\nReason: ${it.message}"
-                            failed.incrementAndGet()
-                        }
-
-                        progress.value = progress.value.copy(
-                            imported = added.get() + exists.get() + failed.get(),
+        combine(
+            feedsRepo.selectAll(),
+            confRepo.select(),
+            showProgress,
+            opmlImportProgress,
+        ) { feeds, conf, showProgress, opmlImportProgress ->
+            if (opmlImportProgress != null) {
+                _state.update { State.ImportingOpml(opmlImportProgress) }
+            } else {
+                if (showProgress) {
+                    _state.update { State.Loading }
+                } else {
+                    _state.update {
+                        State.Loaded(
+                            feeds = feeds.map { it.toItem() },
+                            conf = conf,
                         )
                     }
-                }.awaitAll()
+                }
             }
-        }
+        }.launchIn(viewModelScope)
+    }
 
-        value = State.ImportedOpml(
-            OpmlImportResult.Imported(
-                feedsAdded = added.get(),
-                feedsUpdated = exists.get(),
-                feedsFailed = failed.get(),
-                errors = errors,
-            )
-        )
+//    suspend fun onViewCreated() {
+//        conf = confRepo.select().first()
+//
+//        if (state.value == null) {
+//            reload()
+//        }
+//    }
+
+//    suspend fun reload() = state.apply {
+//        value = State.Loading
+//        value = State.Loaded(runCatching { feedsRepo.selectAll().first().map { it.toItem() } })
+//    }
+
+    suspend fun importOpml(opmlDocument: String): OpmlImportResult {
+        opmlImportProgress.update { OpmlImportProgress(0, -1) }
+
+        return runCatching {
+            val opmlFeeds = opml.importOpml(opmlDocument)
+            opmlImportProgress.update { OpmlImportProgress(0, opmlFeeds.size) }
+
+            val added = AtomicInteger()
+            val exists = AtomicInteger()
+            val failed = AtomicInteger()
+            val errors = mutableListOf<String>()
+
+            withContext(Dispatchers.Default) {
+                val cachedFeeds = feedsRepo.selectAll().first()
+
+                opmlFeeds.chunked(10).forEach { chunk ->
+                    chunk.map { outline ->
+                        async {
+                            val cachedFeed = cachedFeeds.firstOrNull { it.selfLink == outline.xmlUrl }
+
+                            if (cachedFeed != null) {
+                                feedsRepo.insertOrReplace(
+                                    cachedFeed.copy(
+                                        openEntriesInBrowser = outline.openEntriesInBrowser,
+                                        blockedWords = outline.blockedWords,
+                                        showPreviewImages = outline.showPreviewImages,
+                                    )
+                                )
+
+                                exists.incrementAndGet()
+                                return@async
+                            }
+
+                            runCatching {
+                                val feed = feedsRepo.insertByUrl(outline.xmlUrl.toHttpUrl())
+
+                                feedsRepo.updateTitle(
+                                    feedId = feed.id,
+                                    newTitle = outline.text,
+                                )
+                            }.onSuccess {
+                                added.incrementAndGet()
+                            }.onFailure {
+                                errors += "Failed to import feed ${outline.xmlUrl}\nReason: ${it.message}"
+                                failed.incrementAndGet()
+                            }
+
+                            opmlImportProgress.update {
+                                OpmlImportProgress(
+                                    imported = added.get() + exists.get() + failed.get(),
+                                    total = opmlFeeds.size,
+                                )
+                            }
+                        }
+                    }.awaitAll()
+                }
+
+                OpmlImportResult(
+                    feedsAdded = added.get(),
+                    feedsUpdated = exists.get(),
+                    feedsFailed = failed.get(),
+                    errors = errors,
+                )
+            }
+        }.onSuccess {
+            opmlImportProgress.update { null }
+        }.getOrElse {
+            opmlImportProgress.update { null }
+            throw it
+        }
     }
 
     suspend fun exportAsOpml(): ByteArray {
-        return exportOpml(feedsRepo.selectAll().first()).toByteArray()
+        return withContext(Dispatchers.Default) {
+            exportOpml(feedsRepo.selectAll().first()).toByteArray()
+        }
     }
 
     suspend fun addFeed(url: String) {
-        val fullUrl =
-            if (url.startsWith("http://") || !url.startsWith("https://")) "https://$url" else url
-
-        runCatching {
-            val parsedUrl = runCatching {
-                fullUrl.toHttpUrl()
-            }.getOrElse {
-                throw Exception(resources.getString(R.string.invalid_url_s, fullUrl))
-            }
-
-            state.value = State.AddingOne
-            state.value = State.AddedOne(runCatching { feedsRepo.insertByUrl(parsedUrl) })
-        }.onFailure {
-            state.value = State.AddedOne(Result.failure(it))
+        withContext(Dispatchers.Default) {
+            showProgress.update { true }
+            val fullUrl = if (!url.startsWith("http://")) "https://$url" else url
+            val parsedUrl = fullUrl.toHttpUrl()
+            delay(2500)
+            feedsRepo.insertByUrl(parsedUrl)
+            showProgress.update { false }
         }
     }
 
@@ -141,11 +167,7 @@ class FeedsViewModel(
     }
 
     fun delete(feedId: String) {
-        viewModelScope.launch {
-            entriesRepo.deleteByFeedId(feedId)
-            feedsRepo.deleteById(feedId)
-
-        }
+        viewModelScope.launch { feedsRepo.deleteById(feedId) }
     }
 
     private suspend fun Feed.toItem() = FeedsAdapter.Item(
@@ -158,30 +180,24 @@ class FeedsViewModel(
 
     sealed class State {
         object Loading : State()
-        data class Loaded(val result: Result<List<FeedsAdapter.Item>>) : State()
-        object AddingOne : State()
-        data class AddedOne(val result: Result<Any>) : State()
-        data class ImportingOpml(val progress: MutableStateFlow<ImportProgress>) : State()
-        data class ImportedOpml(val result: OpmlImportResult) : State()
-        object Renaming : State()
-        data class Renamed(val result: Result<Any>) : State()
-        object Deleting : State()
-        data class Deleted(val result: Result<Any>) : State()
+
+        data class Loaded(
+            val feeds: List<FeedsAdapter.Item>,
+            val conf: Conf,
+        ) : State()
+
+        data class ImportingOpml(val progress: OpmlImportProgress) : State()
     }
 
-    data class ImportProgress(
+    data class OpmlImportProgress(
         val imported: Int,
         val total: Int,
     )
 
-    sealed class OpmlImportResult {
-        data class FailedToParse(val reason: String) : OpmlImportResult()
-
-        data class Imported(
-            val feedsAdded: Int,
-            val feedsUpdated: Int,
-            val feedsFailed: Int,
-            val errors: List<String>,
-        ) : OpmlImportResult()
-    }
+    data class OpmlImportResult(
+        val feedsAdded: Int,
+        val feedsUpdated: Int,
+        val feedsFailed: Int,
+        val errors: List<String>,
+    )
 }
