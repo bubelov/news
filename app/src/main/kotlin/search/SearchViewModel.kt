@@ -9,7 +9,6 @@ import db.Feed
 import entries.EntriesAdapterItem
 import entries.EntriesFilter
 import entries.EntriesRepository
-import entries.EntriesSummaryRepository
 import feeds.FeedsRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +21,6 @@ import sync.NewsApiSync
 class SearchViewModel(
     private val feedsRepo: FeedsRepository,
     private val entriesRepo: EntriesRepository,
-    private val entriesSummaryRepo: EntriesSummaryRepository,
     private val enclosuresRepo: EnclosuresRepository,
     private val confRepo: ConfRepository,
     private val sync: NewsApiSync,
@@ -122,7 +120,7 @@ class SearchViewModel(
             cropImage = false,
             title = title,
             subtitle = (feed?.title ?: "Unknown feed") + " · " + published,
-            summary = entriesSummaryRepo.getSummary(this@toRow.id, feed),
+            summary = "",
             podcast = links.firstOrNull { it.rel == "enclosure" }?.type?.startsWith("audio") ?: false,
             podcastDownloadPercent = enclosuresRepo.getDownloadProgress(this@toRow.id)
                 .first(),
