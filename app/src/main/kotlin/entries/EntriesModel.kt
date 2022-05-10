@@ -29,7 +29,6 @@ class EntriesModel(
     private val feedsRepo: FeedsRepository,
     private val entriesRepo: EntriesRepository,
     private val enclosuresRepo: EnclosuresRepository,
-    private val entrySummaryRepo: EntriesSummaryRepository,
     private val newsApiSync: NewsApiSync,
 ) : ViewModel() {
 
@@ -240,7 +239,7 @@ class EntriesModel(
         }
     }
 
-    private suspend fun EntryWithoutContent.toRow(
+    private fun EntryWithoutContent.toRow(
         feed: Feed?,
         conf: Conf,
     ): EntriesAdapterItem {
@@ -258,7 +257,7 @@ class EntriesModel(
             cropImage = conf.cropPreviewImages,
             title = title,
             subtitle = "${feed?.title ?: "Unknown feed"} · ${DATE_TIME_FORMAT.format(published)}",
-            summary = entrySummaryRepo.getSummary(id, feed),
+            summary = "",
             podcast = links.firstOrNull { it.rel == "enclosure" }?.type?.startsWith("audio") ?: false,
             podcastDownloadPercent = null,
             read = read,
