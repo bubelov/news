@@ -1,0 +1,52 @@
+insertOrReplace:
+INSERT OR REPLACE
+INTO Link(feedId, entryId, href, rel, type, hreflang, title, length, extEnclosureDownloadProgress)
+VALUES ?;
+
+selectAll:
+SELECT *
+FROM Link;
+
+selectByRel:
+SELECT *
+FROM Link
+WHERE rel = ?;
+
+selectByFeedId:
+SELECT *
+FROM Link
+WHERE feedId = ?;
+
+selectByEntryid:
+SELECT *
+FROM Link
+WHERE entryId = ?;
+
+selectByTypeAndDownloadInProgress:
+SELECT *
+FROM Link
+WHERE type = ? AND extEnclosureDownloadProgress > 0.0 AND extEnclosureDownloadProgress < 1.0;
+
+updateEnclosureDownloadProgress:
+UPDATE Link
+SET extEnclosureDownloadProgress = ?
+WHERE feedId = ? OR entryId = ?;
+
+updateCacheUri:
+UPDATE Link
+SET extCacheUri = ?
+WHERE feedId = ? OR entryId = ?;
+
+deleteAll:
+DELETE
+FROM Link;
+
+deleteByFeedId:
+DELETE
+FROM Link
+WHERE feedId = ?;
+
+deleteByEntryId:
+DELETE
+FROM Link
+WHERE entryId = ?;

@@ -8,6 +8,7 @@ import db.Link
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import retrofit2.Response
 import java.time.Instant
 import java.time.OffsetDateTime
@@ -16,7 +17,7 @@ class NextcloudNewsApiAdapter(
     private val api: NextcloudNewsApi,
 ) : NewsApi {
 
-    override suspend fun addFeed(url: HttpUrl): Result<Feed> = kotlin.runCatching {
+    override suspend fun addFeed(url: HttpUrl): Result<Pair<Feed, List<Link>>> = runCatching {
         val response = api.postFeed(PostFeedArgs(url.toString(), 0)).execute()
 
         if (!response.isSuccessful) {
@@ -29,7 +30,7 @@ class NextcloudNewsApiAdapter(
         feedJson.toFeed() ?: throw Exception("Invalid server response")
     }
 
-    override suspend fun getFeeds(): List<Feed> {
+    override suspend fun getFeeds(): List<Pair<Feed, List<Link>>> {
         val response = api.getFeeds().execute()
 
         if (!response.isSuccessful) {
@@ -56,7 +57,7 @@ class NextcloudNewsApiAdapter(
         }
     }
 
-    override suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Entry>> = flow {
+    override suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Pair<Entry, List<Link>>>> = flow {
         var totalFetched = 0L
         val currentBatch = mutableSetOf<ItemJson>()
         val batchSize = 250L
@@ -103,7 +104,7 @@ class NextcloudNewsApiAdapter(
         maxEntryId: String?,
         maxEntryUpdated: OffsetDateTime?,
         lastSync: OffsetDateTime?,
-    ): List<Entry> {
+    ): List<Pair<Entry, List<Link>>> {
         val lastModified = maxEntryUpdated ?: lastSync!!
 
         val response = api.getNewAndUpdatedItems(lastModified.toEpochSecond() + 1).execute()
@@ -148,19 +149,47 @@ class NextcloudNewsApiAdapter(
         }
     }
 
-    private fun FeedJson.toFeed(): Feed? {
-        return Feed(
-            id = id?.toString() ?: return null,
+    private fun FeedJson.toFeed(): Pair<Feed, List<Link>>? {
+        val feedId = id?.toString() ?: return null
+
+        val selfLink = Link(
+            feedId = feedId,
+            entryId = null,
+            href = url!!.toHttpUrl(),
+            rel = "self",
+            type = null,
+            hreflang = null,
+            title = null,
+            length = null,
+            extEnclosureDownloadProgress = null,
+            extCacheUri = null,
+        )
+
+        val alternateLink = Link(
+            feedId = feedId,
+            entryId = null,
+            href = link!!.toHttpUrl(),
+            rel = "alternate",
+            type = null,
+            hreflang = null,
+            title = null,
+            length = null,
+            extEnclosureDownloadProgress = null,
+            extCacheUri = null,
+        )
+
+        val feed = Feed(
+            id = feedId,
             title = title ?: "Untitled",
-            selfLink = url ?: "",
-            alternateLink = link ?: "",
             openEntriesInBrowser = false,
             blockedWords = "",
             showPreviewImages = null,
         )
+
+        return Pair(feed, listOf(selfLink, alternateLink))
     }
 
-    private fun ItemJson.toEntry(): Entry? {
+    private fun ItemJson.toEntry(): Pair<Entry, List<Link>>? {
         if (id == null) return null
         if (pubDate == null) return null
         if (lastModified == null) return null
@@ -173,30 +202,37 @@ class NextcloudNewsApiAdapter(
         val links = mutableListOf<Link>()
 
         links += Link(
-            href = url ?: "",
+            feedId = null,
+            entryId = id.toString(),
+            href = url!!.toHttpUrl(),
             rel = "alternate",
-            type = "text/html",
+            type = "",
             hreflang = "",
             title = "",
             length = null,
+            extEnclosureDownloadProgress = null,
+            extCacheUri = null,
         )
 
         if (!enclosureLink.isNullOrBlank()) {
             links += Link(
-                href = url ?: "",
+                feedId = null,
+                entryId = id.toString(),
+                href = enclosureLink.toHttpUrl(),
                 rel = "enclosure",
                 type = enclosureMime ?: "",
                 hreflang = "",
                 title = "",
                 length = null,
+                extEnclosureDownloadProgress = null,
+                extCacheUri = null,
             )
         }
 
-        return Entry(
+        val entry = Entry(
             id = id.toString(),
             feedId = feedId?.toString() ?: "",
             title = title ?: "Untitled",
-            links = links,
             published = OffsetDateTime.parse(published),
             updated = OffsetDateTime.parse(updated),
             authorName = author ?: "",
@@ -218,6 +254,8 @@ class NextcloudNewsApiAdapter(
             ogImageWidth = 0,
             ogImageHeight = 0,
         )
+
+        return Pair(entry, links)
     }
 
     private fun Response<*>.toException() =

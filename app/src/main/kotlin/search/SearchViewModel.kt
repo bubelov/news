@@ -1,6 +1,5 @@
 package search
 
-import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import common.ConfRepository
@@ -14,14 +13,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import enclosures.EnclosuresRepository
 import kotlinx.coroutines.flow.first
 import sync.NewsApiSync
 
 class SearchViewModel(
     private val feedsRepo: FeedsRepository,
     private val entriesRepo: EntriesRepository,
-    private val enclosuresRepo: EnclosuresRepository,
     private val confRepo: ConfRepository,
     private val sync: NewsApiSync,
 ) : ViewModel() {
@@ -95,23 +92,9 @@ class SearchViewModel(
         }
     }
 
-    suspend fun downloadPodcast(id: String) {
-        enclosuresRepo.download(id)
-    }
-
-    suspend fun getCachedPodcastUri(entryId: String): Uri? {
-        val enclosure = enclosuresRepo.selectByEntryId(entryId).first() ?: return null
-
-        val uri = runCatching {
-            Uri.parse(enclosure.cacheUri)
-        }
-
-        return uri.getOrNull()
-    }
-
     fun getConf() = confRepo.select()
 
-    private suspend fun Entry.toRow(feed: Feed?): EntriesAdapterItem {
+    private fun Entry.toRow(feed: Feed?): EntriesAdapterItem {
         return EntriesAdapterItem(
             id = id,
             ogImageUrl = "",
@@ -121,9 +104,8 @@ class SearchViewModel(
             title = title,
             subtitle = (feed?.title ?: "Unknown feed") + " · " + published,
             summary = "",
-            podcast = links.firstOrNull { it.rel == "enclosure" }?.type?.startsWith("audio") ?: false,
-            podcastDownloadPercent = enclosuresRepo.getDownloadProgress(this@toRow.id)
-                .first(),
+            podcast = false,
+            podcastDownloadPercent = null,
             read = read,
         )
     }

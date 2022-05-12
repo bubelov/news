@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import links.LinksRepository
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import opml.exportOpml
 import java.util.concurrent.atomic.AtomicInteger
@@ -25,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger
 class FeedsViewModel(
     private val feedsRepo: FeedsRepository,
     private val entriesRepo: EntriesRepository,
+    private val linksRepo: LinksRepository,
     confRepo: ConfRepository,
 ) : ViewModel() {
 
@@ -91,7 +93,8 @@ class FeedsViewModel(
                 opmlFeeds.chunked(10).forEach { chunk ->
                     chunk.map { outline ->
                         async {
-                            val cachedFeed = cachedFeeds.firstOrNull { it.selfLink == outline.xmlUrl }
+                            //val cachedFeed = cachedFeeds.firstOrNull { it.selfLink == outline.xmlUrl }
+                            val cachedFeed: Feed? = null
 
                             if (cachedFeed != null) {
                                 feedsRepo.insertOrReplace(
@@ -147,7 +150,11 @@ class FeedsViewModel(
 
     suspend fun exportAsOpml(): ByteArray {
         return withContext(Dispatchers.Default) {
-            exportOpml(feedsRepo.selectAll().first()).toByteArray()
+            val feedsWithLinks = feedsRepo.selectAll().first().map {
+                Pair(it, linksRepo.selectByFeedId(it.id).first())
+            }
+
+            exportOpml(feedsWithLinks).toByteArray()
         }
     }
 
@@ -173,8 +180,8 @@ class FeedsViewModel(
     private suspend fun Feed.toItem() = FeedsAdapter.Item(
         id = id,
         title = title,
-        selfLink = selfLink,
-        alternateLink = alternateLink,
+        selfLink = "",
+        alternateLink = "",
         unreadCount = entriesRepo.getUnreadCount(id).first(),
     )
 

@@ -24,9 +24,9 @@ class SettingsViewModel(
         db.apply {
             transaction {
                 confQueries.delete()
-                entryQueries.deleteAll()
-                entryEnclosureQueries.deleteAll()
                 feedQueries.deleteAll()
+                entryQueries.deleteAll()
+                linkQueries.deleteAll()
             }
         }
     }

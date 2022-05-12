@@ -1,6 +1,5 @@
 package entry
 
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.text.SpannableStringBuilder
@@ -127,14 +126,14 @@ class EntryFragment : AppFragment() {
                     summaryView.movementMethod = LinkMovementMethod.getInstance()
                     progress.hide()
 
-                    val altLink = state.entry.links.firstOrNull { it.rel == "alternate" }
-
-                    if (altLink == null) {
-                        fab.hide()
-                    } else {
-                        fab.show()
-                        fab.setOnClickListener { openUrl(altLink.href, model.conf.useBuiltInBrowser) }
-                    }
+//                    val altLink = state.entry.links.firstOrNull { it.rel == "alternate" }
+//
+//                    if (altLink == null) {
+//                        fab.hide()
+//                    } else {
+//                        fab.show()
+//                        fab.setOnClickListener { openUrl(altLink.href, model.conf.useBuiltInBrowser) }
+//                    }
                 }
 
                 is EntryViewModel.State.Error -> {
@@ -170,16 +169,16 @@ class EntryFragment : AppFragment() {
             }
 
             R.id.share -> {
-                val altLink = entry.links.firstOrNull { it.rel == "alternate" }
-
-                val intent = Intent().apply {
-                    action = Intent.ACTION_SEND
-                    type = "text/plain"
-                    putExtra(Intent.EXTRA_SUBJECT, entry.title)
-                    putExtra(Intent.EXTRA_TEXT, altLink?.href)
-                }
-
-                startActivity(Intent.createChooser(intent, ""))
+//                val altLink = entry.links.firstOrNull { it.rel == "alternate" }
+//
+//                val intent = Intent().apply {
+//                    action = Intent.ACTION_SEND
+//                    type = "text/plain"
+//                    putExtra(Intent.EXTRA_SUBJECT, entry.title)
+//                    putExtra(Intent.EXTRA_TEXT, altLink?.href)
+//                }
+//
+//                startActivity(Intent.createChooser(intent, ""))
                 return true
             }
         }

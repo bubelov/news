@@ -22,10 +22,11 @@ import entries.EntriesModel
 import entries.EntriesRepository
 import entry.EntryViewModel
 import entriesimages.EntriesImagesRepository
-import enclosures.EnclosuresRepository
+import enclosures.AudioEnclosuresRepository
 import settings.SettingsViewModel
 import common.NetworkMonitor
 import db.entryAdapter
+import db.linkAdapter
 import feeds.FeedsViewModel
 import feedsettings.FeedSettingsViewModel
 import org.koin.androidx.viewmodel.dsl.viewModelOf
@@ -38,17 +39,18 @@ val appModule = module {
 
     single { get<Context>().resources }
 
-    single { Database(driver = get(), EntryAdapter = get()) }
+    single { Database(driver = get(), EntryAdapter = get(), LinkAdapter = get()) }
     single { Database.Schema }
     single<SqlDriver> {
         AndroidSqliteDriver(schema = get(), context = get(), name = App.DB_FILE_NAME)
     }
     single { entryAdapter() }
+    single { linkAdapter() }
 
+    single { get<Database>().confQueries }
     single { get<Database>().feedQueries }
     single { get<Database>().entryQueries }
-    single { get<Database>().entryEnclosureQueries }
-    single { get<Database>().confQueries }
+    single { get<Database>().linkQueries }
 
     singleOf(::NetworkMonitor)
     single { get<Context>().getSystemService<ConnectivityManager>()!! }
@@ -58,22 +60,22 @@ val appModule = module {
     singleOf(::NewsApiSwitcher)
     singleOf(::NewsApiSync)
 
+    singleOf(::ConfRepository)
     singleOf(::AccountsRepository)
     singleOf(::FeedsRepository)
     singleOf(::EntriesRepository)
     singleOf(::EntriesImagesRepository)
-    singleOf(::EnclosuresRepository)
-    singleOf(::ConfRepository)
+    singleOf(::AudioEnclosuresRepository)
 
     viewModelOf(::AppViewModel)
-    viewModelOf(::AuthViewModel)
-    viewModelOf(::EntriesModel)
-    viewModelOf(::EntryViewModel)
     viewModelOf(::SettingsViewModel)
+    viewModelOf(::AuthViewModel)
+    viewModelOf(::MinifluxAuthViewModel)
     viewModelOf(::NextcloudAuthModel)
     viewModelOf(::FeedsViewModel)
     viewModelOf(::FeedSettingsViewModel)
+    viewModelOf(::EntriesModel)
     viewModelOf(::SearchViewModel)
-    viewModelOf(::MinifluxAuthViewModel)
+    viewModelOf(::EntryViewModel)
     viewModelOf(::EnclosuresModel)
 }

@@ -44,6 +44,7 @@ class FeedsViewModelTests {
             feedsRepo = feedsRepo,
             entriesRepo = mockk(),
             confRepo = confRepo,
+            linksRepo = mockk(),
         )
 
         var attempts = 0

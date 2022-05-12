@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentSearchBinding
@@ -15,15 +14,11 @@ import com.google.android.material.internal.TextWatcherAdapter
 import common.AppFragment
 import common.CardListAdapterDecoration
 import common.hideKeyboard
-import common.openCachedPodcast
-import common.openUrl
 import common.screenWidth
-import common.showErrorDialog
 import common.showKeyboard
 import entries.EntriesAdapter
 import entries.EntriesAdapterCallback
 import entries.EntriesAdapterItem
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -41,49 +36,49 @@ class SearchFragment : AppFragment() {
     private val adapter = EntriesAdapter(
         callback = object : EntriesAdapterCallback {
             override fun onItemClick(item: EntriesAdapterItem) {
-                lifecycleScope.launchWhenResumed {
-                    val entry = model.getEntry(item.id).first() ?: return@launchWhenResumed
-                    val feed = model.getFeed(entry.feedId).first() ?: return@launchWhenResumed
-
-                    model.setRead(listOf(entry.id), true)
-
-                    if (feed.openEntriesInBrowser) {
-                        openUrl(
-                            url = entry.links.first { it.rel == "alternate" }.href,
-                            useBuiltInBrowser = model.getConf().first().useBuiltInBrowser
-                        )
-                    } else {
-                        val action =
-                            SearchFragmentDirections.actionSearchFragmentToEntryFragment(item.id)
-                        findNavController().navigate(action)
-                    }
-                }
+//                lifecycleScope.launchWhenResumed {
+//                    val entry = model.getEntry(item.id).first() ?: return@launchWhenResumed
+//                    val feed = model.getFeed(entry.feedId).first() ?: return@launchWhenResumed
+//
+//                    model.setRead(listOf(entry.id), true)
+//
+//                    if (feed.openEntriesInBrowser) {
+//                        openUrl(
+//                            url = entry.links.first { it.rel == "alternate" }.href,
+//                            useBuiltInBrowser = model.getConf().first().useBuiltInBrowser
+//                        )
+//                    } else {
+//                        val action =
+//                            SearchFragmentDirections.actionSearchFragmentToEntryFragment(item.id)
+//                        findNavController().navigate(action)
+//                    }
+//                }
             }
 
             override fun onDownloadPodcastClick(item: EntriesAdapterItem) {
-                lifecycleScope.launchWhenResumed {
-                    runCatching {
-                        model.downloadPodcast(item.id)
-                    }.onFailure {
-                        showErrorDialog(it)
-                    }
-                }
+//                lifecycleScope.launchWhenResumed {
+//                    runCatching {
+//                        model.downloadPodcast(item.id)
+//                    }.onFailure {
+//                        showErrorDialog(it)
+//                    }
+//                }
             }
 
             override fun onPlayPodcastClick(item: EntriesAdapterItem) {
-                lifecycleScope.launch {
-                    runCatching {
-                        val entry = model.getEntry(item.id).first() ?: return@launch
-                        model.setRead(listOf(entry.id), true)
-
-                        openCachedPodcast(
-                            cacheUri = model.getCachedPodcastUri(entry.id),
-                            enclosureLinkType = entry.links.first { it.rel == "enclosure" }.type,
-                        )
-                    }.onFailure {
-                        showErrorDialog(it)
-                    }
-                }
+//                lifecycleScope.launch {
+//                    runCatching {
+//                        val entry = model.getEntry(item.id).first() ?: return@launch
+//                        model.setRead(listOf(entry.id), true)
+//
+//                        openCachedPodcast(
+//                            cacheUri = model.getCachedPodcastUri(entry.id),
+//                            enclosureLinkType = entry.links.first { it.rel == "enclosure" }.type,
+//                        )
+//                    }.onFailure {
+//                        showErrorDialog(it)
+//                    }
+//                }
             }
         }
     )

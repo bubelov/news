@@ -60,8 +60,6 @@ class FeedQueriesTest {
 fun feed() = Feed(
     id = UUID.randomUUID().toString(),
     title = "",
-    selfLink = "",
-    alternateLink = "",
     openEntriesInBrowser = false,
     blockedWords = "",
     showPreviewImages = null,

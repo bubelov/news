@@ -17,6 +17,7 @@ import db.EntryWithoutContent
 import db.Feed
 import db.FeedQueries
 import db.Link
+import db.LinkQueries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -25,6 +26,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.jsoup.Jsoup
@@ -39,11 +41,12 @@ typealias ParsedFeed = co.appreactor.feedk.Feed
 class StandaloneNewsApi(
     private val feedQueries: FeedQueries,
     private val entryQueries: EntryQueries,
+    private val linkQueries: LinkQueries,
 ) : NewsApi {
 
     private val httpClient = OkHttpClient()
 
-    override suspend fun addFeed(url: HttpUrl): Result<Feed> {
+    override suspend fun addFeed(url: HttpUrl): Result<Pair<Feed, List<Link>>> {
         val request = Request.Builder().url(url).build()
 
         runCatching {
@@ -103,8 +106,16 @@ class StandaloneNewsApi(
         }
     }
 
-    override suspend fun getFeeds(): List<Feed> {
-        return feedQueries.selectAll().executeAsList()
+    override suspend fun getFeeds(): List<Pair<Feed, List<Link>>> {
+        val result: MutableList<Pair<Feed, List<Link>>> = mutableListOf()
+
+        feedQueries.transaction {
+            feedQueries.selectAll().executeAsList().onEach {
+                result += Pair(it, linkQueries.selectByFeedId(it.id).executeAsList())
+            }
+        }
+
+        return result
     }
 
     override suspend fun updateFeedTitle(feedId: String, newTitle: String) {
@@ -115,7 +126,7 @@ class StandaloneNewsApi(
 
     }
 
-    override suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Entry>> {
+    override suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Pair<Entry, List<Link>>>> {
         return flowOf(emptyList())
     }
 
@@ -124,23 +135,26 @@ class StandaloneNewsApi(
         maxEntryId: String?,
         maxEntryUpdated: OffsetDateTime?,
         lastSync: OffsetDateTime?,
-    ): List<Entry> = withContext(Dispatchers.IO) {
-        val entries = mutableListOf<Entry>()
+    ): List<Pair<Entry, List<Link>>> = withContext(Dispatchers.IO) {
+        val entries = mutableListOf<Pair<Entry, List<Link>>>()
 
         feedQueries.selectAll().executeAsList().chunked(10).forEach { chunk ->
-            chunk.map { feed -> async { entries.addAll(fetchEntries(feed)) } }.awaitAll()
+            chunk.map { feed ->
+                async {
+                    entries.addAll(fetchEntries(Pair(feed, linkQueries.selectByFeedId(feed.id).executeAsList())))
+                }
+            }.awaitAll()
         }
 
         entries.removeAll {
-            entryQueries.selectById(it.id).executeAsOneOrNull() != null
+            entryQueries.selectById(it.first.id).executeAsOneOrNull() != null
         }
 
         return@withContext entries
     }
 
-    private fun fetchEntries(feed: Feed): List<Entry> {
-        val url = feed.selfLink.toHttpUrl()
-
+    private fun fetchEntries(feed: Pair<Feed, List<Link>>): List<Pair<Entry, List<Link>>> {
+        val url = feed.second.first { it.rel == "self" }.href
         val request = Request.Builder().url(url).build()
 
         val response = runCatching {
@@ -164,12 +178,12 @@ class StandaloneNewsApi(
                         is AtomFeed -> {
                             parsedFeed.entries.getOrElse {
                                 return emptyList()
-                            }.map { it.toEntry(feed.id) }
+                            }.map { it.toEntry(feed.first.id) }
                         }
                         is RssFeed -> {
                             parsedFeed.channel.items.getOrElse {
                                 return emptyList()
-                            }.mapNotNull { it.getOrNull() }.map { it.toEntry(feed.id) }
+                            }.mapNotNull { it.getOrNull() }.map { it.toEntry(feed.first.id) }
                         }
                     }
                 }
@@ -204,51 +218,101 @@ class StandaloneNewsApi(
 
     }
 
-    private fun ParsedFeed.toFeed(feedUrl: HttpUrl): Feed {
+    private fun ParsedFeed.toFeed(feedUrl: HttpUrl): Pair<Feed, List<Link>> {
         return when (this) {
             is AtomFeed -> {
                 val selfLink = links.single { it.rel == AtomLinkRel.Self }
-                val alternateLink = links.single { it.rel == AtomLinkRel.Alternate }
 
-                Feed(
+                val links = links.map {
+                    Link(
+                        feedId = selfLink.href,
+                        entryId = null,
+                        href = it.href.toHttpUrl(),
+                        rel = it.rel.toString().lowercase(),
+                        type = it.type,
+                        hreflang = it.hreflang,
+                        title = it.title,
+                        length = it.length,
+                        extEnclosureDownloadProgress = null,
+                        extCacheUri = null,
+                    )
+                }
+
+                val feed = Feed(
                     id = selfLink.href,
                     title = title,
-                    selfLink = selfLink.href,
-                    alternateLink = alternateLink.href,
                     openEntriesInBrowser = false,
                     blockedWords = "",
                     showPreviewImages = null,
                 )
+
+                Pair(feed, links)
             }
-            is RssFeed -> Feed(
-                id = channel.link,
-                title = channel.title,
-                selfLink = feedUrl.toString(),
-                alternateLink = channel.link,
-                openEntriesInBrowser = false,
-                blockedWords = "",
-                showPreviewImages = null,
-            )
+            is RssFeed -> {
+                val selfLink = Link(
+                    feedId = channel.link,
+                    entryId = null,
+                    href = feedUrl,
+                    rel = "self",
+                    type = null,
+                    hreflang = null,
+                    title = null,
+                    length = null,
+                    extEnclosureDownloadProgress = null,
+                    extCacheUri = null,
+                )
+
+                val alternateLink = Link(
+                    feedId = channel.link,
+                    entryId = null,
+                    href = channel.link.toHttpUrl(),
+                    rel = "alternate",
+                    type = null,
+                    hreflang = null,
+                    title = null,
+                    length = null,
+                    extEnclosureDownloadProgress = null,
+                    extCacheUri = null,
+                )
+
+                val feed = Feed(
+                    id = channel.link,
+                    title = channel.title,
+                    openEntriesInBrowser = false,
+                    blockedWords = "",
+                    showPreviewImages = null,
+                )
+
+                Pair(feed, listOf(selfLink, alternateLink))
+            }
         }
     }
 
-    private fun AtomLink.toLink(): Link {
+    private fun AtomLink.toLink(
+        feedId: String?,
+        entryId: String?,
+    ): Link {
         return Link(
-            href = href,
+            feedId = feedId,
+            entryId = entryId,
+            href = href.toHttpUrl(),
             rel = rel.toString().lowercase(),
             type = type,
             hreflang = hreflang,
             title = title,
             length = length,
+            extEnclosureDownloadProgress = null,
+            extCacheUri = null,
         )
     }
 
-    private fun AtomEntry.toEntry(feedId: String): Entry {
-        return Entry(
+    private fun AtomEntry.toEntry(feedId: String): Pair<Entry, List<Link>> {
+        val links = links.map { it.toLink(feedId = null, entryId = id) }
+
+        val entry = Entry(
             id = id,
             feedId = feedId,
             title = title,
-            links = links.map { it.toLink() },
             published = OffsetDateTime.parse(published),
             updated = OffsetDateTime.parse(updated),
             authorName = authorName,
@@ -266,9 +330,11 @@ class StandaloneNewsApi(
             ogImageWidth = 0,
             ogImageHeight = 0,
         )
+
+        return Pair(entry, links)
     }
 
-    private fun RssItem.toEntry(feedId: String): Entry {
+    private fun RssItem.toEntry(feedId: String): Pair<Entry, List<Link>> {
         val id = when (val guid = guid) {
             is RssItemGuid.StringGuid -> "guid:${guid.value}"
             is RssItemGuid.UrlGuid -> "guid:${guid.value}"
@@ -284,31 +350,38 @@ class StandaloneNewsApi(
 
         if (!link.isNullOrBlank()) {
             links += Link(
-                href = link ?: "",
+                feedId = null,
+                entryId = id,
+                href = link!!.toHttpUrl(),
                 rel = "alternate",
                 type = "text/html",
                 hreflang = "",
                 title = "",
                 length = null,
+                extEnclosureDownloadProgress = null,
+                extCacheUri = null,
             )
         }
 
         if (enclosure != null) {
             links += Link(
-                href = enclosure!!.url.toString(),
+                feedId = null,
+                entryId = id,
+                href = enclosure!!.url.toHttpUrlOrNull()!!,
                 rel = "enclosure",
                 type = enclosure!!.type,
                 hreflang = "",
                 title = "",
                 length = enclosure!!.length,
+                extEnclosureDownloadProgress = null,
+                extCacheUri = null,
             )
         }
 
-        return Entry(
+        val entry = Entry(
             id = id,
             feedId = feedId,
             title = title ?: "",
-            links = links,
             published = OffsetDateTime.parse((pubDate ?: Date()).toIsoString()),
             updated = OffsetDateTime.parse((pubDate ?: Date()).toIsoString()),
             authorName = author ?: "",
@@ -326,6 +399,8 @@ class StandaloneNewsApi(
             ogImageWidth = 0,
             ogImageHeight = 0,
         )
+
+        return Pair(entry, links)
     }
 
     private fun sha256(string: String): String {

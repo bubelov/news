@@ -50,7 +50,7 @@ class FeedsRepositoryTests {
         val feedUrl = "https://example.com/".toHttpUrl()
         val feed = feed()
 
-        coEvery { api.addFeed(feedUrl) } returns Result.success(feed)
+        coEvery { api.addFeed(feedUrl) } returns Result.success(Pair(feed, emptyList()))
 
         repo.insertByUrl(feedUrl)
 

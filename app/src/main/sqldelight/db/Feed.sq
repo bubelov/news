@@ -1,6 +1,6 @@
 insertOrReplace:
 INSERT OR REPLACE
-INTO Feed(id, title, selfLink, alternateLink, openEntriesInBrowser, blockedWords, showPreviewImages)
+INTO Feed(id, title, openEntriesInBrowser, blockedWords, showPreviewImages)
 VALUES ?;
 
 selectAll:

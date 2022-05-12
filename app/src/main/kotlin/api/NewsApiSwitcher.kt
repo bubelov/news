@@ -13,6 +13,7 @@ import com.google.gson.GsonBuilder
 import com.nextcloud.android.sso.api.NextcloudAPI
 import com.nextcloud.android.sso.helper.SingleAccountHelper
 import common.ConfRepository
+import db.LinkQueries
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import retrofit2.NextcloudRetrofitApiBuilder
@@ -21,6 +22,7 @@ class NewsApiSwitcher(
     private val wrapper: NewsApiWrapper,
     private val feedQueries: FeedQueries,
     private val entryQueries: EntryQueries,
+    private val linkQueries: LinkQueries,
     private val confRepo: ConfRepository,
     private val context: Context,
 ) {
@@ -86,6 +88,6 @@ class NewsApiSwitcher(
     }
 
     private fun switchToStandaloneApi() {
-        wrapper.api = StandaloneNewsApi(feedQueries, entryQueries)
+        wrapper.api = StandaloneNewsApi(feedQueries, entryQueries, linkQueries)
     }
 }

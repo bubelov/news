@@ -1,6 +1,8 @@
 package opml
 
 import db.Feed
+import db.Link
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.junit.Test
 import java.io.InputStream
 import java.nio.charset.Charset
@@ -46,19 +48,34 @@ class OpmlTests {
 
     @Test
     fun writesSampleDocument() {
-        val feeds = sampleElements.map {
-            Feed(
+        val feedsWithLinks = sampleElements.map {
+            val feedId = UUID.randomUUID().toString()
+
+            val selfLink = Link(
+                feedId = feedId,
+                entryId = null,
+                href = it.xmlUrl.toHttpUrl(),
+                rel = "self",
+                type = null,
+                hreflang = null,
+                title = it.text,
+                length = null,
+                extEnclosureDownloadProgress = null,
+                extCacheUri = null,
+            )
+
+            val feed = Feed(
                 id = UUID.randomUUID().toString(),
                 title = it.text,
-                selfLink = it.xmlUrl,
-                alternateLink = "",
                 openEntriesInBrowser = it.openEntriesInBrowser,
                 blockedWords = it.blockedWords,
                 showPreviewImages = it.showPreviewImages,
             )
+
+            Pair(feed, listOf(selfLink))
         }
 
-        val opml = exportOpml(feeds)
+        val opml = exportOpml(feedsWithLinks)
         val elements = importOpml(opml)
         assertTrue(opml.lines().size > 1)
         assertContentEquals(sampleElements.toTypedArray(), elements.toTypedArray())

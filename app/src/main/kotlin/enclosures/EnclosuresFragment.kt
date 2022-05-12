@@ -10,6 +10,10 @@ import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentEnclosuresBinding
 import common.AppFragment
 import common.ListAdapterDecoration
+import db.Link
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class EnclosuresFragment : AppFragment() {
@@ -36,31 +40,25 @@ class EnclosuresFragment : AppFragment() {
             setTitle(R.string.enclosures)
         }
 
-        initList()
+        binding.list.layoutManager = LinearLayoutManager(requireContext())
+
+        binding.list.adapter = EnclosuresAdapter(object : EnclosuresAdapter.Listener {
+            override fun onDeleteClick(item: Link) {
+                viewLifecycleOwner.lifecycleScope.launch {
+                    model.deleteEnclosure(item)
+                }
+            }
+        })
+
+        binding.list.addItemDecoration(ListAdapterDecoration(resources.getDimensionPixelSize(R.dimen.dp_8)))
+
+        model.getEnclosures()
+            .onEach { (binding.list.adapter as EnclosuresAdapter).submitList(it) }
+            .launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    private fun initList() = binding.list.apply {
-        setHasFixedSize(true)
-        layoutManager = LinearLayoutManager(requireContext())
-
-        adapter = EnclosuresAdapter(object : EnclosuresAdapter.Listener {
-            override fun onDeleteClick(item: EnclosuresAdapter.Item) {
-                lifecycleScope.launchWhenResumed {
-                    model.deleteEnclosure(item.entryId)
-                    (adapter as EnclosuresAdapter).submitList(model.getEnclosures())
-                }
-            }
-        })
-
-        addItemDecoration(ListAdapterDecoration(resources.getDimensionPixelSize(R.dimen.dp_8)))
-
-        lifecycleScope.launchWhenResumed {
-            (adapter as EnclosuresAdapter).submitList(model.getEnclosures())
-        }
     }
 }

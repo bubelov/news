@@ -14,7 +14,7 @@ import androidx.navigation.ui.setupWithNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.ActivityAppBinding
 import entries.EntriesFilter
-import enclosures.EnclosuresRepository
+import enclosures.AudioEnclosuresRepository
 import entriesimages.EntriesImagesRepository
 import org.koin.android.ext.android.get
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -61,7 +61,7 @@ class AppActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         lifecycleScope.launchWhenCreated {
-            get<EnclosuresRepository>().apply {
+            get<AudioEnclosuresRepository>().apply {
                 deleteIncompleteDownloads()
             }
         }

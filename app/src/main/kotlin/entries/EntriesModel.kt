@@ -1,6 +1,5 @@
 package entries
 
-import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import common.ConfRepository
@@ -9,7 +8,8 @@ import common.ConfRepository.Companion.SORT_ORDER_DESCENDING
 import db.Conf
 import db.EntryWithoutContent
 import db.Feed
-import enclosures.EnclosuresRepository
+import db.Link
+import enclosures.AudioEnclosuresRepository
 import feeds.FeedsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,7 +28,7 @@ class EntriesModel(
     private val confRepo: ConfRepository,
     private val feedsRepo: FeedsRepository,
     private val entriesRepo: EntriesRepository,
-    private val enclosuresRepo: EnclosuresRepository,
+    private val audioEnclosuresRepo: AudioEnclosuresRepository,
     private val newsApiSync: NewsApiSync,
 ) : ViewModel() {
 
@@ -156,23 +156,13 @@ class EntriesModel(
         }
     }
 
-    suspend fun downloadPodcast(id: String) {
-        enclosuresRepo.download(id)
+    suspend fun downloadAudioEnclosure(enclosure: Link) {
+        audioEnclosuresRepo.download(enclosure)
     }
 
     fun getFeed(id: String) = feedsRepo.selectById(id)
 
     fun getEntry(id: String) = entriesRepo.selectById(id)
-
-    suspend fun getCachedPodcastUri(entryId: String): Uri? {
-        val enclosure = enclosuresRepo.selectByEntryId(entryId).first() ?: return null
-
-        val uri = runCatching {
-            Uri.parse(enclosure.cacheUri)
-        }
-
-        return uri.getOrNull()
-    }
 
     fun setRead(entryIds: Collection<String>, value: Boolean) {
         viewModelScope.launch {
@@ -258,7 +248,7 @@ class EntriesModel(
             title = title,
             subtitle = "${feed?.title ?: "Unknown feed"} · ${DATE_TIME_FORMAT.format(published)}",
             summary = "",
-            podcast = links.firstOrNull { it.rel == "enclosure" }?.type?.startsWith("audio") ?: false,
+            podcast = false,
             podcastDownloadPercent = null,
             read = read,
         )

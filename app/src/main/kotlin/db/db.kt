@@ -1,22 +1,18 @@
 package db
 
-import com.google.gson.Gson
 import com.squareup.sqldelight.ColumnAdapter
+import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import java.time.OffsetDateTime
 
 fun entryAdapter() = Entry.Adapter(
-    linksAdapter(),
-    offsetDateTimeAdapter(),
-    offsetDateTimeAdapter(),
+    publishedAdapter = offsetDateTimeAdapter(),
+    updatedAdapter = offsetDateTimeAdapter(),
 )
 
-private fun linksAdapter() = object : ColumnAdapter<List<Link>, String> {
-    override fun decode(databaseValue: String): List<Link> {
-        return Gson().fromJson(databaseValue, Array<Link>::class.java).toList()
-    }
-
-    override fun encode(value: List<Link>) = Gson().toJson(value)
-}
+fun linkAdapter() = Link.Adapter(
+    hrefAdapter = httpUrlAdapter(),
+)
 
 private fun offsetDateTimeAdapter() = object : ColumnAdapter<OffsetDateTime, String> {
     override fun decode(databaseValue: String): OffsetDateTime {
@@ -34,4 +30,9 @@ private fun offsetDateTimeAdapter() = object : ColumnAdapter<OffsetDateTime, Str
     }
 
     override fun encode(value: OffsetDateTime) = value.toString()
+}
+
+private fun httpUrlAdapter() = object : ColumnAdapter<HttpUrl, String> {
+    override fun decode(databaseValue: String): HttpUrl = databaseValue.toHttpUrl()
+    override fun encode(value: HttpUrl) = value.toString()
 }

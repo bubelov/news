@@ -28,8 +28,8 @@ class FeedsRepository(
     suspend fun insertByUrl(url: HttpUrl): Feed {
         return withContext(Dispatchers.Default) {
             val feed = api.addFeed(url).getOrThrow()
-            feedQueries.insertOrReplace(feed)
-            feed
+            feedQueries.insertOrReplace(feed.first)
+            feed.first
         }
     }
 
@@ -64,17 +64,17 @@ class FeedsRepository(
 
     suspend fun sync() {
         withContext(Dispatchers.Default) {
-            val newFeeds = api.getFeeds().sortedBy { it.id }
+            val newFeeds = api.getFeeds().sortedBy { it.first.id }
             val cachedFeeds = selectAll().first().sortedBy { it.id }
 
             feedQueries.transaction {
                 feedQueries.deleteAll()
 
                 newFeeds.forEach { feed ->
-                    val cachedFeed = cachedFeeds.find { it.id == feed.id }
+                    val cachedFeed = cachedFeeds.find { it.id == feed.first.id }
 
                     feedQueries.insertOrReplace(
-                        feed.copy(
+                        feed.first.copy(
                             openEntriesInBrowser = cachedFeed?.openEntriesInBrowser ?: false,
                             blockedWords = cachedFeed?.blockedWords ?: "",
                             showPreviewImages = cachedFeed?.showPreviewImages,

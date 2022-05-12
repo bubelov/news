@@ -19,7 +19,7 @@ class EntriesRepositoryTests {
 
         val repo = EntriesRepository(
             api = mockk(),
-            db = db.entryQueries,
+            entryQueries = db.entryQueries,
         )
 
         val entries = listOf(entryWithoutContent())
@@ -34,7 +34,7 @@ class EntriesRepositoryTests {
 
         val repo = EntriesRepository(
             api = mockk(),
-            db = db.entryQueries,
+            entryQueries = db.entryQueries,
         )
 
         val entries = listOf(entry(), entry(), entry())
@@ -51,7 +51,7 @@ class EntriesRepositoryTests {
 
         val repo = EntriesRepository(
             api = mockk(),
-            db = db.entryQueries,
+            entryQueries = db.entryQueries,
         )
 
         val feedId = UUID.randomUUID().toString()
@@ -74,7 +74,7 @@ class EntriesRepositoryTests {
 
         val repo = EntriesRepository(
             api = mockk(),
-            db = db.entryQueries,
+            entryQueries = db.entryQueries,
         )
 
         val entries = listOf(
@@ -113,7 +113,7 @@ class EntriesRepositoryTests {
 
         val repo = EntriesRepository(
             api = mockk(),
-            db = db.entryQueries,
+            entryQueries = db.entryQueries,
         )
 
         val entries = listOf(
@@ -152,7 +152,7 @@ class EntriesRepositoryTests {
 
         val repo = EntriesRepository(
             api = mockk(),
-            db = db.entryQueries,
+            entryQueries = db.entryQueries,
         )
 
         val entries = listOf(

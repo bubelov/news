@@ -6,6 +6,8 @@ import entries.EntriesRepository
 import com.squareup.picasso.Picasso
 import common.ConfRepository
 import db.EntryWithoutContent
+import db.Link
+import db.LinkQueries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -18,8 +20,9 @@ import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
 class EntriesImagesRepository(
-    private val entriesRepo: EntriesRepository,
     private val confRepo: ConfRepository,
+    private val entriesRepo: EntriesRepository,
+    private val linkQueries: LinkQueries,
 ) {
 
     companion object {
@@ -42,26 +45,30 @@ class EntriesImagesRepository(
                     bookmarked = true,
                 ).collectLatest { entries ->
                     entries.chunked(10).forEach {
-                        it.map { async { syncPreview(it) } }.awaitAll()
+                        it.map {
+                            async {
+                                syncPreview(it, linkQueries.selectByEntryid(it.id).executeAsList())
+                            }
+                        }.awaitAll()
                     }
                 }
             }
         }
     }
 
-    private suspend fun syncPreview(entry: EntryWithoutContent) {
+    private suspend fun syncPreview(entry: EntryWithoutContent, links: List<Link>) {
         withContext(Dispatchers.Default) {
             if (entry.ogImageChecked) {
                 return@withContext
             }
 
-            val htmlLink = entry.links.firstOrNull { it.type == "text/html" }
+            val htmlLink = links.firstOrNull { it.type == "text/html" }
 
             if (htmlLink == null) {
                 entriesRepo.setOgImageChecked(entry.id, true)
                 return@withContext
             }
-            
+
             val request = httpClient.newCall(Request.Builder().url(htmlLink.href).build())
 
             val response = runCatching {

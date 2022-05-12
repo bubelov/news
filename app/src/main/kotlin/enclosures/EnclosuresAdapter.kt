@@ -2,15 +2,15 @@ package enclosures
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.databinding.ListItemEnclosureBinding
-import okhttp3.HttpUrl
+import db.Link
 
 class EnclosuresAdapter(private val listener: Listener) :
-    ListAdapter<EnclosuresAdapter.Item, EnclosuresAdapter.ViewHolder>(DiffCallback()) {
+    ListAdapter<Link, EnclosuresAdapter.ViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -19,7 +19,7 @@ class EnclosuresAdapter(private val listener: Listener) :
         val binding = ListItemEnclosureBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
-            false
+            false,
         )
 
         return ViewHolder(binding)
@@ -29,45 +29,34 @@ class EnclosuresAdapter(private val listener: Listener) :
         holder.bind(getItem(position), listener)
     }
 
-    data class Item(
-        val entryId: String,
-        val title: String,
-        val url: HttpUrl,
-        val downloaded: Boolean,
-    )
-
     interface Listener {
-        fun onDeleteClick(item: Item)
+        fun onDeleteClick(item: Link)
     }
 
     class ViewHolder(
         private val binding: ListItemEnclosureBinding,
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: Item, listener: Listener) = binding.apply {
+        fun bind(item: Link, listener: Listener) = binding.apply {
             binding.primaryText.text = item.title
-            binding.secondaryText.text = item.url.toString()
-
-            binding.delete.isInvisible = !item.downloaded
-
-            binding.delete.setOnClickListener {
-                listener.onDeleteClick(item)
-            }
+            binding.secondaryText.text = item.href.toString()
+            binding.delete.isVisible = item.extEnclosureDownloadProgress == 1.0
+            binding.delete.setOnClickListener { listener.onDeleteClick(item) }
         }
     }
 
-    class DiffCallback : DiffUtil.ItemCallback<Item>() {
+    class DiffCallback : DiffUtil.ItemCallback<Link>() {
 
         override fun areItemsTheSame(
-            oldItem: Item,
-            newItem: Item,
+            oldItem: Link,
+            newItem: Link,
         ): Boolean {
             return false
         }
 
         override fun areContentsTheSame(
-            oldItem: Item,
-            newItem: Item,
+            oldItem: Link,
+            newItem: Link,
         ): Boolean {
             return false
         }

@@ -74,22 +74,6 @@ sqldelight {
     }
 }
 
-gradle.projectsEvaluated {
-    tasks.withType<Test> {
-        addTestListener(object : TestListener {
-            override fun beforeSuite(suite: TestDescriptor) {}
-
-            override fun beforeTest(testDescriptor: TestDescriptor) {}
-
-            override fun afterTest(testDescriptor: TestDescriptor, result: TestResult) {
-                println("test ${testDescriptor.className} ${testDescriptor.name} ... ${result.resultType}")
-            }
-
-            override fun afterSuite(suite: TestDescriptor, result: TestResult) {}
-        })
-    }
-}
-
 dependencies {
     // Kotlin extensions
     // Simplifies non-blocking programming

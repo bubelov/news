@@ -1,32 +1,24 @@
 package enclosures
 
 import androidx.lifecycle.ViewModel
-import entries.EntriesRepository
-import kotlinx.coroutines.flow.first
-import okhttp3.HttpUrl.Companion.toHttpUrl
+import db.Link
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
+import links.LinksRepository
 
 class EnclosuresModel(
-    private val entriesRepo: EntriesRepository,
-    private val enclosuresRepo: EnclosuresRepository,
+    private val linksRepo: LinksRepository,
+    private val audioEnclosuresRepo: AudioEnclosuresRepository,
 ) : ViewModel() {
 
-    suspend fun getEnclosures(): List<EnclosuresAdapter.Item> {
-        return entriesRepo.selectAll().first().map { entry ->
-            entry.links
-                .filter { it.rel == "enclosure" }
-                .map {
-                    EnclosuresAdapter.Item(
-                        entryId = entry.id,
-                        title = it.title,
-                        url = it.href.toHttpUrl(),
-                        downloaded = enclosuresRepo.selectByEntryId(entry.id).first()?.downloadPercent == 100L,
-                    )
-                }
-        }.flatten()
+    fun getEnclosures(): Flow<List<Link>> {
+        return linksRepo.selectEnclosures()
     }
 
-    suspend fun deleteEnclosure(entryId: String) {
-        val enclosure = enclosuresRepo.selectByEntryId(entryId).first() ?: return
-        enclosuresRepo.deleteFromCache(enclosure)
+    suspend fun deleteEnclosure(enclosure: Link) {
+        withContext(Dispatchers.Default) {
+            audioEnclosuresRepo.deleteFromCache(enclosure)
+        }
     }
 }

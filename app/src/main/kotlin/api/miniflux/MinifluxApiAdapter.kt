@@ -8,13 +8,14 @@ import db.Link
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import java.time.OffsetDateTime
 
 class MinifluxApiAdapter(
     private val api: MinifluxApi,
 ) : NewsApi {
 
-    override suspend fun addFeed(url: HttpUrl): Result<Feed> = runCatching {
+    override suspend fun addFeed(url: HttpUrl): Result<Pair<Feed, List<Link>>> = runCatching {
         val categories = api.getCategories()
 
         val category = categories.find { it.title.equals("All", ignoreCase = true) }
@@ -31,7 +32,7 @@ class MinifluxApiAdapter(
         api.getFeed(response.feed_id).toFeed()!!
     }
 
-    override suspend fun getFeeds(): List<Feed> {
+    override suspend fun getFeeds(): List<Pair<Feed, List<Link>>> {
         return api.getFeeds().mapNotNull { it.toFeed() }
     }
 
@@ -43,7 +44,7 @@ class MinifluxApiAdapter(
         api.deleteFeed(feedId.toLong())
     }
 
-    override suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Entry>> = flow {
+    override suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Pair<Entry, List<Link>>>> = flow {
         var totalFetched = 0L
         val currentBatch = mutableSetOf<EntryJson>()
         val batchSize = 250L
@@ -82,7 +83,7 @@ class MinifluxApiAdapter(
         maxEntryId: String?,
         maxEntryUpdated: OffsetDateTime?,
         lastSync: OffsetDateTime?,
-    ): List<Entry> {
+    ): List<Pair<Entry, List<Link>>> {
         return api.getEntriesAfterEntry(
             afterEntryId = maxEntryId?.toLong() ?: 0,
             limit = 0,
@@ -116,46 +117,81 @@ class MinifluxApiAdapter(
         }
     }
 
-    private fun FeedJson.toFeed(): Feed? {
-        return Feed(
-            id = id?.toString() ?: return null,
+    private fun FeedJson.toFeed(): Pair<Feed, List<Link>>? {
+        val feedId = id?.toString() ?: return null
+
+        val selfLink = Link(
+            feedId = feedId,
+            entryId = null,
+            href = feed_url.toHttpUrl(),
+            rel = "self",
+            type = null,
+            hreflang = null,
+            title = null,
+            length = null,
+            extEnclosureDownloadProgress = null,
+            extCacheUri = null,
+        )
+
+        val alternateLink = Link(
+            feedId = feedId,
+            entryId = null,
+            href = site_url.toHttpUrl(),
+            rel = "alternate",
+            type = null,
+            hreflang = null,
+            title = null,
+            length = null,
+            extEnclosureDownloadProgress = null,
+            extCacheUri = null,
+        )
+
+        val feed = Feed(
+            id = feedId,
             title = title,
-            selfLink = feed_url,
-            alternateLink = site_url,
             openEntriesInBrowser = false,
             blockedWords = "",
             showPreviewImages = null,
         )
+
+        return Pair(feed, listOf(selfLink, alternateLink))
     }
 
-    private fun EntryJson.toEntry(): Entry {
+    private fun EntryJson.toEntry(): Pair<Entry, List<Link>> {
         val links = mutableListOf<Link>()
 
         links += Link(
-            href = url,
+            feedId = id.toString(),
+            entryId = null,
+            href = url.toHttpUrl(),
             rel = "alternate",
-            type = "text/html",
+            type = null,
             hreflang = "",
             title = "",
             length = null,
+            extEnclosureDownloadProgress = null,
+            extCacheUri = null,
         )
 
         enclosures?.forEach {
             links += Link(
-                href = it.url,
+                feedId = id.toString(),
+                entryId = null,
+                href = it.url.toHttpUrl(),
                 rel = "enclosure",
                 type = it.mime_type,
                 hreflang = "",
                 title = "",
                 length = it.size,
+                extEnclosureDownloadProgress = null,
+                extCacheUri = null,
             )
         }
 
-        return Entry(
+        val entry = Entry(
             id = id.toString(),
             feedId = feed_id.toString(),
             title = title,
-            links = links,
             published = OffsetDateTime.parse(published_at),
             updated = OffsetDateTime.parse(changed_at),
             authorName = author,
@@ -177,5 +213,7 @@ class MinifluxApiAdapter(
             ogImageWidth = 0,
             ogImageHeight = 0,
         )
+
+        return Pair(entry, links)
     }
 }

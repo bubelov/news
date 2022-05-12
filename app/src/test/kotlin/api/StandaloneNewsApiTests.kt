@@ -3,6 +3,7 @@ package api
 import api.standalone.StandaloneNewsApi
 import db.EntryQueries
 import db.FeedQueries
+import db.LinkQueries
 import io.mockk.mockk
 import okhttp3.OkHttpClient
 import org.junit.Before
@@ -11,6 +12,7 @@ class StandaloneNewsApiTests {
 
     private lateinit var feedQueries: FeedQueries
     private lateinit var entryQueries: EntryQueries
+    private lateinit var linkQueries: LinkQueries
     private lateinit var http: OkHttpClient
 
     private lateinit var api: StandaloneNewsApi
@@ -19,11 +21,13 @@ class StandaloneNewsApiTests {
     fun setup() {
         feedQueries = mockk()
         entryQueries = mockk()
+        linkQueries = mockk()
         http = mockk()
 
         api = StandaloneNewsApi(
             feedQueries = feedQueries,
             entryQueries = entryQueries,
+            linkQueries = linkQueries,
         )
     }
 

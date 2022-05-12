@@ -1,96 +1,98 @@
-import db.Link;
 import java.time.OffsetDateTime;
-import kotlin.collections.List;
+import okhttp3.HttpUrl;
 
 CREATE TABLE Conf (
-  authType TEXT NOT NULL DEFAULT "",
-  nextcloudServerUrl TEXT NOT NULL DEFAULT "",
-  nextcloudServerTrustSelfSignedCerts INTEGER AS Boolean NOT NULL DEFAULT 0,
-  nextcloudServerUsername TEXT NOT NULL DEFAULT "",
-  nextcloudServerPassword TEXT NOT NULL DEFAULT "",
-  minifluxServerUrl TEXT NOT NULL DEFAULT "",
-  minifluxServerTrustSelfSignedCerts INTEGER AS Boolean NOT NULL DEFAULT 0,
-  minifluxServerUsername TEXT NOT NULL DEFAULT "",
-  minifluxServerPassword TEXT NOT NULL DEFAULT "",
-  initialSyncCompleted INTEGER AS Boolean NOT NULL DEFAULT 0,
-  lastEntriesSyncDateTime TEXT NOT NULL DEFAULT "",
-  showReadEntries INTEGER AS Boolean NOT NULL DEFAULT 0,
-  sortOrder TEXT NOT NULL DEFAULT 'descending',
-  showPreviewImages INTEGER AS Boolean NOT NULL DEFAULT 1,
-  cropPreviewImages INTEGER AS Boolean NOT NULL DEFAULT 1,
-  markScrolledEntriesAsRead INTEGER AS Boolean NOT NULL DEFAULT 0,
-  syncOnStartup INTEGER AS Boolean NOT NULL DEFAULT 1,
-  syncInBackground INTEGER AS Boolean NOT NULL DEFAULT 1,
-  backgroundSyncIntervalMillis INTEGER NOT NULL DEFAULT 10800000,
-  useBuiltInBrowser INTEGER AS Boolean NOT NULL DEFAULT 1,
-  showPreviewText INTEGER AS Boolean NOT NULL DEFAULT 1
+    authType TEXT NOT NULL DEFAULT "",
+    nextcloudServerUrl TEXT NOT NULL DEFAULT "",
+    nextcloudServerTrustSelfSignedCerts INTEGER AS Boolean NOT NULL DEFAULT 0,
+    nextcloudServerUsername TEXT NOT NULL DEFAULT "",
+    nextcloudServerPassword TEXT NOT NULL DEFAULT "",
+    minifluxServerUrl TEXT NOT NULL DEFAULT "",
+    minifluxServerTrustSelfSignedCerts INTEGER AS Boolean NOT NULL DEFAULT 0,
+    minifluxServerUsername TEXT NOT NULL DEFAULT "",
+    minifluxServerPassword TEXT NOT NULL DEFAULT "",
+    initialSyncCompleted INTEGER AS Boolean NOT NULL DEFAULT 0,
+    lastEntriesSyncDateTime TEXT NOT NULL DEFAULT "",
+    showReadEntries INTEGER AS Boolean NOT NULL DEFAULT 0,
+    sortOrder TEXT NOT NULL DEFAULT 'descending',
+    showPreviewImages INTEGER AS Boolean NOT NULL DEFAULT 1,
+    cropPreviewImages INTEGER AS Boolean NOT NULL DEFAULT 1,
+    markScrolledEntriesAsRead INTEGER AS Boolean NOT NULL DEFAULT 0,
+    syncOnStartup INTEGER AS Boolean NOT NULL DEFAULT 1,
+    syncInBackground INTEGER AS Boolean NOT NULL DEFAULT 1,
+    backgroundSyncIntervalMillis INTEGER NOT NULL DEFAULT 10800000,
+    useBuiltInBrowser INTEGER AS Boolean NOT NULL DEFAULT 1,
+    showPreviewText INTEGER AS Boolean NOT NULL DEFAULT 1
+);
+
+CREATE TABLE Feed (
+    id TEXT PRIMARY KEY NOT NULL,
+    title TEXT NOT NULL,
+    openEntriesInBrowser INTEGER AS Boolean NOT NULL DEFAULT 0,
+    blockedWords TEXT NOT NULL DEFAULT '',
+    showPreviewImages INTEGER AS Boolean
 );
 
 CREATE TABLE Entry (
-  id TEXT PRIMARY KEY NOT NULL,
-  feedId TEXT NOT NULL,
-  title TEXT NOT NULL,
-  links TEXT AS List<Link> NOT NULL,
-  published TEXT AS OffsetDateTime NOT NULL,
-  updated TEXT AS OffsetDateTime NOT NULL,
-  authorName TEXT NOT NULL,
-  contentType TEXT NOT NULL,
-  contentSrc TEXT NOT NULL,
-  contentText TEXT NOT NULL,
+    id TEXT PRIMARY KEY NOT NULL,
+    feedId TEXT NOT NULL,
+    title TEXT NOT NULL,
+    published TEXT AS OffsetDateTime NOT NULL,
+    updated TEXT AS OffsetDateTime NOT NULL,
+    authorName TEXT NOT NULL,
+    contentType TEXT NOT NULL,
+    contentSrc TEXT NOT NULL,
+    contentText TEXT NOT NULL,
 
-  read INTEGER AS Boolean NOT NULL,
-  readSynced INTEGER AS Boolean NOT NULL,
+    read INTEGER AS Boolean NOT NULL,
+    readSynced INTEGER AS Boolean NOT NULL,
 
-  bookmarked INTEGER AS Boolean NOT NULL,
-  bookmarkedSynced INTEGER AS Boolean NOT NULL,
+    bookmarked INTEGER AS Boolean NOT NULL,
+    bookmarkedSynced INTEGER AS Boolean NOT NULL,
 
-  guidHash TEXT NOT NULL,
-  commentsUrl TEXT NOT NULL,
+    guidHash TEXT NOT NULL,
+    commentsUrl TEXT NOT NULL,
 
-  ogImageChecked INTEGER AS Boolean NOT NULL,
-  ogImageUrl TEXT NOT NULL,
-  ogImageWidth INTEGER NOT NULL,
-  ogImageHeight INTEGER NOT NULL
+    ogImageChecked INTEGER AS Boolean NOT NULL,
+    ogImageUrl TEXT NOT NULL,
+    ogImageWidth INTEGER NOT NULL,
+    ogImageHeight INTEGER NOT NULL
 );
 
 CREATE VIEW EntryWithoutContent
 AS
 SELECT
-  id,
-  feedId,
-  title,
-  links,
-  published,
-  updated,
-  authorName,
+    id,
+    feedId,
+    title,
+    published,
+    updated,
+    authorName,
 
-  read,
-  readSynced,
+    read,
+    readSynced,
 
-  bookmarked,
-  bookmarkedSynced,
+    bookmarked,
+    bookmarkedSynced,
 
-  guidHash,
-  commentsUrl,
+    guidHash,
+    commentsUrl,
 
-  ogImageChecked,
-  ogImageUrl,
-  ogImageWidth,
-  ogImageHeight
+    ogImageChecked,
+    ogImageUrl,
+    ogImageWidth,
+    ogImageHeight
 FROM Entry;
 
-CREATE TABLE EntryEnclosure (
-  entryId TEXT PRIMARY KEY NOT NULL,
-  downloadPercent INTEGER,
-  cacheUri TEXT NOT NULL DEFAULT ''
-);
-
-CREATE TABLE Feed (
-  id TEXT PRIMARY KEY NOT NULL,
-  title TEXT NOT NULL,
-  selfLink TEXT NOT NULL,
-  alternateLink TEXT NOT NULL,
-  openEntriesInBrowser INTEGER AS Boolean NOT NULL DEFAULT 0,
-  blockedWords TEXT NOT NULL DEFAULT '',
-  showPreviewImages INTEGER AS Boolean
+CREATE TABLE Link (
+    feedId TEXT,
+    entryId TEXT,
+    href TEXT AS HttpUrl NOT NULL,
+    rel TEXT NOT NULL DEFAULT 'alternate',
+    type TEXT,
+    hreflang TEXT,
+    title TEXT,
+    length INTEGER,
+    extEnclosureDownloadProgress REAL,
+    extCacheUri TEXT
 );
