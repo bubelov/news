@@ -21,8 +21,10 @@ import kotlinx.coroutines.withContext
 import links.LinksRepository
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import opml.exportOpml
+import org.koin.android.annotation.KoinViewModel
 import java.util.concurrent.atomic.AtomicInteger
 
+@KoinViewModel
 class FeedsViewModel(
     private val feedsRepo: FeedsRepository,
     private val entriesRepo: EntriesRepository,

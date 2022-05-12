@@ -5,6 +5,7 @@ import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOne
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
+import db.Database
 import db.Entry
 import db.EntryQueries
 import db.EntryWithoutContent
@@ -15,58 +16,60 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import org.koin.core.annotation.Single
 import java.time.OffsetDateTime
 
+@Single
 class EntriesRepository(
-    private val entryQueries: EntryQueries,
+    private val db: Database,
     private val api: NewsApi,
 ) {
 
     fun selectAll(): Flow<List<EntryWithoutContent>> {
-        return entryQueries.selectAll().asFlow().mapToList()
+        return db.entryQueries.selectAll().asFlow().mapToList()
     }
 
     fun selectById(entryId: String): Flow<Entry?> {
-        return entryQueries.selectById(entryId).asFlow().mapToOneOrNull()
+        return db.entryQueries.selectById(entryId).asFlow().mapToOneOrNull()
     }
 
     fun selectByFeedId(feedId: String): Flow<List<EntryWithoutContent>> {
-        return entryQueries.selectByFeedId(feedId).asFlow().mapToList()
+        return db.entryQueries.selectByFeedId(feedId).asFlow().mapToList()
     }
 
     fun selectByReadAndBookmarked(
         read: Boolean,
         bookmarked: Boolean,
     ): Flow<List<EntryWithoutContent>> {
-        return entryQueries.selectByReadAndBookmarked(read, bookmarked).asFlow().mapToList()
+        return db.entryQueries.selectByReadAndBookmarked(read, bookmarked).asFlow().mapToList()
     }
 
     fun selectByReadOrBookmarked(
         read: Boolean,
         bookmarked: Boolean,
     ): Flow<List<EntryWithoutContent>> {
-        return entryQueries.selectByReadOrBookmarked(read, bookmarked).asFlow().mapToList()
+        return db.entryQueries.selectByReadOrBookmarked(read, bookmarked).asFlow().mapToList()
     }
 
     fun selectByRead(read: Boolean): Flow<List<EntryWithoutContent>> {
-        return entryQueries.selectByRead(read).asFlow().mapToList()
+        return db.entryQueries.selectByRead(read).asFlow().mapToList()
     }
 
     suspend fun updateReadByFeedId(read: Boolean, feedId: String) {
         withContext(Dispatchers.Default) {
-            entryQueries.updateReadByFeedId(read, feedId)
+            db.entryQueries.updateReadByFeedId(read, feedId)
         }
     }
 
     suspend fun updateReadByBookmarked(read: Boolean, bookmarked: Boolean) {
         withContext(Dispatchers.Default) {
-            entryQueries.updateReadByBookmarked(read = read, bookmarked = bookmarked)
+            db.entryQueries.updateReadByBookmarked(read = read, bookmarked = bookmarked)
         }
     }
 
     suspend fun setRead(id: String, read: Boolean, readSynced: Boolean) {
         withContext(Dispatchers.Default) {
-            entryQueries.updateReadAndReadSynced(
+            db.entryQueries.updateReadAndReadSynced(
                 id = id,
                 read = read,
                 readSynced = readSynced,
@@ -75,7 +78,7 @@ class EntriesRepository(
     }
 
     fun getBookmarked(): Flow<List<EntryWithoutContent>> {
-        return entryQueries.selectByBookmarked(true).asFlow().mapToList()
+        return db.entryQueries.selectByBookmarked(true).asFlow().mapToList()
     }
 
     suspend fun setBookmarked(
@@ -84,7 +87,7 @@ class EntriesRepository(
         bookmarkedSynced: Boolean,
     ) {
         withContext(Dispatchers.Default) {
-            entryQueries.updateBookmarkedAndBookmaredSynced(
+            db.entryQueries.updateBookmarkedAndBookmaredSynced(
                 id = id,
                 bookmarked = bookmarked,
                 bookmarkedSynced = bookmarkedSynced,
@@ -94,45 +97,45 @@ class EntriesRepository(
 
     suspend fun setOgImageChecked(id: String, checked: Boolean) {
         withContext(Dispatchers.Default) {
-            entryQueries.updateOgImageChecked(checked, id)
+            db.entryQueries.updateOgImageChecked(checked, id)
         }
     }
 
     suspend fun setOgImage(url: String, width: Long, height: Long, id: String) {
         withContext(Dispatchers.Default) {
-            entryQueries.updateOgImage(url, width, height, id)
+            db.entryQueries.updateOgImage(url, width, height, id)
         }
     }
 
     fun getUnreadCount(feedId: String): Flow<Long> {
-        return entryQueries.selectUnreadCount(feedId).asFlow().mapToOne()
+        return db.entryQueries.selectUnreadCount(feedId).asFlow().mapToOne()
     }
 
     private fun getMaxId(): Flow<String?> {
-        return entryQueries.selectMaxId().asFlow().mapToOneOrNull().map { it?.MAX }
+        return db.entryQueries.selectMaxId().asFlow().mapToOneOrNull().map { it?.MAX }
     }
 
     private fun getMaxUpdated(): Flow<String?> {
-        return entryQueries.selectMaxUpdaded().asFlow().mapToOneOrNull().map { it?.MAX }
+        return db.entryQueries.selectMaxUpdaded().asFlow().mapToOneOrNull().map { it?.MAX }
     }
 
     fun selectByQuery(query: String): Flow<List<Entry>> {
-        return entryQueries.selectByQuery(query).asFlow().mapToList()
+        return db.entryQueries.selectByQuery(query).asFlow().mapToList()
     }
 
     fun selectByQueryAndBookmarked(query: String, bookmarked: Boolean): Flow<List<Entry>> {
-        return entryQueries.selectByQueryAndBookmarked(bookmarked, query).asFlow().mapToList()
+        return db.entryQueries.selectByQueryAndBookmarked(bookmarked, query).asFlow().mapToList()
     }
 
     fun selectByQueryAndFeedId(query: String, feedId: String): Flow<List<Entry>> {
-        return entryQueries.selectByQueryAndFeedId(feedId, query).asFlow().mapToList()
+        return db.entryQueries.selectByQueryAndFeedId(feedId, query).asFlow().mapToList()
     }
 
-    fun selectCount() = entryQueries.selectCount().asFlow().mapToOne()
+    fun selectCount() = db.entryQueries.selectCount().asFlow().mapToOne()
 
     suspend fun deleteByFeedId(feedId: String) {
         withContext(Dispatchers.Default) {
-            entryQueries.deleteByFeedId(feedId)
+            db.entryQueries.deleteByFeedId(feedId)
         }
     }
 
@@ -147,9 +150,9 @@ class EntriesRepository(
             emit(SyncProgress(entriesLoaded))
 
             withContext(Dispatchers.Default) {
-                entryQueries.transaction {
+                db.entryQueries.transaction {
                     batch.forEach { entryWithLinks ->
-                        entryQueries.insertOrReplace(entryWithLinks.first.postProcess())
+                        db.entryQueries.insertOrReplace(entryWithLinks.first.postProcess())
                     }
                 }
             }
@@ -158,7 +161,7 @@ class EntriesRepository(
 
     suspend fun syncReadEntries() {
         withContext(Dispatchers.Default) {
-            val unsyncedEntries = entryQueries.selectByReadSynced(false).executeAsList()
+            val unsyncedEntries = db.entryQueries.selectByReadSynced(false).executeAsList()
 
             if (unsyncedEntries.isEmpty()) {
                 return@withContext
@@ -172,9 +175,9 @@ class EntriesRepository(
                     read = true,
                 )
 
-                entryQueries.transaction {
+                db.entryQueries.transaction {
                     unsyncedReadEntries.forEach {
-                        entryQueries.updateReadSynced(true, it.id)
+                        db.entryQueries.updateReadSynced(true, it.id)
                     }
                 }
             }
@@ -187,9 +190,9 @@ class EntriesRepository(
                     read = false,
                 )
 
-                entryQueries.transaction {
+                db.entryQueries.transaction {
                     unsyncedUnreadEntries.forEach {
-                        entryQueries.updateReadSynced(true, it.id)
+                        db.entryQueries.updateReadSynced(true, it.id)
                     }
                 }
             }
@@ -198,7 +201,7 @@ class EntriesRepository(
 
     suspend fun syncBookmarkedEntries() {
         withContext(Dispatchers.Default) {
-            val notSyncedEntries = entryQueries.selectByBookmarkedSynced(false).executeAsList()
+            val notSyncedEntries = db.entryQueries.selectByBookmarkedSynced(false).executeAsList()
 
             if (notSyncedEntries.isEmpty()) {
                 return@withContext
@@ -209,9 +212,9 @@ class EntriesRepository(
             if (notSyncedBookmarkedEntries.isNotEmpty()) {
                 api.markEntriesAsBookmarked(notSyncedBookmarkedEntries, true)
 
-                entryQueries.transaction {
+                db.entryQueries.transaction {
                     notSyncedBookmarkedEntries.forEach {
-                        entryQueries.updateBookmarkedSynced(true, it.id)
+                        db.entryQueries.updateBookmarkedSynced(true, it.id)
                     }
                 }
             }
@@ -221,9 +224,9 @@ class EntriesRepository(
             if (notSyncedNotBookmarkedEntries.isNotEmpty()) {
                 api.markEntriesAsBookmarked(notSyncedNotBookmarkedEntries, false)
 
-                entryQueries.transaction {
+                db.entryQueries.transaction {
                     notSyncedNotBookmarkedEntries.forEach {
-                        entryQueries.updateBookmarkedSynced(true, it.id)
+                        db.entryQueries.updateBookmarkedSynced(true, it.id)
                     }
                 }
             }
@@ -255,10 +258,10 @@ class EntriesRepository(
                 maxEntryUpdated = maxUpdatedInstant,
             )
 
-            entryQueries.transaction {
+            db.entryQueries.transaction {
                 entries.forEach { newEntryWithLinks ->
                     val feed = feeds.firstOrNull { it.id == newEntryWithLinks.first.feedId }
-                    entryQueries.insertOrReplace(newEntryWithLinks.first.postProcess(feed))
+                    db.entryQueries.insertOrReplace(newEntryWithLinks.first.postProcess(feed))
                 }
             }
 

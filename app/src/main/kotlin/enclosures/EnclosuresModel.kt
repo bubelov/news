@@ -6,7 +6,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import links.LinksRepository
+import org.koin.android.annotation.KoinViewModel
 
+@KoinViewModel
 class EnclosuresModel(
     private val linksRepo: LinksRepository,
     private val audioEnclosuresRepo: AudioEnclosuresRepository,

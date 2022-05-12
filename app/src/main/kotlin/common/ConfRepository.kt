@@ -3,21 +3,23 @@ package common
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrDefault
 import db.Conf
-import db.ConfQueries
+import db.Database
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.koin.core.annotation.Single
 
+@Single
 class ConfRepository(
-    private val db: ConfQueries,
+    private val db: Database,
 ) {
 
-    fun select() = db.select().asFlow().mapToOneOrDefault(DEFAULT_CONF)
+    fun select() = db.confQueries.select().asFlow().mapToOneOrDefault(DEFAULT_CONF)
 
     suspend fun upsert(conf: Conf) {
         withContext(Dispatchers.Default) {
             db.transaction {
-                db.delete()
-                db.insert(conf)
+                db.confQueries.delete()
+                db.confQueries.insert(conf)
             }
         }
     }

@@ -28,8 +28,7 @@ class FeedsRepositoryTests {
         api = mockk()
 
         repo = FeedsRepository(
-            feedQueries = db.feedQueries,
-            entryQueries = db.entryQueries,
+            db = db,
             api = api,
         )
     }

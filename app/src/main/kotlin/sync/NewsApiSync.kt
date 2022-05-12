@@ -7,8 +7,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
+import org.koin.core.annotation.Single
 import java.time.Instant
 
+@Single
 class NewsApiSync(
     private val confRepo: ConfRepository,
     private val feedsRepo: FeedsRepository,

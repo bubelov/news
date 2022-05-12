@@ -8,21 +8,23 @@ import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import common.ConfRepository
 import db.Conf
-import db.ConfQueries
+import db.Database
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import org.koin.core.annotation.Single
 
+@Single
 class AccountsRepository(
-    private val confQueries: ConfQueries,
+    private val db: Database,
     private val context: Context,
 ) {
 
     private val resources = context.resources
 
     fun account(): Flow<Account> {
-        return confQueries.select().asFlow().mapToOneOrNull().map {
+        return db.confQueries.select().asFlow().mapToOneOrNull().map {
             Account(
                 title = it?.accountTitle() ?: "",
                 subtitle = it?.accountSubtitle() ?: "",

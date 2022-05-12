@@ -7,7 +7,9 @@ import common.ConfRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import org.koin.android.annotation.KoinViewModel
 
+@KoinViewModel
 class MinifluxAuthViewModel(
     private val apiSwitcher: NewsApiSwitcher,
     private val confRepo: ConfRepository,

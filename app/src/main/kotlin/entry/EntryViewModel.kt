@@ -20,8 +20,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import org.koin.android.annotation.KoinViewModel
 
+@KoinViewModel
 class EntryViewModel(
     private val app: Application,
     private val feedsRepository: FeedsRepository,

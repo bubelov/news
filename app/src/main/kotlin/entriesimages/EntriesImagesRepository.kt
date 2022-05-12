@@ -5,9 +5,9 @@ import android.graphics.Color
 import entries.EntriesRepository
 import com.squareup.picasso.Picasso
 import common.ConfRepository
+import db.Database
 import db.EntryWithoutContent
 import db.Link
-import db.LinkQueries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -16,13 +16,15 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.jsoup.Jsoup
+import org.koin.core.annotation.Single
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
+@Single
 class EntriesImagesRepository(
     private val confRepo: ConfRepository,
     private val entriesRepo: EntriesRepository,
-    private val linkQueries: LinkQueries,
+    private val db: Database,
 ) {
 
     companion object {
@@ -47,7 +49,7 @@ class EntriesImagesRepository(
                     entries.chunked(10).forEach {
                         it.map {
                             async {
-                                syncPreview(it, linkQueries.selectByEntryid(it.id).executeAsList())
+                                syncPreview(it, db.linkQueries.selectByEntryid(it.id).executeAsList())
                             }
                         }.awaitAll()
                     }

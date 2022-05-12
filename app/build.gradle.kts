@@ -7,6 +7,7 @@ plugins {
     id("kotlin-parcelize")
     id("androidx.navigation.safeargs.kotlin")
     id("com.squareup.sqldelight")
+    id("com.google.devtools.ksp") version "1.6.21-1.0.5"
 }
 
 val signingPropertiesFile = rootProject.file("signing.properties")
@@ -64,6 +65,12 @@ android {
     buildFeatures {
         viewBinding = true
     }
+
+    sourceSets {
+        getByName("debug") {
+            kotlin.srcDir("build/generated/ksp/debug/kotlin")
+        }
+    }
 }
 
 sqldelight {
@@ -116,7 +123,9 @@ dependencies {
     implementation("com.github.nextcloud:Android-SingleSignOn:0.6.1")
     implementation("com.google.android.material:material:1.7.0-alpha01")
     implementation("com.squareup.picasso:picasso:2.71828")
-    implementation("io.insert-koin:koin-android:3.2.0-beta-1")
+    implementation("io.insert-koin:koin-android:3.2.0")
+    implementation("io.insert-koin:koin-annotations:1.0.0-beta-2")
+    ksp("io.insert-koin:koin-ksp-compiler:1.0.0-beta-2")
     implementation("org.jsoup:jsoup:1.14.3")
 
     // Common testing dependencies

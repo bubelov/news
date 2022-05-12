@@ -7,22 +7,20 @@ import api.nextcloud.DirectNextcloudNewsApiBuilder
 import api.nextcloud.NextcloudNewsApi
 import api.nextcloud.NextcloudNewsApiAdapter
 import api.standalone.StandaloneNewsApi
-import db.EntryQueries
-import db.FeedQueries
 import com.google.gson.GsonBuilder
 import com.nextcloud.android.sso.api.NextcloudAPI
 import com.nextcloud.android.sso.helper.SingleAccountHelper
 import common.ConfRepository
-import db.LinkQueries
+import db.Database
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import org.koin.core.annotation.Single
 import retrofit2.NextcloudRetrofitApiBuilder
 
+@Single
 class NewsApiSwitcher(
+    private val db: Database,
     private val wrapper: NewsApiWrapper,
-    private val feedQueries: FeedQueries,
-    private val entryQueries: EntryQueries,
-    private val linkQueries: LinkQueries,
     private val confRepo: ConfRepository,
     private val context: Context,
 ) {
@@ -88,6 +86,6 @@ class NewsApiSwitcher(
     }
 
     private fun switchToStandaloneApi() {
-        wrapper.api = StandaloneNewsApi(feedQueries, entryQueries, linkQueries)
+        wrapper.api = StandaloneNewsApi(db.feedQueries, db.entryQueries, db.linkQueries)
     }
 }

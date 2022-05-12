@@ -6,8 +6,8 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import db.Database
 import db.Link
-import db.LinkQueries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType
@@ -16,13 +16,15 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okio.buffer
 import okio.sink
+import org.koin.core.annotation.Single
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
 import java.util.UUID
 
+@Single
 class AudioEnclosuresRepository(
-    private val linkQueries: LinkQueries,
+    private val db: Database,
     private val context: Context,
 ) {
 
@@ -30,7 +32,7 @@ class AudioEnclosuresRepository(
 
     suspend fun download(audioEnclosure: Link) {
         withContext(Dispatchers.Default) {
-            linkQueries.updateEnclosureDownloadProgress(
+            db.linkQueries.updateEnclosureDownloadProgress(
                 extEnclosureDownloadProgress = 0.0,
                 feedId = audioEnclosure.feedId,
                 entryId = audioEnclosure.entryId,
@@ -41,7 +43,7 @@ class AudioEnclosuresRepository(
             val response = runCatching {
                 httpClient.newCall(request).execute()
             }.getOrElse {
-                linkQueries.updateEnclosureDownloadProgress(
+                db.linkQueries.updateEnclosureDownloadProgress(
                     extEnclosureDownloadProgress = null,
                     feedId = audioEnclosure.feedId,
                     entryId = audioEnclosure.entryId,
@@ -51,7 +53,7 @@ class AudioEnclosuresRepository(
             }
 
             if (!response.isSuccessful) {
-                linkQueries.updateEnclosureDownloadProgress(
+                db.linkQueries.updateEnclosureDownloadProgress(
                     extEnclosureDownloadProgress = null,
                     feedId = audioEnclosure.feedId,
                     entryId = audioEnclosure.entryId,
@@ -89,7 +91,7 @@ class AudioEnclosuresRepository(
                     outputStream = FileOutputStream(file)
                 }
 
-                linkQueries.updateCacheUri(
+                db.linkQueries.updateCacheUri(
                     extCacheUri = cacheUri.toString(),
                     feedId = audioEnclosure.feedId,
                     entryId = audioEnclosure.entryId,
@@ -119,7 +121,7 @@ class AudioEnclosuresRepository(
                                     (downloadedBytes.toDouble() / bytesInBody.toDouble() * 100.0).toLong()
 
                                 if (downloadedPercent > lastReportedDownloadedPercent) {
-                                    linkQueries.updateEnclosureDownloadProgress(
+                                    db.linkQueries.updateEnclosureDownloadProgress(
                                         extEnclosureDownloadProgress = downloadedPercent.toDouble() / 100,
                                         feedId = audioEnclosure.feedId,
                                         entryId = audioEnclosure.entryId,
@@ -132,7 +134,7 @@ class AudioEnclosuresRepository(
                     }
                 }
             }.onSuccess {
-                linkQueries.insertOrReplace(
+                db.linkQueries.insertOrReplace(
                     audioEnclosure.copy(
                         extEnclosureDownloadProgress = 1.0,
                         extCacheUri = cacheUri.toString(),
@@ -147,14 +149,14 @@ class AudioEnclosuresRepository(
                     }
                 }
             }.onFailure {
-                linkQueries.transaction {
-                    linkQueries.updateEnclosureDownloadProgress(
+                db.linkQueries.transaction {
+                    db.linkQueries.updateEnclosureDownloadProgress(
                         extEnclosureDownloadProgress = null,
                         feedId = audioEnclosure.feedId,
                         entryId = audioEnclosure.entryId,
                     )
 
-                    linkQueries.updateCacheUri(
+                    db.linkQueries.updateCacheUri(
                         extCacheUri = null,
                         feedId = audioEnclosure.feedId,
                         entryId = audioEnclosure.entryId,
@@ -174,7 +176,7 @@ class AudioEnclosuresRepository(
 
     suspend fun deleteIncompleteDownloads() {
         withContext(Dispatchers.Default) {
-            linkQueries
+            db.linkQueries
                 .selectByTypeAndDownloadInProgress(type = "enclosure")
                 .executeAsList()
                 .forEach { audioEnclosure ->
@@ -182,14 +184,14 @@ class AudioEnclosuresRepository(
                         val uri = Uri.parse(audioEnclosure.extCacheUri)
 
                         if (uri.toString().contains(context.packageName)) {
-                            linkQueries.transaction {
-                                linkQueries.updateEnclosureDownloadProgress(
+                            db.linkQueries.transaction {
+                                db.linkQueries.updateEnclosureDownloadProgress(
                                     extEnclosureDownloadProgress = null,
                                     feedId = audioEnclosure.feedId,
                                     entryId = audioEnclosure.entryId,
                                 )
 
-                                linkQueries.updateCacheUri(
+                                db.linkQueries.updateCacheUri(
                                     extCacheUri = null,
                                     feedId = audioEnclosure.feedId,
                                     entryId = audioEnclosure.entryId,
@@ -208,14 +210,14 @@ class AudioEnclosuresRepository(
                         )
 
                         if (cursor == null) {
-                            linkQueries.transaction {
-                                linkQueries.updateEnclosureDownloadProgress(
+                            db.linkQueries.transaction {
+                                db.linkQueries.updateEnclosureDownloadProgress(
                                     extEnclosureDownloadProgress = null,
                                     feedId = audioEnclosure.feedId,
                                     entryId = audioEnclosure.entryId,
                                 )
 
-                                linkQueries.updateCacheUri(
+                                db.linkQueries.updateCacheUri(
                                     extCacheUri = null,
                                     feedId = audioEnclosure.feedId,
                                     entryId = audioEnclosure.entryId,
@@ -225,14 +227,14 @@ class AudioEnclosuresRepository(
 
                         cursor?.use {
                             if (!it.moveToFirst()) {
-                                linkQueries.transaction {
-                                    linkQueries.updateEnclosureDownloadProgress(
+                                db.linkQueries.transaction {
+                                    db.linkQueries.updateEnclosureDownloadProgress(
                                         extEnclosureDownloadProgress = null,
                                         feedId = audioEnclosure.feedId,
                                         entryId = audioEnclosure.entryId,
                                     )
 
-                                    linkQueries.updateCacheUri(
+                                    db.linkQueries.updateCacheUri(
                                         extCacheUri = null,
                                         feedId = audioEnclosure.feedId,
                                         entryId = audioEnclosure.entryId,
@@ -246,14 +248,14 @@ class AudioEnclosuresRepository(
                             val pending = cursor.getInt(isPendingIndex)
 
                             if (pending == 1) {
-                                linkQueries.transaction {
-                                    linkQueries.updateEnclosureDownloadProgress(
+                                db.linkQueries.transaction {
+                                    db.linkQueries.updateEnclosureDownloadProgress(
                                         extEnclosureDownloadProgress = null,
                                         feedId = audioEnclosure.feedId,
                                         entryId = audioEnclosure.entryId,
                                     )
 
-                                    linkQueries.updateCacheUri(
+                                    db.linkQueries.updateCacheUri(
                                         extCacheUri = null,
                                         feedId = audioEnclosure.feedId,
                                         entryId = audioEnclosure.entryId,
@@ -268,14 +270,14 @@ class AudioEnclosuresRepository(
                             file.delete()
                         }
 
-                        linkQueries.transaction {
-                            linkQueries.updateEnclosureDownloadProgress(
+                        db.linkQueries.transaction {
+                            db.linkQueries.updateEnclosureDownloadProgress(
                                 extEnclosureDownloadProgress = null,
                                 feedId = audioEnclosure.feedId,
                                 entryId = audioEnclosure.entryId,
                             )
 
-                            linkQueries.updateCacheUri(
+                            db.linkQueries.updateCacheUri(
                                 extCacheUri = null,
                                 feedId = audioEnclosure.feedId,
                                 entryId = audioEnclosure.entryId,
@@ -294,14 +296,14 @@ class AudioEnclosuresRepository(
                 file.delete()
             }
 
-            linkQueries.transaction {
-                linkQueries.updateEnclosureDownloadProgress(
+            db.linkQueries.transaction {
+                db.linkQueries.updateEnclosureDownloadProgress(
                     extEnclosureDownloadProgress = null,
                     feedId = audioEnclosure.feedId,
                     entryId = audioEnclosure.entryId,
                 )
 
-                linkQueries.updateCacheUri(
+                db.linkQueries.updateCacheUri(
                     extCacheUri = null,
                     feedId = audioEnclosure.feedId,
                     entryId = audioEnclosure.entryId,

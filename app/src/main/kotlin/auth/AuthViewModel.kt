@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import api.NewsApiSwitcher
 import common.ConfRepository
 import db.Conf
+import org.koin.android.annotation.KoinViewModel
 
+@KoinViewModel
 class AuthViewModel(
     private val confRepo: ConfRepository,
     private val newsApiSwitcher: NewsApiSwitcher,

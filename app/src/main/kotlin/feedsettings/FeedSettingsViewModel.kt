@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import feeds.FeedsRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.koin.android.annotation.KoinViewModel
 
+@KoinViewModel
 class FeedSettingsViewModel(
     private val feedsRepository: FeedsRepository,
 ) : ViewModel() {

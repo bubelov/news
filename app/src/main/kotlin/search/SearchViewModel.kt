@@ -14,8 +14,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
+import org.koin.android.annotation.KoinViewModel
 import sync.NewsApiSync
 
+@KoinViewModel
 class SearchViewModel(
     private val feedsRepo: FeedsRepository,
     private val entriesRepo: EntriesRepository,

@@ -19,11 +19,13 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.android.annotation.KoinViewModel
 import sync.NewsApiSync
 import sync.SyncResult
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
+@KoinViewModel
 class EntriesModel(
     private val confRepo: ConfRepository,
     private val feedsRepo: FeedsRepository,
