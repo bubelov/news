@@ -15,7 +15,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
-class FeedsViewModelTests {
+class FeedsModelTests {
 
     private val mainThreadSurrogate = newSingleThreadContext("UI thread")
 
@@ -40,7 +40,7 @@ class FeedsViewModelTests {
             every { select() } returns flowOf(ConfRepository.DEFAULT_CONF)
         }
 
-        val model = FeedsViewModel(
+        val model = FeedsModel(
             feedsRepo = feedsRepo,
             entriesRepo = mockk(),
             confRepo = confRepo,
@@ -49,7 +49,7 @@ class FeedsViewModelTests {
 
         var attempts = 0
 
-        while (model.state.value !is FeedsViewModel.State.Loaded) {
+        while (model.state.value !is FeedsModel.State.Loaded) {
             if (attempts++ > 100) {
                 assertTrue { false }
             } else {

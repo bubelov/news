@@ -5,11 +5,11 @@ import androidx.lifecycle.viewModelScope
 import common.ConfRepository
 import db.Conf
 import db.Feed
+import db.Link
 import entries.EntriesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -25,7 +25,7 @@ import org.koin.android.annotation.KoinViewModel
 import java.util.concurrent.atomic.AtomicInteger
 
 @KoinViewModel
-class FeedsViewModel(
+class FeedsModel(
     private val feedsRepo: FeedsRepository,
     private val entriesRepo: EntriesRepository,
     private val linksRepo: LinksRepository,
@@ -43,10 +43,11 @@ class FeedsViewModel(
 
         combine(
             feedsRepo.selectAll(),
+            linksRepo.selectByEntryId(null),
             confRepo.select(),
             showProgress,
             opmlImportProgress,
-        ) { feeds, conf, showProgress, opmlImportProgress ->
+        ) { feeds, feedLinks, conf, showProgress, opmlImportProgress ->
             if (opmlImportProgress != null) {
                 _state.update { State.ImportingOpml(opmlImportProgress) }
             } else {
@@ -55,7 +56,7 @@ class FeedsViewModel(
                 } else {
                     _state.update {
                         State.Loaded(
-                            feeds = feeds.map { it.toItem() },
+                            feeds = feeds.map { feed -> feed.toItem(feedLinks.filter { it.feedId == feed.id }) },
                             conf = conf,
                         )
                     }
@@ -163,9 +164,8 @@ class FeedsViewModel(
     suspend fun addFeed(url: String) {
         withContext(Dispatchers.Default) {
             showProgress.update { true }
-            val fullUrl = if (!url.startsWith("http://")) "https://$url" else url
+            val fullUrl = if (!url.startsWith("http")) "https://$url" else url
             val parsedUrl = fullUrl.toHttpUrl()
-            delay(2500)
             feedsRepo.insertByUrl(parsedUrl)
             showProgress.update { false }
         }
@@ -179,13 +179,15 @@ class FeedsViewModel(
         viewModelScope.launch { feedsRepo.deleteById(feedId) }
     }
 
-    private suspend fun Feed.toItem() = FeedsAdapter.Item(
-        id = id,
-        title = title,
-        selfLink = "",
-        alternateLink = "",
-        unreadCount = entriesRepo.getUnreadCount(id).first(),
-    )
+    private suspend fun Feed.toItem(links: List<Link>): FeedsAdapter.Item {
+        return FeedsAdapter.Item(
+            id = id,
+            title = title,
+            selfLink = links.firstOrNull { it.rel == "self" }?.href?.toString() ?: "",
+            alternateLink = links.firstOrNull { it.rel == "alternate" }?.href?.toString() ?: "",
+            unreadCount = entriesRepo.getUnreadCount(id).first(),
+        )
+    }
 
     sealed class State {
         object Loading : State()

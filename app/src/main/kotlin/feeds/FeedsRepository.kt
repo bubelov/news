@@ -28,7 +28,12 @@ class FeedsRepository(
     suspend fun insertByUrl(url: HttpUrl): Feed {
         return withContext(Dispatchers.Default) {
             val feed = api.addFeed(url).getOrThrow()
-            db.feedQueries.insertOrReplace(feed.first)
+
+            db.transaction {
+                db.feedQueries.insertOrReplace(feed.first)
+                feed.second.forEach { db.linkQueries.insertOrReplace(it) }
+            }
+
             feed.first
         }
     }

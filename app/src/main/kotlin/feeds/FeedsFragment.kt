@@ -36,7 +36,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class FeedsFragment : AppFragment(lockDrawer = false) {
 
-    private val model: FeedsViewModel by viewModel()
+    private val model: FeedsModel by viewModel()
 
     private var _binding: FragmentFeedsBinding? = null
     private val binding get() = _binding!!
@@ -61,7 +61,7 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
         override fun onOpenSelfLinkClick(item: FeedsAdapter.Item) {
             val state = model.state.value
 
-            if (state is FeedsViewModel.State.Loaded) {
+            if (state is FeedsModel.State.Loaded) {
                 openUrl(item.selfLink, state.conf.useBuiltInBrowser)
             }
         }
@@ -69,7 +69,7 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
         override fun onOpenAlternateLinkClick(item: FeedsAdapter.Item) {
             val state = model.state.value
 
-            if (state is FeedsViewModel.State.Loaded) {
+            if (state is FeedsModel.State.Loaded) {
                 openUrl(item.alternateLink, state.conf.useBuiltInBrowser)
             }
         }
@@ -296,7 +296,7 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
         }
     }
 
-    private fun setState(state: FeedsViewModel.State) = binding.apply {
+    private fun setState(state: FeedsModel.State) = binding.apply {
         list.hide()
         progress.hide()
         message.hide()
@@ -304,11 +304,11 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
         fab.hide()
 
         when (state) {
-            FeedsViewModel.State.Loading -> {
+            FeedsModel.State.Loading -> {
                 progress.show(animate = true)
             }
 
-            is FeedsViewModel.State.Loaded -> {
+            is FeedsModel.State.Loaded -> {
                 if (state.feeds.isEmpty()) {
                     message.show(animate = true)
                     message.text = getString(R.string.you_have_no_feeds)
@@ -320,7 +320,7 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
                 fab.show()
             }
 
-            is FeedsViewModel.State.ImportingOpml -> {
+            is FeedsModel.State.ImportingOpml -> {
                 progress.show(animate = true)
                 message.show(animate = true)
 

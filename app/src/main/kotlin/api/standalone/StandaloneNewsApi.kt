@@ -64,8 +64,8 @@ class StandaloneNewsApi(
                 val html = Jsoup.parse(response.body!!.string())
 
                 val feedElements = buildList {
-                    addAll(html.select("link[type=\"application/rss+xml\"]"))
                     addAll(html.select("link[type=\"application/atom+xml\"]"))
+                    addAll(html.select("link[type=\"application/rss+xml\"]"))
                 }
 
                 if (feedElements.isEmpty()) {
