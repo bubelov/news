@@ -7,7 +7,9 @@ import common.ConfRepository
 import db.Conf
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import org.koin.android.annotation.KoinViewModel
 
+@KoinViewModel
 class SettingsViewModel(
     private val confRepo: ConfRepository,
     private val accountsRepository: AccountsRepository,
