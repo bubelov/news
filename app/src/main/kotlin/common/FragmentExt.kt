@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.WindowManager
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.getSystemService
@@ -18,6 +19,7 @@ fun Fragment.showErrorDialog(
     t: Throwable,
     onDismissListener: (suspend () -> Unit)? = null,
 ) {
+    Log.e(javaClass.simpleName, t.message, t)
     val message = t.message ?: getString(R.string.got_exception_of_class_s, t.javaClass.simpleName)
 
     requireContext().showDialog(R.string.error, message) {

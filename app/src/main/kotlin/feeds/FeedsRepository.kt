@@ -31,6 +31,7 @@ class FeedsRepository(
 
             db.transaction {
                 db.feedQueries.insertOrReplace(feed.first)
+                db.linkQueries.deleteByFeedId(feed.first.id)
                 feed.second.forEach { db.linkQueries.insertOrReplace(it) }
             }
 

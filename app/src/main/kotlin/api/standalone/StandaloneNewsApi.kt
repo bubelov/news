@@ -222,21 +222,7 @@ class StandaloneNewsApi(
         return when (this) {
             is AtomFeed -> {
                 val selfLink = links.single { it.rel == AtomLinkRel.Self }
-
-                val links = links.map {
-                    Link(
-                        feedId = selfLink.href,
-                        entryId = null,
-                        href = it.href.toHttpUrl(),
-                        rel = it.rel.toString().lowercase(),
-                        type = it.type,
-                        hreflang = it.hreflang,
-                        title = it.title,
-                        length = it.length,
-                        extEnclosureDownloadProgress = null,
-                        extCacheUri = null,
-                    )
-                }
+                val links = links.map { it.toLink(feedId = selfLink.href, entryId = null) }
 
                 val feed = Feed(
                     id = selfLink.href,
@@ -296,7 +282,7 @@ class StandaloneNewsApi(
             feedId = feedId,
             entryId = entryId,
             href = href.toHttpUrl(),
-            rel = rel.toString().lowercase(),
+            rel = rel?.asSting() ?: "",
             type = type,
             hreflang = hreflang,
             title = title,
@@ -410,6 +396,16 @@ class StandaloneNewsApi(
     }
 
     private fun Date.toIsoString(): String = ISO.format(this)
+
+    private fun AtomLinkRel.asSting(): String {
+        return when (this) {
+            AtomLinkRel.Alternate -> "alternate"
+            AtomLinkRel.Enclosure -> "enclosure"
+            AtomLinkRel.Related -> "related"
+            AtomLinkRel.Self -> "self"
+            AtomLinkRel.Via -> "via"
+        }
+    }
 
     companion object {
         private val ISO = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.US)
