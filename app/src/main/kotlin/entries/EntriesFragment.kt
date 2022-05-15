@@ -18,6 +18,7 @@ import common.CardListAdapterDecoration
 import common.ConfRepository
 import common.Scrollable
 import common.hide
+import common.openUrl
 import common.screenWidth
 import common.show
 import common.showErrorDialog
@@ -64,22 +65,23 @@ class EntriesFragment : AppFragment(), Scrollable {
         EntriesAdapter(
             callback = object : EntriesAdapterCallback {
                 override fun onItemClick(item: EntriesAdapterItem) {
-//                    lifecycleScope.launchWhenResumed {
-//                        model.setRead(listOf(item.id), true)
-//
-//                        val entry = model.getEntry(item.id).first() ?: return@launchWhenResumed
-//                        val feed = model.getFeed(entry.feedId).first() ?: return@launchWhenResumed
-//
-//                        if (feed.openEntriesInBrowser) {
-//                            openUrl(
-//                                url = entry.links.first { it.rel == "alternate" }.href,
-//                                useBuiltInBrowser = model.getConf().first().useBuiltInBrowser,
-//                            )
-//                        } else {
-//                            val action = EntriesFragmentDirections.actionEntriesFragmentToEntryFragment(item.id)
-//                            findNavController().navigate(action)
-//                        }
-//                    }
+                    lifecycleScope.launchWhenResumed {
+                        model.setRead(listOf(item.id), true)
+
+                        val entry = model.getEntry(item.id).first() ?: return@launchWhenResumed
+                        val entryLinks = model.getEntryLinks(entry.id).first()
+                        val feed = model.getFeed(entry.feedId).first() ?: return@launchWhenResumed
+
+                        if (feed.openEntriesInBrowser) {
+                            openUrl(
+                                url = entryLinks.first { it.rel == "alternate" && it.type == "text/html" }.href.toString(),
+                                useBuiltInBrowser = model.getConf().first().useBuiltInBrowser,
+                            )
+                        } else {
+                            val action = EntriesFragmentDirections.actionEntriesFragmentToEntryFragment(item.id)
+                            findNavController().navigate(action)
+                        }
+                    }
                 }
 
                 override fun onDownloadPodcastClick(item: EntriesAdapterItem) {

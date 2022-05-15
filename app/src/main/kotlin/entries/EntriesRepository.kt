@@ -7,7 +7,6 @@ import com.squareup.sqldelight.runtime.coroutines.mapToOne
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import db.Database
 import db.Entry
-import db.EntryQueries
 import db.EntryWithoutContent
 import db.Feed
 import kotlinx.coroutines.Dispatchers

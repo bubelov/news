@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import links.LinksRepository
 import org.koin.android.annotation.KoinViewModel
 import sync.NewsApiSync
 import sync.SyncResult
@@ -30,6 +31,7 @@ class EntriesModel(
     private val confRepo: ConfRepository,
     private val feedsRepo: FeedsRepository,
     private val entriesRepo: EntriesRepository,
+    private val linksRepo: LinksRepository,
     private val audioEnclosuresRepo: AudioEnclosuresRepository,
     private val newsApiSync: NewsApiSync,
 ) : ViewModel() {
@@ -165,6 +167,8 @@ class EntriesModel(
     fun getFeed(id: String) = feedsRepo.selectById(id)
 
     fun getEntry(id: String) = entriesRepo.selectById(id)
+
+    fun getEntryLinks(entryId: String) = linksRepo.selectByEntryId(entryId)
 
     fun setRead(entryIds: Collection<String>, value: Boolean) {
         viewModelScope.launch {
