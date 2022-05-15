@@ -261,7 +261,13 @@ class EntriesRepository(
             db.entryQueries.transaction {
                 entries.forEach { newEntryWithLinks ->
                     val feed = feeds.firstOrNull { it.id == newEntryWithLinks.first.feedId }
-                    db.entryQueries.insertOrReplace(newEntryWithLinks.first.postProcess(feed))
+
+                    db.transaction {
+                        val postProcessedEntry = newEntryWithLinks.first.postProcess(feed)
+                        db.entryQueries.insertOrReplace(postProcessedEntry)
+                        db.linkQueries.deleteByEntryId(postProcessedEntry.id)
+                        newEntryWithLinks.second.forEach { db.linkQueries.insertOrReplace(it) }
+                    }
                 }
             }
 

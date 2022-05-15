@@ -75,6 +75,13 @@ WHERE feedId = :feedId
 AND (UPPER(title) LIKE '%' || UPPER(:query) || '%'OR UPPER(contentText) LIKE '%' || UPPER(:query) || '%')
 ORDER BY published DESC;
 
+selectByOgImageChecked:
+SELECT *
+FROM EntryWithoutContent
+WHERE ogImageChecked = :ogImageChecked
+ORDER BY published DESC
+LIMIT :limit;
+
 selectCount:
 SELECT COUNT(*)
 FROM Entry;

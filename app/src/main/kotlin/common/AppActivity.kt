@@ -67,7 +67,7 @@ class AppActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launchWhenCreated {
-            get<EntriesImagesRepository>().syncPreviews()
+            get<EntriesImagesRepository>().syncOpenGraphImages()
         }
 
         drawerToggle = ActionBarDrawerToggle(
