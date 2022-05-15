@@ -14,12 +14,14 @@ import db.Conf
 import feeds.FeedsRepository
 import sync.NewsApiSync
 import db.Entry
+import db.Link
 import entries.EntriesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import links.LinksRepository
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
@@ -27,6 +29,7 @@ class EntryViewModel(
     private val app: Application,
     private val feedsRepository: FeedsRepository,
     private val entriesRepository: EntriesRepository,
+    private val linksRepository: LinksRepository,
     private val confRepo: ConfRepository,
     private val newsApiSync: NewsApiSync,
 ) : ViewModel() {
@@ -65,11 +68,10 @@ class EntryViewModel(
                 return@withContext
             }
 
-//            val altLink = entry.links.firstOrNull { it.rel == "alternate" }
-
             state.value = State.Success(
                 feedTitle = feed.title,
                 entry = entry,
+                entryLinks = linksRepository.selectByEntryId(entry.id).first(),
                 parsedContent = parseEntryContent(
                     entry.contentText,
                     TextViewImageGetter(
@@ -141,6 +143,7 @@ class EntryViewModel(
         data class Success(
             val feedTitle: String,
             val entry: Entry,
+            val entryLinks: List<Link>,
             val parsedContent: SpannableStringBuilder,
         ) : State()
 

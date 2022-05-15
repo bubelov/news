@@ -1,5 +1,6 @@
 package entry
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.text.SpannableStringBuilder
@@ -24,6 +25,7 @@ import common.openUrl
 import common.show
 import common.showErrorDialog
 import db.Entry
+import db.Link
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -112,7 +114,8 @@ class EntryFragment : AppFragment() {
                     toolbar?.setOnMenuItemClickListener {
                         onMenuItemClick(
                             menuItem = it,
-                            entry = state.entry
+                            entry = state.entry,
+                            entryLinks = state.entryLinks,
                         )
                     }
 
@@ -126,14 +129,14 @@ class EntryFragment : AppFragment() {
                     summaryView.movementMethod = LinkMovementMethod.getInstance()
                     progress.hide()
 
-//                    val altLink = state.entry.links.firstOrNull { it.rel == "alternate" }
-//
-//                    if (altLink == null) {
-//                        fab.hide()
-//                    } else {
-//                        fab.show()
-//                        fab.setOnClickListener { openUrl(altLink.href, model.conf.useBuiltInBrowser) }
-//                    }
+                    val firstHtmlLink = state.entryLinks.firstOrNull { it.rel == "alternate" && it.type == "text/html" }
+
+                    if (firstHtmlLink == null) {
+                        fab.hide()
+                    } else {
+                        fab.show()
+                        fab.setOnClickListener { openUrl(firstHtmlLink.href.toString(), model.conf.useBuiltInBrowser) }
+                    }
                 }
 
                 is EntryViewModel.State.Error -> {
@@ -145,7 +148,11 @@ class EntryFragment : AppFragment() {
         }
     }
 
-    private fun onMenuItemClick(menuItem: MenuItem?, entry: Entry): Boolean {
+    private fun onMenuItemClick(
+        menuItem: MenuItem?,
+        entry: Entry,
+        entryLinks: List<Link>,
+    ): Boolean {
         when (menuItem?.itemId) {
             R.id.toggleBookmarked -> {
                 lifecycleScope.launchWhenResumed {
@@ -169,16 +176,16 @@ class EntryFragment : AppFragment() {
             }
 
             R.id.share -> {
-//                val altLink = entry.links.firstOrNull { it.rel == "alternate" }
-//
-//                val intent = Intent().apply {
-//                    action = Intent.ACTION_SEND
-//                    type = "text/plain"
-//                    putExtra(Intent.EXTRA_SUBJECT, entry.title)
-//                    putExtra(Intent.EXTRA_TEXT, altLink?.href)
-//                }
-//
-//                startActivity(Intent.createChooser(intent, ""))
+                val firstAlternateLink = entryLinks.firstOrNull { it.rel == "alternate" } ?: return true
+
+                val intent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_SUBJECT, entry.title)
+                    putExtra(Intent.EXTRA_TEXT, firstAlternateLink.href.toString())
+                }
+
+                startActivity(Intent.createChooser(intent, ""))
                 return true
             }
         }
