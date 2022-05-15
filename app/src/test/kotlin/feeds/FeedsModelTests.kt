@@ -1,16 +1,17 @@
 package feeds
 
 import common.ConfRepository
-import io.mockk.every
+import db.database
+import entries.EntriesRepository
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.newSingleThreadContext
 import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
+import links.LinksRepository
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -32,19 +33,17 @@ class FeedsModelTests {
 
     @Test
     fun `init`(): Unit = runBlocking {
-        val feedsRepo = mockk<FeedsRepository> {
-            every { selectAll() } returns flowOf(emptyList())
-        }
-
-        val confRepo = mockk<ConfRepository> {
-            every { select() } returns flowOf(ConfRepository.DEFAULT_CONF)
-        }
+        val db = database()
+        val feedsRepo = FeedsRepository(db = db, api = mockk(),)
+        val entriesRepo = EntriesRepository(db = db, api = mockk(),)
+        val linksRepo = LinksRepository(db = database())
+        val confRepo = ConfRepository(db = db)
 
         val model = FeedsModel(
             feedsRepo = feedsRepo,
-            entriesRepo = mockk(),
+            entriesRepo = entriesRepo,
+            linksRepo = linksRepo,
             confRepo = confRepo,
-            linksRepo = mockk(),
         )
 
         var attempts = 0
