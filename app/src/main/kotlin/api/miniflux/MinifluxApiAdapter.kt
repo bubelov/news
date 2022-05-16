@@ -138,7 +138,7 @@ class MinifluxApiAdapter(
             entryId = null,
             href = site_url.toHttpUrl(),
             rel = "alternate",
-            type = null,
+            type = "text/html",
             hreflang = null,
             title = null,
             length = null,

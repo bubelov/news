@@ -74,6 +74,7 @@ class FeedsRepository(
             val cachedFeeds = selectAll().first().sortedBy { it.id }
 
             db.transaction {
+                db.linkQueries.deleteByEntryId(null)
                 db.feedQueries.deleteAll()
 
                 newFeeds.forEach { feed ->
@@ -86,6 +87,8 @@ class FeedsRepository(
                             showPreviewImages = cachedFeed?.showPreviewImages,
                         )
                     )
+
+                    feed.second.forEach { db.linkQueries.insertOrReplace(it) }
                 }
             }
         }
