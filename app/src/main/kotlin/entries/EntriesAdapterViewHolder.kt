@@ -23,7 +23,6 @@ class EntriesAdapterViewHolder(
             setStrokeAlpha = true
         }
 
-        println(screenWidth)
         val cardMargin = root.resources.getDimensionPixelSize(R.dimen.card_horizontal_margin)
 
         val cardHeightMin = root.resources.getDimensionPixelSize(R.dimen.card_height_min)
@@ -32,24 +31,13 @@ class EntriesAdapterViewHolder(
         Picasso.get().load(null as String?).into(imageView)
         imageView.isVisible = false
         imageProgress.isVisible = false
-        imageView.tag = item
 
-        val handleImage = fun(url: String, width: Long, height: Long) {
-            if (
-                imageView.tag != item
-                || imageView.drawable != null
-                || url.isBlank()
-                || width == 0L
-                || height == 0L
-            ) {
-                return
-            }
-
+        if (item.ogImageUrl.isNotBlank()) {
             imageView.isVisible = true
             imageProgress.isVisible = true
 
             val targetHeight =
-                ((screenWidth - cardMargin) * (height.toDouble() / width.toDouble()))
+                ((screenWidth - cardMargin) * (item.ogImageHeight.toDouble() / item.ogImageWidth.toDouble()))
 
             if (item.cropImage) {
                 var croppedHeight = targetHeight.toInt()
@@ -71,27 +59,21 @@ class EntriesAdapterViewHolder(
                 }
             }
 
-            val picassoRequestCreator = Picasso.get().load(url)
+            Picasso.get()
+                .load(item.ogImageUrl)
+                .resize(item.ogImageWidth.toInt(), 0)
+                .onlyScaleDown()
+                .into(imageView, object : Callback {
+                    override fun onSuccess() {
+                        imageProgress.isVisible = false
+                        imageProgress.isVisible = false
+                    }
 
-            if (width > 0) {
-                picassoRequestCreator.resize(width.toInt(), 0)
-            }
-
-            picassoRequestCreator.into(imageView, object : Callback {
-                override fun onSuccess() {
-                    imageProgress.isVisible = false
-                    imageProgress.isVisible = false
-                }
-
-                override fun onError(e: Exception) {
-                    imageView.isVisible = false
-                    imageProgress.isVisible = false
-                }
-            })
-        }
-
-        if (item.ogImageUrl.isNotBlank()) {
-            handleImage(item.ogImageUrl, item.ogImageWidth, item.ogImageHeight)
+                    override fun onError(e: Exception) {
+                        imageView.isVisible = false
+                        imageProgress.isVisible = false
+                    }
+                })
         }
 
         primaryText.text = item.title.trim()

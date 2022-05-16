@@ -61,14 +61,15 @@ class EntriesImagesRepository(
                 throw IllegalStateException("ogImageChecked = 1")
             }
 
-            val firstAltHtmlLink = links.firstOrNull { it.rel == "alternate" && it.type == "text/html" }
+            val link = links.firstOrNull { it.rel == "alternate" && it.type == "text/html" }
+                ?: links.firstOrNull { it.rel == "alternate" }
 
-            if (firstAltHtmlLink == null) {
+            if (link == null) {
                 db.entryQueries.updateOgImageChecked(true, entry.id)
                 return@withContext
             }
 
-            val request = httpClient.newCall(Request.Builder().url(firstAltHtmlLink.href).build())
+            val request = httpClient.newCall(Request.Builder().url(link.href).build())
 
             val response = runCatching {
                 request.execute()
