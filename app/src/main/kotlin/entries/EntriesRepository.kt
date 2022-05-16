@@ -151,7 +151,10 @@ class EntriesRepository(
             withContext(Dispatchers.Default) {
                 db.entryQueries.transaction {
                     batch.forEach { entryWithLinks ->
-                        db.entryQueries.insertOrReplace(entryWithLinks.first.postProcess())
+                        val postProcessedEntry = entryWithLinks.first.postProcess()
+                        db.entryQueries.insertOrReplace(postProcessedEntry)
+                        db.linkQueries.deleteByEntryId(postProcessedEntry.id)
+                        entryWithLinks.second.forEach { db.linkQueries.insertOrReplace(it) }
                     }
                 }
             }

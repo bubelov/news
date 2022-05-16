@@ -161,8 +161,8 @@ class MinifluxApiAdapter(
         val links = mutableListOf<Link>()
 
         links += Link(
-            feedId = id.toString(),
-            entryId = null,
+            feedId = null,
+            entryId = id.toString(),
             href = url.toHttpUrl(),
             rel = "alternate",
             type = null,
@@ -175,8 +175,8 @@ class MinifluxApiAdapter(
 
         enclosures?.forEach {
             links += Link(
-                feedId = id.toString(),
-                entryId = null,
+                feedId = null,
+                entryId = id.toString(),
                 href = it.url.toHttpUrl(),
                 rel = "enclosure",
                 type = it.mime_type,
