@@ -165,7 +165,7 @@ class MinifluxApiAdapter(
             entryId = id.toString(),
             href = url.toHttpUrl(),
             rel = "alternate",
-            type = null,
+            type = "text/html",
             hreflang = "",
             title = "",
             length = null,
