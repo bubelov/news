@@ -48,7 +48,7 @@ class FeedsModelTests {
 
         var attempts = 0
 
-        while (model.state.value !is FeedsModel.State.Loaded) {
+        while (model.state.value !is FeedsModel.State.ShowingFeeds) {
             if (attempts++ > 100) {
                 assertTrue { false }
             } else {

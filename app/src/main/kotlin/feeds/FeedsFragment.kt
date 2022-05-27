@@ -61,16 +61,16 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
         override fun onOpenSelfLinkClick(item: FeedsAdapter.Item) {
             val state = model.state.value
 
-            if (state is FeedsModel.State.Loaded) {
-                openUrl(item.selfLink, state.conf.useBuiltInBrowser)
+            if (state is FeedsModel.State.ShowingFeeds) {
+                //openUrl(item.selfLink, state.conf.useBuiltInBrowser)
             }
         }
 
         override fun onOpenAlternateLinkClick(item: FeedsAdapter.Item) {
             val state = model.state.value
 
-            if (state is FeedsModel.State.Loaded) {
-                openUrl(item.alternateLink, state.conf.useBuiltInBrowser)
+            if (state is FeedsModel.State.ShowingFeeds) {
+                //openUrl(item.alternateLink, state.conf.useBuiltInBrowser)
             }
         }
 
@@ -81,7 +81,7 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
                 .setPositiveButton(R.string.rename) { dialogInterface, _ ->
                     val dialog = dialogInterface as AlertDialog
                     val title = dialog.findViewById<TextInputEditText>(R.id.title)!!
-                    model.rename(item.id, title.text.toString())
+                    //model.rename(item.id, title.text.toString())
                 }
                 .setNegativeButton(R.string.cancel, null)
                 .setOnDismissListener { hideKeyboard() }
@@ -94,7 +94,7 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
         }
 
         override fun onDeleteClick(item: FeedsAdapter.Item) {
-            model.delete(item.id)
+            //model.delete(item.id)
         }
     })
 
@@ -164,7 +164,7 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
         lifecycleScope.launchWhenResumed {
             withContext(Dispatchers.IO) {
                 requireContext().contentResolver.openOutputStream(uri)?.use {
-                    it.write(model.exportAsOpml())
+                    //it.write(model.exportAsOpml())
                 }
             }
         }
@@ -304,11 +304,11 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
         fab.hide()
 
         when (state) {
-            FeedsModel.State.Loading -> {
+            FeedsModel.State.LoadingFeeds -> {
                 progress.show(animate = true)
             }
 
-            is FeedsModel.State.Loaded -> {
+            is FeedsModel.State.ShowingFeeds -> {
                 if (state.feeds.isEmpty()) {
                     message.show(animate = true)
                     message.text = getString(R.string.you_have_no_feeds)
@@ -320,7 +320,7 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
                 fab.show()
             }
 
-            is FeedsModel.State.ImportingOpml -> {
+            is FeedsModel.State.ImportingFeeds -> {
                 progress.show(animate = true)
                 message.show(animate = true)
 
