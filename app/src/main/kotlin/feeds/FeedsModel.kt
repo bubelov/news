@@ -10,15 +10,12 @@ import db.Database
 import db.Feed
 import db.Link
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import opml.exportOpml
@@ -31,7 +28,7 @@ class FeedsModel(
     private val api: NewsApi,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow<State?>(null)
+    private val _state = MutableStateFlow<State>(State.LoadingFeeds)
     val state = _state.asStateFlow()
 
     private val showProgress = MutableStateFlow(false)
@@ -155,16 +152,24 @@ class FeedsModel(
     }
 
     suspend fun addFeed(url: String) {
-        withContext(Dispatchers.Default) {
-            val fullUrl = if (!url.startsWith("http")) "https://$url" else url
-            val feed = api.addFeed(fullUrl.toHttpUrl()).getOrThrow()
+        showProgress.update { true }
+        val fullUrl = if (!url.startsWith("http")) "https://$url" else url
 
-            db.transaction {
-                db.linkQueries.deleteByFeedId(feed.first.id)
-                db.feedQueries.insertOrReplace(feed.first)
-                feed.second.forEach { db.linkQueries.insertOrReplace(it) }
+        runCatching {
+            withContext(Dispatchers.Default) {
+                val feed = api.addFeed(fullUrl.toHttpUrl()).getOrThrow()
+
+                db.transaction {
+                    db.linkQueries.deleteByFeedId(feed.first.id)
+                    db.feedQueries.insertOrReplace(feed.first)
+                    feed.second.forEach { db.linkQueries.insertOrReplace(it) }
+                }
             }
-        }
+        }.onSuccess {
+            showProgress.update { false }
+        }.onFailure {
+            showProgress.update { false }
+        }.getOrThrow()
     }
 
     suspend fun rename(feedId: String, newTitle: String) {
@@ -180,14 +185,25 @@ class FeedsModel(
     }
 
     suspend fun delete(feedId: String) {
-        withContext(Dispatchers.Default) {
-            api.deleteFeed(feedId)
+        showProgress.update { true }
 
-            db.transaction {
-                db.linkQueries.deleteByFeedId(feedId)
-                db.feedQueries.deleteById(feedId)
+        runCatching {
+            withContext(Dispatchers.Default) {
+                api.deleteFeed(feedId)
+
+                db.transaction {
+                    db.linkQueries.deleteByFeedId(feedId)
+                    db.feedQueries.deleteById(feedId)
+                    val entries = db.entryQueries.selectByFeedId(feedId).executeAsList()
+                    entries.forEach { db.linkQueries.selectByEntryid(it.id) }
+                    db.entryQueries.deleteByFeedId(feedId)
+                }
             }
-        }
+        }.onSuccess {
+            showProgress.update { false }
+        }.onFailure {
+            showProgress.update { false }
+        }.getOrThrow()
     }
 
     private fun Feed.toItem(links: List<Link>, unreadCount: Long): FeedsAdapter.Item {

@@ -20,7 +20,6 @@ import com.google.android.material.textfield.TextInputEditText
 import common.AppFragment
 import common.ListAdapterDecoration
 import common.hide
-import common.openUrl
 import common.show
 import common.showDialog
 import common.showErrorDialog
@@ -94,7 +93,9 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
         }
 
         override fun onDeleteClick(item: FeedsAdapter.Item) {
-            //model.delete(item.id)
+            viewLifecycleOwner.lifecycleScope.launch {
+                runCatching { model.delete(item.id) }.onFailure { showErrorDialog(it) }
+            }
         }
     })
 
@@ -261,11 +262,7 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
                     val dialog = dialogInterface as AlertDialog
                     val url = dialog.findViewById<TextInputEditText>(R.id.url)?.text.toString()
                     viewLifecycleOwner.lifecycleScope.launch {
-                        runCatching {
-                            model.addFeed(url)
-                        }.onFailure {
-                            showErrorDialog(it)
-                        }
+                        runCatching { model.addFeed(url) }.onFailure { showErrorDialog(it) }
                     }
                 }
                 .setNegativeButton(R.string.cancel, null)
@@ -278,11 +275,7 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
                         alert.dismiss()
 
                         viewLifecycleOwner.lifecycleScope.launch {
-                            runCatching {
-                                model.addFeed(text.toString())
-                            }.onFailure {
-                                showErrorDialog(it)
-                            }
+                            runCatching { model.addFeed(text.toString()) }.onFailure { showErrorDialog(it) }
                         }
 
                         return@setOnEditorActionListener true
