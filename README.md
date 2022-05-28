@@ -8,18 +8,18 @@
 
 📰 Feed Reader and 🎧 Podcast Player for Android
 
-## Supported Backends
-
-- Miniflux
-- Nextcloud
-- Standalone (built-in)
-
 <div>
 <img alt="" src="fastlane/metadata/android/en/images/phoneScreenshots/1.png" width="204">
 <img alt="" src="fastlane/metadata/android/en/images/phoneScreenshots/2.png" width="204">
 <img alt="" src="fastlane/metadata/android/en/images/phoneScreenshots/3.png" width="204">
 <img alt="" src="fastlane/metadata/android/en/images/phoneScreenshots/4.png" width="204">
 </div>
+
+## 🔌 Supported Backends
+
+- Miniflux
+- Nextcloud
+- Standalone (built-in)
 
 ## ✨ Main Features:
 
@@ -32,10 +32,11 @@
 - Both light and dark themes are supported
 - This is an open source app which respects your privacy
 
----
+## 🪙 Support News With Bitcoins
 
-## ⚠️ Notes on Standalone Mode
-The standalone mode is still work in progress, which means it's not reliable at the moment. You're welcome to test it out and leave your feedback.
+bc1qng60mcufjnmz6330gze5yt4m6enzra7lywns2d
+
+<img src="https://github.com/bubelov/btcmap-android/raw/master/app/src/main/res/drawable-nodpi/btc_address.png" width="204">
 
 ## 🌍 Help Us Translate
 
@@ -69,4 +70,4 @@ The standalone mode is still work in progress, which means it's not reliable at 
 - [Ukrainian](/app/src/main/res/values-uk/strings.xml)
 - [Vietnamese](/app/src/main/res/values-vi/strings.xml)
 
-Didn't find your language or regional dialect? Open an issue and we'll add it.
+Feel free to open an issue if you can't find your language or regional dialect
