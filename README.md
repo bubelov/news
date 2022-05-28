@@ -15,10 +15,10 @@
 - Standalone (built-in)
 
 <div>
-<img alt="" src="fastlane/metadata/android/en/images/phoneScreenshots/1.png" width="206">
-<img alt="" src="fastlane/metadata/android/en/images/phoneScreenshots/2.png" width="206">
-<img alt="" src="fastlane/metadata/android/en/images/phoneScreenshots/3.png" width="206">
-<img alt="" src="fastlane/metadata/android/en/images/phoneScreenshots/4.png" width="206">
+<img alt="" src="fastlane/metadata/android/en/images/phoneScreenshots/1.png" width="205">
+<img alt="" src="fastlane/metadata/android/en/images/phoneScreenshots/2.png" width="205">
+<img alt="" src="fastlane/metadata/android/en/images/phoneScreenshots/3.png" width="205">
+<img alt="" src="fastlane/metadata/android/en/images/phoneScreenshots/4.png" width="205">
 </div>
 
 ## ✨ Main Features:
