@@ -173,15 +173,23 @@ class FeedsModel(
     }
 
     suspend fun rename(feedId: String, newTitle: String) {
-        withContext(Dispatchers.Default) {
-            val feed = db.feedQueries.selectById(feedId).asFlow().mapToOne().first()
-            val trimmedNewTitle = newTitle.trim()
-            api.updateFeedTitle(feedId, trimmedNewTitle)
+        showProgress.update { true }
 
+        runCatching {
             withContext(Dispatchers.Default) {
-                db.feedQueries.insertOrReplace(feed.copy(title = trimmedNewTitle))
+                val feed = db.feedQueries.selectById(feedId).asFlow().mapToOne().first()
+                val trimmedNewTitle = newTitle.trim()
+                api.updateFeedTitle(feedId, trimmedNewTitle)
+
+                withContext(Dispatchers.Default) {
+                    db.feedQueries.insertOrReplace(feed.copy(title = trimmedNewTitle))
+                }
             }
-        }
+        }.onSuccess {
+            showProgress.update { false }
+        }.onFailure {
+            showProgress.update { false }
+        }.getOrThrow()
     }
 
     suspend fun delete(feedId: String) {

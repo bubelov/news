@@ -80,7 +80,10 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
                 .setPositiveButton(R.string.rename) { dialogInterface, _ ->
                     val dialog = dialogInterface as AlertDialog
                     val title = dialog.findViewById<TextInputEditText>(R.id.title)!!
-                    //model.rename(item.id, title.text.toString())
+
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        runCatching { model.rename(item.id, title.text.toString()) }.onFailure { showErrorDialog(it) }
+                    }
                 }
                 .setNegativeButton(R.string.cancel, null)
                 .setOnDismissListener { hideKeyboard() }
