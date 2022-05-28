@@ -8,21 +8,18 @@
 
 📰 Feed Reader and 🎧 Podcast Player for Android
 
-Using a server is optional. Here is the list of supported backends:
+## Supported Backends
 
 - Miniflux
 - Nextcloud
+- Standalone (built-in)
 
----
-
-<p>
-<img alt="" src="fastlane/metadata/android/en/images/phoneScreenshots/1.png" width="19%">
-<img alt="" src="fastlane/metadata/android/en/images/phoneScreenshots/2.png" width="19%">
-<img alt="" src="fastlane/metadata/android/en/images/phoneScreenshots/3.png" width="19%">
-<img alt="" src="fastlane/metadata/android/en/images/phoneScreenshots/4.png" width="19%">
-</p>
-
----
+<div>
+<img alt="" src="fastlane/metadata/android/en/images/phoneScreenshots/1.png" width="220">
+<img alt="" src="fastlane/metadata/android/en/images/phoneScreenshots/2.png" width="220">
+<img alt="" src="fastlane/metadata/android/en/images/phoneScreenshots/3.png" width="220">
+<img alt="" src="fastlane/metadata/android/en/images/phoneScreenshots/4.png" width="220">
+</div>
 
 ## ✨ Main Features:
 
