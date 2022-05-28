@@ -1,12 +1,10 @@
-# News
+## News - Feed Reader 📰 and Podcast Player 🎧 for Android 🤖
 
 <p>
   <a href="https://f-droid.org/packages/co.appreactor.news/">
     <img src="graphics/get-it-on-fdroid.svg" alt="Get it on F-Droid" height="75">
   </a>
 </p>
-
-📰 Feed Reader and 🎧 Podcast Player for Android
 
 <div>
 <img alt="" src="fastlane/metadata/android/en/images/phoneScreenshots/1.png" width="204">
