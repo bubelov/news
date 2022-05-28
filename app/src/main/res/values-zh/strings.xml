@@ -43,7 +43,7 @@
     <string name="nextcloud_login">Nextcloud 登录</string>
     <string name="delete_all_data">删除所有数据</string>
     <string name="delete_all_data_warning">此操作将重置应用并删除所有数据。</string>
-    <string name="standalone_mode">独立模式 (测试版)</string>
+    <string name="standalone_mode">Standalone mode</string>
     <string name="open_in_browser">在浏览器中打开</string>
     <string name="show_newest_first">先显示最新的</string>
     <string name="show_oldest_first">先显示最旧的</string>
@@ -93,9 +93,6 @@
     <string name="opml_file_is_invalid">OPML 文件无效</string>
     <string name="feed_url">订阅源URL</string>
     <string name="view_comments">查看评论</string>
-    <string name="login_with_nextcloud_app">使用 Nextcloud (app) 登录</string>
-    <string name="standalone_mode_no_beta">独立模式</string>
-    <string name="beta">⚠ 测试版 ⚠</string>
     <string name="use_built_in_browser">使用内置浏览器</string>
     <string name="show_preview_text">Show preview text</string>
     <string name="enclosures">Enclosures</string>

@@ -16,6 +16,6 @@ class AuthViewModel(
 
     suspend fun upsertConf(conf: Conf) {
         confRepo.upsert(conf)
-        newsApiSwitcher.switch(conf.authType)
+        newsApiSwitcher.switch(conf.backend)
     }
 }

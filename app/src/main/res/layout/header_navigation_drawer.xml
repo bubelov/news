@@ -22,9 +22,12 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
-        android:layout_marginBottom="24dp"
         android:textAppearance="?attr/textAppearanceTitleSmall"
         android:textColor="?attr/colorOnSurfaceVariant"
         tools:text="Subtitle" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="24dp" />
 
 </LinearLayout>

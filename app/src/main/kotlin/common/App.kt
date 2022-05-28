@@ -65,10 +65,10 @@ class App : Application() {
         }
 
         runBlocking {
-            val authType = get<ConfRepository>().select().first().authType
+            val backend = get<ConfRepository>().select().first().backend
 
-            if (authType.isNotBlank()) {
-                get<NewsApiSwitcher>().switch(authType)
+            if (backend.isNotBlank()) {
+                get<NewsApiSwitcher>().switch(backend)
                 setupBackgroundSync(override = false)
             }
         }

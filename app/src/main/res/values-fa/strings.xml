@@ -43,7 +43,7 @@
     <string name="nextcloud_login">ورودی Nextcloud</string>
     <string name="delete_all_data">حذف همهٔ داده‌ها</string>
     <string name="delete_all_data_warning">این عمل برنامه را بازنشانی کرده و همهٔ داده‌های آن را پاک می‌کند.</string>
-    <string name="standalone_mode">حالت مستقل (آزمایشی)</string>
+    <string name="standalone_mode">حالت مستقل</string>
     <string name="open_in_browser">در مرورگر باز کن</string>
     <string name="show_newest_first">نمایش جدیدترین در ابتدا</string>
     <string name="show_oldest_first">نمایش قدیمی‌ترین در ابتدا</string>
@@ -93,9 +93,6 @@
     <string name="opml_file_is_invalid">پرونده OPML نامعتبر است</string>
     <string name="feed_url">پیوند خوراک</string>
     <string name="view_comments">نمایش نظرها</string>
-    <string name="login_with_nextcloud_app">Login with Nextcloud (app)</string>
-    <string name="standalone_mode_no_beta">Standalone mode</string>
-    <string name="beta">⚠ BETA ⚠</string>
     <string name="use_built_in_browser">Use built-in browser</string>
     <string name="show_preview_text">Show preview text</string>
     <string name="enclosures">Enclosures</string>

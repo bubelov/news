@@ -83,7 +83,7 @@ class NextcloudAuthFragment : AppFragment() {
                         binding.trustSelfSignedCerts.isChecked,
                     )
 
-                    model.setAuthType(ConfRepository.AUTH_TYPE_NEXTCLOUD_DIRECT)
+                    model.setBackend(ConfRepository.BACKEND_NEXTCLOUD)
 
                     app().setupBackgroundSync(override = true)
 

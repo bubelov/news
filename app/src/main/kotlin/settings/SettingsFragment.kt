@@ -14,7 +14,6 @@ import co.appreactor.news.NavGraphDirections
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.nextcloud.android.sso.AccountImporter
 import common.App
 import common.AppFragment
 import common.ConfRepository
@@ -222,8 +221,8 @@ class SettingsFragment : AppFragment() {
 
             logOut.setOnClickListener {
                 lifecycleScope.launchWhenResumed {
-                    when (model.getConf().first().authType) {
-                        ConfRepository.AUTH_TYPE_STANDALONE -> {
+                    when (model.getConf().first().backend) {
+                        ConfRepository.BACKEND_STANDALONE -> {
                             MaterialAlertDialogBuilder(requireContext())
                                 .setMessage(R.string.delete_all_data_warning)
                                 .setPositiveButton(
@@ -252,8 +251,8 @@ class SettingsFragment : AppFragment() {
                 }
             }
 
-            when (conf.authType) {
-                ConfRepository.AUTH_TYPE_STANDALONE -> {
+            when (conf.backend) {
+                ConfRepository.BACKEND_STANDALONE -> {
                     binding.logOutTitle.setText(R.string.delete_all_data)
                     binding.logOutSubtitle.isVisible = false
                 }
@@ -270,7 +269,6 @@ class SettingsFragment : AppFragment() {
 
     private fun logOut() {
         lifecycleScope.launch {
-            AccountImporter.clearAllAuthTokens(context)
             model.logOut()
 
             findNavController().apply {

@@ -83,7 +83,7 @@ class MinifluxAuthFragment : AppFragment() {
                         binding.trustSelfSignedCerts.isChecked,
                     )
 
-                    model.setAuthType(ConfRepository.AUTH_TYPE_MINIFLUX)
+                    model.setBackend(ConfRepository.BACKEND_MINIFLUX)
 
                     app().setupBackgroundSync(override = true)
 

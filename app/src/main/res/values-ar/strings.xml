@@ -2,7 +2,7 @@
 
 <resources>
     <string name="app_name">أخبار</string>
-    <string name="login_with_nextcloud">تسجيل الدخول باستخدام Nextcloud (مباشر)</string>
+    <string name="login_with_nextcloud">تسجيل الدخول باستخدام Nextcloud</string>
     <string name="post_image">صورة المنشور</string>
     <string name="settings">إعدادات</string>
     <string name="news">أخبار</string>
@@ -43,7 +43,7 @@
     <string name="nextcloud_login">Nextcloud تسجيل الدخول</string>
     <string name="delete_all_data">حذف كافة البيانات</string>
     <string name="delete_all_data_warning">سيؤدي هذا الإجراء إلى إعادة تعيين التطبيق وحذف جميع البيانات.</string>
-    <string name="standalone_mode">الوضع المستقل (بيتا)</string>
+    <string name="standalone_mode">الوضع المستقل</string>
     <string name="open_in_browser">فتح في المتصفح</string>
     <string name="show_newest_first">إظهار الأحدث أولا</string>
     <string name="show_oldest_first">إظهار الأقدم أولا</string>
@@ -93,9 +93,6 @@
     <string name="opml_file_is_invalid">ملف OPML غير صالح</string>
     <string name="feed_url">عنوان URL الموجز</string>
     <string name="view_comments">عرض التعليقات</string>
-    <string name="login_with_nextcloud_app">تسجيل الدخول باستخدام Nextcloud (التطبيق)</string>
-    <string name="standalone_mode_no_beta">وضع مستقل</string>
-    <string name="beta">⚠ الإصدار بيتا ⚠</string>
     <string name="use_built_in_browser">Use built-in browser</string>
     <string name="show_preview_text">Show preview text</string>
     <string name="enclosures">Enclosures</string>

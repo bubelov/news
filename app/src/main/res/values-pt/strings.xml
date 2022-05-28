@@ -2,7 +2,7 @@
 
 <resources>
     <string name="app_name">News</string>
-    <string name="login_with_nextcloud">Acessar via Nextcloud (direto)</string>
+    <string name="login_with_nextcloud">Acessar via Nextcloud</string>
     <string name="post_image">Postar imagem</string>
     <string name="settings">Configurações</string>
     <string name="news">Conteúdo</string>
@@ -43,7 +43,7 @@
     <string name="nextcloud_login">Entrar no Nextcloud</string>
     <string name="delete_all_data">Excluir todos os dados</string>
     <string name="delete_all_data_warning">Esta ação resetará o app e excluirá todos os dados.</string>
-    <string name="standalone_mode">Modo independente (beta)</string>
+    <string name="standalone_mode">Modo independente</string>
     <string name="open_in_browser">Abrir no navegador</string>
     <string name="show_newest_first">Primeiro mais novo</string>
     <string name="show_oldest_first">Primeiro mais antigo</string>
@@ -93,9 +93,6 @@
     <string name="opml_file_is_invalid">O arquivo OPML está inválido</string>
     <string name="feed_url">A URL do feed</string>
     <string name="view_comments">Ver comentários</string>
-    <string name="login_with_nextcloud_app">Acessar via Nextcloud (app)</string>
-    <string name="standalone_mode_no_beta">Standalone mode</string>
-    <string name="beta">⚠ BETA ⚠</string>
     <string name="use_built_in_browser">Use built-in browser</string>
     <string name="show_preview_text">Show preview text</string>
     <string name="enclosures">Enclosures</string>

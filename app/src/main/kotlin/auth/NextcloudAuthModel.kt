@@ -58,9 +58,9 @@ class NextcloudAuthModel(
         confRepo.upsert(newConf)
     }
 
-    suspend fun setAuthType(newAuthType: String) {
-        val newConf = confRepo.select().first().copy(authType = newAuthType)
+    suspend fun setBackend(newBackend: String) {
+        val newConf = confRepo.select().first().copy(backend = newBackend)
         confRepo.upsert(newConf)
-        nextcloudApiSwitcher.switch(newAuthType)
+        nextcloudApiSwitcher.switch(newBackend)
     }
 }

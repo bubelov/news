@@ -120,7 +120,6 @@ dependencies {
     implementation("com.squareup.sqldelight:coroutines-extensions:$sqlDelightVer")
     implementation("com.squareup.sqldelight:android-driver:$sqlDelightVer")
 
-    implementation("com.github.nextcloud:Android-SingleSignOn:0.6.1")
     implementation("com.google.android.material:material:1.6.0")
     implementation("com.squareup.picasso:picasso:2.71828")
     implementation("io.insert-koin:koin-android:3.2.0")

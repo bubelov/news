@@ -1,6 +1,6 @@
 insert:
 INSERT OR REPLACE
-INTO Conf (authType, nextcloudServerUrl, nextcloudServerTrustSelfSignedCerts, nextcloudServerUsername, nextcloudServerPassword, minifluxServerUrl, minifluxServerTrustSelfSignedCerts, minifluxServerUsername, minifluxServerPassword, initialSyncCompleted, lastEntriesSyncDateTime, showReadEntries, sortOrder, showPreviewImages, cropPreviewImages, markScrolledEntriesAsRead, syncOnStartup, syncInBackground, backgroundSyncIntervalMillis, useBuiltInBrowser, showPreviewText)
+INTO Conf (backend, minifluxServerUrl, minifluxServerTrustSelfSignedCerts, minifluxServerUsername, minifluxServerPassword, nextcloudServerUrl, nextcloudServerTrustSelfSignedCerts, nextcloudServerUsername, nextcloudServerPassword, initialSyncCompleted, lastEntriesSyncDateTime, showReadEntries, sortOrder, showPreviewImages, cropPreviewImages, markScrolledEntriesAsRead, syncOnStartup, syncInBackground, backgroundSyncIntervalMillis, useBuiltInBrowser, showPreviewText)
 VALUES ?;
 
 select:

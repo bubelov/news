@@ -43,7 +43,7 @@
     <string name="nextcloud_login">Inicio de sesión con Nextcloud</string>
     <string name="delete_all_data">Eliminar todos los datos</string>
     <string name="delete_all_data_warning">Esta acción restablecerá la aplicación y eliminará todos los datos.</string>
-    <string name="standalone_mode">Modo autónomo (beta)</string>
+    <string name="standalone_mode">Modo autónomo</string>
     <string name="open_in_browser">Abrir en el navegador</string>
     <string name="show_newest_first">Mostrar lo más nuevo primero</string>
     <string name="show_oldest_first">Mostrar lo más antiguo primero</string>
@@ -93,9 +93,6 @@
     <string name="opml_file_is_invalid">OPML file is invalid</string>
     <string name="feed_url">Feed URL</string>
     <string name="view_comments">View comments</string>
-    <string name="login_with_nextcloud_app">Login with Nextcloud (app)</string>
-    <string name="standalone_mode_no_beta">Standalone mode</string>
-    <string name="beta">⚠ BETA ⚠</string>
     <string name="use_built_in_browser">Use built-in browser</string>
     <string name="show_preview_text">Show preview text</string>
     <string name="enclosures">Enclosures</string>

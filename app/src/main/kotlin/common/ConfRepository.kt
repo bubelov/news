@@ -25,16 +25,15 @@ class ConfRepository(
     }
 
     companion object {
-        const val AUTH_TYPE_NEXTCLOUD_APP = "nextcloud_app"
-        const val AUTH_TYPE_NEXTCLOUD_DIRECT = "nextcloud_direct"
-        const val AUTH_TYPE_MINIFLUX = "miniflux"
-        const val AUTH_TYPE_STANDALONE = "standalone"
+        const val BACKEND_STANDALONE = "standalone"
+        const val BACKEND_MINIFLUX = "miniflux"
+        const val BACKEND_NEXTCLOUD = "nextcloud"
 
         const val SORT_ORDER_ASCENDING = "ascending"
         const val SORT_ORDER_DESCENDING = "descending"
 
         val DEFAULT_CONF = Conf(
-            authType = "",
+            backend = "",
             nextcloudServerUrl = "",
             nextcloudServerTrustSelfSignedCerts = false,
             nextcloudServerUsername = "",

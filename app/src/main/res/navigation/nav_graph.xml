@@ -46,15 +46,15 @@
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
-            android:id="@+id/action_authFragment_to_directAuthFragment"
-            app:destination="@id/directAuthFragment"
+            android:id="@+id/action_authFragment_to_minifluxAuthFragment"
+            app:destination="@id/minifluxAuthFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
-            android:id="@+id/action_authFragment_to_minifluxAuthFragment"
-            app:destination="@id/minifluxAuthFragment"
+            android:id="@+id/action_authFragment_to_nextcloudAuthFragment"
+            app:destination="@id/nextcloudAuthFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
@@ -62,7 +62,7 @@
     </fragment>
 
     <fragment
-        android:id="@+id/directAuthFragment"
+        android:id="@+id/nextcloudAuthFragment"
         android:name="auth.NextcloudAuthFragment"
         android:label="DirectAuthFragment"
         tools:layout="@layout/fragment_nextcloud_auth">
