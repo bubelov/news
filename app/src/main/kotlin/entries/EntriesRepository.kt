@@ -280,7 +280,7 @@ class EntriesRepository(
     private fun Entry.postProcess(feed: Feed? = null): Entry {
         var processedEntry = this
 
-        if (contentText.toByteArray().size / 1024 > 250) {
+        if (contentText != null && contentText.toByteArray().size / 1024 > 250) {
             processedEntry = processedEntry.copy(contentText = "Content is too large")
         }
 

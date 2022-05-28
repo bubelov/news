@@ -73,7 +73,7 @@ class EntryViewModel(
                 entry = entry,
                 entryLinks = linksRepository.selectByEntryId(entry.id).first(),
                 parsedContent = parseEntryContent(
-                    entry.contentText,
+                    entry.contentText ?: "",
                     TextViewImageGetter(
                         textView = summaryView,
                         scope = lifecycleScope,

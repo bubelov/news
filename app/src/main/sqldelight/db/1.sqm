@@ -33,16 +33,34 @@ CREATE TABLE Feed (
     showPreviewImages INTEGER AS Boolean
 );
 
+--    atomEntry =
+--       element atom:entry {
+--          atomCommonAttributes,
+--          (atomAuthor*
+--           & atomCategory*
+--           & atomContent?
+--           & atomContributor*
+--           & atomId
+--           & atomLink*
+--           & atomPublished?
+--           & atomRights?
+--           & atomSource?
+--           & atomSummary?
+--           & atomTitle
+--           & atomUpdated
+--           & extensionElement*)
+--       }
 CREATE TABLE Entry (
+    contentType TEXT,
+    contentSrc TEXT,
+    contentText TEXT,
+    summary TEXT,
     id TEXT PRIMARY KEY NOT NULL,
     feedId TEXT NOT NULL,
     title TEXT NOT NULL,
     published TEXT AS OffsetDateTime NOT NULL,
     updated TEXT AS OffsetDateTime NOT NULL,
     authorName TEXT NOT NULL,
-    contentType TEXT NOT NULL,
-    contentSrc TEXT NOT NULL,
-    contentText TEXT NOT NULL,
 
     read INTEGER AS Boolean NOT NULL,
     readSynced INTEGER AS Boolean NOT NULL,
@@ -62,6 +80,7 @@ CREATE TABLE Entry (
 CREATE VIEW EntryWithoutContent
 AS
 SELECT
+    summary,
     id,
     feedId,
     title,

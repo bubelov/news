@@ -189,15 +189,16 @@ class MinifluxApiAdapter(
         }
 
         val entry = Entry(
+            contentType = null,
+            contentSrc = null,
+            contentText = null,
+            summary = null,
             id = id.toString(),
             feedId = feed_id.toString(),
             title = title,
             published = OffsetDateTime.parse(published_at),
             updated = OffsetDateTime.parse(changed_at),
             authorName = author,
-            contentType = "html",
-            contentSrc = "",
-            contentText = content,
 
             read = status == "read",
             readSynced = true,

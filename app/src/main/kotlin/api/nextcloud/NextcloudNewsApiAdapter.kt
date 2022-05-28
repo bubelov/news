@@ -230,15 +230,16 @@ class NextcloudNewsApiAdapter(
         }
 
         val entry = Entry(
+            contentType = "html",
+            contentSrc = "",
+            contentText = body ?: "",
+            summary = "",
             id = id.toString(),
             feedId = feedId?.toString() ?: "",
             title = title ?: "Untitled",
             published = OffsetDateTime.parse(published),
             updated = OffsetDateTime.parse(updated),
             authorName = author ?: "",
-            contentType = "html",
-            contentSrc = "",
-            contentText = body ?: "",
 
             read = !unread,
             readSynced = true,

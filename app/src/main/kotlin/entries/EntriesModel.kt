@@ -253,7 +253,7 @@ class EntriesModel(
             cropImage = conf.cropPreviewImages,
             title = title,
             subtitle = "${feed?.title ?: "Unknown feed"} · ${DATE_TIME_FORMAT.format(published)}",
-            summary = "",
+            summary = summary ?: "",
             podcast = false,
             podcastDownloadPercent = null,
             read = read,

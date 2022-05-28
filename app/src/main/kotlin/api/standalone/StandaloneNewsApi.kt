@@ -296,15 +296,16 @@ class StandaloneNewsApi(
         val links = links.map { it.toLink(feedId = null, entryId = id) }
 
         val entry = Entry(
+            contentType = content.type.toString(),
+            contentSrc = content.src,
+            contentText = content.text,
+            summary = "",
             id = id,
             feedId = feedId,
             title = title,
             published = OffsetDateTime.parse(published),
             updated = OffsetDateTime.parse(updated),
             authorName = authorName,
-            contentType = content.type.toString(),
-            contentSrc = content.src,
-            contentText = content.text,
             read = false,
             readSynced = true,
             bookmarked = false,
@@ -364,16 +365,21 @@ class StandaloneNewsApi(
             )
         }
 
+        // https://practicaltypography.com/line-length.html
+        // 45–90 characters per line x 3 lines
+        val maxSummaryLength = 180
+
         val entry = Entry(
+            contentType = "html",
+            contentSrc = "",
+            contentText = description ?: "",
+            summary = if ((description?.length ?: 0) < maxSummaryLength) description else "",
             id = id,
             feedId = feedId,
             title = title ?: "",
             published = OffsetDateTime.parse((pubDate ?: Date()).toIsoString()),
             updated = OffsetDateTime.parse((pubDate ?: Date()).toIsoString()),
             authorName = author ?: "",
-            contentType = "html",
-            contentSrc = "",
-            contentText = description ?: "",
             read = false,
             readSynced = true,
             bookmarked = false,
