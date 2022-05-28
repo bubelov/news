@@ -1,9 +1,8 @@
 # News
 
 <p>
-  <img src="https://f-droid.org/repo/icons-640/co.appreactor.news.13.png" alt="" height="80">
   <a href="https://f-droid.org/packages/co.appreactor.news/">
-    <img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="80">
+    <img src="graphics/get-it-on-fdroid.svg" alt="Get it on F-Droid" height="75">
   </a>
 </p>
 
