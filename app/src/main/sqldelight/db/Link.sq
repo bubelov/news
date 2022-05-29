@@ -1,3 +1,8 @@
+insert:
+INSERT
+INTO Link(feedId, entryId, href, rel, type, hreflang, title, length, extEnclosureDownloadProgress)
+VALUES ?;
+
 insertOrReplace:
 INSERT OR REPLACE
 INTO Link(feedId, entryId, href, rel, type, hreflang, title, length, extEnclosureDownloadProgress)

@@ -211,15 +211,16 @@ fun EntryQueries.insertOrReplace(): Entry {
 }
 
 fun entry() = Entry(
+    contentType = "",
+    contentSrc = "",
+    contentText = "",
+    summary = "",
     id = UUID.randomUUID().toString(),
     feedId = "",
     title = "",
     published = OffsetDateTime.now(),
     updated = OffsetDateTime.now(),
     authorName = "",
-    contentType = "",
-    contentSrc = "",
-    contentText = "",
     read = false,
     readSynced = true,
     bookmarked = false,
@@ -233,6 +234,7 @@ fun entry() = Entry(
 )
 
 fun entryWithoutContent() = EntryWithoutContent(
+    summary = "",
     id = UUID.randomUUID().toString(),
     feedId = "",
     title = "",
@@ -252,6 +254,7 @@ fun entryWithoutContent() = EntryWithoutContent(
 )
 
 fun Entry.withoutContent() = EntryWithoutContent(
+    summary = "",
     id = id,
     feedId = feedId,
     title = title,
@@ -272,15 +275,16 @@ fun Entry.withoutContent() = EntryWithoutContent(
 
 fun EntryWithoutContent.toEntry(): Entry {
     return Entry(
+        contentType = "",
+        contentSrc = "",
+        contentText = "",
+        summary = summary,
         id = id,
         feedId = feedId,
         title = title,
         published = published,
         updated = updated,
         authorName = authorName,
-        contentType = "",
-        contentSrc = "",
-        contentText = "",
         read = read,
         readSynced = readSynced,
         bookmarked = bookmarked,

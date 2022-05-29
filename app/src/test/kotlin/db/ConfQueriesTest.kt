@@ -13,7 +13,7 @@ class ConfQueriesTest {
         val db = database()
         runBlocking { ConfRepository(db).upsert(ConfRepository.DEFAULT_CONF) }
         val oldConf = db.confQueries.select().executeAsOne()
-        val newConf = oldConf.copy(authType = "test")
+        val newConf = oldConf.copy(backend = ConfRepository.BACKEND_STANDALONE)
         runBlocking { ConfRepository(db).upsert(newConf) }
         assertEquals(newConf, db.confQueries.select().executeAsOne())
     }

@@ -192,7 +192,7 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
         initFab()
 
         model.state
-            .onEach { setState(it ?: return@onEach) }
+            .onEach { setState(it) }
             .catch { showErrorDialog(it) }
             .launchIn(viewLifecycleOwner.lifecycleScope)
 
@@ -293,30 +293,36 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
     }
 
     private fun setState(state: FeedsModel.State) = binding.apply {
-        list.hide()
-        progress.hide()
-        message.hide()
-        importOpml.hide()
-        fab.hide()
-
         when (state) {
-            FeedsModel.State.LoadingFeeds -> {
+            FeedsModel.State.Loading -> {
+                list.hide()
                 progress.show(animate = true)
+                message.hide()
+                importOpml.hide()
+                fab.hide()
             }
 
             is FeedsModel.State.ShowingFeeds -> {
+                adapter.submitList(state.feeds)
+                list.show()
+                progress.hide()
+                message.hide()
+
                 if (state.feeds.isEmpty()) {
                     message.show(animate = true)
                     message.text = getString(R.string.you_have_no_feeds)
                     importOpml.show(animate = true)
+                } else {
+                    message.hide()
+                    importOpml.hide()
                 }
 
-                list.show()
-                adapter.submitList(state.feeds)
                 fab.show()
             }
 
             is FeedsModel.State.ImportingFeeds -> {
+                list.hide()
+
                 progress.show(animate = true)
                 message.show(animate = true)
 
@@ -325,6 +331,9 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
                     state.progress.imported,
                     state.progress.total,
                 )
+
+                importOpml.hide()
+                fab.hide()
             }
         }
     }

@@ -1,3 +1,8 @@
+insert:
+INSERT
+INTO Feed(id, title, openEntriesInBrowser, blockedWords, showPreviewImages)
+VALUES ?;
+
 insertOrReplace:
 INSERT OR REPLACE
 INTO Feed(id, title, openEntriesInBrowser, blockedWords, showPreviewImages)
