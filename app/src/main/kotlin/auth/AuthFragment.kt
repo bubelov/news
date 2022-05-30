@@ -81,7 +81,9 @@ class AuthFragment : AppFragment(
 
                 app().setupBackgroundSync(override = true)
 
-                findNavController().navigate(R.id.action_authFragment_to_entriesFragment)
+                binding.root.animate().alpha(0f).setDuration(250).withEndAction {
+                    findNavController().navigate(R.id.action_authFragment_to_entriesFragment)
+                }
             }
         }
 

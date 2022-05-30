@@ -135,6 +135,7 @@ class App : Application() {
             repeatIntervalTimeUnit = TimeUnit.MILLISECONDS,
         )
             .setConstraints(constraints)
+            .setInitialDelay(conf.backgroundSyncIntervalMillis, TimeUnit.MILLISECONDS)
             .build()
 
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
