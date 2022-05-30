@@ -1,6 +1,7 @@
 package api.standalone
 
 import android.util.Base64
+import android.util.Log
 import api.NewsApi
 import co.appreactor.feedk.AtomEntry
 import co.appreactor.feedk.AtomFeed
@@ -181,9 +182,16 @@ class StandaloneNewsApi(
                             }.map { it.toEntry(feed.first.id) }
                         }
                         is RssFeed -> {
-                            parsedFeed.channel.items.getOrElse {
-                                return emptyList()
-                            }.mapNotNull { it.getOrNull() }.map { it.toEntry(feed.first.id) }
+                            parsedFeed.channel.items
+                                .getOrElse { return emptyList() }
+                                .mapNotNull { it.getOrNull() }
+                                .mapNotNull { rssItem ->
+                                    runCatching {
+                                        rssItem.toEntry(feed.first.id)
+                                    }.onFailure {
+                                        Log.e("api", "Failed to parse RSS item: $rssItem", it)
+                                    }.getOrNull()
+                                }
                         }
                     }
                 }
