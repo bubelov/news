@@ -12,16 +12,12 @@ import co.appreactor.feedk.RssFeed
 import co.appreactor.feedk.RssItem
 import co.appreactor.feedk.RssItemGuid
 import co.appreactor.feedk.feed
+import db.Database
 import db.Entry
-import db.EntryQueries
 import db.EntryWithoutContent
 import db.Feed
-import db.FeedQueries
 import db.Link
-import db.LinkQueries
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withContext
@@ -40,9 +36,7 @@ import java.util.Locale
 typealias ParsedFeed = co.appreactor.feedk.Feed
 
 class StandaloneNewsApi(
-    private val feedQueries: FeedQueries,
-    private val entryQueries: EntryQueries,
-    private val linkQueries: LinkQueries,
+    private val db: Database,
 ) : NewsApi {
 
     private val httpClient = OkHttpClient()
@@ -110,9 +104,9 @@ class StandaloneNewsApi(
     override suspend fun getFeeds(): List<Pair<Feed, List<Link>>> {
         val result: MutableList<Pair<Feed, List<Link>>> = mutableListOf()
 
-        feedQueries.transaction {
-            feedQueries.selectAll().executeAsList().onEach {
-                result += Pair(it, linkQueries.selectByFeedId(it.id).executeAsList())
+        db.feedQueries.transaction {
+            db.feedQueries.selectAll().executeAsList().onEach {
+                result += Pair(it, db.linkQueries.selectByFeedId(it.id).executeAsList())
             }
         }
 
@@ -131,31 +125,33 @@ class StandaloneNewsApi(
         return flowOf(emptyList())
     }
 
-    // TODO return updated entries
     override suspend fun getNewAndUpdatedEntries(
         maxEntryId: String?,
         maxEntryUpdated: OffsetDateTime?,
         lastSync: OffsetDateTime?,
-    ): List<Pair<Entry, List<Link>>> = withContext(Dispatchers.IO) {
+    ): List<Pair<Entry, List<Link>>> {
         val entries = mutableListOf<Pair<Entry, List<Link>>>()
 
-        feedQueries.selectAll().executeAsList().chunked(10).forEach { chunk ->
-            chunk.map { feed ->
-                async {
-                    entries.addAll(fetchEntries(Pair(feed, linkQueries.selectByFeedId(feed.id).executeAsList())))
+        withContext(Dispatchers.Default) {
+            db.feedQueries.selectAll().executeAsList().forEach { feed ->
+                runCatching {
+                    entries += fetchEntries(feed)
+                }.onFailure {
+                    Log.e("api", "Failed to fetch entries for feed: $feed", it)
                 }
-            }.awaitAll()
+            }
         }
 
-        entries.removeAll {
-            entryQueries.selectById(it.first.id).executeAsOneOrNull() != null
+        db.transaction {
+            entries.removeAll { db.entryQueries.selectById(it.first.id).executeAsOneOrNull() != null }
         }
 
-        return@withContext entries
+        return entries
     }
 
-    private fun fetchEntries(feed: Pair<Feed, List<Link>>): List<Pair<Entry, List<Link>>> {
-        val url = feed.second.first { it.rel == "self" }.href
+    private fun fetchEntries(feed: Feed): List<Pair<Entry, List<Link>>> {
+        val links = db.linkQueries.selectByFeedId(feed.id).executeAsList()
+        val url = links.first { it.rel == "self" }.href
         val request = Request.Builder().url(url).build()
 
         val response = runCatching {
@@ -177,9 +173,15 @@ class StandaloneNewsApi(
                 is FeedResult.Success -> {
                     when (val parsedFeed = feedResult.feed) {
                         is AtomFeed -> {
-                            parsedFeed.entries.getOrElse {
-                                return emptyList()
-                            }.map { it.toEntry(feed.first.id) }
+                            parsedFeed.entries
+                                .getOrElse { return emptyList() }
+                                .mapNotNull { atomEntry ->
+                                    runCatching {
+                                        atomEntry.toEntry(feed.id)
+                                    }.onFailure {
+                                        Log.e("api", "Failed to parse Atom entry: $atomEntry", it)
+                                    }.getOrNull()
+                                }
                         }
                         is RssFeed -> {
                             parsedFeed.channel.items
@@ -187,7 +189,7 @@ class StandaloneNewsApi(
                                 .mapNotNull { it.getOrNull() }
                                 .mapNotNull { rssItem ->
                                     runCatching {
-                                        rssItem.toEntry(feed.first.id)
+                                        rssItem.toEntry(feed.id)
                                     }.onFailure {
                                         Log.e("api", "Failed to parse RSS item: $rssItem", it)
                                     }.getOrNull()

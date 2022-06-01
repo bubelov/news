@@ -4,6 +4,7 @@ import api.standalone.StandaloneNewsApi
 import db.EntryQueries
 import db.FeedQueries
 import db.LinkQueries
+import db.database
 import io.mockk.mockk
 import okhttp3.OkHttpClient
 import org.junit.Before
@@ -19,16 +20,9 @@ class StandaloneNewsApiTests {
 
     @Before
     fun setup() {
-        feedQueries = mockk()
-        entryQueries = mockk()
-        linkQueries = mockk()
+        val db = database()
         http = mockk()
-
-        api = StandaloneNewsApi(
-            feedQueries = feedQueries,
-            entryQueries = entryQueries,
-            linkQueries = linkQueries,
-        )
+        api = StandaloneNewsApi(db)
     }
 
 //    @Test

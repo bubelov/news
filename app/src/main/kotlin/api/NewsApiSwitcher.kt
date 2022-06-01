@@ -1,6 +1,5 @@
 package api
 
-import android.content.Context
 import api.miniflux.MinifluxApiAdapter
 import api.miniflux.MinifluxApiBuilder
 import api.nextcloud.DirectNextcloudNewsApiBuilder
@@ -17,7 +16,6 @@ class NewsApiSwitcher(
     private val db: Database,
     private val wrapper: NewsApiWrapper,
     private val confRepo: ConfRepository,
-    private val context: Context,
 ) {
 
     fun switch(backend: String) {
@@ -56,6 +54,6 @@ class NewsApiSwitcher(
     }
 
     private fun switchToStandaloneApi() {
-        wrapper.api = StandaloneNewsApi(db.feedQueries, db.entryQueries, db.linkQueries)
+        wrapper.api = StandaloneNewsApi(db)
     }
 }
