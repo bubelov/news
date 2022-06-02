@@ -81,18 +81,22 @@ class AuthFragment : AppFragment(
 
                 app().setupBackgroundSync(override = true)
 
-                binding.root.animate().alpha(0f).setDuration(250).withEndAction {
+                binding.root.animate().alpha(0f).setDuration(150).withEndAction {
                     findNavController().navigate(R.id.action_authFragment_to_entriesFragment)
                 }
             }
         }
 
         useMinifluxBackend.setOnClickListener {
-            findNavController().navigate(R.id.action_authFragment_to_minifluxAuthFragment)
+            binding.root.animate().alpha(0f).setDuration(150).withEndAction {
+                findNavController().navigate(R.id.action_authFragment_to_minifluxAuthFragment)
+            }
         }
 
         useNextcloudBackend.setOnClickListener {
-            findNavController().navigate(R.id.action_authFragment_to_nextcloudAuthFragment)
+            binding.root.animate().alpha(0f).setDuration(150).withEndAction {
+                findNavController().navigate(R.id.action_authFragment_to_nextcloudAuthFragment)
+            }
         }
     }
 }
