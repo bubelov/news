@@ -2,13 +2,15 @@ package api.nextcloud
 
 import co.appreactor.news.BuildConfig
 import common.trustSelfSignedCerts
-import okhttp3.*
+import okhttp3.Credentials
+import okhttp3.Interceptor
+import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
-class DirectNextcloudNewsApiBuilder {
+class NextcloudNewsApiBuilder {
 
     fun build(
         url: String,

@@ -1,7 +1,5 @@
 package api.nextcloud
 
-import okhttp3.ResponseBody
-import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -13,44 +11,53 @@ import retrofit2.http.Query
 interface NextcloudNewsApi {
 
     @POST("feeds")
-    fun postFeed(@Body args: PostFeedArgs): Call<FeedsPayload>
+    suspend fun postFeed(
+        @Body args: PostFeedArgs,
+    ): FeedsPayload
 
     @GET("feeds")
-    fun getFeeds(): Call<FeedsPayload>
-
-    @GET("feeds")
-    fun getFeedsRaw(): Call<ResponseBody>
+    suspend fun getFeeds(): FeedsPayload
 
     @PUT("feeds/{id}/rename")
-    fun putFeedRename(
+    suspend fun putFeedRename(
         @Path("id") id: Long,
-        @Body args: PutFeedRenameArgs
-    ): Call<List<Long>>
+        @Body args: PutFeedRenameArgs,
+    ): List<Long>
 
     @DELETE("feeds/{id}")
-    fun deleteFeed(@Path("id") id: Long): Call<List<Long>>
+    suspend fun deleteFeed(
+        @Path("id") id: Long,
+    ): List<Long>
 
     @GET("items?type=3")
-    fun getAllItems(
+    suspend fun getAllItems(
         @Query("getRead") getRead: Boolean,
         @Query("batchSize") batchSize: Long,
         @Query("offset") offset: Long,
-    ): Call<ItemsPayload>
+    ): ItemsPayload
 
     @GET("items/updated?type=3")
-    fun getNewAndUpdatedItems(
-        @Query("lastModified") lastModified: Long
-    ): Call<ItemsPayload>
+    suspend fun getNewAndUpdatedItems(
+        @Query("lastModified") lastModified: Long,
+    ): ItemsPayload
 
     @PUT("items/read/multiple")
-    fun putRead(@Body args: PutReadArgs): Call<Void>
+    suspend fun putRead(
+        @Body args: PutReadArgs,
+    )
 
     @PUT("items/unread/multiple")
-    fun putUnread(@Body args: PutReadArgs): Call<Void>
+    suspend fun putUnread(
+        @Body args: PutReadArgs,
+    )
 
     @PUT("items/star/multiple")
-    fun putStarred(@Body args: PutStarredArgs): Call<Void>
+    suspend fun putStarred(
+        @Body args: PutStarredArgs,
+    )
 
     @PUT("items/unstar/multiple")
-    fun putUnstarred(@Body args: PutStarredArgs): Call<Void>
+    fun putUnstarred(
+        @Body args: PutStarredArgs,
+    )
 }

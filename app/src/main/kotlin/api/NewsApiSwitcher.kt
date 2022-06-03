@@ -2,7 +2,7 @@ package api
 
 import api.miniflux.MinifluxApiAdapter
 import api.miniflux.MinifluxApiBuilder
-import api.nextcloud.DirectNextcloudNewsApiBuilder
+import api.nextcloud.NextcloudNewsApiBuilder
 import api.nextcloud.NextcloudNewsApiAdapter
 import api.standalone.StandaloneNewsApi
 import common.ConfRepository
@@ -31,7 +31,7 @@ class NewsApiSwitcher(
         val conf = confRepo.select().first()
 
         wrapper.api = NextcloudNewsApiAdapter(
-            DirectNextcloudNewsApiBuilder().build(
+            NextcloudNewsApiBuilder().build(
                 url = conf.nextcloudServerUrl,
                 username = conf.nextcloudServerUsername,
                 password = conf.nextcloudServerPassword,

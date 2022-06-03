@@ -77,10 +77,6 @@ class App : Application() {
             .downloader(OkHttp3Downloader(File(externalCacheDir, "images")))
             .build()
 
-        if (BuildConfig.DEBUG) {
-            picasso.setIndicatorsEnabled(true)
-        }
-
         Picasso.setSingletonInstance(picasso)
 
         if (BuildConfig.DEBUG) {

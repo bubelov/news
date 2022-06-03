@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
-import retrofit2.Response
 import java.time.Instant
 import java.time.OffsetDateTime
 
@@ -17,44 +16,23 @@ class NextcloudNewsApiAdapter(
     private val api: NextcloudNewsApi,
 ) : NewsApi {
 
-    override suspend fun addFeed(url: HttpUrl): Result<Pair<Feed, List<Link>>> = runCatching {
-        val response = api.postFeed(PostFeedArgs(url.toString(), 0)).execute()
-
-        if (!response.isSuccessful) {
-            throw response.toException()
+    override suspend fun addFeed(url: HttpUrl): Result<Pair<Feed, List<Link>>> {
+        return runCatching {
+            api.postFeed(PostFeedArgs(url.toString(), 0)).feeds.single().toFeed()
+                ?: throw Exception("Invalid server response")
         }
-
-        val feedJson =
-            response.body()?.feeds?.single() ?: throw Exception("Can not parse server response")
-
-        feedJson.toFeed() ?: throw Exception("Invalid server response")
     }
 
     override suspend fun getFeeds(): List<Pair<Feed, List<Link>>> {
-        val response = api.getFeeds().execute()
-
-        if (!response.isSuccessful) {
-            throw response.toException()
-        }
-
-        return response.body()?.feeds?.mapNotNull { it.toFeed() }
-            ?: throw Exception("Can not parse server response")
+        return api.getFeeds().feeds.mapNotNull { it.toFeed() }
     }
 
     override suspend fun updateFeedTitle(feedId: String, newTitle: String) {
-        val response = api.putFeedRename(feedId.toLong(), PutFeedRenameArgs(newTitle)).execute()
-
-        if (!response.isSuccessful) {
-            throw response.toException()
-        }
+        api.putFeedRename(feedId.toLong(), PutFeedRenameArgs(newTitle))
     }
 
     override suspend fun deleteFeed(feedId: String) {
-        val response = api.deleteFeed(feedId.toLong()).execute()
-
-        if (!response.isSuccessful) {
-            throw response.toException()
-        }
+        api.deleteFeed(feedId.toLong())
     }
 
     override suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Pair<Entry, List<Link>>>> = flow {
@@ -68,8 +46,8 @@ class NextcloudNewsApiAdapter(
                 api.getAllItems(
                     getRead = includeReadEntries,
                     batchSize = batchSize,
-                    offset = oldestEntryId
-                ).execute()
+                    offset = oldestEntryId,
+                )
             } catch (e: Exception) {
                 val message = if (e.message == "code < 400: 302") {
                     "Can not load entries. Make sure you have News app installed on your Nextcloud server."
@@ -80,22 +58,17 @@ class NextcloudNewsApiAdapter(
                 throw Exception(message, e)
             }
 
-            if (!response.isSuccessful) {
-                throw response.toException()
-            } else {
-                val entries =
-                    response.body()?.items ?: throw Exception("Can not parse server response")
-                currentBatch += entries
-                totalFetched += currentBatch.size
-                emit(currentBatch.mapNotNull { it.toEntry() })
+            val entries = response.items
+            currentBatch += entries
+            totalFetched += currentBatch.size
+            emit(currentBatch.mapNotNull { it.toEntry() })
 
-                if (currentBatch.size < batchSize) {
-                    break
-                } else {
-                    oldestEntryId =
-                        currentBatch.minOfOrNull { it.id ?: Long.MAX_VALUE }?.toLong() ?: 0L
-                    currentBatch.clear()
-                }
+            if (currentBatch.size < batchSize) {
+                break
+            } else {
+                oldestEntryId =
+                    currentBatch.minOfOrNull { it.id ?: Long.MAX_VALUE }?.toLong() ?: 0L
+                currentBatch.clear()
             }
         }
     }
@@ -106,28 +79,16 @@ class NextcloudNewsApiAdapter(
         lastSync: OffsetDateTime?,
     ): List<Pair<Entry, List<Link>>> {
         val lastModified = maxEntryUpdated ?: lastSync!!
-
-        val response = api.getNewAndUpdatedItems(lastModified.toEpochSecond() + 1).execute()
-
-        if (!response.isSuccessful) {
-            throw response.toException()
-        }
-
-        return response.body()?.items?.mapNotNull { it.toEntry() }
-            ?: throw Exception("Can not parse server response")
+        return api.getNewAndUpdatedItems(lastModified.toEpochSecond() + 1).items.mapNotNull { it.toEntry() }
     }
 
     override suspend fun markEntriesAsRead(entriesIds: List<String>, read: Boolean) {
         val ids = entriesIds.map { it.toLong() }
 
-        val response = if (read) {
+        if (read) {
             api.putRead(PutReadArgs(ids))
         } else {
             api.putUnread(PutReadArgs(ids))
-        }.execute()
-
-        if (!response.isSuccessful) {
-            throw response.toException()
         }
     }
 
@@ -135,17 +96,12 @@ class NextcloudNewsApiAdapter(
         entries: List<EntryWithoutContent>,
         bookmarked: Boolean,
     ) {
-        val args =
-            PutStarredArgs(entries.map { PutStarredArgsItem(it.feedId.toLong(), it.guidHash) })
+        val args = PutStarredArgs(entries.map { PutStarredArgsItem(it.feedId.toLong(), it.guidHash) })
 
-        val response = if (bookmarked) {
+        if (bookmarked) {
             api.putStarred(args)
         } else {
             api.putUnstarred(args)
-        }.execute()
-
-        if (!response.isSuccessful) {
-            throw response.toException()
         }
     }
 
@@ -258,7 +214,4 @@ class NextcloudNewsApiAdapter(
 
         return Pair(entry, links)
     }
-
-    private fun Response<*>.toException() =
-        Exception("HTTPS request failed with error code ${code()}")
 }

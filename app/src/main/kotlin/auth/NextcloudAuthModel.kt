@@ -2,12 +2,11 @@ package auth
 
 import androidx.lifecycle.ViewModel
 import api.NewsApiSwitcher
-import api.nextcloud.DirectNextcloudNewsApiBuilder
+import api.nextcloud.NextcloudNewsApiBuilder
 import common.ConfRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
-import okhttp3.MediaType.Companion.toMediaType
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
@@ -22,24 +21,14 @@ class NextcloudAuthModel(
         password: String,
         trustSelfSignedCerts: Boolean,
     ) {
-        val api = DirectNextcloudNewsApiBuilder().build(
+        val api = NextcloudNewsApiBuilder().build(
             serverUrl,
             username,
             password,
             trustSelfSignedCerts,
         )
 
-        withContext(Dispatchers.IO) {
-            val response = api.getFeedsRaw().execute()
-
-            if (!response.isSuccessful) {
-                throw Exception(response.message())
-            } else {
-                if (response.body()?.contentType() == "text/html; charset=UTF-8".toMediaType()) {
-                    throw Exception("Can not fetch data. Make sure News app is also installed on your Nextcloud server.")
-                }
-            }
-        }
+        withContext(Dispatchers.Default) { api.getFeeds() }
     }
 
     suspend fun setServer(
