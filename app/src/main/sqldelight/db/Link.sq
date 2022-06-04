@@ -40,7 +40,7 @@ WHERE href = ?;
 updateCacheUri:
 UPDATE Link
 SET extCacheUri = ?
-WHERE feedId = ? OR entryId = ?;
+WHERE href = ?;
 
 deleteAll:
 DELETE

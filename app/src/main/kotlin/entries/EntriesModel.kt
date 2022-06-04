@@ -68,7 +68,7 @@ class EntriesModel(
                 entriesRepo.selectCount(),
                 linksRepo.selectEnclosures(),
                 newsApiSync.state,
-            ) { conf, feeds, _, _, syncState ->
+            ) { conf, feeds, _, enclosures, syncState ->
                 when (syncState) {
                     is NewsApiSync.State.InitialSync -> State.InitialSync(syncState.message)
                     else -> {
@@ -82,7 +82,7 @@ class EntriesModel(
                         scrollToTopNextTime = false
 
                         State.ShowingCachedEntries(
-                            entries = selectEntries(filter, conf, feeds),
+                            entries = selectEntries(filter, enclosures, feeds, conf),
                             showBackgroundProgress = showBgProgress,
                             scrollToTop = scrollToTop,
                         )
@@ -98,8 +98,9 @@ class EntriesModel(
 
     private suspend fun selectEntries(
         filter: EntriesFilter,
+        enclosures: List<Link>,
+        feeds: List<Feed>,
         conf: Conf,
-        feeds: List<Feed>
     ): List<EntriesAdapterItem> {
         val unsortedEntries = when (filter) {
             is EntriesFilter.NotBookmarked -> {
@@ -132,9 +133,9 @@ class EntriesModel(
         }
 
         val rows = withContext(Dispatchers.Default) {
-            sortedEntries.map {
-                val feed = feeds.singleOrNull { feed -> feed.id == it.feedId }
-                it.toRow(feed, conf)
+            sortedEntries.map { entry ->
+                val feed = feeds.singleOrNull { feed -> feed.id == entry.feedId }
+                entry.toRow(feed, enclosures.filter { it.entryId == entry.id }, conf)
             }
         }
 
@@ -242,8 +243,9 @@ class EntriesModel(
         }
     }
 
-    private suspend fun EntryWithoutContent.toRow(
+    private fun EntryWithoutContent.toRow(
         feed: Feed?,
+        enclosures: List<Link>,
         conf: Conf,
     ): EntriesAdapterItem {
         val ogImageUrl = if (conf.showPreviewImages) {
@@ -251,9 +253,6 @@ class EntriesModel(
         } else {
             ""
         }
-
-        val links = linksRepo.selectByEntryId(id).first()
-        val podcast = links.firstOrNull { it.rel == "enclosure" && it.type?.startsWith("audio") == true }
 
         return EntriesAdapterItem(
             id = id,
@@ -264,7 +263,7 @@ class EntriesModel(
             title = title,
             subtitle = "${feed?.title ?: "Unknown feed"} · ${DATE_TIME_FORMAT.format(published)}",
             summary = summary ?: "",
-            audioEnclosure = podcast,
+            audioEnclosure = enclosures.firstOrNull { it.type?.startsWith("audio") == true },
             read = read,
         )
     }

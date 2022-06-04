@@ -90,8 +90,7 @@ class AudioEnclosuresRepository(
 
                 db.linkQueries.updateCacheUri(
                     extCacheUri = cacheUri.toString(),
-                    feedId = audioEnclosure.feedId,
-                    entryId = audioEnclosure.entryId,
+                    href = audioEnclosure.href,
                 )
 
                 val responseBody = response.body!!
@@ -130,12 +129,17 @@ class AudioEnclosuresRepository(
                     }
                 }
             }.onSuccess {
-                db.linkQueries.insertOrReplace(
-                    audioEnclosure.copy(
+                db.transaction {
+                    db.linkQueries.updateEnclosureDownloadProgress(
                         extEnclosureDownloadProgress = 1.0,
-                        extCacheUri = cacheUri.toString(),
+                        href = audioEnclosure.href,
                     )
-                )
+
+                    db.linkQueries.updateCacheUri(
+                        extCacheUri = cacheUri.toString(),
+                        href = audioEnclosure.href,
+                    )
+                }
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     cacheUri?.let {
@@ -153,8 +157,7 @@ class AudioEnclosuresRepository(
 
                     db.linkQueries.updateCacheUri(
                         extCacheUri = null,
-                        feedId = audioEnclosure.feedId,
-                        entryId = audioEnclosure.entryId,
+                        href = audioEnclosure.href,
                     )
                 }
 
@@ -187,8 +190,7 @@ class AudioEnclosuresRepository(
 
                                 db.linkQueries.updateCacheUri(
                                     extCacheUri = null,
-                                    feedId = audioEnclosure.feedId,
-                                    entryId = audioEnclosure.entryId,
+                                    href = audioEnclosure.href,
                                 )
                             }
                         }
@@ -212,8 +214,7 @@ class AudioEnclosuresRepository(
 
                                 db.linkQueries.updateCacheUri(
                                     extCacheUri = null,
-                                    feedId = audioEnclosure.feedId,
-                                    entryId = audioEnclosure.entryId,
+                                    href = audioEnclosure.href,
                                 )
                             }
                         }
@@ -228,8 +229,7 @@ class AudioEnclosuresRepository(
 
                                     db.linkQueries.updateCacheUri(
                                         extCacheUri = null,
-                                        feedId = audioEnclosure.feedId,
-                                        entryId = audioEnclosure.entryId,
+                                        href = audioEnclosure.href,
                                     )
                                 }
 
@@ -248,8 +248,7 @@ class AudioEnclosuresRepository(
 
                                     db.linkQueries.updateCacheUri(
                                         extCacheUri = null,
-                                        feedId = audioEnclosure.feedId,
-                                        entryId = audioEnclosure.entryId,
+                                        href = audioEnclosure.href,
                                     )
                                 }
                             }
@@ -269,8 +268,7 @@ class AudioEnclosuresRepository(
 
                             db.linkQueries.updateCacheUri(
                                 extCacheUri = null,
-                                feedId = audioEnclosure.feedId,
-                                entryId = audioEnclosure.entryId,
+                                href = audioEnclosure.href,
                             )
                         }
                     }
@@ -294,8 +292,7 @@ class AudioEnclosuresRepository(
 
                 db.linkQueries.updateCacheUri(
                     extCacheUri = null,
-                    feedId = audioEnclosure.feedId,
-                    entryId = audioEnclosure.entryId,
+                    href = audioEnclosure.href,
                 )
             }
         }
