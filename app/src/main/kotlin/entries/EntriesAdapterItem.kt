@@ -1,5 +1,7 @@
 package entries
 
+import db.Link
+
 data class EntriesAdapterItem(
     val id: String,
     val ogImageUrl: String,
@@ -9,7 +11,6 @@ data class EntriesAdapterItem(
     val title: String,
     val subtitle: String,
     val summary: String,
-    val podcast: Boolean,
-    val podcastDownloadPercent: Long?,
+    val audioEnclosure: Link?,
     var read: Boolean,
 )

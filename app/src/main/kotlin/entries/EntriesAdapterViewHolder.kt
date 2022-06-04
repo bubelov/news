@@ -86,28 +86,29 @@ class EntriesAdapterViewHolder(
         podcastPanel.isVisible = false
         podcastPanel.tag = item
 
-        if (item.podcast) {
+        if (item.audioEnclosure != null) {
             podcastPanel.isVisible = true
 
-            if (item.podcastDownloadPercent == null) {
+            if (item.audioEnclosure.extEnclosureDownloadProgress == null) {
                 downloadPodcast.isVisible = true
                 downloadingPodcast.isVisible = false
                 downloadPodcastProgress.isVisible = false
                 playPodcast.isVisible = false
             } else {
+                val progress = item.audioEnclosure.extEnclosureDownloadProgress
                 downloadPodcast.isVisible = false
-                downloadingPodcast.isVisible = item.podcastDownloadPercent != 100L
-                downloadPodcastProgress.isVisible = item.podcastDownloadPercent != 100L
-                downloadPodcastProgress.progress = item.podcastDownloadPercent.toInt()
-                playPodcast.isVisible = item.podcastDownloadPercent == 100L
+                downloadingPodcast.isVisible = progress != 1.0
+                downloadPodcastProgress.isVisible = progress != 1.0
+                downloadPodcastProgress.progress = (progress * 100).toInt()
+                playPodcast.isVisible = progress == 1.0
             }
 
             downloadPodcast.setOnClickListener {
-                callback.onDownloadPodcastClick(item)
+                callback.onDownloadAudioEnclosureClick(item.audioEnclosure)
             }
 
             playPodcast.setOnClickListener {
-                callback.onPlayPodcastClick(item)
+                callback.onPlayAudioEnclosureClick(item.audioEnclosure)
             }
         }
 

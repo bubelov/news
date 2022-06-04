@@ -50,7 +50,7 @@ class StandaloneNewsApi(
             return Result.failure(it)
         }.use { response ->
             if (!response.isSuccessful) {
-                return Result.failure(Exception("Cannot fetch feed (url = $url, code = $response)"))
+                return Result.failure(Exception("Cannot fetch feed (url = $url, code = ${response.code})"))
             }
 
             val contentType = response.header("content-type") ?: ""

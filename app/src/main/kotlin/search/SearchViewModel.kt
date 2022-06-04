@@ -106,8 +106,7 @@ class SearchViewModel(
             title = title,
             subtitle = (feed?.title ?: "Unknown feed") + " · " + published,
             summary = "",
-            podcast = false,
-            podcastDownloadPercent = null,
+            audioEnclosure = null,
             read = read,
         )
     }

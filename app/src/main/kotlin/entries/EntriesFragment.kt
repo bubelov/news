@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
+import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -18,10 +19,12 @@ import common.CardListAdapterDecoration
 import common.ConfRepository
 import common.Scrollable
 import common.hide
+import common.openCachedPodcast
 import common.openUrl
 import common.screenWidth
 import common.show
 import common.showErrorDialog
+import db.Link
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -84,17 +87,30 @@ class EntriesFragment : AppFragment(), Scrollable {
                     }
                 }
 
-                override fun onDownloadPodcastClick(item: EntriesAdapterItem) {
-//                    lifecycleScope.launchWhenResumed {
-//                        runCatching {
-//                            model.downloadPodcast(item.id)
-//                        }.onFailure {
-//                            showErrorDialog(it)
-//                        }
-//                    }
+                override fun onDownloadAudioEnclosureClick(link: Link) {
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        runCatching {
+                            model.downloadAudioEnclosure(link)
+                        }.onFailure {
+                            showErrorDialog(it)
+                        }
+                    }
                 }
 
-                override fun onPlayPodcastClick(item: EntriesAdapterItem) {
+                override fun onPlayAudioEnclosureClick(link: Link) {
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        runCatching {
+                            openCachedPodcast(
+                                cacheUri = link.extCacheUri?.toUri(),
+                                enclosureLinkType = link.type!!,
+                            )
+
+                            model.setRead(listOf(link.entryId!!), true)
+                        }.onFailure {
+                            showErrorDialog(it)
+                        }
+                    }
+
 //                    lifecycleScope.launch {
 //                        runCatching {
 //                            val entry = model.getEntry(item.id).first() ?: return@launch

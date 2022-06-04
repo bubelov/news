@@ -34,8 +34,7 @@ class AudioEnclosuresRepository(
         withContext(Dispatchers.Default) {
             db.linkQueries.updateEnclosureDownloadProgress(
                 extEnclosureDownloadProgress = 0.0,
-                feedId = audioEnclosure.feedId,
-                entryId = audioEnclosure.entryId,
+                href = audioEnclosure.href,
             )
 
             val request = Request.Builder().url(audioEnclosure.href).build()
@@ -45,8 +44,7 @@ class AudioEnclosuresRepository(
             }.getOrElse {
                 db.linkQueries.updateEnclosureDownloadProgress(
                     extEnclosureDownloadProgress = null,
-                    feedId = audioEnclosure.feedId,
-                    entryId = audioEnclosure.entryId,
+                    href = audioEnclosure.href,
                 )
 
                 throw it
@@ -55,8 +53,7 @@ class AudioEnclosuresRepository(
             if (!response.isSuccessful) {
                 db.linkQueries.updateEnclosureDownloadProgress(
                     extEnclosureDownloadProgress = null,
-                    feedId = audioEnclosure.feedId,
-                    entryId = audioEnclosure.entryId,
+                    href = audioEnclosure.href,
                 )
 
                 throw Exception("Unexpected response code: ${response.code}")
@@ -123,8 +120,7 @@ class AudioEnclosuresRepository(
                                 if (downloadedPercent > lastReportedDownloadedPercent) {
                                     db.linkQueries.updateEnclosureDownloadProgress(
                                         extEnclosureDownloadProgress = downloadedPercent.toDouble() / 100,
-                                        feedId = audioEnclosure.feedId,
-                                        entryId = audioEnclosure.entryId,
+                                        href = audioEnclosure.href,
                                     )
 
                                     lastReportedDownloadedPercent = downloadedPercent
@@ -152,8 +148,7 @@ class AudioEnclosuresRepository(
                 db.linkQueries.transaction {
                     db.linkQueries.updateEnclosureDownloadProgress(
                         extEnclosureDownloadProgress = null,
-                        feedId = audioEnclosure.feedId,
-                        entryId = audioEnclosure.entryId,
+                        href = audioEnclosure.href,
                     )
 
                     db.linkQueries.updateCacheUri(
@@ -187,8 +182,7 @@ class AudioEnclosuresRepository(
                             db.linkQueries.transaction {
                                 db.linkQueries.updateEnclosureDownloadProgress(
                                     extEnclosureDownloadProgress = null,
-                                    feedId = audioEnclosure.feedId,
-                                    entryId = audioEnclosure.entryId,
+                                    href = audioEnclosure.href,
                                 )
 
                                 db.linkQueries.updateCacheUri(
@@ -213,8 +207,7 @@ class AudioEnclosuresRepository(
                             db.linkQueries.transaction {
                                 db.linkQueries.updateEnclosureDownloadProgress(
                                     extEnclosureDownloadProgress = null,
-                                    feedId = audioEnclosure.feedId,
-                                    entryId = audioEnclosure.entryId,
+                                    href = audioEnclosure.href,
                                 )
 
                                 db.linkQueries.updateCacheUri(
@@ -230,8 +223,7 @@ class AudioEnclosuresRepository(
                                 db.linkQueries.transaction {
                                     db.linkQueries.updateEnclosureDownloadProgress(
                                         extEnclosureDownloadProgress = null,
-                                        feedId = audioEnclosure.feedId,
-                                        entryId = audioEnclosure.entryId,
+                                        href = audioEnclosure.href,
                                     )
 
                                     db.linkQueries.updateCacheUri(
@@ -251,8 +243,7 @@ class AudioEnclosuresRepository(
                                 db.linkQueries.transaction {
                                     db.linkQueries.updateEnclosureDownloadProgress(
                                         extEnclosureDownloadProgress = null,
-                                        feedId = audioEnclosure.feedId,
-                                        entryId = audioEnclosure.entryId,
+                                        href = audioEnclosure.href,
                                     )
 
                                     db.linkQueries.updateCacheUri(
@@ -273,8 +264,7 @@ class AudioEnclosuresRepository(
                         db.linkQueries.transaction {
                             db.linkQueries.updateEnclosureDownloadProgress(
                                 extEnclosureDownloadProgress = null,
-                                feedId = audioEnclosure.feedId,
-                                entryId = audioEnclosure.entryId,
+                                href = audioEnclosure.href,
                             )
 
                             db.linkQueries.updateCacheUri(
@@ -299,8 +289,7 @@ class AudioEnclosuresRepository(
             db.linkQueries.transaction {
                 db.linkQueries.updateEnclosureDownloadProgress(
                     extEnclosureDownloadProgress = null,
-                    feedId = audioEnclosure.feedId,
-                    entryId = audioEnclosure.entryId,
+                    href = audioEnclosure.href,
                 )
 
                 db.linkQueries.updateCacheUri(

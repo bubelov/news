@@ -35,7 +35,7 @@ WHERE type = ? AND extEnclosureDownloadProgress > 0.0 AND extEnclosureDownloadPr
 updateEnclosureDownloadProgress:
 UPDATE Link
 SET extEnclosureDownloadProgress = ?
-WHERE feedId = ? OR entryId = ?;
+WHERE href = ?;
 
 updateCacheUri:
 UPDATE Link

@@ -1,10 +1,12 @@
 package entries
 
+import db.Link
+
 interface EntriesAdapterCallback {
 
     fun onItemClick(item: EntriesAdapterItem)
 
-    fun onDownloadPodcastClick(item: EntriesAdapterItem)
+    fun onDownloadAudioEnclosureClick(link: Link)
 
-    fun onPlayPodcastClick(item: EntriesAdapterItem)
+    fun onPlayAudioEnclosureClick(link: Link)
 }

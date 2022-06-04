@@ -16,6 +16,7 @@ import common.CardListAdapterDecoration
 import common.hideKeyboard
 import common.screenWidth
 import common.showKeyboard
+import db.Link
 import entries.EntriesAdapter
 import entries.EntriesAdapterCallback
 import entries.EntriesAdapterItem
@@ -55,7 +56,7 @@ class SearchFragment : AppFragment() {
 //                }
             }
 
-            override fun onDownloadPodcastClick(item: EntriesAdapterItem) {
+            override fun onDownloadAudioEnclosureClick(link: Link) {
 //                lifecycleScope.launchWhenResumed {
 //                    runCatching {
 //                        model.downloadPodcast(item.id)
@@ -65,7 +66,7 @@ class SearchFragment : AppFragment() {
 //                }
             }
 
-            override fun onPlayPodcastClick(item: EntriesAdapterItem) {
+            override fun onPlayAudioEnclosureClick(link: Link) {
 //                lifecycleScope.launch {
 //                    runCatching {
 //                        val entry = model.getEntry(item.id).first() ?: return@launch
