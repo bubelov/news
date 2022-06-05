@@ -1,9 +1,18 @@
-## News - Feed Reader 📰 and Podcast Player 🎧 for Android 🤖
+<h2 align="center"><b>News</b></h2>
+<h4 align="center">Feed Reader 📰 and Podcast Player 🎧 for Android 🤖</h4>
 
-<p>
+
+<p align="center">
   <a href="https://f-droid.org/packages/co.appreactor.news/">
-    <img src="graphics/get-it-on-fdroid.svg" alt="Get it on F-Droid" height="75">
+    <img src="graphics/get-it-on-fdroid.svg" alt="Get it on F-Droid" height="60">
   </a>
+</p>
+
+
+<p align="center">
+<a href="https://github.com/bubelov/news/releases" alt="GitHub release"><img src="https://img.shields.io/github/release/bubelov/news.svg" ></a>
+<a href="https://www.gnu.org/licenses/gpl-3.0" alt="License: GPLv3"><img src="https://img.shields.io/badge/License-GPL%20v3-blue.svg"></a>
+<a href="https://github.com/bubelov/news/actions" alt="Build Status"><img src="https://github.com/bubelov/news/workflows/CI/badge.svg?branch=master&event=push"></a>
 </p>
 
 <div>
