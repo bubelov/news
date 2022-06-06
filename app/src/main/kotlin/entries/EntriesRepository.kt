@@ -150,11 +150,9 @@ class EntriesRepository(
 
             withContext(Dispatchers.Default) {
                 db.entryQueries.transaction {
-                    batch.forEach { entryWithLinks ->
-                        val postProcessedEntry = entryWithLinks.first.postProcess()
+                    batch.forEach { entry ->
+                        val postProcessedEntry = entry.postProcess()
                         db.entryQueries.insertOrReplace(postProcessedEntry)
-                        db.linkQueries.deleteByEntryId(postProcessedEntry.id)
-                        entryWithLinks.second.forEach { db.linkQueries.insertOrReplace(it) }
                     }
                 }
             }
@@ -261,18 +259,14 @@ class EntriesRepository(
             )
 
             db.entryQueries.transaction {
-                entries.forEach { newEntryWithLinks ->
-                    val feed = feeds.firstOrNull { it.id == newEntryWithLinks.first.feedId }
+                entries.forEach { newEntry ->
+                    val feed = feeds.firstOrNull { it.id == newEntry.feedId }
 
                     db.transaction {
-                        val postProcessedEntry = newEntryWithLinks.first.postProcess(feed)
-                        db.entryQueries.insertOrReplace(postProcessedEntry)
-
-                        val oldLinks = db.linkQueries.selectByEntryid(newEntryWithLinks.first.id).executeAsList()
-
-                        if (oldLinks.isEmpty()) {
-                            newEntryWithLinks.second.forEach { db.linkQueries.insertOrReplace(it) }
-                        }
+                        val oldEntry = db.entryQueries.selectById(newEntry.id).executeAsOneOrNull()
+                        val links = oldEntry?.links ?: newEntry.links
+                        val postProcessedEntry = newEntry.postProcess(feed)
+                        db.entryQueries.insertOrReplace(postProcessedEntry.copy(links = links))
                     }
                 }
             }

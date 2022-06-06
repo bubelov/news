@@ -1,6 +1,6 @@
 package feeds
 
-import db.database
+import db.testDb
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -30,7 +30,7 @@ class FeedsModelTests {
 
     @Test
     fun init(): Unit = runBlocking {
-        val db = database()
+        val db = testDb()
 
         val model = FeedsModel(
             db = db,

@@ -8,13 +8,13 @@ import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOne
 import db.Database
 import db.Feed
-import db.Link
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -39,10 +39,9 @@ class FeedsModel(
 
         combine(
             db.feedQueries.selectAll().asFlow().mapToList(),
-            db.linkQueries.selectByEntryid(null).asFlow().mapToList(),
             hasActionInProgress,
             importProgress,
-        ) { feeds, feedLinks, hasActionInProgress, importProgress ->
+        ) { feeds, hasActionInProgress, importProgress ->
             if (importProgress != null) {
                 _state.update { State.ImportingFeeds(importProgress) }
             } else {
@@ -53,7 +52,6 @@ class FeedsModel(
                         State.ShowingFeeds(
                             feeds = feeds.map { feed ->
                                 feed.toItem(
-                                    feedLinks.filter { it.feedId == feed.id },
                                     db.entryQueries.selectUnreadCount(feed.id).asFlow().mapToOne().first(),
                                 )
                             }
@@ -76,7 +74,9 @@ class FeedsModel(
             val failed = AtomicInteger()
             val errors = mutableListOf<String>()
 
-            val existingLinks = db.linkQueries.selectByEntryid(null).asFlow().mapToList().first()
+            val existingLinks = db.feedQueries.selectAll().asFlow().mapToList().map {
+                    feeds -> feeds.map { it.links }.flatten()
+            }.first()
 
             opmlFeeds.forEach { outline ->
                 val outlineUrl = outline.xmlUrl.toHttpUrl()
@@ -88,12 +88,8 @@ class FeedsModel(
                 if (feedAlreadyExists) {
                     exists.incrementAndGet()
                 } else {
-                    api.addFeed(outlineUrl).onSuccess { result ->
-                        db.transaction {
-                            db.feedQueries.insert(result.first)
-                            result.second.forEach { db.linkQueries.insert(it) }
-                        }
-
+                    api.addFeed(outlineUrl).onSuccess { feed ->
+                        db.transaction { db.feedQueries.insert(feed) }
                         added.incrementAndGet()
                     }.onFailure {
                         errors += "Failed to import feed ${outline.xmlUrl}\nReason: ${it.message}"
@@ -127,9 +123,7 @@ class FeedsModel(
 
     suspend fun exportOpml(): ByteArray {
         val feeds = db.feedQueries.selectAll().asFlow().mapToList().first()
-        val links = db.linkQueries.selectByEntryid(null).asFlow().mapToList().first()
-        val feedsWithLinks = feeds.map { feed -> Pair(feed, links.filter { it.feedId == feed.id }) }
-        return exportOpml(feedsWithLinks).toByteArray()
+        return exportOpml(feeds).toByteArray()
     }
 
     suspend fun addFeed(url: String) {
@@ -141,9 +135,7 @@ class FeedsModel(
                 val feed = api.addFeed(fullUrl.toHttpUrl()).getOrThrow()
 
                 db.transaction {
-                    db.linkQueries.deleteByFeedId(feed.first.id)
-                    db.feedQueries.insertOrReplace(feed.first)
-                    feed.second.forEach { db.linkQueries.insertOrReplace(it) }
+                    db.feedQueries.insertOrReplace(feed)
                 }
             }
         }.onSuccess {
@@ -181,10 +173,7 @@ class FeedsModel(
                 api.deleteFeed(feedId)
 
                 db.transaction {
-                    db.linkQueries.deleteByFeedId(feedId)
                     db.feedQueries.deleteById(feedId)
-                    val entries = db.entryQueries.selectByFeedId(feedId).executeAsList()
-                    entries.forEach { db.linkQueries.selectByEntryid(it.id) }
                     db.entryQueries.deleteByFeedId(feedId)
                 }
             }
@@ -195,7 +184,7 @@ class FeedsModel(
         }.getOrThrow()
     }
 
-    private fun Feed.toItem(links: List<Link>, unreadCount: Long): FeedsAdapter.Item {
+    private fun Feed.toItem(unreadCount: Long): FeedsAdapter.Item {
         return FeedsAdapter.Item(
             id = id,
             title = title,

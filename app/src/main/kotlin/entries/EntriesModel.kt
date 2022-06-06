@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import links.LinksRepository
 import org.koin.android.annotation.KoinViewModel
 import sync.NewsApiSync
 import sync.SyncResult
@@ -33,7 +32,6 @@ class EntriesModel(
     private val confRepo: ConfRepository,
     private val feedsRepo: FeedsRepository,
     private val entriesRepo: EntriesRepository,
-    private val linksRepo: LinksRepository,
     private val audioEnclosuresRepo: AudioEnclosuresRepository,
     private val newsApiSync: NewsApiSync,
 ) : ViewModel() {
@@ -66,9 +64,8 @@ class EntriesModel(
                 confRepo.select(),
                 feedsRepo.selectAll(),
                 entriesRepo.selectCount(),
-                linksRepo.selectEnclosures(),
                 newsApiSync.state,
-            ) { conf, feeds, _, enclosures, syncState ->
+            ) { conf, feeds, _, syncState ->
                 when (syncState) {
                     is NewsApiSync.State.InitialSync -> State.InitialSync(syncState.message)
                     else -> {
@@ -82,7 +79,7 @@ class EntriesModel(
                         scrollToTopNextTime = false
 
                         State.ShowingCachedEntries(
-                            entries = selectEntries(filter, enclosures, feeds, conf),
+                            entries = selectEntries(filter, feeds, conf),
                             showBackgroundProgress = showBgProgress,
                             scrollToTop = scrollToTop,
                         )
@@ -98,7 +95,6 @@ class EntriesModel(
 
     private suspend fun selectEntries(
         filter: EntriesFilter,
-        enclosures: List<Link>,
         feeds: List<Feed>,
         conf: Conf,
     ): List<EntriesAdapterItem> {
@@ -135,7 +131,7 @@ class EntriesModel(
         val rows = withContext(Dispatchers.Default) {
             sortedEntries.map { entry ->
                 val feed = feeds.singleOrNull { feed -> feed.id == entry.feedId }
-                entry.toRow(feed, enclosures.filter { it.entryId == entry.id }, conf)
+                entry.toRow(feed, conf)
             }
         }
 
@@ -168,15 +164,13 @@ class EntriesModel(
         }
     }
 
-    suspend fun downloadAudioEnclosure(enclosure: Link) {
-        audioEnclosuresRepo.download(enclosure)
+    suspend fun downloadAudioEnclosure(entry: EntryWithoutContent, enclosure: Link) {
+        audioEnclosuresRepo.download(entry, enclosure)
     }
 
     fun getFeed(id: String) = feedsRepo.selectById(id)
 
     fun getEntry(id: String) = entriesRepo.selectById(id)
-
-    fun getEntryLinks(entryId: String) = linksRepo.selectByEntryId(entryId)
 
     fun setRead(entryIds: Collection<String>, value: Boolean) {
         viewModelScope.launch {
@@ -245,20 +239,13 @@ class EntriesModel(
 
     private fun EntryWithoutContent.toRow(
         feed: Feed?,
-        enclosures: List<Link>,
         conf: Conf,
     ): EntriesAdapterItem {
-        val ogImageUrl = if (conf.showPreviewImages) {
-            ogImageUrl
-        } else {
-            ""
-        }
+        val enclosures = links.filter { it.rel == "enclosure" }
 
         return EntriesAdapterItem(
-            id = id,
-            ogImageUrl = ogImageUrl,
-            ogImageWidth = ogImageWidth,
-            ogImageHeight = ogImageHeight,
+            entry = this,
+            showImage = conf.showPreviewImages,
             cropImage = conf.cropPreviewImages,
             title = title,
             subtitle = "${feed?.title ?: "Unknown feed"} · ${DATE_TIME_FORMAT.format(published)}",

@@ -10,7 +10,6 @@ import common.ConfRepository
 import db.Conf
 import db.Database
 import db.EntryWithoutContent
-import db.Link
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
@@ -52,17 +51,17 @@ class EntriesImagesRepository(
             .asFlow()
             .mapToOneOrNull()
             .filterNotNull()
-            .collectLatest { syncPreview(it, db.linkQueries.selectByEntryid(it.id).executeAsList()) }
+            .collectLatest { syncPreview(it) }
     }
 
-    private suspend fun syncPreview(entry: EntryWithoutContent, links: List<Link>) {
+    private suspend fun syncPreview(entry: EntryWithoutContent) {
         withContext(Dispatchers.Default) {
             if (entry.ogImageChecked) {
                 throw IllegalStateException("ogImageChecked = 1")
             }
 
-            val link = links.firstOrNull { it.rel == "alternate" && it.type == "text/html" }
-                ?: links.firstOrNull { it.rel == "alternate" }
+            val link = entry.links.firstOrNull { it.rel == "alternate" && it.type == "text/html" }
+                ?: entry.links.firstOrNull { it.rel == "alternate" }
 
             if (link == null) {
                 db.entryQueries.updateOgImageChecked(true, entry.id)

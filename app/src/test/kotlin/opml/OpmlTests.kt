@@ -67,12 +67,13 @@ class OpmlTests {
             val feed = Feed(
                 id = UUID.randomUUID().toString(),
                 title = it.text,
+                links = listOf(selfLink),
                 openEntriesInBrowser = it.openEntriesInBrowser,
                 blockedWords = it.blockedWords,
                 showPreviewImages = it.showPreviewImages,
             )
 
-            Pair(feed, listOf(selfLink))
+            feed
         }
 
         val opml = exportOpml(feedsWithLinks)

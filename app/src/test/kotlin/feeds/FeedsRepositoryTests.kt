@@ -2,7 +2,7 @@ package feeds
 
 import api.NewsApi
 import db.Database
-import db.database
+import db.testDb
 import db.feed
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -24,7 +24,7 @@ class FeedsRepositoryTests {
 
     @BeforeTest
     fun setup() {
-        db = database()
+        db = testDb()
         api = mockk()
 
         repo = FeedsRepository(
@@ -49,7 +49,7 @@ class FeedsRepositoryTests {
         val feedUrl = "https://example.com/".toHttpUrl()
         val feed = feed()
 
-        coEvery { api.addFeed(feedUrl) } returns Result.success(Pair(feed, emptyList()))
+        coEvery { api.addFeed(feedUrl) } returns Result.success(feed)
 
         repo.insertByUrl(feedUrl)
 

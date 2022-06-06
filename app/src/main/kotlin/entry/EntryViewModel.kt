@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import links.LinksRepository
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
@@ -29,7 +28,6 @@ class EntryViewModel(
     private val app: Application,
     private val feedsRepository: FeedsRepository,
     private val entriesRepository: EntriesRepository,
-    private val linksRepository: LinksRepository,
     private val confRepo: ConfRepository,
     private val newsApiSync: NewsApiSync,
 ) : ViewModel() {
@@ -71,7 +69,7 @@ class EntryViewModel(
             state.value = State.Success(
                 feedTitle = feed.title,
                 entry = entry,
-                entryLinks = linksRepository.selectByEntryId(entry.id).first(),
+                entryLinks = entry.links,
                 parsedContent = parseEntryContent(
                     entry.contentText ?: "",
                     TextViewImageGetter(

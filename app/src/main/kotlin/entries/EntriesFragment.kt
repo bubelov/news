@@ -24,6 +24,8 @@ import common.openUrl
 import common.screenWidth
 import common.show
 import common.showErrorDialog
+import db.Entry
+import db.EntryWithoutContent
 import db.Link
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
@@ -69,35 +71,34 @@ class EntriesFragment : AppFragment(), Scrollable {
             callback = object : EntriesAdapterCallback {
                 override fun onItemClick(item: EntriesAdapterItem) {
                     lifecycleScope.launchWhenResumed {
-                        model.setRead(listOf(item.id), true)
+                        model.setRead(listOf(item.entry.id), true)
 
-                        val entry = model.getEntry(item.id).first() ?: return@launchWhenResumed
-                        val entryLinks = model.getEntryLinks(entry.id).first()
+                        val entry = model.getEntry(item.entry.id).first() ?: return@launchWhenResumed
                         val feed = model.getFeed(entry.feedId).first() ?: return@launchWhenResumed
 
                         if (feed.openEntriesInBrowser) {
                             openUrl(
-                                url = entryLinks.first { it.rel == "alternate" && it.type == "text/html" }.href.toString(),
+                                url = entry.links.first { it.rel == "alternate" && it.type == "text/html" }.href.toString(),
                                 useBuiltInBrowser = model.getConf().first().useBuiltInBrowser,
                             )
                         } else {
-                            val action = EntriesFragmentDirections.actionEntriesFragmentToEntryFragment(item.id)
+                            val action = EntriesFragmentDirections.actionEntriesFragmentToEntryFragment(item.entry.id)
                             findNavController().navigate(action)
                         }
                     }
                 }
 
-                override fun onDownloadAudioEnclosureClick(link: Link) {
+                override fun onDownloadAudioEnclosureClick(entry: EntryWithoutContent, link: Link) {
                     viewLifecycleOwner.lifecycleScope.launch {
                         runCatching {
-                            model.downloadAudioEnclosure(link)
+                            model.downloadAudioEnclosure(entry, link)
                         }.onFailure {
                             showErrorDialog(it)
                         }
                     }
                 }
 
-                override fun onPlayAudioEnclosureClick(link: Link) {
+                override fun onPlayAudioEnclosureClick(entry: EntryWithoutContent, link: Link) {
                     viewLifecycleOwner.lifecycleScope.launch {
                         runCatching {
                             openCachedPodcast(
@@ -110,21 +111,6 @@ class EntriesFragment : AppFragment(), Scrollable {
                             showErrorDialog(it)
                         }
                     }
-
-//                    lifecycleScope.launch {
-//                        runCatching {
-//                            val entry = model.getEntry(item.id).first() ?: return@launch
-//                            val enclosureLink = entry.links.first { it.rel == "enclosure" }
-//                            model.setRead(listOf(entry.id), true)
-//
-//                            openCachedPodcast(
-//                                cacheUri = model.getCachedPodcastUri(entry.id),
-//                                enclosureLinkType = enclosureLink.type,
-//                            )
-//                        }.onFailure {
-//                            showErrorDialog(it)
-//                        }
-//                    }
                 }
             }
         ).apply {
@@ -158,16 +144,16 @@ class EntriesFragment : AppFragment(), Scrollable {
                             ItemTouchHelper.LEFT -> {
                                 showSnackbar(
                                     actionText = R.string.marked_as_read,
-                                    action = { model.setRead(listOf(entry.id), true) },
-                                    undoAction = { model.setRead(listOf(entry.id), false) }
+                                    action = { model.setRead(listOf(entry.entry.id), true) },
+                                    undoAction = { model.setRead(listOf(entry.entry.id), false) }
                                 )
                             }
 
                             ItemTouchHelper.RIGHT -> {
                                 showSnackbar(
                                     actionText = R.string.bookmarked,
-                                    action = { model.setBookmarked(entry.id, true) },
-                                    undoAction = { model.setBookmarked(entry.id, false) }
+                                    action = { model.setBookmarked(entry.entry.id, true) },
+                                    undoAction = { model.setBookmarked(entry.entry.id, false) }
                                 )
                             }
                         }
@@ -188,16 +174,16 @@ class EntriesFragment : AppFragment(), Scrollable {
                             ItemTouchHelper.LEFT -> {
                                 showSnackbar(
                                     actionText = R.string.removed_from_bookmarks,
-                                    action = { model.setBookmarked(entry.id, false) },
-                                    undoAction = { model.setBookmarked(entry.id, true) },
+                                    action = { model.setBookmarked(entry.entry.id, false) },
+                                    undoAction = { model.setBookmarked(entry.entry.id, true) },
                                 )
                             }
 
                             ItemTouchHelper.RIGHT -> {
                                 showSnackbar(
                                     actionText = R.string.removed_from_bookmarks,
-                                    action = { model.setBookmarked(entry.id, false) },
-                                    undoAction = { model.setBookmarked(entry.id, true) },
+                                    action = { model.setBookmarked(entry.entry.id, false) },
+                                    undoAction = { model.setBookmarked(entry.entry.id, true) },
                                 )
                             }
                         }
@@ -270,7 +256,7 @@ class EntriesFragment : AppFragment(), Scrollable {
 
         if (runBlocking { model.getConf().first().markScrolledEntriesAsRead }) {
             model.setRead(
-                entryIds = seenEntries.map { it.id },
+                entryIds = seenEntries.map { it.entry.id },
                 value = true,
             )
 

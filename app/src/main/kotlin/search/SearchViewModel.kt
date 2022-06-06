@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import common.ConfRepository
 import db.Entry
+import db.EntryWithoutContent
 import db.Feed
 import entries.EntriesAdapterItem
 import entries.EntriesFilter
@@ -98,10 +99,27 @@ class SearchViewModel(
 
     private fun Entry.toRow(feed: Feed?): EntriesAdapterItem {
         return EntriesAdapterItem(
-            id = id,
-            ogImageUrl = "",
-            ogImageWidth = 0,
-            ogImageHeight = 0,
+            entry = EntryWithoutContent(
+                links,
+                summary,
+                id,
+                feedId,
+                title,
+                published,
+                updated,
+                authorName,
+                read,
+                readSynced,
+                bookmarked,
+                bookmarkedSynced,
+                guidHash,
+                commentsUrl,
+                ogImageChecked,
+                ogImageUrl,
+                ogImageWidth,
+                ogImageHeight
+            ),
+            showImage = false,
             cropImage = false,
             title = title,
             subtitle = (feed?.title ?: "Unknown feed") + " · " + published,

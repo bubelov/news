@@ -32,12 +32,12 @@ class EntriesAdapterViewHolder(
         imageView.isVisible = false
         imageProgress.isVisible = false
 
-        if (item.ogImageUrl.isNotBlank()) {
+        if (item.entry.ogImageUrl.isNotBlank()) {
             imageView.isVisible = true
             imageProgress.isVisible = true
 
             val targetHeight =
-                ((screenWidth - cardMargin) * (item.ogImageHeight.toDouble() / item.ogImageWidth.toDouble()))
+                ((screenWidth - cardMargin) * (item.entry.ogImageHeight.toDouble() / item.entry.ogImageWidth.toDouble()))
 
             if (item.cropImage) {
                 var croppedHeight = targetHeight.toInt()
@@ -60,8 +60,8 @@ class EntriesAdapterViewHolder(
             }
 
             Picasso.get()
-                .load(item.ogImageUrl)
-                .resize(item.ogImageWidth.toInt(), 0)
+                .load(item.entry.ogImageUrl)
+                .resize(item.entry.ogImageWidth.toInt(), 0)
                 .onlyScaleDown()
                 .into(imageView, object : Callback {
                     override fun onSuccess() {
@@ -104,11 +104,11 @@ class EntriesAdapterViewHolder(
             }
 
             downloadPodcast.setOnClickListener {
-                callback.onDownloadAudioEnclosureClick(item.audioEnclosure)
+                callback.onDownloadAudioEnclosureClick(item.entry, item.audioEnclosure)
             }
 
             playPodcast.setOnClickListener {
-                callback.onPlayAudioEnclosureClick(item.audioEnclosure)
+                callback.onPlayAudioEnclosureClick(item.entry, item.audioEnclosure)
             }
         }
 

@@ -12,7 +12,7 @@ class EntryQueriesTest {
 
     @Before
     fun setup() {
-        db = database().entryQueries
+        db = testDb().entryQueries
     }
 
     @Test
@@ -214,6 +214,7 @@ fun entry() = Entry(
     contentType = "",
     contentSrc = "",
     contentText = "",
+    links = emptyList(),
     summary = "",
     id = UUID.randomUUID().toString(),
     feedId = "",
@@ -234,6 +235,7 @@ fun entry() = Entry(
 )
 
 fun entryWithoutContent() = EntryWithoutContent(
+    links = emptyList(),
     summary = "",
     id = UUID.randomUUID().toString(),
     feedId = "",
@@ -254,6 +256,7 @@ fun entryWithoutContent() = EntryWithoutContent(
 )
 
 fun Entry.withoutContent() = EntryWithoutContent(
+    links = links,
     summary = "",
     id = id,
     feedId = feedId,
@@ -278,6 +281,7 @@ fun EntryWithoutContent.toEntry(): Entry {
         contentType = "",
         contentSrc = "",
         contentText = "",
+        links = links,
         summary = summary,
         id = id,
         feedId = feedId,

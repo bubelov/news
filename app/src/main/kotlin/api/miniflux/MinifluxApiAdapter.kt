@@ -15,7 +15,7 @@ class MinifluxApiAdapter(
     private val api: MinifluxApi,
 ) : NewsApi {
 
-    override suspend fun addFeed(url: HttpUrl): Result<Pair<Feed, List<Link>>> = runCatching {
+    override suspend fun addFeed(url: HttpUrl): Result<Feed> = runCatching {
         val categories = api.getCategories()
 
         val category = categories.find { it.title.equals("All", ignoreCase = true) }
@@ -32,7 +32,7 @@ class MinifluxApiAdapter(
         api.getFeed(response.feed_id).toFeed()!!
     }
 
-    override suspend fun getFeeds(): List<Pair<Feed, List<Link>>> {
+    override suspend fun getFeeds(): List<Feed> {
         return api.getFeeds().mapNotNull { it.toFeed() }
     }
 
@@ -44,7 +44,7 @@ class MinifluxApiAdapter(
         api.deleteFeed(feedId.toLong())
     }
 
-    override suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Pair<Entry, List<Link>>>> = flow {
+    override suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Entry>> = flow {
         var totalFetched = 0L
         val currentBatch = mutableSetOf<EntryJson>()
         val batchSize = 250L
@@ -83,7 +83,7 @@ class MinifluxApiAdapter(
         maxEntryId: String?,
         maxEntryUpdated: OffsetDateTime?,
         lastSync: OffsetDateTime?,
-    ): List<Pair<Entry, List<Link>>> {
+    ): List<Entry> {
         return api.getEntriesAfterEntry(
             afterEntryId = maxEntryId?.toLong() ?: 0,
             limit = 0,
@@ -117,7 +117,7 @@ class MinifluxApiAdapter(
         }
     }
 
-    private fun FeedJson.toFeed(): Pair<Feed, List<Link>>? {
+    private fun FeedJson.toFeed(): Feed? {
         val feedId = id?.toString() ?: return null
 
         val selfLink = Link(
@@ -149,15 +149,16 @@ class MinifluxApiAdapter(
         val feed = Feed(
             id = feedId,
             title = title,
+            links = listOf(selfLink, alternateLink),
             openEntriesInBrowser = false,
             blockedWords = "",
             showPreviewImages = null,
         )
 
-        return Pair(feed, listOf(selfLink, alternateLink))
+        return feed
     }
 
-    private fun EntryJson.toEntry(): Pair<Entry, List<Link>> {
+    private fun EntryJson.toEntry(): Entry {
         val links = mutableListOf<Link>()
 
         links += Link(
@@ -192,6 +193,7 @@ class MinifluxApiAdapter(
             contentType = null,
             contentSrc = null,
             contentText = null,
+            links = links,
             summary = null,
             id = id.toString(),
             feedId = feed_id.toString(),
@@ -215,6 +217,6 @@ class MinifluxApiAdapter(
             ogImageHeight = 0,
         )
 
-        return Pair(entry, links)
+        return entry
     }
 }

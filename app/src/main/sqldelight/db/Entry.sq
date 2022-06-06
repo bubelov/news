@@ -1,6 +1,6 @@
 insertOrReplace:
 INSERT OR REPLACE
-INTO Entry(contentType, contentSrc, contentText, summary, id, feedId, title, published, updated, authorName, read, readSynced, bookmarked, bookmarkedSynced, guidHash, commentsUrl, ogImageChecked, ogImageUrl, ogImageWidth, ogImageHeight)
+INTO Entry(contentType, contentSrc, contentText, links, summary, id, feedId, title, published, updated, authorName, read, readSynced, bookmarked, bookmarkedSynced, guidHash, commentsUrl, ogImageChecked, ogImageUrl, ogImageWidth, ogImageHeight)
 VALUES ?;
 
 selectAll:
@@ -137,6 +137,11 @@ WHERE id = ?;
 updateOgImage:
 UPDATE Entry
 SET ogImageUrl = ?, ogImageWidth = ?, ogImageHeight = ?, ogImageChecked = 1
+WHERE id = ?;
+
+updateLinks:
+UPDATE Entry
+SET links = ?
 WHERE id = ?;
 
 deleteAll:

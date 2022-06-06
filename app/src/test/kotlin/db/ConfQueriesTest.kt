@@ -10,7 +10,7 @@ class ConfQueriesTest {
 
     @Test
     fun `insert or replace`() {
-        val db = database()
+        val db = testDb()
         runBlocking { ConfRepository(db).upsert(ConfRepository.DEFAULT_CONF) }
         val oldConf = db.confQueries.select().executeAsOne()
         val newConf = oldConf.copy(backend = ConfRepository.BACKEND_STANDALONE)
@@ -20,7 +20,7 @@ class ConfQueriesTest {
 
     @Test
     fun `insert default`() {
-        val db = database()
+        val db = testDb()
         runBlocking { ConfRepository(db).upsert(ConfRepository.DEFAULT_CONF) }
         val conf = db.confQueries.select().executeAsOne()
         assertEquals(ConfRepository.DEFAULT_CONF, conf)
@@ -28,7 +28,7 @@ class ConfQueriesTest {
 
     @Test
     fun select() {
-        val db = database()
+        val db = testDb()
         runBlocking { ConfRepository(db).upsert(ConfRepository.DEFAULT_CONF) }
         val conf = db.confQueries.select().executeAsOne()
         assertEquals(conf, db.confQueries.select().executeAsOne())
@@ -36,7 +36,7 @@ class ConfQueriesTest {
 
     @Test
     fun `delete all`() {
-        val db = database()
+        val db = testDb()
         runBlocking { ConfRepository(db).upsert(ConfRepository.DEFAULT_CONF) }
         db.confQueries.delete()
         assertNull(db.confQueries.select().executeAsOneOrNull())

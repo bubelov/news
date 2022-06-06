@@ -12,7 +12,7 @@ class FeedQueriesTest {
 
     @BeforeTest
     fun setup() {
-        queries = database().feedQueries
+        queries = testDb().feedQueries
     }
 
     @Test
@@ -60,6 +60,7 @@ class FeedQueriesTest {
 fun feed() = Feed(
     id = UUID.randomUUID().toString(),
     title = "",
+    links = emptyList(),
     openEntriesInBrowser = false,
     blockedWords = "",
     showPreviewImages = null,

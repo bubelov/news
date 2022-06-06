@@ -1,11 +1,11 @@
 insert:
 INSERT
-INTO Feed(id, title, openEntriesInBrowser, blockedWords, showPreviewImages)
+INTO Feed(id, title, links, openEntriesInBrowser, blockedWords, showPreviewImages)
 VALUES ?;
 
 insertOrReplace:
 INSERT OR REPLACE
-INTO Feed(id, title, openEntriesInBrowser, blockedWords, showPreviewImages)
+INTO Feed(id, title, links, openEntriesInBrowser, blockedWords, showPreviewImages)
 VALUES ?;
 
 selectAll:

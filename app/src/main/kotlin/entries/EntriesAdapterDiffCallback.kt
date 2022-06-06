@@ -8,16 +8,16 @@ class EntriesAdapterDiffCallback : DiffUtil.ItemCallback<EntriesAdapterItem>() {
         oldItem: EntriesAdapterItem,
         newItem: EntriesAdapterItem,
     ): Boolean {
-        return oldItem.id == newItem.id
+        return oldItem.entry.id == newItem.entry.id
     }
 
     override fun areContentsTheSame(
         oldItem: EntriesAdapterItem,
         newItem: EntriesAdapterItem,
     ): Boolean {
-        return oldItem.ogImageUrl == newItem.ogImageUrl
-                && oldItem.ogImageWidth == newItem.ogImageWidth
-                && oldItem.ogImageHeight == newItem.ogImageHeight
+        return oldItem.entry.ogImageUrl == newItem.entry.ogImageUrl
+                && oldItem.entry.ogImageWidth == newItem.entry.ogImageWidth
+                && oldItem.entry.ogImageHeight == newItem.entry.ogImageHeight
                 && oldItem.cropImage == newItem.cropImage
                 && oldItem.title == newItem.title
                 && oldItem.subtitle == newItem.subtitle

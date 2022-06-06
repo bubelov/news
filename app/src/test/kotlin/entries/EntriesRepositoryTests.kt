@@ -1,6 +1,6 @@
 package entries
 
-import db.database
+import db.testDb
 import db.entry
 import db.entryWithoutContent
 import db.toEntry
@@ -15,7 +15,7 @@ class EntriesRepositoryTests {
 
     @Test
     fun selectAll(): Unit = runBlocking {
-        val db = database()
+        val db = testDb()
 
         val repo = EntriesRepository(
             db = db,
@@ -30,7 +30,7 @@ class EntriesRepositoryTests {
 
     @Test
     fun selectById(): Unit = runBlocking {
-        val db = database()
+        val db = testDb()
 
         val repo = EntriesRepository(
             db = db,
@@ -47,7 +47,7 @@ class EntriesRepositoryTests {
 
     @Test
     fun selectByFeedId(): Unit = runBlocking {
-        val db = database()
+        val db = testDb()
 
         val repo = EntriesRepository(
             db = db,
@@ -70,7 +70,7 @@ class EntriesRepositoryTests {
 
     @Test
     fun selectByReadAndBookmarked(): Unit = runBlocking {
-        val db = database()
+        val db = testDb()
 
         val repo = EntriesRepository(
             db = db,
@@ -109,7 +109,7 @@ class EntriesRepositoryTests {
 
     @Test
     fun selectByReadOrBookmarked(): Unit = runBlocking {
-        val db = database()
+        val db = testDb()
 
         val repo = EntriesRepository(
             db = db,
@@ -148,7 +148,7 @@ class EntriesRepositoryTests {
 
     @Test
     fun selectByRead(): Unit = runBlocking {
-        val db = database()
+        val db = testDb()
 
         val repo = EntriesRepository(
             db = db,

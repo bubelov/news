@@ -41,7 +41,7 @@ class StandaloneNewsApi(
 
     private val httpClient = OkHttpClient()
 
-    override suspend fun addFeed(url: HttpUrl): Result<Pair<Feed, List<Link>>> {
+    override suspend fun addFeed(url: HttpUrl): Result<Feed> {
         val request = Request.Builder().url(url).build()
 
         runCatching {
@@ -101,16 +101,10 @@ class StandaloneNewsApi(
         }
     }
 
-    override suspend fun getFeeds(): List<Pair<Feed, List<Link>>> {
-        val result: MutableList<Pair<Feed, List<Link>>> = mutableListOf()
-
-        db.feedQueries.transaction {
-            db.feedQueries.selectAll().executeAsList().onEach {
-                result += Pair(it, db.linkQueries.selectByFeedId(it.id).executeAsList())
-            }
+    override suspend fun getFeeds(): List<Feed> {
+        return withContext(Dispatchers.Default) {
+            db.feedQueries.selectAll().executeAsList()
         }
-
-        return result
     }
 
     override suspend fun updateFeedTitle(feedId: String, newTitle: String) {
@@ -121,7 +115,7 @@ class StandaloneNewsApi(
 
     }
 
-    override suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Pair<Entry, List<Link>>>> {
+    override suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Entry>> {
         return flowOf(emptyList())
     }
 
@@ -129,8 +123,8 @@ class StandaloneNewsApi(
         maxEntryId: String?,
         maxEntryUpdated: OffsetDateTime?,
         lastSync: OffsetDateTime?,
-    ): List<Pair<Entry, List<Link>>> {
-        val entries = mutableListOf<Pair<Entry, List<Link>>>()
+    ): List<Entry> {
+        val entries = mutableListOf<Entry>()
 
         withContext(Dispatchers.Default) {
             db.feedQueries.selectAll().executeAsList().forEach { feed ->
@@ -143,15 +137,14 @@ class StandaloneNewsApi(
         }
 
         db.transaction {
-            entries.removeAll { db.entryQueries.selectById(it.first.id).executeAsOneOrNull() != null }
+            entries.removeAll { db.entryQueries.selectById(it.id).executeAsOneOrNull() != null }
         }
 
         return entries
     }
 
-    private fun fetchEntries(feed: Feed): List<Pair<Entry, List<Link>>> {
-        val links = db.linkQueries.selectByFeedId(feed.id).executeAsList()
-        val url = links.first { it.rel == "self" }.href
+    private fun fetchEntries(feed: Feed): List<Entry> {
+        val url = feed.links.first { it.rel == "self" }.href
         val request = Request.Builder().url(url).build()
 
         val response = runCatching {
@@ -228,7 +221,7 @@ class StandaloneNewsApi(
 
     }
 
-    private fun ParsedFeed.toFeed(feedUrl: HttpUrl): Pair<Feed, List<Link>> {
+    private fun ParsedFeed.toFeed(feedUrl: HttpUrl): Feed {
         return when (this) {
             is AtomFeed -> {
                 val selfLink = links.single { it.rel == AtomLinkRel.Self }
@@ -237,12 +230,13 @@ class StandaloneNewsApi(
                 val feed = Feed(
                     id = selfLink.href,
                     title = title,
+                    links = links,
                     openEntriesInBrowser = false,
                     blockedWords = "",
                     showPreviewImages = null,
                 )
 
-                Pair(feed, links)
+                feed
             }
             is RssFeed -> {
                 val selfLink = Link(
@@ -274,12 +268,13 @@ class StandaloneNewsApi(
                 val feed = Feed(
                     id = channel.link,
                     title = channel.title,
+                    links = listOf(selfLink, alternateLink),
                     openEntriesInBrowser = false,
                     blockedWords = "",
                     showPreviewImages = null,
                 )
 
-                Pair(feed, listOf(selfLink, alternateLink))
+                feed
             }
         }
     }
@@ -302,13 +297,14 @@ class StandaloneNewsApi(
         )
     }
 
-    private fun AtomEntry.toEntry(feedId: String): Pair<Entry, List<Link>> {
+    private fun AtomEntry.toEntry(feedId: String): Entry {
         val links = links.map { it.toLink(feedId = null, entryId = id) }
 
-        val entry = Entry(
+        return Entry(
             contentType = content.type.toString(),
             contentSrc = content.src,
             contentText = content.text,
+            links = links,
             summary = "",
             id = id,
             feedId = feedId,
@@ -327,11 +323,9 @@ class StandaloneNewsApi(
             ogImageWidth = 0,
             ogImageHeight = 0,
         )
-
-        return Pair(entry, links)
     }
 
-    private fun RssItem.toEntry(feedId: String): Pair<Entry, List<Link>> {
+    private fun RssItem.toEntry(feedId: String): Entry {
         val id = when (val guid = guid) {
             is RssItemGuid.StringGuid -> "guid:${guid.value}"
             is RssItemGuid.UrlGuid -> "guid:${guid.value}"
@@ -383,6 +377,7 @@ class StandaloneNewsApi(
             contentType = "html",
             contentSrc = "",
             contentText = description ?: "",
+            links = links,
             summary = if ((description?.length ?: 0) < maxSummaryLength) description else "",
             id = id,
             feedId = feedId,
@@ -402,7 +397,7 @@ class StandaloneNewsApi(
             ogImageHeight = 0,
         )
 
-        return Pair(entry, links)
+        return entry
     }
 
     private fun sha256(string: String): String {

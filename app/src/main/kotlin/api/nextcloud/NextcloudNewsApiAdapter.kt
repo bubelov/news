@@ -16,14 +16,14 @@ class NextcloudNewsApiAdapter(
     private val api: NextcloudNewsApi,
 ) : NewsApi {
 
-    override suspend fun addFeed(url: HttpUrl): Result<Pair<Feed, List<Link>>> {
+    override suspend fun addFeed(url: HttpUrl): Result<Feed> {
         return runCatching {
             api.postFeed(PostFeedArgs(url.toString(), 0)).feeds.single().toFeed()
                 ?: throw Exception("Invalid server response")
         }
     }
 
-    override suspend fun getFeeds(): List<Pair<Feed, List<Link>>> {
+    override suspend fun getFeeds(): List<Feed> {
         return api.getFeeds().feeds.mapNotNull { it.toFeed() }
     }
 
@@ -35,7 +35,7 @@ class NextcloudNewsApiAdapter(
         api.deleteFeed(feedId.toLong())
     }
 
-    override suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Pair<Entry, List<Link>>>> = flow {
+    override suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Entry>> = flow {
         var totalFetched = 0L
         val currentBatch = mutableSetOf<ItemJson>()
         val batchSize = 250L
@@ -77,7 +77,7 @@ class NextcloudNewsApiAdapter(
         maxEntryId: String?,
         maxEntryUpdated: OffsetDateTime?,
         lastSync: OffsetDateTime?,
-    ): List<Pair<Entry, List<Link>>> {
+    ): List<Entry> {
         val lastModified = maxEntryUpdated ?: lastSync!!
         return api.getNewAndUpdatedItems(lastModified.toEpochSecond() + 1).items.mapNotNull { it.toEntry() }
     }
@@ -105,7 +105,7 @@ class NextcloudNewsApiAdapter(
         }
     }
 
-    private fun FeedJson.toFeed(): Pair<Feed, List<Link>>? {
+    private fun FeedJson.toFeed(): Feed? {
         val feedId = id?.toString() ?: return null
 
         val selfLink = Link(
@@ -137,15 +137,16 @@ class NextcloudNewsApiAdapter(
         val feed = Feed(
             id = feedId,
             title = title ?: "Untitled",
+            links = listOf(selfLink, alternateLink),
             openEntriesInBrowser = false,
             blockedWords = "",
             showPreviewImages = null,
         )
 
-        return Pair(feed, listOf(selfLink, alternateLink))
+        return feed
     }
 
-    private fun ItemJson.toEntry(): Pair<Entry, List<Link>>? {
+    private fun ItemJson.toEntry(): Entry? {
         if (id == null) return null
         if (pubDate == null) return null
         if (lastModified == null) return null
@@ -189,6 +190,7 @@ class NextcloudNewsApiAdapter(
             contentType = "html",
             contentSrc = "",
             contentText = body ?: "",
+            links = links,
             summary = "",
             id = id.toString(),
             feedId = feedId?.toString() ?: "",
@@ -212,6 +214,6 @@ class NextcloudNewsApiAdapter(
             ogImageHeight = 0,
         )
 
-        return Pair(entry, links)
+        return entry
     }
 }

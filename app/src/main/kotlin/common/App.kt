@@ -16,7 +16,7 @@ import com.squareup.picasso.Picasso
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import db.Database
 import db.entryAdapter
-import db.linkAdapter
+import db.feedAdapter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
@@ -53,7 +53,7 @@ class App : Application() {
                             name = DB_FILE_NAME,
                         ),
                         EntryAdapter = entryAdapter(),
-                        LinkAdapter = linkAdapter(),
+                        FeedAdapter = feedAdapter(),
                     )
                 }
 
@@ -143,7 +143,7 @@ class App : Application() {
 
     companion object {
         // When updating, should also update backup_rules.xml
-        const val DB_FILE_NAME = "news-v2.db"
+        const val DB_FILE_NAME = "news-v3.db"
 
         private const val SYNC_WORK_NAME = "sync"
     }

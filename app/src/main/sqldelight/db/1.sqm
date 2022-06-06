@@ -1,5 +1,6 @@
+import db.Link;
 import java.time.OffsetDateTime;
-import okhttp3.HttpUrl;
+import kotlin.collections.List;
 
 CREATE TABLE Conf (
     backend TEXT NOT NULL DEFAULT '',
@@ -28,6 +29,7 @@ CREATE TABLE Conf (
 CREATE TABLE Feed (
     id TEXT PRIMARY KEY NOT NULL,
     title TEXT NOT NULL,
+    links TEXT AS List<Link> NOT NULL,
     openEntriesInBrowser INTEGER AS Boolean NOT NULL DEFAULT 0,
     blockedWords TEXT NOT NULL DEFAULT '',
     showPreviewImages INTEGER AS Boolean
@@ -54,6 +56,7 @@ CREATE TABLE Entry (
     contentType TEXT,
     contentSrc TEXT,
     contentText TEXT,
+    links TEXT AS List<Link> NOT NULL,
     summary TEXT,
     id TEXT PRIMARY KEY NOT NULL,
     feedId TEXT NOT NULL,
@@ -80,6 +83,7 @@ CREATE TABLE Entry (
 CREATE VIEW EntryWithoutContent
 AS
 SELECT
+    links,
     summary,
     id,
     feedId,
@@ -102,16 +106,3 @@ SELECT
     ogImageWidth,
     ogImageHeight
 FROM Entry;
-
-CREATE TABLE Link (
-    feedId TEXT,
-    entryId TEXT,
-    href TEXT AS HttpUrl NOT NULL,
-    rel TEXT NOT NULL DEFAULT 'alternate',
-    type TEXT,
-    hreflang TEXT,
-    title TEXT,
-    length INTEGER,
-    extEnclosureDownloadProgress REAL,
-    extCacheUri TEXT
-);

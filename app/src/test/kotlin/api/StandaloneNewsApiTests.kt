@@ -1,7 +1,7 @@
 package api
 
 import api.standalone.StandaloneNewsApi
-import db.database
+import db.testDb
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -16,7 +16,7 @@ class StandaloneNewsApiTests {
         server.enqueue(MockResponse().setResponseCode(404))
         server.start()
 
-        val result = StandaloneNewsApi(database()).addFeed(server.url("/feed.atom"))
+        val result = StandaloneNewsApi(testDb()).addFeed(server.url("/feed.atom"))
         assertTrue { result.isFailure }
 
         server.shutdown()

@@ -28,7 +28,6 @@ class SettingsViewModel(
                 confQueries.delete()
                 feedQueries.deleteAll()
                 entryQueries.deleteAll()
-                linkQueries.deleteAll()
             }
         }
     }

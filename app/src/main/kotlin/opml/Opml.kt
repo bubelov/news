@@ -1,7 +1,6 @@
 package opml
 
 import db.Feed
-import db.Link
 import org.w3c.dom.Element
 import java.io.StringWriter
 import javax.xml.parsers.DocumentBuilderFactory
@@ -58,7 +57,7 @@ fun importOpml(xml: String): List<Outline> {
     }
 }
 
-fun exportOpml(feeds: List<Pair<Feed, List<Link>>>): String {
+fun exportOpml(feeds: List<Feed>): String {
     val builderFactory = DocumentBuilderFactory.newInstance().apply { isNamespaceAware = true }
     val document = builderFactory.newDocumentBuilder().newDocument()
 
@@ -85,11 +84,11 @@ fun exportOpml(feeds: List<Pair<Feed, List<Link>>>): String {
     val bodyElement = document.createElement(Symbols.BODY)
     opmlElement.appendChild(bodyElement)
 
-    feeds.forEach { (feed, links) ->
+    feeds.forEach { feed ->
         bodyElement.appendChild(document.createElement(Symbols.OUTLINE).apply {
             setAttribute(Symbols.TEXT, feed.title)
             setAttribute(Symbols.TYPE, "rss")
-            setAttribute(Symbols.XML_URL, links.first { it.rel == "self" }.href.toString())
+            setAttribute(Symbols.XML_URL, feed.links.first { it.rel == "self" }.href.toString())
 
             setAttribute(
                 "${Symbols.NEWS_NAMESPACE_PREFIX}:${Symbols.OPEN_ENTRIES_IN_BROWSER}",
