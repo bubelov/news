@@ -1,17 +1,14 @@
 package entries
 
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import auth.AuthFragmentDirections
 import co.appreactor.news.R
-import org.junit.Test
-import org.junit.runner.RunWith
+import kotlin.test.Test
 
-@RunWith(AndroidJUnit4::class)
 class EntriesFragmentTest {
 
     @Test
-    fun resumesWithoutCrashes() {
+    fun launch() {
         val directions =
             AuthFragmentDirections.actionAuthFragmentToEntriesFragment(EntriesFilter.NotBookmarked)
 

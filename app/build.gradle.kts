@@ -22,7 +22,6 @@ android {
         versionCode = 20
         versionName = "0.3.4"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
         setProperty("archivesBaseName", "news-$versionName")
     }
 
@@ -98,8 +97,12 @@ dependencies {
     implementation("androidx.recyclerview:recyclerview:1.2.1")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("androidx.browser:browser:1.4.0")
+
+    // Background job scheduler
+    // Used to fetch new data in background
     val workVer = "2.7.1"
     implementation("androidx.work:work-runtime-ktx:$workVer")
+    androidTestImplementation("androidx.work:work-testing:$workVer")
 
     // Feed parser
     // Used in standalone mode
@@ -137,28 +140,9 @@ dependencies {
     debugImplementation("androidx.fragment:fragment-testing:$fragmentVer")
     testImplementation("com.squareup.sqldelight:sqlite-driver:$sqlDelightVer")
 
-    // Core instrumented testing dependencies
+    // Core Kotlin test infrastructure
     androidTestImplementation(kotlin("test"))
-    androidTestImplementation("androidx.test:core:1.4.0")
 
-    // AndroidJUnitRunner and JUnit Rules
+    // Core Android test infrastructure
     androidTestImplementation("androidx.test:runner:1.4.0")
-    androidTestImplementation("androidx.test:rules:1.4.0")
-
-    // Assertions
-    androidTestImplementation("androidx.test.ext:junit:1.1.3")
-    androidTestImplementation("androidx.test.ext:truth:1.4.0")
-    androidTestImplementation("com.google.truth:truth:1.1.3")
-
-    // Espresso dependencies
-    val espressoVer = "3.4.0"
-    androidTestImplementation("androidx.test.espresso:espresso-core:$espressoVer")
-    androidTestImplementation("androidx.test.espresso:espresso-contrib:$espressoVer")
-    androidTestImplementation("androidx.test.espresso:espresso-intents:$espressoVer")
-    androidTestImplementation("androidx.test.espresso:espresso-accessibility:$espressoVer")
-    androidTestImplementation("androidx.test.espresso:espresso-web:$espressoVer")
-    androidTestImplementation("androidx.test.espresso.idling:idling-concurrent:$espressoVer")
-    androidTestImplementation("androidx.test.espresso:espresso-idling-resource:$espressoVer")
-
-    androidTestImplementation("androidx.work:work-testing:$workVer")
 }

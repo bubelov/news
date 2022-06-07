@@ -1,17 +1,19 @@
 package api
 
 import api.standalone.StandaloneNewsApi
+import db.feed
 import db.testDb
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class StandaloneNewsApiTests {
 
     @Test
-    fun `add feed + 404`(): Unit = runBlocking {
+    fun `addFeed + 404`() = runBlocking {
         val server = MockWebServer()
         server.enqueue(MockResponse().setResponseCode(404))
         server.start()
@@ -20,5 +22,14 @@ class StandaloneNewsApiTests {
         assertTrue { result.isFailure }
 
         server.shutdown()
+    }
+
+    @Test
+    fun getFeeds() = runBlocking {
+        val db = testDb()
+        val feed = feed()
+        db.feedQueries.insert(feed)
+        val api = StandaloneNewsApi(db)
+        assertEquals(feed, api.getFeeds().single())
     }
 }

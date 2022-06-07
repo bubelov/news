@@ -42,16 +42,26 @@ class NewsApiSync(
         if (!conf.initialSyncCompleted) {
             _state.update { State.InitialSync() }
 
-            feedsRepo.sync()
+            runCatching {
+                feedsRepo.sync()
+            }.onFailure {
+                _state.update { State.Idle }
+                return SyncResult.Failure(Exception("Failed to sync feeds", it))
+            }
 
-            entriesRepo.syncAll().collect { progress ->
-                var message = "Fetching news"
+            runCatching {
+                entriesRepo.syncAll().collect { progress ->
+                    var message = "Fetching news"
 
-                if (progress.itemsSynced > 0) {
-                    message += "\n Got ${progress.itemsSynced} items so far"
+                    if (progress.itemsSynced > 0) {
+                        message += "\n Got ${progress.itemsSynced} items so far"
+                    }
+
+                    _state.update { State.InitialSync(message) }
                 }
-
-                _state.update { State.InitialSync(message) }
+            }.onFailure {
+                _state.update { State.Idle }
+                return SyncResult.Failure(Exception("Failed to sync entries", it))
             }
 
             confRepo.upsert(
@@ -70,12 +80,14 @@ class NewsApiSync(
                 runCatching {
                     entriesRepo.syncReadEntries()
                 }.onFailure {
+                    _state.update { State.Idle }
                     return SyncResult.Failure(Exception("Failed to sync read news", it))
                 }
 
                 runCatching {
                     entriesRepo.syncBookmarkedEntries()
                 }.onFailure {
+                    _state.update { State.Idle }
                     return SyncResult.Failure(Exception("Failed to sync bookmarks", it))
                 }
             }
@@ -84,6 +96,7 @@ class NewsApiSync(
                 runCatching {
                     feedsRepo.sync()
                 }.onFailure {
+                    _state.update { State.Idle }
                     return SyncResult.Failure(Exception("Failed to sync feeds", it))
                 }
             }
