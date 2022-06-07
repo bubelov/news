@@ -1,0 +1,12 @@
+AVISO: Este app NÃO é um cliente oficial do Nextcloud News, mas o Nextcloud é inteiramente suportado
+
+Características principais:
+
+* Assine seu feeds favoritos em RSS e Atom
+* Sincronize com seu servidor pessoal de Miniflux ou Nextcloud
+* Experiência de uso suave e rápida, mesmo em dispositivos mais antigos e mais baratos
+* Extração de podcast integrada que pode reproduzir em apps de terceiros
+* Seus feeds de notícias enriquecidos com pré-visualização de imagens em alta resolução
+* Desfrute um design moderno e minimalista de Material Design
+* Possui tanto tema claro como escuro
+* O app é de software livre que respeita sua privacidade
