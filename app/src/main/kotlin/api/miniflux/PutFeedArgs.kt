@@ -1,5 +1,5 @@
 package api.miniflux
 
-data class PutFeedArgs (
+data class PutFeedArgs(
     val title: String,
 )

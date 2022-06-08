@@ -13,8 +13,8 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.ActivityAppBinding
-import entries.EntriesFilter
 import enclosures.AudioEnclosuresRepository
+import entries.EntriesFilter
 import entriesimages.EntriesImagesRepository
 import org.koin.android.ext.android.get
 import org.koin.androidx.viewmodel.ext.android.viewModel

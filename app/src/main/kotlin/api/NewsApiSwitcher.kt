@@ -2,8 +2,8 @@ package api
 
 import api.miniflux.MinifluxApiAdapter
 import api.miniflux.MinifluxApiBuilder
-import api.nextcloud.NextcloudNewsApiBuilder
 import api.nextcloud.NextcloudNewsApiAdapter
+import api.nextcloud.NextcloudNewsApiBuilder
 import api.standalone.StandaloneNewsApi
 import common.ConfRepository
 import db.Database

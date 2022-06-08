@@ -24,7 +24,6 @@ import common.openUrl
 import common.screenWidth
 import common.show
 import common.showErrorDialog
-import db.Entry
 import db.EntryWithoutContent
 import db.Link
 import kotlinx.coroutines.flow.first

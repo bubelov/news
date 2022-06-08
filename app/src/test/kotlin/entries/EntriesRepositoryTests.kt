@@ -1,15 +1,15 @@
 package entries
 
-import db.testDb
 import db.entry
 import db.entryWithoutContent
+import db.testDb
 import db.toEntry
 import io.mockk.mockk
-import kotlin.test.assertEquals
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import java.util.UUID
+import kotlin.test.assertEquals
 
 class EntriesRepositoryTests {
 

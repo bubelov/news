@@ -1,7 +1,7 @@
 package entries
 
 import android.content.Context
-import android.graphics.*
+import android.graphics.Canvas
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper

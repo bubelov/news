@@ -1,5 +1,5 @@
 package api.nextcloud
 
-data class PutReadArgs (
+data class PutReadArgs(
     val items: List<Long>,
 )

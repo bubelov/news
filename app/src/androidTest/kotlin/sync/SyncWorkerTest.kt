@@ -7,9 +7,9 @@ import common.App
 import common.ConfRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import org.koin.android.ext.android.get
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import org.koin.android.ext.android.get
 import kotlin.test.assertIs
 
 class SyncWorkerTest {

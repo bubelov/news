@@ -13,8 +13,8 @@ import feeds.FeedsRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 import sync.NewsApiSync
 

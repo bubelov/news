@@ -2,18 +2,18 @@ package feeds
 
 import api.NewsApi
 import db.Database
-import db.testDb
 import db.feed
+import db.testDb
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
 import kotlinx.coroutines.flow.first
-import kotlin.test.assertEquals
 import kotlinx.coroutines.runBlocking
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class FeedsRepositoryTests {

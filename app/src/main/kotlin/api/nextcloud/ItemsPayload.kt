@@ -1,5 +1,5 @@
 package api.nextcloud
 
-data class ItemsPayload (
-    val items: List<ItemJson>
+data class ItemsPayload(
+    val items: List<ItemJson>,
 )

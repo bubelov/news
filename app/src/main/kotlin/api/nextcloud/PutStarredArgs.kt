@@ -1,5 +1,5 @@
 package api.nextcloud
 
-data class PutStarredArgs (
-    val items: List<PutStarredArgsItem>
+data class PutStarredArgs(
+    val items: List<PutStarredArgsItem>,
 )

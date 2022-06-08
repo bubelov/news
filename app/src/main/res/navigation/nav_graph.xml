@@ -30,21 +30,21 @@
         <action
             android:id="@+id/action_authFragment_to_entriesFragment"
             app:destination="@id/entriesFragment"
-            app:popUpTo="@id/authFragment"
-            app:popUpToInclusive="true"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
+            app:popUpTo="@id/authFragment"
+            app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_authFragment_to_feedsFragment"
             app:destination="@id/feedsFragment"
-            app:popUpTo="@id/authFragment"
-            app:popUpToInclusive="true"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
+            app:popUpTo="@id/authFragment"
+            app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_authFragment_to_minifluxAuthFragment"
             app:destination="@id/minifluxAuthFragment" />
@@ -61,12 +61,12 @@
         <action
             android:id="@+id/action_nextcloudAuthFragment_to_entriesFragment"
             app:destination="@id/entriesFragment"
-            app:popUpTo="@id/authFragment"
-            app:popUpToInclusive="true"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
+            app:popUpTo="@id/authFragment"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
@@ -77,12 +77,12 @@
         <action
             android:id="@+id/action_minifluxAuthFragment_to_entriesFragment"
             app:destination="@id/entriesFragment"
-            app:popUpTo="@id/authFragment"
-            app:popUpToInclusive="true"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"
+            app:popUpTo="@id/authFragment"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
@@ -173,8 +173,8 @@
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <argument
             android:name="url"
-            app:argType="string"
-            android:defaultValue="" />
+            android:defaultValue=""
+            app:argType="string" />
     </fragment>
 
     <fragment

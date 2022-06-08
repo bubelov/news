@@ -39,7 +39,7 @@ private fun offsetDateTimeAdapter() = object : ColumnAdapter<OffsetDateTime, Str
 
 private fun linksAdapter() = object : ColumnAdapter<List<Link>, String> {
 
-    private val gson = GsonBuilder().registerTypeAdapter(HttpUrl::class.java, object: TypeAdapter<HttpUrl>() {
+    private val gson = GsonBuilder().registerTypeAdapter(HttpUrl::class.java, object : TypeAdapter<HttpUrl>() {
         override fun write(out: JsonWriter, value: HttpUrl?) {
             out.value(value.toString())
         }

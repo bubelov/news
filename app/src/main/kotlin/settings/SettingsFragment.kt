@@ -272,7 +272,9 @@ class SettingsFragment : AppFragment() {
             model.logOut()
 
             findNavController().apply {
-                while (popBackStack()) { popBackStack() }
+                while (popBackStack()) {
+                    popBackStack()
+                }
                 navigate(NavGraphDirections.actionGlobalToAuthFragment())
             }
         }

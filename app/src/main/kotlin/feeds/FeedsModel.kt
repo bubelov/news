@@ -74,8 +74,8 @@ class FeedsModel(
             val failed = AtomicInteger()
             val errors = mutableListOf<String>()
 
-            val existingLinks = db.feedQueries.selectAll().asFlow().mapToList().map {
-                    feeds -> feeds.map { it.links }.flatten()
+            val existingLinks = db.feedQueries.selectAll().asFlow().mapToList().map { feeds ->
+                feeds.map { it.links }.flatten()
             }.first()
 
             opmlFeeds.forEach { outline ->

@@ -1,6 +1,6 @@
 package api.nextcloud
 
-data class PutStarredArgsItem (
+data class PutStarredArgsItem(
     val feedId: Long,
-    val guidHash: String
+    val guidHash: String,
 )

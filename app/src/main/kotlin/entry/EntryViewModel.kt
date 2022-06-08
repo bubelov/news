@@ -11,17 +11,17 @@ import androidx.lifecycle.viewModelScope
 import co.appreactor.news.R
 import common.ConfRepository
 import db.Conf
-import feeds.FeedsRepository
-import sync.NewsApiSync
 import db.Entry
 import db.Link
 import entries.EntriesRepository
+import feeds.FeedsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.android.annotation.KoinViewModel
+import sync.NewsApiSync
 
 @KoinViewModel
 class EntryViewModel(

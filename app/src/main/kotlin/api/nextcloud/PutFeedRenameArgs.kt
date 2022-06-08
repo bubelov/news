@@ -1,5 +1,5 @@
 package api.nextcloud
 
-data class PutFeedRenameArgs (
+data class PutFeedRenameArgs(
     val feedTitle: String,
 )

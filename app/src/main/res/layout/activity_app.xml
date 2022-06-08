@@ -21,8 +21,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?colorSurface"
-            android:visibility="gone"
-            android:fitsSystemWindows="true">
+            android:fitsSystemWindows="true"
+            android:visibility="gone">
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"

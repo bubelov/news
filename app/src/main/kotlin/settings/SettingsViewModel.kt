@@ -2,9 +2,9 @@ package settings
 
 import androidx.lifecycle.ViewModel
 import auth.AccountsRepository
-import db.Database
 import common.ConfRepository
 import db.Conf
+import db.Database
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.koin.android.annotation.KoinViewModel
