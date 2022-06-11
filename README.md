@@ -16,10 +16,10 @@
 </p>
 
 <div>
-<img alt="" src="fastlane/metadata/android/en/images/phoneScreenshots/1.png" width="204">
-<img alt="" src="fastlane/metadata/android/en/images/phoneScreenshots/2.jpg" width="204">
-<img alt="" src="fastlane/metadata/android/en/images/phoneScreenshots/3.png" width="204">
-<img alt="" src="fastlane/metadata/android/en/images/phoneScreenshots/4.png" width="204">
+<img alt="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="204">
+<img alt="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.jpg" width="204">
+<img alt="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" width="204">
+<img alt="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width="204">
 </div>
 
 ## 🔌 Supported Backends
