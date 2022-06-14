@@ -1,11 +1,9 @@
 package api.nextcloud
 
-import co.appreactor.news.BuildConfig
 import common.trustSelfSignedCerts
 import okhttp3.Credentials
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
@@ -24,20 +22,8 @@ class NextcloudNewsApiBuilder {
             it.proceed(request.newBuilder().header("Authorization", credential).build())
         }
 
-        val httpLoggingInterceptor = HttpLoggingInterceptor().apply {
-            level = if (BuildConfig.DEBUG) {
-                HttpLoggingInterceptor.Level.HEADERS
-            } else {
-                HttpLoggingInterceptor.Level.NONE
-            }
-
-            redactHeader("Authorization")
-            redactHeader("Cookie")
-        }
-
         val clientBuilder = OkHttpClient.Builder()
             .addInterceptor(authenticatingInterceptor)
-            .addInterceptor(httpLoggingInterceptor)
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(20, TimeUnit.SECONDS)
             .writeTimeout(20, TimeUnit.SECONDS)
