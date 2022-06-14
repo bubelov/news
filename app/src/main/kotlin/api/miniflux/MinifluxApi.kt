@@ -15,13 +15,17 @@ interface MinifluxApi {
     suspend fun getCategories(): List<CategoryJson>
 
     @POST("feeds")
-    suspend fun postFeed(@Body args: PostFeedArgs): PostFeedResponse
+    suspend fun postFeed(
+        @Body args: PostFeedArgs,
+    ): PostFeedResponse
 
     @GET("feeds")
     suspend fun getFeeds(): List<FeedJson>
 
     @GET("feeds/{id}")
-    suspend fun getFeed(@Path("id") id: Long): FeedJson
+    suspend fun getFeed(
+        @Path("id") id: Long,
+    ): FeedJson
 
     @PUT("feeds/{id}")
     suspend fun putFeed(
@@ -30,7 +34,9 @@ interface MinifluxApi {
     ): Response<Unit>
 
     @DELETE("feeds/{id}")
-    suspend fun deleteFeed(@Path("id") id: Long): Response<Unit>
+    suspend fun deleteFeed(
+        @Path("id") id: Long,
+    ): Response<Unit>
 
     @GET("entries?order=id")
     suspend fun getEntriesAfterEntry(
@@ -49,8 +55,12 @@ interface MinifluxApi {
     suspend fun getStarredEntries(): EntriesPayload
 
     @PUT("entries")
-    suspend fun putEntryStatus(@Body args: PutStatusArgs): Response<Unit>
+    suspend fun putEntryStatus(
+        @Body args: PutStatusArgs,
+    ): Response<Unit>
 
     @PUT("entries/{id}/bookmark")
-    suspend fun putEntryBookmark(@Path("id") id: Long): Response<Unit>
+    suspend fun putEntryBookmark(
+        @Path("id") id: Long,
+    ): Response<Unit>
 }

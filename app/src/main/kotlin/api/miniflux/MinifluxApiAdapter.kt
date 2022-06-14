@@ -15,21 +15,23 @@ class MinifluxApiAdapter(
     private val api: MinifluxApi,
 ) : NewsApi {
 
-    override suspend fun addFeed(url: HttpUrl): Result<Feed> = runCatching {
-        val categories = api.getCategories()
+    override suspend fun addFeed(url: HttpUrl): Result<Feed> {
+        return runCatching {
+            val categories = api.getCategories()
 
-        val category = categories.find { it.title.equals("All", ignoreCase = true) }
-            ?: categories.firstOrNull()
-            ?: throw Exception("You have no categories to place this feed into")
+            val category = categories.find { it.title.equals("All", ignoreCase = true) }
+                ?: categories.firstOrNull()
+                ?: throw Exception("You have no categories to place this feed into")
 
-        val response = api.postFeed(
-            PostFeedArgs(
-                feed_url = url.toString(),
-                category_id = category.id,
+            val response = api.postFeed(
+                PostFeedArgs(
+                    feed_url = url.toString(),
+                    category_id = category.id,
+                )
             )
-        )
 
-        api.getFeed(response.feed_id).toFeed()!!
+            api.getFeed(response.feed_id).toFeed()!!
+        }
     }
 
     override suspend fun getFeeds(): List<Feed> {
@@ -146,7 +148,7 @@ class MinifluxApiAdapter(
             extCacheUri = null,
         )
 
-        val feed = Feed(
+        return Feed(
             id = feedId,
             title = title,
             links = listOf(selfLink, alternateLink),
@@ -154,8 +156,6 @@ class MinifluxApiAdapter(
             blockedWords = "",
             showPreviewImages = null,
         )
-
-        return feed
     }
 
     private fun EntryJson.toEntry(): Entry {
@@ -189,7 +189,7 @@ class MinifluxApiAdapter(
             )
         }
 
-        val entry = Entry(
+        return Entry(
             contentType = null,
             contentSrc = null,
             contentText = null,
@@ -216,7 +216,5 @@ class MinifluxApiAdapter(
             ogImageWidth = 0,
             ogImageHeight = 0,
         )
-
-        return entry
     }
 }

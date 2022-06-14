@@ -38,7 +38,7 @@ class MinifluxApiBuilder {
                     "HTTP request ${it.request().url} failed with response code ${response.code}"
                 }
 
-                throw MinifluxApiException(errorMessage)
+                throw Exception(errorMessage)
             }
 
             response
