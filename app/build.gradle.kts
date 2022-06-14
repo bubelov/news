@@ -81,22 +81,22 @@ sqldelight {
 }
 
 dependencies {
-    // Kotlin extensions
     // Simplifies non-blocking programming
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1")
+    val coroutinesVer = "1.6.2"
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVer")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVer")
 
-    // Android extensions
-    implementation("androidx.core:core-ktx:1.7.0")
+    // KTX extensions provide concise, idiomatic Kotlin to Jetpack, Android platform, and other APIs
+    implementation("androidx.core:core-ktx:1.8.0")
+
     val fragmentVer = "1.4.1"
     implementation("androidx.fragment:fragment-ktx:$fragmentVer")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1")
+    debugImplementation("androidx.fragment:fragment-testing:$fragmentVer")
+
+    // Simplifies in-app navigation, assumes single activity pattern
     val navVer = "2.4.2"
     implementation("androidx.navigation:navigation-fragment-ktx:$navVer")
     implementation("androidx.navigation:navigation-ui-ktx:$navVer")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.3")
-    implementation("androidx.recyclerview:recyclerview:1.2.1")
-    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
-    implementation("androidx.browser:browser:1.4.0")
 
     // Background job scheduler
     // Used to fetch new data in background
@@ -104,9 +104,20 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:$workVer")
     androidTestImplementation("androidx.work:work-testing:$workVer")
 
-    // Feed parser
-    // Used in standalone mode
-    implementation("co.appreactor:feedk:0.2.3")
+    // In-app browser, it's about 2x faster than calling an external browser
+    implementation("androidx.browser:browser:1.4.0")
+
+    // Provides lifecycle-aware coroutine scopes
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1")
+
+    // Helps to keep view hierarchies flat
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+
+    // List widget
+    implementation("androidx.recyclerview:recyclerview:1.2.1")
+
+    // Enables swipe to refresh pattern
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
     // Retrofit turns HTTP APIs into Java interfaces
     // Used to communicate with remote backends
@@ -123,22 +134,33 @@ dependencies {
     val sqlDelightVer = "1.5.3"
     implementation("com.squareup.sqldelight:coroutines-extensions:$sqlDelightVer")
     implementation("com.squareup.sqldelight:android-driver:$sqlDelightVer")
+    testImplementation("com.squareup.sqldelight:sqlite-driver:$sqlDelightVer")
 
-    implementation("com.google.android.material:material:1.6.0")
-    implementation("com.squareup.picasso:picasso:2.71828")
+    // Dependency injection framework
+    val koinAnnotationsVer = "1.0.0"
     implementation("io.insert-koin:koin-android:3.2.0")
-    implementation("io.insert-koin:koin-annotations:1.0.0-beta-2")
-    ksp("io.insert-koin:koin-ksp-compiler:1.0.0-beta-2")
+    implementation("io.insert-koin:koin-annotations:$koinAnnotationsVer")
+    ksp("io.insert-koin:koin-ksp-compiler:$koinAnnotationsVer")
+
+    // Material design components
+    implementation("com.google.android.material:material:1.6.1")
+
+    // Used to download, cache and display images
+    implementation("com.squareup.picasso:picasso:2.71828")
+
+    // Java HTML parser
+    // Used to auto-discover feed links
     implementation("org.jsoup:jsoup:1.14.3")
+
+    // Feed parser
+    // Used in standalone mode
+    implementation("co.appreactor:feedk:0.2.3")
 
     // Common testing dependencies
     testImplementation(kotlin("test"))
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.1")
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("io.mockk:mockk:1.12.3")
 
-    debugImplementation("androidx.fragment:fragment-testing:$fragmentVer")
-    testImplementation("com.squareup.sqldelight:sqlite-driver:$sqlDelightVer")
+    // Mocking library, better to go easy on that
+    testImplementation("io.mockk:mockk:1.12.4")
 
     // Core Kotlin test infrastructure
     androidTestImplementation(kotlin("test"))
