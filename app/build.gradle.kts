@@ -153,15 +153,15 @@ dependencies {
     // Used in standalone mode
     implementation("co.appreactor:feedk:0.2.3")
 
-    // Common testing dependencies
+    // Core test infrastructure
     testImplementation(kotlin("test"))
 
     // Mocking library, better to go easy on that
     testImplementation("io.mockk:mockk:1.12.4")
 
-    // Core Kotlin test infrastructure
+    // Core test infrastructure
     androidTestImplementation(kotlin("test"))
 
-    // Core Android test infrastructure
+    // An instrumentation that runs various types of test cases
     androidTestImplementation("androidx.test:runner:1.4.0")
 }
