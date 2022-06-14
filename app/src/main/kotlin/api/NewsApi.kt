@@ -13,7 +13,10 @@ interface NewsApi {
 
     suspend fun getFeeds(): List<Feed>
 
-    suspend fun updateFeedTitle(feedId: String, newTitle: String)
+    suspend fun updateFeedTitle(
+        feedId: String,
+        newTitle: String,
+    )
 
     suspend fun deleteFeed(feedId: String)
 
@@ -25,7 +28,13 @@ interface NewsApi {
         lastSync: OffsetDateTime?,
     ): List<Entry>
 
-    suspend fun markEntriesAsRead(entriesIds: List<String>, read: Boolean)
+    suspend fun markEntriesAsRead(
+        entriesIds: List<String>,
+        read: Boolean,
+    )
 
-    suspend fun markEntriesAsBookmarked(entries: List<EntryWithoutContent>, bookmarked: Boolean)
+    suspend fun markEntriesAsBookmarked(
+        entries: List<EntryWithoutContent>,
+        bookmarked: Boolean,
+    )
 }

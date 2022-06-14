@@ -12,5 +12,5 @@ data class FeedJson(
     val link: String? = null,
     val pinned: Boolean? = null,
     val updateErrorCount: Long? = null,
-    val lastUpdateError: String? = null
+    val lastUpdateError: String? = null,
 )

@@ -265,7 +265,7 @@ class StandaloneNewsApi(
                     extCacheUri = null,
                 )
 
-                val feed = Feed(
+                Feed(
                     id = channel.link,
                     title = channel.title,
                     links = listOf(selfLink, alternateLink),
@@ -273,8 +273,6 @@ class StandaloneNewsApi(
                     blockedWords = "",
                     showPreviewImages = null,
                 )
-
-                feed
             }
         }
     }
@@ -373,7 +371,7 @@ class StandaloneNewsApi(
         // 45–90 characters per line x 3 lines
         val maxSummaryLength = 180
 
-        val entry = Entry(
+        return Entry(
             contentType = "html",
             contentSrc = "",
             contentText = description ?: "",
@@ -396,8 +394,6 @@ class StandaloneNewsApi(
             ogImageWidth = 0,
             ogImageHeight = 0,
         )
-
-        return entry
     }
 
     private fun sha256(string: String): String {

@@ -134,7 +134,7 @@ class NextcloudNewsApiAdapter(
             extCacheUri = null,
         )
 
-        val feed = Feed(
+        return Feed(
             id = feedId,
             title = title ?: "Untitled",
             links = listOf(selfLink, alternateLink),
@@ -142,8 +142,6 @@ class NextcloudNewsApiAdapter(
             blockedWords = "",
             showPreviewImages = null,
         )
-
-        return feed
     }
 
     private fun ItemJson.toEntry(): Entry? {
@@ -186,7 +184,7 @@ class NextcloudNewsApiAdapter(
             )
         }
 
-        val entry = Entry(
+        return Entry(
             contentType = "html",
             contentSrc = "",
             contentText = body ?: "",
@@ -213,7 +211,5 @@ class NextcloudNewsApiAdapter(
             ogImageWidth = 0,
             ogImageHeight = 0,
         )
-
-        return entry
     }
 }

@@ -16,6 +16,8 @@ import co.appreactor.news.databinding.ActivityAppBinding
 import enclosures.AudioEnclosuresRepository
 import entries.EntriesFilter
 import entriesimages.EntriesImagesRepository
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.launchIn
 import org.koin.android.ext.android.get
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -51,14 +53,12 @@ class AppActivity : AppCompatActivity() {
         binding.bottomNavigation.isVisible = bottomNavigationIsVisible
     }
 
-    init {
-        initNavigationView()
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAppBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        initNavigationView()
 
         lifecycleScope.launchWhenCreated {
             get<AudioEnclosuresRepository>().apply {
@@ -172,16 +172,14 @@ class AppActivity : AppCompatActivity() {
     }
 
     private fun initNavigationView() {
-        lifecycleScope.launchWhenResumed {
-            val headerView = binding.navigationView.getHeaderView(0) ?: throw Exception()
-            val titleView = headerView.findViewById<TextView>(R.id.title) ?: throw Exception()
-            val subtitleView = headerView.findViewById<TextView>(R.id.subtitle) ?: throw Exception()
+        val headerView = binding.navigationView.getHeaderView(0)!!
+        val titleView = headerView.findViewById<TextView>(R.id.title)!!
+        val subtitleView = headerView.findViewById<TextView>(R.id.subtitle)!!
 
-            model.account().collect {
-                titleView.text = it.title
-                subtitleView.isVisible = it.subtitle.isNotBlank()
-                subtitleView.text = it.subtitle
-            }
-        }
+        combine(model.accountTitle(), model.accountSubtitle()) { title, subtitle ->
+            titleView.text = title
+            subtitleView.isVisible = subtitle.isNotBlank()
+            subtitleView.text = subtitle
+        }.launchIn(lifecycleScope)
     }
 }
