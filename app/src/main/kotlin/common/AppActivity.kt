@@ -34,6 +34,9 @@ class AppActivity : AppCompatActivity() {
     lateinit var drawerToggle: ActionBarDrawerToggle
 
     private val navListener = NavController.OnDestinationChangedListener { _, destination, args ->
+        binding.appBarLayout.isVisible = destination.id != R.id.authFragment
+        binding.toolbar.title = ""
+
         if (destination.id == R.id.entriesFragment) {
             val filter = args?.getParcelable<EntriesFilter>("filter")
             binding.bottomNavigation.isVisible = filter !is EntriesFilter.BelongToFeed

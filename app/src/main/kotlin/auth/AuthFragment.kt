@@ -6,11 +6,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentAuthBinding
-import common.AppFragment
 import common.ConfRepository
 import common.app
 import kotlinx.coroutines.flow.first
@@ -18,9 +18,7 @@ import kotlinx.coroutines.runBlocking
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.concurrent.TimeUnit
 
-class AuthFragment : AppFragment(
-    showToolbar = false,
-) {
+class AuthFragment : Fragment() {
 
     private val model: AuthViewModel by viewModel()
 

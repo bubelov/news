@@ -3,14 +3,12 @@ package common
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
-import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.appbar.MaterialToolbar
 
 abstract class AppFragment(
-    private val showToolbar: Boolean = true,
     private val lockDrawer: Boolean = true,
 ) : Fragment() {
 
@@ -36,8 +34,6 @@ abstract class AppFragment(
 
     private val activity by lazy { requireActivity() as AppActivity }
 
-    private val appBarLayout by lazy { activity.binding.appBarLayout }
-
     private val drawer by lazy {
         if (getActivity() is AppActivity) {
             activity.binding.drawerLayout
@@ -56,8 +52,6 @@ abstract class AppFragment(
         }
 
         isDrawerLocked = lockDrawer
-
-        appBarLayout.isVisible = showToolbar
 
         toolbar?.apply {
             setNavigationOnClickListener { drawer?.open() }
