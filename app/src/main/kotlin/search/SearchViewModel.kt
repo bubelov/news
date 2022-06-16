@@ -95,7 +95,7 @@ class SearchViewModel(
         }
     }
 
-    fun getConf() = confRepo.select()
+    fun loadConf() = confRepo.load()
 
     private fun Entry.toRow(feed: Feed?): EntriesAdapterItem {
         return EntriesAdapterItem(

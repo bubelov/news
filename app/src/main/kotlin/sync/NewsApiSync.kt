@@ -37,7 +37,7 @@ class NewsApiSync(
             return SyncResult.Failure(Exception("Already syncing"))
         }
 
-        val conf = confRepo.select().first()
+        val conf = confRepo.load().first()
 
         if (!conf.initialSyncCompleted) {
             _state.update { State.InitialSync() }
@@ -64,12 +64,12 @@ class NewsApiSync(
                 return SyncResult.Failure(Exception("Failed to sync entries", it))
             }
 
-            confRepo.upsert(
-                confRepo.select().first().copy(
+            confRepo.save {
+                it.copy(
                     initialSyncCompleted = true,
                     lastEntriesSyncDateTime = Instant.now().toString(),
                 )
-            )
+            }
 
             _state.update { State.Idle }
             return SyncResult.Success(0)
@@ -104,16 +104,11 @@ class NewsApiSync(
             return if (args.syncEntries) {
                 runCatching {
                     val newAndUpdatedEntries = entriesRepo.syncNewAndUpdated(
-                        lastEntriesSyncDateTime = confRepo.select().first().lastEntriesSyncDateTime,
+                        lastEntriesSyncDateTime = confRepo.load().first().lastEntriesSyncDateTime,
                         feeds = feedsRepo.selectAll().first(),
                     )
 
-                    confRepo.upsert(
-                        confRepo.select().first().copy(
-                            lastEntriesSyncDateTime = Instant.now().toString(),
-                        )
-                    )
-
+                    confRepo.save { it.copy(lastEntriesSyncDateTime = Instant.now().toString()) }
                     _state.update { State.Idle }
                     SyncResult.Success(newAndUpdatedEntries)
                 }.getOrElse {

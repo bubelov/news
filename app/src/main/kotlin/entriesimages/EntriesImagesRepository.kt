@@ -4,7 +4,6 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import com.squareup.picasso.Picasso
 import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToOneOrDefault
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import common.ConfRepository
 import db.Conf
@@ -24,6 +23,7 @@ import kotlin.random.Random
 @Single
 class EntriesImagesRepository(
     private val db: Database,
+    private val confRepo: ConfRepository,
 ) {
 
     companion object {
@@ -35,11 +35,7 @@ class EntriesImagesRepository(
         .build()
 
     suspend fun syncOpenGraphImages() {
-        db.confQueries
-            .select()
-            .asFlow()
-            .mapToOneOrDefault(ConfRepository.DEFAULT_CONF)
-            .collectLatest { syncOpenGraphImages(it) }
+        confRepo.load().collectLatest { syncOpenGraphImages(it) }
     }
 
     private suspend fun syncOpenGraphImages(conf: Conf) {

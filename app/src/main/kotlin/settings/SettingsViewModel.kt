@@ -2,8 +2,6 @@ package settings
 
 import androidx.lifecycle.ViewModel
 import auth.accountSubtitle
-import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToOneOrDefault
 import common.ConfRepository
 import db.Conf
 import db.Database
@@ -18,23 +16,18 @@ class SettingsViewModel(
     private val db: Database,
 ) : ViewModel() {
 
-    fun getConf() = confRepo.select()
+    fun loadConf() = confRepo.load()
 
-    suspend fun saveConf(conf: Conf) = this.confRepo.upsert(conf)
+    suspend fun saveConf(newConf: (Conf) -> Conf) = this.confRepo.save(newConf)
 
     fun getAccountName(): String = runBlocking {
-        db.confQueries
-            .select()
-            .asFlow()
-            .mapToOneOrDefault(ConfRepository.DEFAULT_CONF)
-            .map { it.accountSubtitle() }
-            .first()
+        loadConf().map { it.accountSubtitle() }.first()
     }
 
     fun logOut() {
         db.apply {
             transaction {
-                confQueries.delete()
+                confQueries.deleteAll()
                 feedQueries.deleteAll()
                 entryQueries.deleteAll()
             }

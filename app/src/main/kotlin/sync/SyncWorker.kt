@@ -25,7 +25,7 @@ class SyncWorker(context: Context, workerParams: WorkerParameters) : Worker(cont
 
     private suspend fun doWorkAsync(): Result {
         val app = applicationContext as App
-        val conf = app.get<ConfRepository>().select().first()
+        val conf = app.get<ConfRepository>().load().first()
         val sync = app.get<NewsApiSync>()
         val entriesRepository = app.get<EntriesRepository>()
 

@@ -28,7 +28,7 @@ class NewsApiSwitcher(
     }
 
     private fun switchToNextcloudApi(): Unit = runBlocking {
-        val conf = confRepo.select().first()
+        val conf = confRepo.load().first()
 
         wrapper.api = NextcloudNewsApiAdapter(
             NextcloudNewsApiBuilder().build(
@@ -41,7 +41,7 @@ class NewsApiSwitcher(
     }
 
     private fun switchToMinifluxApi(): Unit = runBlocking {
-        val conf = confRepo.select().first()
+        val conf = confRepo.load().first()
 
         wrapper.api = MinifluxApiAdapter(
             MinifluxApiBuilder().build(

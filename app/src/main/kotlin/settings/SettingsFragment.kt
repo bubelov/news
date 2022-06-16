@@ -79,7 +79,7 @@ class SettingsFragment : AppFragment() {
             setTitle(R.string.settings)
         }
 
-        val conf = runBlocking { model.getConf().first() }
+        val conf = runBlocking { model.loadConf().first() }
 
         binding.apply {
             syncInBackground.apply {
@@ -87,11 +87,7 @@ class SettingsFragment : AppFragment() {
                 backgroundSyncIntervalButton.isVisible = conf.syncInBackground
 
                 setOnCheckedChangeListener { _, isChecked ->
-                    runBlocking {
-                        model.saveConf(
-                            model.getConf().first().copy(syncInBackground = isChecked)
-                        )
-                    }
+                    runBlocking { model.saveConf { it.copy(syncInBackground = isChecked) } }
                     backgroundSyncIntervalButton.isVisible = isChecked
                     app().setupBackgroundSync(override = true)
                 }
@@ -109,16 +105,11 @@ class SettingsFragment : AppFragment() {
                     text = resources.getQuantityString(R.plurals.d_hours, hours, hours)
                     val millis = TimeUnit.HOURS.toMillis(hours.toLong())
                     isChecked =
-                        runBlocking { model.getConf().first().backgroundSyncIntervalMillis == millis }
+                        runBlocking { model.loadConf().first().backgroundSyncIntervalMillis == millis }
 
                     setOnCheckedChangeListener { _, isChecked ->
                         if (isChecked) {
-                            runBlocking {
-                                model.saveConf(
-                                    model.getConf().first().copy(backgroundSyncIntervalMillis = millis)
-                                )
-                            }
-
+                            runBlocking { model.saveConf { it.copy(backgroundSyncIntervalMillis = millis) } }
                             app().setupBackgroundSync(override = true)
                             backgroundSyncInterval.text = text
                             dialog.dismiss()
@@ -145,9 +136,7 @@ class SettingsFragment : AppFragment() {
                 isChecked = conf.syncOnStartup
 
                 setOnCheckedChangeListener { _, isChecked ->
-                    runBlocking {
-                        model.saveConf(model.getConf().first().copy(syncOnStartup = isChecked))
-                    }
+                    runBlocking { model.saveConf { it.copy(syncOnStartup = isChecked) } }
                 }
             }
 
@@ -155,9 +144,7 @@ class SettingsFragment : AppFragment() {
                 isChecked = conf.showReadEntries
 
                 setOnCheckedChangeListener { _, isChecked ->
-                    runBlocking {
-                        model.saveConf(model.getConf().first().copy(showReadEntries = isChecked))
-                    }
+                    runBlocking { model.saveConf { it.copy(showReadEntries = isChecked) } }
                 }
             }
 
@@ -165,9 +152,7 @@ class SettingsFragment : AppFragment() {
                 isChecked = conf.showPreviewImages
 
                 setOnCheckedChangeListener { _, isChecked ->
-                    runBlocking {
-                        model.saveConf(model.getConf().first().copy(showPreviewImages = isChecked))
-                    }
+                    runBlocking { model.saveConf { it.copy(showPreviewImages = isChecked) } }
                 }
             }
 
@@ -175,9 +160,7 @@ class SettingsFragment : AppFragment() {
                 isChecked = conf.cropPreviewImages
 
                 setOnCheckedChangeListener { _, isChecked ->
-                    runBlocking {
-                        model.saveConf(model.getConf().first().copy(cropPreviewImages = isChecked))
-                    }
+                    runBlocking { model.saveConf { it.copy(cropPreviewImages = isChecked) } }
                 }
             }
 
@@ -185,9 +168,7 @@ class SettingsFragment : AppFragment() {
                 isChecked = conf.showPreviewText
 
                 setOnCheckedChangeListener { _, isChecked ->
-                    runBlocking {
-                        model.saveConf(model.getConf().first().copy(showPreviewText = isChecked))
-                    }
+                    runBlocking { model.saveConf { it.copy(showPreviewText = isChecked) } }
                 }
             }
 
@@ -195,9 +176,7 @@ class SettingsFragment : AppFragment() {
                 isChecked = conf.markScrolledEntriesAsRead
 
                 setOnCheckedChangeListener { _, isChecked ->
-                    runBlocking {
-                        model.saveConf(model.getConf().first().copy(markScrolledEntriesAsRead = isChecked))
-                    }
+                    runBlocking { model.saveConf { it.copy(markScrolledEntriesAsRead = isChecked) } }
                 }
             }
 
@@ -205,9 +184,7 @@ class SettingsFragment : AppFragment() {
                 isChecked = conf.useBuiltInBrowser
 
                 setOnCheckedChangeListener { _, isChecked ->
-                    runBlocking {
-                        model.saveConf(model.getConf().first().copy(useBuiltInBrowser = isChecked))
-                    }
+                    runBlocking { model.saveConf { it.copy(useBuiltInBrowser = isChecked) } }
                 }
             }
 
@@ -221,7 +198,7 @@ class SettingsFragment : AppFragment() {
 
             logOut.setOnClickListener {
                 lifecycleScope.launchWhenResumed {
-                    when (model.getConf().first().backend) {
+                    when (model.loadConf().first().backend) {
                         ConfRepository.BACKEND_STANDALONE -> {
                             MaterialAlertDialogBuilder(requireContext())
                                 .setMessage(R.string.delete_all_data_warning)

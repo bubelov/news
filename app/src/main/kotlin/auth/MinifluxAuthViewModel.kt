@@ -5,7 +5,6 @@ import api.NewsApiSwitcher
 import api.miniflux.MinifluxApiBuilder
 import common.ConfRepository
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import org.koin.android.annotation.KoinViewModel
 
@@ -37,19 +36,18 @@ class MinifluxAuthViewModel(
         password: String,
         trustSelfSignedCerts: Boolean,
     ) {
-        val newConf = confRepo.select().first().copy(
-            minifluxServerUrl = serverUrl,
-            minifluxServerTrustSelfSignedCerts = trustSelfSignedCerts,
-            minifluxServerUsername = username,
-            minifluxServerPassword = password,
-        )
-
-        confRepo.upsert(newConf)
+        confRepo.save {
+            it.copy(
+                minifluxServerUrl = serverUrl,
+                minifluxServerTrustSelfSignedCerts = trustSelfSignedCerts,
+                minifluxServerUsername = username,
+                minifluxServerPassword = password,
+            )
+        }
     }
 
-    suspend fun setBackend(newBackend: String) {
-        val newConf = confRepo.select().first().copy(backend = newBackend)
-        confRepo.upsert(newConf)
-        apiSwitcher.switch(newBackend)
+    suspend fun setBackend(backend: String) {
+        confRepo.save { it.copy(backend = backend) }
+        apiSwitcher.switch(backend)
     }
 }

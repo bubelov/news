@@ -53,7 +53,7 @@ class EntriesModel(
 
             _state.update { State.LoadingCachedEntries }
 
-            confRepo.select().first().apply {
+            confRepo.load().first().apply {
                 if (!initialSyncCompleted || (syncOnStartup && !syncedOnStartup)) {
                     syncedOnStartup = true
                     viewModelScope.launch { newsApiSync.sync() }
@@ -61,7 +61,7 @@ class EntriesModel(
             }
 
             combine(
-                confRepo.select(),
+                confRepo.load(),
                 feedsRepo.selectAll(),
                 entriesRepo.selectCount(),
                 newsApiSync.state,
@@ -143,24 +143,25 @@ class EntriesModel(
         if (syncResult is SyncResult.Failure) throw syncResult.cause
     }
 
-    fun getConf() = confRepo.select()
+    fun loadConf() = confRepo.load()
 
-    suspend fun saveConf(conf: Conf) {
-        this.confRepo.upsert(conf)
+    suspend fun saveConf(newConf: (Conf) -> Conf) {
+        this.confRepo.save(newConf)
     }
 
     fun changeSortOrder() {
         viewModelScope.launch {
-            val conf = confRepo.select().first()
+            confRepo.save {
+                val newSortOrder = when (it.sortOrder) {
+                    SORT_ORDER_ASCENDING -> SORT_ORDER_DESCENDING
+                    SORT_ORDER_DESCENDING -> SORT_ORDER_ASCENDING
+                    else -> throw Exception()
+                }
 
-            val newSortOrder = when (conf.sortOrder) {
-                SORT_ORDER_ASCENDING -> SORT_ORDER_DESCENDING
-                SORT_ORDER_DESCENDING -> SORT_ORDER_ASCENDING
-                else -> throw Exception()
+                it.copy(sortOrder = newSortOrder)
             }
 
             scrollToTopNextTime = true
-            confRepo.upsert(conf.copy(sortOrder = newSortOrder))
         }
     }
 

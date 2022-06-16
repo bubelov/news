@@ -41,7 +41,7 @@ class EntryViewModel(
         summaryView: TextView,
         lifecycleScope: LifecycleCoroutineScope,
     ) = withContext(Dispatchers.IO) {
-        conf = confRepo.select().first()
+        conf = confRepo.load().first()
 
         if (state.value != null) {
             return@withContext

@@ -13,7 +13,6 @@ import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentAuthBinding
 import common.ConfRepository
 import common.app
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.concurrent.TimeUnit
@@ -30,7 +29,7 @@ class AuthFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
-        val conf = runBlocking { model.selectConf().first() }
+        val conf = runBlocking { model.loadConf() }
 
         return if (conf.backend.isBlank()) {
             _binding = FragmentAuthBinding.inflate(inflater, container, false)
@@ -68,14 +67,15 @@ class AuthFragment : Fragment() {
     private fun FragmentAuthBinding.initButtons() {
         useStandaloneBackend.setOnClickListener {
             lifecycleScope.launchWhenResumed {
-                model.upsertConf(
-                    model.selectConf().first().copy(
+                model.saveConf {
+                    it.copy(
                         backend = ConfRepository.BACKEND_STANDALONE,
                         syncOnStartup = false,
                         backgroundSyncIntervalMillis = TimeUnit.HOURS.toMillis(12),
-                        initialSyncCompleted = true,
                     )
-                )
+                }
+
+                model.setBackend(ConfRepository.BACKEND_STANDALONE)
 
                 app().setupBackgroundSync(override = true)
 

@@ -3,10 +3,10 @@ INSERT OR REPLACE
 INTO Conf (backend, minifluxServerUrl, minifluxServerTrustSelfSignedCerts, minifluxServerUsername, minifluxServerPassword, nextcloudServerUrl, nextcloudServerTrustSelfSignedCerts, nextcloudServerUsername, nextcloudServerPassword, initialSyncCompleted, lastEntriesSyncDateTime, showReadEntries, sortOrder, showPreviewImages, cropPreviewImages, markScrolledEntriesAsRead, syncOnStartup, syncInBackground, backgroundSyncIntervalMillis, useBuiltInBrowser, showPreviewText)
 VALUES ?;
 
-select:
+selectAll:
 SELECT *
 FROM Conf;
 
-delete:
+deleteAll:
 DELETE
 FROM Conf;

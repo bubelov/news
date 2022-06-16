@@ -78,7 +78,7 @@ class EntriesFragment : AppFragment(), Scrollable {
                         if (feed.openEntriesInBrowser) {
                             openUrl(
                                 url = entry.links.first { it.rel == "alternate" && it.type == "text/html" }.href.toString(),
-                                useBuiltInBrowser = model.getConf().first().useBuiltInBrowser,
+                                useBuiltInBrowser = model.loadConf().first().useBuiltInBrowser,
                             )
                         } else {
                             val action = EntriesFragmentDirections.actionEntriesFragmentToEntryFragment(item.entry.id)
@@ -253,7 +253,7 @@ class EntriesFragment : AppFragment(), Scrollable {
         super.onDestroyView()
         _binding = null
 
-        if (runBlocking { model.getConf().first().markScrolledEntriesAsRead }) {
+        if (runBlocking { model.loadConf().first().markScrolledEntriesAsRead }) {
             model.setRead(
                 entryIds = seenEntries.map { it.entry.id },
                 value = true,
@@ -316,7 +316,7 @@ class EntriesFragment : AppFragment(), Scrollable {
         showOpenedEntriesMenuItem?.isVisible = getShowReadEntriesButtonVisibility()
 
         lifecycleScope.launchWhenResumed {
-            val conf = model.getConf().first()
+            val conf = model.loadConf().first()
 
             if (conf.showReadEntries) {
                 showOpenedEntriesMenuItem?.setIcon(R.drawable.ic_baseline_visibility_24)
@@ -331,8 +331,7 @@ class EntriesFragment : AppFragment(), Scrollable {
 
         showOpenedEntriesMenuItem?.setOnMenuItemClickListener {
             lifecycleScope.launchWhenResumed {
-                val conf = model.getConf().first()
-                model.saveConf(conf.copy(showReadEntries = !conf.showReadEntries))
+                model.saveConf { it.copy(showReadEntries = !it.showReadEntries) }
                 initShowReadEntriesButton()
             }
 
@@ -343,7 +342,7 @@ class EntriesFragment : AppFragment(), Scrollable {
     private fun initSortOrderButton() {
         val sortOrderMenuItem = toolbar?.menu?.findItem(R.id.sort) ?: return
 
-        model.getConf().onEach { conf ->
+        model.loadConf().onEach { conf ->
             when (conf.sortOrder) {
                 ConfRepository.SORT_ORDER_ASCENDING -> {
                     sortOrderMenuItem.setIcon(R.drawable.ic_clock_forward)
@@ -410,7 +409,7 @@ class EntriesFragment : AppFragment(), Scrollable {
 
         touchHelper?.attachToRecyclerView(binding.list)
 
-        model.getConf().onEach {
+        model.loadConf().onEach {
             if (
                 it.markScrolledEntriesAsRead
                 && (args.filter is EntriesFilter.NotBookmarked || args.filter is EntriesFilter.BelongToFeed)

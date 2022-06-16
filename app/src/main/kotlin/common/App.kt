@@ -65,7 +65,7 @@ class App : Application() {
         }
 
         runBlocking {
-            val backend = get<ConfRepository>().select().first().backend
+            val backend = get<ConfRepository>().load().first().backend
 
             if (backend.isNotBlank()) {
                 get<NewsApiSwitcher>().switch(backend)
@@ -109,7 +109,7 @@ class App : Application() {
 
     fun setupBackgroundSync(override: Boolean) {
         val workManager = WorkManager.getInstance(this)
-        val conf = runBlocking { get<ConfRepository>().select().first() }
+        val conf = runBlocking { get<ConfRepository>().load().first() }
 
         if (!conf.syncInBackground) {
             workManager.cancelUniqueWork(SYNC_WORK_NAME)

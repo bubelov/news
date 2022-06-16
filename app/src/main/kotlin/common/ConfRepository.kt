@@ -5,6 +5,7 @@ import com.squareup.sqldelight.runtime.coroutines.mapToOneOrDefault
 import db.Conf
 import db.Database
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 
@@ -12,17 +13,6 @@ import org.koin.core.annotation.Single
 class ConfRepository(
     private val db: Database,
 ) {
-
-    fun select() = db.confQueries.select().asFlow().mapToOneOrDefault(DEFAULT_CONF)
-
-    suspend fun upsert(conf: Conf) {
-        withContext(Dispatchers.Default) {
-            db.transaction {
-                db.confQueries.delete()
-                db.confQueries.insert(conf)
-            }
-        }
-    }
 
     companion object {
         const val BACKEND_STANDALONE = "standalone"
@@ -55,5 +45,22 @@ class ConfRepository(
             useBuiltInBrowser = true,
             showPreviewText = true,
         )
+    }
+
+    fun load(): Flow<Conf> {
+        return db.confQueries.selectAll().asFlow().mapToOneOrDefault(DEFAULT_CONF)
+    }
+
+    suspend fun save(newConf: (Conf) -> Conf) {
+        save(newConf(db.confQueries.selectAll().executeAsOneOrNull() ?: DEFAULT_CONF))
+    }
+
+    private suspend fun save(conf: Conf) {
+        withContext(Dispatchers.Default) {
+            db.transaction {
+                db.confQueries.deleteAll()
+                db.confQueries.insert(conf)
+            }
+        }
     }
 }
