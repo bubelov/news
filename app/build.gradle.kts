@@ -39,10 +39,10 @@ android {
             create("release") {
                 val signingProperties = Properties()
                 signingProperties.load(FileInputStream(signingPropertiesFile))
-                storeFile = File(signingProperties["playKeystoreFile"] as String)
-                storePassword = signingProperties["playKeystorePassword"] as String
-                keyAlias = signingProperties["playKeyAlias"] as String
-                keyPassword = signingProperties["playKeyPassword"] as String
+                storeFile = File(signingProperties["releaseKeystoreFile"] as String)
+                storePassword = signingProperties["releaseKeystorePassword"] as String
+                keyAlias = signingProperties["releaseKeyAlias"] as String
+                keyPassword = signingProperties["releaseKeyPassword"] as String
             }
         }
     }
