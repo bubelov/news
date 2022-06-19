@@ -12,8 +12,11 @@ import androidx.core.content.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import co.appreactor.news.R
+import com.google.android.material.appbar.MaterialToolbar
 
 fun Fragment.app() = requireContext().applicationContext as App
+
+fun Fragment.toolbar(): MaterialToolbar? = (requireActivity() as? AppActivity)?.binding?.toolbar
 
 fun Fragment.showErrorDialog(
     t: Throwable,

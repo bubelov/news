@@ -164,4 +164,7 @@ dependencies {
 
     // An instrumentation that runs various types of test cases
     androidTestImplementation("androidx.test:runner:1.4.0")
+
+    // UI testing framework
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
 }

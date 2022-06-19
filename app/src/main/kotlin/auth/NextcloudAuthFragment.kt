@@ -4,18 +4,20 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentNextcloudAuthBinding
-import common.AppFragment
-import common.ConfRepository
 import common.app
-import common.showDialog
+import common.showErrorDialog
+import common.toolbar
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class NextcloudAuthFragment : AppFragment() {
+class NextcloudAuthFragment : Fragment() {
 
     private val model: NextcloudAuthModel by viewModel()
 
@@ -34,8 +36,9 @@ class NextcloudAuthFragment : AppFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        toolbar?.apply {
-            setupUpNavigation()
+        toolbar()?.apply {
+            navigationIcon = DrawerArrowDrawable(context).apply { progress = 1f }
+            setNavigationOnClickListener { findNavController().popBackStack() }
             setTitle(R.string.nextcloud_login)
         }
 
@@ -65,36 +68,35 @@ class NextcloudAuthFragment : AppFragment() {
                 return@setOnClickListener
             }
 
-            lifecycleScope.launchWhenResumed {
+            viewLifecycleOwner.lifecycleScope.launchWhenResumed {
                 binding.progress.isVisible = true
 
+                val url = binding.serverUrl.text.toString().toHttpUrl()
+                val username = binding.username.text.toString()
+                val password = binding.password.text.toString()
+                val trustSelfSignedCerts = binding.trustSelfSignedCerts.isChecked
+
                 runCatching {
-                    model.requestFeeds(
-                        serverUrl = binding.serverUrl.text.toString(),
-                        username = binding.username.text.toString(),
-                        password = binding.password.text.toString(),
-                        trustSelfSignedCerts = binding.trustSelfSignedCerts.isChecked,
+                    model.testServerConf(
+                        url = url,
+                        username = username,
+                        password = password,
+                        trustSelfSignedCerts = trustSelfSignedCerts,
                     )
                 }.onSuccess {
-                    model.setServer(
-                        binding.serverUrl.text.toString(),
-                        binding.username.text.toString(),
-                        binding.password.text.toString(),
-                        binding.trustSelfSignedCerts.isChecked,
+                    model.saveServerConf(
+                        url = url,
+                        username = username,
+                        password = password,
+                        trustSelfSignedCerts = trustSelfSignedCerts,
                     )
-
-                    model.setBackend(ConfRepository.BACKEND_NEXTCLOUD)
 
                     app().setupBackgroundSync(override = true)
 
                     findNavController().navigate(R.id.action_nextcloudAuthFragment_to_entriesFragment)
                 }.onFailure {
                     binding.progress.isVisible = false
-
-                    requireContext().showDialog(
-                        R.string.error,
-                        it.message ?: getString(R.string.direct_login_failed)
-                    )
+                    showErrorDialog(it.message ?: getString(R.string.direct_login_failed))
                 }
             }
         }

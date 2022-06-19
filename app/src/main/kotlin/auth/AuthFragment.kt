@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit
 
 class AuthFragment : Fragment() {
 
-    private val model: AuthViewModel by viewModel()
+    private val model: AuthModel by viewModel()
 
     private var _binding: FragmentAuthBinding? = null
     private val binding get() = _binding!!

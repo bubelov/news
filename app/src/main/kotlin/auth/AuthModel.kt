@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.first
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
-class AuthViewModel(
+class AuthModel(
     private val confRepo: ConfRepository,
     private val apiSwitcher: NewsApiSwitcher,
 ) : ViewModel() {

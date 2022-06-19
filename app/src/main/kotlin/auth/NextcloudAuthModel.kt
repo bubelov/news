@@ -4,50 +4,47 @@ import androidx.lifecycle.ViewModel
 import api.NewsApiSwitcher
 import api.nextcloud.NextcloudNewsApiBuilder
 import common.ConfRepository
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import okhttp3.HttpUrl
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
 class NextcloudAuthModel(
-    private val nextcloudApiSwitcher: NewsApiSwitcher,
+    private val apiSwitcher: NewsApiSwitcher,
     private val confRepo: ConfRepository,
 ) : ViewModel() {
 
-    suspend fun requestFeeds(
-        serverUrl: String,
+    suspend fun testServerConf(
+        url: HttpUrl,
         username: String,
         password: String,
         trustSelfSignedCerts: Boolean,
     ) {
         val api = NextcloudNewsApiBuilder().build(
-            serverUrl,
-            username,
-            password,
-            trustSelfSignedCerts,
+            url = url.toString(),
+            username = username,
+            password = password,
+            trustSelfSignedCerts = trustSelfSignedCerts,
         )
 
-        withContext(Dispatchers.Default) { api.getFeeds() }
+        api.getFeeds()
     }
 
-    suspend fun setServer(
-        serverUrl: String,
+    suspend fun saveServerConf(
+        url: HttpUrl,
         username: String,
         password: String,
         trustSelfSignedCerts: Boolean,
     ) {
         confRepo.save {
             it.copy(
-                nextcloudServerUrl = serverUrl,
+                backend = ConfRepository.BACKEND_NEXTCLOUD,
+                nextcloudServerUrl = url.toString(),
                 nextcloudServerTrustSelfSignedCerts = trustSelfSignedCerts,
                 nextcloudServerUsername = username,
                 nextcloudServerPassword = password,
             )
         }
-    }
 
-    suspend fun setBackend(backend: String) {
-        confRepo.save { it.copy(backend = backend) }
-        nextcloudApiSwitcher.switch(backend)
+        apiSwitcher.switch(ConfRepository.BACKEND_NEXTCLOUD)
     }
 }
