@@ -12,7 +12,7 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import co.appreactor.news.R
 import common.App
-import common.AppActivity
+import common.Activity
 import common.ConfRepository
 import entries.EntriesRepository
 import kotlinx.coroutines.flow.first
@@ -59,7 +59,7 @@ class SyncWorker(context: Context, workerParams: WorkerParameters) : Worker(cont
     private fun showUnreadEntriesNotification(unreadEntries: Int, context: Context) {
         createNotificationChannel(context)
 
-        val intent = Intent(context, AppActivity::class.java).apply {
+        val intent = Intent(context, Activity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
 

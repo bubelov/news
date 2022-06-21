@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/entriesFragment"
+        android:id="@+id/newsFragment"
         android:icon="@drawable/ic_baseline_list_alt_24"
         android:title="@string/news"
         app:showAsAction="ifRoom" />
@@ -19,13 +19,6 @@
         android:id="@+id/feedsFragment"
         android:icon="@drawable/ic_baseline_rss_feed_24"
         android:title="@string/feeds"
-        app:showAsAction="ifRoom" />
-
-    <item
-        android:id="@+id/podcastsFragment"
-        android:icon="@drawable/ic_baseline_headset_24"
-        android:title="@string/podcasts"
-        android:visible="false"
         app:showAsAction="ifRoom" />
 
 </menu>

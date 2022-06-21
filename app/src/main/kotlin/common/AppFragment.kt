@@ -13,7 +13,7 @@ abstract class AppFragment(
 ) : Fragment() {
 
     protected val toolbar by lazy {
-        if (getActivity() is AppActivity) {
+        if (getActivity() is Activity) {
             activity.binding.toolbar
         } else {
             null
@@ -32,10 +32,10 @@ abstract class AppFragment(
             drawer?.setDrawerLockMode(if (value) DrawerLayout.LOCK_MODE_LOCKED_CLOSED else DrawerLayout.LOCK_MODE_UNLOCKED)
         }
 
-    private val activity by lazy { requireActivity() as AppActivity }
+    private val activity by lazy { requireActivity() as Activity }
 
     private val drawer by lazy {
-        if (getActivity() is AppActivity) {
+        if (getActivity() is Activity) {
             activity.binding.drawerLayout
         } else {
             null
@@ -47,7 +47,7 @@ abstract class AppFragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (getActivity() !is AppActivity) {
+        if (getActivity() !is Activity) {
             return
         }
 

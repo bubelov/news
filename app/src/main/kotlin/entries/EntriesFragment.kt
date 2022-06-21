@@ -37,16 +37,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class EntriesFragment : AppFragment(), Scrollable {
 
-    private val args by lazy {
-        val args = requireArguments()
-
-        // Default filter
-        if (args["filter"] == null) {
-            args.putParcelable("filter", EntriesFilter.NotBookmarked)
-        }
-
-        EntriesFragmentArgs.fromBundle(requireArguments())
-    }
+    private val args by lazy { EntriesFragmentArgs.fromBundle(requireArguments()) }
 
     private val model: EntriesModel by viewModel()
 

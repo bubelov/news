@@ -14,7 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import co.appreactor.news.R
 import com.google.android.material.appbar.MaterialToolbar
 
-fun Fragment.toolbar(): MaterialToolbar? = (requireActivity() as? AppActivity)?.binding?.toolbar
+fun Fragment.toolbar(): MaterialToolbar? = (requireActivity() as? Activity)?.binding?.toolbar
 
 fun Fragment.showErrorDialog(
     t: Throwable,

@@ -20,7 +20,7 @@
         tools:targetApi="m">
 
         <activity
-            android:name="common.AppActivity"
+            android:name="common.Activity"
             android:exported="true">
 
             <intent-filter>

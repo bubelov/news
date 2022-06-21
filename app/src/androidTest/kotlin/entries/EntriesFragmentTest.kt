@@ -10,7 +10,7 @@ class EntriesFragmentTest {
     @Test
     fun launch() {
         val directions =
-            AuthFragmentDirections.actionAuthFragmentToEntriesFragment(EntriesFilter.NotBookmarked)
+            AuthFragmentDirections.actionAuthFragmentToNewsFragment(EntriesFilter.NotBookmarked)
 
         launchFragmentInContainer<EntriesFragment>(
             themeResId = R.style.Theme_Material3_DynamicColors_DayNight,

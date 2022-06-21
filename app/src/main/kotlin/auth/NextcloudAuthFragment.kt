@@ -92,7 +92,7 @@ class NextcloudAuthFragment : Fragment() {
 
                     model.scheduleBackgroundSync()
 
-                    findNavController().navigate(R.id.action_nextcloudAuthFragment_to_entriesFragment)
+                    findNavController().navigate(R.id.action_nextcloudAuthFragment_to_newsFragment)
                 }.onFailure {
                     binding.progress.isVisible = false
                     showErrorDialog(it.message ?: getString(R.string.direct_login_failed))

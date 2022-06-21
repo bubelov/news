@@ -12,6 +12,7 @@ import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentAuthBinding
 import common.ConfRepository
+import entries.EntriesFilter
 import kotlinx.coroutines.runBlocking
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.concurrent.TimeUnit
@@ -38,7 +39,7 @@ class AuthFragment : Fragment() {
             val sharedFeedUrl = (intent?.dataString ?: intent?.getStringExtra(Intent.EXTRA_TEXT))?.trim()
 
             if (sharedFeedUrl.isNullOrBlank()) {
-                findNavController().navigate(R.id.action_authFragment_to_entriesFragment)
+                findNavController().navigate(AuthFragmentDirections.actionAuthFragmentToNewsFragment(EntriesFilter.NotBookmarked))
             } else {
                 val directions = AuthFragmentDirections.actionAuthFragmentToFeedsFragment(sharedFeedUrl)
                 findNavController().navigate(directions)
@@ -78,7 +79,7 @@ class AuthFragment : Fragment() {
                 model.scheduleBackgroundSync()
 
                 binding.root.animate().alpha(0f).setDuration(150).withEndAction {
-                    findNavController().navigate(R.id.action_authFragment_to_entriesFragment)
+                    findNavController().navigate(AuthFragmentDirections.actionAuthFragmentToNewsFragment(EntriesFilter.NotBookmarked))
                 }
             }
         }

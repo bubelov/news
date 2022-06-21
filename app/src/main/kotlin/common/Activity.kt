@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.launchIn
 import org.koin.android.ext.android.get
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class AppActivity : AppCompatActivity() {
+class Activity : AppCompatActivity() {
 
     val model: AppViewModel by viewModel()
 
@@ -35,25 +35,24 @@ class AppActivity : AppCompatActivity() {
 
     private val navListener = NavController.OnDestinationChangedListener { _, destination, args ->
         binding.appBarLayout.isVisible = destination.id != R.id.authFragment
-        binding.toolbar.title = ""
+        binding.bottomNavigation.isVisible =
+            destination.id != R.id.authFragment && destination.id != R.id.feedEntriesFragment
 
-        if (destination.id == R.id.entriesFragment) {
-            val filter = args?.getParcelable<EntriesFilter>("filter")
-            binding.bottomNavigation.isVisible = filter !is EntriesFilter.BelongToFeed
-            return@OnDestinationChangedListener
+        val navView = binding.navigationView
+
+        when (destination.id) {
+            R.id.newsFragment -> {
+                navView.setCheckedItem(R.id.news)
+                args!!.putParcelable("filter", EntriesFilter.NotBookmarked)
+            }
+            R.id.bookmarksFragment -> {
+                navView.setCheckedItem(R.id.bookmarks)
+                args!!.putParcelable("filter", EntriesFilter.Bookmarked)
+            }
+            R.id.feedsFragment -> {
+                navView.setCheckedItem(R.id.feeds)
+            }
         }
-
-        if (destination.id == R.id.bookmarksFragment) {
-            args!!.putParcelable("filter", EntriesFilter.Bookmarked)
-        }
-
-        val bottomNavigationIsVisible =
-            destination.id == R.id.feedsFragment
-                    || destination.id == R.id.bookmarksFragment
-                    || destination.id == R.id.podcastsFragment
-                    || destination.id == R.id.entriesFragment
-
-        binding.bottomNavigation.isVisible = bottomNavigationIsVisible
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -82,6 +81,25 @@ class AppActivity : AppCompatActivity() {
         )
 
         binding.drawerLayout.addDrawerListener(drawerToggle)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        binding.bottomNavigation.setupWithNavController(navController)
+        scrollToTopOnSecondClick()
+        navController.addOnDestinationChangedListener(navListener)
+    }
+
+    private fun initNavigationView() {
+        val headerView = binding.navigationView.getHeaderView(0)!!
+        val titleView = headerView.findViewById<TextView>(R.id.title)!!
+        val subtitleView = headerView.findViewById<TextView>(R.id.subtitle)!!
+
+        combine(model.accountTitle(), model.accountSubtitle()) { title, subtitle ->
+            titleView.text = title
+            subtitleView.isVisible = subtitle.isNotBlank()
+            subtitleView.text = subtitle
+        }.launchIn(lifecycleScope)
 
         binding.navigationView.setNavigationItemSelectedListener {
             binding.drawerLayout.close()
@@ -95,7 +113,7 @@ class AppActivity : AppCompatActivity() {
             when (it.itemId) {
                 R.id.news -> {
                     navController.navigate(
-                        R.id.entriesFragment,
+                        R.id.newsFragment,
                         bundleOf(Pair("filter", EntriesFilter.NotBookmarked))
                     )
                 }
@@ -112,7 +130,7 @@ class AppActivity : AppCompatActivity() {
                 }
 
                 R.id.settings -> {
-                    navController.navigate(R.id.action_global_to_settingsFragment)
+                    navController.navigate(R.id.settingsFragment)
                 }
             }
 
@@ -120,10 +138,7 @@ class AppActivity : AppCompatActivity() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        binding.bottomNavigation.setupWithNavController(navController)
-
+    private fun scrollToTopOnSecondClick() {
         binding.bottomNavigation.setOnItemReselectedListener {
             supportFragmentManager.fragments.forEach { fragment ->
                 if (fragment is NavHostFragment) {
@@ -135,54 +150,5 @@ class AppActivity : AppCompatActivity() {
                 }
             }
         }
-
-        binding.bottomNavigation.setOnItemSelectedListener {
-            val navigationView = binding.navigationView
-
-            when (it.itemId) {
-                R.id.entriesFragment -> {
-                    navigationView.setCheckedItem(R.id.news)
-
-                    navController.navigate(
-                        R.id.entriesFragment,
-                        bundleOf(Pair("filter", EntriesFilter.NotBookmarked))
-                    )
-                }
-
-                R.id.bookmarksFragment -> {
-                    navigationView.setCheckedItem(R.id.bookmarks)
-
-                    navController.navigate(
-                        R.id.bookmarksFragment,
-                        bundleOf(Pair("filter", EntriesFilter.Bookmarked))
-                    )
-                }
-
-                R.id.feedsFragment -> {
-                    navigationView.setCheckedItem(R.id.feeds)
-                    navController.navigate(R.id.feedsFragment)
-                }
-
-                R.id.settingsFragment -> {
-                    navController.navigate(R.id.settingsFragment)
-                }
-            }
-
-            false
-        }
-
-        navController.addOnDestinationChangedListener(navListener)
-    }
-
-    private fun initNavigationView() {
-        val headerView = binding.navigationView.getHeaderView(0)!!
-        val titleView = headerView.findViewById<TextView>(R.id.title)!!
-        val subtitleView = headerView.findViewById<TextView>(R.id.subtitle)!!
-
-        combine(model.accountTitle(), model.accountSubtitle()) { title, subtitle ->
-            titleView.text = title
-            subtitleView.isVisible = subtitle.isNotBlank()
-            subtitleView.text = subtitle
-        }.launchIn(lifecycleScope)
     }
 }

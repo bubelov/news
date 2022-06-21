@@ -10,7 +10,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import co.appreactor.news.NavGraphDirections
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -257,7 +256,8 @@ class SettingsFragment : AppFragment() {
                 while (popBackStack()) {
                     popBackStack()
                 }
-                navigate(NavGraphDirections.actionGlobalToAuthFragment())
+
+                navigate(R.id.authFragment)
             }
         }
     }
