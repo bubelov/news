@@ -1,7 +1,6 @@
 package auth
 
 import androidx.lifecycle.ViewModel
-import api.NewsApiSwitcher
 import api.nextcloud.NextcloudNewsApiBuilder
 import common.ConfRepository
 import okhttp3.HttpUrl
@@ -9,7 +8,6 @@ import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
 class NextcloudAuthModel(
-    private val apiSwitcher: NewsApiSwitcher,
     private val confRepo: ConfRepository,
 ) : ViewModel() {
 
@@ -44,7 +42,5 @@ class NextcloudAuthModel(
                 nextcloudServerPassword = password,
             )
         }
-
-        apiSwitcher.switch(ConfRepository.BACKEND_NEXTCLOUD)
     }
 }

@@ -1,7 +1,6 @@
 package auth
 
 import androidx.lifecycle.ViewModel
-import api.NewsApiSwitcher
 import common.ConfRepository
 import db.Conf
 import kotlinx.coroutines.flow.first
@@ -10,7 +9,6 @@ import org.koin.android.annotation.KoinViewModel
 @KoinViewModel
 class AuthModel(
     private val confRepo: ConfRepository,
-    private val apiSwitcher: NewsApiSwitcher,
 ) : ViewModel() {
 
     suspend fun loadConf() = confRepo.load().first()
@@ -19,6 +17,5 @@ class AuthModel(
 
     suspend fun setBackend(newBackend: String) {
         confRepo.save { it.copy(backend = newBackend) }
-        apiSwitcher.switch(newBackend)
     }
 }

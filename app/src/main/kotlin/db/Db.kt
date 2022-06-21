@@ -1,25 +1,48 @@
 package db
 
+import android.content.Context
 import com.google.gson.GsonBuilder
 import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
 import com.squareup.sqldelight.ColumnAdapter
+import com.squareup.sqldelight.android.AndroidSqliteDriver
+import com.squareup.sqldelight.db.SqlDriver
+import common.App
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import java.time.OffsetDateTime
 
-fun entryAdapter() = Entry.Adapter(
+fun database(context: Context): Database {
+    val driver = AndroidSqliteDriver(
+        schema = Database.Schema,
+        context = context,
+        name = App.DB_FILE_NAME,
+    )
+
+    return database(driver)
+}
+
+fun database(driver: SqlDriver): Database {
+    return Database(
+        driver = driver,
+        EntryAdapter = entryAdapter(),
+        FeedAdapter = feedAdapter(),
+    )
+}
+
+private fun entryAdapter() = Entry.Adapter(
     publishedAdapter = offsetDateTimeAdapter(),
     updatedAdapter = offsetDateTimeAdapter(),
     linksAdapter = linksAdapter(),
 )
 
-fun feedAdapter() = Feed.Adapter(
+private fun feedAdapter() = Feed.Adapter(
     linksAdapter = linksAdapter(),
 )
 
 private fun offsetDateTimeAdapter() = object : ColumnAdapter<OffsetDateTime, String> {
+
     override fun decode(databaseValue: String): OffsetDateTime {
         try {
             val value = OffsetDateTime.parse(databaseValue)

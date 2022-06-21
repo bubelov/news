@@ -7,16 +7,10 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import api.NewsApi
-import api.NewsApiSwitcher
-import api.NewsApiWrapper
 import co.appreactor.news.BuildConfig
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
-import com.squareup.sqldelight.android.AndroidSqliteDriver
-import db.Database
-import db.entryAdapter
-import db.feedAdapter
+import db.database
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
@@ -24,7 +18,6 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
-import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 import org.koin.ksp.generated.defaultModule
 import sync.SyncWorker
@@ -43,34 +36,7 @@ class App : Application() {
             if (BuildConfig.DEBUG) androidLogger(Level.DEBUG)
             androidContext(this@App)
             defaultModule()
-
-            modules(module {
-                single {
-                    Database(
-                        driver = AndroidSqliteDriver(
-                            schema = Database.Schema,
-                            context = get(),
-                            name = DB_FILE_NAME,
-                        ),
-                        EntryAdapter = entryAdapter(),
-                        FeedAdapter = feedAdapter(),
-                    )
-                }
-
-                single<NewsApi> { NewsApiWrapper() }
-                single { get<NewsApi>() as NewsApiWrapper }
-
-                singleOf(::NetworkMonitor);
-            })
-        }
-
-        runBlocking {
-            val backend = get<ConfRepository>().load().first().backend
-
-            if (backend.isNotBlank()) {
-                get<NewsApiSwitcher>().switch(backend)
-                setupBackgroundSync(override = false)
-            }
+            modules(module { single { database(this@App) } })
         }
 
         val picasso = Picasso.Builder(this)

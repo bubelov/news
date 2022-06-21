@@ -10,7 +10,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class StandaloneNewsApiTests {
+class StandaloneNewsApiTest {
 
     @Test
     fun `addFeed + 404`() = runBlocking {
