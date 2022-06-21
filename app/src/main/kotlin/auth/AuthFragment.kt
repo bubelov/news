@@ -12,7 +12,6 @@ import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentAuthBinding
 import common.ConfRepository
-import common.app
 import kotlinx.coroutines.runBlocking
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.concurrent.TimeUnit
@@ -76,8 +75,7 @@ class AuthFragment : Fragment() {
                 }
 
                 model.setBackend(ConfRepository.BACKEND_STANDALONE)
-
-                app().setupBackgroundSync(override = true)
+                model.scheduleBackgroundSync()
 
                 binding.root.animate().alpha(0f).setDuration(150).withEndAction {
                     findNavController().navigate(R.id.action_authFragment_to_entriesFragment)

@@ -14,11 +14,10 @@ import co.appreactor.news.NavGraphDirections
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import common.App
 import common.AppFragment
 import common.ConfRepository
-import common.app
 import common.showErrorDialog
+import db.databaseFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -42,10 +41,10 @@ class SettingsFragment : AppFragment() {
             return@registerForActivityResult
         }
 
-        val database = requireActivity().getDatabasePath(App.DB_FILE_NAME)
+        val databaseFile = requireContext().databaseFile()
 
-        if (!database.exists()) {
-            Toast.makeText(requireContext(), "Database does not exist", Toast.LENGTH_LONG).show()
+        if (!databaseFile.exists()) {
+            Toast.makeText(requireContext(), "Database file does not exist", Toast.LENGTH_LONG).show()
             return@registerForActivityResult
         }
 
@@ -53,7 +52,7 @@ class SettingsFragment : AppFragment() {
             withContext(Dispatchers.IO) {
                 runCatching {
                     requireContext().contentResolver.openOutputStream(uri)?.use {
-                        database.inputStream().copyTo(it)
+                        databaseFile.inputStream().copyTo(it)
                     }
                 }.onFailure {
                     showErrorDialog(it)
@@ -87,9 +86,12 @@ class SettingsFragment : AppFragment() {
                 backgroundSyncIntervalButton.isVisible = conf.syncInBackground
 
                 setOnCheckedChangeListener { _, isChecked ->
-                    runBlocking { model.saveConf { it.copy(syncInBackground = isChecked) } }
+                    runBlocking {
+                        model.saveConf { it.copy(syncInBackground = isChecked) }
+                        model.scheduleBackgroundSync()
+                    }
+
                     backgroundSyncIntervalButton.isVisible = isChecked
-                    app().setupBackgroundSync(override = true)
                 }
             }
 
@@ -109,8 +111,11 @@ class SettingsFragment : AppFragment() {
 
                     setOnCheckedChangeListener { _, isChecked ->
                         if (isChecked) {
-                            runBlocking { model.saveConf { it.copy(backgroundSyncIntervalMillis = millis) } }
-                            app().setupBackgroundSync(override = true)
+                            runBlocking {
+                                model.saveConf { it.copy(backgroundSyncIntervalMillis = millis) }
+                                model.scheduleBackgroundSync()
+                            }
+
                             backgroundSyncInterval.text = text
                             dialog.dismiss()
                         }

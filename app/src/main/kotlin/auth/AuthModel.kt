@@ -5,10 +5,12 @@ import common.ConfRepository
 import db.Conf
 import kotlinx.coroutines.flow.first
 import org.koin.android.annotation.KoinViewModel
+import sync.BackgroundSyncScheduler
 
 @KoinViewModel
 class AuthModel(
     private val confRepo: ConfRepository,
+    private val syncScheduler: BackgroundSyncScheduler,
 ) : ViewModel() {
 
     suspend fun loadConf() = confRepo.load().first()
@@ -17,5 +19,9 @@ class AuthModel(
 
     suspend fun setBackend(newBackend: String) {
         confRepo.save { it.copy(backend = newBackend) }
+    }
+
+    suspend fun scheduleBackgroundSync() {
+        syncScheduler.schedule(override = true)
     }
 }

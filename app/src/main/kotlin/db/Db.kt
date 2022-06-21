@@ -8,16 +8,18 @@ import com.google.gson.stream.JsonWriter
 import com.squareup.sqldelight.ColumnAdapter
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
-import common.App
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import java.io.File
 import java.time.OffsetDateTime
+
+private const val FILE_NAME = "news-v3.db"
 
 fun database(context: Context): Database {
     val driver = AndroidSqliteDriver(
         schema = Database.Schema,
         context = context,
-        name = App.DB_FILE_NAME,
+        name = FILE_NAME,
     )
 
     return database(driver)
@@ -29,6 +31,10 @@ fun database(driver: SqlDriver): Database {
         EntryAdapter = entryAdapter(),
         FeedAdapter = feedAdapter(),
     )
+}
+
+fun Context.databaseFile(): File {
+    return getDatabasePath(FILE_NAME)
 }
 
 private fun entryAdapter() = Entry.Adapter(

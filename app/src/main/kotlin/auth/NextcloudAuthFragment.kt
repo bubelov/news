@@ -11,7 +11,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentNextcloudAuthBinding
-import common.app
 import common.showErrorDialog
 import common.toolbar
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -91,7 +90,7 @@ class NextcloudAuthFragment : Fragment() {
                         trustSelfSignedCerts = trustSelfSignedCerts,
                     )
 
-                    app().setupBackgroundSync(override = true)
+                    model.scheduleBackgroundSync()
 
                     findNavController().navigate(R.id.action_nextcloudAuthFragment_to_entriesFragment)
                 }.onFailure {

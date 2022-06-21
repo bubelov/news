@@ -5,10 +5,12 @@ import api.miniflux.MinifluxApiBuilder
 import common.ConfRepository
 import okhttp3.HttpUrl
 import org.koin.android.annotation.KoinViewModel
+import sync.BackgroundSyncScheduler
 
 @KoinViewModel
 class MinifluxAuthModel(
     private val confRepo: ConfRepository,
+    private val syncScheduler: BackgroundSyncScheduler,
 ) : ViewModel() {
 
     suspend fun testServerConf(
@@ -42,5 +44,9 @@ class MinifluxAuthModel(
                 minifluxServerPassword = password,
             )
         }
+    }
+
+    suspend fun scheduleBackgroundSync() {
+        syncScheduler.schedule(override = true)
     }
 }

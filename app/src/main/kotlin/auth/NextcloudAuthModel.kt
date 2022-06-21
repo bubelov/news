@@ -5,10 +5,12 @@ import api.nextcloud.NextcloudNewsApiBuilder
 import common.ConfRepository
 import okhttp3.HttpUrl
 import org.koin.android.annotation.KoinViewModel
+import sync.BackgroundSyncScheduler
 
 @KoinViewModel
 class NextcloudAuthModel(
     private val confRepo: ConfRepository,
+    private val backgroundSyncScheduler: BackgroundSyncScheduler,
 ) : ViewModel() {
 
     suspend fun testServerConf(
@@ -42,5 +44,9 @@ class NextcloudAuthModel(
                 nextcloudServerPassword = password,
             )
         }
+    }
+
+    suspend fun scheduleBackgroundSync() {
+        backgroundSyncScheduler.schedule(override = true)
     }
 }

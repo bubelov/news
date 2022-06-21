@@ -11,7 +11,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentMinifluxAuthBinding
-import common.app
 import common.showErrorDialog
 import common.toolbar
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -91,7 +90,7 @@ class MinifluxAuthFragment : Fragment() {
                         trustSelfSignedCerts = trustSelfSignedCerts,
                     )
 
-                    app().setupBackgroundSync(override = true)
+                    model.scheduleBackgroundSync()
 
                     findNavController().navigate(R.id.action_minifluxAuthFragment_to_entriesFragment)
                 }.onFailure {
