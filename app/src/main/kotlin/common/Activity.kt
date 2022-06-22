@@ -23,7 +23,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class Activity : AppCompatActivity() {
 
-    val model: AppViewModel by viewModel()
+    val model: ActivityModel by viewModel()
 
     lateinit var binding: ActivityAppBinding
 
