@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.net.toUri
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -17,17 +16,17 @@ import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentEntriesBinding
 import com.google.android.material.snackbar.Snackbar
+import common.AppFragment
 import common.CardListAdapterDecoration
 import common.ConfRepository
 import common.Scrollable
-import common.drawer
 import common.hide
 import common.openCachedPodcast
 import common.openUrl
 import common.screenWidth
+import common.sharedToolbar
 import common.show
 import common.showErrorDialog
-import common.toolbar
 import db.EntryWithoutContent
 import db.Link
 import kotlinx.coroutines.flow.first
@@ -39,7 +38,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class EntriesFragment : Fragment(), Scrollable {
+class EntriesFragment : AppFragment(), Scrollable {
 
     private val args by lazy { EntriesFragmentArgs.fromBundle(requireArguments()) }
 
@@ -230,7 +229,6 @@ class EntriesFragment : Fragment(), Scrollable {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initDrawer()
         initToolbar()
         initSwipeRefresh()
         initList()
@@ -262,18 +260,8 @@ class EntriesFragment : Fragment(), Scrollable {
         binding.list.layoutManager?.scrollToPosition(0)
     }
 
-    private fun initDrawer() {
-        drawer()?.apply {
-            if (args.filter is EntriesFilter.BelongToFeed) {
-                setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
-            } else {
-                setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
-            }
-        }
-    }
-
     private fun initToolbar() {
-        toolbar()?.apply {
+        sharedToolbar()?.apply {
             inflateMenu(R.menu.menu_entries)
 
             when (val filter = args.filter!!) {
@@ -303,7 +291,7 @@ class EntriesFragment : Fragment(), Scrollable {
     }
 
     private fun initSearchButton() {
-        val searchMenuItem = toolbar()?.menu?.findItem(R.id.search)
+        val searchMenuItem = sharedToolbar()?.menu?.findItem(R.id.search)
 
         searchMenuItem?.setOnMenuItemClickListener {
             findNavController().navigate(
@@ -316,7 +304,7 @@ class EntriesFragment : Fragment(), Scrollable {
     }
 
     private fun initShowReadEntriesButton() {
-        val showOpenedEntriesMenuItem = toolbar()?.menu?.findItem(R.id.showOpenedEntries)
+        val showOpenedEntriesMenuItem = sharedToolbar()?.menu?.findItem(R.id.showOpenedEntries)
         showOpenedEntriesMenuItem?.isVisible = getShowReadEntriesButtonVisibility()
 
         lifecycleScope.launchWhenResumed {
@@ -344,7 +332,7 @@ class EntriesFragment : Fragment(), Scrollable {
     }
 
     private fun initSortOrderButton() {
-        val sortOrderMenuItem = toolbar()?.menu?.findItem(R.id.sort) ?: return
+        val sortOrderMenuItem = sharedToolbar()?.menu?.findItem(R.id.sort) ?: return
 
         model.loadConf().onEach { conf ->
             when (conf.sortOrder) {
@@ -367,7 +355,7 @@ class EntriesFragment : Fragment(), Scrollable {
     }
 
     private fun initMarkAllAsReadButton() {
-        toolbar()?.menu?.findItem(R.id.markAllAsRead)?.setOnMenuItemClickListener {
+        sharedToolbar()?.menu?.findItem(R.id.markAllAsRead)?.setOnMenuItemClickListener {
             lifecycleScope.launchWhenResumed { model.markAllAsRead() }
             true
         }

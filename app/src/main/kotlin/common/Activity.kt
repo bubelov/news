@@ -6,6 +6,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
@@ -35,8 +36,12 @@ class Activity : AppCompatActivity() {
 
     private val navListener = NavController.OnDestinationChangedListener { _, destination, args ->
         binding.appBarLayout.isVisible = destination.id != R.id.authFragment
+
         binding.bottomNavigation.isVisible =
-            destination.id != R.id.authFragment && destination.id != R.id.feedEntriesFragment
+            destination.id != R.id.authFragment
+                    && destination.id != R.id.minifluxAuthFragment
+                    && destination.id != R.id.nextcloudAuthFragment
+                    && destination.id != R.id.feedEntriesFragment
 
         val navView = binding.navigationView
 
@@ -53,6 +58,18 @@ class Activity : AppCompatActivity() {
                 navView.setCheckedItem(R.id.feeds)
             }
         }
+
+        val lockDrawer = when (destination.id) {
+            R.id.authFragment -> true
+            R.id.minifluxAuthFragment -> true
+            R.id.nextcloudAuthFragment -> true
+            R.id.settingsFragment -> true
+            else -> false
+        }
+
+        val lockMode = if (lockDrawer) DrawerLayout.LOCK_MODE_LOCKED_CLOSED else DrawerLayout.LOCK_MODE_UNLOCKED
+        binding.drawerLayout.setDrawerLockMode(lockMode)
+        if (!lockDrawer) drawerToggle.syncState()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

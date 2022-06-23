@@ -15,6 +15,7 @@ import co.appreactor.news.databinding.FragmentFeedSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import common.AppFragment
+import common.sharedToolbar
 import common.showErrorDialog
 import common.showKeyboard
 import kotlinx.coroutines.flow.first
@@ -51,7 +52,7 @@ class FeedSettingsFragment : AppFragment() {
                 return@launch
             }
 
-            toolbar?.apply {
+            sharedToolbar()?.apply {
                 setupUpNavigation()
                 title = feed.title
             }

@@ -4,19 +4,18 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentNextcloudAuthBinding
+import common.AppFragment
 import common.showErrorDialog
-import common.toolbar
+import common.sharedToolbar
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class NextcloudAuthFragment : Fragment() {
+class NextcloudAuthFragment : AppFragment() {
 
     private val model: NextcloudAuthModel by viewModel()
 
@@ -35,9 +34,8 @@ class NextcloudAuthFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        toolbar()?.apply {
-            navigationIcon = DrawerArrowDrawable(context).apply { progress = 1f }
-            setNavigationOnClickListener { findNavController().popBackStack() }
+        sharedToolbar()?.apply {
+            setupUpNavigation()
             setTitle(R.string.nextcloud_login)
         }
 

@@ -15,6 +15,7 @@ import common.AppFragment
 import common.CardListAdapterDecoration
 import common.hideKeyboard
 import common.screenWidth
+import common.sharedToolbar
 import common.showKeyboard
 import db.EntryWithoutContent
 import db.Link
@@ -99,7 +100,7 @@ class SearchFragment : AppFragment() {
 
         searchPanel.isVisible = true
 
-        toolbar?.setupUpNavigation(hideKeyboard = true)
+        sharedToolbar()?.setupUpNavigation(hideKeyboard = true)
 
         lifecycleScope.launch {
             model.searchString.collect {

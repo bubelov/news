@@ -22,6 +22,7 @@ import co.appreactor.news.databinding.FragmentEntryBinding
 import common.AppFragment
 import common.hide
 import common.openUrl
+import common.sharedToolbar
 import common.show
 import common.showErrorDialog
 import db.Entry
@@ -53,7 +54,7 @@ class EntryFragment : AppFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        toolbar?.apply {
+        sharedToolbar()?.apply {
             setupUpNavigation()
             inflateMenu(R.menu.menu_entry)
         }
@@ -86,7 +87,7 @@ class EntryFragment : AppFragment() {
 
     private fun setState(state: EntryViewModel.State) {
         binding.apply {
-            val menu = toolbar?.menu
+            val menu = sharedToolbar()?.menu
 
             when (state) {
                 EntryViewModel.State.Progress -> {
@@ -109,9 +110,9 @@ class EntryFragment : AppFragment() {
                     menu?.findItem(R.id.share)?.isVisible = true
 
                     contentContainer.show(animate = true)
-                    toolbar?.title = state.feedTitle
+                    sharedToolbar()?.title = state.feedTitle
 
-                    toolbar?.setOnMenuItemClickListener {
+                    sharedToolbar()?.setOnMenuItemClickListener {
                         onMenuItemClick(
                             menuItem = it,
                             entry = state.entry,
@@ -194,7 +195,7 @@ class EntryFragment : AppFragment() {
     }
 
     private fun updateBookmarkedButton(bookmarked: Boolean) {
-        toolbar?.menu?.findItem(R.id.toggleBookmarked)?.apply {
+        sharedToolbar()?.menu?.findItem(R.id.toggleBookmarked)?.apply {
             if (bookmarked) {
                 setIcon(R.drawable.ic_baseline_bookmark_24)
                 setTitle(R.string.remove_bookmark)

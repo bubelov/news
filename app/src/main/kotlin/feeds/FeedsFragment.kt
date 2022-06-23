@@ -20,6 +20,7 @@ import com.google.android.material.textfield.TextInputEditText
 import common.AppFragment
 import common.ListAdapterDecoration
 import common.hide
+import common.sharedToolbar
 import common.show
 import common.showDialog
 import common.showErrorDialog
@@ -33,7 +34,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class FeedsFragment : AppFragment(lockDrawer = false) {
+class FeedsFragment : AppFragment() {
 
     private val model: FeedsModel by viewModel()
 
@@ -214,7 +215,7 @@ class FeedsFragment : AppFragment(lockDrawer = false) {
         _binding = null
     }
 
-    private fun initToolbar() = toolbar?.apply {
+    private fun initToolbar() = sharedToolbar()?.apply {
         setTitle(R.string.feeds)
         inflateMenu(R.menu.menu_feeds)
 

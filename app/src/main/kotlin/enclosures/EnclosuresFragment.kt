@@ -10,6 +10,7 @@ import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentEnclosuresBinding
 import common.AppFragment
 import common.ListAdapterDecoration
+import common.sharedToolbar
 import db.Link
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -35,7 +36,7 @@ class EnclosuresFragment : AppFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        toolbar?.apply {
+        sharedToolbar()?.apply {
             setupUpNavigation()
             setTitle(R.string.enclosures)
         }

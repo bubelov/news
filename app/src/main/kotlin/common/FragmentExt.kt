@@ -9,15 +9,14 @@ import android.util.Log
 import android.view.WindowManager
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.getSystemService
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import co.appreactor.news.R
 import com.google.android.material.appbar.MaterialToolbar
 
-fun Fragment.drawer(): DrawerLayout? = (requireActivity() as? Activity)?.binding?.drawerLayout
-
-fun Fragment.toolbar(): MaterialToolbar? = (requireActivity() as? Activity)?.binding?.toolbar
+fun Fragment.sharedToolbar(): MaterialToolbar? {
+    return (requireActivity() as? Activity)?.binding?.toolbar
+}
 
 fun Fragment.showErrorDialog(
     t: Throwable,
