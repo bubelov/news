@@ -10,68 +10,78 @@ import entries.EntriesAdapterItem
 import entries.EntriesFilter
 import entries.EntriesRepository
 import feeds.FeedsRepository
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 import sync.NewsApiSync
 
 @KoinViewModel
-class SearchViewModel(
+class SearchModel(
     private val feedsRepo: FeedsRepository,
     private val entriesRepo: EntriesRepository,
     private val confRepo: ConfRepository,
     private val sync: NewsApiSync,
 ) : ViewModel() {
 
-    val searchString = MutableStateFlow("")
+    private val _filter = MutableStateFlow<EntriesFilter?>(null)
 
-    val searchResults = MutableStateFlow(listOf<EntriesAdapterItem>())
+    private val _query = MutableStateFlow("")
+    val query = _query.asStateFlow()
 
-    val showProgress = MutableStateFlow(false)
+    private val _state = MutableStateFlow<State>(State.Loaded("", emptyList()))
+    val state = _state.asStateFlow()
 
-    val showEmpty = MutableStateFlow(false)
+    init {
+        combine(_filter, _query) { filter, query ->
+            if (filter == null) {
+                _state.update { State.Loaded("", emptyList()) }
+            } else {
+                _state.update { State.Loaded(query, emptyList()) }
 
-    suspend fun onViewCreated(filter: EntriesFilter) {
-        searchString.collectLatest { query ->
-            searchResults.value = emptyList()
-            showProgress.value = false
-            showEmpty.value = false
+                if (query.length >= 3) {
+                    _state.update { State.Loading }
 
-            if (query.length < 3) {
-                return@collectLatest
-            }
+                    val entries = when (filter) {
+                        EntriesFilter.NotBookmarked -> {
+                            entriesRepo.selectByQuery(query).first()
+                        }
+                        EntriesFilter.Bookmarked -> entriesRepo.selectByQueryAndBookmarked(
+                            query,
+                            true,
+                        ).first()
+                        is EntriesFilter.BelongToFeed -> entriesRepo.selectByQueryAndFeedId(
+                            query,
+                            filter.feedId,
+                        ).first()
+                    }
 
-            showProgress.value = true
+                    val feeds = feedsRepo.selectAll().first()
 
-            val entries = when (filter) {
-                EntriesFilter.NotBookmarked -> {
-                    delay(1500)
-                    entriesRepo.selectByQuery(query).first()
+                    val results = entries.map { entry ->
+                        val feed = feeds.singleOrNull { feed -> feed.id == entry.feedId }
+                        entry.toRow(feed)
+                    }
+
+                    _state.update { State.Loaded(query, results) }
                 }
-                EntriesFilter.Bookmarked -> entriesRepo.selectByQueryAndBookmarked(
-                    query,
-                    true,
-                ).first()
-                is EntriesFilter.BelongToFeed -> entriesRepo.selectByQueryAndFeedId(
-                    query,
-                    filter.feedId,
-                ).first()
             }
+        }.onEach {
 
-            val feeds = feedsRepo.selectAll().first()
+        }.launchIn(viewModelScope)
+    }
 
-            val results = entries.map { entry ->
-                val feed = feeds.singleOrNull { feed -> feed.id == entry.feedId }
-                entry.toRow(feed)
-            }
+    fun setFilter(filter: EntriesFilter) {
+        _filter.update { filter }
+    }
 
-            showProgress.value = false
-            showEmpty.value = results.isEmpty()
-            searchResults.value = results
-        }
+    fun setQuery(query: String) {
+        _query.update { query }
     }
 
     fun getEntry(id: String) = entriesRepo.selectById(id)
@@ -127,5 +137,10 @@ class SearchViewModel(
             audioEnclosure = null,
             read = read,
         )
+    }
+
+    sealed class State {
+        object Loading : State()
+        data class Loaded(val query: String, val items: List<EntriesAdapterItem>) : State()
     }
 }

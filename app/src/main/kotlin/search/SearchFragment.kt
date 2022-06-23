@@ -22,16 +22,15 @@ import db.Link
 import entries.EntriesAdapter
 import entries.EntriesAdapterCallback
 import entries.EntriesAdapterItem
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SearchFragment : AppFragment() {
 
-    private val args by lazy {
-        SearchFragmentArgs.fromBundle(requireArguments())
-    }
+    private val args by lazy { SearchFragmentArgs.fromBundle(requireArguments()) }
 
-    private val model: SearchViewModel by viewModel()
+    private val model: SearchModel by viewModel()
 
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
@@ -102,15 +101,13 @@ class SearchFragment : AppFragment() {
 
         sharedToolbar()?.setupUpNavigation(hideKeyboard = true)
 
-        lifecycleScope.launch {
-            model.searchString.collect {
-                searchPanelClearButton.isVisible = it.isNotEmpty()
-            }
-        }
+        model.query
+            .onEach { searchPanelClearButton.isVisible = it.isNotEmpty() }
+            .launchIn(viewLifecycleOwner.lifecycleScope)
 
         searchPanelText.addTextChangedListener(object : TextWatcherAdapter() {
             override fun afterTextChanged(s: Editable) {
-                model.searchString.value = s.toString()
+                model.setQuery(s.toString())
             }
         })
 
@@ -120,18 +117,6 @@ class SearchFragment : AppFragment() {
 
         searchPanelText.requestFocus()
         requireContext().showKeyboard()
-
-        lifecycleScope.launch {
-            model.showProgress.collect {
-                binding.progress.isVisible = it
-            }
-        }
-
-        lifecycleScope.launch {
-            model.showEmpty.collect {
-                binding.message.isVisible = it
-            }
-        }
 
         binding.list.setHasFixedSize(true)
         binding.list.layoutManager = LinearLayoutManager(context)
@@ -146,20 +131,32 @@ class SearchFragment : AppFragment() {
 
         adapter.screenWidth = screenWidth()
 
-        lifecycleScope.launch {
-            model.searchResults.collect { results ->
-                adapter.submitList(results)
-            }
-        }
+        model.setFilter(args.filter!!)
 
-        lifecycleScope.launch {
-            model.onViewCreated(args.filter!!)
-        }
+        model.state
+            .onEach { setState(it) }
+            .launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
     override fun onDestroyView() {
         searchPanel.isVisible = false
         requireContext().hideKeyboard(searchPanelText)
         super.onDestroyView()
+    }
+
+    private fun setState(state: SearchModel.State) {
+        binding.progress.isVisible = false
+
+        when (state) {
+            SearchModel.State.Loading -> {
+                binding.progress.isVisible = true
+            }
+            is SearchModel.State.Loaded -> {
+                binding.progress.isVisible = false
+                val items = state.items
+                binding.message.isVisible = items.isEmpty()
+                adapter.submitList(items)
+            }
+        }
     }
 }
