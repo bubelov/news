@@ -1,14 +1,15 @@
 package common
 
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -24,17 +25,16 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class Activity : AppCompatActivity() {
 
-    val model: ActivityModel by viewModel()
+    private val model: ActivityModel by viewModel()
 
     lateinit var binding: ActivityAppBinding
 
-    private val navController by lazy {
-        findNavController(R.id.nav_host_fragment)
-    }
+    private val navController by lazy { findNavController(R.id.nav_host_fragment) }
 
     lateinit var drawerToggle: ActionBarDrawerToggle
 
     private val navListener = NavController.OnDestinationChangedListener { _, destination, args ->
+        syncDrawerState(destination)
         binding.appBarLayout.isVisible = destination.id != R.id.authFragment
 
         binding.bottomNavigation.isVisible =
@@ -43,51 +43,16 @@ class Activity : AppCompatActivity() {
                     && destination.id != R.id.nextcloudAuthFragment
                     && destination.id != R.id.feedEntriesFragment
 
-        val navView = binding.navigationView
-
         when (destination.id) {
-            R.id.newsFragment -> {
-                navView.setCheckedItem(R.id.news)
-                args!!.putParcelable("filter", EntriesFilter.NotBookmarked)
-            }
-            R.id.bookmarksFragment -> {
-                navView.setCheckedItem(R.id.bookmarks)
-                args!!.putParcelable("filter", EntriesFilter.Bookmarked)
-            }
-            R.id.feedsFragment -> {
-                navView.setCheckedItem(R.id.feeds)
-            }
+            R.id.newsFragment -> args!!.putParcelable("filter", EntriesFilter.NotBookmarked)
+            R.id.bookmarksFragment -> args!!.putParcelable("filter", EntriesFilter.Bookmarked)
         }
-
-        val lockDrawer = when (destination.id) {
-            R.id.authFragment -> true
-            R.id.minifluxAuthFragment -> true
-            R.id.nextcloudAuthFragment -> true
-            R.id.settingsFragment -> true
-            else -> false
-        }
-
-        val lockMode = if (lockDrawer) DrawerLayout.LOCK_MODE_LOCKED_CLOSED else DrawerLayout.LOCK_MODE_UNLOCKED
-        binding.drawerLayout.setDrawerLockMode(lockMode)
-        if (!lockDrawer) drawerToggle.syncState()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAppBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        initNavigationView()
-
-        lifecycleScope.launchWhenCreated {
-            get<AudioEnclosuresRepository>().apply {
-                deleteIncompleteDownloads()
-            }
-        }
-
-        lifecycleScope.launchWhenCreated {
-            get<EntriesImagesRepository>().syncOpenGraphImages()
-        }
 
         drawerToggle = ActionBarDrawerToggle(
             this,
@@ -98,16 +63,34 @@ class Activity : AppCompatActivity() {
         )
 
         binding.drawerLayout.addDrawerListener(drawerToggle)
+
+        initDrawerHeader()
+
+        lifecycleScope.launchWhenCreated {
+            get<AudioEnclosuresRepository>().apply {
+                deleteIncompleteDownloads()
+            }
+        }
+
+        lifecycleScope.launchWhenCreated {
+            get<EntriesImagesRepository>().syncOpenGraphImages()
+        }
+    }
+
+    override fun onPostCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
+        super.onPostCreate(savedInstanceState, persistentState)
+        drawerToggle.syncState()
     }
 
     override fun onStart() {
         super.onStart()
+        binding.navigationView.setupWithNavController(navController)
         binding.bottomNavigation.setupWithNavController(navController)
         scrollToTopOnSecondClick()
         navController.addOnDestinationChangedListener(navListener)
     }
 
-    private fun initNavigationView() {
+    private fun initDrawerHeader() {
         val headerView = binding.navigationView.getHeaderView(0)!!
         val titleView = headerView.findViewById<TextView>(R.id.title)!!
         val subtitleView = headerView.findViewById<TextView>(R.id.subtitle)!!
@@ -117,42 +100,6 @@ class Activity : AppCompatActivity() {
             subtitleView.isVisible = subtitle.isNotBlank()
             subtitleView.text = subtitle
         }.launchIn(lifecycleScope)
-
-        binding.navigationView.setNavigationItemSelectedListener {
-            binding.drawerLayout.close()
-
-            if (it.isChecked) {
-                return@setNavigationItemSelectedListener false
-            } else {
-                it.isChecked = it.groupId == R.id.main
-            }
-
-            when (it.itemId) {
-                R.id.news -> {
-                    navController.navigate(
-                        R.id.newsFragment,
-                        bundleOf(Pair("filter", EntriesFilter.NotBookmarked))
-                    )
-                }
-
-                R.id.bookmarks -> {
-                    navController.navigate(
-                        R.id.bookmarksFragment,
-                        bundleOf(Pair("filter", EntriesFilter.Bookmarked))
-                    )
-                }
-
-                R.id.feeds -> {
-                    navController.navigate(R.id.feedsFragment)
-                }
-
-                R.id.settings -> {
-                    navController.navigate(R.id.settingsFragment)
-                }
-            }
-
-            return@setNavigationItemSelectedListener true
-        }
     }
 
     private fun scrollToTopOnSecondClick() {
@@ -167,5 +114,19 @@ class Activity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun syncDrawerState(destination: NavDestination) {
+        val lockDrawer = when (destination.id) {
+            R.id.authFragment -> true
+            R.id.minifluxAuthFragment -> true
+            R.id.nextcloudAuthFragment -> true
+            R.id.feedEntriesFragment -> true
+            R.id.settingsFragment -> true
+            else -> false
+        }
+
+        val lockMode = if (lockDrawer) DrawerLayout.LOCK_MODE_LOCKED_CLOSED else DrawerLayout.LOCK_MODE_UNLOCKED
+        binding.drawerLayout.setDrawerLockMode(lockMode)
     }
 }
