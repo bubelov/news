@@ -6,6 +6,8 @@ import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import crash.CrashHandler
 import db.database
+import enclosures.AudioEnclosuresRepository
+import entriesimages.EntriesImagesRepository
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.get
@@ -38,6 +40,12 @@ class App : Application() {
 
         val syncScheduler = get<BackgroundSyncScheduler>()
         GlobalScope.launch { syncScheduler.schedule(override = false) }
+
+        val enclosuresRepo = get<AudioEnclosuresRepository>()
+        GlobalScope.launch { enclosuresRepo.deleteIncompleteDownloads() }
+
+        val entriesImagesRepo = get<EntriesImagesRepository>()
+        GlobalScope.launch { entriesImagesRepo.syncOpenGraphImages() }
 
         CrashHandler().setup(this)
     }

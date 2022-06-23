@@ -15,12 +15,9 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.ActivityAppBinding
-import enclosures.AudioEnclosuresRepository
 import entries.EntriesFilter
-import entriesimages.EntriesImagesRepository
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
-import org.koin.android.ext.android.get
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class Activity : AppCompatActivity() {
@@ -54,6 +51,8 @@ class Activity : AppCompatActivity() {
         binding = ActivityAppBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        initDrawerHeader()
+
         drawerToggle = ActionBarDrawerToggle(
             this,
             binding.drawerLayout,
@@ -63,18 +62,6 @@ class Activity : AppCompatActivity() {
         )
 
         binding.drawerLayout.addDrawerListener(drawerToggle)
-
-        initDrawerHeader()
-
-        lifecycleScope.launchWhenCreated {
-            get<AudioEnclosuresRepository>().apply {
-                deleteIncompleteDownloads()
-            }
-        }
-
-        lifecycleScope.launchWhenCreated {
-            get<EntriesImagesRepository>().syncOpenGraphImages()
-        }
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {

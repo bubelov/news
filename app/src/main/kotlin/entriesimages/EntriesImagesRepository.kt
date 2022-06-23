@@ -10,6 +10,7 @@ import db.Conf
 import db.Database
 import db.EntryWithoutContent
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.withContext
@@ -35,7 +36,10 @@ class EntriesImagesRepository(
         .build()
 
     suspend fun syncOpenGraphImages() {
-        confRepo.load().collectLatest { syncOpenGraphImages(it) }
+        while (true) {
+            runCatching { confRepo.load().collectLatest { syncOpenGraphImages(it) } }
+            delay(1000)
+        }
     }
 
     private suspend fun syncOpenGraphImages(conf: Conf) {
