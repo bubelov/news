@@ -1,6 +1,7 @@
 package feeds
 
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -274,8 +275,8 @@ class FeedsFragment : AppFragment() {
                 .show()
 
             alert.findViewById<EditText>(R.id.url)?.apply {
-                setOnEditorActionListener { _, actionId, _ ->
-                    if (actionId == EditorInfo.IME_ACTION_DONE) {
+                setOnEditorActionListener { _, actionId, keyEvent ->
+                    if (actionId == EditorInfo.IME_ACTION_DONE || keyEvent.keyCode == KeyEvent.KEYCODE_ENTER) {
                         alert.dismiss()
 
                         viewLifecycleOwner.lifecycleScope.launch {
