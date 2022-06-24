@@ -19,7 +19,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentEntryBinding
-import common.AppFragment
+import common.BaseFragment
 import common.hide
 import common.openUrl
 import common.sharedToolbar
@@ -33,7 +33,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-class EntryFragment : AppFragment() {
+class EntryFragment : BaseFragment() {
 
     private val args: EntryFragmentArgs by navArgs()
 

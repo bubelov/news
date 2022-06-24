@@ -8,7 +8,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentEnclosuresBinding
-import common.AppFragment
+import common.BaseFragment
 import common.ListAdapterDecoration
 import common.sharedToolbar
 import db.Link
@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class EnclosuresFragment : AppFragment() {
+class EnclosuresFragment : BaseFragment() {
 
     private val model: EnclosuresModel by viewModel()
 

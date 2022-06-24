@@ -14,7 +14,7 @@ import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentFeedSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
-import common.AppFragment
+import common.BaseFragment
 import common.sharedToolbar
 import common.showErrorDialog
 import common.showKeyboard
@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class FeedSettingsFragment : AppFragment() {
+class FeedSettingsFragment : BaseFragment() {
 
     private val args: FeedSettingsFragmentArgs by navArgs()
 

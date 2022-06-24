@@ -9,13 +9,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentMinifluxAuthBinding
-import common.AppFragment
+import common.BaseFragment
 import common.sharedToolbar
 import common.showErrorDialog
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class MinifluxAuthFragment : AppFragment() {
+class MinifluxAuthFragment : BaseFragment() {
 
     private val model: MinifluxAuthModel by viewModel()
 

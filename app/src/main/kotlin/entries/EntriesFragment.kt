@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.net.toUri
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -16,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentEntriesBinding
 import com.google.android.material.snackbar.Snackbar
-import common.AppFragment
+import common.BaseFragment
 import common.CardListAdapterDecoration
 import common.ConfRepository
 import common.Scrollable
@@ -38,7 +37,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class EntriesFragment : AppFragment(), Scrollable {
+class EntriesFragment : BaseFragment(), Scrollable {
 
     private val args by lazy { EntriesFragmentArgs.fromBundle(requireArguments()) }
 

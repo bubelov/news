@@ -5,17 +5,18 @@ import android.text.Editable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentSearchBinding
 import com.google.android.material.internal.TextWatcherAdapter
-import common.AppFragment
+import common.BaseFragment
 import common.CardListAdapterDecoration
 import common.hideKeyboard
 import common.screenWidth
-import common.sharedToolbar
 import common.showKeyboard
 import db.EntryWithoutContent
 import db.Link
@@ -26,7 +27,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class SearchFragment : AppFragment() {
+class SearchFragment : BaseFragment() {
 
     private val args by lazy { SearchFragmentArgs.fromBundle(requireArguments()) }
 
@@ -97,25 +98,28 @@ class SearchFragment : AppFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        searchPanel.isVisible = true
+        binding.toolbar.navigationIcon = DrawerArrowDrawable(context).also { it.progress = 1f }
 
-        sharedToolbar()?.setupUpNavigation(hideKeyboard = true)
+        binding.toolbar.setNavigationOnClickListener {
+            requireContext().hideKeyboard(binding.query)
+            findNavController().popBackStack()
+        }
 
         model.query
-            .onEach { searchPanelClearButton.isVisible = it.isNotEmpty() }
+            .onEach { binding.clear.isVisible = it.isNotEmpty() }
             .launchIn(viewLifecycleOwner.lifecycleScope)
 
-        searchPanelText.addTextChangedListener(object : TextWatcherAdapter() {
+        binding.query.addTextChangedListener(object : TextWatcherAdapter() {
             override fun afterTextChanged(s: Editable) {
                 model.setQuery(s.toString())
             }
         })
 
-        searchPanelClearButton.setOnClickListener {
-            searchPanelText.setText("")
+        binding.clear.setOnClickListener {
+            binding.query.setText("")
         }
 
-        searchPanelText.requestFocus()
+        binding.query.requestFocus()
         requireContext().showKeyboard()
 
         binding.list.setHasFixedSize(true)
@@ -139,9 +143,8 @@ class SearchFragment : AppFragment() {
     }
 
     override fun onDestroyView() {
-        searchPanel.isVisible = false
-        requireContext().hideKeyboard(searchPanelText)
         super.onDestroyView()
+        _binding = null
     }
 
     private fun setState(state: SearchModel.State) {

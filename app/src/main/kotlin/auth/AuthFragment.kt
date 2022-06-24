@@ -10,14 +10,14 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentAuthBinding
-import common.AppFragment
+import common.BaseFragment
 import common.ConfRepository
 import entries.EntriesFilter
 import kotlinx.coroutines.runBlocking
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.concurrent.TimeUnit
 
-class AuthFragment : AppFragment() {
+class AuthFragment : BaseFragment() {
 
     private val model: AuthModel by viewModel()
 

@@ -18,7 +18,7 @@ import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentFeedsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
-import common.AppFragment
+import common.BaseFragment
 import common.ListAdapterDecoration
 import common.hide
 import common.sharedToolbar
@@ -35,7 +35,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class FeedsFragment : AppFragment() {
+class FeedsFragment : BaseFragment() {
 
     private val model: FeedsModel by viewModel()
 

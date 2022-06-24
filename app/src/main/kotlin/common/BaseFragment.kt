@@ -7,13 +7,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.appbar.MaterialToolbar
 
-abstract class AppFragment : Fragment() {
-
-    protected val searchPanel by lazy { activity.binding.searchPanel }
-
-    protected val searchPanelText by lazy { activity.binding.searchPanelText }
-
-    protected val searchPanelClearButton by lazy { activity.binding.searchPanelClearButton }
+abstract class BaseFragment : Fragment() {
 
     private val activity by lazy { requireActivity() as Activity }
 
@@ -38,11 +32,8 @@ abstract class AppFragment : Fragment() {
         }
     }
 
-    protected fun MaterialToolbar.setupUpNavigation(hideKeyboard: Boolean = false) {
+    protected fun MaterialToolbar.setupUpNavigation() {
         navigationIcon = DrawerArrowDrawable(context).also { it.progress = 1f }
-        setNavigationOnClickListener {
-            if (hideKeyboard) requireContext().hideKeyboard(searchPanelText)
-            findNavController().popBackStack()
-        }
+        setNavigationOnClickListener { findNavController().popBackStack() }
     }
 }

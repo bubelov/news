@@ -7,15 +7,13 @@ import android.view.ViewGroup
 import android.widget.RadioButton
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import common.AppFragment
+import common.BaseFragment
 import common.ConfRepository
 import common.showErrorDialog
 import common.sharedToolbar
@@ -28,7 +26,7 @@ import kotlinx.coroutines.withContext
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.concurrent.TimeUnit
 
-class SettingsFragment : AppFragment() {
+class SettingsFragment : BaseFragment() {
 
     private val model: SettingsViewModel by viewModel()
 

@@ -9,13 +9,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentNextcloudAuthBinding
-import common.AppFragment
+import common.BaseFragment
 import common.showErrorDialog
 import common.sharedToolbar
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class NextcloudAuthFragment : AppFragment() {
+class NextcloudAuthFragment : BaseFragment() {
 
     private val model: NextcloudAuthModel by viewModel()
 

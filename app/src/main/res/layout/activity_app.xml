@@ -16,56 +16,12 @@
         android:fitsSystemWindows="true"
         android:orientation="vertical">
 
-        <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/appBarLayout"
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="?colorSurface"
-            android:fitsSystemWindows="true">
-
-            <com.google.android.material.appbar.MaterialToolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="?colorSurface"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:title="Title">
-
-                <LinearLayout
-                    android:id="@+id/searchPanel"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:visibility="gone">
-
-                    <EditText
-                        android:id="@+id/searchPanelText"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:background="@android:color/transparent"
-                        android:hint="@string/search"
-                        android:importantForAutofill="no"
-                        android:inputType="text"
-                        android:lines="1" />
-
-                    <ImageView
-                        android:id="@+id/searchPanelClearButton"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginEnd="16dp"
-                        android:background="?android:selectableItemBackgroundBorderless"
-                        android:clickable="true"
-                        android:contentDescription="@string/clear_search_input"
-                        android:focusable="true"
-                        android:src="@drawable/ic_baseline_close_24" />
-
-                </LinearLayout>
-
-            </com.google.android.material.appbar.MaterialToolbar>
-
-        </com.google.android.material.appbar.AppBarLayout>
+            app:layout_constraintTop_toTopOf="parent"
+            tools:title="Title" />
 
         <LinearLayout
             android:layout_width="match_parent"

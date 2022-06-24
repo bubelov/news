@@ -32,13 +32,14 @@ class Activity : AppCompatActivity() {
 
     private val navListener = NavController.OnDestinationChangedListener { _, destination, args ->
         syncDrawerState(destination)
-        binding.appBarLayout.isVisible = destination.id != R.id.authFragment
+        binding.toolbar.isVisible = destination.id != R.id.authFragment && destination.id != R.id.searchFragment
 
         binding.bottomNavigation.isVisible =
             destination.id != R.id.authFragment
                     && destination.id != R.id.minifluxAuthFragment
                     && destination.id != R.id.nextcloudAuthFragment
                     && destination.id != R.id.feedEntriesFragment
+                    && destination.id != R.id.searchFragment
 
         when (destination.id) {
             R.id.newsFragment -> args!!.putParcelable("filter", EntriesFilter.NotBookmarked)
