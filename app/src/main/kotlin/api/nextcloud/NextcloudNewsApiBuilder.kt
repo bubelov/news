@@ -1,6 +1,8 @@
 package api.nextcloud
 
+import co.appreactor.news.BuildConfig
 import common.trustSelfSignedCerts
+import log.LoggingInterceptor
 import okhttp3.Credentials
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -30,6 +32,10 @@ class NextcloudNewsApiBuilder {
 
         if (trustSelfSignedCerts) {
             clientBuilder.trustSelfSignedCerts()
+        }
+
+        if (BuildConfig.DEBUG) {
+            clientBuilder.addInterceptor(LoggingInterceptor("miniflux"))
         }
 
         val client = clientBuilder.build()

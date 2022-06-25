@@ -62,11 +62,11 @@ class EntriesFragment : BaseFragment(), Scrollable {
         EntriesAdapter(
             callback = object : EntriesAdapterCallback {
                 override fun onItemClick(item: EntriesAdapterItem) {
-                    lifecycleScope.launchWhenResumed {
+                    viewLifecycleOwner.lifecycleScope.launch {
                         model.setRead(listOf(item.entry.id), true)
 
-                        val entry = model.getEntry(item.entry.id).first() ?: return@launchWhenResumed
-                        val feed = model.getFeed(entry.feedId).first() ?: return@launchWhenResumed
+                        val entry = model.getEntry(item.entry.id).first() ?: return@launch
+                        val feed = model.getFeed(entry.feedId).first() ?: return@launch
 
                         if (feed.openEntriesInBrowser) {
                             openUrl(

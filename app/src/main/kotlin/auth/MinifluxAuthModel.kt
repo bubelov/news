@@ -20,7 +20,7 @@ class MinifluxAuthModel(
         trustSelfSignedCerts: Boolean,
     ) {
         val api = MinifluxApiBuilder().build(
-            url = url.toString(),
+            url = url.toString().trim('/'),
             username = username,
             password = password,
             trustSelfSignedCerts = trustSelfSignedCerts,
@@ -38,7 +38,7 @@ class MinifluxAuthModel(
         confRepo.save {
             it.copy(
                 backend = ConfRepository.BACKEND_MINIFLUX,
-                minifluxServerUrl = url.toString(),
+                minifluxServerUrl = url.toString().trim('/'),
                 minifluxServerTrustSelfSignedCerts = trustSelfSignedCerts,
                 minifluxServerUsername = username,
                 minifluxServerPassword = password,

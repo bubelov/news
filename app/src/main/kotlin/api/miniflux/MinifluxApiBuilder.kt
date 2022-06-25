@@ -1,8 +1,10 @@
 package api.miniflux
 
+import co.appreactor.news.BuildConfig
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import common.trustSelfSignedCerts
+import log.LoggingInterceptor
 import okhttp3.Credentials
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -51,6 +53,10 @@ class MinifluxApiBuilder {
 
         if (trustSelfSignedCerts) {
             clientBuilder.trustSelfSignedCerts()
+        }
+
+        if (BuildConfig.DEBUG) {
+            clientBuilder.addInterceptor(LoggingInterceptor("miniflux"))
         }
 
         val client = clientBuilder.build()

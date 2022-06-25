@@ -20,7 +20,7 @@ class NextcloudAuthModel(
         trustSelfSignedCerts: Boolean,
     ) {
         val api = NextcloudNewsApiBuilder().build(
-            url = url.toString(),
+            url = url.toString().trim('/'),
             username = username,
             password = password,
             trustSelfSignedCerts = trustSelfSignedCerts,
@@ -38,7 +38,7 @@ class NextcloudAuthModel(
         confRepo.save {
             it.copy(
                 backend = ConfRepository.BACKEND_NEXTCLOUD,
-                nextcloudServerUrl = url.toString(),
+                nextcloudServerUrl = url.toString().trim('/'),
                 nextcloudServerTrustSelfSignedCerts = trustSelfSignedCerts,
                 nextcloudServerUsername = username,
                 nextcloudServerPassword = password,
