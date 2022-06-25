@@ -35,11 +35,9 @@ class Activity : AppCompatActivity() {
         binding.toolbar.isVisible = destination.id != R.id.authFragment && destination.id != R.id.searchFragment
 
         binding.bottomNavigation.isVisible =
-            destination.id != R.id.authFragment
-                    && destination.id != R.id.minifluxAuthFragment
-                    && destination.id != R.id.nextcloudAuthFragment
-                    && destination.id != R.id.feedEntriesFragment
-                    && destination.id != R.id.searchFragment
+            destination.id == R.id.newsFragment
+                    || destination.id == R.id.bookmarksFragment
+                    || destination.id == R.id.feedsFragment
 
         when (destination.id) {
             R.id.newsFragment -> args!!.putParcelable("filter", EntriesFilter.NotBookmarked)
