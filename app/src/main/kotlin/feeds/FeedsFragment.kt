@@ -217,6 +217,7 @@ class FeedsFragment : BaseFragment() {
     }
 
     private fun initToolbar() = sharedToolbar()?.apply {
+        setupGlobalNavigation()
         setTitle(R.string.feeds)
         inflateMenu(R.menu.menu_feeds)
 

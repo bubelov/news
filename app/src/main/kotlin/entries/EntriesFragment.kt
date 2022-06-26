@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
-import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -265,16 +264,17 @@ class EntriesFragment : BaseFragment(), Scrollable {
 
             when (val filter = args.filter!!) {
                 EntriesFilter.Bookmarked -> {
+                    setupGlobalNavigation()
                     setTitle(R.string.bookmarks)
                 }
 
                 EntriesFilter.NotBookmarked -> {
+                    setupGlobalNavigation()
                     setTitle(R.string.news)
                 }
 
                 is EntriesFilter.BelongToFeed -> {
-                    navigationIcon = DrawerArrowDrawable(context).apply { progress = 1f }
-                    setNavigationOnClickListener { findNavController().popBackStack() }
+                    setupUpNavigation()
 
                     model.getFeed(filter.feedId)
                         .onEach { title = it?.title }

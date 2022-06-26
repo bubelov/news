@@ -9,26 +9,19 @@ import com.google.android.material.appbar.MaterialToolbar
 
 abstract class BaseFragment : Fragment() {
 
-    private val activity by lazy { requireActivity() as Activity }
-
-    private val drawer by lazy {
-        if (getActivity() is Activity) {
-            activity.binding.drawerLayout
-        } else {
-            null
-        }
-    }
-
-    private val drawerToggle by lazy { activity.drawerToggle }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         sharedToolbar()?.apply {
-            setNavigationOnClickListener { drawer?.open() }
-            drawerToggle.syncState()
             title = ""
             menu?.clear()
+        }
+    }
+
+    protected fun MaterialToolbar.setupGlobalNavigation() {
+        (requireActivity() as? Activity)?.apply {
+            setNavigationOnClickListener { binding.drawerLayout.open() }
+            drawerToggle.syncState()
         }
     }
 
