@@ -1,4 +1,4 @@
-package entriesimages
+package opengraph
 
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -6,13 +6,14 @@ import com.squareup.picasso.Picasso
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import common.ConfRepository
-import db.Conf
 import db.Database
 import db.EntryWithoutContent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -22,39 +23,41 @@ import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
 @Single
-class EntriesImagesRepository(
+class OpenGraphImagesRepository(
     private val db: Database,
     private val confRepo: ConfRepository,
 ) {
 
     companion object {
-        const val MAX_WIDTH = 1080
+        const val MAX_WIDTH_PX = 1080
     }
 
     private val httpClient = OkHttpClient.Builder()
         .callTimeout(10, TimeUnit.SECONDS)
         .build()
 
-    suspend fun syncOpenGraphImages() {
+    suspend fun fetchEntryImages() {
         while (true) {
-            runCatching { confRepo.load().collectLatest { syncOpenGraphImages(it) } }
+            runCatching {
+                confRepo.load()
+                    .map { it.showPreviewImages }
+                    .distinctUntilChanged()
+                    .collectLatest { showPreviewImages ->
+                        if (showPreviewImages) {
+                            db.entryQueries.selectByOgImageChecked(false, 1)
+                                .asFlow()
+                                .mapToOneOrNull()
+                                .filterNotNull()
+                                .collectLatest { fetchImage(it) }
+                        }
+                    }
+            }
+
             delay(1000)
         }
     }
 
-    private suspend fun syncOpenGraphImages(conf: Conf) {
-        if (!conf.showPreviewImages) {
-            return
-        }
-
-        db.entryQueries.selectByOgImageChecked(false, 1)
-            .asFlow()
-            .mapToOneOrNull()
-            .filterNotNull()
-            .collectLatest { syncPreview(it) }
-    }
-
-    private suspend fun syncPreview(entry: EntryWithoutContent) {
+    private suspend fun fetchImage(entry: EntryWithoutContent) {
         withContext(Dispatchers.Default) {
             if (entry.ogImageChecked) {
                 throw IllegalStateException("ogImageChecked = 1")
@@ -103,7 +106,7 @@ class EntriesImagesRepository(
             }
 
             val bitmap = kotlin.runCatching {
-                Picasso.get().load(imageUrl).resize(MAX_WIDTH, 0).onlyScaleDown().get()
+                Picasso.get().load(imageUrl).resize(MAX_WIDTH_PX, 0).onlyScaleDown().get()
             }.getOrElse {
                 db.entryQueries.updateOgImageChecked(true, entry.id)
                 return@withContext

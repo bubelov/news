@@ -7,9 +7,9 @@ import com.squareup.picasso.Picasso
 import crash.CrashHandler
 import db.database
 import enclosures.AudioEnclosuresRepository
-import entriesimages.EntriesImagesRepository
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import opengraph.OpenGraphImagesRepository
 import org.koin.android.ext.android.get
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -44,8 +44,8 @@ class App : Application() {
         val enclosuresRepo = get<AudioEnclosuresRepository>()
         GlobalScope.launch { enclosuresRepo.deleteIncompleteDownloads() }
 
-        val entriesImagesRepo = get<EntriesImagesRepository>()
-        GlobalScope.launch { entriesImagesRepo.syncOpenGraphImages() }
+        val ogImagesRepo = get<OpenGraphImagesRepository>()
+        GlobalScope.launch { ogImagesRepo.fetchEntryImages() }
 
         CrashHandler().setup(this)
     }
