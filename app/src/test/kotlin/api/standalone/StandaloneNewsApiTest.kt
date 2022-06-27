@@ -1,6 +1,5 @@
-package api
+package api.standalone
 
-import api.standalone.StandaloneNewsApi
 import db.feed
 import db.testDb
 import kotlinx.coroutines.runBlocking
