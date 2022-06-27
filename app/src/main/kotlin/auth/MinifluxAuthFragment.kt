@@ -9,9 +9,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentMinifluxAuthBinding
-import common.BaseFragment
-import common.sharedToolbar
-import common.showErrorDialog
+import dialog.showErrorDialog
+import navigation.BaseFragment
+import navigation.sharedToolbar
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.koin.androidx.viewmodel.ext.android.viewModel
 

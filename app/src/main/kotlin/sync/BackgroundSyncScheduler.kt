@@ -6,7 +6,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import common.ConfRepository
+import conf.ConfRepository
 import kotlinx.coroutines.flow.first
 import org.koin.core.annotation.Single
 import java.util.concurrent.TimeUnit

@@ -1,6 +1,6 @@
 package sync
 
-import common.ConfRepository
+import conf.ConfRepository
 import entries.EntriesRepository
 import feeds.FeedsRepository
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -1,4 +1,4 @@
-package common
+package navigation
 
 interface Scrollable {
 

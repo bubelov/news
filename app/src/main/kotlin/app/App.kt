@@ -1,4 +1,4 @@
-package common
+package app
 
 import android.app.Application
 import co.appreactor.news.BuildConfig

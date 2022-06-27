@@ -11,9 +11,9 @@ import androidx.core.content.getSystemService
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import co.appreactor.news.R
-import common.App
-import common.Activity
-import common.ConfRepository
+import app.App
+import navigation.Activity
+import conf.ConfRepository
 import entries.EntriesRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking

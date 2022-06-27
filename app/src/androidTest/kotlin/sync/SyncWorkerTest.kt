@@ -3,8 +3,8 @@ package sync
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.work.ListenableWorker
 import androidx.work.testing.TestWorkerBuilder
-import common.App
-import common.ConfRepository
+import app.App
+import conf.ConfRepository
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
 import kotlin.test.BeforeTest

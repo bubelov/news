@@ -1,5 +1,6 @@
 package feeds
 
+import android.graphics.Rect
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -14,18 +15,17 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import anim.hide
+import anim.show
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentFeedsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
-import common.BaseFragment
-import common.ListAdapterDecoration
-import common.hide
-import common.sharedToolbar
-import common.show
-import common.showDialog
-import common.showErrorDialog
-import common.showKeyboard
+import dialog.showDialog
+import dialog.showErrorDialog
+import navigation.BaseFragment
+import navigation.sharedToolbar
+import navigation.showKeyboard
 import entries.EntriesFilter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
@@ -76,20 +76,15 @@ class FeedsFragment : BaseFragment() {
         }
 
         override fun onRenameClick(item: FeedsAdapter.Item) {
-            val dialog = MaterialAlertDialogBuilder(requireContext())
-                .setTitle(getString(R.string.rename))
-                .setView(R.layout.dialog_rename_feed)
-                .setPositiveButton(R.string.rename) { dialogInterface, _ ->
+            val dialog = MaterialAlertDialogBuilder(requireContext()).setTitle(getString(R.string.rename))
+                .setView(R.layout.dialog_rename_feed).setPositiveButton(R.string.rename) { dialogInterface, _ ->
                     val dialog = dialogInterface as AlertDialog
                     val title = dialog.findViewById<TextInputEditText>(R.id.title)!!
 
                     viewLifecycleOwner.lifecycleScope.launch {
                         runCatching { model.rename(item.id, title.text.toString()) }.onFailure { showErrorDialog(it) }
                     }
-                }
-                .setNegativeButton(R.string.cancel, null)
-                .setOnDismissListener { hideKeyboard() }
-                .show()
+                }.setNegativeButton(R.string.cancel, null).setOnDismissListener { hideKeyboard() }.show()
 
             val title = dialog.findViewById<TextInputEditText>(R.id.title)!!
             title.append(item.title)
@@ -177,9 +172,7 @@ class FeedsFragment : BaseFragment() {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentFeedsBinding.inflate(inflater, container, false)
         return binding.root
@@ -193,10 +186,7 @@ class FeedsFragment : BaseFragment() {
         initImportButton()
         initFab()
 
-        model.state
-            .onEach { setState(it) }
-            .catch { showErrorDialog(it) }
-            .launchIn(viewLifecycleOwner.lifecycleScope)
+        model.state.onEach { setState(it) }.catch { showErrorDialog(it) }.launchIn(viewLifecycleOwner.lifecycleScope)
 
         val args = FeedsFragmentArgs.fromBundle(requireArguments())
 
@@ -261,19 +251,14 @@ class FeedsFragment : BaseFragment() {
 
     private fun initFab() {
         binding.fab.setOnClickListener {
-            val alert = MaterialAlertDialogBuilder(requireContext())
-                .setTitle(getString(R.string.add_feed))
-                .setView(R.layout.dialog_add_feed)
-                .setPositiveButton(R.string.add) { dialogInterface, _ ->
+            val alert = MaterialAlertDialogBuilder(requireContext()).setTitle(getString(R.string.add_feed))
+                .setView(R.layout.dialog_add_feed).setPositiveButton(R.string.add) { dialogInterface, _ ->
                     val dialog = dialogInterface as AlertDialog
                     val url = dialog.findViewById<TextInputEditText>(R.id.url)?.text.toString()
                     viewLifecycleOwner.lifecycleScope.launch {
                         runCatching { model.addFeed(url) }.onFailure { showErrorDialog(it) }
                     }
-                }
-                .setNegativeButton(R.string.cancel, null)
-                .setOnDismissListener { hideKeyboard() }
-                .show()
+                }.setNegativeButton(R.string.cancel, null).setOnDismissListener { hideKeyboard() }.show()
 
             alert.findViewById<EditText>(R.id.url)?.apply {
                 setOnEditorActionListener { _, actionId, keyEvent ->
@@ -345,5 +330,26 @@ class FeedsFragment : BaseFragment() {
         requireActivity().window.setSoftInputMode(
             WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
         )
+    }
+
+    class ListAdapterDecoration(private val gapInPixels: Int) : RecyclerView.ItemDecoration() {
+
+        override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
+            val adapter = parent.adapter
+
+            if (adapter == null || adapter.itemCount == 0) {
+                super.getItemOffsets(outRect, view, parent, state)
+                return
+            }
+
+            val position = parent.getChildLayoutPosition(view)
+
+            val left = 0
+            val top = if (position == 0) gapInPixels else 0
+            val right = 0
+            val bottom = if (position == adapter.itemCount - 1) gapInPixels else 0
+
+            outRect.set(left, top, right, bottom)
+        }
     }
 }

@@ -1,6 +1,6 @@
 package auth
 
-import common.ConfRepository
+import conf.ConfRepository
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

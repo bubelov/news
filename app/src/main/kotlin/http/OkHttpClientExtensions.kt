@@ -1,4 +1,4 @@
-package common
+package http
 
 import android.annotation.SuppressLint
 import okhttp3.OkHttpClient

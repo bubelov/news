@@ -5,7 +5,7 @@ import api.miniflux.MinifluxApiBuilder
 import api.nextcloud.NextcloudNewsApiAdapter
 import api.nextcloud.NextcloudNewsApiBuilder
 import api.standalone.StandaloneNewsApi
-import common.ConfRepository
+import conf.ConfRepository
 import db.Database
 import db.Entry
 import db.EntryWithoutContent

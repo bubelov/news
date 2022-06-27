@@ -1,32 +1,33 @@
 package entries
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.graphics.Rect
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import androidx.annotation.StringRes
+import androidx.core.content.getSystemService
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import anim.hide
+import anim.show
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentEntriesBinding
 import com.google.android.material.snackbar.Snackbar
-import common.BaseFragment
-import common.CardListAdapterDecoration
-import common.ConfRepository
-import common.Scrollable
-import common.hide
-import common.openCachedPodcast
-import common.openUrl
-import common.screenWidth
-import common.sharedToolbar
-import common.show
-import common.showErrorDialog
+import conf.ConfRepository
 import db.EntryWithoutContent
 import db.Link
+import dialog.showErrorDialog
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -34,6 +35,10 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import navigation.BaseFragment
+import navigation.Scrollable
+import navigation.openUrl
+import navigation.sharedToolbar
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class EntriesFragment : BaseFragment(), Scrollable {
@@ -505,6 +510,70 @@ class EntriesFragment : BaseFragment(), Scrollable {
             }
         }.onFailure {
             showErrorDialog(it)
+        }
+    }
+
+    fun openCachedPodcast(cacheUri: Uri?, enclosureLinkType: String) {
+        if (cacheUri == null) {
+            showErrorDialog(Exception("Can't find podcast audio file"))
+            return
+        }
+
+        val intent = Intent().apply {
+            action = Intent.ACTION_VIEW
+            data = cacheUri
+            setDataAndType(cacheUri, enclosureLinkType)
+        }
+
+        runCatching {
+            startActivity(intent)
+        }.onFailure {
+            if (it is ActivityNotFoundException) {
+                showErrorDialog(getString(R.string.you_have_no_apps_which_can_play_this_podcast))
+            } else {
+                showErrorDialog(it)
+            }
+        }
+    }
+
+    fun screenWidth(): Int {
+        return when {
+            Build.VERSION.SDK_INT >= 31 -> {
+                val windowManager = requireContext().getSystemService<WindowManager>()!!
+                windowManager.currentWindowMetrics.bounds.width()
+            }
+            Build.VERSION.SDK_INT >= 30 -> {
+                val displayMetrics = DisplayMetrics()
+                @Suppress("DEPRECATION")
+                requireContext().display?.getRealMetrics(displayMetrics)
+                displayMetrics.widthPixels
+            }
+            else -> {
+                val displayMetrics = DisplayMetrics()
+                @Suppress("DEPRECATION")
+                requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
+                displayMetrics.widthPixels
+            }
+        }
+    }
+
+    private class CardListAdapterDecoration(private val gapInPixels: Int) : RecyclerView.ItemDecoration() {
+
+        override fun getItemOffsets(
+            outRect: Rect,
+            view: View,
+            parent: RecyclerView,
+            state: RecyclerView.State,
+        ) {
+            val position = parent.getChildAdapterPosition(view)
+
+            val bottomGap = if (position == (parent.adapter?.itemCount ?: 0) - 1) {
+                gapInPixels
+            } else {
+                0
+            }
+
+            outRect.set(gapInPixels, gapInPixels, gapInPixels, bottomGap)
         }
     }
 }

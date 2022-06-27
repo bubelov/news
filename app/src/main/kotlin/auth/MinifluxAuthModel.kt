@@ -2,7 +2,7 @@ package auth
 
 import androidx.lifecycle.ViewModel
 import api.miniflux.MinifluxApiBuilder
-import common.ConfRepository
+import conf.ConfRepository
 import okhttp3.HttpUrl
 import org.koin.android.annotation.KoinViewModel
 import sync.BackgroundSyncScheduler

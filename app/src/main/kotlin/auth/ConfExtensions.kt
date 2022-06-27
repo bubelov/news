@@ -2,7 +2,7 @@ package auth
 
 import android.content.res.Resources
 import co.appreactor.news.R
-import common.ConfRepository
+import conf.ConfRepository
 import db.Conf
 
 fun Conf.accountTitle(resources: Resources): String {

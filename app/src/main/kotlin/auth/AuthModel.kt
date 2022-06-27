@@ -1,7 +1,7 @@
 package auth
 
 import androidx.lifecycle.ViewModel
-import common.ConfRepository
+import conf.ConfRepository
 import db.Conf
 import kotlinx.coroutines.flow.first
 import org.koin.android.annotation.KoinViewModel

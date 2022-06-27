@@ -2,7 +2,7 @@ package search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import common.ConfRepository
+import conf.ConfRepository
 import db.Entry
 import db.EntryWithoutContent
 import db.Feed

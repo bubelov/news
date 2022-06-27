@@ -1,6 +1,6 @@
 package db
 
-import common.ConfRepository
+import conf.ConfRepository
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals

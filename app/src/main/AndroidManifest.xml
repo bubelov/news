@@ -8,7 +8,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
-        android:name="common.App"
+        android:name="app.App"
         android:allowBackup="false"
         android:icon="@drawable/ic_launcher"
         android:installLocation="preferExternal"
@@ -20,7 +20,7 @@
         tools:targetApi="m">
 
         <activity
-            android:name="common.Activity"
+            android:name="navigation.Activity"
             android:exported="true"
             android:windowSoftInputMode="adjustNothing">
 

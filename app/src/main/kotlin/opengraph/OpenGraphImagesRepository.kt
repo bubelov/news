@@ -5,7 +5,7 @@ import android.graphics.Color
 import com.squareup.picasso.Picasso
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
-import common.ConfRepository
+import conf.ConfRepository
 import db.Database
 import db.EntryWithoutContent
 import kotlinx.coroutines.Dispatchers

@@ -1,4 +1,4 @@
-package common
+package anim
 
 import android.view.View
 import android.view.animation.AccelerateInterpolator

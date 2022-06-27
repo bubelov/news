@@ -1,7 +1,7 @@
 package api
 
 import api.standalone.StandaloneNewsApi
-import common.ConfRepository
+import conf.ConfRepository
 import db.testDb
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking

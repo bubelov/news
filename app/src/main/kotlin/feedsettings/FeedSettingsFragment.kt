@@ -14,10 +14,10 @@ import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentFeedSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
-import common.BaseFragment
-import common.sharedToolbar
-import common.showErrorDialog
-import common.showKeyboard
+import dialog.showErrorDialog
+import navigation.BaseFragment
+import navigation.sharedToolbar
+import navigation.showKeyboard
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking

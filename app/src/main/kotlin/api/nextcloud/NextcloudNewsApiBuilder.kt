@@ -1,7 +1,7 @@
 package api.nextcloud
 
 import co.appreactor.news.BuildConfig
-import common.trustSelfSignedCerts
+import http.trustSelfSignedCerts
 import log.LoggingInterceptor
 import okhttp3.Credentials
 import okhttp3.Interceptor

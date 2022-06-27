@@ -2,7 +2,7 @@ package settings
 
 import androidx.lifecycle.ViewModel
 import auth.accountSubtitle
-import common.ConfRepository
+import conf.ConfRepository
 import db.Conf
 import db.Database
 import kotlinx.coroutines.flow.first

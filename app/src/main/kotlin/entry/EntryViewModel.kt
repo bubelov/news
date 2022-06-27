@@ -9,7 +9,7 @@ import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.appreactor.news.R
-import common.ConfRepository
+import conf.ConfRepository
 import db.Conf
 import db.Entry
 import db.Link

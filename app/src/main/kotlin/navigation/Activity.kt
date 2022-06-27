@@ -1,4 +1,4 @@
-package common
+package navigation
 
 import android.os.Bundle
 import android.os.PersistableBundle

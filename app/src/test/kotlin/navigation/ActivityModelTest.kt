@@ -1,7 +1,8 @@
-package common
+package navigation
 
 import android.app.Application
 import android.content.res.Resources
+import conf.ConfRepository
 import db.testDb
 import io.mockk.every
 import io.mockk.mockk

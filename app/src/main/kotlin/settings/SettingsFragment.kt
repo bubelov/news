@@ -13,16 +13,16 @@ import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import common.BaseFragment
-import common.ConfRepository
-import common.showErrorDialog
-import common.sharedToolbar
+import conf.ConfRepository
 import db.databaseFile
+import dialog.showErrorDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import navigation.BaseFragment
+import navigation.sharedToolbar
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.concurrent.TimeUnit
 
@@ -54,9 +54,7 @@ class SettingsFragment : BaseFragment() {
                     requireContext().contentResolver.openOutputStream(uri)?.use {
                         databaseFile.inputStream().copyTo(it)
                     }
-                }.onFailure {
-                    showErrorDialog(it)
-                }
+                }.onFailure { showErrorDialog(it) }
             }
         }
     }
@@ -64,7 +62,7 @@ class SettingsFragment : BaseFragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
         return binding.root
@@ -96,18 +94,16 @@ class SettingsFragment : BaseFragment() {
             }
 
             backgroundSyncIntervalButton.setOnClickListener {
-                val dialog = MaterialAlertDialogBuilder(requireContext())
-                    .setTitle(getString(R.string.background_sync_interval))
-                    .setView(R.layout.dialog_background_sync_interval)
-                    .show()
+                val dialog =
+                    MaterialAlertDialogBuilder(requireContext()).setTitle(getString(R.string.background_sync_interval))
+                        .setView(R.layout.dialog_background_sync_interval).show()
 
                 val setupInterval = fun RadioButton?.(hours: Int) {
                     if (this == null) return
 
                     text = resources.getQuantityString(R.plurals.d_hours, hours, hours)
                     val millis = TimeUnit.HOURS.toMillis(hours.toLong())
-                    isChecked =
-                        runBlocking { model.loadConf().first().backgroundSyncIntervalMillis == millis }
+                    isChecked = runBlocking { model.loadConf().first().backgroundSyncIntervalMillis == millis }
 
                     setOnCheckedChangeListener { _, isChecked ->
                         if (isChecked) {
@@ -205,28 +201,24 @@ class SettingsFragment : BaseFragment() {
                 lifecycleScope.launchWhenResumed {
                     when (model.loadConf().first().backend) {
                         ConfRepository.BACKEND_STANDALONE -> {
-                            MaterialAlertDialogBuilder(requireContext())
-                                .setMessage(R.string.delete_all_data_warning)
+                            MaterialAlertDialogBuilder(requireContext()).setMessage(R.string.delete_all_data_warning)
                                 .setPositiveButton(
                                     R.string.delete
                                 ) { _, _ ->
                                     logOut()
                                 }.setNegativeButton(
-                                    R.string.cancel,
-                                    null
+                                    R.string.cancel, null
                                 ).show()
                         }
 
                         else -> {
-                            MaterialAlertDialogBuilder(requireContext())
-                                .setMessage(R.string.log_out_warning)
+                            MaterialAlertDialogBuilder(requireContext()).setMessage(R.string.log_out_warning)
                                 .setPositiveButton(
                                     R.string.log_out
                                 ) { _, _ ->
                                     logOut()
                                 }.setNegativeButton(
-                                    R.string.cancel,
-                                    null
+                                    R.string.cancel, null
                                 ).show()
                         }
                     }

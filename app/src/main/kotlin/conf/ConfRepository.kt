@@ -1,4 +1,4 @@
-package common
+package conf
 
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrDefault

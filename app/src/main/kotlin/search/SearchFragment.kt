@@ -1,23 +1,27 @@
 package search
 
+import android.graphics.Rect
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
+import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
+import androidx.core.content.getSystemService
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentSearchBinding
 import com.google.android.material.internal.TextWatcherAdapter
-import common.BaseFragment
-import common.CardListAdapterDecoration
-import common.hideKeyboard
-import common.screenWidth
-import common.showKeyboard
+import navigation.BaseFragment
+import navigation.hideKeyboard
+import navigation.showKeyboard
 import db.EntryWithoutContent
 import db.Link
 import entries.EntriesAdapter
@@ -160,6 +164,47 @@ class SearchFragment : BaseFragment() {
                 binding.message.isVisible = items.isEmpty()
                 adapter.submitList(items)
             }
+        }
+    }
+
+    fun screenWidth(): Int {
+        return when {
+            Build.VERSION.SDK_INT >= 31 -> {
+                val windowManager = requireContext().getSystemService<WindowManager>()!!
+                windowManager.currentWindowMetrics.bounds.width()
+            }
+            Build.VERSION.SDK_INT >= 30 -> {
+                val displayMetrics = DisplayMetrics()
+                @Suppress("DEPRECATION")
+                requireContext().display?.getRealMetrics(displayMetrics)
+                displayMetrics.widthPixels
+            }
+            else -> {
+                val displayMetrics = DisplayMetrics()
+                @Suppress("DEPRECATION")
+                requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
+                displayMetrics.widthPixels
+            }
+        }
+    }
+
+    private class CardListAdapterDecoration(private val gapInPixels: Int) : RecyclerView.ItemDecoration() {
+
+        override fun getItemOffsets(
+            outRect: Rect,
+            view: View,
+            parent: RecyclerView,
+            state: RecyclerView.State,
+        ) {
+            val position = parent.getChildAdapterPosition(view)
+
+            val bottomGap = if (position == (parent.adapter?.itemCount ?: 0) - 1) {
+                gapInPixels
+            } else {
+                0
+            }
+
+            outRect.set(gapInPixels, gapInPixels, gapInPixels, bottomGap)
         }
     }
 }

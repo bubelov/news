@@ -2,9 +2,9 @@ package entries
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import common.ConfRepository
-import common.ConfRepository.Companion.SORT_ORDER_ASCENDING
-import common.ConfRepository.Companion.SORT_ORDER_DESCENDING
+import conf.ConfRepository
+import conf.ConfRepository.Companion.SORT_ORDER_ASCENDING
+import conf.ConfRepository.Companion.SORT_ORDER_DESCENDING
 import db.Conf
 import db.EntryWithoutContent
 import db.Feed
