@@ -40,11 +40,11 @@ class ConfRepository(
             cropPreviewImages = true,
             markScrolledEntriesAsRead = false,
             syncOnStartup = true,
-            syncedOnStartup = false,
             syncInBackground = true,
             backgroundSyncIntervalMillis = 10800000,
             useBuiltInBrowser = true,
             showPreviewText = true,
+            syncedOnStartup = false,
         )
     }
 
