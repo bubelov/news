@@ -41,8 +41,6 @@ class EntriesModel(
     private val _state = MutableStateFlow<State?>(null)
     val state = _state.asStateFlow()
 
-    private var syncedOnStartup = false
-
     private var scrollToTopNextTime = false
 
     init {
@@ -55,8 +53,10 @@ class EntriesModel(
 
             confRepo.load().first().apply {
                 if (!initialSyncCompleted || (syncOnStartup && !syncedOnStartup)) {
-                    syncedOnStartup = true
-                    viewModelScope.launch { newsApiSync.sync() }
+                    viewModelScope.launch {
+                        newsApiSync.sync()
+                        confRepo.save { it.copy(syncedOnStartup = true) }
+                    }
                 }
             }
 

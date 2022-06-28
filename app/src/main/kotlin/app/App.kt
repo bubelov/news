@@ -4,11 +4,13 @@ import android.app.Application
 import co.appreactor.news.BuildConfig
 import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
+import conf.ConfRepository
 import crash.CrashHandler
 import db.database
 import enclosures.AudioEnclosuresRepository
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import opengraph.OpenGraphImagesRepository
 import org.koin.android.ext.android.get
 import org.koin.android.ext.koin.androidContext
@@ -37,6 +39,9 @@ class App : Application() {
             .build()
 
         Picasso.setSingletonInstance(picasso)
+
+        val confRepo = get<ConfRepository>()
+        runBlocking { confRepo.save { it.copy(syncedOnStartup = false) } }
 
         val syncScheduler = get<BackgroundSyncScheduler>()
         GlobalScope.launch { syncScheduler.schedule(override = false) }
