@@ -72,10 +72,9 @@ android {
 }
 
 sqldelight {
-    database("Database") {
-        sourceFolders = listOf("sqldelight")
+    database("Db") {
         packageName = "db"
-        deriveSchemaFromMigrations = true
+        schemaOutputDirectory = file("src/main/sqldelight/$packageName/schemas")
     }
 }
 

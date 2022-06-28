@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import auth.accountSubtitle
 import conf.ConfRepository
 import db.Conf
-import db.Database
+import db.Db
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
@@ -14,7 +14,7 @@ import sync.BackgroundSyncScheduler
 @KoinViewModel
 class SettingsViewModel(
     private val confRepo: ConfRepository,
-    private val db: Database,
+    private val db: Db,
     private val syncScheduler: BackgroundSyncScheduler,
 ) : ViewModel() {
 

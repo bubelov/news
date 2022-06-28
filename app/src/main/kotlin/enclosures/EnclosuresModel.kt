@@ -3,7 +3,7 @@ package enclosures
 import androidx.lifecycle.ViewModel
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
-import db.Database
+import db.Db
 import db.Link
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -13,7 +13,7 @@ import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
 class EnclosuresModel(
-    private val db: Database,
+    private val db: Db,
     private val audioEnclosuresRepo: AudioEnclosuresRepository,
 ) : ViewModel() {
 

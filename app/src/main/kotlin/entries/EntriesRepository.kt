@@ -5,7 +5,7 @@ import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOne
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
-import db.Database
+import db.Db
 import db.Entry
 import db.EntryWithoutContent
 import db.Feed
@@ -20,7 +20,7 @@ import java.time.OffsetDateTime
 
 @Single
 class EntriesRepository(
-    private val db: Database,
+    private val db: Db,
     private val api: NewsApi,
 ) {
 

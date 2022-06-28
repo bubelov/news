@@ -6,7 +6,7 @@ import api.nextcloud.NextcloudNewsApiAdapter
 import api.nextcloud.NextcloudNewsApiBuilder
 import api.standalone.StandaloneNewsApi
 import conf.ConfRepository
-import db.Database
+import db.Db
 import db.Entry
 import db.EntryWithoutContent
 import db.Feed
@@ -21,7 +21,7 @@ import java.time.OffsetDateTime
 @Single(binds = [NewsApi::class])
 class HotSwapNewsApi(
     private val confRepo: ConfRepository,
-    private val db: Database,
+    private val db: Db,
 ) : NewsApi {
 
     lateinit var api: NewsApi

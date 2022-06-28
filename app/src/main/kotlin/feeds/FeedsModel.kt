@@ -6,7 +6,7 @@ import api.NewsApi
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOne
-import db.Database
+import db.Db
 import db.Feed
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 @KoinViewModel
 class FeedsModel(
-    private val db: Database,
+    private val db: Db,
     private val api: NewsApi,
 ) : ViewModel() {
 

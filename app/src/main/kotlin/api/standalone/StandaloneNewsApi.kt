@@ -12,7 +12,7 @@ import co.appreactor.feedk.RssFeed
 import co.appreactor.feedk.RssItem
 import co.appreactor.feedk.RssItemGuid
 import co.appreactor.feedk.feed
-import db.Database
+import db.Db
 import db.Entry
 import db.EntryWithoutContent
 import db.Feed
@@ -36,7 +36,7 @@ import java.util.Locale
 typealias ParsedFeed = co.appreactor.feedk.Feed
 
 class StandaloneNewsApi(
-    private val db: Database,
+    private val db: Db,
 ) : NewsApi {
 
     private val httpClient = OkHttpClient()

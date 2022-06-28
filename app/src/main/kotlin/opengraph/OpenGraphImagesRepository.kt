@@ -6,7 +6,7 @@ import com.squareup.picasso.Picasso
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import conf.ConfRepository
-import db.Database
+import db.Db
 import db.EntryWithoutContent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -24,7 +24,7 @@ import kotlin.random.Random
 
 @Single
 class OpenGraphImagesRepository(
-    private val db: Database,
+    private val db: Db,
     private val confRepo: ConfRepository,
 ) {
 

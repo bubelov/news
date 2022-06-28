@@ -1,3 +1,15 @@
+import db.Link;
+import kotlin.collections.List;
+
+CREATE TABLE Feed (
+    id TEXT PRIMARY KEY NOT NULL,
+    title TEXT NOT NULL,
+    links TEXT AS List<Link> NOT NULL,
+    openEntriesInBrowser INTEGER AS Boolean NOT NULL DEFAULT 0,
+    blockedWords TEXT NOT NULL DEFAULT '',
+    showPreviewImages INTEGER AS Boolean
+);
+
 insert:
 INSERT
 INTO Feed(id, title, links, openEntriesInBrowser, blockedWords, showPreviewImages)

@@ -3,7 +3,7 @@ package conf
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrDefault
 import db.Conf
-import db.Database
+import db.Db
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
@@ -11,7 +11,7 @@ import org.koin.core.annotation.Single
 
 @Single
 class ConfRepository(
-    private val db: Database,
+    private val db: Db,
 ) {
 
     companion object {

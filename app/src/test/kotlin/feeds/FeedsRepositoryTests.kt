@@ -1,7 +1,7 @@
 package feeds
 
 import api.NewsApi
-import db.Database
+import db.Db
 import db.feed
 import db.testDb
 import io.mockk.coEvery
@@ -18,7 +18,7 @@ import kotlin.test.assertTrue
 
 class FeedsRepositoryTests {
 
-    private lateinit var db: Database
+    private lateinit var db: Db
     private lateinit var api: NewsApi
     private lateinit var repo: FeedsRepository
 

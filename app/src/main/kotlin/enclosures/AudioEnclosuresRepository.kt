@@ -6,7 +6,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
-import db.Database
+import db.Db
 import db.Entry
 import db.EntryWithoutContent
 import db.Link
@@ -26,7 +26,7 @@ import java.util.UUID
 
 @Single
 class AudioEnclosuresRepository(
-    private val db: Database,
+    private val db: Db,
     private val context: Context,
 ) {
 

@@ -1,3 +1,79 @@
+import db.Link;
+import java.time.OffsetDateTime;
+import kotlin.collections.List;
+
+--    atomEntry =
+--       element atom:entry {
+--          atomCommonAttributes,
+--          (atomAuthor*
+--           & atomCategory*
+--           & atomContent?
+--           & atomContributor*
+--           & atomId
+--           & atomLink*
+--           & atomPublished?
+--           & atomRights?
+--           & atomSource?
+--           & atomSummary?
+--           & atomTitle
+--           & atomUpdated
+--           & extensionElement*)
+--       }
+CREATE TABLE Entry (
+    contentType TEXT,
+    contentSrc TEXT,
+    contentText TEXT,
+    links TEXT AS List<Link> NOT NULL,
+    summary TEXT,
+    id TEXT PRIMARY KEY NOT NULL,
+    feedId TEXT NOT NULL,
+    title TEXT NOT NULL,
+    published TEXT AS OffsetDateTime NOT NULL,
+    updated TEXT AS OffsetDateTime NOT NULL,
+    authorName TEXT NOT NULL,
+
+    read INTEGER AS Boolean NOT NULL,
+    readSynced INTEGER AS Boolean NOT NULL,
+
+    bookmarked INTEGER AS Boolean NOT NULL,
+    bookmarkedSynced INTEGER AS Boolean NOT NULL,
+
+    guidHash TEXT NOT NULL,
+    commentsUrl TEXT NOT NULL,
+
+    ogImageChecked INTEGER AS Boolean NOT NULL,
+    ogImageUrl TEXT NOT NULL,
+    ogImageWidth INTEGER NOT NULL,
+    ogImageHeight INTEGER NOT NULL
+);
+
+CREATE VIEW EntryWithoutContent
+AS
+SELECT
+    links,
+    summary,
+    id,
+    feedId,
+    title,
+    published,
+    updated,
+    authorName,
+
+    read,
+    readSynced,
+
+    bookmarked,
+    bookmarkedSynced,
+
+    guidHash,
+    commentsUrl,
+
+    ogImageChecked,
+    ogImageUrl,
+    ogImageWidth,
+    ogImageHeight
+FROM Entry;
+
 insertOrReplace:
 INSERT OR REPLACE
 INTO Entry(contentType, contentSrc, contentText, links, summary, id, feedId, title, published, updated, authorName, read, readSynced, bookmarked, bookmarkedSynced, guidHash, commentsUrl, ogImageChecked, ogImageUrl, ogImageWidth, ogImageHeight)

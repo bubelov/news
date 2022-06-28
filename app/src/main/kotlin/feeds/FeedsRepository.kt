@@ -4,7 +4,7 @@ import api.NewsApi
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
-import db.Database
+import db.Db
 import db.Feed
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -15,7 +15,7 @@ import org.koin.core.annotation.Single
 
 @Single
 class FeedsRepository(
-    private val db: Database,
+    private val db: Db,
     private val api: NewsApi,
 ) {
 
