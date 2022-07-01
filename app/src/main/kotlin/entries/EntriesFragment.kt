@@ -14,13 +14,12 @@ import android.view.WindowManager
 import androidx.annotation.StringRes
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import anim.hide
-import anim.show
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentEntriesBinding
 import com.google.android.material.snackbar.Snackbar
@@ -421,27 +420,27 @@ class EntriesFragment : BaseFragment(), Scrollable {
         when (state) {
             null -> {
                 swipeRefresh.isRefreshing = false
-                list.hide()
-                progress.hide()
-                message.hide()
-                retry.hide()
+                list.isVisible = false
+                progress.isVisible = false
+                message.isVisible = false
+                retry.isVisible = false
             }
 
             is EntriesModel.State.InitialSync -> {
                 swipeRefresh.isRefreshing = false
-                list.hide()
-                progress.show(animate = true)
-                message.show(animate = true)
+                list.isVisible = false
+                progress.isVisible = true
+                message.isVisible = true
                 message.text = state.message
-                retry.hide()
+                retry.isVisible = false
             }
 
             is EntriesModel.State.FailedToSync -> {
                 swipeRefresh.isRefreshing = false
-                list.hide()
-                progress.hide()
-                message.hide()
-                retry.show(animate = true)
+                list.isVisible = false
+                progress.isVisible = false
+                message.isVisible = false
+                retry.isVisible = true
                 retry.setOnClickListener {
                     lifecycleScope.launchWhenResumed {
                         model.onRetry()
@@ -452,25 +451,25 @@ class EntriesFragment : BaseFragment(), Scrollable {
 
             EntriesModel.State.LoadingCachedEntries -> {
                 swipeRefresh.isRefreshing = false
-                list.hide()
-                progress.show(animate = true)
-                message.hide()
-                retry.hide()
+                list.isVisible = false
+                progress.isVisible = true
+                message.isVisible = false
+                retry.isVisible = false
             }
 
             is EntriesModel.State.ShowingCachedEntries -> {
                 swipeRefresh.isRefreshing = state.showBackgroundProgress
-                list.show()
-                progress.hide()
+                list.isVisible = true
+                progress.isVisible = false
 
                 if (state.entries.isEmpty()) {
                     message.text = getEmptyMessage()
-                    message.show(animate = true)
+                    message.isVisible = true
                 } else {
-                    message.hide()
+                    message.isVisible = false
                 }
 
-                retry.hide()
+                retry.isVisible = false
                 seenEntries.clear()
                 adapter.submitList(state.entries) { if (state.scrollToTop) scrollToTop() }
             }

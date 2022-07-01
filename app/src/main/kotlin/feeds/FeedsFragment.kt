@@ -11,21 +11,17 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import anim.hide
-import anim.show
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentFeedsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import dialog.showDialog
 import dialog.showErrorDialog
-import navigation.BaseFragment
-import navigation.sharedToolbar
-import navigation.showKeyboard
 import entries.EntriesFilter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
@@ -33,6 +29,9 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import navigation.BaseFragment
+import navigation.sharedToolbar
+import navigation.showKeyboard
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class FeedsFragment : BaseFragment() {
@@ -186,7 +185,10 @@ class FeedsFragment : BaseFragment() {
         initImportButton()
         initFab()
 
-        model.state.onEach { setState(it) }.catch { showErrorDialog(it) }.launchIn(viewLifecycleOwner.lifecycleScope)
+        model.state
+            .onEach { setState(it) }
+            .catch { showErrorDialog(it) }
+            .launchIn(viewLifecycleOwner.lifecycleScope)
 
         val args = FeedsFragmentArgs.fromBundle(requireArguments())
 
@@ -283,36 +285,36 @@ class FeedsFragment : BaseFragment() {
     private fun setState(state: FeedsModel.State) = binding.apply {
         when (state) {
             FeedsModel.State.Loading -> {
-                list.hide()
-                progress.show(animate = true)
-                message.hide()
-                importOpml.hide()
+                list.isVisible = false
+                progress.isVisible = true
+                message.isVisible = false
+                importOpml.isVisible = false
                 fab.hide()
             }
 
             is FeedsModel.State.ShowingFeeds -> {
                 adapter.submitList(state.feeds)
-                list.show()
-                progress.hide()
-                message.hide()
+                list.isVisible = true
+                progress.isVisible = false
+                message.isVisible = false
 
                 if (state.feeds.isEmpty()) {
-                    message.show(animate = true)
+                    message.isVisible = true
                     message.text = getString(R.string.you_have_no_feeds)
-                    importOpml.show(animate = true)
+                    importOpml.isVisible = true
                 } else {
-                    message.hide()
-                    importOpml.hide()
+                    message.isVisible = false
+                    importOpml.isVisible = false
                 }
 
                 fab.show()
             }
 
             is FeedsModel.State.ImportingFeeds -> {
-                list.hide()
+                list.isVisible = false
 
-                progress.show(animate = true)
-                message.show(animate = true)
+                progress.isVisible = true
+                message.isVisible = true
 
                 message.text = getString(
                     R.string.importing_feeds_n_of_n,
@@ -320,7 +322,7 @@ class FeedsFragment : BaseFragment() {
                     state.progress.total,
                 )
 
-                importOpml.hide()
+                importOpml.isVisible = false
                 fab.hide()
             }
         }

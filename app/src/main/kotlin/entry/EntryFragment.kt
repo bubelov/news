@@ -13,12 +13,11 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.core.view.iterator
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import anim.hide
-import anim.show
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentEntryBinding
 import db.Entry
@@ -92,8 +91,8 @@ class EntryFragment : BaseFragment() {
             when (state) {
                 EntryViewModel.State.Progress -> {
                     menu?.iterator()?.forEach { it.isVisible = false }
-                    contentContainer.hide()
-                    progress.show(animate = true)
+                    contentContainer.isVisible = false
+                    progress.isVisible = true
                     fab.hide()
                 }
 
@@ -109,7 +108,7 @@ class EntryFragment : BaseFragment() {
                     menu?.findItem(R.id.feedSettings)?.isVisible = true
                     menu?.findItem(R.id.share)?.isVisible = true
 
-                    contentContainer.show(animate = true)
+                    contentContainer.isVisible = true
                     sharedToolbar()?.title = state.feedTitle
 
                     sharedToolbar()?.setOnMenuItemClickListener {
@@ -128,7 +127,7 @@ class EntryFragment : BaseFragment() {
                     state.parsedContent.applyStyle(summaryView)
                     summaryView.text = state.parsedContent
                     summaryView.movementMethod = LinkMovementMethod.getInstance()
-                    progress.hide()
+                    progress.isVisible = false
 
                     val firstHtmlLink = state.entryLinks.firstOrNull { it.rel == "alternate" && it.type == "text/html" }
 
@@ -142,7 +141,7 @@ class EntryFragment : BaseFragment() {
 
                 is EntryViewModel.State.Error -> {
                     menu?.iterator()?.forEach { it.isVisible = false }
-                    contentContainer.hide()
+                    contentContainer.isVisible = false
                     showErrorDialog(state.message) { findNavController().popBackStack() }
                 }
             }
