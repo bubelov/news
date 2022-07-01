@@ -23,8 +23,8 @@ class NextcloudNewsApiAdapter(
         }
     }
 
-    override suspend fun getFeeds(): List<Feed> {
-        return api.getFeeds().feeds.mapNotNull { it.toFeed() }
+    override suspend fun getFeeds(): Result<List<Feed>> {
+        return runCatching { api.getFeeds().feeds.mapNotNull { it.toFeed() } }
     }
 
     override suspend fun updateFeedTitle(feedId: String, newTitle: String) {

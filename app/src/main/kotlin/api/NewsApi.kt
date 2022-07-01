@@ -11,7 +11,7 @@ interface NewsApi {
 
     suspend fun addFeed(url: HttpUrl): Result<Feed>
 
-    suspend fun getFeeds(): List<Feed>
+    suspend fun getFeeds(): Result<List<Feed>>
 
     suspend fun updateFeedTitle(
         feedId: String,

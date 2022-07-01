@@ -64,7 +64,7 @@ class HotSwapNewsApi(
         return api.addFeed(url)
     }
 
-    override suspend fun getFeeds(): List<Feed> {
+    override suspend fun getFeeds(): Result<List<Feed>> {
         return api.getFeeds()
     }
 

@@ -34,8 +34,8 @@ class MinifluxApiAdapter(
         }
     }
 
-    override suspend fun getFeeds(): List<Feed> {
-        return api.getFeeds().mapNotNull { it.toFeed() }
+    override suspend fun getFeeds(): Result<List<Feed>> {
+        return runCatching { api.getFeeds().mapNotNull { it.toFeed() } }
     }
 
     override suspend fun updateFeedTitle(feedId: String, newTitle: String) {

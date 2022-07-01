@@ -64,7 +64,7 @@ class FeedsRepository(
 
     suspend fun sync() {
         withContext(Dispatchers.Default) {
-            val newFeeds = api.getFeeds().sortedBy { it.id }
+            val newFeeds = api.getFeeds().getOrThrow().sortedBy { it.id }
             val cachedFeeds = selectAll().first().sortedBy { it.id }
 
             db.transaction {

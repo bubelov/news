@@ -56,4 +56,23 @@ class MinifluxApiAdapterTest {
             api.getFeed(feedJson.id!!)
         }
     }
+
+    @Test
+    fun getFeeds() = runBlocking {
+        val feedJson = FeedJson(
+            id = Random.Default.nextLong(),
+            title = "",
+            feed_url = "https://acme.org",
+            site_url = "https://acme.org",
+        )
+
+        val api = mockk<MinifluxApi>()
+        coEvery { api.getFeeds() } returns listOf(feedJson)
+
+        val adapter = MinifluxApiAdapter(api)
+        val result = adapter.getFeeds()
+        assert(result.isSuccess)
+
+        coVerify { api.getFeeds() }
+    }
 }

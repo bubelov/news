@@ -12,6 +12,8 @@ import co.appreactor.feedk.RssFeed
 import co.appreactor.feedk.RssItem
 import co.appreactor.feedk.RssItemGuid
 import co.appreactor.feedk.feed
+import com.squareup.sqldelight.runtime.coroutines.asFlow
+import com.squareup.sqldelight.runtime.coroutines.mapToList
 import db.Db
 import db.Entry
 import db.EntryWithoutContent
@@ -19,6 +21,7 @@ import db.Feed
 import db.Link
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl
@@ -101,10 +104,8 @@ class StandaloneNewsApi(
         }
     }
 
-    override suspend fun getFeeds(): List<Feed> {
-        return withContext(Dispatchers.Default) {
-            db.feedQueries.selectAll().executeAsList()
-        }
+    override suspend fun getFeeds(): Result<List<Feed>> {
+        return runCatching { db.feedQueries.selectAll().asFlow().mapToList().first() }
     }
 
     override suspend fun updateFeedTitle(feedId: String, newTitle: String) {
