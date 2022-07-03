@@ -5,17 +5,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentMinifluxAuthBinding
 import dialog.showErrorDialog
-import navigation.BaseFragment
-import navigation.sharedToolbar
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class MinifluxAuthFragment : BaseFragment() {
+class MinifluxAuthFragment : Fragment() {
 
     private val model: MinifluxAuthModel by viewModel()
 
@@ -34,10 +33,7 @@ class MinifluxAuthFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        sharedToolbar()?.apply {
-            setupUpNavigation()
-            setTitle(R.string.miniflux_login)
-        }
+        binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
         binding.login.setOnClickListener {
             if (binding.serverUrl.text.isNullOrEmpty()) {

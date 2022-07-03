@@ -12,6 +12,7 @@ import android.view.WindowManager
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.content.getSystemService
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,9 +20,6 @@ import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentSearchBinding
 import com.google.android.material.internal.TextWatcherAdapter
-import navigation.BaseFragment
-import navigation.hideKeyboard
-import navigation.showKeyboard
 import db.EntryWithoutContent
 import db.Link
 import entries.EntriesAdapter
@@ -29,9 +27,11 @@ import entries.EntriesAdapterCallback
 import entries.EntriesAdapterItem
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import navigation.hideKeyboard
+import navigation.showKeyboard
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class SearchFragment : BaseFragment() {
+class SearchFragment : Fragment() {
 
     private val args by lazy { SearchFragmentArgs.fromBundle(requireArguments()) }
 

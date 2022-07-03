@@ -15,6 +15,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.core.view.iterator
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -25,14 +26,12 @@ import db.Link
 import dialog.showErrorDialog
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import navigation.BaseFragment
 import navigation.openUrl
-import navigation.sharedToolbar
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-class EntryFragment : BaseFragment() {
+class EntryFragment : Fragment() {
 
     private val args: EntryFragmentArgs by navArgs()
 
@@ -53,8 +52,8 @@ class EntryFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        sharedToolbar()?.apply {
-            setupUpNavigation()
+        binding.toolbar.apply {
+            setNavigationOnClickListener { findNavController().popBackStack() }
             inflateMenu(R.menu.menu_entry)
         }
 
@@ -86,7 +85,7 @@ class EntryFragment : BaseFragment() {
 
     private fun setState(state: EntryViewModel.State) {
         binding.apply {
-            val menu = sharedToolbar()?.menu
+            val menu = binding.toolbar.menu
 
             when (state) {
                 EntryViewModel.State.Progress -> {
@@ -109,9 +108,9 @@ class EntryFragment : BaseFragment() {
                     menu?.findItem(R.id.share)?.isVisible = true
 
                     contentContainer.isVisible = true
-                    sharedToolbar()?.title = state.feedTitle
+                    binding.toolbar.title = state.feedTitle
 
-                    sharedToolbar()?.setOnMenuItemClickListener {
+                    binding.toolbar.setOnMenuItemClickListener {
                         onMenuItemClick(
                             menuItem = it,
                             entry = state.entry,
@@ -194,7 +193,7 @@ class EntryFragment : BaseFragment() {
     }
 
     private fun updateBookmarkedButton(bookmarked: Boolean) {
-        sharedToolbar()?.menu?.findItem(R.id.toggleBookmarked)?.apply {
+        binding.toolbar.menu?.findItem(R.id.toggleBookmarked)?.apply {
             if (bookmarked) {
                 setIcon(R.drawable.ic_baseline_bookmark_24)
                 setTitle(R.string.remove_bookmark)

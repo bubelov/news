@@ -5,20 +5,20 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentEnclosuresBinding
-import navigation.BaseFragment
-import navigation.sharedToolbar
 import db.Link
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class EnclosuresFragment : BaseFragment() {
+class EnclosuresFragment : Fragment() {
 
     private val model: EnclosuresModel by viewModel()
 
@@ -37,9 +37,8 @@ class EnclosuresFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        sharedToolbar()?.apply {
-            setupUpNavigation()
-            setTitle(R.string.enclosures)
+        binding.toolbar.setNavigationOnClickListener {
+            findNavController().popBackStack()
         }
 
         binding.list.layoutManager = LinearLayoutManager(requireContext())

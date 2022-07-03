@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.RadioButton
 import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -15,15 +16,13 @@ import co.appreactor.news.databinding.FragmentFeedSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import dialog.showErrorDialog
-import navigation.BaseFragment
-import navigation.sharedToolbar
-import navigation.showKeyboard
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import navigation.showKeyboard
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class FeedSettingsFragment : BaseFragment() {
+class FeedSettingsFragment : Fragment() {
 
     private val args: FeedSettingsFragmentArgs by navArgs()
 
@@ -52,8 +51,8 @@ class FeedSettingsFragment : BaseFragment() {
                 return@launch
             }
 
-            sharedToolbar()?.apply {
-                setupUpNavigation()
+            binding.toolbar.apply {
+                setNavigationOnClickListener { findNavController().popBackStack() }
                 title = feed.title
             }
 

@@ -4,12 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.fragment.app.Fragment
-import com.google.android.material.appbar.MaterialToolbar
 import dialog.showErrorDialog
-
-fun Fragment.sharedToolbar(): MaterialToolbar? {
-    return (requireActivity() as? Activity)?.binding?.toolbar
-}
 
 fun Fragment.openUrl(
     url: String,

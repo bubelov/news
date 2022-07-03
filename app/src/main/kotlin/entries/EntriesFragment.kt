@@ -11,12 +11,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.TextView
 import androidx.annotation.StringRes
+import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -27,6 +32,7 @@ import conf.ConfRepository
 import db.EntryWithoutContent
 import db.Link
 import dialog.showErrorDialog
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -34,13 +40,10 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import navigation.BaseFragment
-import navigation.Scrollable
 import navigation.openUrl
-import navigation.sharedToolbar
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class EntriesFragment : BaseFragment(), Scrollable {
+class EntriesFragment : Fragment() {
 
     private val args by lazy { EntriesFragmentArgs.fromBundle(requireArguments()) }
 
@@ -231,7 +234,30 @@ class EntriesFragment : BaseFragment(), Scrollable {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        initDrawerHeader()
         initToolbar()
+
+        if (args.filter !is EntriesFilter.BelongToFeed) {
+            val drawerToggle = ActionBarDrawerToggle(
+                requireActivity(),
+                binding.drawerLayout,
+                binding.toolbar,
+                R.string.open,
+                R.string.close,
+            )
+
+            binding.drawerLayout.addDrawerListener(drawerToggle)
+
+            drawerToggle.syncState()
+        }
+
+        runCatching {
+            binding.navigationView.setupWithNavController(findNavController())
+            binding.bottomNavigation.setupWithNavController(findNavController())
+        }
+
+        binding.bottomNavigation.setOnItemReselectedListener { scrollToTop() }
+
         initSwipeRefresh()
         initList()
 
@@ -258,27 +284,28 @@ class EntriesFragment : BaseFragment(), Scrollable {
         }
     }
 
-    override fun scrollToTop() {
+    private fun scrollToTop() {
         binding.list.layoutManager?.scrollToPosition(0)
     }
 
     private fun initToolbar() {
-        sharedToolbar()?.apply {
+        binding.toolbar.apply {
             inflateMenu(R.menu.menu_entries)
 
             when (val filter = args.filter!!) {
                 EntriesFilter.Bookmarked -> {
-                    setupGlobalNavigation()
                     setTitle(R.string.bookmarks)
                 }
 
                 EntriesFilter.NotBookmarked -> {
-                    setupGlobalNavigation()
                     setTitle(R.string.news)
                 }
 
                 is EntriesFilter.BelongToFeed -> {
-                    setupUpNavigation()
+                    binding.toolbar.apply {
+                        navigationIcon = DrawerArrowDrawable(context).also { it.progress = 1f }
+                        setNavigationOnClickListener { findNavController().popBackStack() }
+                    }
 
                     model.getFeed(filter.feedId)
                         .onEach { title = it?.title }
@@ -294,7 +321,7 @@ class EntriesFragment : BaseFragment(), Scrollable {
     }
 
     private fun initSearchButton() {
-        val searchMenuItem = sharedToolbar()?.menu?.findItem(R.id.search)
+        val searchMenuItem = binding.toolbar.menu?.findItem(R.id.search)
 
         searchMenuItem?.setOnMenuItemClickListener {
             findNavController().navigate(
@@ -307,7 +334,7 @@ class EntriesFragment : BaseFragment(), Scrollable {
     }
 
     private fun initShowReadEntriesButton() {
-        val showOpenedEntriesMenuItem = sharedToolbar()?.menu?.findItem(R.id.showOpenedEntries)
+        val showOpenedEntriesMenuItem = binding.toolbar.menu?.findItem(R.id.showOpenedEntries)
         showOpenedEntriesMenuItem?.isVisible = getShowReadEntriesButtonVisibility()
 
         lifecycleScope.launchWhenResumed {
@@ -335,7 +362,7 @@ class EntriesFragment : BaseFragment(), Scrollable {
     }
 
     private fun initSortOrderButton() {
-        val sortOrderMenuItem = sharedToolbar()?.menu?.findItem(R.id.sort) ?: return
+        val sortOrderMenuItem = binding.toolbar.menu?.findItem(R.id.sort) ?: return
 
         model.loadConf().onEach { conf ->
             when (conf.sortOrder) {
@@ -358,7 +385,7 @@ class EntriesFragment : BaseFragment(), Scrollable {
     }
 
     private fun initMarkAllAsReadButton() {
-        sharedToolbar()?.menu?.findItem(R.id.markAllAsRead)?.setOnMenuItemClickListener {
+        binding.toolbar.menu?.findItem(R.id.markAllAsRead)?.setOnMenuItemClickListener {
             lifecycleScope.launchWhenResumed { model.markAllAsRead() }
             true
         }
@@ -554,6 +581,18 @@ class EntriesFragment : BaseFragment(), Scrollable {
                 displayMetrics.widthPixels
             }
         }
+    }
+
+    private fun initDrawerHeader() {
+        val headerView = binding.navigationView.getHeaderView(0)!!
+        val titleView = headerView.findViewById<TextView>(R.id.title)!!
+        val subtitleView = headerView.findViewById<TextView>(R.id.subtitle)!!
+
+        combine(model.accountTitle(), model.accountSubtitle()) { title, subtitle ->
+            titleView.text = title
+            subtitleView.isVisible = subtitle.isNotBlank()
+            subtitleView.text = subtitle
+        }.launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
     private class CardListAdapterDecoration(private val gapInPixels: Int) : RecyclerView.ItemDecoration() {

@@ -6,18 +6,18 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentAuthBinding
-import navigation.BaseFragment
 import conf.ConfRepository
 import entries.EntriesFilter
 import kotlinx.coroutines.runBlocking
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.concurrent.TimeUnit
 
-class AuthFragment : BaseFragment() {
+class AuthFragment : Fragment() {
 
     private val model: AuthModel by viewModel()
 
@@ -85,15 +85,11 @@ class AuthFragment : BaseFragment() {
         }
 
         useMinifluxBackend.setOnClickListener {
-            binding.root.animate().alpha(0f).setDuration(150).withEndAction {
-                findNavController().navigate(R.id.action_authFragment_to_minifluxAuthFragment)
-            }
+            findNavController().navigate(R.id.action_authFragment_to_minifluxAuthFragment)
         }
 
         useNextcloudBackend.setOnClickListener {
-            binding.root.animate().alpha(0f).setDuration(150).withEndAction {
-                findNavController().navigate(R.id.action_authFragment_to_nextcloudAuthFragment)
-            }
+            findNavController().navigate(R.id.action_authFragment_to_nextcloudAuthFragment)
         }
     }
 }

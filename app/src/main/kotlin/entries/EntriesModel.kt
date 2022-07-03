@@ -1,7 +1,10 @@
 package entries
 
+import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import auth.accountSubtitle
+import auth.accountTitle
 import conf.ConfRepository
 import conf.ConfRepository.Companion.SORT_ORDER_ASCENDING
 import conf.ConfRepository.Companion.SORT_ORDER_DESCENDING
@@ -12,11 +15,13 @@ import db.Link
 import enclosures.AudioEnclosuresRepository
 import feeds.FeedsRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -29,6 +34,7 @@ import java.time.format.FormatStyle
 
 @KoinViewModel
 class EntriesModel(
+    private val app: Application,
     private val confRepo: ConfRepository,
     private val feedsRepo: FeedsRepository,
     private val entriesRepo: EntriesRepository,
@@ -91,6 +97,14 @@ class EntriesModel(
 
     suspend fun onRetry() {
         viewModelScope.launch { newsApiSync.sync() }
+    }
+
+    fun accountTitle(): Flow<String> {
+        return confRepo.load().map { it.accountTitle(app.resources) }
+    }
+
+    fun accountSubtitle(): Flow<String> {
+        return confRepo.load().map { it.accountSubtitle() }
     }
 
     private suspend fun selectEntries(

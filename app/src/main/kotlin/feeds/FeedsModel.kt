@@ -1,14 +1,19 @@
 package feeds
 
+import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import api.NewsApi
+import auth.accountSubtitle
+import auth.accountTitle
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOne
+import conf.ConfRepository
 import db.Db
 import db.Feed
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -24,6 +29,8 @@ import java.util.concurrent.atomic.AtomicInteger
 
 @KoinViewModel
 class FeedsModel(
+    private val app: Application,
+    private val confRepo: ConfRepository,
     private val db: Db,
     private val api: NewsApi,
 ) : ViewModel() {
@@ -182,6 +189,14 @@ class FeedsModel(
         }.onFailure {
             hasActionInProgress.update { false }
         }.getOrThrow()
+    }
+
+    fun accountTitle(): Flow<String> {
+        return confRepo.load().map { it.accountTitle(app.resources) }
+    }
+
+    fun accountSubtitle(): Flow<String> {
+        return confRepo.load().map { it.accountSubtitle() }
     }
 
     private fun Feed.toItem(unreadCount: Long): FeedsAdapter.Item {
