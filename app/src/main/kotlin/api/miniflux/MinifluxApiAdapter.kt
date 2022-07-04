@@ -1,6 +1,6 @@
 package api.miniflux
 
-import api.NewsApi
+import api.Api
 import db.Entry
 import db.EntryWithoutContent
 import db.Feed
@@ -13,7 +13,7 @@ import java.time.OffsetDateTime
 
 class MinifluxApiAdapter(
     private val api: MinifluxApi,
-) : NewsApi {
+) : Api {
 
     override suspend fun addFeed(url: HttpUrl): Result<Feed> {
         return runCatching {

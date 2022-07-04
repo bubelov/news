@@ -1,6 +1,6 @@
 package feeds
 
-import api.NewsApi
+import api.Api
 import db.Db
 import db.feed
 import db.testDb
@@ -19,7 +19,7 @@ import kotlin.test.assertTrue
 class FeedsRepositoryTests {
 
     private lateinit var db: Db
-    private lateinit var api: NewsApi
+    private lateinit var api: Api
     private lateinit var repo: FeedsRepository
 
     @BeforeTest

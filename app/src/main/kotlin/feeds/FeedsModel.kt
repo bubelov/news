@@ -3,7 +3,7 @@ package feeds
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import api.NewsApi
+import api.Api
 import auth.accountSubtitle
 import auth.accountTitle
 import com.squareup.sqldelight.runtime.coroutines.asFlow
@@ -32,7 +32,7 @@ class FeedsModel(
     private val app: Application,
     private val confRepo: ConfRepository,
     private val db: Db,
-    private val api: NewsApi,
+    private val api: Api,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<State>(State.Loading)

@@ -1,29 +1,29 @@
 package api
 
-import api.standalone.StandaloneNewsApi
 import conf.ConfRepository
 import db.testDb
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
-class HotSwapNewsApiTest {
+class HotSwapApiTest {
 
     @Test
     fun standaloneBackend() = runBlocking {
         val db = testDb()
         val confRepo = ConfRepository(db)
-        val api = HotSwapNewsApi(confRepo, db)
+        val api = HotSwapApi(confRepo, db)
 
         confRepo.save { it.copy(backend = ConfRepository.BACKEND_STANDALONE) }
 
         var attempts = 0L
 
-        while (attempts < 20 && runCatching { api.api }.isFailure) {
+        while (attempts < 20 && runCatching { api.getFeeds() }.isFailure) {
             attempts += 1
             delay(10 * attempts)
         }
 
-        assert(api.api is StandaloneNewsApi)
+        assertEquals(0, api.getFeeds().getOrThrow().size)
     }
 }

@@ -1,6 +1,6 @@
 package entries
 
-import api.NewsApi
+import api.Api
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOne
@@ -21,7 +21,7 @@ import java.time.OffsetDateTime
 @Single
 class EntriesRepository(
     private val db: Db,
-    private val api: NewsApi,
+    private val api: Api,
 ) {
 
     fun selectAll(): Flow<List<EntryWithoutContent>> {

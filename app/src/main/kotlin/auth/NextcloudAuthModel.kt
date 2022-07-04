@@ -1,7 +1,7 @@
 package auth
 
 import androidx.lifecycle.ViewModel
-import api.nextcloud.NextcloudNewsApiBuilder
+import api.nextcloud.NextcloudApiBuilder
 import conf.ConfRepository
 import okhttp3.HttpUrl
 import org.koin.android.annotation.KoinViewModel
@@ -19,7 +19,7 @@ class NextcloudAuthModel(
         password: String,
         trustSelfSignedCerts: Boolean,
     ) {
-        val api = NextcloudNewsApiBuilder().build(
+        val api = NextcloudApiBuilder().build(
             url = url.toString().trim('/'),
             username = username,
             password = password,

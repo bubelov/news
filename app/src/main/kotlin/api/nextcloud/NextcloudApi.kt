@@ -8,7 +8,7 @@ import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-interface NextcloudNewsApi {
+interface NextcloudApi {
 
     @POST("feeds")
     suspend fun postFeed(

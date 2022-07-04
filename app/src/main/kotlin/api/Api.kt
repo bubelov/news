@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import okhttp3.HttpUrl
 import java.time.OffsetDateTime
 
-interface NewsApi {
+interface Api {
 
     suspend fun addFeed(url: HttpUrl): Result<Feed>
 

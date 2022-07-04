@@ -2,8 +2,8 @@ package api
 
 import api.miniflux.MinifluxApiAdapter
 import api.miniflux.MinifluxApiBuilder
-import api.nextcloud.NextcloudNewsApiAdapter
-import api.nextcloud.NextcloudNewsApiBuilder
+import api.nextcloud.NextcloudApiAdapter
+import api.nextcloud.NextcloudApiBuilder
 import api.standalone.StandaloneNewsApi
 import conf.ConfRepository
 import db.Db
@@ -18,13 +18,13 @@ import okhttp3.HttpUrl
 import org.koin.core.annotation.Single
 import java.time.OffsetDateTime
 
-@Single(binds = [NewsApi::class])
-class HotSwapNewsApi(
+@Single(binds = [Api::class])
+class HotSwapApi(
     private val confRepo: ConfRepository,
     private val db: Db,
-) : NewsApi {
+) : Api {
 
-    lateinit var api: NewsApi
+    private lateinit var api: Api
 
     init {
         GlobalScope.launch {
@@ -46,8 +46,8 @@ class HotSwapNewsApi(
                     }
 
                     ConfRepository.BACKEND_NEXTCLOUD -> {
-                        api = NextcloudNewsApiAdapter(
-                            NextcloudNewsApiBuilder().build(
+                        api = NextcloudApiAdapter(
+                            NextcloudApiBuilder().build(
                                 url = conf.nextcloudServerUrl,
                                 username = conf.nextcloudServerUsername,
                                 password = conf.nextcloudServerPassword,

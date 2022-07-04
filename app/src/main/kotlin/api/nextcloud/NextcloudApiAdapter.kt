@@ -1,6 +1,6 @@
 package api.nextcloud
 
-import api.NewsApi
+import api.Api
 import db.Entry
 import db.EntryWithoutContent
 import db.Feed
@@ -12,9 +12,9 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import java.time.Instant
 import java.time.OffsetDateTime
 
-class NextcloudNewsApiAdapter(
-    private val api: NextcloudNewsApi,
-) : NewsApi {
+class NextcloudApiAdapter(
+    private val api: NextcloudApi,
+) : Api {
 
     override suspend fun addFeed(url: HttpUrl): Result<Feed> {
         return runCatching {

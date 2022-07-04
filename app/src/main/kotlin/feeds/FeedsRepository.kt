@@ -1,6 +1,6 @@
 package feeds
 
-import api.NewsApi
+import api.Api
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
@@ -16,7 +16,7 @@ import org.koin.core.annotation.Single
 @Single
 class FeedsRepository(
     private val db: Db,
-    private val api: NewsApi,
+    private val api: Api,
 ) {
 
     suspend fun insertOrReplace(feed: Feed) {
