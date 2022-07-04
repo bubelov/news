@@ -53,6 +53,8 @@
 
         </activity>
 
+        <activity android:name="crash.CrashActivity" />
+
     </application>
 
     <queries>

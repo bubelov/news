@@ -97,6 +97,7 @@
     <string name="show_preview_text">Show preview text</string>
     <string name="enclosures">Enclosures</string>
     <string name="manage_enclosures">Manage enclosures</string>
+    <string name="crash">Crash</string>
     <plurals name="d_hours">
         <item quantity="one">%d hodinu</item>
         <item quantity="few">%d hodina</item>

@@ -97,6 +97,7 @@
     <string name="show_preview_text">Mostrar texto de pré-visualização</string>
     <string name="enclosures">Anexos</string>
     <string name="manage_enclosures">Gerenciar anexos</string>
+    <string name="crash">Crash</string>
     <plurals name="d_hours">
         <item quantity="zero">%d horas</item>
         <item quantity="one">%d hora</item>

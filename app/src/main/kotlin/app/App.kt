@@ -24,11 +24,13 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
 
+        CrashHandler().setup(this)
+
         startKoin {
             if (BuildConfig.DEBUG) androidLogger(Level.DEBUG)
-            androidContext(applicationContext)
+            androidContext(this@App)
             defaultModule()
-            modules(module { single { db(applicationContext) } })
+            modules(module { single { db(this@App) } })
         }
 
         val confRepo = get<ConfRepository>()
@@ -42,7 +44,5 @@ class App : Application() {
 
         val ogImagesRepo = get<OpenGraphImagesRepository>()
         GlobalScope.launch { ogImagesRepo.fetchEntryImages() }
-
-        CrashHandler().setup(this)
     }
 }
