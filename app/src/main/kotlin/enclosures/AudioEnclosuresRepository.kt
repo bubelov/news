@@ -208,7 +208,7 @@ class AudioEnclosuresRepository(
         }
     }
 
-    suspend fun deleteIncompleteDownloads() {
+    suspend fun deletePartialDownloads() {
         withContext(Dispatchers.Default) {
             db.entryQueries.selectAll().executeAsList().forEach { entry ->
                 entry.links
