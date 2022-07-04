@@ -15,17 +15,17 @@ import java.time.OffsetDateTime
 
 private const val FILE_NAME = "news-v3.db"
 
-fun database(context: Context): Db {
+fun db(context: Context): Db {
     val driver = AndroidSqliteDriver(
         schema = Db.Schema,
         context = context,
         name = FILE_NAME,
     )
 
-    return database(driver)
+    return db(driver)
 }
 
-fun database(driver: SqlDriver): Db {
+fun db(driver: SqlDriver): Db {
     return Db(
         driver = driver,
         EntryAdapter = entryAdapter(),

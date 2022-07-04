@@ -6,7 +6,7 @@ import com.squareup.picasso.OkHttp3Downloader
 import com.squareup.picasso.Picasso
 import conf.ConfRepository
 import crash.CrashHandler
-import db.database
+import db.db
 import enclosures.AudioEnclosuresRepository
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -29,9 +29,9 @@ class App : Application() {
 
         startKoin {
             if (BuildConfig.DEBUG) androidLogger(Level.DEBUG)
-            androidContext(this@App)
+            androidContext(applicationContext)
             defaultModule()
-            modules(module { single { database(this@App) } })
+            modules(module { single { db(applicationContext) } })
         }
 
         val picasso = Picasso.Builder(this)
