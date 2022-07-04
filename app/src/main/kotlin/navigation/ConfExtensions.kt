@@ -1,4 +1,4 @@
-package auth
+package navigation
 
 import android.content.res.Resources
 import co.appreactor.news.R

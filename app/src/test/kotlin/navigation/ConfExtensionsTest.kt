@@ -1,4 +1,4 @@
-package auth
+package navigation
 
 import conf.ConfRepository
 import kotlin.test.Test

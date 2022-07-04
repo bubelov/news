@@ -11,11 +11,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentAuthBinding
-import conf.ConfRepository
 import entries.EntriesFilter
 import kotlinx.coroutines.runBlocking
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.util.concurrent.TimeUnit
 
 class AuthFragment : Fragment() {
 
@@ -29,12 +27,7 @@ class AuthFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
-        val conf = runBlocking { model.loadConf() }
-
-        return if (conf.backend.isBlank()) {
-            _binding = FragmentAuthBinding.inflate(inflater, container, false)
-            binding.root
-        } else {
+        return if (runBlocking { model.hasBackend() }) {
             val intent = requireActivity().intent
             val sharedFeedUrl = (intent?.dataString ?: intent?.getStringExtra(Intent.EXTRA_TEXT))?.trim()
 
@@ -46,6 +39,9 @@ class AuthFragment : Fragment() {
             }
 
             null
+        } else {
+            _binding = FragmentAuthBinding.inflate(inflater, container, false)
+            binding.root
         }
     }
 
@@ -67,20 +63,8 @@ class AuthFragment : Fragment() {
     private fun FragmentAuthBinding.initButtons() {
         useStandaloneBackend.setOnClickListener {
             lifecycleScope.launchWhenResumed {
-                model.saveConf {
-                    it.copy(
-                        backend = ConfRepository.BACKEND_STANDALONE,
-                        syncOnStartup = false,
-                        backgroundSyncIntervalMillis = TimeUnit.HOURS.toMillis(12),
-                    )
-                }
-
-                model.setBackend(ConfRepository.BACKEND_STANDALONE)
-                model.scheduleBackgroundSync()
-
-                binding.root.animate().alpha(0f).setDuration(150).withEndAction {
-                    findNavController().navigate(AuthFragmentDirections.actionAuthFragmentToNewsFragment(EntriesFilter.NotBookmarked))
-                }
+                model.setStandaloneBackend()
+                findNavController().navigate(AuthFragmentDirections.actionAuthFragmentToNewsFragment(EntriesFilter.NotBookmarked))
             }
         }
 

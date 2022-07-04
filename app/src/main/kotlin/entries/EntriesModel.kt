@@ -3,8 +3,6 @@ package entries
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import auth.accountSubtitle
-import auth.accountTitle
 import conf.ConfRepository
 import conf.ConfRepository.Companion.SORT_ORDER_ASCENDING
 import conf.ConfRepository.Companion.SORT_ORDER_DESCENDING
@@ -26,6 +24,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import navigation.accountSubtitle
+import navigation.accountTitle
 import org.koin.android.annotation.KoinViewModel
 import sync.NewsApiSync
 import sync.SyncResult

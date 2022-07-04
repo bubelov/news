@@ -4,8 +4,6 @@ import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import api.Api
-import auth.accountSubtitle
-import auth.accountTitle
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOne
@@ -22,6 +20,8 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
+import navigation.accountSubtitle
+import navigation.accountTitle
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import opml.exportOpml
 import org.koin.android.annotation.KoinViewModel

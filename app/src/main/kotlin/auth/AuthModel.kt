@@ -2,10 +2,10 @@ package auth
 
 import androidx.lifecycle.ViewModel
 import conf.ConfRepository
-import db.Conf
 import kotlinx.coroutines.flow.first
 import org.koin.android.annotation.KoinViewModel
 import sync.BackgroundSyncScheduler
+import java.util.concurrent.TimeUnit
 
 @KoinViewModel
 class AuthModel(
@@ -13,15 +13,17 @@ class AuthModel(
     private val syncScheduler: BackgroundSyncScheduler,
 ) : ViewModel() {
 
-    suspend fun loadConf() = confRepo.load().first()
+    suspend fun hasBackend() = confRepo.load().first().backend.isNotBlank()
 
-    suspend fun saveConf(newConf: (Conf) -> Conf) = confRepo.save { newConf(it) }
+    suspend fun setStandaloneBackend() {
+        confRepo.save {
+            it.copy(
+                backend = ConfRepository.BACKEND_STANDALONE,
+                syncOnStartup = false,
+                backgroundSyncIntervalMillis = TimeUnit.HOURS.toMillis(12),
+            )
+        }
 
-    suspend fun setBackend(newBackend: String) {
-        confRepo.save { it.copy(backend = newBackend) }
-    }
-
-    suspend fun scheduleBackgroundSync() {
         syncScheduler.schedule(override = true)
     }
 }

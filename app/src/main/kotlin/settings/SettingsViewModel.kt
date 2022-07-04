@@ -1,13 +1,13 @@
 package settings
 
 import androidx.lifecycle.ViewModel
-import auth.accountSubtitle
 import conf.ConfRepository
 import db.Conf
 import db.Db
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
+import navigation.accountSubtitle
 import org.koin.android.annotation.KoinViewModel
 import sync.BackgroundSyncScheduler
 
