@@ -2,7 +2,6 @@
 
 <resources>
     <string name="app_name">News</string>
-    <string name="login_with_nextcloud">Acessar via Nextcloud</string>
     <string name="post_image">Postar imagem</string>
     <string name="settings">Configurações</string>
     <string name="news">Notícias</string>
@@ -14,7 +13,6 @@
     <string name="log_out">Sair</string>
     <string name="log_out_warning">Você realmente quer sair?</string>
     <string name="cancel">Cancelar</string>
-    <string name="login">Entrar</string>
     <string name="direct_login_failed">Não foi possível conectar-se ao servidor. Por favor, certifique-se de que seus credenciais estejam corretos.</string>
     <string name="server_url_hint">https://examplo.com</string>
     <string name="username">Usuário</string>
@@ -88,7 +86,6 @@
     <string name="open">Abrir</string>
     <string name="close">Fechar</string>
     <string name="miniflux_login">Entrar no Miniflux</string>
-    <string name="login_with_miniflux">Acessar via Miniflux</string>
     <string name="miniflux">Miniflux</string>
     <string name="opml_file_is_invalid">O arquivo OPML está inválido</string>
     <string name="feed_url">A URL do feed</string>
@@ -98,6 +95,9 @@
     <string name="enclosures">Anexos</string>
     <string name="manage_enclosures">Gerenciar anexos</string>
     <string name="crash">Crash</string>
+    <string name="connect_to_miniflux">Connect to Miniflux</string>
+    <string name="connect_to_nextcloud">Connect to Nextcloud</string>
+    <string name="connect">Connect</string>
     <plurals name="d_hours">
         <item quantity="zero">%d horas</item>
         <item quantity="one">%d hora</item>

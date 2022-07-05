@@ -2,7 +2,6 @@
 
 <resources>
     <string name="app_name">新闻</string>
-    <string name="login_with_nextcloud">使用 Nextcloud 登录</string>
     <string name="post_image">发布图像</string>
     <string name="settings">设置</string>
     <string name="news">新闻</string>
@@ -14,7 +13,6 @@
     <string name="log_out">登出</string>
     <string name="log_out_warning">您确定要登出吗？</string>
     <string name="cancel">取消</string>
-    <string name="login">登录</string>
     <string name="direct_login_failed">无法连接到服务器。请确认您的登录信息正确。</string>
     <string name="server_url_hint">https://example.com</string>
     <string name="username">用户名</string>
@@ -88,7 +86,6 @@
     <string name="open">打开</string>
     <string name="close">关闭</string>
     <string name="miniflux_login">登录 Miniflux</string>
-    <string name="login_with_miniflux">使用 Miniflux 登录</string>
     <string name="miniflux">Miniflux</string>
     <string name="opml_file_is_invalid">OPML 文件无效</string>
     <string name="feed_url">订阅源URL</string>
@@ -98,6 +95,9 @@
     <string name="enclosures">Enclosures</string>
     <string name="manage_enclosures">Manage enclosures</string>
     <string name="crash">Crash</string>
+    <string name="connect_to_miniflux">Connect to Miniflux</string>
+    <string name="connect_to_nextcloud">Connect to Nextcloud</string>
+    <string name="connect">Connect</string>
     <plurals name="d_hours">
         <item quantity="other">%d 小时</item>
     </plurals>

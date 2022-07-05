@@ -35,7 +35,7 @@ class NextcloudAuthFragment : Fragment() {
 
         binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
-        binding.login.setOnClickListener {
+        binding.connect.setOnClickListener {
             if (binding.serverUrl.text.isNullOrEmpty()) {
                 binding.serverUrlLayout.error = getString(R.string.field_is_empty)
             } else {

@@ -2,7 +2,6 @@
 
 <resources>
     <string name="app_name">News</string>
-    <string name="login_with_nextcloud">ورود با Nextcloud</string>
     <string name="post_image">ارسال تصویر</string>
     <string name="settings">تنظیمات</string>
     <string name="news">اخبار</string>
@@ -14,7 +13,6 @@
     <string name="log_out">خروج</string>
     <string name="log_out_warning">آیا واقعاً می‌خواهید خارج شوید؟</string>
     <string name="cancel">فسخ</string>
-    <string name="login">ورود</string>
     <string name="direct_login_failed">نمی‌توان به سرور متصل شد. لطفاً مطمئن شوید اطلاعات ورود شما صحیح است.</string>
     <string name="server_url_hint">https://example.com</string>
     <string name="username">نام کاربری</string>
@@ -88,7 +86,6 @@
     <string name="open">بازکردن</string>
     <string name="close">بستن</string>
     <string name="miniflux_login">ورودی Miniflux</string>
-    <string name="login_with_miniflux">ورود با Miniflux</string>
     <string name="miniflux">Miniflux</string>
     <string name="opml_file_is_invalid">پرونده OPML نامعتبر است</string>
     <string name="feed_url">پیوند خوراک</string>
@@ -98,6 +95,9 @@
     <string name="enclosures">Enclosures</string>
     <string name="manage_enclosures">Manage enclosures</string>
     <string name="crash">Crash</string>
+    <string name="connect_to_miniflux">Connect to Miniflux</string>
+    <string name="connect_to_nextcloud">Connect to Nextcloud</string>
+    <string name="connect">Connect</string>
     <plurals name="d_hours">
         <item quantity="one">%d ساعت</item>
         <item quantity="other">%d ساعت</item>

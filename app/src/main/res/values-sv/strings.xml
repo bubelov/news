@@ -2,7 +2,6 @@
 
 <resources>
     <string name="app_name">Nyheter</string>
-    <string name="login_with_nextcloud">Logga in med Nextcloud</string>
     <string name="post_image">Artikelbild</string>
     <string name="settings">Inställningar</string>
     <string name="news">Nyheter</string>
@@ -14,7 +13,6 @@
     <string name="log_out">Logga ut</string>
     <string name="log_out_warning">Är du säker på att du vill logga ut?</string>
     <string name="cancel">Avbryt</string>
-    <string name="login">Logga in</string>
     <string name="direct_login_failed">Kan inte ansluta till server. Kontrollera uppgifterna.</string>
     <string name="server_url_hint">https://example.com</string>
     <string name="username">Användarnamn</string>
@@ -88,7 +86,6 @@
     <string name="open">Open</string>
     <string name="close">Close</string>
     <string name="miniflux_login">Miniflux Login</string>
-    <string name="login_with_miniflux">Login with Miniflux</string>
     <string name="miniflux">Miniflux</string>
     <string name="opml_file_is_invalid">OPML file is invalid</string>
     <string name="feed_url">Feed URL</string>
@@ -98,6 +95,9 @@
     <string name="enclosures">Enclosures</string>
     <string name="manage_enclosures">Manage enclosures</string>
     <string name="crash">Crash</string>
+    <string name="connect_to_miniflux">Connect to Miniflux</string>
+    <string name="connect_to_nextcloud">Connect to Nextcloud</string>
+    <string name="connect">Connect</string>
     <plurals name="d_hours">
         <item quantity="one">%d hour</item>
         <item quantity="other">%d hours</item>
