@@ -12,6 +12,7 @@ import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentNextcloudAuthBinding
 import dialog.showErrorDialog
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class NextcloudAuthFragment : Fragment() {
@@ -33,38 +34,22 @@ class NextcloudAuthFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
+        binding.apply {
+            toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
+            initConnectButton()
+        }
+    }
 
-        binding.connect.setOnClickListener {
-            if (binding.serverUrl.text.isNullOrEmpty()) {
-                binding.serverUrlLayout.error = getString(R.string.field_is_empty)
-            } else {
-                binding.serverUrlLayout.error = null
-            }
-
-            if (binding.username.text.isNullOrEmpty()) {
-                binding.usernameLayout.error = getString(R.string.field_is_empty)
-            } else {
-                binding.usernameLayout.error = null
-            }
-
-            if (binding.password.text.isNullOrEmpty()) {
-                binding.passwordLayout.error = getString(R.string.field_is_empty)
-            } else {
-                binding.passwordLayout.error = null
-            }
-
-            if (binding.serverUrlLayout.error != null
-                || binding.usernameLayout.error != null
-                || binding.passwordLayout.error != null
-            ) {
+    private fun FragmentNextcloudAuthBinding.initConnectButton() {
+        connect.setOnClickListener {
+            if (!validate()) {
                 return@setOnClickListener
             }
 
             viewLifecycleOwner.lifecycleScope.launchWhenResumed {
-                binding.progress.isVisible = true
+                progress.isVisible = true
 
-                val url = binding.serverUrl.text.toString().toHttpUrl()
+                val url = url.text.toString().toHttpUrl()
                 val username = binding.username.text.toString()
                 val password = binding.password.text.toString()
                 val trustSelfSignedCerts = binding.trustSelfSignedCerts.isChecked
@@ -86,13 +71,38 @@ class NextcloudAuthFragment : Fragment() {
 
                     model.scheduleBackgroundSync()
 
-                    findNavController().navigate(R.id.action_nextcloudAuthFragment_to_newsFragment)
+                    findNavController().navigate(R.id.action_minifluxAuthFragment_to_newsFragment)
                 }.onFailure {
                     binding.progress.isVisible = false
                     showErrorDialog(it.message ?: getString(R.string.direct_login_failed))
                 }
             }
         }
+    }
+
+    private fun FragmentNextcloudAuthBinding.validate(): Boolean {
+        urlLayout.error = when (url.text.toString().length) {
+            0 -> getString(R.string.field_is_empty)
+            else -> null
+        }
+
+        urlLayout.error = when (binding.url.text.toString().toHttpUrlOrNull()) {
+            null -> getString(R.string.invalid_url)
+            else -> null
+        }
+
+        usernameLayout.error = when (username.text.toString().length) {
+            0 -> getString(R.string.field_is_empty)
+            else -> null
+        }
+
+        if (binding.password.text.isNullOrEmpty()) {
+            binding.passwordLayout.error = getString(R.string.field_is_empty)
+        } else {
+            binding.passwordLayout.error = null
+        }
+
+        return urlLayout.error == null && usernameLayout.error == null && passwordLayout.error == null
     }
 
     override fun onDestroyView() {

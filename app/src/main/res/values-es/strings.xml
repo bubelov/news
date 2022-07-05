@@ -98,6 +98,7 @@
     <string name="connect_to_miniflux">Connect to Miniflux</string>
     <string name="connect_to_nextcloud">Connect to Nextcloud</string>
     <string name="connect">Connect</string>
+    <string name="invalid_url">Invalid URL</string>
     <plurals name="d_hours">
         <item quantity="one">%d horas</item>
         <item quantity="other">%d horas</item>

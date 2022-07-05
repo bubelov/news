@@ -14,7 +14,7 @@
         app:title="@string/connect_to_miniflux" />
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/serverUrlLayout"
+        android:id="@+id/urlLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
@@ -23,7 +23,7 @@
         app:startIconDrawable="@drawable/ic_baseline_cloud_24">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/serverUrl"
+            android:id="@+id/url"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textUri" />
@@ -39,7 +39,7 @@
         android:paddingEnd="16dp"
         android:paddingBottom="24dp"
         android:text="@string/trust_self_signed_certificates"
-        app:layout_constraintTop_toBottomOf="@id/serverUrlLayout" />
+        app:layout_constraintTop_toBottomOf="@id/urlLayout" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/usernameLayout"
