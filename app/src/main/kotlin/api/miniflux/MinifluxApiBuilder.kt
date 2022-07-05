@@ -8,6 +8,7 @@ import log.LoggingInterceptor
 import okhttp3.Credentials
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okio.IOException
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
@@ -38,7 +39,7 @@ class MinifluxApiBuilder {
                     "HTTP request ${it.request().url} failed with response code ${response.code}"
                 }
 
-                throw Exception(errorMessage)
+                throw IOException(errorMessage)
             }
 
             response
