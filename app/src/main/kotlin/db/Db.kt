@@ -8,6 +8,7 @@ import com.google.gson.stream.JsonWriter
 import com.squareup.sqldelight.ColumnAdapter
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
+import io.requery.android.database.sqlite.RequerySQLiteOpenHelperFactory
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import java.io.File
@@ -20,6 +21,7 @@ fun db(context: Context): Db {
         schema = Db.Schema,
         context = context,
         name = FILE_NAME,
+        factory = RequerySQLiteOpenHelperFactory(),
     )
 
     return db(driver)

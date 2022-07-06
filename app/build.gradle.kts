@@ -75,6 +75,7 @@ sqldelight {
     database("Db") {
         packageName = "db"
         schemaOutputDirectory = file("src/main/sqldelight/$packageName/schemas")
+        dialect = "sqlite:3.25"
     }
 }
 
@@ -126,6 +127,9 @@ dependencies {
     implementation(platform("com.squareup.okhttp3:okhttp-bom:4.9.3"))
     implementation("com.squareup.okhttp3:okhttp")
     testImplementation("com.squareup.okhttp3:mockwebserver")
+
+    // Bundle SQLite binaries
+    implementation("com.github.requery:sqlite-android:3.36.0")
 
     // SQLDelight generates typesafe kotlin APIs from SQL statements
     val sqlDelightVer = "1.5.3"
