@@ -13,7 +13,7 @@ class MinifluxAuthModel(
     private val syncScheduler: BackgroundSyncScheduler,
 ) : ViewModel() {
 
-    suspend fun testServerConf(
+    suspend fun testBackend(
         url: HttpUrl,
         username: String,
         password: String,
@@ -29,7 +29,7 @@ class MinifluxAuthModel(
         api.getFeeds()
     }
 
-    suspend fun saveServerConf(
+    suspend fun setBackend(
         url: HttpUrl,
         username: String,
         password: String,
@@ -44,9 +44,7 @@ class MinifluxAuthModel(
                 minifluxServerPassword = password,
             )
         }
-    }
 
-    suspend fun scheduleBackgroundSync() {
         syncScheduler.schedule(override = true)
     }
 }

@@ -1,9 +1,11 @@
 package auth
 
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -36,46 +38,52 @@ class MinifluxAuthFragment : Fragment() {
 
         binding.apply {
             toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
-            initConnectButton()
+
+            password.setOnEditorActionListener { _, actionId, keyEvent ->
+                if (actionId == EditorInfo.IME_ACTION_DONE || keyEvent.keyCode == KeyEvent.KEYCODE_ENTER) {
+                    connect()
+                    return@setOnEditorActionListener true
+                }
+
+                false
+            }
+
+            connect.setOnClickListener { connect() }
         }
     }
 
-    private fun FragmentMinifluxAuthBinding.initConnectButton() {
-        connect.setOnClickListener {
-            if (!validate()) {
-                return@setOnClickListener
-            }
+    private fun connect() {
+        if (!binding.validate()) {
+            return
+        }
 
-            viewLifecycleOwner.lifecycleScope.launchWhenResumed {
-                progress.isVisible = true
+        viewLifecycleOwner.lifecycleScope.launchWhenResumed {
+            binding.progress.isVisible = true
 
-                val url = url.text.toString().toHttpUrl()
-                val username = binding.username.text.toString()
-                val password = binding.password.text.toString()
-                val trustSelfSignedCerts = binding.trustSelfSignedCerts.isChecked
+            val url = binding.url.text.toString().toHttpUrl()
+            val username = binding.username.text.toString()
+            val password = binding.password.text.toString()
+            val trustSelfSignedCerts = binding.trustSelfSignedCerts.isChecked
 
-                runCatching {
-                    model.testServerConf(
-                        url = url,
-                        username = username,
-                        password = password,
-                        trustSelfSignedCerts = trustSelfSignedCerts,
-                    )
-                }.onSuccess {
-                    model.saveServerConf(
-                        url = url,
-                        username = username,
-                        password = password,
-                        trustSelfSignedCerts = trustSelfSignedCerts,
-                    )
+            runCatching {
+                model.testBackend(
+                    url = url,
+                    username = username,
+                    password = password,
+                    trustSelfSignedCerts = trustSelfSignedCerts,
+                )
+            }.onSuccess {
+                model.setBackend(
+                    url = url,
+                    username = username,
+                    password = password,
+                    trustSelfSignedCerts = trustSelfSignedCerts,
+                )
 
-                    model.scheduleBackgroundSync()
-
-                    findNavController().navigate(R.id.action_minifluxAuthFragment_to_newsFragment)
-                }.onFailure {
-                    binding.progress.isVisible = false
-                    showErrorDialog(it.message ?: getString(R.string.direct_login_failed))
-                }
+                findNavController().navigate(R.id.action_minifluxAuthFragment_to_newsFragment)
+            }.onFailure {
+                binding.progress.isVisible = false
+                showErrorDialog(it.message ?: getString(R.string.direct_login_failed))
             }
         }
     }

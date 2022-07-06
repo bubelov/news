@@ -10,10 +10,10 @@ import sync.BackgroundSyncScheduler
 @KoinViewModel
 class NextcloudAuthModel(
     private val confRepo: ConfRepository,
-    private val backgroundSyncScheduler: BackgroundSyncScheduler,
+    private val syncScheduler: BackgroundSyncScheduler,
 ) : ViewModel() {
 
-    suspend fun testServerConf(
+    suspend fun testBackend(
         url: HttpUrl,
         username: String,
         password: String,
@@ -29,7 +29,7 @@ class NextcloudAuthModel(
         api.getFeeds()
     }
 
-    suspend fun saveServerConf(
+    suspend fun setBackend(
         url: HttpUrl,
         username: String,
         password: String,
@@ -44,9 +44,7 @@ class NextcloudAuthModel(
                 nextcloudServerPassword = password,
             )
         }
-    }
 
-    suspend fun scheduleBackgroundSync() {
-        backgroundSyncScheduler.schedule(override = true)
+        syncScheduler.schedule(override = true)
     }
 }
