@@ -2,13 +2,12 @@ package app
 
 import android.app.Application
 import co.appreactor.news.BuildConfig
-import conf.ConfRepository
+import conf.ConfRepo
 import crash.CrashHandler
 import db.db
 import enclosures.AudioEnclosuresRepository
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import opengraph.OpenGraphImagesRepository
 import org.koin.android.ext.android.get
 import org.koin.android.ext.koin.androidContext
@@ -33,8 +32,8 @@ class App : Application() {
             modules(module { single { db(this@App) } })
         }
 
-        val confRepo = get<ConfRepository>()
-        runBlocking { confRepo.save { it.copy(syncedOnStartup = false) } }
+        val confRepo = get<ConfRepo>()
+        confRepo.update { it.copy(syncedOnStartup = false) }
 
         val syncScheduler = get<BackgroundSyncScheduler>()
         GlobalScope.launch { syncScheduler.schedule(override = false) }

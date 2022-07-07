@@ -1,11 +1,9 @@
 package auth
 
-import conf.ConfRepository
+import conf.ConfRepo
 import db.testDb
 import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 import sync.BackgroundSyncScheduler
 import java.util.concurrent.TimeUnit
 import kotlin.test.Test
@@ -14,9 +12,9 @@ import kotlin.test.assertEquals
 class AuthModelTest {
 
     @Test
-    fun hasBackend() = runBlocking {
+    fun hasBackend() {
         val db = testDb()
-        val confRepo = ConfRepository(db)
+        val confRepo = ConfRepo(db)
 
         val model = AuthModel(
             confRepo = confRepo,
@@ -24,14 +22,14 @@ class AuthModelTest {
         )
 
         assertEquals(model.hasBackend(), false)
-        confRepo.save { it.copy(backend = ConfRepository.BACKEND_STANDALONE) }
+        confRepo.update { it.copy(backend = ConfRepo.BACKEND_STANDALONE) }
         assertEquals(model.hasBackend(), true)
     }
 
     @Test
-    fun setStandaloneBackend() = runBlocking {
+    fun setStandaloneBackend() {
         val db = testDb()
-        val confRepo = ConfRepository(db)
+        val confRepo = ConfRepo(db)
         val syncScheduler = mockk<BackgroundSyncScheduler>(relaxUnitFun = true)
 
         val model = AuthModel(
@@ -41,8 +39,8 @@ class AuthModelTest {
 
         model.setStandaloneBackend()
 
-        val conf = confRepo.load().first()
-        assertEquals(ConfRepository.BACKEND_STANDALONE, conf.backend)
+        val conf = confRepo.conf.value
+        assertEquals(ConfRepo.BACKEND_STANDALONE, conf.backend)
         assertEquals(false, conf.syncOnStartup)
         assertEquals(TimeUnit.HOURS.toMillis(12), conf.backgroundSyncIntervalMillis)
 

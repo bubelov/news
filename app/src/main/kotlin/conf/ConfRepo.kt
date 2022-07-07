@@ -1,18 +1,44 @@
 package conf
 
-import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToOneOrDefault
 import db.Conf
 import db.Db
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 
 @Single
-class ConfRepository(
+class ConfRepo(
     private val db: Db,
 ) {
+
+    private val _conf: MutableStateFlow<Conf> = MutableStateFlow(
+        runBlocking { db.confQueries.selectAll().executeAsOneOrNull() ?: DEFAULT_CONF }
+    )
+
+    val conf: StateFlow<Conf> = _conf.asStateFlow()
+
+    init {
+        conf.onEach {
+            withContext(Dispatchers.Default) {
+                db.transaction {
+                    db.confQueries.deleteAll()
+                    db.confQueries.insert(it)
+                }
+            }
+        }.launchIn(GlobalScope)
+    }
+
+    fun update(newConf: (Conf) -> Conf) {
+        _conf.update { newConf(conf.value) }
+    }
 
     companion object {
         const val BACKEND_STANDALONE = "standalone"
@@ -46,22 +72,5 @@ class ConfRepository(
             showPreviewText = true,
             syncedOnStartup = false,
         )
-    }
-
-    fun load(): Flow<Conf> {
-        return db.confQueries.selectAll().asFlow().mapToOneOrDefault(DEFAULT_CONF)
-    }
-
-    suspend fun save(newConf: (Conf) -> Conf) {
-        save(newConf(db.confQueries.selectAll().executeAsOneOrNull() ?: DEFAULT_CONF))
-    }
-
-    private suspend fun save(conf: Conf) {
-        withContext(Dispatchers.Default) {
-            db.transaction {
-                db.confQueries.deleteAll()
-                db.confQueries.insert(conf)
-            }
-        }
     }
 }

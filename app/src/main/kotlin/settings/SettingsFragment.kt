@@ -14,7 +14,7 @@ import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import conf.ConfRepository
+import conf.ConfRepo
 import db.databaseFile
 import dialog.showErrorDialog
 import kotlinx.coroutines.Dispatchers
@@ -80,11 +80,8 @@ class SettingsFragment : Fragment() {
                 backgroundSyncIntervalButton.isVisible = conf.syncInBackground
 
                 setOnCheckedChangeListener { _, isChecked ->
-                    runBlocking {
-                        model.saveConf { it.copy(syncInBackground = isChecked) }
-                        model.scheduleBackgroundSync()
-                    }
-
+                    model.saveConf { it.copy(syncInBackground = isChecked) }
+                    model.scheduleBackgroundSync()
                     backgroundSyncIntervalButton.isVisible = isChecked
                 }
             }
@@ -103,11 +100,8 @@ class SettingsFragment : Fragment() {
 
                     setOnCheckedChangeListener { _, isChecked ->
                         if (isChecked) {
-                            runBlocking {
-                                model.saveConf { it.copy(backgroundSyncIntervalMillis = millis) }
-                                model.scheduleBackgroundSync()
-                            }
-
+                            model.saveConf { it.copy(backgroundSyncIntervalMillis = millis) }
+                            model.scheduleBackgroundSync()
                             backgroundSyncInterval.text = text
                             dialog.dismiss()
                         }
@@ -133,7 +127,7 @@ class SettingsFragment : Fragment() {
                 isChecked = conf.syncOnStartup
 
                 setOnCheckedChangeListener { _, isChecked ->
-                    runBlocking { model.saveConf { it.copy(syncOnStartup = isChecked) } }
+                    model.saveConf { it.copy(syncOnStartup = isChecked) }
                 }
             }
 
@@ -141,7 +135,7 @@ class SettingsFragment : Fragment() {
                 isChecked = conf.showReadEntries
 
                 setOnCheckedChangeListener { _, isChecked ->
-                    runBlocking { model.saveConf { it.copy(showReadEntries = isChecked) } }
+                    model.saveConf { it.copy(showReadEntries = isChecked) }
                 }
             }
 
@@ -149,7 +143,7 @@ class SettingsFragment : Fragment() {
                 isChecked = conf.showPreviewImages
 
                 setOnCheckedChangeListener { _, isChecked ->
-                    runBlocking { model.saveConf { it.copy(showPreviewImages = isChecked) } }
+                    model.saveConf { it.copy(showPreviewImages = isChecked) }
                 }
             }
 
@@ -157,7 +151,7 @@ class SettingsFragment : Fragment() {
                 isChecked = conf.cropPreviewImages
 
                 setOnCheckedChangeListener { _, isChecked ->
-                    runBlocking { model.saveConf { it.copy(cropPreviewImages = isChecked) } }
+                    model.saveConf { it.copy(cropPreviewImages = isChecked) }
                 }
             }
 
@@ -165,7 +159,7 @@ class SettingsFragment : Fragment() {
                 isChecked = conf.showPreviewText
 
                 setOnCheckedChangeListener { _, isChecked ->
-                    runBlocking { model.saveConf { it.copy(showPreviewText = isChecked) } }
+                    model.saveConf { it.copy(showPreviewText = isChecked) }
                 }
             }
 
@@ -173,7 +167,7 @@ class SettingsFragment : Fragment() {
                 isChecked = conf.markScrolledEntriesAsRead
 
                 setOnCheckedChangeListener { _, isChecked ->
-                    runBlocking { model.saveConf { it.copy(markScrolledEntriesAsRead = isChecked) } }
+                    model.saveConf { it.copy(markScrolledEntriesAsRead = isChecked) }
                 }
             }
 
@@ -181,7 +175,7 @@ class SettingsFragment : Fragment() {
                 isChecked = conf.useBuiltInBrowser
 
                 setOnCheckedChangeListener { _, isChecked ->
-                    runBlocking { model.saveConf { it.copy(useBuiltInBrowser = isChecked) } }
+                    model.saveConf { it.copy(useBuiltInBrowser = isChecked) }
                 }
             }
 
@@ -196,7 +190,7 @@ class SettingsFragment : Fragment() {
             logOut.setOnClickListener {
                 lifecycleScope.launchWhenResumed {
                     when (model.loadConf().first().backend) {
-                        ConfRepository.BACKEND_STANDALONE -> {
+                        ConfRepo.BACKEND_STANDALONE -> {
                             MaterialAlertDialogBuilder(requireContext()).setMessage(R.string.delete_all_data_warning)
                                 .setPositiveButton(
                                     R.string.delete
@@ -222,7 +216,7 @@ class SettingsFragment : Fragment() {
             }
 
             when (conf.backend) {
-                ConfRepository.BACKEND_STANDALONE -> {
+                ConfRepo.BACKEND_STANDALONE -> {
                     binding.logOutTitle.setText(R.string.delete_all_data)
                     binding.logOutSubtitle.isVisible = false
                 }

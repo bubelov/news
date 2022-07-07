@@ -6,14 +6,13 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import conf.ConfRepository
-import kotlinx.coroutines.flow.first
+import conf.ConfRepo
 import org.koin.core.annotation.Single
 import java.util.concurrent.TimeUnit
 
 @Single
 class BackgroundSyncScheduler(
-    private val confRepo: ConfRepository,
+    private val confRepo: ConfRepo,
     private val context: Context,
 ) {
 
@@ -21,9 +20,9 @@ class BackgroundSyncScheduler(
         private const val WORK_NAME = "sync"
     }
 
-    suspend fun schedule(override: Boolean) {
+    fun schedule(override: Boolean) {
         val workManager = WorkManager.getInstance(context)
-        val conf = confRepo.load().first()
+        val conf = confRepo.conf.value
 
         if (!conf.syncInBackground) {
             workManager.cancelUniqueWork(WORK_NAME)

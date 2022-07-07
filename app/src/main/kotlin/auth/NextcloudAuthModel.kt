@@ -2,14 +2,14 @@ package auth
 
 import androidx.lifecycle.ViewModel
 import api.nextcloud.NextcloudApiBuilder
-import conf.ConfRepository
+import conf.ConfRepo
 import okhttp3.HttpUrl
 import org.koin.android.annotation.KoinViewModel
 import sync.BackgroundSyncScheduler
 
 @KoinViewModel
 class NextcloudAuthModel(
-    private val confRepo: ConfRepository,
+    private val confRepo: ConfRepo,
     private val syncScheduler: BackgroundSyncScheduler,
 ) : ViewModel() {
 
@@ -29,15 +29,15 @@ class NextcloudAuthModel(
         api.getFeeds()
     }
 
-    suspend fun setBackend(
+    fun setBackend(
         url: HttpUrl,
         username: String,
         password: String,
         trustSelfSignedCerts: Boolean,
     ) {
-        confRepo.save {
+        confRepo.update {
             it.copy(
-                backend = ConfRepository.BACKEND_NEXTCLOUD,
+                backend = ConfRepo.BACKEND_NEXTCLOUD,
                 nextcloudServerUrl = url.toString().trim('/'),
                 nextcloudServerTrustSelfSignedCerts = trustSelfSignedCerts,
                 nextcloudServerUsername = username,

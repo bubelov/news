@@ -2,7 +2,7 @@ package search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import conf.ConfRepository
+import conf.ConfRepo
 import db.Entry
 import db.EntryWithoutContent
 import db.Feed
@@ -25,7 +25,7 @@ import sync.NewsApiSync
 class SearchModel(
     private val feedsRepo: FeedsRepository,
     private val entriesRepo: EntriesRepository,
-    private val confRepo: ConfRepository,
+    private val confRepo: ConfRepo,
     private val sync: NewsApiSync,
 ) : ViewModel() {
 
@@ -105,7 +105,7 @@ class SearchModel(
         }
     }
 
-    fun loadConf() = confRepo.load()
+    fun loadConf() = confRepo.conf
 
     private fun Entry.toRow(feed: Feed?): EntriesAdapterItem {
         return EntriesAdapterItem(

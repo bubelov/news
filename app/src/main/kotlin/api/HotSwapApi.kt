@@ -5,7 +5,7 @@ import api.miniflux.MinifluxApiBuilder
 import api.nextcloud.NextcloudApiAdapter
 import api.nextcloud.NextcloudApiBuilder
 import api.standalone.StandaloneNewsApi
-import conf.ConfRepository
+import conf.ConfRepo
 import db.Db
 import db.Entry
 import db.EntryWithoutContent
@@ -20,7 +20,7 @@ import java.time.OffsetDateTime
 
 @Single(binds = [Api::class])
 class HotSwapApi(
-    private val confRepo: ConfRepository,
+    private val confRepo: ConfRepo,
     private val db: Db,
 ) : Api {
 
@@ -28,13 +28,13 @@ class HotSwapApi(
 
     init {
         GlobalScope.launch {
-            confRepo.load().collectLatest { conf ->
+            confRepo.conf.collectLatest { conf ->
                 when (conf.backend) {
-                    ConfRepository.BACKEND_STANDALONE -> {
+                    ConfRepo.BACKEND_STANDALONE -> {
                         api = StandaloneNewsApi(db)
                     }
 
-                    ConfRepository.BACKEND_MINIFLUX -> {
+                    ConfRepo.BACKEND_MINIFLUX -> {
                         api = MinifluxApiAdapter(
                             MinifluxApiBuilder().build(
                                 url = conf.minifluxServerUrl,
@@ -45,7 +45,7 @@ class HotSwapApi(
                         )
                     }
 
-                    ConfRepository.BACKEND_NEXTCLOUD -> {
+                    ConfRepo.BACKEND_NEXTCLOUD -> {
                         api = NextcloudApiAdapter(
                             NextcloudApiBuilder().build(
                                 url = conf.nextcloudServerUrl,

@@ -1,6 +1,6 @@
 package api
 
-import conf.ConfRepository
+import conf.ConfRepo
 import db.testDb
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -12,10 +12,10 @@ class HotSwapApiTest {
     @Test
     fun standaloneBackend() = runBlocking {
         val db = testDb()
-        val confRepo = ConfRepository(db)
+        val confRepo = ConfRepo(db)
         val api = HotSwapApi(confRepo, db)
 
-        confRepo.save { it.copy(backend = ConfRepository.BACKEND_STANDALONE) }
+        confRepo.update { it.copy(backend = ConfRepo.BACKEND_STANDALONE) }
 
         var attempts = 0L
 

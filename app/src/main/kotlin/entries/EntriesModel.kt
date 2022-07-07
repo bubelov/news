@@ -3,9 +3,9 @@ package entries
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import conf.ConfRepository
-import conf.ConfRepository.Companion.SORT_ORDER_ASCENDING
-import conf.ConfRepository.Companion.SORT_ORDER_DESCENDING
+import conf.ConfRepo
+import conf.ConfRepo.Companion.SORT_ORDER_ASCENDING
+import conf.ConfRepo.Companion.SORT_ORDER_DESCENDING
 import db.Conf
 import db.EntryWithoutContent
 import db.Feed
@@ -35,7 +35,7 @@ import java.time.format.FormatStyle
 @KoinViewModel
 class EntriesModel(
     private val app: Application,
-    private val confRepo: ConfRepository,
+    private val confRepo: ConfRepo,
     private val feedsRepo: FeedsRepository,
     private val entriesRepo: EntriesRepository,
     private val audioEnclosuresRepo: AudioEnclosuresRepository,
@@ -57,17 +57,17 @@ class EntriesModel(
 
             _state.update { State.LoadingCachedEntries }
 
-            confRepo.load().first().apply {
+            confRepo.conf.value.apply {
                 if (!initialSyncCompleted || (syncOnStartup && !syncedOnStartup)) {
                     viewModelScope.launch {
                         newsApiSync.sync()
-                        confRepo.save { it.copy(syncedOnStartup = true) }
+                        confRepo.update { it.copy(syncedOnStartup = true) }
                     }
                 }
             }
 
             combine(
-                confRepo.load(),
+                confRepo.conf,
                 feedsRepo.selectAll(),
                 entriesRepo.selectCount(),
                 newsApiSync.state,
@@ -100,11 +100,11 @@ class EntriesModel(
     }
 
     fun accountTitle(): Flow<String> {
-        return confRepo.load().map { it.accountTitle(app.resources) }
+        return confRepo.conf.map { it.accountTitle(app.resources) }
     }
 
     fun accountSubtitle(): Flow<String> {
-        return confRepo.load().map { it.accountSubtitle() }
+        return confRepo.conf.map { it.accountSubtitle() }
     }
 
     private suspend fun selectEntries(
@@ -157,26 +157,24 @@ class EntriesModel(
         if (syncResult is SyncResult.Failure) throw syncResult.cause
     }
 
-    fun loadConf() = confRepo.load()
+    fun loadConf() = confRepo.conf
 
-    suspend fun saveConf(newConf: (Conf) -> Conf) {
-        this.confRepo.save(newConf)
+    fun saveConf(newConf: (Conf) -> Conf) {
+        this.confRepo.update(newConf)
     }
 
     fun changeSortOrder() {
-        viewModelScope.launch {
-            confRepo.save {
-                val newSortOrder = when (it.sortOrder) {
-                    SORT_ORDER_ASCENDING -> SORT_ORDER_DESCENDING
-                    SORT_ORDER_DESCENDING -> SORT_ORDER_ASCENDING
-                    else -> throw Exception()
-                }
-
-                it.copy(sortOrder = newSortOrder)
+        confRepo.update {
+            val newSortOrder = when (it.sortOrder) {
+                SORT_ORDER_ASCENDING -> SORT_ORDER_DESCENDING
+                SORT_ORDER_DESCENDING -> SORT_ORDER_ASCENDING
+                else -> throw Exception()
             }
 
-            scrollToTopNextTime = true
+            it.copy(sortOrder = newSortOrder)
         }
+
+        scrollToTopNextTime = true
     }
 
     suspend fun downloadAudioEnclosure(entry: EntryWithoutContent, enclosure: Link) {

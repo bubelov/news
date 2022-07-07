@@ -1,6 +1,6 @@
 package sync
 
-import conf.ConfRepository
+import conf.ConfRepo
 import entries.EntriesRepository
 import feeds.FeedsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,7 +12,7 @@ import java.time.Instant
 
 @Single
 class NewsApiSync(
-    private val confRepo: ConfRepository,
+    private val confRepo: ConfRepo,
     private val feedsRepo: FeedsRepository,
     private val entriesRepo: EntriesRepository,
 ) {
@@ -37,7 +37,7 @@ class NewsApiSync(
             return SyncResult.Failure(Exception("Already syncing"))
         }
 
-        val conf = confRepo.load().first()
+        val conf = confRepo.conf.value
 
         if (!conf.initialSyncCompleted) {
             _state.update { State.InitialSync() }
@@ -64,7 +64,7 @@ class NewsApiSync(
                 return SyncResult.Failure(Exception("Failed to sync entries", it))
             }
 
-            confRepo.save {
+            confRepo.update {
                 it.copy(
                     initialSyncCompleted = true,
                     lastEntriesSyncDateTime = Instant.now().toString(),
@@ -104,11 +104,11 @@ class NewsApiSync(
             return if (args.syncEntries) {
                 runCatching {
                     val newAndUpdatedEntries = entriesRepo.syncNewAndUpdated(
-                        lastEntriesSyncDateTime = confRepo.load().first().lastEntriesSyncDateTime,
+                        lastEntriesSyncDateTime = confRepo.conf.value.lastEntriesSyncDateTime,
                         feeds = feedsRepo.selectAll().first(),
                     )
 
-                    confRepo.save { it.copy(lastEntriesSyncDateTime = Instant.now().toString()) }
+                    confRepo.update { it.copy(lastEntriesSyncDateTime = Instant.now().toString()) }
                     _state.update { State.Idle }
                     SyncResult.Success(newAndUpdatedEntries)
                 }.getOrElse {

@@ -9,7 +9,7 @@ import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.appreactor.news.R
-import conf.ConfRepository
+import conf.ConfRepo
 import db.Conf
 import db.Entry
 import db.Link
@@ -28,7 +28,7 @@ class EntryViewModel(
     private val app: Application,
     private val feedsRepository: FeedsRepository,
     private val entriesRepository: EntriesRepository,
-    private val confRepo: ConfRepository,
+    private val confRepo: ConfRepo,
     private val newsApiSync: NewsApiSync,
 ) : ViewModel() {
 
@@ -41,7 +41,7 @@ class EntryViewModel(
         summaryView: TextView,
         lifecycleScope: LifecycleCoroutineScope,
     ) = withContext(Dispatchers.IO) {
-        conf = confRepo.load().first()
+        conf = confRepo.conf.value
 
         if (state.value != null) {
             return@withContext

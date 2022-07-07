@@ -7,12 +7,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentAuthBinding
 import entries.EntriesFilter
-import kotlinx.coroutines.runBlocking
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class AuthFragment : Fragment() {
@@ -27,7 +25,7 @@ class AuthFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
-        return if (runBlocking { model.hasBackend() }) {
+        return if (model.hasBackend()) {
             val intent = requireActivity().intent
             val sharedFeedUrl = (intent?.dataString ?: intent?.getStringExtra(Intent.EXTRA_TEXT))?.trim()
 
@@ -62,10 +60,8 @@ class AuthFragment : Fragment() {
 
     private fun FragmentAuthBinding.initButtons() {
         useStandaloneBackend.setOnClickListener {
-            lifecycleScope.launchWhenResumed {
-                model.setStandaloneBackend()
-                findNavController().navigate(AuthFragmentDirections.actionAuthFragmentToNewsFragment(EntriesFilter.NotBookmarked))
-            }
+            model.setStandaloneBackend()
+            findNavController().navigate(AuthFragmentDirections.actionAuthFragmentToNewsFragment(EntriesFilter.NotBookmarked))
         }
 
         useMinifluxBackend.setOnClickListener {

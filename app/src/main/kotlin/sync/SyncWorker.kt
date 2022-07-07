@@ -13,7 +13,7 @@ import androidx.work.WorkerParameters
 import co.appreactor.news.R
 import app.App
 import navigation.Activity
-import conf.ConfRepository
+import conf.ConfRepo
 import entries.EntriesRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -25,7 +25,7 @@ class SyncWorker(context: Context, workerParams: WorkerParameters) : Worker(cont
 
     private suspend fun doWorkAsync(): Result {
         val app = applicationContext as App
-        val conf = app.get<ConfRepository>().load().first()
+        val conf = app.get<ConfRepo>().conf.value
         val sync = app.get<NewsApiSync>()
         val entriesRepository = app.get<EntriesRepository>()
 

@@ -1,7 +1,7 @@
 package settings
 
 import androidx.lifecycle.ViewModel
-import conf.ConfRepository
+import conf.ConfRepo
 import db.Conf
 import db.Db
 import kotlinx.coroutines.flow.first
@@ -13,20 +13,20 @@ import sync.BackgroundSyncScheduler
 
 @KoinViewModel
 class SettingsViewModel(
-    private val confRepo: ConfRepository,
+    private val confRepo: ConfRepo,
     private val db: Db,
     private val syncScheduler: BackgroundSyncScheduler,
 ) : ViewModel() {
 
-    fun loadConf() = confRepo.load()
+    fun loadConf() = confRepo.conf
 
-    suspend fun saveConf(newConf: (Conf) -> Conf) = this.confRepo.save(newConf)
+    fun saveConf(newConf: (Conf) -> Conf) = this.confRepo.update(newConf)
 
     fun getAccountName(): String = runBlocking {
         loadConf().map { it.accountSubtitle() }.first()
     }
 
-    suspend fun scheduleBackgroundSync() {
+    fun scheduleBackgroundSync() {
         syncScheduler.schedule(override = true)
     }
 

@@ -2,7 +2,7 @@ package entries
 
 import android.app.Application
 import android.content.res.Resources
-import conf.ConfRepository
+import conf.ConfRepo
 import db.testDb
 import io.mockk.every
 import io.mockk.mockk
@@ -34,7 +34,7 @@ class EntriesModelTest {
     }
 
     @Test
-    fun getAccountTitle() = runBlocking {
+    fun getAccountTitle() {
         val title = "Title"
 
         val app = mockk<Application>()
@@ -43,7 +43,7 @@ class EntriesModelTest {
         every { app.resources } returns resources
 
         val db = testDb()
-        val confRepo = ConfRepository(db)
+        val confRepo = ConfRepo(db)
 
         val model = EntriesModel(
             app = app,
@@ -54,19 +54,19 @@ class EntriesModelTest {
             newsApiSync = mockk(),
         )
 
-        confRepo.save { it.copy(backend = ConfRepository.BACKEND_STANDALONE) }
+        confRepo.update { it.copy(backend = ConfRepo.BACKEND_STANDALONE) }
 
-        assertEquals(title, model.accountTitle().first())
+        assertEquals(title, runBlocking { model.accountTitle().first() })
 
         verify { app.resources }
     }
 
     @Test
-    fun getAccountSubtitle() = runBlocking {
+    fun getAccountSubtitle() {
         val username = "test"
 
         val db = testDb()
-        val confRepo = ConfRepository(db)
+        val confRepo = ConfRepo(db)
 
         val model = EntriesModel(
             app = mockk(),
@@ -77,13 +77,13 @@ class EntriesModelTest {
             newsApiSync = mockk(),
         )
 
-        confRepo.save {
+        confRepo.update {
             it.copy(
-                backend = ConfRepository.BACKEND_MINIFLUX,
+                backend = ConfRepo.BACKEND_MINIFLUX,
                 minifluxServerUsername = "test",
             )
         }
 
-        assert(model.accountSubtitle().first().contains(username))
+        assert(runBlocking { model.accountSubtitle().first() }.contains(username))
     }
 }

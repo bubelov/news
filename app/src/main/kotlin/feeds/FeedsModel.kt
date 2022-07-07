@@ -7,7 +7,7 @@ import api.Api
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOne
-import conf.ConfRepository
+import conf.ConfRepo
 import db.Db
 import db.Feed
 import kotlinx.coroutines.Dispatchers
@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger
 @KoinViewModel
 class FeedsModel(
     private val app: Application,
-    private val confRepo: ConfRepository,
+    private val confRepo: ConfRepo,
     private val db: Db,
     private val api: Api,
 ) : ViewModel() {
@@ -192,11 +192,11 @@ class FeedsModel(
     }
 
     fun accountTitle(): Flow<String> {
-        return confRepo.load().map { it.accountTitle(app.resources) }
+        return confRepo.conf.map { it.accountTitle(app.resources) }
     }
 
     fun accountSubtitle(): Flow<String> {
-        return confRepo.load().map { it.accountSubtitle() }
+        return confRepo.conf.map { it.accountSubtitle() }
     }
 
     private fun Feed.toItem(unreadCount: Long): FeedsAdapter.Item {

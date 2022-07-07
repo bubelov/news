@@ -1,6 +1,6 @@
 package navigation
 
-import conf.ConfRepository
+import conf.ConfRepo
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -8,8 +8,8 @@ class ConfExtensionsTest {
 
     @Test
     fun removeProtocolPrefixFromAccountSubtitle() {
-        var conf = ConfRepository.DEFAULT_CONF.copy(
-            backend = ConfRepository.BACKEND_MINIFLUX,
+        var conf = ConfRepo.DEFAULT_CONF.copy(
+            backend = ConfRepo.BACKEND_MINIFLUX,
             minifluxServerUrl = "https://acme.com",
         )
 
@@ -18,8 +18,8 @@ class ConfExtensionsTest {
             conf.accountSubtitle(),
         )
 
-        conf = ConfRepository.DEFAULT_CONF.copy(
-            backend = ConfRepository.BACKEND_MINIFLUX,
+        conf = ConfRepo.DEFAULT_CONF.copy(
+            backend = ConfRepo.BACKEND_MINIFLUX,
             minifluxServerUrl = "http://acme.com",
         )
 

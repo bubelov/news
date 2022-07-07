@@ -5,7 +5,7 @@ import android.graphics.Color
 import com.squareup.picasso.Picasso
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
-import conf.ConfRepository
+import conf.ConfRepo
 import db.Db
 import db.EntryWithoutContent
 import kotlinx.coroutines.Dispatchers
@@ -25,7 +25,7 @@ import kotlin.random.Random
 @Single
 class OpenGraphImagesRepository(
     private val db: Db,
-    private val confRepo: ConfRepository,
+    private val confRepo: ConfRepo,
 ) {
 
     companion object {
@@ -39,7 +39,7 @@ class OpenGraphImagesRepository(
     suspend fun fetchEntryImages() {
         while (true) {
             runCatching {
-                confRepo.load()
+                confRepo.conf
                     .map { it.showPreviewImages }
                     .distinctUntilChanged()
                     .collectLatest { showPreviewImages ->

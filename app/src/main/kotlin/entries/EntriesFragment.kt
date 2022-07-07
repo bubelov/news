@@ -28,7 +28,7 @@ import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentEntriesBinding
 import com.google.android.material.snackbar.Snackbar
-import conf.ConfRepository
+import conf.ConfRepo
 import db.EntryWithoutContent
 import db.Link
 import dialog.showErrorDialog
@@ -352,11 +352,8 @@ class EntriesFragment : Fragment() {
         }
 
         showOpenedEntriesMenuItem?.setOnMenuItemClickListener {
-            lifecycleScope.launchWhenResumed {
-                model.saveConf { it.copy(showReadEntries = !it.showReadEntries) }
-                initShowReadEntriesButton()
-            }
-
+            model.saveConf { it.copy(showReadEntries = !it.showReadEntries) }
+            initShowReadEntriesButton()
             true
         }
     }
@@ -366,12 +363,12 @@ class EntriesFragment : Fragment() {
 
         model.loadConf().onEach { conf ->
             when (conf.sortOrder) {
-                ConfRepository.SORT_ORDER_ASCENDING -> {
+                ConfRepo.SORT_ORDER_ASCENDING -> {
                     sortOrderMenuItem.setIcon(R.drawable.ic_clock_forward)
                     sortOrderMenuItem.title = getString(R.string.show_newest_first)
                 }
 
-                ConfRepository.SORT_ORDER_DESCENDING -> {
+                ConfRepo.SORT_ORDER_DESCENDING -> {
                     sortOrderMenuItem.setIcon(R.drawable.ic_clock_back)
                     sortOrderMenuItem.title = getString(R.string.show_oldest_first)
                 }
