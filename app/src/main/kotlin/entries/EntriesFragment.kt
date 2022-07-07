@@ -8,12 +8,11 @@ import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.widget.TextView
 import androidx.annotation.StringRes
-import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
@@ -21,18 +20,17 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentEntriesBinding
+import com.google.android.material.navigation.NavigationBarView.OnItemReselectedListener
 import com.google.android.material.snackbar.Snackbar
 import conf.ConfRepo
 import db.EntryWithoutContent
 import db.Link
 import dialog.showErrorDialog
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -40,10 +38,11 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import navigation.Activity
 import navigation.openUrl
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class EntriesFragment : Fragment() {
+class EntriesFragment : Fragment(), OnItemReselectedListener {
 
     private val args by lazy { EntriesFragmentArgs.fromBundle(requireArguments()) }
 
@@ -60,7 +59,7 @@ class EntriesFragment : Fragment() {
             "",
             Snackbar.LENGTH_SHORT
         ).apply {
-            anchorView = requireActivity().findViewById(R.id.bottomNavigation)
+            anchorView = requireActivity().findViewById(R.id.bottomNav)
         }
     }
 
@@ -228,44 +227,17 @@ class EntriesFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentEntriesBinding.inflate(inflater, container, false)
-
-        if (args.filter!! == EntriesFilter.NotBookmarked) {
-            binding.bottomNavigation.selectedItemId = R.id.newsFragment
-        }
-
-        if (args.filter!! == EntriesFilter.Bookmarked) {
-            binding.bottomNavigation.selectedItemId = R.id.bookmarksFragment
-        }
-
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initDrawerHeader()
         initToolbar()
 
         if (args.filter !is EntriesFilter.BelongToFeed) {
-            val drawerToggle = ActionBarDrawerToggle(
-                requireActivity(),
-                binding.drawerLayout,
-                binding.toolbar,
-                R.string.open,
-                R.string.close,
-            )
-
-            binding.drawerLayout.addDrawerListener(drawerToggle)
-
-            drawerToggle.syncState()
+            (requireActivity() as? Activity)?.setupDrawerToggle(binding.toolbar)
         }
-
-        runCatching {
-            binding.navigationView.setupWithNavController(findNavController())
-            binding.bottomNavigation.setupWithNavController(findNavController())
-        }
-
-        binding.bottomNavigation.setOnItemReselectedListener { scrollToTop() }
 
         initSwipeRefresh()
         initList()
@@ -291,6 +263,10 @@ class EntriesFragment : Fragment() {
 
             seenEntries.clear()
         }
+    }
+
+    override fun onNavigationItemReselected(item: MenuItem) {
+        scrollToTop()
     }
 
     private fun scrollToTop() {
@@ -587,18 +563,6 @@ class EntriesFragment : Fragment() {
                 displayMetrics.widthPixels
             }
         }
-    }
-
-    private fun initDrawerHeader() {
-        val headerView = binding.navigationView.getHeaderView(0)!!
-        val titleView = headerView.findViewById<TextView>(R.id.title)!!
-        val subtitleView = headerView.findViewById<TextView>(R.id.subtitle)!!
-
-        combine(model.accountTitle(), model.accountSubtitle()) { title, subtitle ->
-            titleView.text = title
-            subtitleView.isVisible = subtitle.isNotBlank()
-            subtitleView.text = subtitle
-        }.launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
     private class CardListAdapterDecoration(private val gapInPixels: Int) : RecyclerView.ItemDecoration() {

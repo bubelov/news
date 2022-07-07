@@ -9,15 +9,12 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
-import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
@@ -29,11 +26,11 @@ import dialog.showErrorDialog
 import entries.EntriesFilter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import navigation.Activity
 import navigation.showKeyboard
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -177,21 +174,13 @@ class FeedsFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentFeedsBinding.inflate(inflater, container, false)
-        binding.bottomNavigation.selectedItemId = R.id.feedsFragment
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initDrawerHeader()
         initToolbar()
-
-        runCatching {
-            binding.navigationView.setupWithNavController(findNavController())
-            binding.bottomNavigation.setupWithNavController(findNavController())
-        }
-
         initList()
         initImportButton()
         initFab()
@@ -220,17 +209,7 @@ class FeedsFragment : Fragment() {
     }
 
     private fun initToolbar() = binding.toolbar.apply {
-        val drawerToggle = ActionBarDrawerToggle(
-            requireActivity(),
-            binding.drawerLayout,
-            this,
-            R.string.open,
-            R.string.close,
-        )
-
-        binding.drawerLayout.addDrawerListener(drawerToggle)
-
-        drawerToggle.syncState()
+        (requireActivity() as? Activity)?.setupDrawerToggle(this)
 
         inflateMenu(R.menu.menu_feeds)
 
@@ -353,18 +332,6 @@ class FeedsFragment : Fragment() {
         requireActivity().window.setSoftInputMode(
             WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
         )
-    }
-
-    private fun initDrawerHeader() {
-        val headerView = binding.navigationView.getHeaderView(0)!!
-        val titleView = headerView.findViewById<TextView>(R.id.title)!!
-        val subtitleView = headerView.findViewById<TextView>(R.id.subtitle)!!
-
-        combine(model.accountTitle(), model.accountSubtitle()) { title, subtitle ->
-            titleView.text = title
-            subtitleView.isVisible = subtitle.isNotBlank()
-            subtitleView.text = subtitle
-        }.launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
     class ListAdapterDecoration(private val gapInPixels: Int) : RecyclerView.ItemDecoration() {
