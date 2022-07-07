@@ -228,6 +228,15 @@ class EntriesFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentEntriesBinding.inflate(inflater, container, false)
+
+        if (args.filter!! == EntriesFilter.NotBookmarked) {
+            binding.bottomNavigation.selectedItemId = R.id.newsFragment
+        }
+
+        if (args.filter!! == EntriesFilter.Bookmarked) {
+            binding.bottomNavigation.selectedItemId = R.id.bookmarksFragment
+        }
+
         return binding.root
     }
 

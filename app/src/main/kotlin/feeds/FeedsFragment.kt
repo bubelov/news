@@ -177,6 +177,7 @@ class FeedsFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentFeedsBinding.inflate(inflater, container, false)
+        binding.bottomNavigation.selectedItemId = R.id.feedsFragment
         return binding.root
     }
 
