@@ -1,4 +1,4 @@
-package entries
+package navigation
 
 import android.app.Application
 import android.content.res.Resources
@@ -7,31 +7,12 @@ import db.testDb
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Before
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class EntriesModelTest {
-
-    private val mainThreadSurrogate = newSingleThreadContext("UI thread")
-
-    @Before
-    fun beforeEachTest() {
-        Dispatchers.setMain(mainThreadSurrogate)
-    }
-
-    @After
-    fun afterEachTest() {
-        Dispatchers.resetMain() // reset the main dispatcher to the original Main dispatcher
-        mainThreadSurrogate.close()
-    }
+class ActivityModelTest {
 
     @Test
     fun getAccountTitle() {
@@ -45,13 +26,9 @@ class EntriesModelTest {
         val db = testDb()
         val confRepo = ConfRepo(db)
 
-        val model = EntriesModel(
+        val model = ActivityModel(
             app = app,
             confRepo = confRepo,
-            feedsRepo = mockk(),
-            entriesRepo = mockk(),
-            audioEnclosuresRepo = mockk(),
-            newsApiSync = mockk(),
         )
 
         confRepo.update { it.copy(backend = ConfRepo.BACKEND_STANDALONE) }
@@ -68,13 +45,9 @@ class EntriesModelTest {
         val db = testDb()
         val confRepo = ConfRepo(db)
 
-        val model = EntriesModel(
+        val model = ActivityModel(
             app = mockk(),
             confRepo = confRepo,
-            feedsRepo = mockk(),
-            entriesRepo = mockk(),
-            audioEnclosuresRepo = mockk(),
-            newsApiSync = mockk(),
         )
 
         confRepo.update {

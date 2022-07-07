@@ -33,8 +33,6 @@ class FeedsModelTests {
         val db = testDb()
 
         val model = FeedsModel(
-            app = mockk(),
-            confRepo = mockk(),
             db = db,
             api = mockk(),
         )
