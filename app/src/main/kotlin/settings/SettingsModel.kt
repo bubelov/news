@@ -12,7 +12,7 @@ import org.koin.android.annotation.KoinViewModel
 import sync.BackgroundSyncScheduler
 
 @KoinViewModel
-class SettingsViewModel(
+class SettingsModel(
     private val confRepo: ConfRepo,
     private val db: Db,
     private val syncScheduler: BackgroundSyncScheduler,
@@ -31,9 +31,10 @@ class SettingsViewModel(
     }
 
     fun logOut() {
+        confRepo.update { ConfRepo.DEFAULT_CONF }
+
         db.apply {
             transaction {
-                confQueries.deleteAll()
                 feedQueries.deleteAll()
                 entryQueries.deleteAll()
             }

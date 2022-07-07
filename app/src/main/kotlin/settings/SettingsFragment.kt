@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit
 
 class SettingsFragment : Fragment() {
 
-    private val model: SettingsViewModel by viewModel()
+    private val model: SettingsModel by viewModel()
 
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
