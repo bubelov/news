@@ -30,7 +30,8 @@ class AuthFragment : Fragment() {
             val sharedFeedUrl = (intent?.dataString ?: intent?.getStringExtra(Intent.EXTRA_TEXT))?.trim()
 
             if (sharedFeedUrl.isNullOrBlank()) {
-                findNavController().navigate(AuthFragmentDirections.actionAuthFragmentToNewsFragment(EntriesFilter.NotBookmarked))
+                val directions = AuthFragmentDirections.actionAuthFragmentToNewsFragment(EntriesFilter.NotBookmarked)
+                findNavController().navigate(directions)
             } else {
                 val directions = AuthFragmentDirections.actionAuthFragmentToFeedsFragment(sharedFeedUrl)
                 findNavController().navigate(directions)
