@@ -7,10 +7,13 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.databinding.ListItemEnclosureBinding
+import db.EntryWithoutContent
 import db.Link
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 class EnclosuresAdapter(private val listener: Listener) :
-    ListAdapter<Link, EnclosuresAdapter.ViewHolder>(DiffCallback()) {
+    ListAdapter<EnclosuresAdapter.Item, EnclosuresAdapter.ViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -30,35 +33,48 @@ class EnclosuresAdapter(private val listener: Listener) :
     }
 
     interface Listener {
-        fun onDeleteClick(item: Link)
+        fun onDeleteClick(item: Item)
     }
+
+    data class Item(
+        val entry: EntryWithoutContent,
+        val enclosure: Link,
+    )
 
     class ViewHolder(
         private val binding: ListItemEnclosureBinding,
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: Link, listener: Listener) = binding.apply {
-            binding.primaryText.text = item.title
-            binding.secondaryText.text = item.href.toString()
-            binding.delete.isVisible = item.extEnclosureDownloadProgress == 1.0
+        fun bind(item: Item, listener: Listener) = binding.apply {
+            binding.primaryText.text = item.entry.title
+            binding.secondaryText.text = DATE_TIME_FORMAT.format(item.entry.published)
+            binding.delete.isVisible = item.enclosure.extEnclosureDownloadProgress == 1.0
             binding.delete.setOnClickListener { listener.onDeleteClick(item) }
         }
     }
 
-    class DiffCallback : DiffUtil.ItemCallback<Link>() {
+    class DiffCallback : DiffUtil.ItemCallback<Item>() {
 
         override fun areItemsTheSame(
-            oldItem: Link,
-            newItem: Link,
+            oldItem: Item,
+            newItem: Item,
         ): Boolean {
-            return false
+            return newItem.entry.id == oldItem.entry.id
+                    && newItem.enclosure.href == oldItem.enclosure.href
         }
 
         override fun areContentsTheSame(
-            oldItem: Link,
-            newItem: Link,
+            oldItem: Item,
+            newItem: Item,
         ): Boolean {
-            return false
+            return true
         }
+    }
+
+    companion object {
+        private val DATE_TIME_FORMAT = DateTimeFormatter.ofLocalizedDateTime(
+            FormatStyle.MEDIUM,
+            FormatStyle.SHORT,
+        )
     }
 }

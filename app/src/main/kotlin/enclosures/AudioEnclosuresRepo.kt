@@ -7,7 +7,6 @@ import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import db.Db
-import db.Entry
 import db.EntryWithoutContent
 import db.Link
 import kotlinx.coroutines.Dispatchers
@@ -334,7 +333,7 @@ class AudioEnclosuresRepo(
         }
     }
 
-    suspend fun deleteFromCache(entry: Entry, audioEnclosure: Link) {
+    suspend fun deleteFromCache(entry: EntryWithoutContent, audioEnclosure: Link) {
         withContext(Dispatchers.Default) {
             val file = File(audioEnclosure.extCacheUri!!)
 

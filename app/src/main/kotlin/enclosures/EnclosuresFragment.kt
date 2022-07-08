@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentEnclosuresBinding
-import db.Link
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -42,9 +41,9 @@ class EnclosuresFragment : Fragment() {
         binding.list.layoutManager = LinearLayoutManager(requireContext())
 
         binding.list.adapter = EnclosuresAdapter(object : EnclosuresAdapter.Listener {
-            override fun onDeleteClick(item: Link) {
+            override fun onDeleteClick(item: EnclosuresAdapter.Item) {
                 viewLifecycleOwner.lifecycleScope.launch {
-                    //model.deleteEnclosure(item)
+                    model.deleteEnclosure(item.entry, item.enclosure)
                 }
             }
         })
