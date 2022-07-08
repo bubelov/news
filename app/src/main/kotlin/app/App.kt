@@ -5,7 +5,7 @@ import co.appreactor.news.BuildConfig
 import conf.ConfRepo
 import crash.CrashHandler
 import db.db
-import enclosures.AudioEnclosuresRepository
+import enclosures.AudioEnclosuresRepo
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import opengraph.OpenGraphImagesRepository
@@ -38,7 +38,7 @@ class App : Application() {
         val syncScheduler = get<BackgroundSyncScheduler>()
         syncScheduler.schedule(override = false)
 
-        val enclosuresRepo = get<AudioEnclosuresRepository>()
+        val enclosuresRepo = get<AudioEnclosuresRepo>()
         GlobalScope.launch { enclosuresRepo.deletePartialDownloads() }
 
         val ogImagesRepo = get<OpenGraphImagesRepository>()

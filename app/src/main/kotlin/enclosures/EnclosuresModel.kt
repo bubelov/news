@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import db.Db
+import db.Entry
 import db.Link
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -14,16 +15,16 @@ import org.koin.android.annotation.KoinViewModel
 @KoinViewModel
 class EnclosuresModel(
     private val db: Db,
-    private val audioEnclosuresRepo: AudioEnclosuresRepository,
+    private val audioEnclosuresRepo: AudioEnclosuresRepo,
 ) : ViewModel() {
 
     fun getEnclosures(): Flow<List<Link>> {
         return db.entryQueries.selectAll().asFlow().mapToList().map { list -> list.map { it.links }.flatten() }
     }
 
-    suspend fun deleteEnclosure(enclosure: Link) {
+    suspend fun deleteEnclosure(entry: Entry, enclosure: Link) {
         withContext(Dispatchers.Default) {
-            //audioEnclosuresRepo.deleteFromCache(enclosure)
+            audioEnclosuresRepo.deleteFromCache(entry, enclosure)
         }
     }
 }

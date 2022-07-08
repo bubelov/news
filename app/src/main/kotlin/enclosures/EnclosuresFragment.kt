@@ -37,16 +37,14 @@ class EnclosuresFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.toolbar.setNavigationOnClickListener {
-            findNavController().popBackStack()
-        }
+        binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
         binding.list.layoutManager = LinearLayoutManager(requireContext())
 
         binding.list.adapter = EnclosuresAdapter(object : EnclosuresAdapter.Listener {
             override fun onDeleteClick(item: Link) {
                 viewLifecycleOwner.lifecycleScope.launch {
-                    model.deleteEnclosure(item)
+                    //model.deleteEnclosure(item)
                 }
             }
         })

@@ -9,7 +9,7 @@ import db.Conf
 import db.EntryWithoutContent
 import db.Feed
 import db.Link
-import enclosures.AudioEnclosuresRepository
+import enclosures.AudioEnclosuresRepo
 import feeds.FeedsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,7 +32,7 @@ class EntriesModel(
     private val confRepo: ConfRepo,
     private val feedsRepo: FeedsRepository,
     private val entriesRepo: EntriesRepository,
-    private val audioEnclosuresRepo: AudioEnclosuresRepository,
+    private val audioEnclosuresRepo: AudioEnclosuresRepo,
     private val newsApiSync: NewsApiSync,
 ) : ViewModel() {
 

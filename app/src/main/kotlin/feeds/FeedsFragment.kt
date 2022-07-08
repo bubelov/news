@@ -143,7 +143,7 @@ class FeedsFragment : Fragment() {
                     }
                 }
 
-                requireContext().showDialog(
+                showDialog(
                     title = getString(R.string.import_title),
                     message = message,
                 )

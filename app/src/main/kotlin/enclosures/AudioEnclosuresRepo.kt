@@ -25,19 +25,23 @@ import java.io.OutputStream
 import java.util.UUID
 
 @Single
-class AudioEnclosuresRepository(
+class AudioEnclosuresRepo(
     private val db: Db,
     private val context: Context,
 ) {
 
     private val httpClient = OkHttpClient()
 
-    suspend fun download(entry: EntryWithoutContent, audioEnclosure: Link) {
+    suspend fun download(entry: EntryWithoutContent, enclosure: Link) {
+        if (enclosure.type?.startsWith("audio") == false) {
+            throw Exception("Invalid enclosure type: ${enclosure.type}")
+        }
+
         withContext(Dispatchers.Default) {
             db.entryQueries.updateLinks(
                 id = entry.id,
                 links = entry.links.map {
-                    if (it.href == audioEnclosure.href) {
+                    if (it.href == enclosure.href) {
                         it.copy(extEnclosureDownloadProgress = 0.0)
                     } else {
                         it
@@ -45,7 +49,7 @@ class AudioEnclosuresRepository(
                 }
             )
 
-            val request = Request.Builder().url(audioEnclosure.href).build()
+            val request = Request.Builder().url(enclosure.href).build()
 
             val response = runCatching {
                 httpClient.newCall(request).execute()
@@ -53,7 +57,7 @@ class AudioEnclosuresRepository(
                 db.entryQueries.updateLinks(
                     id = entry.id,
                     links = entry.links.map { link ->
-                        if (link.href == audioEnclosure.href) {
+                        if (link.href == enclosure.href) {
                             link.copy(extEnclosureDownloadProgress = null)
                         } else {
                             link
@@ -68,7 +72,7 @@ class AudioEnclosuresRepository(
                 db.entryQueries.updateLinks(
                     id = entry.id,
                     links = entry.links.map { link ->
-                        if (link.href == audioEnclosure.href) {
+                        if (link.href == enclosure.href) {
                             link.copy(extEnclosureDownloadProgress = null)
                         } else {
                             link
@@ -82,7 +86,7 @@ class AudioEnclosuresRepository(
             var cacheUri: Uri? = null
 
             runCatching {
-                val mediaType = audioEnclosure.type!!.toMediaType()
+                val mediaType = enclosure.type!!.toMediaType()
                 val fileExtension = mediaType.fileExtension()
                 val fileName = "${UUID.randomUUID()}.$fileExtension"
                 val outputStream: OutputStream
@@ -91,7 +95,7 @@ class AudioEnclosuresRepository(
                     cacheUri = context.contentResolver.insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                         ContentValues().apply {
                             put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-                            put(MediaStore.MediaColumns.MIME_TYPE, audioEnclosure.type)
+                            put(MediaStore.MediaColumns.MIME_TYPE, enclosure.type)
                             put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PODCASTS)
                             put(MediaStore.MediaColumns.IS_PENDING, true)
                         })
@@ -111,8 +115,11 @@ class AudioEnclosuresRepository(
                 db.entryQueries.updateLinks(
                     id = entry.id,
                     links = entry.links.map { link ->
-                        if (link.href == audioEnclosure.href) {
-                            link.copy(extCacheUri = cacheUri.toString())
+                        if (link.href == enclosure.href) {
+                            link.copy(
+                                extEnclosureDownloadProgress = 0.0,
+                                extCacheUri = cacheUri.toString(),
+                            )
                         } else {
                             link
                         }
@@ -146,8 +153,11 @@ class AudioEnclosuresRepository(
                                     db.entryQueries.updateLinks(
                                         id = entry.id,
                                         links = entry.links.map { link ->
-                                            if (link.href == audioEnclosure.href) {
-                                                link.copy(extEnclosureDownloadProgress = downloadedPercent.toDouble() / 100)
+                                            if (link.href == enclosure.href) {
+                                                link.copy(
+                                                    extEnclosureDownloadProgress = downloadedPercent.toDouble() / 100,
+                                                    extCacheUri = cacheUri.toString(),
+                                                )
                                             } else {
                                                 link
                                             }
@@ -164,7 +174,7 @@ class AudioEnclosuresRepository(
                 db.entryQueries.updateLinks(
                     id = entry.id,
                     links = entry.links.map { link ->
-                        if (link.href == audioEnclosure.href) {
+                        if (link.href == enclosure.href) {
                             link.copy(
                                 extEnclosureDownloadProgress = 1.0,
                                 extCacheUri = cacheUri.toString(),
@@ -186,7 +196,7 @@ class AudioEnclosuresRepository(
                 db.entryQueries.updateLinks(
                     id = entry.id,
                     links = entry.links.map { link ->
-                        if (link.href == audioEnclosure.href) {
+                        if (link.href == enclosure.href) {
                             link.copy(
                                 extEnclosureDownloadProgress = null,
                                 extCacheUri = null,
