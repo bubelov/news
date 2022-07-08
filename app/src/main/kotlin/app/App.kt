@@ -36,7 +36,7 @@ class App : Application() {
         confRepo.update { it.copy(syncedOnStartup = false) }
 
         val syncScheduler = get<BackgroundSyncScheduler>()
-        GlobalScope.launch { syncScheduler.schedule(override = false) }
+        syncScheduler.schedule(override = false)
 
         val enclosuresRepo = get<AudioEnclosuresRepository>()
         GlobalScope.launch { enclosuresRepo.deletePartialDownloads() }
