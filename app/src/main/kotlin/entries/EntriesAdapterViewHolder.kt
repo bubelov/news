@@ -32,7 +32,7 @@ class EntriesAdapterViewHolder(
         imageView.isVisible = false
         imageProgress.isVisible = false
 
-        if (item.entry.ogImageUrl.isNotBlank()) {
+        if (item.showImage && item.entry.ogImageUrl.isNotBlank()) {
             imageView.isVisible = true
             imageProgress.isVisible = true
 
