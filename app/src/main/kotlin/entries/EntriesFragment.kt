@@ -65,54 +65,9 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
 
     private val adapter by lazy {
         EntriesAdapter(
-            callback = object : EntriesAdapterCallback {
-                override fun onItemClick(item: EntriesAdapterItem) {
-                    viewLifecycleOwner.lifecycleScope.launch {
-                        model.setRead(listOf(item.entry.id), true)
-
-                        val entry = model.getEntry(item.entry.id).first() ?: return@launch
-                        val feed = model.getFeed(entry.feedId).first() ?: return@launch
-
-                        if (feed.openEntriesInBrowser) {
-                            openUrl(
-                                url = entry.links.first { it.rel == "alternate" && it.type == "text/html" }.href.toString(),
-                                useBuiltInBrowser = model.loadConf().first().useBuiltInBrowser,
-                            )
-                        } else {
-                            val action = EntriesFragmentDirections.actionEntriesFragmentToEntryFragment(item.entry.id)
-                            findNavController().navigate(action)
-                        }
-                    }
-                }
-
-                override fun onDownloadAudioEnclosureClick(entry: EntryWithoutContent, link: Link) {
-                    viewLifecycleOwner.lifecycleScope.launch {
-                        runCatching {
-                            model.downloadAudioEnclosure(entry, link)
-                        }.onFailure {
-                            showErrorDialog(it)
-                        }
-                    }
-                }
-
-                override fun onPlayAudioEnclosureClick(entry: EntryWithoutContent, link: Link) {
-                    viewLifecycleOwner.lifecycleScope.launch {
-                        runCatching {
-                            openCachedPodcast(
-                                cacheUri = link.extCacheUri?.toUri(),
-                                enclosureLinkType = link.type!!,
-                            )
-
-                            model.setRead(listOf(link.entryId!!), true)
-                        }.onFailure {
-                            showErrorDialog(it)
-                        }
-                    }
-                }
-            }
+            screenWidth = screenWidth(),
+            callback = adapterCallback
         ).apply {
-            screenWidth = screenWidth()
-
             registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
                 override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
                     if (positionStart == 0) {
@@ -123,6 +78,52 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
                     }
                 }
             })
+        }
+    }
+
+    private val adapterCallback = object : EntriesAdapterCallback {
+        override fun onItemClick(item: EntriesAdapterItem) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                model.setRead(listOf(item.entry.id), true)
+
+                val entry = model.getEntry(item.entry.id).first() ?: return@launch
+                val feed = model.getFeed(entry.feedId).first() ?: return@launch
+
+                if (feed.openEntriesInBrowser) {
+                    openUrl(
+                        url = entry.links.first { it.rel == "alternate" && it.type == "text/html" }.href.toString(),
+                        useBuiltInBrowser = model.loadConf().first().useBuiltInBrowser,
+                    )
+                } else {
+                    val action = EntriesFragmentDirections.actionEntriesFragmentToEntryFragment(item.entry.id)
+                    findNavController().navigate(action)
+                }
+            }
+        }
+
+        override fun onDownloadAudioEnclosureClick(entry: EntryWithoutContent, link: Link) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                runCatching {
+                    model.downloadAudioEnclosure(entry, link)
+                }.onFailure {
+                    showErrorDialog(it)
+                }
+            }
+        }
+
+        override fun onPlayAudioEnclosureClick(entry: EntryWithoutContent, link: Link) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                runCatching {
+                    openCachedPodcast(
+                        cacheUri = link.extCacheUri?.toUri(),
+                        enclosureLinkType = link.type!!,
+                    )
+
+                    model.setRead(listOf(link.entryId!!), true)
+                }.onFailure {
+                    showErrorDialog(it)
+                }
+            }
         }
     }
 
@@ -544,7 +545,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         }
     }
 
-    fun screenWidth(): Int {
+    private fun screenWidth(): Int {
         return when {
             Build.VERSION.SDK_INT >= 31 -> {
                 val windowManager = requireContext().getSystemService<WindowManager>()!!

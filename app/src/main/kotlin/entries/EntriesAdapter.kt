@@ -6,9 +6,15 @@ import androidx.recyclerview.widget.ListAdapter
 import co.appreactor.news.databinding.ListItemEntryBinding
 
 class EntriesAdapter(
-    var screenWidth: Int = 0,
     private val callback: EntriesAdapterCallback,
+    private val screenWidth: Int,
 ) : ListAdapter<EntriesAdapterItem, EntriesAdapterViewHolder>(EntriesAdapterDiffCallback()) {
+
+    init {
+        if (screenWidth == 0) {
+            throw Exception("Invalid screen width")
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EntriesAdapterViewHolder {
         val binding = ListItemEntryBinding.inflate(

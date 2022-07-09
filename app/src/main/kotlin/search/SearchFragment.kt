@@ -40,55 +40,26 @@ class SearchFragment : Fragment() {
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
 
-    private val adapter = EntriesAdapter(
-        callback = object : EntriesAdapterCallback {
-            override fun onItemClick(item: EntriesAdapterItem) {
-//                lifecycleScope.launchWhenResumed {
-//                    val entry = model.getEntry(item.id).first() ?: return@launchWhenResumed
-//                    val feed = model.getFeed(entry.feedId).first() ?: return@launchWhenResumed
-//
-//                    model.setRead(listOf(entry.id), true)
-//
-//                    if (feed.openEntriesInBrowser) {
-//                        openUrl(
-//                            url = entry.links.first { it.rel == "alternate" }.href,
-//                            useBuiltInBrowser = model.getConf().first().useBuiltInBrowser
-//                        )
-//                    } else {
-//                        val action =
-//                            SearchFragmentDirections.actionSearchFragmentToEntryFragment(item.id)
-//                        findNavController().navigate(action)
-//                    }
-//                }
-            }
+    private val adapter by lazy {
+        EntriesAdapter(
+            callback = adapterCallback,
+            screenWidth = screenWidth(),
+        )
+    }
 
-            override fun onDownloadAudioEnclosureClick(entry: EntryWithoutContent, link: Link) {
-//                lifecycleScope.launchWhenResumed {
-//                    runCatching {
-//                        model.downloadPodcast(item.id)
-//                    }.onFailure {
-//                        showErrorDialog(it)
-//                    }
-//                }
-            }
-
-            override fun onPlayAudioEnclosureClick(entry: EntryWithoutContent, link: Link) {
-//                lifecycleScope.launch {
-//                    runCatching {
-//                        val entry = model.getEntry(item.id).first() ?: return@launch
-//                        model.setRead(listOf(entry.id), true)
-//
-//                        openCachedPodcast(
-//                            cacheUri = model.getCachedPodcastUri(entry.id),
-//                            enclosureLinkType = entry.links.first { it.rel == "enclosure" }.type,
-//                        )
-//                    }.onFailure {
-//                        showErrorDialog(it)
-//                    }
-//                }
-            }
+    private val adapterCallback = object : EntriesAdapterCallback {
+        override fun onItemClick(item: EntriesAdapterItem) {
+            TODO()
         }
-    )
+
+        override fun onDownloadAudioEnclosureClick(entry: EntryWithoutContent, link: Link) {
+            TODO()
+        }
+
+        override fun onPlayAudioEnclosureClick(entry: EntryWithoutContent, link: Link) {
+            TODO()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -137,8 +108,6 @@ class SearchFragment : Fragment() {
             )
         )
 
-        adapter.screenWidth = screenWidth()
-
         model.setFilter(args.filter!!)
 
         model.state
@@ -167,7 +136,7 @@ class SearchFragment : Fragment() {
         }
     }
 
-    fun screenWidth(): Int {
+    private fun screenWidth(): Int {
         return when {
             Build.VERSION.SDK_INT >= 31 -> {
                 val windowManager = requireContext().getSystemService<WindowManager>()!!
