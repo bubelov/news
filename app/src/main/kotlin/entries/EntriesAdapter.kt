@@ -20,10 +20,14 @@ class EntriesAdapter(
         val binding = ListItemEntryBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
-            false
+            false,
         )
 
-        return EntriesAdapterViewHolder(binding, screenWidth, callback)
+        return EntriesAdapterViewHolder(
+            binding = binding,
+            callback = callback,
+            screenWidth = screenWidth,
+        )
     }
 
     override fun onBindViewHolder(holder: EntriesAdapterViewHolder, position: Int) {

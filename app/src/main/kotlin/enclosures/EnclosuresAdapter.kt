@@ -7,12 +7,12 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.databinding.ListItemEnclosureBinding
-import db.EntryWithoutContent
 import db.Link
+import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-class EnclosuresAdapter(private val listener: Listener) :
+class EnclosuresAdapter(private val listener: Callback) :
     ListAdapter<EnclosuresAdapter.Item, EnclosuresAdapter.ViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(
@@ -32,12 +32,16 @@ class EnclosuresAdapter(private val listener: Listener) :
         holder.bind(getItem(position), listener)
     }
 
-    interface Listener {
+    interface Callback {
+        fun onDownloadClick(item: Item)
+        fun onPlayClick(item: Item)
         fun onDeleteClick(item: Item)
     }
 
     data class Item(
-        val entry: EntryWithoutContent,
+        val entryId: String,
+        val entryTitle: String,
+        val entryPublished: OffsetDateTime,
         val enclosure: Link,
     )
 
@@ -45,9 +49,10 @@ class EnclosuresAdapter(private val listener: Listener) :
         private val binding: ListItemEnclosureBinding,
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: Item, listener: Listener) = binding.apply {
-            binding.primaryText.text = item.entry.title
-            binding.secondaryText.text = DATE_TIME_FORMAT.format(item.entry.published)
+        fun bind(item: Item, listener: Callback) = binding.apply {
+            binding.primaryText.text = item.entryTitle
+            binding.secondaryText.text = DATE_TIME_FORMAT.format(item.entryPublished)
+            binding.supportingText.isVisible = false
             binding.delete.isVisible = item.enclosure.extEnclosureDownloadProgress == 1.0
             binding.delete.setOnClickListener { listener.onDeleteClick(item) }
         }
@@ -59,7 +64,7 @@ class EnclosuresAdapter(private val listener: Listener) :
             oldItem: Item,
             newItem: Item,
         ): Boolean {
-            return newItem.entry.id == oldItem.entry.id
+            return newItem.entryId == oldItem.entryId
                     && newItem.enclosure.href == oldItem.enclosure.href
         }
 

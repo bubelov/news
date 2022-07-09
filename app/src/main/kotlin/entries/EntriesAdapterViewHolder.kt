@@ -9,8 +9,8 @@ import com.squareup.picasso.Picasso
 
 class EntriesAdapterViewHolder(
     private val binding: ListItemEntryBinding,
-    private val screenWidth: Int,
     private val callback: EntriesAdapterCallback,
+    private val screenWidth: Int,
 ) : RecyclerView.ViewHolder(binding.root) {
 
     private var setStrokeAlpha = false

@@ -337,8 +337,10 @@ class EnclosuresRepo(
         }
     }
 
-    suspend fun deleteFromCache(entry: EntryWithoutContent, enclosure: Link) {
+    suspend fun deleteFromCache(entryId: String, enclosure: Link) {
         withContext(Dispatchers.Default) {
+            val entry = db.entryQueries.selectById(entryId).executeAsOne()
+
             val file = File(enclosure.extCacheUri!!)
 
             if (file.exists()) {

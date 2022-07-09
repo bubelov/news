@@ -40,15 +40,23 @@ class EnclosuresFragment : Fragment() {
 
         binding.list.layoutManager = LinearLayoutManager(requireContext())
 
-        binding.list.adapter = EnclosuresAdapter(object : EnclosuresAdapter.Listener {
+        binding.list.adapter = EnclosuresAdapter(object : EnclosuresAdapter.Callback {
+            override fun onDownloadClick(item: EnclosuresAdapter.Item) {
+                TODO()
+            }
+
+            override fun onPlayClick(item: EnclosuresAdapter.Item) {
+                TODO()
+            }
+
             override fun onDeleteClick(item: EnclosuresAdapter.Item) {
                 viewLifecycleOwner.lifecycleScope.launch {
-                    model.deleteEnclosure(item.entry, item.enclosure)
+                    model.deleteEnclosure(item.entryId, item.enclosure)
                 }
             }
         })
 
-        binding.list.addItemDecoration(ListAdapterDecoration(resources.getDimensionPixelSize(R.dimen.dp_8)))
+        binding.list.addItemDecoration(CardListAdapterDecoration(resources.getDimensionPixelSize(R.dimen.dp_8)))
 
         model.getEnclosures()
             .onEach { (binding.list.adapter as EnclosuresAdapter).submitList(it) }
@@ -60,24 +68,23 @@ class EnclosuresFragment : Fragment() {
         _binding = null
     }
 
-    private class ListAdapterDecoration(private val gapInPixels: Int) : RecyclerView.ItemDecoration() {
+    private class CardListAdapterDecoration(private val gapInPixels: Int) : RecyclerView.ItemDecoration() {
 
-        override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
-            val adapter = parent.adapter
+        override fun getItemOffsets(
+            outRect: Rect,
+            view: View,
+            parent: RecyclerView,
+            state: RecyclerView.State,
+        ) {
+            val position = parent.getChildAdapterPosition(view)
 
-            if (adapter == null || adapter.itemCount == 0) {
-                super.getItemOffsets(outRect, view, parent, state)
-                return
+            val bottomGap = if (position == (parent.adapter?.itemCount ?: 0) - 1) {
+                gapInPixels
+            } else {
+                0
             }
 
-            val position = parent.getChildLayoutPosition(view)
-
-            val left = 0
-            val top = if (position == 0) gapInPixels else 0
-            val right = 0
-            val bottom = if (position == adapter.itemCount - 1) gapInPixels else 0
-
-            outRect.set(left, top, right, bottom)
+            outRect.set(gapInPixels, gapInPixels, gapInPixels, bottomGap)
         }
     }
 }

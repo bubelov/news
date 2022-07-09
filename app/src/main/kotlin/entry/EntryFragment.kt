@@ -1,6 +1,7 @@
 package entry
 
 import android.content.Intent
+import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
 import android.text.SpannableStringBuilder
@@ -19,11 +20,14 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentEntryBinding
 import db.Entry
 import db.Link
 import dialog.showErrorDialog
+import enclosures.EnclosuresAdapter
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import navigation.openUrl
@@ -39,6 +43,20 @@ class EntryFragment : Fragment() {
 
     private var _binding: FragmentEntryBinding? = null
     private val binding get() = _binding!!
+
+    private val enclosuresAdapter = EnclosuresAdapter(object : EnclosuresAdapter.Callback {
+        override fun onDownloadClick(item: EnclosuresAdapter.Item) {
+            TODO()
+        }
+
+        override fun onPlayClick(item: EnclosuresAdapter.Item) {
+            TODO()
+        }
+
+        override fun onDeleteClick(item: EnclosuresAdapter.Item) {
+            TODO()
+        }
+    })
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -56,6 +74,10 @@ class EntryFragment : Fragment() {
             setNavigationOnClickListener { findNavController().popBackStack() }
             inflateMenu(R.menu.menu_entry)
         }
+
+        binding.enclosures.layoutManager = LinearLayoutManager(requireContext())
+        binding.enclosures.adapter = enclosuresAdapter
+        binding.enclosures.addItemDecoration(CardListAdapterDecoration(resources.getDimensionPixelSize(R.dimen.dp_16)))
 
         binding.apply {
             viewLifecycleOwner.lifecycleScope.launch {
@@ -127,6 +149,15 @@ class EntryFragment : Fragment() {
                     summaryView.text = state.parsedContent
                     summaryView.movementMethod = LinkMovementMethod.getInstance()
                     progress.isVisible = false
+
+                    enclosuresAdapter.submitList(state.entryLinks.filter { it.rel == "enclosure" }.map {
+                        EnclosuresAdapter.Item(
+                            entryId = state.entry.id,
+                            entryTitle = state.entry.title,
+                            entryPublished = state.entry.published,
+                            enclosure = it,
+                        )
+                    })
 
                     val firstHtmlLink = state.entryLinks.firstOrNull { it.rel == "alternate" && it.type == "text/html" }
 
@@ -256,6 +287,26 @@ class EntryFragment : Fragment() {
                     }
                 }
             }
+        }
+    }
+
+    private class CardListAdapterDecoration(private val gapInPixels: Int) : RecyclerView.ItemDecoration() {
+
+        override fun getItemOffsets(
+            outRect: Rect,
+            view: View,
+            parent: RecyclerView,
+            state: RecyclerView.State,
+        ) {
+            val position = parent.getChildAdapterPosition(view)
+
+            val bottomGap = if (position == (parent.adapter?.itemCount ?: 0) - 1) {
+                gapInPixels
+            } else {
+                0
+            }
+
+            outRect.set(gapInPixels, gapInPixels, gapInPixels, bottomGap)
         }
     }
 }
