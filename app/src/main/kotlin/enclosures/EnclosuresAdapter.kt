@@ -8,11 +8,8 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.databinding.ListItemEnclosureBinding
 import db.Link
-import java.time.OffsetDateTime
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 
-class EnclosuresAdapter(private val listener: Callback) :
+class EnclosuresAdapter(private val callback: Callback) :
     ListAdapter<EnclosuresAdapter.Item, EnclosuresAdapter.ViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(
@@ -29,7 +26,7 @@ class EnclosuresAdapter(private val listener: Callback) :
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position), listener)
+        holder.bind(getItem(position), callback)
     }
 
     interface Callback {
@@ -40,21 +37,49 @@ class EnclosuresAdapter(private val listener: Callback) :
 
     data class Item(
         val entryId: String,
-        val entryTitle: String,
-        val entryPublished: OffsetDateTime,
         val enclosure: Link,
+        val primaryText: String,
+        val secondaryText: String,
     )
 
     class ViewHolder(
         private val binding: ListItemEnclosureBinding,
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: Item, listener: Callback) = binding.apply {
-            binding.primaryText.text = item.entryTitle
-            binding.secondaryText.text = DATE_TIME_FORMAT.format(item.entryPublished)
+        private var setStrokeAlpha = false
+
+        fun bind(item: Item, callback: Callback) = binding.apply {
+            if (!setStrokeAlpha) {
+                card.setStrokeColor(card.strokeColorStateList!!.withAlpha(32))
+                download.strokeColor = download.strokeColor.withAlpha(32)
+                play.strokeColor = play.strokeColor.withAlpha(32)
+                delete.strokeColor = delete.strokeColor.withAlpha(32)
+                setStrokeAlpha = true
+            }
+
+            binding.primaryText.text = item.primaryText
+            binding.secondaryText.text = item.secondaryText
             binding.supportingText.isVisible = false
-            binding.delete.isVisible = item.enclosure.extEnclosureDownloadProgress == 1.0
-            binding.delete.setOnClickListener { listener.onDeleteClick(item) }
+
+            if (item.enclosure.extEnclosureDownloadProgress == null) {
+                download.isVisible = true
+                downloading.isVisible = false
+                downloadProgress.isVisible = false
+                play.isVisible = false
+                delete.isVisible = false
+            } else {
+                val progress = item.enclosure.extEnclosureDownloadProgress
+                download.isVisible = false
+                downloading.isVisible = progress != 1.0
+                downloadProgress.isVisible = progress != 1.0
+                downloadProgress.progress = (progress * 100).toInt()
+                play.isVisible = progress == 1.0
+                delete.isVisible = progress == 1.0
+            }
+
+            download.setOnClickListener { callback.onDownloadClick(item) }
+            play.setOnClickListener { callback.onPlayClick(item) }
+            delete.setOnClickListener { callback.onDeleteClick(item) }
         }
     }
 
@@ -74,12 +99,5 @@ class EnclosuresAdapter(private val listener: Callback) :
         ): Boolean {
             return true
         }
-    }
-
-    companion object {
-        private val DATE_TIME_FORMAT = DateTimeFormatter.ofLocalizedDateTime(
-            FormatStyle.MEDIUM,
-            FormatStyle.SHORT,
-        )
     }
 }

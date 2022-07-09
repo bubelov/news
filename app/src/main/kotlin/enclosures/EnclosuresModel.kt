@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import org.koin.android.annotation.KoinViewModel
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 @KoinViewModel
 class EnclosuresModel(
@@ -23,9 +25,9 @@ class EnclosuresModel(
                 entry.links.filter { it.rel == "enclosure" }.map {
                     EnclosuresAdapter.Item(
                         entryId = entry.id,
-                        entryTitle = entry.title,
-                        entryPublished = entry.published,
                         enclosure = it,
+                        primaryText = entry.title,
+                        secondaryText = DATE_TIME_FORMAT.format(entry.published),
                     )
                 }
             }.flatten()
@@ -36,5 +38,12 @@ class EnclosuresModel(
         withContext(Dispatchers.Default) {
             audioEnclosuresRepo.deleteFromCache(entryId, enclosure)
         }
+    }
+
+    companion object {
+        private val DATE_TIME_FORMAT = DateTimeFormatter.ofLocalizedDateTime(
+            FormatStyle.MEDIUM,
+            FormatStyle.SHORT,
+        )
     }
 }

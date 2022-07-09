@@ -150,14 +150,17 @@ class EntryFragment : Fragment() {
                     summaryView.movementMethod = LinkMovementMethod.getInstance()
                     progress.isVisible = false
 
-                    enclosuresAdapter.submitList(state.entryLinks.filter { it.rel == "enclosure" }.map {
-                        EnclosuresAdapter.Item(
-                            entryId = state.entry.id,
-                            entryTitle = state.entry.title,
-                            entryPublished = state.entry.published,
-                            enclosure = it,
-                        )
-                    })
+                    enclosuresAdapter.submitList(state.entryLinks
+                        .filter { it.rel == "enclosure" }
+                        .filter { it.type?.startsWith("audio") ?: false }
+                        .mapIndexed { index, enclosure ->
+                            EnclosuresAdapter.Item(
+                                entryId = state.entry.id,
+                                enclosure = enclosure,
+                                primaryText = "Audio attachment ${index + 1}",
+                                secondaryText = enclosure.href.toString()
+                            )
+                        })
 
                     val firstHtmlLink = state.entryLinks.firstOrNull { it.rel == "alternate" && it.type == "text/html" }
 
