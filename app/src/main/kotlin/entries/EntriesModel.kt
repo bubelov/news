@@ -9,7 +9,7 @@ import db.Conf
 import db.EntryWithoutContent
 import db.Feed
 import db.Link
-import enclosures.AudioEnclosuresRepo
+import enclosures.EnclosuresRepo
 import feeds.FeedsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,7 +32,7 @@ class EntriesModel(
     private val confRepo: ConfRepo,
     private val feedsRepo: FeedsRepository,
     private val entriesRepo: EntriesRepository,
-    private val audioEnclosuresRepo: AudioEnclosuresRepo,
+    private val audioEnclosuresRepo: EnclosuresRepo,
     private val newsApiSync: NewsApiSync,
 ) : ViewModel() {
 
@@ -164,7 +164,7 @@ class EntriesModel(
     }
 
     suspend fun downloadAudioEnclosure(entry: EntryWithoutContent, enclosure: Link) {
-        audioEnclosuresRepo.download(entry, enclosure)
+        audioEnclosuresRepo.downloadAudioEnclosure(entry, enclosure)
     }
 
     fun getFeed(id: String) = feedsRepo.selectById(id)

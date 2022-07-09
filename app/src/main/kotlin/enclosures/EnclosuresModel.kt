@@ -15,7 +15,7 @@ import org.koin.android.annotation.KoinViewModel
 @KoinViewModel
 class EnclosuresModel(
     private val db: Db,
-    private val audioEnclosuresRepo: AudioEnclosuresRepo,
+    private val audioEnclosuresRepo: EnclosuresRepo,
 ) : ViewModel() {
 
     fun getEnclosures(): Flow<List<EnclosuresAdapter.Item>> {

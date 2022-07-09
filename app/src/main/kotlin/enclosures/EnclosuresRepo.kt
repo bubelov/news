@@ -24,16 +24,20 @@ import java.io.OutputStream
 import java.util.UUID
 
 @Single
-class AudioEnclosuresRepo(
-    private val db: Db,
+class EnclosuresRepo(
     private val context: Context,
+    private val db: Db,
 ) {
 
     private val httpClient = OkHttpClient()
 
-    suspend fun download(entry: EntryWithoutContent, enclosure: Link) {
+    suspend fun downloadAudioEnclosure(entry: EntryWithoutContent, enclosure: Link) {
+        if (enclosure.rel != "enclosure") {
+            throw Exception("Invalid link rel: ${enclosure.rel}")
+        }
+
         if (enclosure.type?.startsWith("audio") == false) {
-            throw Exception("Invalid enclosure type: ${enclosure.type}")
+            throw Exception("Invalid link type: ${enclosure.type}")
         }
 
         withContext(Dispatchers.Default) {
@@ -217,7 +221,7 @@ class AudioEnclosuresRepo(
         }
     }
 
-    suspend fun deletePartialDownloads() {
+    suspend fun deletePartialAudioDownloads() {
         withContext(Dispatchers.Default) {
             db.entryQueries.selectAll().executeAsList().forEach { entry ->
                 entry.links
@@ -333,9 +337,9 @@ class AudioEnclosuresRepo(
         }
     }
 
-    suspend fun deleteFromCache(entry: EntryWithoutContent, audioEnclosure: Link) {
+    suspend fun deleteFromCache(entry: EntryWithoutContent, enclosure: Link) {
         withContext(Dispatchers.Default) {
-            val file = File(audioEnclosure.extCacheUri!!)
+            val file = File(enclosure.extCacheUri!!)
 
             if (file.exists()) {
                 file.delete()
@@ -344,7 +348,7 @@ class AudioEnclosuresRepo(
             db.entryQueries.updateLinks(
                 id = entry.id,
                 links = entry.links.map { link ->
-                    if (link.href == audioEnclosure.href) {
+                    if (link.href == enclosure.href) {
                         link.copy(
                             extEnclosureDownloadProgress = null,
                             extCacheUri = null,
