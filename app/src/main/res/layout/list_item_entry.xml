@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/card"
     style="?materialCardViewOutlinedStyle"
@@ -44,8 +43,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 android:textAppearance="?attr/textAppearanceHeadline6"
-                android:visibility="visible"
-                tools:text="Bla" />
+                tools:text="Primary text" />
 
             <TextView
                 android:id="@+id/secondaryText"
@@ -53,7 +51,7 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="?attr/textAppearanceBody2"
                 android:textColor="?android:attr/textColorSecondary"
-                tools:text="Foo Bar | Jan 3, 2020 6:42 AM" />
+                tools:text="Secondary text" />
 
             <TextView
                 android:id="@+id/supportingText"
@@ -62,58 +60,7 @@
                 android:layout_marginTop="16dp"
                 android:textAppearance="?attr/textAppearanceBody2"
                 android:textColor="?android:attr/textColorSecondary"
-                tools:text="Bla bla bla"
-                tools:visibility="gone" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/podcastPanel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:gravity="end|center_vertical"
-            android:orientation="horizontal"
-            tools:visibility="visible">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/downloadPodcast"
-                style="?materialButtonOutlinedStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:text="@string/download"
-                android:visibility="gone"
-                app:icon="@drawable/ic_baseline_save_alt_24" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/downloadingPodcast"
-                style="?attr/borderlessButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:enabled="false"
-                android:text="@string/downloading"
-                android:visibility="gone" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/playPodcast"
-                style="?materialButtonOutlinedStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:text="@string/listen"
-                android:visibility="visible"
-                app:icon="@drawable/ic_baseline_headset_24" />
-
-            <com.google.android.material.progressindicator.LinearProgressIndicator
-                android:id="@+id/downloadPodcastProgress"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="16dp"
-                android:layout_weight="1"
-                android:progress="25" />
+                tools:text="Supporting text" />
 
         </LinearLayout>
 

@@ -1,10 +1,13 @@
 package enclosures
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import android.graphics.Rect
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -12,6 +15,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentEnclosuresBinding
+import db.Link
+import dialog.showErrorDialog
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -42,17 +47,15 @@ class EnclosuresFragment : Fragment() {
 
         binding.list.adapter = EnclosuresAdapter(object : EnclosuresAdapter.Callback {
             override fun onDownloadClick(item: EnclosuresAdapter.Item) {
-                TODO()
+                downloadAudioEnclosure(item.enclosure)
             }
 
             override fun onPlayClick(item: EnclosuresAdapter.Item) {
-                TODO()
+                playAudioEnclosure(item.enclosure)
             }
 
             override fun onDeleteClick(item: EnclosuresAdapter.Item) {
-                viewLifecycleOwner.lifecycleScope.launch {
-                    model.deleteEnclosure(item.entryId, item.enclosure)
-                }
+                deleteEnclosure(item.enclosure)
             }
         })
 
@@ -68,7 +71,45 @@ class EnclosuresFragment : Fragment() {
         _binding = null
     }
 
-    private class CardListAdapterDecoration(private val gapInPixels: Int) : RecyclerView.ItemDecoration() {
+    fun downloadAudioEnclosure(enclosure: Link) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            runCatching { model.downloadAudioEnclosure(enclosure) }
+                .onFailure { showErrorDialog(it) }
+        }
+    }
+
+    fun playAudioEnclosure(enclosure: Link) {
+        val cacheUri = enclosure.extCacheUri?.toUri()
+
+        if (cacheUri == null) {
+            showErrorDialog(Exception("Can't find podcast audio file"))
+            return
+        }
+
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.setDataAndType(cacheUri, enclosure.type)
+
+        runCatching {
+            startActivity(intent)
+        }.onFailure {
+            if (it is ActivityNotFoundException) {
+                showErrorDialog(getString(R.string.you_have_no_apps_which_can_play_this_podcast))
+            } else {
+                showErrorDialog(it)
+            }
+        }
+    }
+
+    private fun deleteEnclosure(enclosure: Link) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            runCatching { model.deleteEnclosure(enclosure) }
+                .onFailure { showErrorDialog(it) }
+        }
+    }
+
+    private class CardListAdapterDecoration(
+        private val gapInPixels: Int
+    ) : RecyclerView.ItemDecoration() {
 
         override fun getItemOffsets(
             outRect: Rect,

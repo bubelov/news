@@ -1,5 +1,6 @@
 package entry
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Rect
 import android.os.Build
@@ -14,6 +15,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.core.view.iterator
 import androidx.fragment.app.Fragment
@@ -28,7 +30,8 @@ import db.Entry
 import db.Link
 import dialog.showErrorDialog
 import enclosures.EnclosuresAdapter
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import navigation.openUrl
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -39,22 +42,22 @@ class EntryFragment : Fragment() {
 
     private val args: EntryFragmentArgs by navArgs()
 
-    private val model: EntryViewModel by viewModel()
+    private val model: EntryModel by viewModel()
 
     private var _binding: FragmentEntryBinding? = null
     private val binding get() = _binding!!
 
     private val enclosuresAdapter = EnclosuresAdapter(object : EnclosuresAdapter.Callback {
         override fun onDownloadClick(item: EnclosuresAdapter.Item) {
-            TODO()
+            downloadAudioEnclosure(item.enclosure)
         }
 
         override fun onPlayClick(item: EnclosuresAdapter.Item) {
-            TODO()
+            playAudioEnclosure(item.enclosure)
         }
 
         override fun onDeleteClick(item: EnclosuresAdapter.Item) {
-            TODO()
+            deleteEnclosure(item.enclosure)
         }
     })
 
@@ -79,17 +82,19 @@ class EntryFragment : Fragment() {
         binding.enclosures.adapter = enclosuresAdapter
         binding.enclosures.addItemDecoration(CardListAdapterDecoration(resources.getDimensionPixelSize(R.dimen.dp_16)))
 
+        model.setArgs(
+            EntryModel.Args(
+                entryId = args.entryId,
+                summaryView = binding.summaryView,
+                lifecycleScope = lifecycleScope,
+            )
+        )
+
+        model.state
+            .onEach { setState(it) }
+            .launchIn(viewLifecycleOwner.lifecycleScope)
+
         binding.apply {
-            viewLifecycleOwner.lifecycleScope.launch {
-                model.onViewCreated(
-                    entryId = args.entryId,
-                    summaryView = binding.summaryView,
-                    lifecycleScope = lifecycleScope,
-                )
-
-                model.state.collectLatest { setState(it ?: return@collectLatest) }
-            }
-
             scrollView.setOnScrollChangeListener { _, _, _, _, _ ->
                 if (scrollView.canScrollVertically(1)) {
                     fab.show()
@@ -105,24 +110,24 @@ class EntryFragment : Fragment() {
         _binding = null
     }
 
-    private fun setState(state: EntryViewModel.State) {
+    private fun setState(state: EntryModel.State) {
         binding.apply {
             val menu = binding.toolbar.menu
 
             when (state) {
-                EntryViewModel.State.Progress -> {
+                EntryModel.State.Progress -> {
                     menu?.iterator()?.forEach { it.isVisible = false }
                     contentContainer.isVisible = false
                     progress.isVisible = true
                     fab.hide()
                 }
 
-                is EntryViewModel.State.Success -> {
+                is EntryModel.State.Success -> {
                     menu?.findItem(R.id.toggleBookmarked)?.isVisible = true
                     menu?.findItem(R.id.comments)?.apply {
                         isVisible = state.entry.commentsUrl.isNotBlank()
                         setOnMenuItemClickListener {
-                            openUrl(state.entry.commentsUrl, model.conf.useBuiltInBrowser)
+                            openUrl(state.entry.commentsUrl, model.conf.value.useBuiltInBrowser)
                             true
                         }
                     }
@@ -168,11 +173,16 @@ class EntryFragment : Fragment() {
                         fab.hide()
                     } else {
                         fab.show()
-                        fab.setOnClickListener { openUrl(firstHtmlLink.href.toString(), model.conf.useBuiltInBrowser) }
+                        fab.setOnClickListener {
+                            openUrl(
+                                firstHtmlLink.href.toString(),
+                                model.conf.value.useBuiltInBrowser
+                            )
+                        }
                     }
                 }
 
-                is EntryViewModel.State.Error -> {
+                is EntryModel.State.Error -> {
                     menu?.iterator()?.forEach { it.isVisible = false }
                     contentContainer.isVisible = false
                     showErrorDialog(state.message) { findNavController().popBackStack() }
@@ -235,6 +245,42 @@ class EntryFragment : Fragment() {
                 setIcon(R.drawable.ic_baseline_bookmark_border_24)
                 setTitle(R.string.bookmark)
             }
+        }
+    }
+
+    fun downloadAudioEnclosure(enclosure: Link) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            runCatching { model.downloadAudioEnclosure(enclosure) }
+                .onFailure { showErrorDialog(it) }
+        }
+    }
+
+    fun playAudioEnclosure(enclosure: Link) {
+        val cacheUri = enclosure.extCacheUri?.toUri()
+
+        if (cacheUri == null) {
+            showErrorDialog(Exception("Can't find podcast audio file"))
+            return
+        }
+
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.setDataAndType(cacheUri, enclosure.type)
+
+        runCatching {
+            startActivity(intent)
+        }.onFailure {
+            if (it is ActivityNotFoundException) {
+                showErrorDialog(getString(R.string.you_have_no_apps_which_can_play_this_podcast))
+            } else {
+                showErrorDialog(it)
+            }
+        }
+    }
+
+    private fun deleteEnclosure(enclosure: Link) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            runCatching { model.deleteEnclosure(enclosure) }
+                .onFailure { showErrorDialog(it) }
         }
     }
 

@@ -23,7 +23,6 @@ class EntriesAdapterDiffCallback : DiffUtil.ItemCallback<EntriesAdapterItem>() {
                 && oldItem.title == newItem.title
                 && oldItem.subtitle == newItem.subtitle
                 && oldItem.summary == newItem.summary
-                && oldItem.audioEnclosure == newItem.audioEnclosure
                 && oldItem.read == newItem.read
     }
 }

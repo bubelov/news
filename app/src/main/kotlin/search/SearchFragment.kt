@@ -20,8 +20,6 @@ import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentSearchBinding
 import com.google.android.material.internal.TextWatcherAdapter
-import db.EntryWithoutContent
-import db.Link
 import entries.EntriesAdapter
 import entries.EntriesAdapterCallback
 import entries.EntriesAdapterItem
@@ -49,14 +47,6 @@ class SearchFragment : Fragment() {
 
     private val adapterCallback = object : EntriesAdapterCallback {
         override fun onItemClick(item: EntriesAdapterItem) {
-            TODO()
-        }
-
-        override fun onDownloadAudioEnclosureClick(entry: EntryWithoutContent, link: Link) {
-            TODO()
-        }
-
-        override fun onPlayAudioEnclosureClick(entry: EntryWithoutContent, link: Link) {
             TODO()
         }
     }

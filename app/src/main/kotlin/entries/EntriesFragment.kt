@@ -1,9 +1,6 @@
 package entries
 
-import android.content.ActivityNotFoundException
-import android.content.Intent
 import android.graphics.Rect
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
@@ -15,7 +12,6 @@ import android.view.WindowManager
 import androidx.annotation.StringRes
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.content.getSystemService
-import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -28,8 +24,6 @@ import co.appreactor.news.databinding.FragmentEntriesBinding
 import com.google.android.material.navigation.NavigationBarView.OnItemReselectedListener
 import com.google.android.material.snackbar.Snackbar
 import conf.ConfRepo
-import db.EntryWithoutContent
-import db.Link
 import dialog.showErrorDialog
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
@@ -97,31 +91,6 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
                 } else {
                     val action = EntriesFragmentDirections.actionEntriesFragmentToEntryFragment(item.entry.id)
                     findNavController().navigate(action)
-                }
-            }
-        }
-
-        override fun onDownloadAudioEnclosureClick(entry: EntryWithoutContent, link: Link) {
-            viewLifecycleOwner.lifecycleScope.launch {
-                runCatching {
-                    model.downloadAudioEnclosure(entry, link)
-                }.onFailure {
-                    showErrorDialog(it)
-                }
-            }
-        }
-
-        override fun onPlayAudioEnclosureClick(entry: EntryWithoutContent, link: Link) {
-            viewLifecycleOwner.lifecycleScope.launch {
-                runCatching {
-                    openCachedPodcast(
-                        cacheUri = link.extCacheUri?.toUri(),
-                        enclosureLinkType = link.type!!,
-                    )
-
-                    model.setRead(listOf(link.entryId!!), true)
-                }.onFailure {
-                    showErrorDialog(it)
                 }
             }
         }
@@ -519,29 +488,6 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
             }
         }.onFailure {
             showErrorDialog(it)
-        }
-    }
-
-    fun openCachedPodcast(cacheUri: Uri?, enclosureLinkType: String) {
-        if (cacheUri == null) {
-            showErrorDialog(Exception("Can't find podcast audio file"))
-            return
-        }
-
-        val intent = Intent().apply {
-            action = Intent.ACTION_VIEW
-            data = cacheUri
-            setDataAndType(cacheUri, enclosureLinkType)
-        }
-
-        runCatching {
-            startActivity(intent)
-        }.onFailure {
-            if (it is ActivityNotFoundException) {
-                showErrorDialog(getString(R.string.you_have_no_apps_which_can_play_this_podcast))
-            } else {
-                showErrorDialog(it)
-            }
         }
     }
 

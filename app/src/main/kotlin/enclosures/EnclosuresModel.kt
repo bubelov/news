@@ -5,10 +5,8 @@ import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import db.Db
 import db.Link
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.withContext
 import org.koin.android.annotation.KoinViewModel
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -16,7 +14,7 @@ import java.time.format.FormatStyle
 @KoinViewModel
 class EnclosuresModel(
     private val db: Db,
-    private val audioEnclosuresRepo: EnclosuresRepo,
+    private val enclosuresRepo: EnclosuresRepo,
 ) : ViewModel() {
 
     fun getEnclosures(): Flow<List<EnclosuresAdapter.Item>> {
@@ -34,10 +32,12 @@ class EnclosuresModel(
         }
     }
 
-    suspend fun deleteEnclosure(entryId: String, enclosure: Link) {
-        withContext(Dispatchers.Default) {
-            audioEnclosuresRepo.deleteFromCache(entryId, enclosure)
-        }
+    suspend fun downloadAudioEnclosure(enclosure: Link) {
+        enclosuresRepo.downloadAudioEnclosure(enclosure)
+    }
+
+    suspend fun deleteEnclosure(enclosure: Link) {
+        enclosuresRepo.deleteFromCache(enclosure)
     }
 
     companion object {

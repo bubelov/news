@@ -35,7 +35,7 @@ class EnclosuresRepoTest {
             extCacheUri = null,
         )
 
-        val res = runCatching { repo.downloadAudioEnclosure(entry, link) }
+        val res = runCatching { repo.downloadAudioEnclosure(link) }
         assertTrue { res.isFailure }
         assertTrue { res.exceptionOrNull()?.message?.startsWith("Invalid link rel") ?: false }
     }

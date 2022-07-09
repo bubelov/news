@@ -18,8 +18,6 @@ class EntriesAdapterViewHolder(
     fun bind(item: EntriesAdapterItem) = binding.apply {
         if (!setStrokeAlpha) {
             card.setStrokeColor(card.strokeColorStateList!!.withAlpha(32))
-            downloadPodcast.strokeColor = downloadPodcast.strokeColor.withAlpha(32)
-            playPodcast.strokeColor = playPodcast.strokeColor.withAlpha(32)
             setStrokeAlpha = true
         }
 
@@ -82,35 +80,6 @@ class EntriesAdapterViewHolder(
 
         supportingText.isVisible = item.summary.isNotBlank()
         supportingText.text = item.summary
-
-        podcastPanel.isVisible = false
-        podcastPanel.tag = item
-
-        if (item.audioEnclosure != null) {
-            podcastPanel.isVisible = true
-
-            if (item.audioEnclosure.extEnclosureDownloadProgress == null) {
-                downloadPodcast.isVisible = true
-                downloadingPodcast.isVisible = false
-                downloadPodcastProgress.isVisible = false
-                playPodcast.isVisible = false
-            } else {
-                val progress = item.audioEnclosure.extEnclosureDownloadProgress
-                downloadPodcast.isVisible = false
-                downloadingPodcast.isVisible = progress != 1.0
-                downloadPodcastProgress.isVisible = progress != 1.0
-                downloadPodcastProgress.progress = (progress * 100).toInt()
-                playPodcast.isVisible = progress == 1.0
-            }
-
-            downloadPodcast.setOnClickListener {
-                callback.onDownloadAudioEnclosureClick(item.entry, item.audioEnclosure)
-            }
-
-            playPodcast.setOnClickListener {
-                callback.onPlayAudioEnclosureClick(item.entry, item.audioEnclosure)
-            }
-        }
 
         primaryText.isEnabled = !item.read
         secondaryText.isEnabled = !item.read

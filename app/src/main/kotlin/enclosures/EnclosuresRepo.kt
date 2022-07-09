@@ -7,7 +7,6 @@ import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import db.Db
-import db.EntryWithoutContent
 import db.Link
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -31,7 +30,7 @@ class EnclosuresRepo(
 
     private val httpClient = OkHttpClient()
 
-    suspend fun downloadAudioEnclosure(entry: EntryWithoutContent, enclosure: Link) {
+    suspend fun downloadAudioEnclosure(enclosure: Link) {
         if (enclosure.rel != "enclosure") {
             throw Exception("Invalid link rel: ${enclosure.rel}")
         }
@@ -41,6 +40,8 @@ class EnclosuresRepo(
         }
 
         withContext(Dispatchers.Default) {
+            val entry = db.entryQueries.selectById(enclosure.entryId!!).executeAsOne()
+
             db.entryQueries.updateLinks(
                 id = entry.id,
                 links = entry.links.map {
@@ -337,9 +338,9 @@ class EnclosuresRepo(
         }
     }
 
-    suspend fun deleteFromCache(entryId: String, enclosure: Link) {
+    suspend fun deleteFromCache(enclosure: Link) {
         withContext(Dispatchers.Default) {
-            val entry = db.entryQueries.selectById(entryId).executeAsOne()
+            val entry = db.entryQueries.selectById(enclosure.entryId!!).executeAsOne()
 
             val file = File(enclosure.extCacheUri!!)
 

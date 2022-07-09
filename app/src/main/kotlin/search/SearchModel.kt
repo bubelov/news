@@ -2,7 +2,6 @@ package search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import conf.ConfRepo
 import db.Entry
 import db.EntryWithoutContent
 import db.Feed
@@ -15,18 +14,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
-import sync.NewsApiSync
 
 @KoinViewModel
 class SearchModel(
-    private val feedsRepo: FeedsRepository,
     private val entriesRepo: EntriesRepository,
-    private val confRepo: ConfRepo,
-    private val sync: NewsApiSync,
+    private val feedsRepo: FeedsRepository,
 ) : ViewModel() {
 
     private val _filter = MutableStateFlow<EntriesFilter?>(null)
@@ -71,8 +65,6 @@ class SearchModel(
                     _state.update { State.Loaded(query, results) }
                 }
             }
-        }.onEach {
-
         }.launchIn(viewModelScope)
     }
 
@@ -83,29 +75,6 @@ class SearchModel(
     fun setQuery(query: String) {
         _query.update { query }
     }
-
-    fun getEntry(id: String) = entriesRepo.selectById(id)
-
-    fun getFeed(id: String) = feedsRepo.selectById(id)
-
-    fun setRead(
-        entryIds: Collection<String>,
-        read: Boolean,
-    ) {
-        viewModelScope.launch {
-            entryIds.forEach { entriesRepo.setRead(it, read, false) }
-
-            sync.sync(
-                NewsApiSync.SyncArgs(
-                    syncFeeds = false,
-                    syncFlags = true,
-                    syncEntries = false,
-                )
-            )
-        }
-    }
-
-    fun loadConf() = confRepo.conf
 
     private fun Entry.toRow(feed: Feed?): EntriesAdapterItem {
         return EntriesAdapterItem(
@@ -134,7 +103,6 @@ class SearchModel(
             title = title,
             subtitle = (feed?.title ?: "Unknown feed") + " · " + published,
             summary = "",
-            audioEnclosure = null,
             read = read,
         )
     }

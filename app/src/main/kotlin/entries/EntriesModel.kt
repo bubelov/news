@@ -8,8 +8,6 @@ import conf.ConfRepo.Companion.SORT_ORDER_DESCENDING
 import db.Conf
 import db.EntryWithoutContent
 import db.Feed
-import db.Link
-import enclosures.EnclosuresRepo
 import feeds.FeedsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,9 +28,8 @@ import java.time.format.FormatStyle
 @KoinViewModel
 class EntriesModel(
     private val confRepo: ConfRepo,
-    private val feedsRepo: FeedsRepository,
     private val entriesRepo: EntriesRepository,
-    private val audioEnclosuresRepo: EnclosuresRepo,
+    private val feedsRepo: FeedsRepository,
     private val newsApiSync: NewsApiSync,
 ) : ViewModel() {
 
@@ -163,10 +160,6 @@ class EntriesModel(
         scrollToTopNextTime = true
     }
 
-    suspend fun downloadAudioEnclosure(entry: EntryWithoutContent, enclosure: Link) {
-        audioEnclosuresRepo.downloadAudioEnclosure(entry, enclosure)
-    }
-
     fun getFeed(id: String) = feedsRepo.selectById(id)
 
     fun getEntry(id: String) = entriesRepo.selectById(id)
@@ -240,8 +233,6 @@ class EntriesModel(
         feed: Feed?,
         conf: Conf,
     ): EntriesAdapterItem {
-        val enclosures = links.filter { it.rel == "enclosure" }
-
         return EntriesAdapterItem(
             entry = this,
             showImage = conf.showPreviewImages,
@@ -249,7 +240,6 @@ class EntriesModel(
             title = title,
             subtitle = "${feed?.title ?: "Unknown feed"} · ${DATE_TIME_FORMAT.format(published)}",
             summary = summary ?: "",
-            audioEnclosure = enclosures.firstOrNull { it.type?.startsWith("audio") == true },
             read = read,
         )
     }

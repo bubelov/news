@@ -9,12 +9,13 @@ import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.databinding.ListItemEnclosureBinding
 import db.Link
 
-class EnclosuresAdapter(private val callback: Callback) :
-    ListAdapter<EnclosuresAdapter.Item, EnclosuresAdapter.ViewHolder>(DiffCallback()) {
+class EnclosuresAdapter(
+    private val callback: Callback,
+) : ListAdapter<EnclosuresAdapter.Item, EnclosuresAdapter.ViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
-        viewType: Int
+        viewType: Int,
     ): ViewHolder {
         val binding = ListItemEnclosureBinding.inflate(
             LayoutInflater.from(parent.context),
@@ -97,7 +98,7 @@ class EnclosuresAdapter(private val callback: Callback) :
             oldItem: Item,
             newItem: Item,
         ): Boolean {
-            return true
+            return newItem.enclosure == oldItem.enclosure
         }
     }
 }
