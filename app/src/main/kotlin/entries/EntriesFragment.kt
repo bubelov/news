@@ -1,17 +1,13 @@
 package entries
 
 import android.graphics.Rect
-import android.os.Build
 import android.os.Bundle
-import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import androidx.annotation.StringRes
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
-import androidx.core.content.getSystemService
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -57,44 +53,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         }
     }
 
-    private val adapter by lazy {
-        EntriesAdapter(
-            screenWidth = screenWidth(),
-            callback = adapterCallback
-        ).apply {
-            registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
-                override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-                    if (positionStart == 0) {
-                        (binding.list.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
-                            0,
-                            0
-                        )
-                    }
-                }
-            })
-        }
-    }
-
-    private val adapterCallback = object : EntriesAdapterCallback {
-        override fun onItemClick(item: EntriesAdapterItem) {
-            viewLifecycleOwner.lifecycleScope.launch {
-                model.setRead(listOf(item.entry.id), true)
-
-                val entry = model.getEntry(item.entry.id).first() ?: return@launch
-                val feed = model.getFeed(entry.feedId).first() ?: return@launch
-
-                if (feed.openEntriesInBrowser) {
-                    openUrl(
-                        url = entry.links.first { it.rel == "alternate" && it.type == "text/html" }.href.toString(),
-                        useBuiltInBrowser = model.loadConf().first().useBuiltInBrowser,
-                    )
-                } else {
-                    val action = EntriesFragmentDirections.actionEntriesFragmentToEntryFragment(item.entry.id)
-                    findNavController().navigate(action)
-                }
-            }
-        }
-    }
+    private val adapter by lazy { EntriesAdapter(requireActivity()) { onListItemClick(it) } }
 
     private val touchHelper: ItemTouchHelper? by lazy {
         when (args.filter) {
@@ -112,7 +71,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
                                 showSnackbar(
                                     actionText = R.string.marked_as_read,
                                     action = { model.setRead(listOf(entry.entry.id), true) },
-                                    undoAction = { model.setRead(listOf(entry.entry.id), false) }
+                                    undoAction = { model.setRead(listOf(entry.entry.id), false) },
                                 )
                             }
 
@@ -120,7 +79,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
                                 showSnackbar(
                                     actionText = R.string.bookmarked,
                                     action = { model.setBookmarked(entry.entry.id, true) },
-                                    undoAction = { model.setBookmarked(entry.entry.id, false) }
+                                    undoAction = { model.setBookmarked(entry.entry.id, false) },
                                 )
                             }
                         }
@@ -491,23 +450,21 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         }
     }
 
-    private fun screenWidth(): Int {
-        return when {
-            Build.VERSION.SDK_INT >= 31 -> {
-                val windowManager = requireContext().getSystemService<WindowManager>()!!
-                windowManager.currentWindowMetrics.bounds.width()
-            }
-            Build.VERSION.SDK_INT >= 30 -> {
-                val displayMetrics = DisplayMetrics()
-                @Suppress("DEPRECATION")
-                requireContext().display?.getRealMetrics(displayMetrics)
-                displayMetrics.widthPixels
-            }
-            else -> {
-                val displayMetrics = DisplayMetrics()
-                @Suppress("DEPRECATION")
-                requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
-                displayMetrics.widthPixels
+    private fun onListItemClick(item: EntriesAdapterItem) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            model.setRead(listOf(item.entry.id), true)
+
+            val entry = model.getEntry(item.entry.id).first() ?: return@launch
+            val feed = model.getFeed(entry.feedId).first() ?: return@launch
+
+            if (feed.openEntriesInBrowser) {
+                openUrl(
+                    url = entry.links.first { it.rel == "alternate" && it.type == "text/html" }.href.toString(),
+                    useBuiltInBrowser = model.loadConf().first().useBuiltInBrowser,
+                )
+            } else {
+                val action = EntriesFragmentDirections.actionEntriesFragmentToEntryFragment(item.entry.id)
+                findNavController().navigate(action)
             }
         }
     }

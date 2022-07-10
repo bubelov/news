@@ -1,16 +1,12 @@
 package search
 
 import android.graphics.Rect
-import android.os.Build
 import android.os.Bundle
 import android.text.Editable
-import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
-import androidx.core.content.getSystemService
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -21,11 +17,12 @@ import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentSearchBinding
 import com.google.android.material.internal.TextWatcherAdapter
 import entries.EntriesAdapter
-import entries.EntriesAdapterCallback
 import entries.EntriesAdapterItem
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import navigation.hideKeyboard
+import navigation.openUrl
 import navigation.showKeyboard
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -39,16 +36,7 @@ class SearchFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val adapter by lazy {
-        EntriesAdapter(
-            callback = adapterCallback,
-            screenWidth = screenWidth(),
-        )
-    }
-
-    private val adapterCallback = object : EntriesAdapterCallback {
-        override fun onItemClick(item: EntriesAdapterItem) {
-            TODO()
-        }
+        EntriesAdapter(requireActivity()) { onListItemClick(it) }
     }
 
     override fun onCreateView(
@@ -126,23 +114,18 @@ class SearchFragment : Fragment() {
         }
     }
 
-    private fun screenWidth(): Int {
-        return when {
-            Build.VERSION.SDK_INT >= 31 -> {
-                val windowManager = requireContext().getSystemService<WindowManager>()!!
-                windowManager.currentWindowMetrics.bounds.width()
-            }
-            Build.VERSION.SDK_INT >= 30 -> {
-                val displayMetrics = DisplayMetrics()
-                @Suppress("DEPRECATION")
-                requireContext().display?.getRealMetrics(displayMetrics)
-                displayMetrics.widthPixels
-            }
-            else -> {
-                val displayMetrics = DisplayMetrics()
-                @Suppress("DEPRECATION")
-                requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
-                displayMetrics.widthPixels
+    private fun onListItemClick(item: EntriesAdapterItem) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            model.setRead(listOf(item.entry.id), true)
+
+            if (item.feed.openEntriesInBrowser) {
+                openUrl(
+                    url = item.entry.links.first { it.rel == "alternate" && it.type == "text/html" }.href.toString(),
+                    useBuiltInBrowser = item.conf.useBuiltInBrowser,
+                )
+            } else {
+                val action = SearchFragmentDirections.actionSearchFragmentToEntryFragment(item.entry.id)
+                findNavController().navigate(action)
             }
         }
     }

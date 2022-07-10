@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
-import sync.NewsApiSync
+import sync.Sync
 
 @KoinViewModel
 class EntryModel(
@@ -31,7 +31,7 @@ class EntryModel(
     private val enclosuresRepo: EnclosuresRepo,
     private val entriesRepository: EntriesRepository,
     private val feedsRepository: FeedsRepository,
-    private val newsApiSync: NewsApiSync,
+    private val newsApiSync: Sync,
     confRepo: ConfRepo,
 ) : ViewModel() {
 
@@ -100,8 +100,8 @@ class EntryModel(
         }
 
         viewModelScope.launch {
-            newsApiSync.sync(
-                NewsApiSync.SyncArgs(
+            newsApiSync.run(
+                Sync.Args(
                     syncFeeds = false,
                     syncFlags = true,
                     syncEntries = false,

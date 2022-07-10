@@ -26,14 +26,14 @@ class SyncWorker(context: Context, workerParams: WorkerParameters) : Worker(cont
     private suspend fun doWorkAsync(): Result {
         val app = applicationContext as App
         val conf = app.get<ConfRepo>().conf.value
-        val sync = app.get<NewsApiSync>()
+        val sync = app.get<Sync>()
         val entriesRepository = app.get<EntriesRepository>()
 
         if (!conf.initialSyncCompleted) {
             return Result.retry()
         }
 
-        when (val syncResult = sync.sync()) {
+        when (val syncResult = sync.run()) {
             is SyncResult.Success -> {
                 if (syncResult.newAndUpdatedEntries > 0) {
                     runCatching {

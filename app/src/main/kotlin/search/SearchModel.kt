@@ -2,6 +2,8 @@ package search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import conf.ConfRepo
+import db.Conf
 import db.Entry
 import db.EntryWithoutContent
 import db.Feed
@@ -15,12 +17,16 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
+import sync.Sync
 
 @KoinViewModel
 class SearchModel(
+    confRepo: ConfRepo,
     private val entriesRepo: EntriesRepository,
     private val feedsRepo: FeedsRepository,
+    private val sync: Sync,
 ) : ViewModel() {
 
     private val _filter = MutableStateFlow<EntriesFilter?>(null)
@@ -32,7 +38,7 @@ class SearchModel(
     val state = _state.asStateFlow()
 
     init {
-        combine(_filter, _query) { filter, query ->
+        combine(_filter, _query, confRepo.conf) { filter, query, conf ->
             if (filter == null) {
                 _state.update { State.Loaded("", emptyList()) }
             } else {
@@ -58,8 +64,8 @@ class SearchModel(
                     val feeds = feedsRepo.selectAll().first()
 
                     val results = entries.map { entry ->
-                        val feed = feeds.singleOrNull { feed -> feed.id == entry.feedId }
-                        entry.toRow(feed)
+                        val feed = feeds.single { feed -> feed.id == entry.feedId }
+                        entry.toRow(feed, conf)
                     }
 
                     _state.update { State.Loaded(query, results) }
@@ -76,7 +82,21 @@ class SearchModel(
         _query.update { query }
     }
 
-    private fun Entry.toRow(feed: Feed?): EntriesAdapterItem {
+    fun setRead(entryIds: Collection<String>, value: Boolean) {
+        viewModelScope.launch {
+            entryIds.forEach { entriesRepo.setRead(it, value, false) }
+
+            sync.run(
+                Sync.Args(
+                    syncFeeds = false,
+                    syncFlags = true,
+                    syncEntries = false,
+                )
+            )
+        }
+    }
+
+    private fun Entry.toRow(feed: Feed, conf: Conf): EntriesAdapterItem {
         return EntriesAdapterItem(
             entry = EntryWithoutContent(
                 links,
@@ -98,10 +118,12 @@ class SearchModel(
                 ogImageWidth,
                 ogImageHeight
             ),
+            feed = feed,
+            conf = conf,
             showImage = false,
             cropImage = false,
             title = title,
-            subtitle = (feed?.title ?: "Unknown feed") + " · " + published,
+            subtitle = feed.title + " · " + published,
             summary = "",
             read = read,
         )

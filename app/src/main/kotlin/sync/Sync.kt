@@ -11,7 +11,7 @@ import org.koin.core.annotation.Single
 import java.time.Instant
 
 @Single
-class NewsApiSync(
+class Sync(
     private val confRepo: ConfRepo,
     private val feedsRepo: FeedsRepository,
     private val entriesRepo: EntriesRepository,
@@ -20,10 +20,10 @@ class NewsApiSync(
     sealed class State {
         object Idle : State()
         data class InitialSync(val message: String = "") : State()
-        data class FollowUpSync(val args: SyncArgs) : State()
+        data class FollowUpSync(val args: Args) : State()
     }
 
-    data class SyncArgs(
+    data class Args(
         val syncFeeds: Boolean = true,
         val syncFlags: Boolean = true,
         val syncEntries: Boolean = true,
@@ -32,7 +32,7 @@ class NewsApiSync(
     private val _state = MutableStateFlow<State>(State.Idle)
     val state = _state.asStateFlow()
 
-    suspend fun sync(args: SyncArgs = SyncArgs()): SyncResult {
+    suspend fun run(args: Args = Args()): SyncResult {
         if (_state.value != State.Idle) {
             return SyncResult.Failure(Exception("Already syncing"))
         }

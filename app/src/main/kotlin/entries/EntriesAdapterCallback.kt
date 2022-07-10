@@ -1,6 +1,5 @@
 package entries
 
-interface EntriesAdapterCallback {
-
+fun interface EntriesAdapterCallback {
     fun onItemClick(item: EntriesAdapterItem)
 }

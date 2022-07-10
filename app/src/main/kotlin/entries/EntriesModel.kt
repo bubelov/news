@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.android.annotation.KoinViewModel
-import sync.NewsApiSync
+import sync.Sync
 import sync.SyncResult
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -30,7 +30,7 @@ class EntriesModel(
     private val confRepo: ConfRepo,
     private val entriesRepo: EntriesRepository,
     private val feedsRepo: FeedsRepository,
-    private val newsApiSync: NewsApiSync,
+    private val newsApiSync: Sync,
 ) : ViewModel() {
 
     val filter = MutableStateFlow<EntriesFilter?>(null)
@@ -51,7 +51,7 @@ class EntriesModel(
             confRepo.conf.value.apply {
                 if (!initialSyncCompleted || (syncOnStartup && !syncedOnStartup)) {
                     viewModelScope.launch {
-                        newsApiSync.sync()
+                        newsApiSync.run()
                         confRepo.update { it.copy(syncedOnStartup = true) }
                     }
                 }
@@ -64,12 +64,12 @@ class EntriesModel(
                 newsApiSync.state,
             ) { conf, feeds, _, syncState ->
                 when (syncState) {
-                    is NewsApiSync.State.InitialSync -> State.InitialSync(syncState.message)
+                    is Sync.State.InitialSync -> State.InitialSync(syncState.message)
                     else -> {
                         val showBgProgress = when (syncState) {
-                            is NewsApiSync.State.Idle -> false
-                            is NewsApiSync.State.InitialSync -> false
-                            is NewsApiSync.State.FollowUpSync -> syncState.args.syncEntries
+                            is Sync.State.Idle -> false
+                            is Sync.State.InitialSync -> false
+                            is Sync.State.FollowUpSync -> syncState.args.syncEntries
                         }
 
                         val scrollToTop = scrollToTopNextTime
@@ -87,7 +87,7 @@ class EntriesModel(
     }
 
     suspend fun onRetry() {
-        viewModelScope.launch { newsApiSync.sync() }
+        viewModelScope.launch { newsApiSync.run() }
     }
 
     private suspend fun selectEntries(
@@ -127,7 +127,7 @@ class EntriesModel(
 
         val rows = withContext(Dispatchers.Default) {
             sortedEntries.map { entry ->
-                val feed = feeds.singleOrNull { feed -> feed.id == entry.feedId }
+                val feed = feeds.single { feed -> feed.id == entry.feedId }
                 entry.toRow(feed, conf)
             }
         }
@@ -136,7 +136,7 @@ class EntriesModel(
     }
 
     suspend fun onPullRefresh() {
-        val syncResult = newsApiSync.sync()
+        val syncResult = newsApiSync.run()
         if (syncResult is SyncResult.Failure) throw syncResult.cause
     }
 
@@ -168,8 +168,8 @@ class EntriesModel(
         viewModelScope.launch {
             entryIds.forEach { entriesRepo.setRead(it, value, false) }
 
-            newsApiSync.sync(
-                NewsApiSync.SyncArgs(
+            newsApiSync.run(
+                Sync.Args(
                     syncFeeds = false,
                     syncFlags = true,
                     syncEntries = false,
@@ -182,8 +182,8 @@ class EntriesModel(
         viewModelScope.launch {
             entriesRepo.setBookmarked(entryId, bookmarked, false)
 
-            newsApiSync.sync(
-                NewsApiSync.SyncArgs(
+            newsApiSync.run(
+                Sync.Args(
                     syncFeeds = false,
                     syncFlags = true,
                     syncEntries = false,
@@ -219,8 +219,8 @@ class EntriesModel(
         }
 
         viewModelScope.launch {
-            newsApiSync.sync(
-                NewsApiSync.SyncArgs(
+            newsApiSync.run(
+                Sync.Args(
                     syncFeeds = false,
                     syncFlags = true,
                     syncEntries = false,
@@ -230,15 +230,17 @@ class EntriesModel(
     }
 
     private fun EntryWithoutContent.toRow(
-        feed: Feed?,
+        feed: Feed,
         conf: Conf,
     ): EntriesAdapterItem {
         return EntriesAdapterItem(
             entry = this,
+            feed = feed,
+            conf = conf,
             showImage = conf.showPreviewImages,
             cropImage = conf.cropPreviewImages,
             title = title,
-            subtitle = "${feed?.title ?: "Unknown feed"} · ${DATE_TIME_FORMAT.format(published)}",
+            subtitle = "${feed.title} · ${DATE_TIME_FORMAT.format(published)}",
             summary = summary ?: "",
             read = read,
         )
