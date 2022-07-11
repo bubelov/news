@@ -6,7 +6,6 @@ import android.text.Editable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -51,29 +50,28 @@ class SearchFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.toolbar.navigationIcon = DrawerArrowDrawable(context).also { it.progress = 1f }
-
         binding.toolbar.setNavigationOnClickListener {
             requireContext().hideKeyboard(binding.query)
             findNavController().popBackStack()
         }
 
-        model.query
-            .onEach { binding.clear.isVisible = it.isNotEmpty() }
-            .launchIn(viewLifecycleOwner.lifecycleScope)
-
         binding.query.addTextChangedListener(object : TextWatcherAdapter() {
             override fun afterTextChanged(s: Editable) {
-                model.setQuery(s.toString())
+                binding.clear.isVisible = s.isNotEmpty()
+
+                model.setArgs(
+                    SearchModel.Args(
+                        filter = args.filter!!,
+                        query = s.toString(),
+                    )
+                )
             }
         })
 
-        binding.clear.setOnClickListener {
-            binding.query.setText("")
-        }
-
         binding.query.requestFocus()
         requireContext().showKeyboard()
+
+        binding.clear.setOnClickListener { binding.query.setText("") }
 
         binding.list.setHasFixedSize(true)
         binding.list.layoutManager = LinearLayoutManager(context)
@@ -86,8 +84,6 @@ class SearchFragment : Fragment() {
             )
         )
 
-        model.setFilter(args.filter!!)
-
         model.state
             .onEach { setState(it) }
             .launchIn(viewLifecycleOwner.lifecycleScope)
@@ -99,24 +95,32 @@ class SearchFragment : Fragment() {
     }
 
     private fun setState(state: SearchModel.State) {
-        binding.progress.isVisible = false
-
         when (state) {
-            SearchModel.State.Loading -> {
-                binding.progress.isVisible = true
-            }
-            is SearchModel.State.Loaded -> {
+            SearchModel.State.QueryIsEmpty,
+            SearchModel.State.QueryIsTooShort -> {
+                binding.list.isVisible = false
                 binding.progress.isVisible = false
-                val items = state.items
-                binding.message.isVisible = items.isEmpty()
-                adapter.submitList(items)
+                binding.message.isVisible = false
+            }
+
+            SearchModel.State.RunningQuery -> {
+                binding.list.isVisible = false
+                binding.progress.isVisible = true
+                binding.message.isVisible = false
+            }
+
+            is SearchModel.State.ShowingQueryResults -> {
+                binding.list.isVisible = true
+                adapter.submitList(state.items)
+                binding.progress.isVisible = false
+                binding.message.isVisible = false
             }
         }
     }
 
     private fun onListItemClick(item: EntriesAdapterItem) {
         viewLifecycleOwner.lifecycleScope.launch {
-            model.setRead(listOf(item.entry.id), true)
+            model.markAsRead(item.entry.id)
 
             if (item.feed.openEntriesInBrowser) {
                 openUrl(

@@ -12,6 +12,7 @@
         android:layout_height="wrap_content"
         android:background="?colorSurface"
         app:layout_constraintTop_toTopOf="parent"
+        app:navigationIcon="?attr/homeAsUpIndicator"
         tools:title="Title">
 
         <LinearLayout

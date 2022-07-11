@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import conf.ConfRepo
 import db.Conf
 import db.Entry
-import db.EntryWithoutContent
 import db.Feed
+import db.withoutContent
 import entries.EntriesAdapterItem
 import entries.EntriesFilter
 import entries.EntriesRepository
@@ -20,6 +20,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 import sync.Sync
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 @KoinViewModel
 class SearchModel(
@@ -29,62 +31,53 @@ class SearchModel(
     private val sync: Sync,
 ) : ViewModel() {
 
-    private val _filter = MutableStateFlow<EntriesFilter?>(null)
+    private val args = MutableStateFlow<Args?>(null)
 
-    private val _query = MutableStateFlow("")
-    val query = _query.asStateFlow()
-
-    private val _state = MutableStateFlow<State>(State.Loaded("", emptyList()))
+    private val _state = MutableStateFlow<State>(State.QueryIsEmpty)
     val state = _state.asStateFlow()
 
     init {
-        combine(_filter, _query, confRepo.conf) { filter, query, conf ->
-            if (filter == null) {
-                _state.update { State.Loaded("", emptyList()) }
-            } else {
-                _state.update { State.Loaded(query, emptyList()) }
-
-                if (query.length >= 3) {
-                    _state.update { State.Loading }
-
-                    val entries = when (filter) {
-                        EntriesFilter.NotBookmarked -> {
-                            entriesRepo.selectByQuery(query).first()
-                        }
-                        EntriesFilter.Bookmarked -> entriesRepo.selectByQueryAndBookmarked(
-                            query,
-                            true,
-                        ).first()
-                        is EntriesFilter.BelongToFeed -> entriesRepo.selectByQueryAndFeedId(
-                            query,
-                            filter.feedId,
-                        ).first()
-                    }
-
-                    val feeds = feedsRepo.selectAll().first()
-
-                    val results = entries.map { entry ->
-                        val feed = feeds.single { feed -> feed.id == entry.feedId }
-                        entry.toRow(feed, conf)
-                    }
-
-                    _state.update { State.Loaded(query, results) }
-                }
+        combine(args, confRepo.conf, entriesRepo.selectCount()) { args, conf, _ ->
+            if (args == null) {
+                _state.update { State.QueryIsEmpty }
+                return@combine
             }
+
+            if (args.query.length < 3) {
+                _state.update { State.QueryIsTooShort }
+                return@combine
+            }
+
+            _state.update { State.RunningQuery }
+
+            val entries = when (args.filter) {
+                EntriesFilter.NotBookmarked -> entriesRepo.selectByQuery(args.query)
+                EntriesFilter.Bookmarked -> entriesRepo.selectByQueryAndBookmarked(args.query, true)
+                is EntriesFilter.BelongToFeed -> entriesRepo.selectByQueryAndFeedId(args.query, args.filter.feedId)
+            }
+
+            val feeds = feedsRepo.selectAll().first()
+
+            val results = entries.first().map { entry ->
+                val feed = feeds.single { feed -> feed.id == entry.feedId }
+                entry.toRow(feed, conf)
+            }
+
+            _state.update { State.ShowingQueryResults(results) }
         }.launchIn(viewModelScope)
     }
 
-    fun setFilter(filter: EntriesFilter) {
-        _filter.update { filter }
+    fun setArgs(args: Args) {
+        this.args.update { args }
     }
 
-    fun setQuery(query: String) {
-        _query.update { query }
-    }
-
-    fun setRead(entryIds: Collection<String>, value: Boolean) {
+    fun markAsRead(entryId: String) {
         viewModelScope.launch {
-            entryIds.forEach { entriesRepo.setRead(it, value, false) }
+            entriesRepo.setRead(
+                id = entryId,
+                read = true,
+                readSynced = false
+            )
 
             sync.run(
                 Sync.Args(
@@ -98,39 +91,34 @@ class SearchModel(
 
     private fun Entry.toRow(feed: Feed, conf: Conf): EntriesAdapterItem {
         return EntriesAdapterItem(
-            entry = EntryWithoutContent(
-                links,
-                summary,
-                id,
-                feedId,
-                title,
-                published,
-                updated,
-                authorName,
-                read,
-                readSynced,
-                bookmarked,
-                bookmarkedSynced,
-                guidHash,
-                commentsUrl,
-                ogImageChecked,
-                ogImageUrl,
-                ogImageWidth,
-                ogImageHeight
-            ),
+            entry = withoutContent(),
             feed = feed,
             conf = conf,
             showImage = false,
             cropImage = false,
             title = title,
-            subtitle = feed.title + " · " + published,
+            subtitle = "${feed.title} · ${DATE_TIME_FORMAT.format(published)}",
             summary = "",
             read = read,
         )
     }
 
+    data class Args(
+        val filter: EntriesFilter,
+        val query: String,
+    )
+
     sealed class State {
-        object Loading : State()
-        data class Loaded(val query: String, val items: List<EntriesAdapterItem>) : State()
+        object QueryIsEmpty : State()
+        object QueryIsTooShort : State()
+        object RunningQuery : State()
+        data class ShowingQueryResults(val items: List<EntriesAdapterItem>) : State()
+    }
+
+    companion object {
+        private val DATE_TIME_FORMAT = DateTimeFormatter.ofLocalizedDateTime(
+            FormatStyle.MEDIUM,
+            FormatStyle.SHORT,
+        )
     }
 }
