@@ -53,7 +53,9 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         }
     }
 
-    private val adapter by lazy { EntriesAdapter(requireActivity()) { onListItemClick(it) } }
+    private val adapter by lazy {
+        EntriesAdapter(requireActivity()) { onListItemClick(it) }.apply { scrollToTopOnInsert() }
+    }
 
     private val touchHelper: ItemTouchHelper? by lazy {
         when (args.filter) {
@@ -467,6 +469,19 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
                 findNavController().navigate(action)
             }
         }
+    }
+
+    private fun EntriesAdapter.scrollToTopOnInsert() {
+        registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                if (positionStart == 0) {
+                    (binding.list.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
+                        0,
+                        0,
+                    )
+                }
+            }
+        })
     }
 
     private class CardListAdapterDecoration(private val gapInPixels: Int) : RecyclerView.ItemDecoration() {
