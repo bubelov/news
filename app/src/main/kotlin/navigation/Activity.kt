@@ -3,6 +3,7 @@ package navigation
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
@@ -11,6 +12,9 @@ import co.appreactor.news.R
 import co.appreactor.news.databinding.ActivityBinding
 import com.google.android.material.navigation.NavigationBarView.OnItemReselectedListener
 import entries.EntriesFilter
+import kotlinx.coroutines.launch
+import opengraph.OpenGraphImagesRepository
+import org.koin.android.ext.android.get
 
 class Activity : AppCompatActivity() {
 
@@ -26,6 +30,10 @@ class Activity : AppCompatActivity() {
             R.id.newsFragment -> args!!.putParcelable("filter", EntriesFilter.NotBookmarked)
             R.id.bookmarksFragment -> args!!.putParcelable("filter", EntriesFilter.Bookmarked)
         }
+    }
+
+    init {
+        lifecycleScope.launch { get<OpenGraphImagesRepository>().fetchEntryImages() }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

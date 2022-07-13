@@ -8,7 +8,6 @@ import db.db
 import enclosures.EnclosuresRepo
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import opengraph.OpenGraphImagesRepository
 import org.koin.android.ext.android.get
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -32,16 +31,10 @@ class App : Application() {
             modules(module { single { db(this@App) } })
         }
 
-        val confRepo = get<ConfRepo>()
-        confRepo.update { it.copy(syncedOnStartup = false) }
-
-        val syncScheduler = get<BackgroundSyncScheduler>()
-        syncScheduler.schedule(override = false)
+        get<ConfRepo>().update { it.copy(syncedOnStartup = false) }
+        get<BackgroundSyncScheduler>().schedule(override = false)
 
         val enclosuresRepo = get<EnclosuresRepo>()
         GlobalScope.launch { enclosuresRepo.deletePartialAudioDownloads() }
-
-        val ogImagesRepo = get<OpenGraphImagesRepository>()
-        GlobalScope.launch { ogImagesRepo.fetchEntryImages() }
     }
 }
