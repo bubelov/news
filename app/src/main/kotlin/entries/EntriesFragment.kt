@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import navigation.Activity
 import navigation.openUrl
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -165,11 +164,6 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         super.onViewCreated(view, savedInstanceState)
 
         initToolbar()
-
-        if (args.filter !is EntriesFilter.BelongToFeed) {
-            (requireActivity() as? Activity)?.setupDrawerToggle(binding.toolbar)
-        }
-
         initSwipeRefresh()
         initList()
 
@@ -233,6 +227,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
             initShowReadEntriesButton()
             initSortOrderButton()
             initMarkAllAsReadButton()
+            initSettingsButton()
         }
     }
 
@@ -300,6 +295,15 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
     private fun initMarkAllAsReadButton() {
         binding.toolbar.menu?.findItem(R.id.markAllAsRead)?.setOnMenuItemClickListener {
             lifecycleScope.launchWhenResumed { model.markAllAsRead() }
+            true
+        }
+    }
+
+    private fun initSettingsButton() {
+        val settingsMenuItem = binding.toolbar.menu?.findItem(R.id.settings) ?: return
+
+        settingsMenuItem.setOnMenuItemClickListener {
+            findNavController().navigate(EntriesFragmentDirections.actionEntriesFragmentToSettingsFragment())
             true
         }
     }

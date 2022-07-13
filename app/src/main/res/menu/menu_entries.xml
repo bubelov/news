@@ -24,4 +24,9 @@
         android:title="@string/mark_all_as_read"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/settings"
+        android:title="@string/settings"
+        app:showAsAction="never" />
+
 </menu>

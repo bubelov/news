@@ -30,7 +30,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import navigation.Activity
 import navigation.showKeyboard
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -209,8 +208,6 @@ class FeedsFragment : Fragment() {
     }
 
     private fun initToolbar() = binding.toolbar.apply {
-        (requireActivity() as? Activity)?.setupDrawerToggle(this)
-
         inflateMenu(R.menu.menu_feeds)
 
         setOnMenuItemClickListener {
