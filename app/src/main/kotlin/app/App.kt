@@ -35,6 +35,6 @@ class App : Application() {
         get<BackgroundSyncScheduler>().schedule(override = false)
 
         val enclosuresRepo = get<EnclosuresRepo>()
-        GlobalScope.launch { enclosuresRepo.deletePartialAudioDownloads() }
+        GlobalScope.launch { enclosuresRepo.deletePartialDownloads() }
     }
 }

@@ -6,9 +6,16 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
+import androidx.core.net.toUri
+import com.squareup.sqldelight.runtime.coroutines.asFlow
+import com.squareup.sqldelight.runtime.coroutines.mapToList
+import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import db.Db
 import db.Link
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
@@ -147,6 +154,8 @@ class EnclosuresRepo(
                                 break
                             }
 
+                            delay(100)
+
                             downloadedBytes += buffer
 
                             if (downloadedBytes > 0) {
@@ -222,145 +231,62 @@ class EnclosuresRepo(
         }
     }
 
-    suspend fun deletePartialAudioDownloads() {
-        withContext(Dispatchers.Default) {
-            db.entryQueries.selectAll().executeAsList().forEach { entry ->
-                entry.links
-                    .filter { it.rel == "enclosure" }
-                    .filter { it.extEnclosureDownloadProgress != null && it.extEnclosureDownloadProgress != 1.0 }
-                    .forEach { audioEnclosure ->
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                            val uri = Uri.parse(audioEnclosure.extCacheUri)
+    suspend fun deletePartialDownloads() {
+        Log.d(TAG, "Deleting partial downloads")
+        val links = db.entryQueries.selectLinks().asFlow().mapToList().first().flatten()
+        Log.d(TAG, "Got ${links.size} links")
+        val enclosures = links.filter { it.rel == "enclosure" }
+        Log.d(TAG, "Of them, ${enclosures.size} are enclosures")
 
-                            if (uri.toString().contains(context.packageName)) {
-                                db.entryQueries.updateLinks(
-                                    id = entry.id,
-                                    links = entry.links.map { link ->
-                                        if (link.href == audioEnclosure.href) {
-                                            link.copy(
-                                                extEnclosureDownloadProgress = null,
-                                                extCacheUri = null,
-                                            )
-                                        } else {
-                                            link
-                                        }
-                                    }
-                                )
-                            }
-
-                            val cursor = context.contentResolver.query(
-                                uri,
-                                arrayOf(
-                                    MediaStore.MediaColumns.DISPLAY_NAME, MediaStore.MediaColumns.IS_PENDING
-                                ),
-                                null,
-                                null,
-                                null,
-                            )
-
-                            if (cursor == null) {
-                                db.entryQueries.updateLinks(
-                                    id = entry.id,
-                                    links = entry.links.map { link ->
-                                        if (link.href == audioEnclosure.href) {
-                                            link.copy(
-                                                extEnclosureDownloadProgress = null,
-                                                extCacheUri = null,
-                                            )
-                                        } else {
-                                            link
-                                        }
-                                    }
-                                )
-                            }
-
-                            cursor?.use {
-                                if (!it.moveToFirst()) {
-                                    db.entryQueries.updateLinks(
-                                        id = entry.id,
-                                        links = entry.links.map { link ->
-                                            if (link.href == audioEnclosure.href) {
-                                                link.copy(
-                                                    extEnclosureDownloadProgress = null,
-                                                    extCacheUri = null,
-                                                )
-                                            } else {
-                                                link
-                                            }
-                                        }
-                                    )
-
-                                    return@use
-                                }
-
-                                val isPendingIndex = cursor.getColumnIndex(MediaStore.MediaColumns.IS_PENDING)
-                                val pending = cursor.getInt(isPendingIndex)
-
-                                if (pending == 1) {
-                                    db.entryQueries.updateLinks(
-                                        id = entry.id,
-                                        links = entry.links.map { link ->
-                                            if (link.href == audioEnclosure.href) {
-                                                link.copy(
-                                                    extEnclosureDownloadProgress = null,
-                                                    extCacheUri = null,
-                                                )
-                                            } else {
-                                                link
-                                            }
-                                        }
-                                    )
-                                }
-                            }
-                        } else {
-                            val file = File(audioEnclosure.extCacheUri!!)
-
-                            if (file.exists()) {
-                                file.delete()
-                            }
-
-                            db.entryQueries.updateLinks(
-                                id = entry.id,
-                                links = entry.links.map { link ->
-                                    if (link.href == audioEnclosure.href) {
-                                        link.copy(
-                                            extEnclosureDownloadProgress = null,
-                                            extCacheUri = null,
-                                        )
-                                    } else {
-                                        link
-                                    }
-                                }
-                            )
-                        }
-                    }
-            }
+        val partialDownloads = enclosures.filter {
+            it.extEnclosureDownloadProgress != null && it.extEnclosureDownloadProgress != 1.0
         }
+
+        Log.d(TAG, "Number of partial downloads: ${partialDownloads.size}")
+        partialDownloads.forEach { deleteFromCache(it) }
     }
 
     suspend fun deleteFromCache(enclosure: Link) {
-        withContext(Dispatchers.Default) {
-            val entry = db.entryQueries.selectById(enclosure.entryId!!).executeAsOne()
+        if (enclosure.extCacheUri == null) {
+            TODO()
+        }
 
-            val file = File(enclosure.extCacheUri!!)
+        val rowsDeleted = withContext(Dispatchers.Default) {
+            context.contentResolver.delete(enclosure.extCacheUri.toUri(), null)
+        }
 
-            if (file.exists()) {
-                file.delete()
-            }
+        if (rowsDeleted != 1) {
+            TODO()
+        }
 
-            db.entryQueries.updateLinks(
-                id = entry.id,
-                links = entry.links.map { link ->
-                    if (link.href == enclosure.href) {
-                        link.copy(
-                            extEnclosureDownloadProgress = null,
-                            extCacheUri = null,
-                        )
-                    } else {
-                        link
-                    }
-                }
+        update(
+            enclosure.copy(
+                extCacheUri = null,
+                extEnclosureDownloadProgress = null,
             )
+        )
+    }
+
+    private suspend fun update(enclosure: Link) {
+        if (enclosure.feedId != null) {
+            TODO()
+        }
+
+        if (enclosure.entryId != null) {
+            val entry = db.entryQueries.selectById(enclosure.entryId).asFlow().mapToOneOrNull().first() ?: TODO()
+
+            withContext(Dispatchers.Default) {
+                db.entryQueries.updateLinks(
+                    id = entry.id,
+                    links = entry.links.map { link ->
+                        if (link.href == enclosure.href) {
+                            enclosure
+                        } else {
+                            link
+                        }
+                    }
+                )
+            }
         }
     }
 
@@ -372,5 +298,9 @@ class EnclosuresRepo(
             "audio/opus" -> "opus"
             else -> this.subtype
         }
+    }
+
+    companion object {
+        private const val TAG = "enclosures"
     }
 }

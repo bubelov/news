@@ -158,6 +158,10 @@ WHERE ogImageChecked = :ogImageChecked
 ORDER BY published DESC
 LIMIT :limit;
 
+selectLinks:
+SELECT links
+FROM Entry;
+
 selectCount:
 SELECT COUNT(*)
 FROM Entry;
