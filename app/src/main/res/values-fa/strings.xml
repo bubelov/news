@@ -99,6 +99,7 @@
     <string name="connect_to_nextcloud">Connect to Nextcloud</string>
     <string name="connect">Connect</string>
     <string name="invalid_url">Invalid URL</string>
+    <string name="audio_n">Audio %1$d</string>
     <plurals name="d_hours">
         <item quantity="one">%d ساعت</item>
         <item quantity="other">%d ساعت</item>

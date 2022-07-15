@@ -17,7 +17,7 @@ android {
 
     defaultConfig {
         applicationId = "co.appreactor.news"
-        minSdk = 30
+        minSdk = 29
         targetSdk = 31
         versionCode = 20
         versionName = "0.3.4"

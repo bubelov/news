@@ -2,8 +2,6 @@ package enclosures
 
 import android.content.ContentValues
 import android.content.Context
-import android.net.Uri
-import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
@@ -12,9 +10,10 @@ import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import db.Db
+import db.Entry
 import db.Link
+import http.await
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType
@@ -24,10 +23,8 @@ import okhttp3.Request
 import okio.buffer
 import okio.sink
 import org.koin.core.annotation.Single
-import java.io.File
-import java.io.FileOutputStream
-import java.io.OutputStream
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 @Single
 class EnclosuresRepo(
@@ -46,188 +43,129 @@ class EnclosuresRepo(
             throw Exception("Invalid link type: ${enclosure.type}")
         }
 
-        withContext(Dispatchers.Default) {
-            val entry = db.entryQueries.selectById(enclosure.entryId!!).executeAsOne()
+        val entry = db.entryQueries.selectById(enclosure.entryId!!).asFlow().mapToOneOrNull().first()
+            ?: throw Exception("Entry ${enclosure.entryId} does not exist")
 
-            db.entryQueries.updateLinks(
-                id = entry.id,
-                links = entry.links.map {
-                    if (it.href == enclosure.href) {
-                        it.copy(extEnclosureDownloadProgress = 0.0)
-                    } else {
-                        it
-                    }
-                }
+        updateLink(
+            link = enclosure.copy(extEnclosureDownloadProgress = 0.0),
+            entry = entry,
+        )
+
+        val request = Request.Builder().url(enclosure.href).build()
+
+        val response = runCatching {
+            httpClient.newCall(request).await()
+        }.getOrElse {
+            updateLink(
+                link = enclosure.copy(extEnclosureDownloadProgress = null),
+                entry = entry,
             )
 
-            val request = Request.Builder().url(enclosure.href).build()
+            throw it
+        }
 
-            val response = runCatching {
-                httpClient.newCall(request).execute()
-            }.getOrElse {
-                db.entryQueries.updateLinks(
-                    id = entry.id,
-                    links = entry.links.map { link ->
-                        if (link.href == enclosure.href) {
-                            link.copy(extEnclosureDownloadProgress = null)
-                        } else {
-                            link
-                        }
-                    }
-                )
+        if (!response.isSuccessful) {
+            updateLink(
+                link = enclosure.copy(extEnclosureDownloadProgress = null),
+                entry = entry,
+            )
 
-                throw it
+            throw Exception("Unexpected response code: ${response.code}")
+        }
+
+        val mediaType = enclosure.type!!.toMediaType()
+        val fileExtension = mediaType.fileExtension()
+        val fileName = "${UUID.randomUUID()}.$fileExtension"
+
+        val cacheUri = kotlin.runCatching {
+            withContext(Dispatchers.Default) {
+                context.contentResolver.insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                    ContentValues().apply {
+                        put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+                        put(MediaStore.MediaColumns.MIME_TYPE, enclosure.type)
+                        put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PODCASTS)
+                        put(MediaStore.MediaColumns.IS_PENDING, true)
+                    })!!
+            }
+        }.getOrElse {
+            throw it
+        }
+
+        runCatching {
+            val outputStream = withContext(Dispatchers.Default) {
+                context.contentResolver.openOutputStream(cacheUri)
+                    ?: throw Exception("Failed to open an output stream for URI $cacheUri")
             }
 
-            if (!response.isSuccessful) {
-                db.entryQueries.updateLinks(
-                    id = entry.id,
-                    links = entry.links.map { link ->
-                        if (link.href == enclosure.href) {
-                            link.copy(extEnclosureDownloadProgress = null)
-                        } else {
-                            link
+            updateLink(
+                link = enclosure.copy(
+                    extEnclosureDownloadProgress = 0.0,
+                    extCacheUri = cacheUri.toString(),
+                ),
+                entry = entry,
+            )
+
+            val responseBody = response.body!!
+            val bytesInBody = responseBody.contentLength()
+
+            responseBody.source().use { bufferedSource ->
+                outputStream.sink().buffer().use { bufferedSink ->
+                    var progressBytes = 0L
+                    var progress: Double
+                    var lastNotificationNanos = System.nanoTime()
+
+                    while (true) {
+                        val buffer = bufferedSource.read(bufferedSink.buffer, 1024L * 16L)
+                        bufferedSink.flush()
+
+                        if (buffer == -1L) {
+                            break
+                        }
+
+                        progressBytes += buffer
+                        progress = progressBytes.toDouble() / bytesInBody.toDouble()
+
+                        if (System.nanoTime() - lastNotificationNanos > TimeUnit.MILLISECONDS.toNanos(100)) {
+                            updateLink(
+                                link = enclosure.copy(
+                                    extEnclosureDownloadProgress = progress,
+                                    extCacheUri = cacheUri.toString(),
+                                ),
+                                entry = entry,
+                            )
+
+                            lastNotificationNanos = System.nanoTime()
                         }
                     }
-                )
-
-                throw Exception("Unexpected response code: ${response.code}")
+                }
             }
+        }.onSuccess {
+            updateLink(
+                link = enclosure.copy(
+                    extEnclosureDownloadProgress = 1.0,
+                    extCacheUri = cacheUri.toString(),
+                ),
+                entry = entry,
+            )
 
-            var cacheUri: Uri? = null
+            context.contentResolver.update(
+                cacheUri,
+                ContentValues().apply { put(MediaStore.MediaColumns.IS_PENDING, false) },
+                null,
+                null,
+            )
+        }.onFailure { throwable ->
+            updateLink(
+                link = enclosure.copy(
+                    extEnclosureDownloadProgress = null,
+                    extCacheUri = null,
+                ),
+                entry = entry,
+            )
 
-            runCatching {
-                val mediaType = enclosure.type!!.toMediaType()
-                val fileExtension = mediaType.fileExtension()
-                val fileName = "${UUID.randomUUID()}.$fileExtension"
-                val outputStream: OutputStream
+            context.contentResolver.delete(cacheUri, null, null)
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    cacheUri = context.contentResolver.insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                        ContentValues().apply {
-                            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-                            put(MediaStore.MediaColumns.MIME_TYPE, enclosure.type)
-                            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PODCASTS)
-                            put(MediaStore.MediaColumns.IS_PENDING, true)
-                        })
-
-                    if (cacheUri == null) {
-                        throw Exception("Failed to save enclosure to a media store")
-                    }
-
-                    outputStream = context.contentResolver.openOutputStream(cacheUri!!)!!
-                } else {
-                    val podcastsDirectory = context.getExternalFilesDir(Environment.DIRECTORY_PODCASTS)
-                    val file = File(podcastsDirectory, fileName)
-                    cacheUri = Uri.fromFile(file)
-                    outputStream = FileOutputStream(file)
-                }
-
-                db.entryQueries.updateLinks(
-                    id = entry.id,
-                    links = entry.links.map { link ->
-                        if (link.href == enclosure.href) {
-                            link.copy(
-                                extEnclosureDownloadProgress = 0.0,
-                                extCacheUri = cacheUri.toString(),
-                            )
-                        } else {
-                            link
-                        }
-                    }
-                )
-
-                val responseBody = response.body!!
-                val bytesInBody = responseBody.contentLength()
-
-                responseBody.source().use { bufferedSource ->
-                    outputStream.sink().buffer().use { bufferedSink ->
-                        var downloadedBytes = 0L
-                        var downloadedPercent: Long
-                        var lastReportedDownloadedPercent = 0L
-
-                        while (true) {
-                            val buffer = bufferedSource.read(bufferedSink.buffer, 1024L * 16L)
-                            bufferedSink.flush()
-
-                            if (buffer == -1L) {
-                                break
-                            }
-
-                            delay(100)
-
-                            downloadedBytes += buffer
-
-                            if (downloadedBytes > 0) {
-                                downloadedPercent =
-                                    (downloadedBytes.toDouble() / bytesInBody.toDouble() * 100.0).toLong()
-
-                                if (downloadedPercent > lastReportedDownloadedPercent) {
-                                    db.entryQueries.updateLinks(
-                                        id = entry.id,
-                                        links = entry.links.map { link ->
-                                            if (link.href == enclosure.href) {
-                                                link.copy(
-                                                    extEnclosureDownloadProgress = downloadedPercent.toDouble() / 100,
-                                                    extCacheUri = cacheUri.toString(),
-                                                )
-                                            } else {
-                                                link
-                                            }
-                                        }
-                                    )
-
-                                    lastReportedDownloadedPercent = downloadedPercent
-                                }
-                            }
-                        }
-                    }
-                }
-            }.onSuccess {
-                db.entryQueries.updateLinks(
-                    id = entry.id,
-                    links = entry.links.map { link ->
-                        if (link.href == enclosure.href) {
-                            link.copy(
-                                extEnclosureDownloadProgress = 1.0,
-                                extCacheUri = cacheUri.toString(),
-                            )
-                        } else {
-                            link
-                        }
-                    }
-                )
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    cacheUri?.let {
-                        context.contentResolver.update(
-                            it, ContentValues().apply { put(MediaStore.MediaColumns.IS_PENDING, false) }, null, null
-                        )
-                    }
-                }
-            }.onFailure {
-                db.entryQueries.updateLinks(
-                    id = entry.id,
-                    links = entry.links.map { link ->
-                        if (link.href == enclosure.href) {
-                            link.copy(
-                                extEnclosureDownloadProgress = null,
-                                extCacheUri = null,
-                            )
-                        } else {
-                            link
-                        }
-                    }
-                )
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    cacheUri?.let { uri ->
-                        context.contentResolver.delete(uri, null, null)
-                    }
-                }
-
-                throw it
-            }
+            throw throwable
         }
     }
 
@@ -252,14 +190,14 @@ class EnclosuresRepo(
         }
 
         val rowsDeleted = withContext(Dispatchers.Default) {
-            context.contentResolver.delete(enclosure.extCacheUri.toUri(), null)
+            context.contentResolver.delete(enclosure.extCacheUri.toUri(), null, null)
         }
 
         if (rowsDeleted != 1) {
             TODO()
         }
 
-        update(
+        updateLink(
             enclosure.copy(
                 extCacheUri = null,
                 extEnclosureDownloadProgress = null,
@@ -267,27 +205,32 @@ class EnclosuresRepo(
         )
     }
 
-    private suspend fun update(enclosure: Link) {
-        if (enclosure.feedId != null) {
+    private suspend fun updateLink(link: Link) {
+        if (link.feedId != null) {
             TODO()
         }
 
-        if (enclosure.entryId != null) {
-            val entry = db.entryQueries.selectById(enclosure.entryId).asFlow().mapToOneOrNull().first() ?: TODO()
-
-            withContext(Dispatchers.Default) {
-                db.entryQueries.updateLinks(
-                    id = entry.id,
-                    links = entry.links.map { link ->
-                        if (link.href == enclosure.href) {
-                            enclosure
-                        } else {
-                            link
-                        }
-                    }
-                )
-            }
+        if (link.entryId != null) {
+            val entry = db.entryQueries.selectById(link.entryId).asFlow().mapToOneOrNull().first() ?: TODO()
+            updateLink(link, entry)
         }
+    }
+
+    private suspend fun updateLink(link: Link, entry: Entry): Link {
+        withContext(Dispatchers.Default) {
+            db.entryQueries.updateLinks(
+                id = entry.id,
+                links = entry.links.map {
+                    if (it.href == link.href) {
+                        link
+                    } else {
+                        it
+                    }
+                },
+            )
+        }
+
+        return link
     }
 
     private fun MediaType.fileExtension(): String {

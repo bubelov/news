@@ -70,10 +70,11 @@ class EnclosuresAdapter(
                 delete.isVisible = false
             } else {
                 val progress = item.enclosure.extEnclosureDownloadProgress
+                val progressPercent = (progress * 100).toInt()
                 download.isVisible = false
                 downloading.isVisible = progress != 1.0
                 downloadProgress.isVisible = progress != 1.0
-                downloadProgress.progress = (progress * 100).toInt()
+                downloadProgress.progress = progressPercent
                 play.isVisible = progress == 1.0
                 delete.isVisible = progress == 1.0
             }

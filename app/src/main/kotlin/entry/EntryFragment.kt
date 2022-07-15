@@ -162,7 +162,7 @@ class EntryFragment : Fragment() {
                             EnclosuresAdapter.Item(
                                 entryId = state.entry.id,
                                 enclosure = enclosure,
-                                primaryText = "Audio attachment ${index + 1}",
+                                primaryText = getString(R.string.audio_n, index + 1),
                                 secondaryText = enclosure.href.toString()
                             )
                         })
