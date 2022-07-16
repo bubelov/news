@@ -19,9 +19,12 @@ class MinifluxApiAdapter(
         return runCatching {
             val categories = api.getCategories()
 
-            val category = categories.find { it.title.equals("All", ignoreCase = true) }
-                ?: categories.firstOrNull()
-                ?: throw Exception("You have no categories to place this feed into")
+            if (categories.isEmpty()) {
+                return Result.failure(Exception("You have no categories"))
+            }
+
+            // Catch-all category always has the lowest id
+            val category = categories.minByOrNull { it.id }!!
 
             val response = api.postFeed(
                 PostFeedArgs(
@@ -46,48 +49,47 @@ class MinifluxApiAdapter(
         return runCatching { api.deleteFeed(feedId.toLong()) }
     }
 
-    override suspend fun getEntries(includeReadEntries: Boolean): Flow<Result<List<Entry>>> = flow {
-        var totalFetched = 0L
-        val currentBatch = mutableSetOf<EntryJson>()
-        val batchSize = 250L
-        var oldestEntryId = Long.MAX_VALUE
+    override suspend fun getEntries(
+        includeReadEntries: Boolean,
+    ): Flow<Result<List<Entry>>> {
+        return flow {
+            runCatching {
+                var totalFetched = 0L
+                val currentBatch = mutableSetOf<EntryJson>()
+                val batchSize = 250L
+                var oldestEntryId = Long.MAX_VALUE
 
-        while (true) {
-            val entries = runCatching {
-                api.getEntriesBeforeEntry(
-                    status = if (includeReadEntries) "" else "unread",
-                    entryId = oldestEntryId,
-                    limit = batchSize,
-                )
+                while (true) {
+                    val entries = api.getEntriesBeforeEntry(
+                        status = if (includeReadEntries) "" else "unread",
+                        entryId = oldestEntryId,
+                        limit = batchSize,
+                    )
+
+                    currentBatch += entries.entries
+                    totalFetched += currentBatch.size
+                    emit(Result.success(currentBatch.map { it.toEntry() }))
+
+                    if (currentBatch.size < batchSize) {
+                        break
+                    } else {
+                        oldestEntryId = currentBatch.minOfOrNull { it.id }?.toLong() ?: 0L
+                        currentBatch.clear()
+                    }
+                }
+
+                val starredEntries = api.getStarredEntries()
+
+                if (starredEntries.entries.isNotEmpty()) {
+                    currentBatch += starredEntries.entries
+                    totalFetched += currentBatch.size
+                    emit(Result.success(currentBatch.map { it.toEntry() }))
+                    currentBatch.clear()
+                }
             }.getOrElse {
                 emit(Result.failure(it))
                 return@flow
             }
-
-            currentBatch += entries.entries
-            totalFetched += currentBatch.size
-            emit(Result.success(currentBatch.map { it.toEntry() }))
-
-            if (currentBatch.size < batchSize) {
-                break
-            } else {
-                oldestEntryId = currentBatch.minOfOrNull { it.id }?.toLong() ?: 0L
-                currentBatch.clear()
-            }
-        }
-
-        val starredEntries = runCatching {
-            api.getStarredEntries()
-        }.getOrElse {
-            emit(Result.failure(it))
-            return@flow
-        }
-
-        if (starredEntries.entries.isNotEmpty()) {
-            currentBatch += starredEntries.entries
-            totalFetched += currentBatch.size
-            emit(Result.success(currentBatch.map { it.toEntry() }))
-            currentBatch.clear()
         }
     }
 

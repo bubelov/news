@@ -21,22 +21,26 @@ class MinifluxApiBuilder {
         password: String,
         trustSelfSignedCerts: Boolean,
     ): MinifluxApi {
-        val authenticatingInterceptor = Interceptor {
-            val request = it.request()
-            val credential = Credentials.basic(username, password)
-            it.proceed(request.newBuilder().header("Authorization", credential).build())
+        val authInterceptor = Interceptor { chain ->
+            chain.proceed(
+                chain.request().newBuilder()
+                    .header("Authorization", Credentials.basic(username, password))
+                    .build()
+            )
         }
 
         val errorInterceptor = Interceptor {
             val response = it.proceed(it.request())
 
-            if (!response.isSuccessful) {
-                val json = Gson().fromJson(response.body!!.string(), JsonObject::class.java)
+            if (!response.isSuccessful && response.body != null) {
+                val json = runCatching {
+                    Gson().fromJson(response.body!!.string(), JsonObject::class.java)
+                }.getOrNull()
 
                 val errorMessage = if (json != null && json.has("error_message")) {
                     json["error_message"].asString
                 } else {
-                    "HTTP request ${it.request().url} failed with response code ${response.code}"
+                    "Endpoint ${it.request().url} failed with response code ${response.code}"
                 }
 
                 throw IOException(errorMessage)
@@ -46,7 +50,7 @@ class MinifluxApiBuilder {
         }
 
         val clientBuilder = OkHttpClient.Builder()
-            .addInterceptor(authenticatingInterceptor)
+            .addInterceptor(authInterceptor)
             .addInterceptor(errorInterceptor)
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(20, TimeUnit.SECONDS)
@@ -60,12 +64,10 @@ class MinifluxApiBuilder {
             clientBuilder.addInterceptor(LoggingInterceptor("miniflux"))
         }
 
-        val client = clientBuilder.build()
-
         val retrofit = Retrofit.Builder()
             .baseUrl("$url/v1/")
             .addConverterFactory(GsonConverterFactory.create())
-            .client(client)
+            .client(clientBuilder.build())
             .build()
 
         return retrofit.create(MinifluxApi::class.java)
