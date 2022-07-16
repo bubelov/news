@@ -57,14 +57,14 @@ class MinifluxAuthFragment : Fragment() {
             return
         }
 
+        binding.progress.isVisible = true
+
+        val url = binding.url.text.toString().toHttpUrl()
+        val username = binding.username.text.toString()
+        val password = binding.password.text.toString()
+        val trustSelfSignedCerts = binding.trustSelfSignedCerts.isChecked
+
         viewLifecycleOwner.lifecycleScope.launchWhenResumed {
-            binding.progress.isVisible = true
-
-            val url = binding.url.text.toString().toHttpUrl()
-            val username = binding.username.text.toString()
-            val password = binding.password.text.toString()
-            val trustSelfSignedCerts = binding.trustSelfSignedCerts.isChecked
-
             runCatching {
                 model.testBackend(
                     url = url,

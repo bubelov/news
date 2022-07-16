@@ -5,7 +5,7 @@ import android.content.Context
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
-import androidx.core.net.toUri
+import co.appreactor.feedk.AtomLinkRel
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
@@ -35,7 +35,7 @@ class EnclosuresRepo(
     private val httpClient = OkHttpClient()
 
     suspend fun downloadAudioEnclosure(enclosure: Link) {
-        if (enclosure.rel != "enclosure") {
+        if (enclosure.rel !is AtomLinkRel.Enclosure) {
             throw Exception("Invalid link rel: ${enclosure.rel}")
         }
 
@@ -100,7 +100,7 @@ class EnclosuresRepo(
             updateLink(
                 link = enclosure.copy(
                     extEnclosureDownloadProgress = 0.0,
-                    extCacheUri = cacheUri.toString(),
+                    extCacheUri = cacheUri,
                 ),
                 entry = entry,
             )
@@ -129,7 +129,7 @@ class EnclosuresRepo(
                             updateLink(
                                 link = enclosure.copy(
                                     extEnclosureDownloadProgress = progress,
-                                    extCacheUri = cacheUri.toString(),
+                                    extCacheUri = cacheUri,
                                 ),
                                 entry = entry,
                             )
@@ -143,7 +143,7 @@ class EnclosuresRepo(
             updateLink(
                 link = enclosure.copy(
                     extEnclosureDownloadProgress = 1.0,
-                    extCacheUri = cacheUri.toString(),
+                    extCacheUri = cacheUri,
                 ),
                 entry = entry,
             )
@@ -173,7 +173,7 @@ class EnclosuresRepo(
         Log.d(TAG, "Deleting partial downloads")
         val links = db.entryQueries.selectLinks().asFlow().mapToList().first().flatten()
         Log.d(TAG, "Got ${links.size} links")
-        val enclosures = links.filter { it.rel == "enclosure" }
+        val enclosures = links.filter { it.rel is AtomLinkRel.Enclosure }
         Log.d(TAG, "Of them, ${enclosures.size} are enclosures")
 
         val partialDownloads = enclosures.filter {
@@ -190,7 +190,7 @@ class EnclosuresRepo(
         }
 
         val rowsDeleted = withContext(Dispatchers.Default) {
-            context.contentResolver.delete(enclosure.extCacheUri.toUri(), null, null)
+            context.contentResolver.delete(enclosure.extCacheUri, null, null)
         }
 
         if (rowsDeleted != 1) {

@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -29,6 +28,20 @@ class EnclosuresFragment : Fragment() {
     private var _binding: FragmentEnclosuresBinding? = null
     private val binding get() = _binding!!
 
+    val adapter = EnclosuresAdapter(object : EnclosuresAdapter.Callback {
+        override fun onDownloadClick(item: EnclosuresAdapter.Item) {
+            downloadAudioEnclosure(item.enclosure)
+        }
+
+        override fun onPlayClick(item: EnclosuresAdapter.Item) {
+            playAudioEnclosure(item.enclosure)
+        }
+
+        override fun onDeleteClick(item: EnclosuresAdapter.Item) {
+            deleteEnclosure(item.enclosure)
+        }
+    })
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -43,23 +56,11 @@ class EnclosuresFragment : Fragment() {
 
         binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
-        binding.list.layoutManager = LinearLayoutManager(requireContext())
-
-        binding.list.adapter = EnclosuresAdapter(object : EnclosuresAdapter.Callback {
-            override fun onDownloadClick(item: EnclosuresAdapter.Item) {
-                downloadAudioEnclosure(item.enclosure)
-            }
-
-            override fun onPlayClick(item: EnclosuresAdapter.Item) {
-                playAudioEnclosure(item.enclosure)
-            }
-
-            override fun onDeleteClick(item: EnclosuresAdapter.Item) {
-                deleteEnclosure(item.enclosure)
-            }
-        })
-
-        binding.list.addItemDecoration(CardListAdapterDecoration(resources.getDimensionPixelSize(R.dimen.dp_8)))
+        binding.list.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = this@EnclosuresFragment.adapter
+            addItemDecoration(CardListAdapterDecoration(resources.getDimensionPixelSize(R.dimen.dp_8)))
+        }
 
         model.getEnclosures()
             .onEach { (binding.list.adapter as EnclosuresAdapter).submitList(it) }
@@ -79,15 +80,8 @@ class EnclosuresFragment : Fragment() {
     }
 
     fun playAudioEnclosure(enclosure: Link) {
-        val cacheUri = enclosure.extCacheUri?.toUri()
-
-        if (cacheUri == null) {
-            showErrorDialog(Exception("Can't find podcast audio file"))
-            return
-        }
-
         val intent = Intent(Intent.ACTION_VIEW)
-        intent.setDataAndType(cacheUri, enclosure.type)
+        intent.setDataAndType(enclosure.extCacheUri!!, enclosure.type)
 
         runCatching {
             startActivity(intent)
@@ -108,7 +102,7 @@ class EnclosuresFragment : Fragment() {
     }
 
     private class CardListAdapterDecoration(
-        private val gapInPixels: Int
+        private val gapPx: Int
     ) : RecyclerView.ItemDecoration() {
 
         override fun getItemOffsets(
@@ -120,12 +114,12 @@ class EnclosuresFragment : Fragment() {
             val position = parent.getChildAdapterPosition(view)
 
             val bottomGap = if (position == (parent.adapter?.itemCount ?: 0) - 1) {
-                gapInPixels
+                gapPx
             } else {
                 0
             }
 
-            outRect.set(gapInPixels, gapInPixels, gapInPixels, bottomGap)
+            outRect.set(gapPx, gapPx, gapPx, bottomGap)
         }
     }
 }

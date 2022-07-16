@@ -2,6 +2,7 @@ package enclosures
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.appreactor.feedk.AtomLinkRel
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import db.Db
@@ -26,7 +27,7 @@ class EnclosuresModel(
     fun getEnclosures(): Flow<List<EnclosuresAdapter.Item>> {
         return db.entryQueries.selectAll().asFlow().mapToList().map { entries ->
             entries.map { entry ->
-                entry.links.filter { it.rel == "enclosure" }.map {
+                entry.links.filter { it.rel is AtomLinkRel.Enclosure }.map {
                     EnclosuresAdapter.Item(
                         entryId = entry.id,
                         enclosure = it,

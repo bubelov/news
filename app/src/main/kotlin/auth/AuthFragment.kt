@@ -61,8 +61,11 @@ class AuthFragment : Fragment() {
 
     private fun FragmentAuthBinding.initButtons() {
         useStandaloneBackend.setOnClickListener {
-            model.setStandaloneBackend()
-            findNavController().navigate(AuthFragmentDirections.actionAuthFragmentToNewsFragment(EntriesFilter.NotBookmarked))
+            // This animation hides layout shift caused by bottom nav visibility change
+            binding.root.animate().alpha(0f).withEndAction {
+                model.setStandaloneBackend()
+                findNavController().navigate(AuthFragmentDirections.actionAuthFragmentToNewsFragment(EntriesFilter.NotBookmarked))
+            }
         }
 
         useMinifluxBackend.setOnClickListener {

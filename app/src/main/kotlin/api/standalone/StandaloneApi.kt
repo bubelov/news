@@ -144,7 +144,7 @@ class StandaloneNewsApi(
     }
 
     private suspend fun fetchEntries(feed: Feed): List<Entry> {
-        val url = feed.links.first { it.rel == "self" }.href
+        val url = feed.links.first { it.rel == AtomLinkRel.Self }.href
         val request = Request.Builder().url(url).build()
 
         val response = runCatching {
@@ -243,7 +243,7 @@ class StandaloneNewsApi(
                     feedId = channel.link,
                     entryId = null,
                     href = feedUrl,
-                    rel = "self",
+                    rel = AtomLinkRel.Self,
                     type = null,
                     hreflang = null,
                     title = null,
@@ -256,7 +256,7 @@ class StandaloneNewsApi(
                     feedId = channel.link,
                     entryId = null,
                     href = channel.link.toHttpUrl(),
-                    rel = "alternate",
+                    rel = AtomLinkRel.Alternate,
                     type = null,
                     hreflang = null,
                     title = null,
@@ -285,7 +285,7 @@ class StandaloneNewsApi(
             feedId = feedId,
             entryId = entryId,
             href = href.toHttpUrl(),
-            rel = rel?.asSting() ?: "",
+            rel = rel,
             type = type,
             hreflang = hreflang,
             title = title,
@@ -342,7 +342,7 @@ class StandaloneNewsApi(
                 feedId = null,
                 entryId = id,
                 href = link!!.toHttpUrl(),
-                rel = "alternate",
+                rel = AtomLinkRel.Alternate,
                 type = "text/html",
                 hreflang = "",
                 title = "",
@@ -357,7 +357,7 @@ class StandaloneNewsApi(
                 feedId = null,
                 entryId = id,
                 href = enclosure!!.url.toHttpUrlOrNull()!!,
-                rel = "enclosure",
+                rel = AtomLinkRel.Enclosure,
                 type = enclosure!!.type,
                 hreflang = "",
                 title = "",
@@ -403,16 +403,6 @@ class StandaloneNewsApi(
     }
 
     private fun Date.toIsoString(): String = ISO.format(this)
-
-    private fun AtomLinkRel.asSting(): String {
-        return when (this) {
-            AtomLinkRel.Alternate -> "alternate"
-            AtomLinkRel.Enclosure -> "enclosure"
-            AtomLinkRel.Related -> "related"
-            AtomLinkRel.Self -> "self"
-            AtomLinkRel.Via -> "via"
-        }
-    }
 
     companion object {
         private val TAG = "api"

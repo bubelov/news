@@ -1,5 +1,6 @@
 package opml
 
+import co.appreactor.feedk.AtomLinkRel
 import db.Feed
 import db.Link
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -55,7 +56,7 @@ class OpmlTests {
                 feedId = feedId,
                 entryId = null,
                 href = it.xmlUrl.toHttpUrl(),
-                rel = "self",
+                rel = AtomLinkRel.Self,
                 type = null,
                 hreflang = null,
                 title = it.text,

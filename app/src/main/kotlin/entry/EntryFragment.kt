@@ -15,7 +15,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.core.view.iterator
 import androidx.fragment.app.Fragment
@@ -24,6 +23,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import co.appreactor.feedk.AtomLinkRel
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentEntryBinding
 import db.Entry
@@ -156,7 +156,7 @@ class EntryFragment : Fragment() {
                     progress.isVisible = false
 
                     enclosuresAdapter.submitList(state.entryLinks
-                        .filter { it.rel == "enclosure" }
+                        .filter { it.rel is AtomLinkRel.Enclosure }
                         .filter { it.type?.startsWith("audio") ?: false }
                         .mapIndexed { index, enclosure ->
                             EnclosuresAdapter.Item(
@@ -167,7 +167,8 @@ class EntryFragment : Fragment() {
                             )
                         })
 
-                    val firstHtmlLink = state.entryLinks.firstOrNull { it.rel == "alternate" && it.type == "text/html" }
+                    val firstHtmlLink =
+                        state.entryLinks.firstOrNull { it.rel is AtomLinkRel.Alternate && it.type == "text/html" }
 
                     if (firstHtmlLink == null) {
                         fab.hide()
@@ -219,7 +220,7 @@ class EntryFragment : Fragment() {
             }
 
             R.id.share -> {
-                val firstAlternateLink = entryLinks.firstOrNull { it.rel == "alternate" } ?: return true
+                val firstAlternateLink = entryLinks.firstOrNull { it.rel is AtomLinkRel.Alternate } ?: return true
 
                 val intent = Intent().apply {
                     action = Intent.ACTION_SEND
@@ -256,15 +257,8 @@ class EntryFragment : Fragment() {
     }
 
     fun playAudioEnclosure(enclosure: Link) {
-        val cacheUri = enclosure.extCacheUri?.toUri()
-
-        if (cacheUri == null) {
-            showErrorDialog(Exception("Can't find podcast audio file"))
-            return
-        }
-
         val intent = Intent(Intent.ACTION_VIEW)
-        intent.setDataAndType(cacheUri, enclosure.type)
+        intent.setDataAndType(enclosure.extCacheUri!!, enclosure.type)
 
         runCatching {
             startActivity(intent)

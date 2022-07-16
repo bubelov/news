@@ -1,5 +1,6 @@
 package opml
 
+import co.appreactor.feedk.AtomLinkRel
 import db.Feed
 import org.w3c.dom.Element
 import java.io.StringWriter
@@ -88,7 +89,7 @@ fun exportOpml(feeds: List<Feed>): String {
         bodyElement.appendChild(document.createElement(Symbols.OUTLINE).apply {
             setAttribute(Symbols.TEXT, feed.title)
             setAttribute(Symbols.TYPE, "rss")
-            setAttribute(Symbols.XML_URL, feed.links.first { it.rel == "self" }.href.toString())
+            setAttribute(Symbols.XML_URL, feed.links.first { it.rel is AtomLinkRel.Self }.href.toString())
 
             setAttribute(
                 "${Symbols.NEWS_NAMESPACE_PREFIX}:${Symbols.OPEN_ENTRIES_IN_BROWSER}",

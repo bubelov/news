@@ -15,6 +15,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import co.appreactor.feedk.AtomLinkRel
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentEntriesBinding
 import com.google.android.material.navigation.NavigationBarView.OnItemReselectedListener
@@ -465,7 +466,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
 
             if (feed.openEntriesInBrowser) {
                 openUrl(
-                    url = entry.links.first { it.rel == "alternate" && it.type == "text/html" }.href.toString(),
+                    url = entry.links.first { it.rel is AtomLinkRel.Alternate && it.type == "text/html" }.href.toString(),
                     useBuiltInBrowser = model.loadConf().first().useBuiltInBrowser,
                 )
             } else {

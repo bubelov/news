@@ -3,6 +3,7 @@ package feeds
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import api.Api
+import co.appreactor.feedk.AtomLinkRel
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOne
@@ -188,8 +189,8 @@ class FeedsModel(
         return FeedsAdapter.Item(
             id = id,
             title = title,
-            selfLink = links.firstOrNull { it.rel == "self" }?.href?.toString() ?: "",
-            alternateLink = links.firstOrNull { it.rel == "alternate" }?.href?.toString() ?: "",
+            selfLink = links.firstOrNull { it.rel is AtomLinkRel.Self }?.href?.toString() ?: "",
+            alternateLink = links.firstOrNull { it.rel is AtomLinkRel.Alternate }?.href?.toString() ?: "",
             unreadCount = unreadCount,
         )
     }

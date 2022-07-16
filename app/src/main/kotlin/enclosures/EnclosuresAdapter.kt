@@ -17,13 +17,13 @@ class EnclosuresAdapter(
         parent: ViewGroup,
         viewType: Int,
     ): ViewHolder {
-        val binding = ListItemEnclosureBinding.inflate(
-            LayoutInflater.from(parent.context),
-            parent,
-            false,
+        return ViewHolder(
+            ListItemEnclosureBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false,
+            )
         )
-
-        return ViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -91,8 +91,7 @@ class EnclosuresAdapter(
             oldItem: Item,
             newItem: Item,
         ): Boolean {
-            return newItem.entryId == oldItem.entryId
-                    && newItem.enclosure.href == oldItem.enclosure.href
+            return newItem.entryId == oldItem.entryId && newItem.enclosure.href == oldItem.enclosure.href
         }
 
         override fun areContentsTheSame(

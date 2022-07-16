@@ -1,6 +1,8 @@
 package db
 
 import android.content.Context
+import android.net.Uri
+import co.appreactor.feedk.AtomLinkRel
 import com.google.gson.GsonBuilder
 import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonReader
@@ -70,15 +72,11 @@ private fun offsetDateTimeAdapter() = object : ColumnAdapter<OffsetDateTime, Str
 
 private fun linksAdapter() = object : ColumnAdapter<List<Link>, String> {
 
-    private val gson = GsonBuilder().registerTypeAdapter(HttpUrl::class.java, object : TypeAdapter<HttpUrl>() {
-        override fun write(out: JsonWriter, value: HttpUrl?) {
-            out.value(value.toString())
-        }
-
-        override fun read(`in`: JsonReader): HttpUrl {
-            return `in`.nextString().toHttpUrl()
-        }
-    }).create()
+    private val gson = GsonBuilder()
+        .registerTypeAdapter(HttpUrl::class.java, httpUrlAdapter())
+        .registerTypeAdapter(Uri::class.java, uriAdapter())
+        .registerTypeAdapter(AtomLinkRel::class.java, atomLinkRelAdapter())
+        .create()
 
     override fun decode(databaseValue: String): List<Link> {
         return if (databaseValue.isEmpty()) {
@@ -89,4 +87,55 @@ private fun linksAdapter() = object : ColumnAdapter<List<Link>, String> {
     }
 
     override fun encode(value: List<Link>) = gson.toJson(value)
+}
+
+private fun httpUrlAdapter(): TypeAdapter<HttpUrl> {
+    return object : TypeAdapter<HttpUrl>() {
+        override fun write(out: JsonWriter, value: HttpUrl?) {
+            out.value(value.toString())
+        }
+
+        override fun read(`in`: JsonReader): HttpUrl {
+            return `in`.nextString().toHttpUrl()
+        }
+    }
+}
+
+private fun uriAdapter(): TypeAdapter<Uri> {
+    return object : TypeAdapter<Uri>() {
+        override fun write(out: JsonWriter, value: Uri?) {
+            out.value(value.toString())
+        }
+
+        override fun read(`in`: JsonReader): Uri {
+            return Uri.parse(`in`.nextString())
+        }
+    }
+}
+
+private fun atomLinkRelAdapter(): TypeAdapter<AtomLinkRel> {
+    return object : TypeAdapter<AtomLinkRel>() {
+        override fun write(out: JsonWriter, value: AtomLinkRel) {
+            val string = when (value) {
+                AtomLinkRel.Alternate -> "alternate"
+                AtomLinkRel.Related -> "related"
+                AtomLinkRel.Self -> "self"
+                AtomLinkRel.Enclosure -> "enclosure"
+                AtomLinkRel.Via -> "via"
+            }
+
+            out.value(string)
+        }
+
+        override fun read(`in`: JsonReader): AtomLinkRel {
+            return when (`in`.nextString()) {
+                "alternate" -> AtomLinkRel.Alternate
+                "related" -> AtomLinkRel.Related
+                "self" -> AtomLinkRel.Self
+                "enclosure" -> AtomLinkRel.Enclosure
+                "via" -> AtomLinkRel.Via
+                else -> throw Exception()
+            }
+        }
+    }
 }

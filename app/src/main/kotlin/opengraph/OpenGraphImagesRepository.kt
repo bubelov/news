@@ -2,6 +2,7 @@ package opengraph
 
 import android.graphics.Bitmap
 import android.graphics.Color
+import co.appreactor.feedk.AtomLinkRel
 import com.squareup.picasso.Picasso
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
@@ -63,8 +64,8 @@ class OpenGraphImagesRepository(
                 throw IllegalStateException("ogImageChecked = 1")
             }
 
-            val link = entry.links.firstOrNull { it.rel == "alternate" && it.type == "text/html" }
-                ?: entry.links.firstOrNull { it.rel == "alternate" }
+            val link = entry.links.firstOrNull { it.rel is AtomLinkRel.Alternate && it.type == "text/html" }
+                ?: entry.links.firstOrNull { it.rel is AtomLinkRel.Alternate }
 
             if (link == null) {
                 db.entryQueries.updateOgImageChecked(true, entry.id)

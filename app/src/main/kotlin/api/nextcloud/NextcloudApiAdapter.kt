@@ -1,6 +1,7 @@
 package api.nextcloud
 
 import api.Api
+import co.appreactor.feedk.AtomLinkRel
 import db.Entry
 import db.EntryWithoutContent
 import db.Feed
@@ -127,7 +128,7 @@ class NextcloudApiAdapter(
             feedId = feedId,
             entryId = null,
             href = url!!.toHttpUrl(),
-            rel = "self",
+            rel = AtomLinkRel.Self,
             type = null,
             hreflang = null,
             title = null,
@@ -140,7 +141,7 @@ class NextcloudApiAdapter(
             feedId = feedId,
             entryId = null,
             href = link!!.toHttpUrl(),
-            rel = "alternate",
+            rel = AtomLinkRel.Alternate,
             type = null,
             hreflang = null,
             title = null,
@@ -175,7 +176,7 @@ class NextcloudApiAdapter(
             feedId = null,
             entryId = id.toString(),
             href = url!!.toHttpUrl(),
-            rel = "alternate",
+            rel = AtomLinkRel.Alternate,
             type = "",
             hreflang = "",
             title = "",
@@ -189,7 +190,7 @@ class NextcloudApiAdapter(
                 feedId = null,
                 entryId = id.toString(),
                 href = enclosureLink.toHttpUrl(),
-                rel = "enclosure",
+                rel = AtomLinkRel.Enclosure,
                 type = enclosureMime ?: "",
                 hreflang = "",
                 title = "",

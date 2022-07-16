@@ -1,6 +1,7 @@
 package api.miniflux
 
 import api.Api
+import co.appreactor.feedk.AtomLinkRel
 import db.Entry
 import db.EntryWithoutContent
 import db.Feed
@@ -133,7 +134,7 @@ class MinifluxApiAdapter(
             feedId = feedId,
             entryId = null,
             href = feed_url.toHttpUrl(),
-            rel = "self",
+            rel = AtomLinkRel.Self,
             type = null,
             hreflang = null,
             title = null,
@@ -146,7 +147,7 @@ class MinifluxApiAdapter(
             feedId = feedId,
             entryId = null,
             href = site_url.toHttpUrl(),
-            rel = "alternate",
+            rel = AtomLinkRel.Alternate,
             type = "text/html",
             hreflang = null,
             title = null,
@@ -172,7 +173,7 @@ class MinifluxApiAdapter(
             feedId = null,
             entryId = id.toString(),
             href = url.toHttpUrl(),
-            rel = "alternate",
+            rel = AtomLinkRel.Alternate,
             type = "text/html",
             hreflang = "",
             title = "",
@@ -186,7 +187,7 @@ class MinifluxApiAdapter(
                 feedId = null,
                 entryId = id.toString(),
                 href = it.url.toHttpUrl(),
-                rel = "enclosure",
+                rel = AtomLinkRel.Enclosure,
                 type = it.mime_type,
                 hreflang = "",
                 title = "",

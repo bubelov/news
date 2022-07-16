@@ -12,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import co.appreactor.feedk.AtomLinkRel
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentSearchBinding
 import com.google.android.material.internal.TextWatcherAdapter
@@ -124,7 +125,7 @@ class SearchFragment : Fragment() {
 
             if (item.feed.openEntriesInBrowser) {
                 openUrl(
-                    url = item.entry.links.first { it.rel == "alternate" && it.type == "text/html" }.href.toString(),
+                    url = item.entry.links.first { it.rel is AtomLinkRel.Alternate && it.type == "text/html" }.href.toString(),
                     useBuiltInBrowser = item.conf.useBuiltInBrowser,
                 )
             } else {

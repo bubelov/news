@@ -1,5 +1,6 @@
 package enclosures
 
+import co.appreactor.feedk.AtomLinkRel
 import db.Link
 import db.entryWithoutContent
 import db.testDb
@@ -26,7 +27,7 @@ class EnclosuresRepoTest {
             feedId = null,
             entryId = entry.id,
             href = "https://localhost".toHttpUrl(),
-            rel = "alt",
+            rel = AtomLinkRel.Alternate,
             type = null,
             hreflang = null,
             title = null,
