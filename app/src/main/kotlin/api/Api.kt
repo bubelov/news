@@ -16,25 +16,25 @@ interface Api {
     suspend fun updateFeedTitle(
         feedId: String,
         newTitle: String,
-    )
+    ): Result<Unit>
 
-    suspend fun deleteFeed(feedId: String)
+    suspend fun deleteFeed(feedId: String): Result<Unit>
 
-    suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Entry>>
+    suspend fun getEntries(includeReadEntries: Boolean): Flow<Result<List<Entry>>>
 
     suspend fun getNewAndUpdatedEntries(
         maxEntryId: String?,
         maxEntryUpdated: OffsetDateTime?,
         lastSync: OffsetDateTime?,
-    ): List<Entry>
+    ): Result<List<Entry>>
 
     suspend fun markEntriesAsRead(
         entriesIds: List<String>,
         read: Boolean,
-    )
+    ): Result<Unit>
 
     suspend fun markEntriesAsBookmarked(
         entries: List<EntryWithoutContent>,
         bookmarked: Boolean,
-    )
+    ): Result<Unit>
 }

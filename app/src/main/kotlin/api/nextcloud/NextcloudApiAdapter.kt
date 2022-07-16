@@ -27,47 +27,41 @@ class NextcloudApiAdapter(
         return runCatching { api.getFeeds().feeds.mapNotNull { it.toFeed() } }
     }
 
-    override suspend fun updateFeedTitle(feedId: String, newTitle: String) {
-        api.putFeedRename(feedId.toLong(), PutFeedRenameArgs(newTitle))
+    override suspend fun updateFeedTitle(feedId: String, newTitle: String): Result<Unit> {
+        return runCatching { api.putFeedRename(feedId.toLong(), PutFeedRenameArgs(newTitle)) }
     }
 
-    override suspend fun deleteFeed(feedId: String) {
-        api.deleteFeed(feedId.toLong())
+    override suspend fun deleteFeed(feedId: String): Result<Unit> {
+        return runCatching { api.deleteFeed(feedId.toLong()) }
     }
 
-    override suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Entry>> = flow {
+    override suspend fun getEntries(includeReadEntries: Boolean): Flow<Result<List<Entry>>> = flow {
         var totalFetched = 0L
         val currentBatch = mutableSetOf<ItemJson>()
         val batchSize = 250L
         var oldestEntryId = 0L
 
         while (true) {
-            val response = try {
+            val response = runCatching {
                 api.getAllItems(
                     getRead = includeReadEntries,
                     batchSize = batchSize,
                     offset = oldestEntryId,
                 )
-            } catch (e: Exception) {
-                val message = if (e.message == "code < 400: 302") {
-                    "Can not load entries. Make sure you have News app installed on your Nextcloud server."
-                } else {
-                    e.message
-                }
-
-                throw Exception(message, e)
+            }.getOrElse {
+                emit(Result.failure(it))
+                return@flow
             }
 
             val entries = response.items
             currentBatch += entries
             totalFetched += currentBatch.size
-            emit(currentBatch.mapNotNull { it.toEntry() })
+            emit(Result.success(currentBatch.mapNotNull { it.toEntry() }))
 
             if (currentBatch.size < batchSize) {
                 break
             } else {
-                oldestEntryId =
-                    currentBatch.minOfOrNull { it.id ?: Long.MAX_VALUE }?.toLong() ?: 0L
+                oldestEntryId = currentBatch.minOfOrNull { it.id ?: Long.MAX_VALUE }?.toLong() ?: 0L
                 currentBatch.clear()
             }
         }
@@ -77,31 +71,38 @@ class NextcloudApiAdapter(
         maxEntryId: String?,
         maxEntryUpdated: OffsetDateTime?,
         lastSync: OffsetDateTime?,
-    ): List<Entry> {
+    ): Result<List<Entry>> {
         val lastModified = maxEntryUpdated ?: lastSync!!
-        return api.getNewAndUpdatedItems(lastModified.toEpochSecond() + 1).items.mapNotNull { it.toEntry() }
+
+        return runCatching {
+            api.getNewAndUpdatedItems(lastModified.toEpochSecond() + 1).items.mapNotNull { it.toEntry() }
+        }
     }
 
-    override suspend fun markEntriesAsRead(entriesIds: List<String>, read: Boolean) {
-        val ids = entriesIds.map { it.toLong() }
+    override suspend fun markEntriesAsRead(entriesIds: List<String>, read: Boolean): Result<Unit> {
+        return runCatching {
+            val ids = entriesIds.map { it.toLong() }
 
-        if (read) {
-            api.putRead(PutReadArgs(ids))
-        } else {
-            api.putUnread(PutReadArgs(ids))
+            if (read) {
+                api.putRead(PutReadArgs(ids))
+            } else {
+                api.putUnread(PutReadArgs(ids))
+            }
         }
     }
 
     override suspend fun markEntriesAsBookmarked(
         entries: List<EntryWithoutContent>,
         bookmarked: Boolean,
-    ) {
-        val args = PutStarredArgs(entries.map { PutStarredArgsItem(it.feedId.toLong(), it.guidHash) })
+    ): Result<Unit> {
+        return runCatching {
+            val args = PutStarredArgs(entries.map { PutStarredArgsItem(it.feedId.toLong(), it.guidHash) })
 
-        if (bookmarked) {
-            api.putStarred(args)
-        } else {
-            api.putUnstarred(args)
+            if (bookmarked) {
+                api.putStarred(args)
+            } else {
+                api.putUnstarred(args)
+            }
         }
     }
 

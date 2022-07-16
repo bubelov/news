@@ -38,30 +38,35 @@ class MinifluxApiAdapter(
         return runCatching { api.getFeeds().mapNotNull { it.toFeed() } }
     }
 
-    override suspend fun updateFeedTitle(feedId: String, newTitle: String) {
-        api.putFeed(feedId.toLong(), PutFeedArgs(newTitle))
+    override suspend fun updateFeedTitle(feedId: String, newTitle: String): Result<Unit> {
+        return runCatching { api.putFeed(feedId.toLong(), PutFeedArgs(newTitle)) }
     }
 
-    override suspend fun deleteFeed(feedId: String) {
-        api.deleteFeed(feedId.toLong())
+    override suspend fun deleteFeed(feedId: String): Result<Unit> {
+        return runCatching { api.deleteFeed(feedId.toLong()) }
     }
 
-    override suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Entry>> = flow {
+    override suspend fun getEntries(includeReadEntries: Boolean): Flow<Result<List<Entry>>> = flow {
         var totalFetched = 0L
         val currentBatch = mutableSetOf<EntryJson>()
         val batchSize = 250L
         var oldestEntryId = Long.MAX_VALUE
 
         while (true) {
-            val entries = api.getEntriesBeforeEntry(
-                status = if (includeReadEntries) "" else "unread",
-                entryId = oldestEntryId,
-                limit = batchSize,
-            )
+            val entries = runCatching {
+                api.getEntriesBeforeEntry(
+                    status = if (includeReadEntries) "" else "unread",
+                    entryId = oldestEntryId,
+                    limit = batchSize,
+                )
+            }.getOrElse {
+                emit(Result.failure(it))
+                return@flow
+            }
 
             currentBatch += entries.entries
             totalFetched += currentBatch.size
-            emit(currentBatch.map { it.toEntry() })
+            emit(Result.success(currentBatch.map { it.toEntry() }))
 
             if (currentBatch.size < batchSize) {
                 break
@@ -71,12 +76,17 @@ class MinifluxApiAdapter(
             }
         }
 
-        val starredEntries = api.getStarredEntries()
+        val starredEntries = runCatching {
+            api.getStarredEntries()
+        }.getOrElse {
+            emit(Result.failure(it))
+            return@flow
+        }
 
         if (starredEntries.entries.isNotEmpty()) {
             currentBatch += starredEntries.entries
             totalFetched += currentBatch.size
-            emit(currentBatch.map { it.toEntry() })
+            emit(Result.success(currentBatch.map { it.toEntry() }))
             currentBatch.clear()
         }
     }
@@ -85,26 +95,21 @@ class MinifluxApiAdapter(
         maxEntryId: String?,
         maxEntryUpdated: OffsetDateTime?,
         lastSync: OffsetDateTime?,
-    ): List<Entry> {
-        return api.getEntriesAfterEntry(
-            afterEntryId = maxEntryId?.toLong() ?: 0,
-            limit = 0,
-        ).entries.map { it.toEntry() }
+    ): Result<List<Entry>> {
+        return runCatching {
+            api.getEntriesAfterEntry(
+                afterEntryId = maxEntryId?.toLong() ?: 0,
+                limit = 0,
+            ).entries.map { it.toEntry() }
+        }
     }
 
-    override suspend fun markEntriesAsRead(entriesIds: List<String>, read: Boolean) {
-        if (read) {
+    override suspend fun markEntriesAsRead(entriesIds: List<String>, read: Boolean): Result<Unit> {
+        return runCatching {
             api.putEntryStatus(
                 PutStatusArgs(
                     entry_ids = entriesIds.map { it.toLong() },
-                    status = "read"
-                )
-            )
-        } else {
-            api.putEntryStatus(
-                PutStatusArgs(
-                    entry_ids = entriesIds.map { it.toLong() },
-                    status = "unread"
+                    status = if (read) "read" else "unread",
                 )
             )
         }
@@ -113,9 +118,9 @@ class MinifluxApiAdapter(
     override suspend fun markEntriesAsBookmarked(
         entries: List<EntryWithoutContent>,
         bookmarked: Boolean,
-    ) {
-        entries.forEach {
-            api.putEntryBookmark(it.id.toLong())
+    ): Result<Unit> {
+        return runCatching {
+            entries.forEach { api.putEntryBookmark(it.id.toLong()) }
         }
     }
 

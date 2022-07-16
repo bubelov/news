@@ -19,11 +19,10 @@ import db.Entry
 import db.EntryWithoutContent
 import db.Feed
 import db.Link
-import kotlinx.coroutines.Dispatchers
+import http.await
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
@@ -108,50 +107,50 @@ class StandaloneNewsApi(
         return runCatching { db.feedQueries.selectAll().asFlow().mapToList().first() }
     }
 
-    override suspend fun updateFeedTitle(feedId: String, newTitle: String) {
-
+    override suspend fun updateFeedTitle(feedId: String, newTitle: String): Result<Unit> {
+        return Result.success(Unit)
     }
 
-    override suspend fun deleteFeed(feedId: String) {
-
+    override suspend fun deleteFeed(feedId: String): Result<Unit> {
+        return Result.success(Unit)
     }
 
-    override suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Entry>> {
-        return flowOf(emptyList())
+    override suspend fun getEntries(includeReadEntries: Boolean): Flow<Result<List<Entry>>> {
+        return flowOf(Result.success(emptyList()))
     }
 
     override suspend fun getNewAndUpdatedEntries(
         maxEntryId: String?,
         maxEntryUpdated: OffsetDateTime?,
         lastSync: OffsetDateTime?,
-    ): List<Entry> {
+    ): Result<List<Entry>> {
         val entries = mutableListOf<Entry>()
 
-        withContext(Dispatchers.Default) {
-            db.feedQueries.selectAll().executeAsList().forEach { feed ->
+        return runCatching {
+            db.feedQueries.selectAll().asFlow().mapToList().first().forEach { feed ->
                 runCatching {
                     entries += fetchEntries(feed)
                 }.onFailure {
-                    Log.e("api", "Failed to fetch entries for feed: $feed", it)
+                    Log.e(TAG, "Failed to fetch entries for feed: $feed", it)
                 }
             }
-        }
 
-        db.transaction {
-            entries.removeAll { db.entryQueries.selectById(it.id).executeAsOneOrNull() != null }
-        }
+            db.transaction {
+                entries.removeAll { db.entryQueries.selectById(it.id).executeAsOneOrNull() != null }
+            }
 
-        return entries
+            entries
+        }
     }
 
-    private fun fetchEntries(feed: Feed): List<Entry> {
+    private suspend fun fetchEntries(feed: Feed): List<Entry> {
         val url = feed.links.first { it.rel == "self" }.href
         val request = Request.Builder().url(url).build()
 
         val response = runCatching {
-            httpClient.newCall(request).execute()
+            httpClient.newCall(request).await()
         }.getOrElse {
-            return emptyList()
+            throw it
         }
 
         response.use {
@@ -160,7 +159,7 @@ class StandaloneNewsApi(
             val feedResult = runCatching {
                 feed(response.body!!.byteStream(), response.header("content-type") ?: "")
             }.getOrElse {
-                return emptyList()
+                throw it
             }
 
             return when (feedResult) {
@@ -173,7 +172,7 @@ class StandaloneNewsApi(
                                     runCatching {
                                         atomEntry.toEntry(feed.id)
                                     }.onFailure {
-                                        Log.e("api", "Failed to parse Atom entry: $atomEntry", it)
+                                        Log.e(TAG, "Failed to parse Atom entry: $atomEntry", it)
                                     }.getOrNull()
                                 }
                         }
@@ -185,7 +184,7 @@ class StandaloneNewsApi(
                                     runCatching {
                                         rssItem.toEntry(feed.id)
                                     }.onFailure {
-                                        Log.e("api", "Failed to parse RSS item: $rssItem", it)
+                                        Log.e(TAG, "Failed to parse RSS item: $rssItem", it)
                                     }.getOrNull()
                                 }
                         }
@@ -211,15 +210,15 @@ class StandaloneNewsApi(
         }
     }
 
-    override suspend fun markEntriesAsRead(entriesIds: List<String>, read: Boolean) {
-
+    override suspend fun markEntriesAsRead(entriesIds: List<String>, read: Boolean): Result<Unit> {
+        return Result.success(Unit)
     }
 
     override suspend fun markEntriesAsBookmarked(
         entries: List<EntryWithoutContent>,
         bookmarked: Boolean
-    ) {
-
+    ): Result<Unit> {
+        return Result.success(Unit)
     }
 
     private fun ParsedFeed.toFeed(feedUrl: HttpUrl): Feed {
@@ -416,6 +415,8 @@ class StandaloneNewsApi(
     }
 
     companion object {
+        private val TAG = "api"
+
         private val ISO = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.US)
     }
 }

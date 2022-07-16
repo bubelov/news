@@ -145,12 +145,12 @@ class EntriesRepository(
         emit(SyncProgress(entriesLoaded))
 
         api.getEntries(false).collect { batch ->
-            entriesLoaded += batch.size
+            entriesLoaded += batch.getOrThrow().size
             emit(SyncProgress(entriesLoaded))
 
             withContext(Dispatchers.Default) {
                 db.entryQueries.transaction {
-                    batch.forEach { entry ->
+                    batch.getOrThrow().forEach { entry ->
                         val postProcessedEntry = entry.postProcess()
                         db.entryQueries.insertOrReplace(postProcessedEntry)
                     }
@@ -256,7 +256,7 @@ class EntriesRepository(
                 lastSync = lastSyncInstant,
                 maxEntryId = getMaxId().first(),
                 maxEntryUpdated = maxUpdatedInstant,
-            )
+            ).getOrThrow()
 
             db.entryQueries.transaction {
                 entries.forEach { newEntry ->

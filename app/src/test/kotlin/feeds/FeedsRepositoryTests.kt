@@ -83,7 +83,7 @@ class FeedsRepositoryTests {
         val newTitle = "  ${feed.title}_modified "
         val trimmedNewTitle = newTitle.trim()
 
-        coEvery { api.updateFeedTitle(feed.id, trimmedNewTitle) } returns Unit
+        coEvery { api.updateFeedTitle(feed.id, trimmedNewTitle) } returns Result.success(Unit)
 
         db.feedQueries.insertOrReplace(feed)
 
@@ -103,7 +103,7 @@ class FeedsRepositoryTests {
         val feeds = listOf(feed(), feed(), feed())
         val randomFeed = feeds.random()
 
-        coEvery { api.deleteFeed(randomFeed.id) } returns Unit
+        coEvery { api.deleteFeed(randomFeed.id) } returns Result.success(Unit)
 
         feeds.forEach { db.feedQueries.insertOrReplace(it) }
 

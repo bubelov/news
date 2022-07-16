@@ -68,15 +68,15 @@ class HotSwapApi(
         return api.getFeeds()
     }
 
-    override suspend fun updateFeedTitle(feedId: String, newTitle: String) {
-        api.updateFeedTitle(feedId, newTitle)
+    override suspend fun updateFeedTitle(feedId: String, newTitle: String): Result<Unit> {
+        return api.updateFeedTitle(feedId, newTitle)
     }
 
-    override suspend fun deleteFeed(feedId: String) {
-        api.deleteFeed(feedId)
+    override suspend fun deleteFeed(feedId: String): Result<Unit> {
+        return api.deleteFeed(feedId)
     }
 
-    override suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Entry>> {
+    override suspend fun getEntries(includeReadEntries: Boolean): Flow<Result<List<Entry>>> {
         return api.getEntries(includeReadEntries)
     }
 
@@ -84,18 +84,18 @@ class HotSwapApi(
         maxEntryId: String?,
         maxEntryUpdated: OffsetDateTime?,
         lastSync: OffsetDateTime?,
-    ): List<Entry> {
+    ): Result<List<Entry>> {
         return api.getNewAndUpdatedEntries(maxEntryId, maxEntryUpdated, lastSync)
     }
 
-    override suspend fun markEntriesAsRead(entriesIds: List<String>, read: Boolean) {
-        api.markEntriesAsRead(entriesIds, read)
+    override suspend fun markEntriesAsRead(entriesIds: List<String>, read: Boolean): Result<Unit> {
+        return api.markEntriesAsRead(entriesIds, read)
     }
 
     override suspend fun markEntriesAsBookmarked(
         entries: List<EntryWithoutContent>,
         bookmarked: Boolean,
-    ) {
-        api.markEntriesAsBookmarked(entries, bookmarked)
+    ): Result<Unit> {
+        return api.markEntriesAsBookmarked(entries, bookmarked)
     }
 }
