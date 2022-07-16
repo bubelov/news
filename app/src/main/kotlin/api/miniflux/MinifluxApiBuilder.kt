@@ -3,9 +3,9 @@ package api.miniflux
 import co.appreactor.news.BuildConfig
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import http.authInterceptor
+import http.loggingInterceptor
 import http.trustSelfSignedCerts
-import log.LoggingInterceptor
-import okhttp3.Credentials
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okio.IOException
@@ -21,15 +21,31 @@ class MinifluxApiBuilder {
         password: String,
         trustSelfSignedCerts: Boolean,
     ): MinifluxApi {
-        val authInterceptor = Interceptor { chain ->
-            chain.proceed(
-                chain.request().newBuilder()
-                    .header("Authorization", Credentials.basic(username, password))
-                    .build()
-            )
+        val builder = OkHttpClient.Builder()
+            .addInterceptor(authInterceptor(username, password))
+            .addInterceptor(errorInterceptor())
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(20, TimeUnit.SECONDS)
+            .writeTimeout(20, TimeUnit.SECONDS)
+
+        if (trustSelfSignedCerts) {
+            builder.trustSelfSignedCerts()
         }
 
-        val errorInterceptor = Interceptor {
+        if (BuildConfig.DEBUG) {
+            builder.addInterceptor(loggingInterceptor("miniflux"))
+        }
+
+        return Retrofit.Builder()
+            .baseUrl("$url/v1/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(builder.build())
+            .build()
+            .create(MinifluxApi::class.java)
+    }
+
+    private fun errorInterceptor(): Interceptor {
+        return Interceptor {
             val response = it.proceed(it.request())
 
             if (!response.isSuccessful && response.body != null) {
@@ -48,28 +64,5 @@ class MinifluxApiBuilder {
 
             response
         }
-
-        val clientBuilder = OkHttpClient.Builder()
-            .addInterceptor(authInterceptor)
-            .addInterceptor(errorInterceptor)
-            .connectTimeout(15, TimeUnit.SECONDS)
-            .readTimeout(20, TimeUnit.SECONDS)
-            .writeTimeout(20, TimeUnit.SECONDS)
-
-        if (trustSelfSignedCerts) {
-            clientBuilder.trustSelfSignedCerts()
-        }
-
-        if (BuildConfig.DEBUG) {
-            clientBuilder.addInterceptor(LoggingInterceptor("miniflux"))
-        }
-
-        val retrofit = Retrofit.Builder()
-            .baseUrl("$url/v1/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(clientBuilder.build())
-            .build()
-
-        return retrofit.create(MinifluxApi::class.java)
     }
 }

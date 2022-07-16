@@ -1,10 +1,9 @@
 package api.nextcloud
 
 import co.appreactor.news.BuildConfig
+import http.authInterceptor
+import http.loggingInterceptor
 import http.trustSelfSignedCerts
-import log.LoggingInterceptor
-import okhttp3.Credentials
-import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -18,14 +17,8 @@ class NextcloudApiBuilder {
         password: String,
         trustSelfSignedCerts: Boolean,
     ): NextcloudApi {
-        val authenticatingInterceptor = Interceptor {
-            val request = it.request()
-            val credential = Credentials.basic(username, password)
-            it.proceed(request.newBuilder().header("Authorization", credential).build())
-        }
-
         val clientBuilder = OkHttpClient.Builder()
-            .addInterceptor(authenticatingInterceptor)
+            .addInterceptor(authInterceptor(username, password))
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(20, TimeUnit.SECONDS)
             .writeTimeout(20, TimeUnit.SECONDS)
@@ -35,17 +28,14 @@ class NextcloudApiBuilder {
         }
 
         if (BuildConfig.DEBUG) {
-            clientBuilder.addInterceptor(LoggingInterceptor("miniflux"))
+            clientBuilder.addInterceptor(loggingInterceptor("miniflux"))
         }
 
-        val client = clientBuilder.build()
-
-        val retrofit = Retrofit.Builder()
+        return Retrofit.Builder()
             .baseUrl("$url/index.php/apps/news/api/v1-2/")
             .addConverterFactory(GsonConverterFactory.create())
-            .client(client)
+            .client(clientBuilder.build())
             .build()
-
-        return retrofit.create(NextcloudApi::class.java)
+            .create(NextcloudApi::class.java)
     }
 }

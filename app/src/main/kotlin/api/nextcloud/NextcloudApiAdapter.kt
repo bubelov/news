@@ -18,8 +18,14 @@ class NextcloudApiAdapter(
 
     override suspend fun addFeed(url: HttpUrl): Result<Feed> {
         return runCatching {
-            api.postFeed(PostFeedArgs(url.toString(), 0)).feeds.single().toFeed()
-                ?: throw Exception("Invalid server response")
+            val response = api.postFeed(
+                PostFeedArgs(
+                    url = url.toString(),
+                    folderId = 0,
+                )
+            )
+
+            response.feeds.single().toFeed()!!
         }
     }
 
@@ -28,41 +34,50 @@ class NextcloudApiAdapter(
     }
 
     override suspend fun updateFeedTitle(feedId: String, newTitle: String): Result<Unit> {
-        return runCatching { api.putFeedRename(feedId.toLong(), PutFeedRenameArgs(newTitle)) }
+        return runCatching {
+            api.putFeedRename(
+                id = feedId.toLong(),
+                args = PutFeedRenameArgs(newTitle),
+            )
+        }
     }
 
     override suspend fun deleteFeed(feedId: String): Result<Unit> {
         return runCatching { api.deleteFeed(feedId.toLong()) }
     }
 
-    override suspend fun getEntries(includeReadEntries: Boolean): Flow<Result<List<Entry>>> = flow {
-        var totalFetched = 0L
-        val currentBatch = mutableSetOf<ItemJson>()
-        val batchSize = 250L
-        var oldestEntryId = 0L
+    override suspend fun getEntries(
+        includeReadEntries: Boolean,
+    ): Flow<Result<List<Entry>>> {
+        return flow {
+            var totalFetched = 0L
+            val currentBatch = mutableSetOf<ItemJson>()
+            val batchSize = 250L
+            var oldestEntryId = 0L
 
-        while (true) {
-            val response = runCatching {
-                api.getAllItems(
-                    getRead = includeReadEntries,
-                    batchSize = batchSize,
-                    offset = oldestEntryId,
-                )
-            }.getOrElse {
-                emit(Result.failure(it))
-                return@flow
-            }
+            while (true) {
+                val response = runCatching {
+                    api.getAllItems(
+                        getRead = includeReadEntries,
+                        batchSize = batchSize,
+                        offset = oldestEntryId,
+                    )
+                }.getOrElse {
+                    emit(Result.failure(it))
+                    return@flow
+                }
 
-            val entries = response.items
-            currentBatch += entries
-            totalFetched += currentBatch.size
-            emit(Result.success(currentBatch.mapNotNull { it.toEntry() }))
+                val entries = response.items
+                currentBatch += entries
+                totalFetched += currentBatch.size
+                emit(Result.success(currentBatch.mapNotNull { it.toEntry() }))
 
-            if (currentBatch.size < batchSize) {
-                break
-            } else {
-                oldestEntryId = currentBatch.minOfOrNull { it.id ?: Long.MAX_VALUE }?.toLong() ?: 0L
-                currentBatch.clear()
+                if (currentBatch.size < batchSize) {
+                    break
+                } else {
+                    oldestEntryId = currentBatch.minOfOrNull { it.id ?: Long.MAX_VALUE }?.toLong() ?: 0L
+                    currentBatch.clear()
+                }
             }
         }
     }
@@ -72,9 +87,8 @@ class NextcloudApiAdapter(
         maxEntryUpdated: OffsetDateTime?,
         lastSync: OffsetDateTime?,
     ): Result<List<Entry>> {
-        val lastModified = maxEntryUpdated ?: lastSync!!
-
         return runCatching {
+            val lastModified = maxEntryUpdated ?: lastSync!!
             api.getNewAndUpdatedItems(lastModified.toEpochSecond() + 1).items.mapNotNull { it.toEntry() }
         }
     }
