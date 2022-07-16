@@ -100,6 +100,8 @@
     <string name="connect">Connect</string>
     <string name="invalid_url">Invalid URL</string>
     <string name="audio_n">Audio %1$d</string>
+    <string name="crash_title">The app has crashed</string>
+    <string name="crash_summary">You can let us know about that by sharing your crash report</string>
     <plurals name="d_hours">
         <item quantity="other">%d 小时</item>
     </plurals>

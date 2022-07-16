@@ -157,6 +157,11 @@ dependencies {
     // Used in standalone mode
     implementation("co.appreactor:feedk:0.2.3")
 
+    // Custom global exception handler
+    val acraVer = "5.9.5"
+    implementation("ch.acra:acra-mail:$acraVer")
+    implementation("ch.acra:acra-dialog:$acraVer")
+
     // Core test infrastructure
     testImplementation(kotlin("test"))
 
