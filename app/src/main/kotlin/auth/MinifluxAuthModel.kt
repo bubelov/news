@@ -45,6 +45,6 @@ class MinifluxAuthModel(
             )
         }
 
-        syncScheduler.schedule(override = true)
+        syncScheduler.schedule()
     }
 }

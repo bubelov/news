@@ -1,12 +1,14 @@
 package enclosures
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import db.Db
 import db.Link
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -16,6 +18,10 @@ class EnclosuresModel(
     private val db: Db,
     private val enclosuresRepo: EnclosuresRepo,
 ) : ViewModel() {
+
+    init {
+        viewModelScope.launch { enclosuresRepo.deletePartialDownloads() }
+    }
 
     fun getEnclosures(): Flow<List<EnclosuresAdapter.Item>> {
         return db.entryQueries.selectAll().asFlow().mapToList().map { entries ->

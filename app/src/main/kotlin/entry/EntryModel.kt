@@ -43,6 +43,8 @@ class EntryModel(
     private val args = MutableStateFlow<Args?>(null)
 
     init {
+        viewModelScope.launch { enclosuresRepo.deletePartialDownloads() }
+
         combine(args, entriesRepository.selectCount()) { args, _ ->
             if (args == null) {
                 _state.update { State.Progress }

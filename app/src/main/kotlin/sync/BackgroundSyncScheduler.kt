@@ -16,23 +16,13 @@ class BackgroundSyncScheduler(
     private val context: Context,
 ) {
 
-    companion object {
-        private const val WORK_NAME = "sync"
-    }
-
-    fun schedule(override: Boolean) {
+    fun schedule() {
         val workManager = WorkManager.getInstance(context)
         val conf = confRepo.conf.value
 
         if (!conf.syncInBackground) {
             workManager.cancelUniqueWork(WORK_NAME)
             return
-        }
-
-        val policy = if (override) {
-            ExistingPeriodicWorkPolicy.REPLACE
-        } else {
-            ExistingPeriodicWorkPolicy.KEEP
         }
 
         val constraints = Constraints.Builder()
@@ -49,8 +39,12 @@ class BackgroundSyncScheduler(
 
         workManager.enqueueUniquePeriodicWork(
             WORK_NAME,
-            policy,
+            ExistingPeriodicWorkPolicy.REPLACE,
             periodicSyncRequest,
         )
+    }
+
+    companion object {
+        private const val WORK_NAME = "sync"
     }
 }

@@ -44,6 +44,6 @@ class AuthModelTest {
         assertEquals(false, conf.syncOnStartup)
         assertEquals(TimeUnit.HOURS.toMillis(12), conf.backgroundSyncIntervalMillis)
 
-        coVerify { syncScheduler.schedule(override = true) }
+        coVerify { syncScheduler.schedule() }
     }
 }

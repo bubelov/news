@@ -27,7 +27,7 @@ class SettingsModel(
     }
 
     fun scheduleBackgroundSync() {
-        syncScheduler.schedule(override = true)
+        syncScheduler.schedule()
     }
 
     fun logOut() {

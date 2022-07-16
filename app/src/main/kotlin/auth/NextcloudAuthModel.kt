@@ -45,6 +45,6 @@ class NextcloudAuthModel(
             )
         }
 
-        syncScheduler.schedule(override = true)
+        syncScheduler.schedule()
     }
 }

@@ -23,6 +23,6 @@ class AuthModel(
             )
         }
 
-        syncScheduler.schedule(override = true)
+        syncScheduler.schedule()
     }
 }

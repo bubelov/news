@@ -11,6 +11,7 @@ import androidx.navigation.ui.setupWithNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.ActivityBinding
 import com.google.android.material.navigation.NavigationBarView.OnItemReselectedListener
+import conf.ConfRepo
 import entries.EntriesFilter
 import kotlinx.coroutines.launch
 import opengraph.OpenGraphImagesRepository
@@ -32,14 +33,13 @@ class Activity : AppCompatActivity() {
         }
     }
 
-    init {
-        lifecycleScope.launch { get<OpenGraphImagesRepository>().fetchEntryImages() }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        get<ConfRepo>().update { it.copy(syncedOnStartup = false) }
+        lifecycleScope.launch { get<OpenGraphImagesRepository>().fetchEntryImages() }
     }
 
     override fun onStart() {
