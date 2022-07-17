@@ -9,7 +9,7 @@ import db.Feed
 import db.withoutContent
 import entries.EntriesAdapterItem
 import entries.EntriesFilter
-import entries.EntriesRepository
+import entries.EntriesRepo
 import feeds.FeedsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,7 +26,7 @@ import java.time.format.FormatStyle
 @KoinViewModel
 class SearchModel(
     confRepo: ConfRepo,
-    private val entriesRepo: EntriesRepository,
+    private val entriesRepo: EntriesRepo,
     private val feedsRepo: FeedsRepository,
     private val sync: Sync,
 ) : ViewModel() {

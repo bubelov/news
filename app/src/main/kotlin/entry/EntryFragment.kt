@@ -48,19 +48,7 @@ class EntryFragment : Fragment() {
     private var _binding: FragmentEntryBinding? = null
     private val binding get() = _binding!!
 
-    private val enclosuresAdapter = EnclosuresAdapter(object : EnclosuresAdapter.Callback {
-        override fun onDownloadClick(item: EnclosuresAdapter.Item) {
-            downloadAudioEnclosure(item.enclosure)
-        }
-
-        override fun onPlayClick(item: EnclosuresAdapter.Item) {
-            playAudioEnclosure(item.enclosure)
-        }
-
-        override fun onDeleteClick(item: EnclosuresAdapter.Item) {
-            deleteEnclosure(item.enclosure)
-        }
-    })
+    private val enclosuresAdapter = createEnclosuresAdapter()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -74,14 +62,13 @@ class EntryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.toolbar.apply {
-            setNavigationOnClickListener { findNavController().popBackStack() }
-            inflateMenu(R.menu.menu_entry)
-        }
+        binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
-        binding.enclosures.layoutManager = LinearLayoutManager(requireContext())
-        binding.enclosures.adapter = enclosuresAdapter
-        binding.enclosures.addItemDecoration(CardListAdapterDecoration(resources.getDimensionPixelSize(R.dimen.dp_16)))
+        binding.enclosures.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = enclosuresAdapter
+            addItemDecoration(CardListAdapterDecoration(resources.getDimensionPixelSize(R.dimen.dp_16)))
+        }
 
         model.setArgs(
             EntryModel.Args(
@@ -113,27 +100,27 @@ class EntryFragment : Fragment() {
 
     private fun setState(state: EntryModel.State) {
         binding.apply {
-            val menu = binding.toolbar.menu
+            val menu = binding.toolbar.menu!!
 
             when (state) {
                 EntryModel.State.Progress -> {
-                    menu?.iterator()?.forEach { it.isVisible = false }
+                    menu.iterator().forEach { it.isVisible = false }
                     contentContainer.isVisible = false
                     progress.isVisible = true
                     fab.hide()
                 }
 
                 is EntryModel.State.Success -> {
-                    menu?.findItem(R.id.toggleBookmarked)?.isVisible = true
-                    menu?.findItem(R.id.comments)?.apply {
+                    menu.findItem(R.id.toggleBookmarked)?.isVisible = true
+                    menu.findItem(R.id.comments)?.apply {
                         isVisible = state.entry.commentsUrl.isNotBlank()
                         setOnMenuItemClickListener {
                             openUrl(state.entry.commentsUrl, model.conf.value.useBuiltInBrowser)
                             true
                         }
                     }
-                    menu?.findItem(R.id.feedSettings)?.isVisible = true
-                    menu?.findItem(R.id.share)?.isVisible = true
+                    menu.findItem(R.id.feedSettings)?.isVisible = true
+                    menu.findItem(R.id.share)?.isVisible = true
 
                     contentContainer.isVisible = true
                     binding.toolbar.title = state.feedTitle
@@ -185,7 +172,7 @@ class EntryFragment : Fragment() {
                 }
 
                 is EntryModel.State.Error -> {
-                    menu?.iterator()?.forEach { it.isVisible = false }
+                    menu.iterator().forEach { it.isVisible = false }
                     contentContainer.isVisible = false
                     showErrorDialog(state.message) { findNavController().popBackStack() }
                 }
@@ -332,6 +319,22 @@ class EntryFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun createEnclosuresAdapter(): EnclosuresAdapter {
+        return EnclosuresAdapter(object : EnclosuresAdapter.Callback {
+            override fun onDownloadClick(item: EnclosuresAdapter.Item) {
+                downloadAudioEnclosure(item.enclosure)
+            }
+
+            override fun onPlayClick(item: EnclosuresAdapter.Item) {
+                playAudioEnclosure(item.enclosure)
+            }
+
+            override fun onDeleteClick(item: EnclosuresAdapter.Item) {
+                deleteEnclosure(item.enclosure)
+            }
+        })
     }
 
     private class CardListAdapterDecoration(private val gapInPixels: Int) : RecyclerView.ItemDecoration() {

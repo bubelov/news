@@ -1,7 +1,7 @@
 package sync
 
 import conf.ConfRepo
-import entries.EntriesRepository
+import entries.EntriesRepo
 import feeds.FeedsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,7 +14,7 @@ import java.time.Instant
 class Sync(
     private val confRepo: ConfRepo,
     private val feedsRepo: FeedsRepository,
-    private val entriesRepo: EntriesRepository,
+    private val entriesRepo: EntriesRepo,
 ) {
 
     sealed class State {

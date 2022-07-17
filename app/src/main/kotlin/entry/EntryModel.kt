@@ -13,7 +13,7 @@ import conf.ConfRepo
 import db.Entry
 import db.Link
 import enclosures.EnclosuresRepo
-import entries.EntriesRepository
+import entries.EntriesRepo
 import feeds.FeedsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,7 +29,7 @@ import sync.Sync
 class EntryModel(
     private val app: Application,
     private val enclosuresRepo: EnclosuresRepo,
-    private val entriesRepository: EntriesRepository,
+    private val entriesRepository: EntriesRepo,
     private val feedsRepository: FeedsRepository,
     private val newsApiSync: Sync,
     confRepo: ConfRepo,

@@ -28,12 +28,12 @@ import java.time.format.FormatStyle
 @KoinViewModel
 class EntriesModel(
     private val confRepo: ConfRepo,
-    private val entriesRepo: EntriesRepository,
+    private val entriesRepo: EntriesRepo,
     private val feedsRepo: FeedsRepository,
     private val newsApiSync: Sync,
 ) : ViewModel() {
 
-    val filter = MutableStateFlow<EntriesFilter?>(null)
+    val args = MutableStateFlow<EntriesFilter?>(null)
 
     private val _state = MutableStateFlow<State?>(null)
     val state = _state.asStateFlow()
@@ -41,7 +41,7 @@ class EntriesModel(
     private var scrollToTopNextTime = false
 
     init {
-        filter.onEach { filter ->
+        args.onEach { filter ->
             if (filter == null) {
                 return@onEach
             }
@@ -193,7 +193,7 @@ class EntriesModel(
     }
 
     suspend fun markAllAsRead() {
-        when (val filter = filter.value) {
+        when (val filter = args.value) {
             null -> {}
 
             is EntriesFilter.NotBookmarked -> {

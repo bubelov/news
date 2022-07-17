@@ -15,6 +15,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 import co.appreactor.feedk.AtomLinkRel
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentEntriesBinding
@@ -25,7 +26,6 @@ import dialog.showErrorDialog
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -44,118 +44,24 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
     private val seenEntries = mutableSetOf<EntriesAdapterItem>()
 
     private val snackbar by lazy {
-        Snackbar.make(
-            binding.root,
-            "",
-            Snackbar.LENGTH_SHORT
-        ).apply {
+        Snackbar.make(binding.root, "", Snackbar.LENGTH_SHORT).apply {
             anchorView = requireActivity().findViewById(R.id.bottomNav)
         }
     }
 
     private val adapter by lazy {
-        EntriesAdapter(requireActivity()) { onListItemClick(it) }.apply { scrollToTopOnInsert() }
+        EntriesAdapter(requireActivity()) { onListItemClick(it) }
+            .apply { scrollToTopOnInsert() }
     }
 
-    private val touchHelper: ItemTouchHelper? by lazy {
-        when (args.filter) {
-            EntriesFilter.NotBookmarked -> {
-                ItemTouchHelper(object : SwipeHelper(
-                    requireContext(),
-                    R.drawable.ic_baseline_visibility_24,
-                    R.drawable.ic_baseline_bookmark_add_24,
-                ) {
-                    override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                        val entry = adapter.currentList[viewHolder.bindingAdapterPosition]
+    private val touchHelper: ItemTouchHelper? by lazy { createTouchHelper() }
 
-                        when (direction) {
-                            ItemTouchHelper.LEFT -> {
-                                showSnackbar(
-                                    actionText = R.string.marked_as_read,
-                                    action = { model.setRead(listOf(entry.entry.id), true) },
-                                    undoAction = { model.setRead(listOf(entry.entry.id), false) },
-                                )
-                            }
-
-                            ItemTouchHelper.RIGHT -> {
-                                showSnackbar(
-                                    actionText = R.string.bookmarked,
-                                    action = { model.setBookmarked(entry.entry.id, true) },
-                                    undoAction = { model.setBookmarked(entry.entry.id, false) },
-                                )
-                            }
-                        }
-                    }
-                })
-            }
-
-            EntriesFilter.Bookmarked -> {
-                ItemTouchHelper(object : SwipeHelper(
-                    requireContext(),
-                    R.drawable.ic_baseline_bookmark_remove_24,
-                    R.drawable.ic_baseline_bookmark_remove_24,
-                ) {
-                    override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                        val entry = adapter.currentList[viewHolder.bindingAdapterPosition]
-
-                        when (direction) {
-                            ItemTouchHelper.LEFT -> {
-                                showSnackbar(
-                                    actionText = R.string.removed_from_bookmarks,
-                                    action = { model.setBookmarked(entry.entry.id, false) },
-                                    undoAction = { model.setBookmarked(entry.entry.id, true) },
-                                )
-                            }
-
-                            ItemTouchHelper.RIGHT -> {
-                                showSnackbar(
-                                    actionText = R.string.removed_from_bookmarks,
-                                    action = { model.setBookmarked(entry.entry.id, false) },
-                                    undoAction = { model.setBookmarked(entry.entry.id, true) },
-                                )
-                            }
-                        }
-                    }
-                })
-            }
-
-            else -> null
-        }
-    }
-
-    private val trackingListener = object : RecyclerView.OnScrollListener() {
-        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-
-        }
-
-        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-            if (recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE) {
-                return
-            }
-
-            val layoutManager = recyclerView.layoutManager as LinearLayoutManager
-
-            if (layoutManager.findFirstVisibleItemPosition() == RecyclerView.NO_POSITION) {
-                return
-            }
-
-            if (layoutManager.findLastVisibleItemPosition() == RecyclerView.NO_POSITION) {
-                return
-            }
-
-            val visibleEntries =
-                (layoutManager.findFirstVisibleItemPosition()..layoutManager.findLastVisibleItemPosition()).map {
-                    adapter.currentList[it]
-                }
-
-            seenEntries.addAll(visibleEntries)
-        }
-    }
+    private val trackingListener = createTrackingListener()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentEntriesBinding.inflate(inflater, container, false)
         return binding.root
@@ -168,12 +74,10 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         initSwipeRefresh()
         initList()
 
-        model.state
-            .onStart { model.filter.update { args.filter!! } }
-            .launchIn(viewLifecycleOwner.lifecycleScope)
+        model.args.update { args.filter!! }
 
         model.state
-            .onEach { displayState(it) }
+            .onEach { setState(it) }
             .launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
@@ -233,9 +137,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
     }
 
     private fun initSearchButton() {
-        val searchMenuItem = binding.toolbar.menu?.findItem(R.id.search)
-
-        searchMenuItem?.setOnMenuItemClickListener {
+        binding.toolbar.menu!!.findItem(R.id.search).setOnMenuItemClickListener {
             findNavController().navigate(
                 EntriesFragmentDirections.actionEntriesFragmentToSearchFragment(
                     args.filter!!
@@ -246,24 +148,24 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
     }
 
     private fun initShowReadEntriesButton() {
-        val showOpenedEntriesMenuItem = binding.toolbar.menu?.findItem(R.id.showOpenedEntries)
-        showOpenedEntriesMenuItem?.isVisible = getShowReadEntriesButtonVisibility()
+        val button = binding.toolbar.menu!!.findItem(R.id.showOpenedEntries)
+        button.isVisible = getShowReadEntriesButtonVisibility()
 
         lifecycleScope.launchWhenResumed {
             val conf = model.loadConf().first()
 
             if (conf.showReadEntries) {
-                showOpenedEntriesMenuItem?.setIcon(R.drawable.ic_baseline_visibility_24)
-                showOpenedEntriesMenuItem?.title = getString(R.string.hide_read_news)
+                button.setIcon(R.drawable.ic_baseline_visibility_24)
+                button.title = getString(R.string.hide_read_news)
                 touchHelper?.attachToRecyclerView(null)
             } else {
-                showOpenedEntriesMenuItem?.setIcon(R.drawable.ic_baseline_visibility_off_24)
-                showOpenedEntriesMenuItem?.title = getString(R.string.show_read_news)
+                button.setIcon(R.drawable.ic_baseline_visibility_off_24)
+                button.title = getString(R.string.show_read_news)
                 touchHelper?.attachToRecyclerView(binding.list)
             }
         }
 
-        showOpenedEntriesMenuItem?.setOnMenuItemClickListener {
+        button.setOnMenuItemClickListener {
             model.saveConf { it.copy(showReadEntries = !it.showReadEntries) }
             initShowReadEntriesButton()
             true
@@ -271,22 +173,22 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
     }
 
     private fun initSortOrderButton() {
-        val sortOrderMenuItem = binding.toolbar.menu?.findItem(R.id.sort) ?: return
+        val button = binding.toolbar.menu.findItem(R.id.sort)
 
         model.loadConf().onEach { conf ->
             when (conf.sortOrder) {
                 ConfRepo.SORT_ORDER_ASCENDING -> {
-                    sortOrderMenuItem.setIcon(R.drawable.ic_clock_forward)
-                    sortOrderMenuItem.title = getString(R.string.show_newest_first)
+                    button.setIcon(R.drawable.ic_clock_forward)
+                    button.title = getString(R.string.show_newest_first)
                 }
 
                 ConfRepo.SORT_ORDER_DESCENDING -> {
-                    sortOrderMenuItem.setIcon(R.drawable.ic_clock_back)
-                    sortOrderMenuItem.title = getString(R.string.show_oldest_first)
+                    button.setIcon(R.drawable.ic_clock_back)
+                    button.title = getString(R.string.show_oldest_first)
                 }
             }
 
-            sortOrderMenuItem.setOnMenuItemClickListener {
+            button.setOnMenuItemClickListener {
                 model.changeSortOrder()
                 true
             }
@@ -294,57 +196,57 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
     }
 
     private fun initMarkAllAsReadButton() {
-        binding.toolbar.menu?.findItem(R.id.markAllAsRead)?.setOnMenuItemClickListener {
+        binding.toolbar.menu!!.findItem(R.id.markAllAsRead).setOnMenuItemClickListener {
             lifecycleScope.launchWhenResumed { model.markAllAsRead() }
             true
         }
     }
 
     private fun initSettingsButton() {
-        val settingsMenuItem = binding.toolbar.menu?.findItem(R.id.settings) ?: return
-
-        settingsMenuItem.setOnMenuItemClickListener {
+        binding.toolbar.menu!!.findItem(R.id.settings).setOnMenuItemClickListener {
             findNavController().navigate(EntriesFragmentDirections.actionEntriesFragmentToSettingsFragment())
             true
         }
     }
 
-    private fun initSwipeRefresh() = binding.swipeRefresh.apply {
-        when (args.filter) {
-            is EntriesFilter.NotBookmarked -> {
-                isEnabled = true
+    private fun initSwipeRefresh() {
+        val swipeRefresh = binding.swipeRefresh
 
-                setOnRefreshListener {
-                    lifecycleScope.launch {
-                        runCatching {
-                            model.onPullRefresh()
-                        }.onFailure {
-                            lifecycleScope.launchWhenResumed { showErrorDialog(it) }
+        swipeRefresh.apply {
+            when (args.filter) {
+                is EntriesFilter.NotBookmarked -> {
+                    isEnabled = true
+
+                    setOnRefreshListener {
+                        lifecycleScope.launch {
+                            runCatching {
+                                model.onPullRefresh()
+                            }.onFailure {
+                                lifecycleScope.launchWhenResumed { showErrorDialog(it) }
+                            }
+
+                            swipeRefresh.isRefreshing = false
                         }
-
-                        binding.swipeRefresh.isRefreshing = false
                     }
                 }
-            }
 
-            else -> {
-                binding.swipeRefresh.isEnabled = false
+                else -> {
+                    swipeRefresh.isEnabled = false
+                }
             }
         }
     }
 
     private fun initList() {
-        binding.apply {
-            list.apply {
-                layoutManager = LinearLayoutManager(requireContext())
-                adapter = this@EntriesFragment.adapter
+        binding.list.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = this@EntriesFragment.adapter
 
-                val listItemDecoration = CardListAdapterDecoration(
-                    resources.getDimensionPixelSize(R.dimen.entries_cards_gap)
-                )
+            val listItemDecoration = CardListAdapterDecoration(
+                resources.getDimensionPixelSize(R.dimen.entries_cards_gap)
+            )
 
-                addItemDecoration(listItemDecoration)
-            }
+            addItemDecoration(listItemDecoration)
         }
 
         touchHelper?.attachToRecyclerView(binding.list)
@@ -361,7 +263,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         }.launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
-    private suspend fun displayState(state: EntriesModel.State?) = binding.apply {
+    private suspend fun setState(state: EntriesModel.State?) = binding.apply {
         when (state) {
             null -> {
                 swipeRefresh.isRefreshing = false
@@ -444,14 +346,10 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         runCatching {
             snackbar.apply {
                 setText(actionText)
-                setAction(R.string.undo) {
-                    undoAction.invoke()
-                }
+                setAction(R.string.undo) { undoAction.invoke() }
             }.show()
 
-            model.apply {
-                action.invoke()
-            }
+            model.apply { action.invoke() }
         }.onFailure {
             showErrorDialog(it)
         }
@@ -472,6 +370,103 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
             } else {
                 val action = EntriesFragmentDirections.actionEntriesFragmentToEntryFragment(item.entry.id)
                 findNavController().navigate(action)
+            }
+        }
+    }
+
+    private fun createTouchHelper(): ItemTouchHelper? {
+        return when (args.filter) {
+            EntriesFilter.NotBookmarked -> {
+                ItemTouchHelper(object : SwipeHelper(
+                    requireContext(),
+                    R.drawable.ic_baseline_visibility_24,
+                    R.drawable.ic_baseline_bookmark_add_24,
+                ) {
+                    override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                        val entry = adapter.currentList[viewHolder.bindingAdapterPosition]
+
+                        when (direction) {
+                            ItemTouchHelper.LEFT -> {
+                                showSnackbar(
+                                    actionText = R.string.marked_as_read,
+                                    action = { model.setRead(listOf(entry.entry.id), true) },
+                                    undoAction = { model.setRead(listOf(entry.entry.id), false) },
+                                )
+                            }
+
+                            ItemTouchHelper.RIGHT -> {
+                                showSnackbar(
+                                    actionText = R.string.bookmarked,
+                                    action = { model.setBookmarked(entry.entry.id, true) },
+                                    undoAction = { model.setBookmarked(entry.entry.id, false) },
+                                )
+                            }
+                        }
+                    }
+                })
+            }
+
+            EntriesFilter.Bookmarked -> {
+                ItemTouchHelper(object : SwipeHelper(
+                    requireContext(),
+                    R.drawable.ic_baseline_bookmark_remove_24,
+                    R.drawable.ic_baseline_bookmark_remove_24,
+                ) {
+                    override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                        val entry = adapter.currentList[viewHolder.bindingAdapterPosition]
+
+                        when (direction) {
+                            ItemTouchHelper.LEFT -> {
+                                showSnackbar(
+                                    actionText = R.string.removed_from_bookmarks,
+                                    action = { model.setBookmarked(entry.entry.id, false) },
+                                    undoAction = { model.setBookmarked(entry.entry.id, true) },
+                                )
+                            }
+
+                            ItemTouchHelper.RIGHT -> {
+                                showSnackbar(
+                                    actionText = R.string.removed_from_bookmarks,
+                                    action = { model.setBookmarked(entry.entry.id, false) },
+                                    undoAction = { model.setBookmarked(entry.entry.id, true) },
+                                )
+                            }
+                        }
+                    }
+                })
+            }
+
+            else -> null
+        }
+    }
+
+    private fun createTrackingListener(): OnScrollListener {
+        return object : OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+
+            }
+
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if (recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE) {
+                    return
+                }
+
+                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+
+                if (layoutManager.findFirstVisibleItemPosition() == RecyclerView.NO_POSITION) {
+                    return
+                }
+
+                if (layoutManager.findLastVisibleItemPosition() == RecyclerView.NO_POSITION) {
+                    return
+                }
+
+                val visibleEntries =
+                    (layoutManager.findFirstVisibleItemPosition()..layoutManager.findLastVisibleItemPosition()).map {
+                        adapter.currentList[it]
+                    }
+
+                seenEntries.addAll(visibleEntries)
             }
         }
     }

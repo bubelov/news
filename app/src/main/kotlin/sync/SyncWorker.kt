@@ -14,7 +14,7 @@ import co.appreactor.news.R
 import app.App
 import navigation.Activity
 import conf.ConfRepo
-import entries.EntriesRepository
+import entries.EntriesRepo
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
@@ -27,7 +27,7 @@ class SyncWorker(context: Context, workerParams: WorkerParameters) : Worker(cont
         val app = applicationContext as App
         val conf = app.get<ConfRepo>().conf.value
         val sync = app.get<Sync>()
-        val entriesRepository = app.get<EntriesRepository>()
+        val entriesRepository = app.get<EntriesRepo>()
 
         if (!conf.initialSyncCompleted) {
             return Result.retry()

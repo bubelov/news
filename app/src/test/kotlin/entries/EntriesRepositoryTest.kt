@@ -17,7 +17,7 @@ class EntriesRepositoryTest {
     fun selectAll(): Unit = runBlocking {
         val db = testDb()
 
-        val repo = EntriesRepository(
+        val repo = EntriesRepo(
             db = db,
             api = mockk(),
         )
@@ -32,7 +32,7 @@ class EntriesRepositoryTest {
     fun selectById(): Unit = runBlocking {
         val db = testDb()
 
-        val repo = EntriesRepository(
+        val repo = EntriesRepo(
             db = db,
             api = mockk(),
         )
@@ -49,7 +49,7 @@ class EntriesRepositoryTest {
     fun selectByFeedId(): Unit = runBlocking {
         val db = testDb()
 
-        val repo = EntriesRepository(
+        val repo = EntriesRepo(
             db = db,
             api = mockk(),
         )
@@ -72,7 +72,7 @@ class EntriesRepositoryTest {
     fun selectByReadAndBookmarked(): Unit = runBlocking {
         val db = testDb()
 
-        val repo = EntriesRepository(
+        val repo = EntriesRepo(
             db = db,
             api = mockk(),
         )
@@ -111,7 +111,7 @@ class EntriesRepositoryTest {
     fun selectByReadOrBookmarked(): Unit = runBlocking {
         val db = testDb()
 
-        val repo = EntriesRepository(
+        val repo = EntriesRepo(
             db = db,
             api = mockk(),
         )
@@ -150,7 +150,7 @@ class EntriesRepositoryTest {
     fun selectByRead(): Unit = runBlocking {
         val db = testDb()
 
-        val repo = EntriesRepository(
+        val repo = EntriesRepo(
             db = db,
             api = mockk(),
         )

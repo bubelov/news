@@ -19,9 +19,9 @@ import org.koin.core.annotation.Single
 import java.time.OffsetDateTime
 
 @Single
-class EntriesRepository(
-    private val db: Db,
+class EntriesRepo(
     private val api: Api,
+    private val db: Db,
 ) {
 
     fun selectAll(): Flow<List<EntryWithoutContent>> {
@@ -94,22 +94,6 @@ class EntriesRepository(
         }
     }
 
-    suspend fun setOgImageChecked(id: String, checked: Boolean) {
-        withContext(Dispatchers.Default) {
-            db.entryQueries.updateOgImageChecked(checked, id)
-        }
-    }
-
-    suspend fun setOgImage(url: String, width: Long, height: Long, id: String) {
-        withContext(Dispatchers.Default) {
-            db.entryQueries.updateOgImage(url, width, height, id)
-        }
-    }
-
-    fun getUnreadCount(feedId: String): Flow<Long> {
-        return db.entryQueries.selectUnreadCount(feedId).asFlow().mapToOne()
-    }
-
     private fun getMaxId(): Flow<String?> {
         return db.entryQueries.selectMaxId().asFlow().mapToOneOrNull().map { it?.MAX }
     }
@@ -131,12 +115,6 @@ class EntriesRepository(
     }
 
     fun selectCount() = db.entryQueries.selectCount().asFlow().mapToOne()
-
-    suspend fun deleteByFeedId(feedId: String) {
-        withContext(Dispatchers.Default) {
-            db.entryQueries.deleteByFeedId(feedId)
-        }
-    }
 
     suspend fun syncAll(): Flow<SyncProgress> = flow {
         emit(SyncProgress(0L))
