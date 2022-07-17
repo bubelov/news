@@ -1,6 +1,5 @@
 package db
 
-import android.net.Uri
 import co.appreactor.feedk.AtomLinkRel
 import okhttp3.HttpUrl
 
@@ -14,5 +13,5 @@ data class Link(
     val title: String?,
     val length: Long?,
     val extEnclosureDownloadProgress: Double?,
-    val extCacheUri: Uri?
+    val extCacheUri: String?,
 )

@@ -7,6 +7,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.net.toUri
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -45,7 +47,7 @@ class EnclosuresFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentEnclosuresBinding.inflate(inflater, container, false)
         return binding.root
@@ -62,9 +64,20 @@ class EnclosuresFragment : Fragment() {
             addItemDecoration(CardListAdapterDecoration(resources.getDimensionPixelSize(R.dimen.dp_8)))
         }
 
-        model.getEnclosures()
-            .onEach { (binding.list.adapter as EnclosuresAdapter).submitList(it) }
-            .launchIn(viewLifecycleOwner.lifecycleScope)
+        model.state.onEach {
+            when (it) {
+                is EnclosuresModel.State.LoadingEnclosures -> {
+                    binding.progress.isVisible = true
+                    binding.list.isVisible = false
+                }
+
+                is EnclosuresModel.State.ShowingEnclosures -> {
+                    binding.progress.isVisible = false
+                    binding.list.isVisible = true
+                    adapter.submitList(it.items)
+                }
+            }
+        }.launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
     override fun onDestroyView() {
@@ -81,7 +94,7 @@ class EnclosuresFragment : Fragment() {
 
     fun playAudioEnclosure(enclosure: Link) {
         val intent = Intent(Intent.ACTION_VIEW)
-        intent.setDataAndType(enclosure.extCacheUri!!, enclosure.type)
+        intent.setDataAndType(enclosure.extCacheUri!!.toUri(), enclosure.type)
 
         runCatching {
             startActivity(intent)
@@ -102,7 +115,7 @@ class EnclosuresFragment : Fragment() {
     }
 
     private class CardListAdapterDecoration(
-        private val gapPx: Int
+        private val gapPx: Int,
     ) : RecyclerView.ItemDecoration() {
 
         override fun getItemOffsets(

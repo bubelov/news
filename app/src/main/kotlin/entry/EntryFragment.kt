@@ -15,6 +15,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.core.view.iterator
 import androidx.fragment.app.Fragment
@@ -258,7 +259,7 @@ class EntryFragment : Fragment() {
 
     fun playAudioEnclosure(enclosure: Link) {
         val intent = Intent(Intent.ACTION_VIEW)
-        intent.setDataAndType(enclosure.extCacheUri!!, enclosure.type)
+        intent.setDataAndType(enclosure.extCacheUri!!.toUri(), enclosure.type)
 
         runCatching {
             startActivity(intent)

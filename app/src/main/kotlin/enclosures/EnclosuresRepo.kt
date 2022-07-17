@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
+import androidx.core.net.toUri
 import co.appreactor.feedk.AtomLinkRel
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
@@ -100,7 +101,7 @@ class EnclosuresRepo(
             updateLink(
                 link = enclosure.copy(
                     extEnclosureDownloadProgress = 0.0,
-                    extCacheUri = cacheUri,
+                    extCacheUri = cacheUri.toString(),
                 ),
                 entry = entry,
             )
@@ -129,7 +130,7 @@ class EnclosuresRepo(
                             updateLink(
                                 link = enclosure.copy(
                                     extEnclosureDownloadProgress = progress,
-                                    extCacheUri = cacheUri,
+                                    extCacheUri = cacheUri.toString(),
                                 ),
                                 entry = entry,
                             )
@@ -143,7 +144,7 @@ class EnclosuresRepo(
             updateLink(
                 link = enclosure.copy(
                     extEnclosureDownloadProgress = 1.0,
-                    extCacheUri = cacheUri,
+                    extCacheUri = cacheUri.toString(),
                 ),
                 entry = entry,
             )
@@ -190,7 +191,7 @@ class EnclosuresRepo(
         }
 
         val rowsDeleted = withContext(Dispatchers.Default) {
-            context.contentResolver.delete(enclosure.extCacheUri, null, null)
+            context.contentResolver.delete(enclosure.extCacheUri.toUri(), null, null)
         }
 
         if (rowsDeleted != 1) {

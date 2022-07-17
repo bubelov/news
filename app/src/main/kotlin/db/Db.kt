@@ -1,7 +1,6 @@
 package db
 
 import android.content.Context
-import android.net.Uri
 import co.appreactor.feedk.AtomLinkRel
 import com.google.gson.GsonBuilder
 import com.google.gson.TypeAdapter
@@ -74,7 +73,6 @@ private fun linksAdapter() = object : ColumnAdapter<List<Link>, String> {
 
     private val gson = GsonBuilder()
         .registerTypeAdapter(HttpUrl::class.java, httpUrlAdapter())
-        .registerTypeAdapter(Uri::class.java, uriAdapter())
         .registerTypeAdapter(AtomLinkRel::class.java, atomLinkRelAdapter())
         .create()
 
@@ -97,18 +95,6 @@ private fun httpUrlAdapter(): TypeAdapter<HttpUrl> {
 
         override fun read(`in`: JsonReader): HttpUrl {
             return `in`.nextString().toHttpUrl()
-        }
-    }
-}
-
-private fun uriAdapter(): TypeAdapter<Uri> {
-    return object : TypeAdapter<Uri>() {
-        override fun write(out: JsonWriter, value: Uri?) {
-            out.value(value.toString())
-        }
-
-        override fun read(`in`: JsonReader): Uri {
-            return Uri.parse(`in`.nextString())
         }
     }
 }
