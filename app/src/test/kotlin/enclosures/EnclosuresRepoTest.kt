@@ -7,7 +7,7 @@ import db.testDb
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import okhttp3.HttpUrl.Companion.toHttpUrl
-import org.junit.Test
+import kotlin.test.Test
 import kotlin.test.assertTrue
 
 class EnclosuresRepoTest {

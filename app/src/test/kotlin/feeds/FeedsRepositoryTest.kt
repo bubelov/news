@@ -16,14 +16,14 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class FeedsRepositoryTests {
+class FeedsRepositoryTest {
 
     private lateinit var db: Db
     private lateinit var api: Api
     private lateinit var repo: FeedsRepository
 
     @BeforeTest
-    fun setup() {
+    fun before() {
         db = testDb()
         api = mockk()
 

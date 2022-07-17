@@ -1,29 +1,29 @@
 package db
 
-import org.junit.Before
-import org.junit.Test
 import java.time.OffsetDateTime
 import java.util.UUID
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class EntryQueriesTest {
 
     private lateinit var db: EntryQueries
 
-    @Before
-    fun setup() {
+    @BeforeTest
+    fun before() {
         db = testDb().entryQueries
     }
 
     @Test
-    fun `insert or replace`() {
+    fun insertOrReplace() {
         val item = entry()
         db.insertOrReplace(item)
         assertEquals(item, db.selectById(item.id).executeAsOne())
     }
 
     @Test
-    fun `select all`() {
+    fun selectAll() {
         val items = listOf(entry(), entry())
         items.forEach { db.insertOrReplace(it) }
 
@@ -34,7 +34,7 @@ class EntryQueriesTest {
     }
 
     @Test
-    fun `select by id`() {
+    fun selectById() {
         val items = listOf(
             db.insertOrReplace(),
             db.insertOrReplace(),
@@ -48,7 +48,7 @@ class EntryQueriesTest {
     }
 
     @Test
-    fun `select by feed id`() {
+    fun selectByFeedId() {
         val feed1 = UUID.randomUUID().toString()
         val feed2 = UUID.randomUUID().toString()
 
@@ -63,7 +63,7 @@ class EntryQueriesTest {
     }
 
     @Test
-    fun `select by read and bookmarked`() {
+    fun selectByReadAndBookmarked() {
         val all = listOf(
             entry().copy(read = true, bookmarked = true),
             entry().copy(read = true, bookmarked = false),
@@ -79,7 +79,7 @@ class EntryQueriesTest {
     }
 
     @Test
-    fun `select by read or bookmarked`() {
+    fun selectByReadOrBookmarked() {
         val all = listOf(
             entry().copy(read = true, bookmarked = true),
             entry().copy(read = true, bookmarked = false),
@@ -95,7 +95,7 @@ class EntryQueriesTest {
     }
 
     @Test
-    fun `select by read`() {
+    fun selectByRead() {
         val all = listOf(
             entry().copy(read = true),
             entry().copy(read = true),
@@ -116,7 +116,7 @@ class EntryQueriesTest {
     }
 
     @Test
-    fun `select by read synced`() {
+    fun selectByReadSynced() {
         val all = listOf(
             entry().copy(readSynced = true),
             entry().copy(readSynced = false),
@@ -137,7 +137,7 @@ class EntryQueriesTest {
     }
 
     @Test
-    fun `select by bookmarked`() {
+    fun selectByBookmarked() {
         val all = listOf(
             entry().copy(bookmarked = true),
             entry().copy(bookmarked = false),
@@ -158,7 +158,7 @@ class EntryQueriesTest {
     }
 
     @Test
-    fun `update read by feed id`() {
+    fun updateReadByFeedId() {
         val feedId = UUID.randomUUID().toString()
 
         val all = listOf(
@@ -181,7 +181,7 @@ class EntryQueriesTest {
     }
 
     @Test
-    fun `update read by bookmarked`() {
+    fun updateReadByBookmarked() {
         val bookmarked = true
 
         val all = listOf(

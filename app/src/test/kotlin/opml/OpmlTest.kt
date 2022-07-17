@@ -4,15 +4,15 @@ import co.appreactor.feedk.AtomLinkRel
 import db.Feed
 import db.Link
 import okhttp3.HttpUrl.Companion.toHttpUrl
-import org.junit.Test
 import java.io.InputStream
 import java.nio.charset.Charset
 import java.util.UUID
+import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class OpmlTests {
+class OpmlTest {
 
     private val sampleElements = listOf(
         Outline(

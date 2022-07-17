@@ -9,20 +9,16 @@ import io.mockk.mockkStatic
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
 class MinifluxAuthModelTest {
 
-    @BeforeTest
-    fun mockAllUriInteractions() {
-        mockkStatic(Log::class)
-        every { Log.d(any(), any()) } returns 0
-    }
-
     @Test
     fun testBackend() = runBlocking {
+        mockkStatic(Log::class)
+        every { Log.d(any(), any()) } returns 0
+
         val db = testDb()
         val confRepo = ConfRepo(db)
 

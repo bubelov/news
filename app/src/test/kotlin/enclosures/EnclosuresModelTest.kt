@@ -27,7 +27,7 @@ import kotlin.test.assertTrue
 
 class EnclosuresModelTest {
 
-    private val mainDispatcher = newSingleThreadContext("UI thread")
+    private val mainDispatcher = newSingleThreadContext("UI")
 
     @BeforeTest
     fun before() {

@@ -12,7 +12,7 @@ import kotlin.test.assertTrue
 class StandaloneApiTest {
 
     @Test
-    fun `addFeed + 404`() = runBlocking {
+    fun addFeed404() = runBlocking {
         val server = MockWebServer()
         server.enqueue(MockResponse().setResponseCode(404))
         server.start()

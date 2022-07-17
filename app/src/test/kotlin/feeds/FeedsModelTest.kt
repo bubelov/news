@@ -8,28 +8,28 @@ import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 import kotlin.test.assertTrue
 
-class FeedsModelTests {
+class FeedsModelTest {
 
-    private val mainThreadSurrogate = newSingleThreadContext("UI thread")
+    private val mainDispatcher = newSingleThreadContext("UI")
 
-    @Before
-    fun beforeEachTest() {
-        Dispatchers.setMain(mainThreadSurrogate)
+    @BeforeTest
+    fun before() {
+        Dispatchers.setMain(mainDispatcher)
     }
 
-    @After
-    fun afterEachTest() {
-        Dispatchers.resetMain() // reset the main dispatcher to the original Main dispatcher
-        mainThreadSurrogate.close()
+    @AfterTest
+    fun after() {
+        Dispatchers.resetMain()
+        mainDispatcher.close()
     }
 
     @Test
-    fun init(): Unit = runBlocking {
+    fun init() = runBlocking {
         val db = testDb()
 
         val model = FeedsModel(

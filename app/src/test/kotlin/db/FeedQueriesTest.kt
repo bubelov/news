@@ -11,7 +11,7 @@ class FeedQueriesTest {
     private lateinit var queries: FeedQueries
 
     @BeforeTest
-    fun setup() {
+    fun before() {
         queries = testDb().feedQueries
     }
 
