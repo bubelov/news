@@ -27,7 +27,7 @@
     <string name="crop_feed_images">Обрезать изображения предпросмотра</string>
     <string name="feeds">Ленты</string>
     <string name="bookmarks">Закладки</string>
-    <string name="open_xml_link">Открыть ленту</string>
+    <string name="open_feed">Открыть ленту</string>
     <string name="open_html_link">Открыть сайт</string>
     <string name="actions">Действия</string>
     <string name="delete">Удалить</string>

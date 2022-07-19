@@ -27,7 +27,7 @@
     <string name="crop_feed_images">Oříznout náhled obrázků</string>
     <string name="feeds">Kanály</string>
     <string name="bookmarks">Záložky</string>
-    <string name="open_xml_link">Otevřít kanál</string>
+    <string name="open_feed">Otevřít kanál</string>
     <string name="open_html_link">Otevřít web</string>
     <string name="actions">Akce</string>
     <string name="delete">Vymazat</string>

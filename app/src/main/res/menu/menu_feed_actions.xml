@@ -9,22 +9,22 @@
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/openHtmlLink"
+        android:id="@+id/openSelfLink"
+        android:title="@string/open_feed"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/openAlternateLink"
         android:title="@string/open_html_link"
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/openLink"
-        android:title="@string/open_xml_link"
-        app:showAsAction="ifRoom" />
-
-    <item
-        android:id="@+id/renameFeed"
+        android:id="@+id/rename"
         android:title="@string/rename"
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/deleteFeed"
+        android:id="@+id/delete"
         android:title="@string/delete"
         app:showAsAction="ifRoom" />
 

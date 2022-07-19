@@ -27,7 +27,7 @@
     <string name="crop_feed_images">Recortar imágenes de vista previa</string>
     <string name="feeds">Feeds</string>
     <string name="bookmarks">Marcadores</string>
-    <string name="open_xml_link">Abrir feed</string>
+    <string name="open_feed">Abrir feed</string>
     <string name="open_html_link">Abrir sitio web</string>
     <string name="actions">Acciones</string>
     <string name="delete">Eliminar</string>

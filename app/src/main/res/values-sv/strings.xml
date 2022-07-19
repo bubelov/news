@@ -27,7 +27,7 @@
     <string name="crop_feed_images">Beskär artikelbilden</string>
     <string name="feeds">Flöden</string>
     <string name="bookmarks">Bokmärken</string>
-    <string name="open_xml_link">Öppna flöde</string>
+    <string name="open_feed">Öppna flöde</string>
     <string name="open_html_link">Öppna webbplats</string>
     <string name="actions">Åtgärder</string>
     <string name="delete">Ta bort</string>

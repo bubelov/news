@@ -1,5 +1,6 @@
 package feeds
 
+import conf.ConfRepo
 import db.testDb
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -31,10 +32,12 @@ class FeedsModelTest {
     @Test
     fun init() = runBlocking {
         val db = testDb()
+        val confRepo = ConfRepo(db)
 
         val model = FeedsModel(
-            db = db,
             api = mockk(),
+            confRepo = confRepo,
+            db = db,
         )
 
         var attempts = 0

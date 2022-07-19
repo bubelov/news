@@ -27,7 +27,7 @@
     <string name="crop_feed_images">裁剪预览图像</string>
     <string name="feeds">订阅源</string>
     <string name="bookmarks">书签</string>
-    <string name="open_xml_link">打开订阅源</string>
+    <string name="open_feed">打开订阅源</string>
     <string name="open_html_link">打开网站</string>
     <string name="actions">操作</string>
     <string name="delete">删除</string>

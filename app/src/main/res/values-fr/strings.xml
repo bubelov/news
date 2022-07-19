@@ -27,7 +27,7 @@
     <string name="crop_feed_images">Recadrer les images d’aperçu</string>
     <string name="feeds">Flux</string>
     <string name="bookmarks">Épingles</string>
-    <string name="open_xml_link">Ouvrir le flux</string>
+    <string name="open_feed">Ouvrir le flux</string>
     <string name="open_html_link">Ouvrir le site</string>
     <string name="actions">Actions</string>
     <string name="delete">Supprimer</string>

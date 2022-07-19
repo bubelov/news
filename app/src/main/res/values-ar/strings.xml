@@ -27,7 +27,7 @@
     <string name="crop_feed_images">تصغير صور المعاينة</string>
     <string name="feeds">مواجز</string>
     <string name="bookmarks">العلامات المرجعية</string>
-    <string name="open_xml_link">افتح الموجز</string>
+    <string name="open_feed">افتح الموجز</string>
     <string name="open_html_link">افتح الموقع</string>
     <string name="actions">الاجراءات</string>
     <string name="delete">امسح</string>

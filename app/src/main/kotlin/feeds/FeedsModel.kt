@@ -7,6 +7,7 @@ import co.appreactor.feedk.AtomLinkRel
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOne
+import conf.ConfRepo
 import db.Db
 import db.Feed
 import kotlinx.coroutines.Dispatchers
@@ -25,8 +26,9 @@ import java.util.concurrent.atomic.AtomicInteger
 
 @KoinViewModel
 class FeedsModel(
-    private val db: Db,
     private val api: Api,
+    private val confRepo: ConfRepo,
+    private val db: Db,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<State>(State.Loading)
@@ -189,9 +191,10 @@ class FeedsModel(
         return FeedsAdapter.Item(
             id = id,
             title = title,
-            selfLink = links.firstOrNull { it.rel is AtomLinkRel.Self }?.href?.toString() ?: "",
-            alternateLink = links.firstOrNull { it.rel is AtomLinkRel.Alternate }?.href?.toString() ?: "",
+            selfLink = links.single { it.rel is AtomLinkRel.Self }.href,
+            alternateLink = links.firstOrNull { it.rel is AtomLinkRel.Alternate }?.href,
             unreadCount = unreadCount,
+            confUseBuiltInBrowser = confRepo.conf.value.useBuiltInBrowser,
         )
     }
 

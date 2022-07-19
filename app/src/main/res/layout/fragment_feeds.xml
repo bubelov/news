@@ -10,6 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
+        app:menu="@menu/menu_feeds"
         app:title="@string/feeds" />
 
     <androidx.recyclerview.widget.RecyclerView

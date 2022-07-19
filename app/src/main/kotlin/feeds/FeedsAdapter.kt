@@ -1,7 +1,6 @@
 package feeds
 
 import android.view.LayoutInflater
-import android.view.MenuInflater
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.isVisible
@@ -10,22 +9,24 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
 import co.appreactor.news.databinding.ListItemFeedBinding
+import okhttp3.HttpUrl
 
 class FeedsAdapter(
     private val callback: Callback,
-) : ListAdapter<FeedsAdapter.Item, FeedsAdapter.ViewHolder>(
+) : ListAdapter<FeedsAdapter.Item, FeedsAdapter.ItemViewHolder>(
     Diff(),
 ) {
 
     data class Item(
         val id: String,
         val title: String,
-        val selfLink: String,
-        val alternateLink: String,
+        val selfLink: HttpUrl,
+        val alternateLink: HttpUrl?,
         val unreadCount: Long,
+        val confUseBuiltInBrowser: Boolean,
     )
 
-    class ViewHolder(
+    class ItemViewHolder(
         private val binding: ListItemFeedBinding,
         private val callback: Callback,
     ) : RecyclerView.ViewHolder(
@@ -35,43 +36,45 @@ class FeedsAdapter(
         fun bind(item: Item) {
             binding.apply {
                 primaryText.text = item.title
-                secondaryText.text = item.selfLink
+                secondaryText.text = item.selfLink.toString()
 
-                unread.isVisible = false
-
-                unread.isVisible = item.unreadCount > 0
-                unread.text = item.unreadCount.toString()
+                unreadCount.isVisible = item.unreadCount > 0
+                unreadCount.text = item.unreadCount.toString()
 
                 actions.setOnClickListener {
                     val popup = PopupMenu(root.context, actions)
-                    val inflater: MenuInflater = popup.menuInflater
-                    inflater.inflate(R.menu.menu_feed_actions, popup.menu)
-                    popup.show()
 
-                    popup.setOnMenuItemClickListener {
-                        when (it.itemId) {
-                            R.id.openSettings -> {
-                                callback.onSettingsClick(item)
+                    popup.apply {
+                        menuInflater.inflate(R.menu.menu_feed_actions, popup.menu)
+                        menu.findItem(R.id.openAlternateLink)!!.isVisible = item.alternateLink != null
+
+                        setOnMenuItemClickListener {
+                            when (it.itemId) {
+                                R.id.openSettings -> {
+                                    callback.onSettingsClick(item)
+                                }
+
+                                R.id.openSelfLink -> {
+                                    callback.onOpenSelfLinkClick(item)
+                                }
+
+                                R.id.openAlternateLink -> {
+                                    callback.onOpenAlternateLinkClick(item)
+                                }
+
+                                R.id.rename -> {
+                                    callback.onRenameClick(item)
+                                }
+
+                                R.id.delete -> {
+                                    callback.onDeleteClick(item)
+                                }
                             }
 
-                            R.id.openHtmlLink -> {
-                                callback.onOpenAlternateLinkClick(item)
-                            }
-
-                            R.id.openLink -> {
-                                callback.onOpenSelfLinkClick(item)
-                            }
-
-                            R.id.renameFeed -> {
-                                callback.onRenameClick(item)
-                            }
-
-                            R.id.deleteFeed -> {
-                                callback.onDeleteClick(item)
-                            }
+                            true
                         }
 
-                        true
+                        show()
                     }
                 }
 
@@ -92,24 +95,20 @@ class FeedsAdapter(
     class Diff : DiffUtil.ItemCallback<Item>() {
         override fun areItemsTheSame(oldItem: Item, newItem: Item) = oldItem.id == newItem.id
 
-        override fun areContentsTheSame(oldItem: Item, newItem: Item) = oldItem.id == newItem.id
-                && oldItem.title == newItem.title
-                && oldItem.selfLink == newItem.selfLink
-                && oldItem.alternateLink == newItem.alternateLink
-                && oldItem.unreadCount == newItem.unreadCount
+        override fun areContentsTheSame(oldItem: Item, newItem: Item) = oldItem == newItem
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         val binding = ListItemFeedBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false,
         )
 
-        return ViewHolder(binding, callback)
+        return ItemViewHolder(binding, callback)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
 }

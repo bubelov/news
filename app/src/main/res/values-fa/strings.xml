@@ -27,7 +27,7 @@
     <string name="crop_feed_images">برش تصویر پیش‌نمایش</string>
     <string name="feeds">خوراک‌ها</string>
     <string name="bookmarks">نشانک‌ها</string>
-    <string name="open_xml_link">باز کردن خوراک</string>
+    <string name="open_feed">باز کردن خوراک</string>
     <string name="open_html_link">باز کردن تارنما</string>
     <string name="actions">عمل‌ها</string>
     <string name="delete">حذف</string>

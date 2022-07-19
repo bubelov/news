@@ -27,7 +27,7 @@
     <string name="crop_feed_images">Ritaglia le immagini di anteprima</string>
     <string name="feeds">Feed</string>
     <string name="bookmarks">Segnalibri</string>
-    <string name="open_xml_link">Apri il feed</string>
+    <string name="open_feed">Apri il feed</string>
     <string name="open_html_link">Apri il sito web</string>
     <string name="actions">Azioni</string>
     <string name="delete">Elimina</string>

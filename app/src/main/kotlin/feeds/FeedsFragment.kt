@@ -1,5 +1,7 @@
 package feeds
 
+import android.content.Context
+import android.content.DialogInterface
 import android.graphics.Rect
 import android.os.Bundle
 import android.view.KeyEvent
@@ -9,6 +11,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
@@ -30,6 +33,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import navigation.openUrl
 import navigation.showKeyboard
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -40,137 +44,16 @@ class FeedsFragment : Fragment() {
     private var _binding: FragmentFeedsBinding? = null
     private val binding get() = _binding!!
 
-    private val adapter = FeedsAdapter(callback = object : FeedsAdapter.Callback {
-        override fun onClick(item: FeedsAdapter.Item) {
-            findNavController().navigate(
-                FeedsFragmentDirections.actionFeedsFragmentToFeedEntriesFragment(
-                    EntriesFilter.BelongToFeed(feedId = item.id)
-                )
-            )
-        }
+    private val listAdapter = createFeedsAdapter()
+    private val listItemDecoration by lazy { ListItemDecoration(requireContext()) }
 
-        override fun onSettingsClick(item: FeedsAdapter.Item) {
-            findNavController().navigate(
-                FeedsFragmentDirections.actionFeedsFragmentToFeedSettingsFragment(
-                    feedId = item.id,
-                )
-            )
-        }
-
-        override fun onOpenSelfLinkClick(item: FeedsAdapter.Item) {
-            val state = model.state.value
-
-            if (state is FeedsModel.State.ShowingFeeds) {
-                //openUrl(item.selfLink, state.conf.useBuiltInBrowser)
-            }
-        }
-
-        override fun onOpenAlternateLinkClick(item: FeedsAdapter.Item) {
-            val state = model.state.value
-
-            if (state is FeedsModel.State.ShowingFeeds) {
-                //openUrl(item.alternateLink, state.conf.useBuiltInBrowser)
-            }
-        }
-
-        override fun onRenameClick(item: FeedsAdapter.Item) {
-            val dialog = MaterialAlertDialogBuilder(requireContext()).setTitle(getString(R.string.rename))
-                .setView(R.layout.dialog_rename_feed).setPositiveButton(R.string.rename) { dialogInterface, _ ->
-                    val dialog = dialogInterface as AlertDialog
-                    val title = dialog.findViewById<TextInputEditText>(R.id.title)!!
-
-                    viewLifecycleOwner.lifecycleScope.launch {
-                        runCatching { model.rename(item.id, title.text.toString()) }.onFailure { showErrorDialog(it) }
-                    }
-                }.setNegativeButton(R.string.cancel, null).setOnDismissListener { hideKeyboard() }.show()
-
-            val title = dialog.findViewById<TextInputEditText>(R.id.title)!!
-            title.append(item.title)
-
-            requireContext().showKeyboard()
-        }
-
-        override fun onDeleteClick(item: FeedsAdapter.Item) {
-            viewLifecycleOwner.lifecycleScope.launch {
-                runCatching { model.delete(item.id) }.onFailure { showErrorDialog(it) }
-            }
-        }
-    })
-
-    private val importFeedsLauncher = registerForActivityResult(
-        ActivityResultContracts.GetContent()
-    ) { uri ->
-        if (uri == null) {
-            return@registerForActivityResult
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            runCatching {
-                val result = withContext(Dispatchers.Default) {
-                    requireContext().contentResolver.openInputStream(uri)!!.use { inputStream ->
-                        model.importOpml(inputStream.bufferedReader().readText())
-                    }
-                }
-
-                val message = buildString {
-                    append(getString(R.string.added_d, result.feedsAdded))
-                    append("\n")
-                    append(
-                        getString(
-                            R.string.exists_d,
-                            result.feedsUpdated,
-                        )
-                    )
-                    append("\n")
-                    append(
-                        getString(
-                            R.string.failed_d,
-                            result.feedsFailed,
-                        )
-                    )
-
-                    if (result.errors.isNotEmpty()) {
-                        append("\n\n")
-                    }
-
-                    result.errors.forEach {
-                        append(it)
-
-                        if (result.errors.last() != it) {
-                            append("\n\n")
-                        }
-                    }
-                }
-
-                showDialog(
-                    title = getString(R.string.import_title),
-                    message = message,
-                )
-            }.onFailure {
-                showErrorDialog(it)
-            }
-        }
-    }
-
-    @Suppress("BlockingMethodInNonBlockingContext")
-    private val exportFeedsLauncher = registerForActivityResult(
-        ActivityResultContracts.CreateDocument()
-    ) { uri ->
-        if (uri == null) {
-            return@registerForActivityResult
-        }
-
-        lifecycleScope.launchWhenResumed {
-            withContext(Dispatchers.IO) {
-                requireContext().contentResolver.openOutputStream(uri)?.use {
-                    //it.write(model.exportAsOpml())
-                }
-            }
-        }
-    }
+    private val importFeedsLauncher = createImportFeedsLauncher()
+    private val exportFeedsLauncher = createExportFeedsLauncher()
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentFeedsBinding.inflate(inflater, container, false)
         return binding.root
@@ -189,17 +72,7 @@ class FeedsFragment : Fragment() {
             .catch { showErrorDialog(it) }
             .launchIn(viewLifecycleOwner.lifecycleScope)
 
-        val args = FeedsFragmentArgs.fromBundle(requireArguments())
-
-        if (args.url.isNotBlank()) {
-            viewLifecycleOwner.lifecycleScope.launch {
-                runCatching {
-                    model.addFeed(args.url)
-                }.onFailure {
-                    showErrorDialog(it)
-                }
-            }
-        }
+        handleAddFeedIntent()
     }
 
     override fun onDestroyView() {
@@ -207,10 +80,8 @@ class FeedsFragment : Fragment() {
         _binding = null
     }
 
-    private fun initToolbar() = binding.toolbar.apply {
-        inflateMenu(R.menu.menu_feeds)
-
-        setOnMenuItemClickListener {
+    private fun initToolbar() {
+        binding.toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.importFeeds -> {
                     importFeedsLauncher.launch("*/*")
@@ -225,54 +96,54 @@ class FeedsFragment : Fragment() {
         }
     }
 
-    private fun initList() = binding.list.apply {
-        setHasFixedSize(true)
-        layoutManager = LinearLayoutManager(requireContext())
-        adapter = this@FeedsFragment.adapter
-        addItemDecoration(ListAdapterDecoration(resources.getDimensionPixelSize(R.dimen.dp_8)))
+    private fun initList() {
+        binding.list.apply {
+            setHasFixedSize(true)
+            adapter = listAdapter
+            layoutManager = LinearLayoutManager(requireContext())
+            addItemDecoration(listItemDecoration)
 
-        addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                if (canScrollVertically(1) || !canScrollVertically(-1)) {
-                    binding.fab.show()
-                } else {
-                    binding.fab.hide()
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    if (canScrollVertically(1) || !canScrollVertically(-1)) {
+                        binding.fab.show()
+                    } else {
+                        binding.fab.hide()
+                    }
                 }
-            }
-        })
+            })
+        }
     }
 
     private fun initImportButton() {
-        binding.importOpml.setOnClickListener {
-            importFeedsLauncher.launch("*/*")
-        }
+        binding.importOpml.setOnClickListener { importFeedsLauncher.launch("*/*") }
     }
 
     private fun initFab() {
         binding.fab.setOnClickListener {
-            val alert = MaterialAlertDialogBuilder(requireContext()).setTitle(getString(R.string.add_feed))
-                .setView(R.layout.dialog_add_feed).setPositiveButton(R.string.add) { dialogInterface, _ ->
-                    val dialog = dialogInterface as AlertDialog
-                    val url = dialog.findViewById<TextInputEditText>(R.id.url)?.text.toString()
+            val alert = MaterialAlertDialogBuilder(requireContext())
+                .setTitle(getString(R.string.add_feed))
+                .setView(R.layout.dialog_add_feed)
+                .setPositiveButton(R.string.add) { dialogInterface, _ -> onAddClick(dialogInterface) }
+                .setNegativeButton(R.string.cancel, null)
+                .setOnDismissListener { hideKeyboard() }
+                .show()
+
+            val url = alert.findViewById<EditText>(R.id.url)!!
+
+            url.setOnEditorActionListener { _, actionId, keyEvent ->
+                if (actionId == EditorInfo.IME_ACTION_DONE || keyEvent.keyCode == KeyEvent.KEYCODE_ENTER) {
+                    alert.dismiss()
+
                     viewLifecycleOwner.lifecycleScope.launch {
-                        runCatching { model.addFeed(url) }.onFailure { showErrorDialog(it) }
-                    }
-                }.setNegativeButton(R.string.cancel, null).setOnDismissListener { hideKeyboard() }.show()
-
-            alert.findViewById<EditText>(R.id.url)?.apply {
-                setOnEditorActionListener { _, actionId, keyEvent ->
-                    if (actionId == EditorInfo.IME_ACTION_DONE || keyEvent.keyCode == KeyEvent.KEYCODE_ENTER) {
-                        alert.dismiss()
-
-                        viewLifecycleOwner.lifecycleScope.launch {
-                            runCatching { model.addFeed(text.toString()) }.onFailure { showErrorDialog(it) }
-                        }
-
-                        return@setOnEditorActionListener true
+                        runCatching { model.addFeed(url.text.toString()) }
+                            .onFailure { showErrorDialog(it) }
                     }
 
-                    false
+                    return@setOnEditorActionListener true
                 }
+
+                false
             }
 
             requireContext().showKeyboard()
@@ -290,7 +161,7 @@ class FeedsFragment : Fragment() {
             }
 
             is FeedsModel.State.ShowingFeeds -> {
-                adapter.submitList(state.feeds)
+                listAdapter.submitList(state.feeds)
                 list.isVisible = true
                 progress.isVisible = false
                 message.isVisible = false
@@ -325,13 +196,172 @@ class FeedsFragment : Fragment() {
         }
     }
 
+    private fun handleAddFeedIntent() {
+        val args = FeedsFragmentArgs.fromBundle(requireArguments())
+
+        if (args.url.isNotBlank()) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                runCatching { model.addFeed(args.url) }
+                    .onFailure { showErrorDialog(it) }
+            }
+        }
+    }
+
+    private fun onAddClick(dialogInterface: DialogInterface) {
+        val url = (dialogInterface as AlertDialog).findViewById<TextInputEditText>(R.id.url)?.text.toString()
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            runCatching { model.addFeed(url) }
+                .onFailure { showErrorDialog(it) }
+        }
+    }
+
+    private fun onRenameClick(feedId: String, dialogInterface: DialogInterface) {
+        val title = (dialogInterface as AlertDialog).findViewById<TextInputEditText>(R.id.title)!!
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            runCatching { model.rename(feedId, title.text.toString()) }
+                .onFailure { showErrorDialog(it) }
+        }
+    }
+
     private fun hideKeyboard() {
         requireActivity().window.setSoftInputMode(
             WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
         )
     }
 
-    class ListAdapterDecoration(private val gapInPixels: Int) : RecyclerView.ItemDecoration() {
+    private fun createFeedsAdapter(): FeedsAdapter {
+        return FeedsAdapter(callback = object : FeedsAdapter.Callback {
+            override fun onClick(item: FeedsAdapter.Item) {
+                findNavController().navigate(
+                    FeedsFragmentDirections.actionFeedsFragmentToFeedEntriesFragment(
+                        filter = EntriesFilter.BelongToFeed(feedId = item.id),
+                    )
+                )
+            }
+
+            override fun onSettingsClick(item: FeedsAdapter.Item) {
+                findNavController().navigate(
+                    FeedsFragmentDirections.actionFeedsFragmentToFeedSettingsFragment(
+                        feedId = item.id,
+                    )
+                )
+            }
+
+            override fun onOpenSelfLinkClick(item: FeedsAdapter.Item) {
+                openUrl(
+                    url = item.selfLink.toString(),
+                    useBuiltInBrowser = item.confUseBuiltInBrowser,
+                )
+            }
+
+            override fun onOpenAlternateLinkClick(item: FeedsAdapter.Item) {
+                openUrl(
+                    url = item.alternateLink.toString(),
+                    useBuiltInBrowser = item.confUseBuiltInBrowser,
+                )
+            }
+
+            override fun onRenameClick(item: FeedsAdapter.Item) {
+                val dialog = MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(getString(R.string.rename))
+                    .setView(R.layout.dialog_rename_feed)
+                    .setPositiveButton(R.string.rename) { dialogInterface, _ ->
+                        onRenameClick(
+                            feedId = item.id,
+                            dialogInterface = dialogInterface,
+                        )
+                    }
+                    .setNegativeButton(R.string.cancel, null)
+                    .setOnDismissListener { hideKeyboard() }
+                    .show()
+
+                val title = dialog.findViewById<TextInputEditText>(R.id.title)!!
+                title.append(item.title)
+
+                requireContext().showKeyboard()
+            }
+
+            override fun onDeleteClick(item: FeedsAdapter.Item) {
+                viewLifecycleOwner.lifecycleScope.launch {
+                    runCatching { model.delete(item.id) }
+                        .onFailure { showErrorDialog(it) }
+                }
+            }
+        })
+    }
+
+    private fun createImportFeedsLauncher(): ActivityResultLauncher<String> {
+        return registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            if (uri == null) {
+                return@registerForActivityResult
+            }
+
+            viewLifecycleOwner.lifecycleScope.launch {
+                runCatching {
+                    val result = withContext(Dispatchers.Default) {
+                        requireContext().contentResolver.openInputStream(uri)!!.use { inputStream ->
+                            model.importOpml(inputStream.bufferedReader().readText())
+                        }
+                    }
+
+                    val message = buildString {
+                        append(getString(R.string.added_d, result.feedsAdded))
+                        append("\n")
+                        append(
+                            getString(
+                                R.string.exists_d,
+                                result.feedsUpdated,
+                            )
+                        )
+                        append("\n")
+                        append(
+                            getString(
+                                R.string.failed_d,
+                                result.feedsFailed,
+                            )
+                        )
+
+                        if (result.errors.isNotEmpty()) {
+                            append("\n\n")
+                        }
+
+                        result.errors.forEach {
+                            append(it)
+
+                            if (result.errors.last() != it) {
+                                append("\n\n")
+                            }
+                        }
+                    }
+
+                    showDialog(
+                        title = getString(R.string.import_title),
+                        message = message,
+                    )
+                }.onFailure {
+                    showErrorDialog(it)
+                }
+            }
+        }
+    }
+
+    private fun createExportFeedsLauncher(): ActivityResultLauncher<String> {
+        return registerForActivityResult(ActivityResultContracts.CreateDocument()) { uri ->
+            lifecycleScope.launchWhenResumed {
+                withContext(Dispatchers.Default) {
+                    requireContext().contentResolver.openOutputStream(uri!!)?.use {
+                        it.write(model.exportOpml())
+                    }
+                }
+            }
+        }
+    }
+
+    class ListItemDecoration(context: Context) : RecyclerView.ItemDecoration() {
+
+        private val gapInPixels = context.resources.getDimensionPixelSize(R.dimen.dp_8)
 
         override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
             val adapter = parent.adapter
