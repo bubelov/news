@@ -30,6 +30,10 @@ SELECT *
 FROM Feed
 WHERE id = ?;
 
+selectLinks:
+SELECT links
+FROM Entry;
+
 deleteAll:
 DELETE
 FROM Feed;

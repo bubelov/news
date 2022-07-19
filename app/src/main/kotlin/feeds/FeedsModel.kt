@@ -2,21 +2,17 @@ package feeds
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import api.Api
 import co.appreactor.feedk.AtomLinkRel
-import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToList
-import com.squareup.sqldelight.runtime.coroutines.mapToOne
 import conf.ConfRepo
 import db.Db
 import db.Feed
+import entries.EntriesRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -26,47 +22,45 @@ import java.util.concurrent.atomic.AtomicInteger
 
 @KoinViewModel
 class FeedsModel(
-    private val api: Api,
     private val confRepo: ConfRepo,
     private val db: Db,
+    private val entriesRepo: EntriesRepo,
+    private val feedsRepo: FeedsRepo,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<State>(State.Loading)
     val state = _state.asStateFlow()
 
-    private val hasActionInProgress = MutableStateFlow(false)
+    private val actionInProgress = MutableStateFlow(false)
     private val importProgress = MutableStateFlow<ImportProgress?>(null)
 
     init {
-        _state.update { State.Loading }
-
         combine(
-            db.feedQueries.selectAll().asFlow().mapToList(),
-            hasActionInProgress,
+            feedsRepo.selectAll(),
+            actionInProgress,
             importProgress,
-        ) { feeds, hasActionInProgress, importProgress ->
+        ) { feeds, actionInProgress, importProgress ->
             if (importProgress != null) {
                 _state.update { State.ImportingFeeds(importProgress) }
-            } else {
-                if (hasActionInProgress) {
-                    _state.update { State.Loading }
-                } else {
-                    _state.update {
-                        State.ShowingFeeds(
-                            feeds = feeds.map { feed ->
-                                feed.toItem(
-                                    db.entryQueries.selectUnreadCount(feed.id).asFlow().mapToOne().first(),
-                                )
-                            }
-                        )
-                    }
+                return@combine
+            }
+
+            if (actionInProgress) {
+                _state.update { State.Loading }
+                return@combine
+            }
+
+            withContext(Dispatchers.Default) {
+                db.transaction {
+                    val items = feeds.map { it.toItem(entriesRepo.selectUnreadCount(it.id)) }
+                    _state.update { State.ShowingFeeds(items) }
                 }
             }
         }.launchIn(viewModelScope)
     }
 
     suspend fun importOpml(opmlDocument: String): ImportResult {
-        hasActionInProgress.update { true }
+        actionInProgress.update { true }
 
         return runCatching {
             val opmlFeeds = opml.importOpml(opmlDocument)
@@ -77,9 +71,7 @@ class FeedsModel(
             val failed = AtomicInteger()
             val errors = mutableListOf<String>()
 
-            val existingLinks = db.feedQueries.selectAll().asFlow().mapToList().map { feeds ->
-                feeds.map { it.links }.flatten()
-            }.first()
+            val existingLinks = feedsRepo.selectLinks().first()
 
             opmlFeeds.forEach { outline ->
                 val outlineUrl = outline.xmlUrl.toHttpUrl()
@@ -91,8 +83,9 @@ class FeedsModel(
                 if (feedAlreadyExists) {
                     exists.incrementAndGet()
                 } else {
-                    api.addFeed(outlineUrl).onSuccess { feed ->
-                        db.transaction { db.feedQueries.insert(feed) }
+                    runCatching {
+                        feedsRepo.insertByUrl(outlineUrl)
+                    }.onSuccess {
                         added.incrementAndGet()
                     }.onFailure {
                         errors += "Failed to import feed ${outline.xmlUrl}\nReason: ${it.message}"
@@ -116,74 +109,53 @@ class FeedsModel(
             )
         }.onSuccess {
             importProgress.update { null }
-            hasActionInProgress.update { false }
+            actionInProgress.update { false }
         }.getOrElse {
             importProgress.update { null }
-            hasActionInProgress.update { false }
+            actionInProgress.update { false }
             throw it
         }
     }
 
     suspend fun exportOpml(): ByteArray {
-        val feeds = db.feedQueries.selectAll().asFlow().mapToList().first()
+        val feeds = feedsRepo.selectAll().first()
         return exportOpml(feeds).toByteArray()
     }
 
     suspend fun addFeed(url: String) {
-        hasActionInProgress.update { true }
+        actionInProgress.update { true }
         val fullUrl = if (!url.startsWith("http")) "https://$url" else url
 
         runCatching {
-            withContext(Dispatchers.Default) {
-                val feed = api.addFeed(fullUrl.toHttpUrl()).getOrThrow()
-
-                db.transaction {
-                    db.feedQueries.insertOrReplace(feed)
-                }
-            }
+            feedsRepo.insertByUrl(fullUrl.toHttpUrl())
         }.onSuccess {
-            hasActionInProgress.update { false }
+            actionInProgress.update { false }
         }.onFailure {
-            hasActionInProgress.update { false }
+            actionInProgress.update { false }
         }.getOrThrow()
     }
 
     suspend fun rename(feedId: String, newTitle: String) {
-        hasActionInProgress.update { true }
+        actionInProgress.update { true }
 
         runCatching {
-            withContext(Dispatchers.Default) {
-                val feed = db.feedQueries.selectById(feedId).asFlow().mapToOne().first()
-                val trimmedNewTitle = newTitle.trim()
-                api.updateFeedTitle(feedId, trimmedNewTitle)
-
-                withContext(Dispatchers.Default) {
-                    db.feedQueries.insertOrReplace(feed.copy(title = trimmedNewTitle))
-                }
-            }
+            feedsRepo.updateTitle(feedId, newTitle)
         }.onSuccess {
-            hasActionInProgress.update { false }
+            actionInProgress.update { false }
         }.onFailure {
-            hasActionInProgress.update { false }
+            actionInProgress.update { false }
         }.getOrThrow()
     }
 
     suspend fun delete(feedId: String) {
-        hasActionInProgress.update { true }
+        actionInProgress.update { true }
 
         runCatching {
-            withContext(Dispatchers.Default) {
-                api.deleteFeed(feedId)
-
-                db.transaction {
-                    db.feedQueries.deleteById(feedId)
-                    db.entryQueries.deleteByFeedId(feedId)
-                }
-            }
+            feedsRepo.deleteById(feedId)
         }.onSuccess {
-            hasActionInProgress.update { false }
+            actionInProgress.update { false }
         }.onFailure {
-            hasActionInProgress.update { false }
+            actionInProgress.update { false }
         }.getOrThrow()
     }
 

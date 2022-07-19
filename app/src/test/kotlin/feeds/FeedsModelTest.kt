@@ -2,6 +2,7 @@ package feeds
 
 import conf.ConfRepo
 import db.testDb
+import entries.EntriesRepo
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -33,11 +34,14 @@ class FeedsModelTest {
     fun init() = runBlocking {
         val db = testDb()
         val confRepo = ConfRepo(db)
+        val entriesRepo = EntriesRepo(mockk(), db)
+        val feedsRepo = FeedsRepo(db, mockk())
 
         val model = FeedsModel(
-            api = mockk(),
             confRepo = confRepo,
             db = db,
+            entriesRepo = entriesRepo,
+            feedsRepo = feedsRepo,
         )
 
         var attempts = 0

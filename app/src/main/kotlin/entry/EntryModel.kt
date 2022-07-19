@@ -14,7 +14,7 @@ import db.Entry
 import db.Link
 import enclosures.EnclosuresRepo
 import entries.EntriesRepo
-import feeds.FeedsRepository
+import feeds.FeedsRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -30,7 +30,7 @@ class EntryModel(
     private val app: Application,
     private val enclosuresRepo: EnclosuresRepo,
     private val entriesRepository: EntriesRepo,
-    private val feedsRepository: FeedsRepository,
+    private val feedsRepository: FeedsRepo,
     private val newsApiSync: Sync,
     confRepo: ConfRepo,
 ) : ViewModel() {

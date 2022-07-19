@@ -116,6 +116,10 @@ class EntriesRepo(
 
     fun selectCount() = db.entryQueries.selectCount().asFlow().mapToOne()
 
+    fun selectUnreadCount(feedId: String): Long {
+        return db.entryQueries.selectUnreadCount(feedId).executeAsOne()
+    }
+
     suspend fun syncAll(): Flow<SyncProgress> = flow {
         emit(SyncProgress(0L))
 

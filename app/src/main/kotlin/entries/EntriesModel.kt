@@ -8,7 +8,7 @@ import conf.ConfRepo.Companion.SORT_ORDER_DESCENDING
 import db.Conf
 import db.EntryWithoutContent
 import db.Feed
-import feeds.FeedsRepository
+import feeds.FeedsRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,7 +29,7 @@ import java.time.format.FormatStyle
 class EntriesModel(
     private val confRepo: ConfRepo,
     private val entriesRepo: EntriesRepo,
-    private val feedsRepo: FeedsRepository,
+    private val feedsRepo: FeedsRepo,
     private val newsApiSync: Sync,
 ) : ViewModel() {
 

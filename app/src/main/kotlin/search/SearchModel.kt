@@ -10,7 +10,7 @@ import db.withoutContent
 import entries.EntriesAdapterItem
 import entries.EntriesFilter
 import entries.EntriesRepo
-import feeds.FeedsRepository
+import feeds.FeedsRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -27,7 +27,7 @@ import java.time.format.FormatStyle
 class SearchModel(
     confRepo: ConfRepo,
     private val entriesRepo: EntriesRepo,
-    private val feedsRepo: FeedsRepository,
+    private val feedsRepo: FeedsRepo,
     private val sync: Sync,
 ) : ViewModel() {
 

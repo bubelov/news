@@ -20,14 +20,14 @@ class FeedsRepositoryTest {
 
     private lateinit var db: Db
     private lateinit var api: Api
-    private lateinit var repo: FeedsRepository
+    private lateinit var repo: FeedsRepo
 
     @BeforeTest
     fun before() {
         db = testDb()
         api = mockk()
 
-        repo = FeedsRepository(
+        repo = FeedsRepo(
             db = db,
             api = api,
         )

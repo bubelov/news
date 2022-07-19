@@ -2,7 +2,7 @@ package sync
 
 import conf.ConfRepo
 import entries.EntriesRepo
-import feeds.FeedsRepository
+import feeds.FeedsRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
@@ -13,7 +13,7 @@ import java.time.Instant
 @Single
 class Sync(
     private val confRepo: ConfRepo,
-    private val feedsRepo: FeedsRepository,
+    private val feedsRepo: FeedsRepo,
     private val entriesRepo: EntriesRepo,
 ) {
 

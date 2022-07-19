@@ -2,14 +2,14 @@ package feedsettings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import feeds.FeedsRepository
+import feeds.FeedsRepo
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
 class FeedSettingsViewModel(
-    private val feedsRepository: FeedsRepository,
+    private val feedsRepository: FeedsRepo,
 ) : ViewModel() {
 
     fun getFeed(id: String) = feedsRepository.selectById(id)

@@ -47,7 +47,7 @@ class StandaloneNewsApi(
         val request = Request.Builder().url(url).build()
 
         runCatching {
-            httpClient.newCall(request).execute()
+            httpClient.newCall(request).await()
         }.getOrElse {
             return Result.failure(it)
         }.use { response ->

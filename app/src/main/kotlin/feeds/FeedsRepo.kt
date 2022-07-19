@@ -6,15 +6,17 @@ import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import db.Db
 import db.Feed
+import db.Link
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl
 import org.koin.core.annotation.Single
 
 @Single
-class FeedsRepository(
+class FeedsRepo(
     private val db: Db,
     private val api: Api,
 ) {
@@ -26,8 +28,9 @@ class FeedsRepository(
     }
 
     suspend fun insertByUrl(url: HttpUrl): Feed {
+        val feed = api.addFeed(url).getOrThrow()
+
         return withContext(Dispatchers.Default) {
-            val feed = api.addFeed(url).getOrThrow()
             db.feedQueries.insertOrReplace(feed)
             feed
         }
@@ -41,6 +44,10 @@ class FeedsRepository(
         return db.feedQueries.selectById(id).asFlow().mapToOneOrNull()
     }
 
+    fun selectLinks(): Flow<List<Link>> {
+        return db.feedQueries.selectLinks().asFlow().mapToList().map { it.flatten() }
+    }
+
     suspend fun updateTitle(feedId: String, newTitle: String) {
         withContext(Dispatchers.Default) {
             val feed = db.feedQueries.selectById(feedId).executeAsOneOrNull()
@@ -52,9 +59,9 @@ class FeedsRepository(
     }
 
     suspend fun deleteById(id: String) {
-        withContext(Dispatchers.Default) {
-            api.deleteFeed(id)
+        api.deleteFeed(id)
 
+        withContext(Dispatchers.Default) {
             db.transaction {
                 db.feedQueries.deleteById(id)
                 db.entryQueries.deleteByFeedId(id)
