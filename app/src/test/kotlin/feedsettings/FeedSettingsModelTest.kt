@@ -1,11 +1,12 @@
-package feeds
+package feedsettings
 
-import conf.ConfRepo
+import db.feed
 import db.testDb
-import entries.EntriesRepo
+import feeds.FeedsRepo
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.resetMain
@@ -13,9 +14,10 @@ import kotlinx.coroutines.test.setMain
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class FeedsModelTest {
+class FeedSettingsModelTest {
 
     private val mainDispatcher = newSingleThreadContext("UI")
 
@@ -31,22 +33,23 @@ class FeedsModelTest {
     }
 
     @Test
-    fun init() = runBlocking {
+    fun loadFeed() = runBlocking {
         val db = testDb()
-        val confRepo = ConfRepo(db)
-        val entriesRepo = EntriesRepo(mockk(), db)
         val feedsRepo = FeedsRepo(mockk(), db)
 
-        val model = FeedsModel(
-            confRepo = confRepo,
-            db = db,
-            entriesRepo = entriesRepo,
+        val feed = feed()
+        feedsRepo.insertOrReplace(feed)
+
+        val model = FeedSettingsModel(
             feedsRepo = feedsRepo,
         )
 
+        assertEquals(FeedSettingsModel.State.LoadingFeed, model.state.value)
+        model.feedId.update { feed.id }
+
         var attempts = 0
 
-        while (model.state.value !is FeedsModel.State.ShowingFeeds) {
+        while (model.state.value !is FeedSettingsModel.State.ShowingFeedSettings) {
             if (attempts++ > 100) {
                 assertTrue { false }
             } else {

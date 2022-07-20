@@ -17,8 +17,8 @@ import org.koin.core.annotation.Single
 
 @Single
 class FeedsRepo(
-    private val db: Db,
     private val api: Api,
+    private val db: Db,
 ) {
 
     suspend fun insertOrReplace(feed: Feed) {

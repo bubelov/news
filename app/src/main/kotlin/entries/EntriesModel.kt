@@ -237,7 +237,7 @@ class EntriesModel(
             entry = this,
             feed = feed,
             conf = conf,
-            showImage = conf.showPreviewImages,
+            showImage = feed.showPreviewImages ?: conf.showPreviewImages,
             cropImage = conf.cropPreviewImages,
             title = title,
             subtitle = "${feed.title} · ${DATE_TIME_FORMAT.format(published)}",
