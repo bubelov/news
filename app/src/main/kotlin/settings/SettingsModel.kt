@@ -4,10 +4,6 @@ import androidx.lifecycle.ViewModel
 import conf.ConfRepo
 import db.Conf
 import db.Db
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.runBlocking
-import navigation.accountSubtitle
 import org.koin.android.annotation.KoinViewModel
 import sync.BackgroundSyncScheduler
 
@@ -22,8 +18,21 @@ class SettingsModel(
 
     fun saveConf(newConf: (Conf) -> Conf) = this.confRepo.update(newConf)
 
-    fun getAccountName(): String = runBlocking {
-        loadConf().map { it.accountSubtitle() }.first()
+    fun getAccountName(): String {
+        val conf = confRepo.conf.value
+
+        return when (conf.backend) {
+            ConfRepo.BACKEND_STANDALONE -> ""
+            ConfRepo.BACKEND_MINIFLUX -> {
+                val username = conf.minifluxServerUsername
+                "$username@${conf.minifluxServerUrl.extractDomain()}"
+            }
+            ConfRepo.BACKEND_NEXTCLOUD -> {
+                val username = conf.nextcloudServerUsername
+                "$username@${conf.nextcloudServerUrl.extractDomain()}"
+            }
+            else -> ""
+        }
     }
 
     fun scheduleBackgroundSync() {
@@ -39,5 +48,9 @@ class SettingsModel(
                 entryQueries.deleteAll()
             }
         }
+    }
+
+    private fun String.extractDomain(): String {
+        return replace("https://", "").replace("http://", "")
     }
 }

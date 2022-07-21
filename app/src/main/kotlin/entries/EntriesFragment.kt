@@ -288,11 +288,13 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
                 progress.isVisible = false
                 message.isVisible = false
                 retry.isVisible = true
+
                 retry.setOnClickListener {
                     lifecycleScope.launchWhenResumed {
                         model.onRetry()
                     }
                 }
+
                 showErrorDialog(state.cause)
             }
 
