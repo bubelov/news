@@ -20,9 +20,11 @@ import db.EntryWithoutContent
 import db.Feed
 import db.Link
 import http.await
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
@@ -78,7 +80,15 @@ class StandaloneNewsApi(
                     addFeed("$url$href".toHttpUrl())
                 }
             } else {
-                return when (val result = feed(response.body!!.byteStream(), contentType)) {
+                val result = runCatching {
+                    withContext(Dispatchers.Default) {
+                        feed(response.body!!.byteStream(), contentType)
+                    }
+                }.getOrElse {
+                    return Result.failure(Exception("Failed to read response", it))
+                }
+
+                return when (result) {
                     is FeedResult.Success -> {
                         Result.success(result.feed.toFeed(url))
                     }
@@ -303,7 +313,7 @@ class StandaloneNewsApi(
             contentSrc = content.src,
             contentText = content.text,
             links = links,
-            summary = "",
+            summary = summary?.text ?: "",
             id = id,
             feedId = feedId,
             title = title,

@@ -108,19 +108,20 @@ private fun atomLinkRelAdapter(): TypeAdapter<AtomLinkRel> {
                 AtomLinkRel.Self -> "self"
                 AtomLinkRel.Enclosure -> "enclosure"
                 AtomLinkRel.Via -> "via"
+                is AtomLinkRel.Custom -> value.value
             }
 
             out.value(string)
         }
 
         override fun read(`in`: JsonReader): AtomLinkRel {
-            return when (`in`.nextString()) {
+            return when (val str = `in`.nextString()) {
                 "alternate" -> AtomLinkRel.Alternate
                 "related" -> AtomLinkRel.Related
                 "self" -> AtomLinkRel.Self
                 "enclosure" -> AtomLinkRel.Enclosure
                 "via" -> AtomLinkRel.Via
-                else -> throw Exception()
+                else -> AtomLinkRel.Custom(str)
             }
         }
     }
