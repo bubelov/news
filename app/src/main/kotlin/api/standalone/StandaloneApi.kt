@@ -60,7 +60,13 @@ class StandaloneNewsApi(
             val contentType = response.header("content-type") ?: ""
 
             if (contentType.startsWith("text/html")) {
-                val html = Jsoup.parse(response.body!!.string())
+                val html = runCatching {
+                    withContext(Dispatchers.Default) {
+                        Jsoup.parse(response.body!!.string())
+                    }
+                }.getOrElse {
+                    return Result.failure(Exception("Failed to read response", it))
+                }
 
                 val feedElements = buildList {
                     addAll(html.select("link[type=\"application/atom+xml\"]"))
