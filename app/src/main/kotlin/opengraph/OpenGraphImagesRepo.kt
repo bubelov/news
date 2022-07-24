@@ -40,8 +40,11 @@ class OpenGraphImagesRepo(
 
     suspend fun fetchEntryImages() {
         withContext(Dispatchers.Default) {
-            restartOnFailure {
+            runCatching {
                 consumePendingEntries(producePendingEntries())
+            }.onFailure {
+                delay(1000)
+                fetchEntryImages()
             }
         }
     }
