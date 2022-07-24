@@ -182,15 +182,6 @@ class OpenGraphImagesRepo(
         return randomPixels.all { it == randomPixels.first() }
     }
 
-    private suspend fun restartOnFailure(block: suspend () -> Unit) {
-        runCatching {
-            block()
-        }.onFailure {
-            delay(1000)
-            restartOnFailure(block)
-        }
-    }
-
     companion object {
         const val MAX_WIDTH_PX = 1080
         const val BATCH_SIZE = 5
