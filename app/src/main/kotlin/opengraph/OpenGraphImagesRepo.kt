@@ -32,20 +32,20 @@ class OpenGraphImagesRepo(
     private val db: Db,
 ) {
 
-    private val queue = Channel<EntryWithoutContent>(5)
-
     private val httpClient = OkHttpClient.Builder()
         .callTimeout(10, TimeUnit.SECONDS)
         .build()
 
     suspend fun fetchEntryImages() {
+        val queue = Channel<EntryWithoutContent>(5)
+
         withContext(Dispatchers.Default) {
-            launch { restartOnFailure { fillQueue() } }
-            launch { restartOnFailure { processQueue() } }
+            launch { restartOnFailure { fillQueue(queue) } }
+            launch { restartOnFailure { processQueue(queue) } }
         }
     }
 
-    private suspend fun fillQueue() {
+    private suspend fun fillQueue(queue: Channel<EntryWithoutContent>) {
         confRepo.conf
             .map { it.showPreviewImages }
             .distinctUntilChanged()
@@ -63,7 +63,7 @@ class OpenGraphImagesRepo(
             }
     }
 
-    private suspend fun processQueue() {
+    private suspend fun processQueue(queue: Channel<EntryWithoutContent>) {
         withContext(Dispatchers.Default) {
             repeat(5) {
                 launch {
