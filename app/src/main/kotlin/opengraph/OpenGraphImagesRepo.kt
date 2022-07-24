@@ -11,8 +11,10 @@ import conf.ConfRepo
 import db.Db
 import db.EntryWithoutContent
 import http.await
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -37,40 +39,42 @@ class OpenGraphImagesRepo(
         .build()
 
     suspend fun fetchEntryImages() {
-        val queue = Channel<EntryWithoutContent>(5)
-
         withContext(Dispatchers.Default) {
-            launch { restartOnFailure { fillQueue(queue) } }
-            launch { restartOnFailure { processQueue(queue) } }
+            restartOnFailure {
+                consumePendingEntries(producePendingEntries())
+            }
         }
     }
 
-    private suspend fun fillQueue(queue: Channel<EntryWithoutContent>) {
+    private fun CoroutineScope.producePendingEntries(): ReceiveChannel<EntryWithoutContent> = produce {
+        val sentEntryIds = mutableSetOf<String>()
+
         confRepo.conf
             .map { it.showPreviewImages }
             .distinctUntilChanged()
             .collectLatest { showPreviewImages ->
                 if (showPreviewImages) {
-                    db.entryQueries.selectByOgImageChecked(false, 5)
+                    db.entryQueries.selectByOgImageChecked(false, BATCH_SIZE * 2L)
                         .asFlow()
                         .mapToList()
                         .collectLatest { highPrioEntries ->
                             highPrioEntries.forEach {
-                                queue.send(it)
+                                if (!sentEntryIds.contains(it.id)) {
+                                    send(it)
+                                    sentEntryIds += it.id
+                                }
                             }
                         }
                 }
             }
     }
 
-    private suspend fun processQueue(queue: Channel<EntryWithoutContent>) {
-        withContext(Dispatchers.Default) {
-            repeat(5) {
-                launch {
-                    for (entry in queue) {
-                        runCatching { fetchImage(entry) }
-                            .onFailure { Log.e("opengraph", "Failed to fetch image", it) }
-                    }
+    private fun CoroutineScope.consumePendingEntries(entries: ReceiveChannel<EntryWithoutContent>) {
+        repeat(BATCH_SIZE) {
+            launch {
+                for (entry in entries) {
+                    runCatching { fetchImage(entry) }
+                        .onFailure { Log.e("opengraph", "Failed to fetch image", it) }
                 }
             }
         }
@@ -186,5 +190,6 @@ class OpenGraphImagesRepo(
 
     companion object {
         const val MAX_WIDTH_PX = 1080
+        const val BATCH_SIZE = 5
     }
 }
