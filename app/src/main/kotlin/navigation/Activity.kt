@@ -16,7 +16,7 @@ import com.google.android.material.navigation.NavigationBarView.OnItemReselected
 import conf.ConfRepo
 import entries.EntriesFilter
 import kotlinx.coroutines.launch
-import opengraph.OpenGraphImagesRepository
+import opengraph.OpenGraphImagesRepo
 import org.koin.android.ext.android.get
 
 class Activity : AppCompatActivity() {
@@ -31,7 +31,7 @@ class Activity : AppCompatActivity() {
         setContentView(binding.root)
 
         get<ConfRepo>().update { it.copy(syncedOnStartup = false) }
-        lifecycleScope.launch { get<OpenGraphImagesRepository>().fetchEntryImages() }
+        lifecycleScope.launch { get<OpenGraphImagesRepo>().fetchEntryImages() }
     }
 
     override fun onStart() {

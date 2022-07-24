@@ -2,18 +2,22 @@ package opengraph
 
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.util.Log
 import co.appreactor.feedk.AtomLinkRel
 import com.squareup.picasso.Picasso
 import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
+import com.squareup.sqldelight.runtime.coroutines.mapToList
 import conf.ConfRepo
 import db.Db
 import db.EntryWithoutContent
+import http.await
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -24,46 +28,63 @@ import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
 @Single
-class OpenGraphImagesRepository(
-    private val db: Db,
+class OpenGraphImagesRepo(
     private val confRepo: ConfRepo,
+    private val db: Db,
 ) {
 
-    companion object {
-        const val MAX_WIDTH_PX = 1080
-    }
+    private val queue = Channel<EntryWithoutContent>(5)
 
     private val httpClient = OkHttpClient.Builder()
         .callTimeout(10, TimeUnit.SECONDS)
         .build()
 
     suspend fun fetchEntryImages() {
-        while (true) {
-            runCatching {
-                confRepo.conf
-                    .map { it.showPreviewImages }
-                    .distinctUntilChanged()
-                    .collectLatest { showPreviewImages ->
-                        if (showPreviewImages) {
-                            db.entryQueries.selectByOgImageChecked(false, 1)
-                                .asFlow()
-                                .mapToOneOrNull()
-                                .filterNotNull()
-                                .collectLatest { fetchImage(it) }
+        withContext(Dispatchers.Default) {
+            listOf(
+                async { fillQueue() },
+                async { processQueue() },
+            ).awaitAll()
+        }
+    }
+
+    private suspend fun fillQueue() {
+        confRepo.conf
+            .map { it.showPreviewImages }
+            .distinctUntilChanged()
+            .collectLatest { showPreviewImages ->
+                if (showPreviewImages) {
+                    db.entryQueries.selectByOgImageChecked(false, 5)
+                        .asFlow()
+                        .mapToList()
+                        .collectLatest { highPrioEntries ->
+                            highPrioEntries.forEach {
+                                queue.send(it)
+                            }
                         }
+                }
+            }
+    }
+
+    private suspend fun processQueue() {
+        withContext(Dispatchers.Default) {
+            val processors = mutableListOf<Deferred<Unit>>()
+
+            repeat(5) {
+                processors += async {
+                    for (entry in queue) {
+                        runCatching { fetchImage(entry) }
+                            .onFailure { Log.e("opengraph", "Failed to fetch image", it) }
                     }
+                }
             }
 
-            delay(1000)
+            processors.awaitAll()
         }
     }
 
     private suspend fun fetchImage(entry: EntryWithoutContent) {
         withContext(Dispatchers.Default) {
-            if (entry.ogImageChecked) {
-                throw IllegalStateException("ogImageChecked = 1")
-            }
-
             val link = entry.links.firstOrNull { it.rel is AtomLinkRel.Alternate && it.type == "text/html" }
                 ?: entry.links.firstOrNull { it.rel is AtomLinkRel.Alternate }
 
@@ -72,10 +93,8 @@ class OpenGraphImagesRepository(
                 return@withContext
             }
 
-            val request = httpClient.newCall(Request.Builder().url(link.href).build())
-
             val response = runCatching {
-                request.execute()
+                httpClient.newCall(Request.Builder().url(link.href).build()).await()
             }.getOrElse {
                 db.entryQueries.updateOgImageChecked(true, entry.id)
                 return@withContext
@@ -106,7 +125,7 @@ class OpenGraphImagesRepository(
                 return@withContext
             }
 
-            val bitmap = kotlin.runCatching {
+            val bitmap = runCatching {
                 Picasso.get().load(imageUrl).resize(MAX_WIDTH_PX, 0).onlyScaleDown().get()
             }.getOrElse {
                 db.entryQueries.updateOgImageChecked(true, entry.id)
@@ -161,5 +180,9 @@ class OpenGraphImagesRepository(
         }
 
         return randomPixels.all { it == randomPixels.first() }
+    }
+
+    companion object {
+        const val MAX_WIDTH_PX = 1080
     }
 }
