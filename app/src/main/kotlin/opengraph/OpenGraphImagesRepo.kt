@@ -11,14 +11,13 @@ import conf.ConfRepo
 import db.Db
 import db.EntryWithoutContent
 import http.await
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -41,10 +40,8 @@ class OpenGraphImagesRepo(
 
     suspend fun fetchEntryImages() {
         withContext(Dispatchers.Default) {
-            listOf(
-                async { fillQueue() },
-                async { processQueue() },
-            ).awaitAll()
+            launch { restartOnFailure { fillQueue() } }
+            launch { restartOnFailure { processQueue() } }
         }
     }
 
@@ -68,18 +65,14 @@ class OpenGraphImagesRepo(
 
     private suspend fun processQueue() {
         withContext(Dispatchers.Default) {
-            val processors = mutableListOf<Deferred<Unit>>()
-
             repeat(5) {
-                processors += async {
+                launch {
                     for (entry in queue) {
                         runCatching { fetchImage(entry) }
                             .onFailure { Log.e("opengraph", "Failed to fetch image", it) }
                     }
                 }
             }
-
-            processors.awaitAll()
         }
     }
 
@@ -180,6 +173,15 @@ class OpenGraphImagesRepo(
         }
 
         return randomPixels.all { it == randomPixels.first() }
+    }
+
+    private suspend fun restartOnFailure(block: suspend () -> Unit) {
+        runCatching {
+            block()
+        }.onFailure {
+            delay(1000)
+            restartOnFailure(block)
+        }
     }
 
     companion object {
