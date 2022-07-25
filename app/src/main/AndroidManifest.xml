@@ -22,7 +22,7 @@
         <activity
             android:name="navigation.Activity"
             android:exported="true"
-            android:windowSoftInputMode="adjustNothing">
+            android:windowSoftInputMode="stateAlwaysHidden|adjustNothing">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

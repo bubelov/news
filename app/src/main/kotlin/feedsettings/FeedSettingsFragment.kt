@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.widget.RadioButton
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
@@ -135,7 +134,7 @@ class FeedSettingsFragment : Fragment() {
         binding.blockedWords.text = model.formatBlockedWords(blockedWords)
 
         binding.blockedWordsPanel.setOnClickListener {
-            MaterialAlertDialogBuilder(requireContext())
+            val dialog = MaterialAlertDialogBuilder(requireContext())
                 .setTitle(getString(R.string.blocked_words))
                 .setView(R.layout.dialog_blocked_words)
                 .setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
@@ -152,16 +151,12 @@ class FeedSettingsFragment : Fragment() {
                     }
                 }
                 .setNegativeButton(R.string.cancel, null)
-                .setOnDismissListener { hideKeyboard() }
                 .show()
 
-            requireContext().showKeyboard()
+            val blockedWordsView = dialog.findViewById<TextInputEditText>(R.id.blockedWords)!!
+            blockedWordsView.append(blockedWords)
+            blockedWordsView.requestFocus()
+            blockedWordsView.postDelayed({ showKeyboard(blockedWordsView) }, 300)
         }
-    }
-
-    private fun hideKeyboard() {
-        requireActivity().window.setSoftInputMode(
-            WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
-        )
     }
 }

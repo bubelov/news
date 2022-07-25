@@ -42,7 +42,7 @@ class SearchFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentSearchBinding.inflate(inflater, container, false)
         return binding.root
@@ -51,8 +51,22 @@ class SearchFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        initToolbar()
+        initList()
+
+        model.state
+            .onEach { setState(it) }
+            .launchIn(viewLifecycleOwner.lifecycleScope)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    private fun initToolbar() {
         binding.toolbar.setNavigationOnClickListener {
-            requireContext().hideKeyboard(binding.query)
+            hideKeyboard(binding.query)
             findNavController().popBackStack()
         }
 
@@ -70,29 +84,25 @@ class SearchFragment : Fragment() {
         })
 
         binding.query.requestFocus()
-        requireContext().showKeyboard()
+        showKeyboard(binding.query)
 
         binding.clear.setOnClickListener { binding.query.setText("") }
-
-        binding.list.setHasFixedSize(true)
-        binding.list.layoutManager = LinearLayoutManager(context)
-        binding.list.adapter = adapter
-        binding.list.addItemDecoration(
-            CardListAdapterDecoration(
-                resources.getDimensionPixelSize(
-                    R.dimen.entries_cards_gap
-                )
-            )
-        )
-
-        model.state
-            .onEach { setState(it) }
-            .launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    private fun initList() {
+        binding.list.apply {
+            setHasFixedSize(true)
+            layoutManager = LinearLayoutManager(context)
+            this.adapter = this@SearchFragment.adapter
+
+            addItemDecoration(
+                CardListAdapterDecoration(
+                    resources.getDimensionPixelSize(
+                        R.dimen.entries_cards_gap
+                    )
+                )
+            )
+        }
     }
 
     private fun setState(state: SearchModel.State) {

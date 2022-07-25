@@ -8,7 +8,6 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import androidx.activity.result.ActivityResultLauncher
@@ -121,19 +120,18 @@ class FeedsFragment : Fragment() {
 
     private fun initFab() {
         binding.fab.setOnClickListener {
-            val alert = MaterialAlertDialogBuilder(requireContext())
+            val dialog = MaterialAlertDialogBuilder(requireContext())
                 .setTitle(getString(R.string.add_feed))
                 .setView(R.layout.dialog_add_feed)
                 .setPositiveButton(R.string.add) { dialogInterface, _ -> onAddClick(dialogInterface) }
                 .setNegativeButton(R.string.cancel, null)
-                .setOnDismissListener { hideKeyboard() }
                 .show()
 
-            val url = alert.findViewById<EditText>(R.id.url)!!
+            val url = dialog.findViewById<EditText>(R.id.url)!!
 
             url.setOnEditorActionListener { _, actionId, keyEvent ->
                 if (actionId == EditorInfo.IME_ACTION_DONE || keyEvent.keyCode == KeyEvent.KEYCODE_ENTER) {
-                    alert.dismiss()
+                    dialog.dismiss()
 
                     viewLifecycleOwner.lifecycleScope.launch {
                         runCatching { model.addFeed(url.text.toString()) }
@@ -146,7 +144,8 @@ class FeedsFragment : Fragment() {
                 false
             }
 
-            requireContext().showKeyboard()
+            url.requestFocus()
+            url.postDelayed({ showKeyboard(url) }, 300)
         }
     }
 
@@ -225,12 +224,6 @@ class FeedsFragment : Fragment() {
         }
     }
 
-    private fun hideKeyboard() {
-        requireActivity().window.setSoftInputMode(
-            WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
-        )
-    }
-
     private fun createFeedsAdapter(): FeedsAdapter {
         return FeedsAdapter(callback = object : FeedsAdapter.Callback {
             override fun onClick(item: FeedsAdapter.Item) {
@@ -274,13 +267,13 @@ class FeedsFragment : Fragment() {
                         )
                     }
                     .setNegativeButton(R.string.cancel, null)
-                    .setOnDismissListener { hideKeyboard() }
                     .show()
 
                 val title = dialog.findViewById<TextInputEditText>(R.id.title)!!
                 title.append(item.title)
 
-                requireContext().showKeyboard()
+                title.requestFocus()
+                title.postDelayed({ showKeyboard(title) }, 300)
             }
 
             override fun onDeleteClick(item: FeedsAdapter.Item) {

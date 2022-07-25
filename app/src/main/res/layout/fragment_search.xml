@@ -41,7 +41,8 @@
                 android:clickable="true"
                 android:contentDescription="@string/clear_search_input"
                 android:focusable="true"
-                android:src="@drawable/ic_baseline_close_24" />
+                android:src="@drawable/ic_baseline_close_24"
+                android:visibility="gone" />
 
         </LinearLayout>
 
