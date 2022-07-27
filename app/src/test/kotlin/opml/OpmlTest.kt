@@ -15,49 +15,65 @@ import kotlin.test.assertTrue
 class OpmlTest {
 
     private val sampleElements = listOf(
-        Outline(
+        OpmlOutline(
             text = "WirelessMoves",
-            type = "rss",
+            outlines = emptyList(),
             xmlUrl = "https://blog.wirelessmoves.com/feed",
-            openEntriesInBrowser = true,
-            blockedWords = "abc",
-            showPreviewImages = false,
+            htmlUrl = "https://blog.wirelessmoves.com/",
+            extOpenEntriesInBrowser = true,
+            extShowPreviewImages = false,
+            extBlockedWords = "abc",
         ),
-        Outline(
+        OpmlOutline(
             text = "Nextcloud",
-            type = "rss",
+            outlines = emptyList(),
             xmlUrl = "https://nextcloud.com/blogfeed",
-            openEntriesInBrowser = false,
-            blockedWords = "",
-            showPreviewImages = true,
+            htmlUrl = "https://nextcloud.com/",
+            extOpenEntriesInBrowser = false,
+            extBlockedWords = "",
+            extShowPreviewImages = true,
         ),
-        Outline(
+        OpmlOutline(
             text = "PINE64",
-            type = "rss",
+            outlines = emptyList(),
             xmlUrl = "https://www.pine64.org/feed/",
-            openEntriesInBrowser = true,
-            blockedWords = "xyz",
-            showPreviewImages = null,
+            htmlUrl = "https://www.pine64.org/",
+            extOpenEntriesInBrowser = true,
+            extBlockedWords = "xyz",
+            extShowPreviewImages = null,
         ),
     )
 
     @Test
     fun readsSampleDocument() {
-        val elements = importOpml(readFile("sample.opml"))
-        assertContentEquals(sampleElements, elements)
+        val doc = readFile("sample.opml").toOpml()
+        assertContentEquals(sampleElements, doc.outlines)
     }
 
     @Test
     fun writesSampleDocument() {
-        val feedsWithLinks = sampleElements.map {
+        val feeds = sampleElements.map {
             val feedId = UUID.randomUUID().toString()
 
             val selfLink = Link(
                 feedId = feedId,
                 entryId = null,
-                href = it.xmlUrl.toHttpUrl(),
+                href = it.xmlUrl!!.toHttpUrl(),
                 rel = AtomLinkRel.Self,
                 type = null,
+                hreflang = null,
+                title = it.text,
+                length = null,
+                extEnclosureDownloadProgress = null,
+                extCacheUri = null,
+            )
+
+            val alternateLink = Link(
+                feedId = feedId,
+                entryId = null,
+                href = it.htmlUrl!!.toHttpUrl(),
+                rel = AtomLinkRel.Alternate,
+                type = "text/html",
                 hreflang = null,
                 title = it.text,
                 length = null,
@@ -68,31 +84,49 @@ class OpmlTest {
             val feed = Feed(
                 id = UUID.randomUUID().toString(),
                 title = it.text,
-                links = listOf(selfLink),
-                openEntriesInBrowser = it.openEntriesInBrowser,
-                blockedWords = it.blockedWords,
-                showPreviewImages = it.showPreviewImages,
+                links = listOf(selfLink, alternateLink),
+                openEntriesInBrowser = it.extOpenEntriesInBrowser!!,
+                blockedWords = it.extBlockedWords!!,
+                showPreviewImages = it.extShowPreviewImages,
             )
 
             feed
         }
 
-        val opml = exportOpml(feedsWithLinks)
-        val elements = importOpml(opml)
-        assertTrue(opml.lines().size > 1)
-        assertContentEquals(sampleElements.toTypedArray(), elements.toTypedArray())
+        val outlines = feeds.map { feed ->
+            OpmlOutline(
+                text = feed.title,
+                outlines = emptyList(),
+                xmlUrl = feed.links.first { it.rel is AtomLinkRel.Self }.href.toString(),
+                htmlUrl = feed.links.first { it.rel is AtomLinkRel.Alternate }.href.toString(),
+                extOpenEntriesInBrowser = feed.openEntriesInBrowser,
+                extShowPreviewImages = feed.showPreviewImages,
+                extBlockedWords = feed.blockedWords,
+            )
+        }
+
+        var opmlDocument = OpmlDocument(
+            version = OpmlVersion.V_2_0,
+            outlines = outlines,
+        )
+
+        assertTrue(opmlDocument.toDocument().format().lines().size > 1)
+
+        opmlDocument = opmlDocument.toDocument().format().toOpml()
+
+        assertContentEquals(sampleElements.toTypedArray(), opmlDocument.outlines.toTypedArray())
     }
 
     @Test
     fun readNestedOpml() {
-        val elements = importOpml(readFile("nested.opml"))
-        assertEquals(6, elements.size)
+        val document = readFile("nested.opml").toOpml()
+        assertEquals(6, document.leafOutlines().size)
     }
 
     @Test
     fun readsMozillaOpml() {
-        val elements = importOpml(readFile("mozilla.opml"))
-        assertEquals(2, elements.size)
+        val document = readFile("mozilla.opml").toOpml()
+        assertEquals(2, document.outlines.size)
     }
 
     private fun readFile(path: String) = javaClass.getResourceAsStream(path)!!.readTextAndClose()

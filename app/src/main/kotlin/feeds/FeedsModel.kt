@@ -16,7 +16,11 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrl
-import opml.exportOpml
+import opml.OpmlDocument
+import opml.OpmlOutline
+import opml.OpmlVersion
+import opml.leafOutlines
+import opml.toOpml
 import org.koin.android.annotation.KoinViewModel
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -59,12 +63,12 @@ class FeedsModel(
         }.launchIn(viewModelScope)
     }
 
-    suspend fun importOpml(opmlDocument: String): ImportResult {
+    suspend fun importOpml(xml: String): ImportResult {
         actionInProgress.update { true }
 
         return runCatching {
-            val opmlFeeds = opml.importOpml(opmlDocument)
-            importProgress.update { ImportProgress(0, opmlFeeds.size) }
+            val leafOutlines = xml.toOpml().leafOutlines()
+            importProgress.update { ImportProgress(0, leafOutlines.size) }
 
             val added = AtomicInteger()
             val exists = AtomicInteger()
@@ -73,8 +77,8 @@ class FeedsModel(
 
             val existingLinks = feedsRepo.selectLinks().first()
 
-            opmlFeeds.forEach { outline ->
-                val outlineUrl = outline.xmlUrl.toHttpUrl()
+            leafOutlines.forEach { outline ->
+                val outlineUrl = outline.xmlUrl!!.toHttpUrl()
 
                 val feedAlreadyExists = existingLinks.any {
                     it.href.toUri().normalize() == outlineUrl.toUri().normalize()
@@ -95,7 +99,7 @@ class FeedsModel(
                     importProgress.update {
                         ImportProgress(
                             imported = added.get() + exists.get() + failed.get(),
-                            total = opmlFeeds.size,
+                            total = leafOutlines.size,
                         )
                     }
                 }
@@ -117,9 +121,23 @@ class FeedsModel(
         }
     }
 
-    suspend fun exportOpml(): ByteArray {
-        val feeds = feedsRepo.selectAll().first()
-        return exportOpml(feeds).toByteArray()
+    suspend fun generateOpml(): OpmlDocument {
+        val outlines = feedsRepo.selectAll().first().map { feed ->
+            OpmlOutline(
+                text = feed.title,
+                outlines = emptyList(),
+                xmlUrl = feed.links.first { it.rel is AtomLinkRel.Self }.href.toString(),
+                htmlUrl = feed.links.first { it.rel is AtomLinkRel.Alternate }.href.toString(),
+                extOpenEntriesInBrowser = feed.openEntriesInBrowser,
+                extShowPreviewImages = feed.showPreviewImages,
+                extBlockedWords = feed.blockedWords,
+            )
+        }
+
+        return OpmlDocument(
+            version = OpmlVersion.V_2_0,
+            outlines = outlines,
+        )
     }
 
     suspend fun addFeed(url: String) {

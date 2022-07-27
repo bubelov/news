@@ -34,6 +34,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import navigation.openUrl
 import navigation.showKeyboard
+import opml.format
+import opml.toDocument
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class FeedsFragment : Fragment() {
@@ -345,7 +347,7 @@ class FeedsFragment : Fragment() {
             lifecycleScope.launchWhenResumed {
                 withContext(Dispatchers.Default) {
                     requireContext().contentResolver.openOutputStream(uri!!)?.use {
-                        it.write(model.exportOpml())
+                        it.write(model.generateOpml().toDocument().format().toByteArray())
                     }
                 }
             }
