@@ -5,15 +5,15 @@ import db.testDb
 import entries.EntriesRepo
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withTimeout
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertTrue
 
 class FeedsModelTest {
 
@@ -31,7 +31,7 @@ class FeedsModelTest {
     }
 
     @Test
-    fun init() = runBlocking {
+    fun init(): Unit = runBlocking {
         val db = testDb()
         val confRepo = ConfRepo(db)
         val entriesRepo = EntriesRepo(mockk(), db)
@@ -44,14 +44,8 @@ class FeedsModelTest {
             feedsRepo = feedsRepo,
         )
 
-        var attempts = 0
-
-        while (model.state.value !is FeedsModel.State.ShowingFeeds) {
-            if (attempts++ > 100) {
-                assertTrue { false }
-            } else {
-                delay(10)
-            }
+        withTimeout(1000) {
+            model.state.filterIsInstance<FeedsModel.State.ShowingFeeds>()
         }
     }
 }

@@ -13,17 +13,18 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withTimeout
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import java.util.UUID
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertTrue
 
 class EnclosuresModelTest {
 
@@ -88,14 +89,8 @@ class EnclosuresModelTest {
             enclosuresRepo = enclosuresRepo,
         )
 
-        var attempts = 0
-
-        while (model.state.value !is EnclosuresModel.State.ShowingEnclosures) {
-            if (attempts++ > 100) {
-                assertTrue { false }
-            } else {
-                delay(10)
-            }
+        withTimeout(1000) {
+            model.state.filterIsInstance<EnclosuresModel.State.ShowingEnclosures>().first()
         }
 
         verify { contentResolver.delete(any(), null, null) }

@@ -5,17 +5,18 @@ import db.testDb
 import feeds.FeedsRepo
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withTimeout
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class FeedSettingsModelTest {
 
@@ -33,7 +34,7 @@ class FeedSettingsModelTest {
     }
 
     @Test
-    fun loadFeed() = runBlocking {
+    fun loadFeed(): Unit = runBlocking {
         val db = testDb()
         val feedsRepo = FeedsRepo(mockk(), db)
 
@@ -47,14 +48,8 @@ class FeedSettingsModelTest {
         assertEquals(FeedSettingsModel.State.LoadingFeed, model.state.value)
         model.feedId.update { feed.id }
 
-        var attempts = 0
-
-        while (model.state.value !is FeedSettingsModel.State.ShowingFeedSettings) {
-            if (attempts++ > 100) {
-                assertTrue { false }
-            } else {
-                delay(10)
-            }
+        withTimeout(1000) {
+            model.state.filterIsInstance<FeedSettingsModel.State.ShowingFeedSettings>().first()
         }
     }
 }
