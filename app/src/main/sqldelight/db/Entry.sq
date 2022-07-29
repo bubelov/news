@@ -166,12 +166,6 @@ selectCount:
 SELECT COUNT(*)
 FROM Entry;
 
-selectUnreadCount:
-SELECT COUNT(*)
-FROM Entry
-WHERE feedId = ?
-AND read = 0;
-
 selectMaxId:
 SELECT MAX(id + 0) FROM Entry;
 

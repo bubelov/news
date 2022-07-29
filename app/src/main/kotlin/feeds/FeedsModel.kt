@@ -4,17 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.appreactor.feedk.AtomLinkRel
 import conf.ConfRepo
-import db.Db
-import db.Feed
-import entries.EntriesRepo
-import kotlinx.coroutines.Dispatchers
+import db.SelectAllWithUnreadEntryCount
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import opml.OpmlDocument
 import opml.OpmlOutline
@@ -27,8 +23,6 @@ import java.util.concurrent.atomic.AtomicInteger
 @KoinViewModel
 class FeedsModel(
     private val confRepo: ConfRepo,
-    private val db: Db,
-    private val entriesRepo: EntriesRepo,
     private val feedsRepo: FeedsRepo,
 ) : ViewModel() {
 
@@ -40,7 +34,7 @@ class FeedsModel(
 
     init {
         combine(
-            feedsRepo.selectAll(),
+            feedsRepo.selectAllWithUnreadEntryCount(),
             actionInProgress,
             importProgress,
         ) { feeds, actionInProgress, importProgress ->
@@ -54,12 +48,7 @@ class FeedsModel(
                 return@combine
             }
 
-            withContext(Dispatchers.Default) {
-                db.transaction {
-                    val items = feeds.map { it.toItem(entriesRepo.selectUnreadCount(it.id)) }
-                    _state.update { State.ShowingFeeds(items) }
-                }
-            }
+            _state.update { State.ShowingFeeds(feeds.map { it.toItem() }) }
         }.launchIn(viewModelScope)
     }
 
@@ -177,13 +166,13 @@ class FeedsModel(
         }.getOrThrow()
     }
 
-    private fun Feed.toItem(unreadCount: Long): FeedsAdapter.Item {
+    private fun SelectAllWithUnreadEntryCount.toItem(): FeedsAdapter.Item {
         return FeedsAdapter.Item(
             id = id,
             title = title,
             selfLink = links.single { it.rel is AtomLinkRel.Self }.href,
             alternateLink = links.firstOrNull { it.rel is AtomLinkRel.Alternate }?.href,
-            unreadCount = unreadCount,
+            unreadCount = unreadEntries,
             confUseBuiltInBrowser = confRepo.conf.value.useBuiltInBrowser,
         )
     }

@@ -25,6 +25,13 @@ SELECT *
 FROM Feed
 ORDER BY title;
 
+selectAllWithUnreadEntryCount:
+SELECT f.id, f.title, f.links, COUNT(e.id) AS unreadEntries
+FROM Feed f
+LEFT JOIN Entry e ON e.feedId = f.id
+GROUP BY f.id
+ORDER BY f.title;
+
 selectById:
 SELECT *
 FROM Feed

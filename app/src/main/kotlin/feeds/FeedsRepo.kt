@@ -7,6 +7,7 @@ import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import db.Db
 import db.Feed
 import db.Link
+import db.SelectAllWithUnreadEntryCount
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -38,6 +39,10 @@ class FeedsRepo(
 
     fun selectAll(): Flow<List<Feed>> {
         return db.feedQueries.selectAll().asFlow().mapToList()
+    }
+
+    fun selectAllWithUnreadEntryCount(): Flow<List<SelectAllWithUnreadEntryCount>> {
+        return db.feedQueries.selectAllWithUnreadEntryCount().asFlow().mapToList()
     }
 
     fun selectById(id: String): Flow<Feed?> {

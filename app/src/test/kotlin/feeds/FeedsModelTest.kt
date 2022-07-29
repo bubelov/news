@@ -2,7 +2,6 @@ package feeds
 
 import conf.ConfRepo
 import db.testDb
-import entries.EntriesRepo
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterIsInstance
@@ -34,13 +33,10 @@ class FeedsModelTest {
     fun init(): Unit = runBlocking {
         val db = testDb()
         val confRepo = ConfRepo(db)
-        val entriesRepo = EntriesRepo(mockk(), db)
         val feedsRepo = FeedsRepo(mockk(), db)
 
         val model = FeedsModel(
             confRepo = confRepo,
-            db = db,
-            entriesRepo = entriesRepo,
             feedsRepo = feedsRepo,
         )
 

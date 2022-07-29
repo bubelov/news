@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.DialogInterface
 import android.graphics.Rect
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -152,6 +153,8 @@ class FeedsFragment : Fragment() {
     }
 
     private fun setState(state: FeedsModel.State) = binding.apply {
+        Log.d("feeds", "New state: ${state.javaClass}")
+
         when (state) {
             FeedsModel.State.Loading -> {
                 list.isVisible = false
