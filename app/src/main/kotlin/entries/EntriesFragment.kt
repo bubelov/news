@@ -77,7 +77,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         model.args.update { args.filter!! }
 
         model.state
-            .onEach { setState(it) }
+            .onEach { binding.setState(it) }
             .launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
@@ -263,62 +263,47 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         }.launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
-    private suspend fun setState(state: EntriesModel.State?) = binding.apply {
-        when (state) {
-            null -> {
-                swipeRefresh.isRefreshing = false
-                list.isVisible = false
-                progress.isVisible = false
-                message.isVisible = false
-                retry.isVisible = false
-            }
+    private fun FragmentEntriesBinding.views(): List<View> {
+        return listOf(progress, message, retry, swipeRefresh)
+    }
 
+    private fun FragmentEntriesBinding.visibleViews(state: EntriesModel.State): List<View> {
+        return when (state) {
+            is EntriesModel.State.InitialSync -> listOf(progress, message)
+            is EntriesModel.State.FailedToSync -> listOf(retry)
+            is EntriesModel.State.LoadingCachedEntries -> listOf(progress)
+            is EntriesModel.State.ShowingCachedEntries -> listOf(swipeRefresh, message)
+        }
+    }
+
+    private fun FragmentEntriesBinding.setState(state: EntriesModel.State) {
+        views().forEach { it.isVisible = false }
+        visibleViews(state).forEach { it.isVisible = true }
+
+        when (state) {
             is EntriesModel.State.InitialSync -> {
-                swipeRefresh.isRefreshing = false
-                list.isVisible = false
-                progress.isVisible = true
-                message.isVisible = true
                 message.text = state.message
-                retry.isVisible = false
+                message.isVisible = state.message.isNotEmpty()
             }
 
             is EntriesModel.State.FailedToSync -> {
-                swipeRefresh.isRefreshing = false
-                list.isVisible = false
-                progress.isVisible = false
-                message.isVisible = false
-                retry.isVisible = true
-
-                retry.setOnClickListener {
-                    lifecycleScope.launchWhenResumed {
-                        model.onRetry()
-                    }
-                }
-
+                retry.setOnClickListener { model.onRetry() }
                 showErrorDialog(state.cause)
             }
 
             EntriesModel.State.LoadingCachedEntries -> {
-                swipeRefresh.isRefreshing = false
-                list.isVisible = false
-                progress.isVisible = true
-                message.isVisible = false
-                retry.isVisible = false
+
             }
 
             is EntriesModel.State.ShowingCachedEntries -> {
                 swipeRefresh.isRefreshing = state.showBackgroundProgress
-                list.isVisible = true
-                progress.isVisible = false
 
                 if (state.entries.isEmpty()) {
                     message.text = getEmptyMessage()
-                    message.isVisible = true
                 } else {
-                    message.isVisible = false
+                    message.text = ""
                 }
 
-                retry.isVisible = false
                 seenEntries.clear()
                 adapter.submitList(state.entries) { if (state.scrollToTop) scrollToTop() }
             }

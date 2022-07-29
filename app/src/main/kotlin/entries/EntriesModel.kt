@@ -35,7 +35,7 @@ class EntriesModel(
 
     val args = MutableStateFlow<EntriesFilter?>(null)
 
-    private val _state = MutableStateFlow<State?>(null)
+    private val _state = MutableStateFlow<State>(State.LoadingCachedEntries)
     val state = _state.asStateFlow()
 
     private var scrollToTopNextTime = false
@@ -86,7 +86,7 @@ class EntriesModel(
         }.launchIn(viewModelScope)
     }
 
-    suspend fun onRetry() {
+    fun onRetry() {
         viewModelScope.launch { newsApiSync.run() }
     }
 
