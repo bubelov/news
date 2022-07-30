@@ -1,5 +1,6 @@
 package entries
 
+import android.text.Html
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
@@ -74,7 +75,7 @@ class EntriesAdapterViewHolder(
                 })
         }
 
-        primaryText.text = item.title
+        primaryText.text = Html.fromHtml(item.title, Html.FROM_HTML_MODE_COMPACT).toString()
         primaryText.isVisible = primaryText.length() > 0
         secondaryText.text = item.subtitle
 
