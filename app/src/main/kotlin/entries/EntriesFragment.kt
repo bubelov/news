@@ -2,6 +2,7 @@ package entries
 
 import android.graphics.Rect
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -277,6 +278,8 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
     }
 
     private fun FragmentEntriesBinding.setState(state: EntriesModel.State) {
+        Log.d("entries", "New state: ${state.javaClass}")
+
         views().forEach { it.isVisible = false }
         visibleViews(state).forEach { it.isVisible = true }
 
