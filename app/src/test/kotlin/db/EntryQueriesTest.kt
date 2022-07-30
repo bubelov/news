@@ -8,42 +8,42 @@ import kotlin.test.assertEquals
 
 class EntryQueriesTest {
 
-    private lateinit var db: EntryQueries
+    private lateinit var db: Db
 
     @BeforeTest
     fun before() {
-        db = testDb().entryQueries
+        db = testDb()
     }
 
     @Test
     fun insertOrReplace() {
         val item = entry()
-        db.insertOrReplace(item)
-        assertEquals(item, db.selectById(item.id).executeAsOne())
+        db.entryQueries.insertOrReplace(item)
+        assertEquals(item, db.entryQueries.selectById(item.id).executeAsOne())
     }
 
     @Test
     fun selectAll() {
         val items = listOf(entry(), entry())
-        items.forEach { db.insertOrReplace(it) }
+        items.forEach { db.entryQueries.insertOrReplace(it) }
 
         assertEquals(
             items.map { it.withoutContent() }.reversed(),
-            db.selectAll().executeAsList()
+            db.entryQueries.selectAll().executeAsList()
         )
     }
 
     @Test
     fun selectById() {
         val items = listOf(
-            db.insertOrReplace(),
-            db.insertOrReplace(),
-            db.insertOrReplace(),
+            db.entryQueries.insertOrReplace(),
+            db.entryQueries.insertOrReplace(),
+            db.entryQueries.insertOrReplace(),
         )
 
         assertEquals(
             items[1],
-            db.selectById(items[1].id).executeAsOneOrNull(),
+            db.entryQueries.selectById(items[1].id).executeAsOneOrNull(),
         )
     }
 
@@ -52,29 +52,32 @@ class EntryQueriesTest {
         val feed1 = UUID.randomUUID().toString()
         val feed2 = UUID.randomUUID().toString()
 
-        db.insertOrReplace(entry().copy(feedId = feed1))
-        db.insertOrReplace(entry().copy(feedId = feed1))
-        db.insertOrReplace(entry().copy(feedId = feed2))
+        db.entryQueries.insertOrReplace(entry().copy(feedId = feed1))
+        db.entryQueries.insertOrReplace(entry().copy(feedId = feed1))
+        db.entryQueries.insertOrReplace(entry().copy(feedId = feed2))
 
         assertEquals(
             1,
-            db.selectByFeedId(feed2).executeAsList().size,
+            db.entryQueries.selectByFeedId(feed2).executeAsList().size,
         )
     }
 
     @Test
     fun selectByReadAndBookmarked() {
+        val feed = feed()
+        db.feedQueries.insertOrReplace(feed)
+        
         val all = listOf(
-            entry().copy(read = true, bookmarked = true),
-            entry().copy(read = true, bookmarked = false),
-            entry().copy(read = false, bookmarked = false),
+            entry().copy(feedId = feed.id, read = true, bookmarked = true),
+            entry().copy(feedId = feed.id, read = true, bookmarked = false),
+            entry().copy(feedId = feed.id, read = false, bookmarked = false),
         )
 
-        all.forEach { db.insertOrReplace(it) }
+        all.forEach { db.entryQueries.insertOrReplace(it) }
 
         assertEquals(
-            all.filter { !it.read && !it.bookmarked }.map { it.withoutContent() },
-            db.selectByReadAndBookmarked(read = false, bookmarked = false).executeAsList(),
+            all.filter { !it.read && !it.bookmarked }.map { it.id },
+            db.entryQueries.selectByReadAndBookmarked(read = listOf(false), bookmarked = false).executeAsList().map { it.id },
         )
     }
 
@@ -86,11 +89,11 @@ class EntryQueriesTest {
             entry().copy(read = false, bookmarked = false),
         )
 
-        all.forEach { db.insertOrReplace(it) }
+        all.forEach { db.entryQueries.insertOrReplace(it) }
 
         assertEquals(
             all.filter { !it.read || it.bookmarked }.map { it.withoutContent() }.reversed(),
-            db.selectByReadOrBookmarked(read = false, bookmarked = true).executeAsList(),
+            db.entryQueries.selectByReadOrBookmarked(read = false, bookmarked = true).executeAsList(),
         )
     }
 
@@ -102,16 +105,16 @@ class EntryQueriesTest {
             entry().copy(read = false),
         )
 
-        all.forEach { db.insertOrReplace(it) }
+        all.forEach { db.entryQueries.insertOrReplace(it) }
 
         assertEquals(
             all.filter { it.read }.map { it.withoutContent() }.sortedByDescending { it.published },
-            db.selectByRead(true).executeAsList(),
+            db.entryQueries.selectByRead(true).executeAsList(),
         )
 
         assertEquals(
             all.filter { !it.read }.map { it.withoutContent() }.sortedByDescending { it.published },
-            db.selectByRead(false).executeAsList(),
+            db.entryQueries.selectByRead(false).executeAsList(),
         )
     }
 
@@ -123,16 +126,16 @@ class EntryQueriesTest {
             entry().copy(readSynced = true),
         )
 
-        all.forEach { db.insertOrReplace(it) }
+        all.forEach { db.entryQueries.insertOrReplace(it) }
 
         assertEquals(
             all.filter { it.readSynced }.map { it.withoutContent() }.sortedByDescending { it.published },
-            db.selectByReadSynced(true).executeAsList(),
+            db.entryQueries.selectByReadSynced(true).executeAsList(),
         )
 
         assertEquals(
             all.filter { !it.readSynced }.map { it.withoutContent() }.sortedByDescending { it.published },
-            db.selectByReadSynced(false).executeAsList(),
+            db.entryQueries.selectByReadSynced(false).executeAsList(),
         )
     }
 
@@ -144,16 +147,16 @@ class EntryQueriesTest {
             entry().copy(bookmarked = false),
         )
 
-        all.forEach { db.insertOrReplace(it) }
+        all.forEach { db.entryQueries.insertOrReplace(it) }
 
         assertEquals(
             all.filter { it.bookmarked }.map { it.withoutContent() }.sortedByDescending { it.published },
-            db.selectByBookmarked(true).executeAsList(),
+            db.entryQueries.selectByBookmarked(true).executeAsList(),
         )
 
         assertEquals(
             all.filter { !it.bookmarked }.map { it.withoutContent() }.sortedByDescending { it.published },
-            db.selectByBookmarked(false).executeAsList(),
+            db.entryQueries.selectByBookmarked(false).executeAsList(),
         )
     }
 
@@ -169,11 +172,11 @@ class EntryQueriesTest {
         )
 
         db.apply {
-            all.forEach { insertOrReplace(it) }
+            all.forEach { entryQueries.insertOrReplace(it) }
 
-            updateReadByFeedId(read = true, feedId = feedId)
+            entryQueries.updateReadByFeedId(read = true, feedId = feedId)
 
-            selectAll().executeAsList().apply {
+            entryQueries.selectAll().executeAsList().apply {
                 assertEquals(1, filter { !it.readSynced }.size)
                 assertEquals(2, filter { it.feedId == feedId && it.read }.size)
             }
@@ -192,11 +195,11 @@ class EntryQueriesTest {
         )
 
         db.apply {
-            all.forEach { insertOrReplace(it) }
+            all.forEach { entryQueries.insertOrReplace(it) }
 
-            updateReadByBookmarked(read = true, bookmarked = bookmarked)
+            entryQueries.updateReadByBookmarked(read = true, bookmarked = bookmarked)
 
-            selectAll().executeAsList().apply {
+            entryQueries.selectAll().executeAsList().apply {
                 assertEquals(1, filterNot { it.readSynced }.size)
                 assertEquals(2, filter { it.bookmarked && it.read }.size)
             }

@@ -87,7 +87,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
 
         if (runBlocking { model.loadConf().first().markScrolledEntriesAsRead }) {
             model.setRead(
-                entryIds = seenEntries.map { it.entry.id },
+                entryIds = seenEntries.map { it.id },
                 value = true,
             )
 
@@ -344,18 +344,15 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
 
     private fun onListItemClick(item: EntriesAdapterItem) {
         viewLifecycleOwner.lifecycleScope.launch {
-            model.setRead(listOf(item.entry.id), true)
+            model.setRead(listOf(item.id), true)
 
-            val entry = model.getEntry(item.entry.id).first() ?: return@launch
-            val feed = model.getFeed(entry.feedId).first() ?: return@launch
-
-            if (feed.openEntriesInBrowser) {
+            if (item.openInBrowser) {
                 openUrl(
-                    url = entry.links.first { it.rel is AtomLinkRel.Alternate && it.type == "text/html" }.href.toString(),
-                    useBuiltInBrowser = model.loadConf().first().useBuiltInBrowser,
+                    url = item.links.first { it.rel is AtomLinkRel.Alternate && it.type == "text/html" }.href.toString(),
+                    useBuiltInBrowser = item.useBuiltInBrowser,
                 )
             } else {
-                val action = EntriesFragmentDirections.actionEntriesFragmentToEntryFragment(item.entry.id)
+                val action = EntriesFragmentDirections.actionEntriesFragmentToEntryFragment(item.id)
                 findNavController().navigate(action)
             }
         }
@@ -376,16 +373,16 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
                             ItemTouchHelper.LEFT -> {
                                 showSnackbar(
                                     actionText = R.string.marked_as_read,
-                                    action = { model.setRead(listOf(entry.entry.id), true) },
-                                    undoAction = { model.setRead(listOf(entry.entry.id), false) },
+                                    action = { model.setRead(listOf(entry.id), true) },
+                                    undoAction = { model.setRead(listOf(entry.id), false) },
                                 )
                             }
 
                             ItemTouchHelper.RIGHT -> {
                                 showSnackbar(
                                     actionText = R.string.bookmarked,
-                                    action = { model.setBookmarked(entry.entry.id, true) },
-                                    undoAction = { model.setBookmarked(entry.entry.id, false) },
+                                    action = { model.setBookmarked(entry.id, true) },
+                                    undoAction = { model.setBookmarked(entry.id, false) },
                                 )
                             }
                         }
@@ -406,16 +403,16 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
                             ItemTouchHelper.LEFT -> {
                                 showSnackbar(
                                     actionText = R.string.removed_from_bookmarks,
-                                    action = { model.setBookmarked(entry.entry.id, false) },
-                                    undoAction = { model.setBookmarked(entry.entry.id, true) },
+                                    action = { model.setBookmarked(entry.id, false) },
+                                    undoAction = { model.setBookmarked(entry.id, true) },
                                 )
                             }
 
                             ItemTouchHelper.RIGHT -> {
                                 showSnackbar(
                                     actionText = R.string.removed_from_bookmarks,
-                                    action = { model.setBookmarked(entry.entry.id, false) },
-                                    undoAction = { model.setBookmarked(entry.entry.id, true) },
+                                    action = { model.setBookmarked(entry.id, false) },
+                                    undoAction = { model.setBookmarked(entry.id, true) },
                                 )
                             }
                         }

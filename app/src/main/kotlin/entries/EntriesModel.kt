@@ -6,13 +6,15 @@ import conf.ConfRepo
 import conf.ConfRepo.Companion.SORT_ORDER_ASCENDING
 import conf.ConfRepo.Companion.SORT_ORDER_DESCENDING
 import db.Conf
-import db.EntryWithoutContent
-import db.Feed
+import db.SelectByFeedIdAndReadAndBookmarked
+import db.SelectByReadAndBookmarked
 import feeds.FeedsRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -41,48 +43,48 @@ class EntriesModel(
     private var scrollToTopNextTime = false
 
     init {
-        args.onEach { filter ->
-            if (filter == null) {
-                return@onEach
-            }
-
-            _state.update { State.LoadingCachedEntries }
-
-            confRepo.conf.value.apply {
-                if (!initialSyncCompleted || (syncOnStartup && !syncedOnStartup)) {
-                    viewModelScope.launch {
-                        newsApiSync.run()
-                        confRepo.update { it.copy(syncedOnStartup = true) }
-                    }
-                }
-            }
-
+        args.filterNotNull().onEach { filter ->
             combine(
                 confRepo.conf,
-                feedsRepo.selectAll(),
                 entriesRepo.selectCount(),
                 newsApiSync.state,
-            ) { conf, feeds, _, syncState ->
-                when (syncState) {
+            ) { conf, _, syncState ->
+                if (!conf.initialSyncCompleted || (conf.syncOnStartup && !conf.syncedOnStartup)) {
+                    confRepo.update { it.copy(syncedOnStartup = true) }
+                    viewModelScope.launch { newsApiSync.run() }
+                }
+
+                val newState = when (syncState) {
                     is Sync.State.InitialSync -> State.InitialSync(syncState.message)
+
                     else -> {
                         val showBgProgress = when (syncState) {
-                            is Sync.State.Idle -> false
-                            is Sync.State.InitialSync -> false
                             is Sync.State.FollowUpSync -> syncState.args.syncEntries
+                            else -> false
                         }
 
                         val scrollToTop = scrollToTopNextTime
                         scrollToTopNextTime = false
 
                         State.ShowingCachedEntries(
-                            entries = selectEntries(filter, feeds, conf),
+                            entries = if (filter is EntriesFilter.BelongToFeed) selectByFeedIdAndReadAndBookmarked(
+                                feedId = filter.feedId,
+                                bookmarked = filter is EntriesFilter.Bookmarked,
+                                conf = conf,
+                            ) else {
+                                selectByReadAndBookmarked(
+                                    bookmarked = filter is EntriesFilter.Bookmarked,
+                                    conf = conf,
+                                )
+                            },
                             showBackgroundProgress = showBgProgress,
                             scrollToTop = scrollToTop,
                         )
                     }
                 }
-            }.collect { state -> _state.update { state } }
+
+                _state.update { newState }
+            }.collect()
         }.launchIn(viewModelScope)
     }
 
@@ -90,49 +92,44 @@ class EntriesModel(
         viewModelScope.launch { newsApiSync.run() }
     }
 
-    private suspend fun selectEntries(
-        filter: EntriesFilter,
-        feeds: List<Feed>,
+    private suspend fun selectByFeedIdAndReadAndBookmarked(
+        feedId: String,
+        bookmarked: Boolean,
         conf: Conf,
     ): List<EntriesAdapterItem> {
-        val unsortedEntries = when (filter) {
-            is EntriesFilter.NotBookmarked -> {
-                if (conf.showReadEntries) {
-                    entriesRepo.selectAll().first()
-                } else {
-                    entriesRepo.selectByRead(false).first()
-                }.filterNot { it.bookmarked }
-            }
+        val unsorted = entriesRepo.selectByFeedIdAndReadAndBookmarked(
+            feedId = feedId,
+            read = if (conf.showReadEntries) listOf(true, false) else listOf(false),
+            bookmarked = bookmarked,
+        ).first()
 
-            is EntriesFilter.Bookmarked -> {
-                entriesRepo.getBookmarked().first()
-            }
+        val sorted = when (conf.sortOrder) {
+            SORT_ORDER_ASCENDING -> unsorted.sortedBy { it.published }
+            SORT_ORDER_DESCENDING -> unsorted.sortedByDescending { it.published }
+            else -> throw Exception()
+        }
 
-            is EntriesFilter.BelongToFeed -> {
-                val feedEntries = entriesRepo.selectByFeedId(filter.feedId).first()
+        return sorted.map { it.toRow(conf) }
+    }
 
-                if (conf.showReadEntries) {
-                    feedEntries
-                } else {
-                    feedEntries.filter { !it.read }
-                }
+    private suspend fun selectByReadAndBookmarked(
+        bookmarked: Boolean,
+        conf: Conf,
+    ): List<EntriesAdapterItem> {
+        val entries = entriesRepo.selectByReadAndBookmarked(
+            read = if (conf.showReadEntries) listOf(true, false) else listOf(false),
+            bookmarked = bookmarked,
+        ).first()
+
+        val sortedEntries = withContext(Dispatchers.Default) {
+            when (conf.sortOrder) {
+                SORT_ORDER_ASCENDING -> entries.sortedBy { it.published }
+                SORT_ORDER_DESCENDING -> entries.sortedByDescending { it.published }
+                else -> throw Exception()
             }
         }
 
-        val sortedEntries = when (conf.sortOrder) {
-            SORT_ORDER_ASCENDING -> unsortedEntries.sortedBy { it.published }
-            SORT_ORDER_DESCENDING -> unsortedEntries.sortedByDescending { it.published }
-            else -> unsortedEntries
-        }
-
-        val rows = withContext(Dispatchers.Default) {
-            sortedEntries.map { entry ->
-                val feed = feeds.single { feed -> feed.id == entry.feedId }
-                entry.toRow(feed, conf)
-            }
-        }
-
-        return rows
+        return withContext(Dispatchers.Default) { sortedEntries.map { it.toRow(conf) } }
     }
 
     suspend fun onPullRefresh() {
@@ -161,8 +158,6 @@ class EntriesModel(
     }
 
     fun getFeed(id: String) = feedsRepo.selectById(id)
-
-    fun getEntry(id: String) = entriesRepo.selectById(id)
 
     fun setRead(entryIds: Collection<String>, value: Boolean) {
         viewModelScope.launch {
@@ -229,20 +224,39 @@ class EntriesModel(
         }
     }
 
-    private fun EntryWithoutContent.toRow(
-        feed: Feed,
-        conf: Conf,
-    ): EntriesAdapterItem {
+    private fun SelectByFeedIdAndReadAndBookmarked.toRow(conf: Conf): EntriesAdapterItem {
         return EntriesAdapterItem(
-            entry = this,
-            feed = feed,
-            conf = conf,
-            showImage = feed.showPreviewImages ?: conf.showPreviewImages,
+            id = id,
+            showImage = showPreviewImages ?: conf.showPreviewImages,
             cropImage = conf.cropPreviewImages,
+            imageUrl = ogImageUrl,
+            imageWidth = ogImageWidth.toInt(),
+            imageHeight = ogImageHeight.toInt(),
             title = title,
-            subtitle = "${feed.title} · ${DATE_TIME_FORMAT.format(published)}",
+            subtitle = "$feedTitle · ${DATE_TIME_FORMAT.format(published)}",
             summary = summary ?: "",
             read = read,
+            openInBrowser = openEntriesInBrowser,
+            useBuiltInBrowser = conf.useBuiltInBrowser,
+            links = links,
+        )
+    }
+
+    private fun SelectByReadAndBookmarked.toRow(conf: Conf): EntriesAdapterItem {
+        return EntriesAdapterItem(
+            id = id,
+            showImage = showPreviewImages ?: conf.showPreviewImages,
+            cropImage = conf.cropPreviewImages,
+            imageUrl = ogImageUrl,
+            imageWidth = ogImageWidth.toInt(),
+            imageHeight = ogImageHeight.toInt(),
+            title = title,
+            subtitle = "$feedTitle · ${DATE_TIME_FORMAT.format(published)}",
+            summary = summary ?: "",
+            read = read,
+            openInBrowser = openEntriesInBrowser,
+            useBuiltInBrowser = conf.useBuiltInBrowser,
+            links = links,
         )
     }
 

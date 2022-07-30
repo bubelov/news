@@ -38,7 +38,7 @@ class SyncWorker(context: Context, workerParams: WorkerParameters) : Worker(cont
                 if (syncResult.newAndUpdatedEntries > 0) {
                     runCatching {
                         val unreadEntries = entriesRepository.selectByReadAndBookmarked(
-                            read = false,
+                            read = listOf(false),
                             bookmarked = false,
                         ).first().size
 

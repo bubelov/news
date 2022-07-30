@@ -94,11 +94,24 @@ SELECT *
 FROM EntryWithoutContent
 WHERE feedId = ?;
 
+selectByFeedIdAndReadAndBookmarked:
+SELECT e.id, f.showPreviewImages, e.ogImageUrl, e.ogImageWidth, e.ogImageHeight, e.title, f.title AS feedTitle, e.published, e.summary, e.read, f.openEntriesInBrowser, e.links
+FROM Entry e
+JOIN Feed f
+ON f.id = e.feedId
+WHERE e.feedId = ?
+AND e.read IN ?
+AND e.bookmarked = ?
+ORDER BY e.published DESC;
+
 selectByReadAndBookmarked:
-SELECT *
-FROM EntryWithoutContent
-WHERE read = ? AND bookmarked = ?
-ORDER BY published DESC;
+SELECT e.id, f.showPreviewImages, e.ogImageUrl, e.ogImageWidth, e.ogImageHeight, e.title, f.title AS feedTitle, e.published, e.summary, e.read, f.openEntriesInBrowser, e.links
+FROM Entry e
+JOIN Feed f
+ON f.id = e.feedId
+AND e.read IN ?
+AND e.bookmarked = ?
+ORDER BY e.published DESC;
 
 selectByReadOrBookmarked:
 SELECT *

@@ -131,15 +131,15 @@ class SearchFragment : Fragment() {
 
     private fun onListItemClick(item: EntriesAdapterItem) {
         viewLifecycleOwner.lifecycleScope.launch {
-            model.markAsRead(item.entry.id)
+            model.markAsRead(item.id)
 
-            if (item.feed.openEntriesInBrowser) {
+            if (item.openInBrowser) {
                 openUrl(
-                    url = item.entry.links.first { it.rel is AtomLinkRel.Alternate && it.type == "text/html" }.href.toString(),
-                    useBuiltInBrowser = item.conf.useBuiltInBrowser,
+                    url = item.links.first { it.rel is AtomLinkRel.Alternate && it.type == "text/html" }.href.toString(),
+                    useBuiltInBrowser = item.useBuiltInBrowser,
                 )
             } else {
-                val action = SearchFragmentDirections.actionSearchFragmentToEntryFragment(item.entry.id)
+                val action = SearchFragmentDirections.actionSearchFragmentToEntryFragment(item.id)
                 findNavController().navigate(action)
             }
         }

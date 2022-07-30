@@ -9,6 +9,8 @@ import db.Db
 import db.Entry
 import db.EntryWithoutContent
 import db.Feed
+import db.SelectByFeedIdAndReadAndBookmarked
+import db.SelectByReadAndBookmarked
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -36,11 +38,26 @@ class EntriesRepo(
         return db.entryQueries.selectByFeedId(feedId).asFlow().mapToList()
     }
 
-    fun selectByReadAndBookmarked(
-        read: Boolean,
+    fun selectByFeedIdAndReadAndBookmarked(
+        feedId: String,
+        read: Collection<Boolean>,
         bookmarked: Boolean,
-    ): Flow<List<EntryWithoutContent>> {
-        return db.entryQueries.selectByReadAndBookmarked(read, bookmarked).asFlow().mapToList()
+    ): Flow<List<SelectByFeedIdAndReadAndBookmarked>> {
+        return db.entryQueries.selectByFeedIdAndReadAndBookmarked(
+            feedId = feedId,
+            read = read,
+            bookmarked = bookmarked,
+        ).asFlow().mapToList()
+    }
+
+    fun selectByReadAndBookmarked(
+        read: Collection<Boolean>,
+        bookmarked: Boolean,
+    ): Flow<List<SelectByReadAndBookmarked>> {
+        return db.entryQueries.selectByReadAndBookmarked(
+            read = read,
+            bookmarked = bookmarked,
+        ).asFlow().mapToList()
     }
 
     fun selectByReadOrBookmarked(
@@ -74,10 +91,6 @@ class EntriesRepo(
                 readSynced = readSynced,
             )
         }
-    }
-
-    fun getBookmarked(): Flow<List<EntryWithoutContent>> {
-        return db.entryQueries.selectByBookmarked(true).asFlow().mapToList()
     }
 
     suspend fun setBookmarked(

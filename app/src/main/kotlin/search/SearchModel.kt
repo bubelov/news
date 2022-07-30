@@ -6,7 +6,6 @@ import conf.ConfRepo
 import db.Conf
 import db.Entry
 import db.Feed
-import db.withoutContent
 import entries.EntriesAdapterItem
 import entries.EntriesFilter
 import entries.EntriesRepo
@@ -14,6 +13,7 @@ import feeds.FeedsRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
@@ -37,12 +37,11 @@ class SearchModel(
     val state = _state.asStateFlow()
 
     init {
-        combine(args, confRepo.conf, entriesRepo.selectCount()) { args, conf, _ ->
-            if (args == null) {
-                _state.update { State.QueryIsEmpty }
-                return@combine
-            }
-
+        combine(
+            args.filterNotNull(),
+            confRepo.conf,
+            entriesRepo.selectCount(),
+        ) { args, conf, _ ->
             if (args.query.length < 3) {
                 _state.update { State.QueryIsTooShort }
                 return@combine
@@ -91,15 +90,19 @@ class SearchModel(
 
     private fun Entry.toRow(feed: Feed, conf: Conf): EntriesAdapterItem {
         return EntriesAdapterItem(
-            entry = withoutContent(),
-            feed = feed,
-            conf = conf,
+            id = id,
             showImage = false,
             cropImage = false,
+            imageUrl = "",
+            imageWidth = 0,
+            imageHeight = 0,
             title = title,
             subtitle = "${feed.title} · ${DATE_TIME_FORMAT.format(published)}",
             summary = "",
             read = read,
+            openInBrowser = conf.useBuiltInBrowser,
+            useBuiltInBrowser = conf.useBuiltInBrowser,
+            links = links,
         )
     }
 

@@ -2,6 +2,7 @@ package entries
 
 import db.entry
 import db.entryWithoutContent
+import db.feed
 import db.testDb
 import db.toEntry
 import io.mockk.mockk
@@ -72,38 +73,41 @@ class EntriesRepositoryTest {
     fun selectByReadAndBookmarked(): Unit = runBlocking {
         val db = testDb()
 
+        val feed = feed()
+        db.feedQueries.insertOrReplace(feed)
+
         val repo = EntriesRepo(
             db = db,
             api = mockk(),
         )
 
         val entries = listOf(
-            entryWithoutContent().copy(read = true, bookmarked = true),
-            entryWithoutContent().copy(read = true, bookmarked = false),
-            entryWithoutContent().copy(read = false, bookmarked = true),
-            entryWithoutContent().copy(read = false, bookmarked = false),
+            entryWithoutContent().copy(feedId = feed.id, read = true, bookmarked = true),
+            entryWithoutContent().copy(feedId = feed.id, read = true, bookmarked = false),
+            entryWithoutContent().copy(feedId = feed.id, read = false, bookmarked = true),
+            entryWithoutContent().copy(feedId = feed.id, read = false, bookmarked = false),
         )
 
         entries.forEach { db.entryQueries.insertOrReplace(it.toEntry()) }
 
         assertEquals(
-            entries.filter { it.read && it.bookmarked },
-            repo.selectByReadAndBookmarked(read = true, bookmarked = true).first(),
+            entries.filter { it.read && it.bookmarked }.map { it.id },
+            repo.selectByReadAndBookmarked(read = listOf(true), bookmarked = true).first().map { it.id },
         )
 
         assertEquals(
-            entries.filter { it.read && !it.bookmarked },
-            repo.selectByReadAndBookmarked(read = true, bookmarked = false).first(),
+            entries.filter { it.read && !it.bookmarked }.map { it.id },
+            repo.selectByReadAndBookmarked(read = listOf(true), bookmarked = false).first().map { it.id },
         )
 
         assertEquals(
-            entries.filter { !it.read && it.bookmarked },
-            repo.selectByReadAndBookmarked(read = false, bookmarked = true).first(),
+            entries.filter { !it.read && it.bookmarked }.map { it.id },
+            repo.selectByReadAndBookmarked(read = listOf(false), bookmarked = true).first().map { it.id },
         )
 
         assertEquals(
-            entries.filter { !it.read && !it.bookmarked },
-            repo.selectByReadAndBookmarked(read = false, bookmarked = false).first(),
+            entries.filter { !it.read && !it.bookmarked }.map { it.id },
+            repo.selectByReadAndBookmarked(read = listOf(false), bookmarked = false).first().map { it.id },
         )
     }
 

@@ -30,12 +30,12 @@ class EntriesAdapterViewHolder(
         imageView.isVisible = false
         imageProgress.isVisible = false
 
-        if (item.showImage && item.entry.ogImageUrl.isNotBlank()) {
+        if (item.showImage && item.imageUrl.isNotEmpty()) {
             imageView.isVisible = true
             imageProgress.isVisible = true
 
             val targetHeight =
-                ((screenWidth - cardMargin) * (item.entry.ogImageHeight.toDouble() / item.entry.ogImageWidth.toDouble()))
+                ((screenWidth - cardMargin) * (item.imageHeight.toDouble() / item.imageWidth.toDouble()))
 
             if (item.cropImage) {
                 var croppedHeight = targetHeight.toInt()
@@ -58,8 +58,8 @@ class EntriesAdapterViewHolder(
             }
 
             Picasso.get()
-                .load(item.entry.ogImageUrl)
-                .resize(item.entry.ogImageWidth.toInt(), 0)
+                .load(item.imageUrl)
+                .resize(item.imageWidth, 0)
                 .onlyScaleDown()
                 .into(imageView, object : Callback {
                     override fun onSuccess() {
@@ -85,8 +85,6 @@ class EntriesAdapterViewHolder(
         secondaryText.isEnabled = !item.read
         supportingText.isEnabled = !item.read
 
-        root.setOnClickListener {
-            callback.onItemClick(item)
-        }
+        root.setOnClickListener { callback.onItemClick(item) }
     }
 }
