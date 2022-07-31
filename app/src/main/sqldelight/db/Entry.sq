@@ -111,7 +111,8 @@ JOIN Feed f
 ON f.id = e.feedId
 AND e.read IN ?
 AND e.bookmarked = ?
-ORDER BY e.published DESC;
+ORDER BY e.published DESC
+LIMIT 500;
 
 selectByReadOrBookmarked:
 SELECT *
