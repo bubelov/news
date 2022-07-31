@@ -28,7 +28,7 @@ ORDER BY title;
 selectAllWithUnreadEntryCount:
 SELECT f.id, f.title, f.links, COUNT(e.id) AS unreadEntries
 FROM Feed f
-LEFT JOIN Entry e ON e.feedId = f.id
+LEFT JOIN Entry e ON e.feedId = f.id AND e.read = 0 AND e.bookmarked = 0
 GROUP BY f.id
 ORDER BY f.title;
 
