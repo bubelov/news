@@ -2,7 +2,6 @@ package entries
 
 import android.graphics.Rect
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -11,7 +10,9 @@ import androidx.annotation.StringRes
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -24,12 +25,8 @@ import com.google.android.material.navigation.NavigationBarView.OnItemReselected
 import com.google.android.material.snackbar.Snackbar
 import conf.ConfRepo
 import dialog.showErrorDialog
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import navigation.openUrl
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -71,22 +68,25 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initToolbar()
         initSwipeRefresh()
         initList()
 
         model.args.update { args.filter!! }
 
-        model.state
-            .onEach { binding.setState(it) }
-            .launchIn(viewLifecycleOwner.lifecycleScope)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                model.state.collect { binding.setState(it) }
+            }
+        }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
 
-        if (runBlocking { model.loadConf().first().markScrolledEntriesAsRead }) {
+        val state = model.state.value
+
+        if (state is EntriesModel.State.ShowingCachedEntries && state.conf.markScrolledEntriesAsRead) {
             model.setRead(
                 entryIds = seenEntries.map { it.id },
                 value = true,
@@ -100,188 +100,41 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         scrollToTop()
     }
 
-    private fun scrollToTop() {
-        binding.list.layoutManager?.scrollToPosition(0)
-    }
-
-    private fun initToolbar() {
-        binding.toolbar.apply {
-            inflateMenu(R.menu.menu_entries)
-
-            when (val filter = args.filter!!) {
-                EntriesFilter.Bookmarked -> {
-                    setTitle(R.string.bookmarks)
-                }
-
-                EntriesFilter.NotBookmarked -> {
-                    setTitle(R.string.news)
-                }
-
-                is EntriesFilter.BelongToFeed -> {
-                    binding.toolbar.apply {
-                        navigationIcon = DrawerArrowDrawable(context).also { it.progress = 1f }
-                        setNavigationOnClickListener { findNavController().popBackStack() }
-                    }
-
-                    model.getFeed(filter.feedId)
-                        .onEach { title = it?.title }
-                        .launchIn(viewLifecycleOwner.lifecycleScope)
-                }
-            }
-
-            initSearchButton()
-            initShowReadEntriesButton()
-            initSortOrderButton()
-            initMarkAllAsReadButton()
-            initSettingsButton()
-        }
-    }
-
-    private fun initSearchButton() {
-        binding.toolbar.menu!!.findItem(R.id.search).setOnMenuItemClickListener {
-            findNavController().navigate(
-                EntriesFragmentDirections.actionEntriesFragmentToSearchFragment(
-                    args.filter!!
-                )
-            )
-            true
-        }
-    }
-
-    private fun initShowReadEntriesButton() {
-        val button = binding.toolbar.menu!!.findItem(R.id.showOpenedEntries)
-        button.isVisible = getShowReadEntriesButtonVisibility()
-
-        lifecycleScope.launchWhenResumed {
-            val conf = model.loadConf().first()
-
-            if (conf.showReadEntries) {
-                button.setIcon(R.drawable.ic_baseline_visibility_24)
-                button.title = getString(R.string.hide_read_news)
-                touchHelper?.attachToRecyclerView(null)
-            } else {
-                button.setIcon(R.drawable.ic_baseline_visibility_off_24)
-                button.title = getString(R.string.show_read_news)
-                touchHelper?.attachToRecyclerView(binding.list)
-            }
-        }
-
-        button.setOnMenuItemClickListener {
-            model.saveConf { it.copy(showReadEntries = !it.showReadEntries) }
-            initShowReadEntriesButton()
-            true
-        }
-    }
-
-    private fun initSortOrderButton() {
-        val button = binding.toolbar.menu.findItem(R.id.sort)
-
-        model.loadConf().onEach { conf ->
-            when (conf.sortOrder) {
-                ConfRepo.SORT_ORDER_ASCENDING -> {
-                    button.setIcon(R.drawable.ic_clock_forward)
-                    button.title = getString(R.string.show_newest_first)
-                }
-
-                ConfRepo.SORT_ORDER_DESCENDING -> {
-                    button.setIcon(R.drawable.ic_clock_back)
-                    button.title = getString(R.string.show_oldest_first)
-                }
-            }
-
-            button.setOnMenuItemClickListener {
-                model.changeSortOrder()
-                true
-            }
-        }.launchIn(viewLifecycleOwner.lifecycleScope)
-    }
-
-    private fun initMarkAllAsReadButton() {
-        binding.toolbar.menu!!.findItem(R.id.markAllAsRead).setOnMenuItemClickListener {
-            lifecycleScope.launchWhenResumed { model.markAllAsRead() }
-            true
-        }
-    }
-
-    private fun initSettingsButton() {
-        binding.toolbar.menu!!.findItem(R.id.settings).setOnMenuItemClickListener {
-            findNavController().navigate(EntriesFragmentDirections.actionEntriesFragmentToSettingsFragment())
-            true
-        }
-    }
-
     private fun initSwipeRefresh() {
-        val swipeRefresh = binding.swipeRefresh
-
-        swipeRefresh.apply {
+        binding.swipeRefresh.apply {
             when (args.filter) {
                 is EntriesFilter.NotBookmarked -> {
                     isEnabled = true
-
-                    setOnRefreshListener {
-                        lifecycleScope.launch {
-                            runCatching {
-                                model.onPullRefresh()
-                            }.onFailure {
-                                lifecycleScope.launchWhenResumed { showErrorDialog(it) }
-                            }
-
-                            swipeRefresh.isRefreshing = false
-                        }
-                    }
+                    setOnRefreshListener { model.onPullRefresh() }
                 }
 
-                else -> {
-                    swipeRefresh.isEnabled = false
-                }
+                else -> isEnabled = false
             }
         }
     }
 
     private fun initList() {
-        binding.list.apply {
-            layoutManager = LinearLayoutManager(requireContext())
-            adapter = this@EntriesFragment.adapter
+        if (binding.list.adapter == null) {
+            binding.list.apply {
+                layoutManager = LinearLayoutManager(requireContext())
+                adapter = this@EntriesFragment.adapter
 
-            val listItemDecoration = CardListAdapterDecoration(
-                resources.getDimensionPixelSize(R.dimen.entries_cards_gap)
-            )
+                val listItemDecoration = CardListAdapterDecoration(
+                    resources.getDimensionPixelSize(R.dimen.entries_cards_gap)
+                )
 
-            addItemDecoration(listItemDecoration)
-        }
-
-        touchHelper?.attachToRecyclerView(binding.list)
-
-        model.loadConf().onEach {
-            if (
-                it.markScrolledEntriesAsRead
-                && (args.filter is EntriesFilter.NotBookmarked || args.filter is EntriesFilter.BelongToFeed)
-            ) {
-                binding.list.addOnScrollListener(trackingListener)
-            } else {
-                binding.list.removeOnScrollListener(trackingListener)
+                addItemDecoration(listItemDecoration)
             }
-        }.launchIn(viewLifecycleOwner.lifecycleScope)
-    }
 
-    private fun FragmentEntriesBinding.views(): List<View> {
-        return listOf(progress, message, retry, swipeRefresh)
-    }
-
-    private fun FragmentEntriesBinding.visibleViews(state: EntriesModel.State): List<View> {
-        return when (state) {
-            is EntriesModel.State.InitialSync -> listOf(progress, message)
-            is EntriesModel.State.FailedToSync -> listOf(retry)
-            is EntriesModel.State.LoadingCachedEntries -> listOf(progress)
-            is EntriesModel.State.ShowingCachedEntries -> listOf(swipeRefresh, message)
+            touchHelper?.attachToRecyclerView(binding.list)
         }
     }
 
     private fun FragmentEntriesBinding.setState(state: EntriesModel.State) {
-        Log.d("entries", "New state: ${state.javaClass}")
-
         views().forEach { it.isVisible = false }
         visibleViews(state).forEach { it.isVisible = true }
+
+        updateToolbar(state)
 
         when (state) {
             is EntriesModel.State.InitialSync -> {
@@ -309,7 +162,135 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
 
                 seenEntries.clear()
                 adapter.submitList(state.entries) { if (state.scrollToTop) scrollToTop() }
+
+                if (
+                    state.conf.markScrolledEntriesAsRead
+                    && (args.filter is EntriesFilter.NotBookmarked || args.filter is EntriesFilter.BelongToFeed)
+                ) {
+                    binding.list.addOnScrollListener(trackingListener)
+                } else {
+                    binding.list.removeOnScrollListener(trackingListener)
+                }
             }
+        }
+    }
+
+    private fun updateToolbar(state: EntriesModel.State) {
+        binding.toolbar.apply {
+            when (args.filter!!) {
+                EntriesFilter.Bookmarked -> setTitle(R.string.bookmarks)
+                EntriesFilter.NotBookmarked -> setTitle(R.string.news)
+
+                is EntriesFilter.BelongToFeed -> {
+                    binding.toolbar.apply {
+                        navigationIcon = DrawerArrowDrawable(context).also { it.progress = 1f }
+                        setNavigationOnClickListener { findNavController().popBackStack() }
+                    }
+
+                    if (state is EntriesModel.State.ShowingCachedEntries) {
+                        title = state.feed?.title
+                    }
+                }
+            }
+
+            updateSearchButton()
+            updateShowReadEntriesButton(state)
+            updateSortOrderButton(state)
+            updateMarkAllAsReadButton()
+            updateSettingsButton()
+        }
+    }
+
+    private fun updateSearchButton() {
+        binding.toolbar.menu!!.findItem(R.id.search).setOnMenuItemClickListener {
+            findNavController().navigate(
+                EntriesFragmentDirections.actionEntriesFragmentToSearchFragment(
+                    args.filter!!
+                )
+            )
+            true
+        }
+    }
+
+    private fun updateShowReadEntriesButton(state: EntriesModel.State) {
+        val button = binding.toolbar.menu!!.findItem(R.id.showOpenedEntries)
+        button.isVisible = getShowReadEntriesButtonVisibility()
+
+        if (state !is EntriesModel.State.ShowingCachedEntries) {
+            button.isVisible = false
+            return
+        }
+
+        if (state.conf.showReadEntries) {
+            button.setIcon(R.drawable.ic_baseline_visibility_24)
+            button.title = getString(R.string.hide_read_news)
+            touchHelper?.attachToRecyclerView(null)
+        } else {
+            button.setIcon(R.drawable.ic_baseline_visibility_off_24)
+            button.title = getString(R.string.show_read_news)
+            touchHelper?.attachToRecyclerView(binding.list)
+        }
+
+        button.setOnMenuItemClickListener {
+            model.saveConf { it.copy(showReadEntries = !it.showReadEntries) }
+            true
+        }
+    }
+
+    private fun updateSortOrderButton(state: EntriesModel.State) {
+        val button = binding.toolbar.menu.findItem(R.id.sort)
+
+        if (state !is EntriesModel.State.ShowingCachedEntries) {
+            button.isVisible = false
+            return
+        }
+
+        when (state.conf.sortOrder) {
+            ConfRepo.SORT_ORDER_ASCENDING -> {
+                button.setIcon(R.drawable.ic_clock_forward)
+                button.title = getString(R.string.show_newest_first)
+            }
+
+            ConfRepo.SORT_ORDER_DESCENDING -> {
+                button.setIcon(R.drawable.ic_clock_back)
+                button.title = getString(R.string.show_oldest_first)
+            }
+        }
+
+        button.setOnMenuItemClickListener {
+            model.changeSortOrder()
+            true
+        }
+    }
+
+    private fun updateMarkAllAsReadButton() {
+        binding.toolbar.menu!!.findItem(R.id.markAllAsRead).setOnMenuItemClickListener {
+            model.markAllAsRead()
+            true
+        }
+    }
+
+    private fun updateSettingsButton() {
+        binding.toolbar.menu!!.findItem(R.id.settings).setOnMenuItemClickListener {
+            findNavController().navigate(EntriesFragmentDirections.actionEntriesFragmentToSettingsFragment())
+            true
+        }
+    }
+
+    private fun scrollToTop() {
+        binding.list.layoutManager?.scrollToPosition(0)
+    }
+
+    private fun FragmentEntriesBinding.views(): List<View> {
+        return listOf(toolbar, progress, message, retry, swipeRefresh)
+    }
+
+    private fun FragmentEntriesBinding.visibleViews(state: EntriesModel.State): List<View> {
+        return when (state) {
+            is EntriesModel.State.InitialSync -> listOf(toolbar, progress, message)
+            is EntriesModel.State.FailedToSync -> listOf(toolbar, retry)
+            is EntriesModel.State.LoadingCachedEntries -> listOf(toolbar, progress)
+            is EntriesModel.State.ShowingCachedEntries -> listOf(toolbar, swipeRefresh, message)
         }
     }
 
@@ -346,18 +327,16 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
     }
 
     private fun onListItemClick(item: EntriesAdapterItem) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            model.setRead(listOf(item.id), true)
+        model.setRead(listOf(item.id), true)
 
-            if (item.openInBrowser) {
-                openUrl(
-                    url = item.links.first { it.rel is AtomLinkRel.Alternate && it.type == "text/html" }.href.toString(),
-                    useBuiltInBrowser = item.useBuiltInBrowser,
-                )
-            } else {
-                val action = EntriesFragmentDirections.actionEntriesFragmentToEntryFragment(item.id)
-                findNavController().navigate(action)
-            }
+        if (item.openInBrowser) {
+            openUrl(
+                url = item.links.first { it.rel is AtomLinkRel.Alternate && it.type == "text/html" }.href.toString(),
+                useBuiltInBrowser = item.useBuiltInBrowser,
+            )
+        } else {
+            val action = EntriesFragmentDirections.actionEntriesFragmentToEntryFragment(item.id)
+            findNavController().navigate(action)
         }
     }
 

@@ -6,6 +6,7 @@ import conf.ConfRepo
 import conf.ConfRepo.Companion.SORT_ORDER_ASCENDING
 import conf.ConfRepo.Companion.SORT_ORDER_DESCENDING
 import db.Conf
+import db.Feed
 import db.SelectByFeedIdAndReadAndBookmarked
 import db.SelectByReadAndBookmarked
 import feeds.FeedsRepo
@@ -19,7 +20,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 import sync.Sync
-import sync.SyncResult
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
@@ -44,7 +44,7 @@ class EntriesModel(
                 args.filterNotNull(),
                 confRepo.conf,
                 newsApiSync.state,
-                entriesRepo.selectCount()
+                entriesRepo.selectCount(),
             ) { filter, conf, syncState, _ -> updateState(filter, conf, syncState) }.collectLatest { }
         }
     }
@@ -82,9 +82,11 @@ class EntriesModel(
 
                     _state.update {
                         State.ShowingCachedEntries(
+                            feed = feedsRepo.selectById(filter.feedId).first(),
                             entries = sortedRows.map { it.toAdapterItem(conf) },
                             showBackgroundProgress = showBgProgress,
                             scrollToTop = scrollToTop,
+                            conf = conf,
                         )
                     }
                 } else {
@@ -101,9 +103,11 @@ class EntriesModel(
 
                     _state.update {
                         State.ShowingCachedEntries(
+                            feed = null,
                             entries = sortedRows.map { it.toAdapterItem(conf) },
                             showBackgroundProgress = showBgProgress,
                             scrollToTop = scrollToTop,
+                            conf = conf,
                         )
                     }
                 }
@@ -115,12 +119,9 @@ class EntriesModel(
         viewModelScope.launch { newsApiSync.run() }
     }
 
-    suspend fun onPullRefresh() {
-        val syncResult = newsApiSync.run()
-        if (syncResult is SyncResult.Failure) throw syncResult.cause
+    fun onPullRefresh() {
+        viewModelScope.launch { newsApiSync.run() }
     }
-
-    fun loadConf() = confRepo.conf
 
     fun saveConf(newConf: (Conf) -> Conf) {
         this.confRepo.update(newConf)
@@ -170,33 +171,33 @@ class EntriesModel(
         }
     }
 
-    suspend fun markAllAsRead() {
-        when (val filter = args.value) {
-            null -> {}
-
-            is EntriesFilter.NotBookmarked -> {
-                entriesRepo.updateReadByBookmarked(
-                    read = true,
-                    bookmarked = false,
-                )
-            }
-
-            is EntriesFilter.Bookmarked -> {
-                entriesRepo.updateReadByBookmarked(
-                    read = true,
-                    bookmarked = true,
-                )
-            }
-
-            is EntriesFilter.BelongToFeed -> {
-                entriesRepo.updateReadByFeedId(
-                    read = true,
-                    feedId = filter.feedId,
-                )
-            }
-        }
-
+    fun markAllAsRead() {
         viewModelScope.launch {
+            when (val filter = args.value) {
+                null -> {}
+
+                is EntriesFilter.NotBookmarked -> {
+                    entriesRepo.updateReadByBookmarked(
+                        read = true,
+                        bookmarked = false,
+                    )
+                }
+
+                is EntriesFilter.Bookmarked -> {
+                    entriesRepo.updateReadByBookmarked(
+                        read = true,
+                        bookmarked = true,
+                    )
+                }
+
+                is EntriesFilter.BelongToFeed -> {
+                    entriesRepo.updateReadByFeedId(
+                        read = true,
+                        feedId = filter.feedId,
+                    )
+                }
+            }
+
             newsApiSync.run(
                 Sync.Args(
                     syncFeeds = false,
@@ -250,9 +251,11 @@ class EntriesModel(
         object LoadingCachedEntries : State()
 
         data class ShowingCachedEntries(
+            val feed: Feed?,
             val entries: List<EntriesAdapterItem>,
             val showBackgroundProgress: Boolean,
             val scrollToTop: Boolean = false,
+            val conf: Conf,
         ) : State()
 
         data class FailedToSync(val cause: Throwable) : State()

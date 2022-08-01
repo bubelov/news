@@ -107,7 +107,9 @@ dependencies {
     implementation("androidx.browser:browser:1.4.0")
 
     // Provides lifecycle-aware coroutine scopes
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1")
+    val lifecycleVer = "2.5.1"
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVer")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVer")
 
     // Helps to keep view hierarchies flat
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
