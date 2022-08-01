@@ -128,6 +128,8 @@ class EntriesModel(
     }
 
     fun changeSortOrder() {
+        scrollToTopNextTime = true
+
         confRepo.update {
             val newSortOrder = when (it.sortOrder) {
                 SORT_ORDER_ASCENDING -> SORT_ORDER_DESCENDING
@@ -137,11 +139,7 @@ class EntriesModel(
 
             it.copy(sortOrder = newSortOrder)
         }
-
-        scrollToTopNextTime = true
     }
-
-    fun getFeed(id: String) = feedsRepo.selectById(id)
 
     fun setRead(entryIds: Collection<String>, value: Boolean) {
         viewModelScope.launch {

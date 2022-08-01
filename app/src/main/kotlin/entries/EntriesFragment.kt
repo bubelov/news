@@ -243,6 +243,8 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         if (state !is EntriesModel.State.ShowingCachedEntries) {
             button.isVisible = false
             return
+        } else {
+            button.isVisible = true
         }
 
         when (state.conf.sortOrder) {
@@ -259,6 +261,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
 
         button.setOnMenuItemClickListener {
             model.changeSortOrder()
+            scrollToTop()
             true
         }
     }
