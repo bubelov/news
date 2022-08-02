@@ -39,7 +39,7 @@ WHERE id = ?;
 
 selectLinks:
 SELECT links
-FROM Entry;
+FROM Feed;
 
 deleteAll:
 DELETE

@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.DialogInterface
 import android.graphics.Rect
 import android.os.Bundle
-import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -153,8 +152,6 @@ class FeedsFragment : Fragment() {
     }
 
     private fun setState(state: FeedsModel.State) = binding.apply {
-        Log.d("feeds", "New state: ${state.javaClass}")
-
         when (state) {
             FeedsModel.State.Loading -> {
                 list.isVisible = false
@@ -196,6 +193,31 @@ class FeedsFragment : Fragment() {
 
                 importOpml.isVisible = false
                 fab.hide()
+            }
+
+            is FeedsModel.State.ShowingImportErrors -> {
+                list.isVisible = false
+                progress.isVisible = false
+                message.isVisible = false
+                importOpml.isVisible = false
+                fab.hide()
+
+                val message = buildString {
+                    state.errors.forEach {
+                        append(it)
+
+                        if (state.errors.last() != it) {
+                            append("\n\n")
+                        }
+                    }
+                }
+
+                showDialog(
+                    title = getString(R.string.import_title),
+                    message = message,
+                ) {
+                    model.onImportErrorsAcknowledged()
+                }
             }
         }
     }
@@ -296,52 +318,7 @@ class FeedsFragment : Fragment() {
                 return@registerForActivityResult
             }
 
-            viewLifecycleOwner.lifecycleScope.launch {
-                runCatching {
-                    val result = withContext(Dispatchers.Default) {
-                        requireContext().contentResolver.openInputStream(uri)!!.use { inputStream ->
-                            model.importOpml(inputStream.bufferedReader().readText())
-                        }
-                    }
-
-                    val message = buildString {
-                        append(getString(R.string.added_d, result.feedsAdded))
-                        append("\n")
-                        append(
-                            getString(
-                                R.string.exists_d,
-                                result.feedsUpdated,
-                            )
-                        )
-                        append("\n")
-                        append(
-                            getString(
-                                R.string.failed_d,
-                                result.feedsFailed,
-                            )
-                        )
-
-                        if (result.errors.isNotEmpty()) {
-                            append("\n\n")
-                        }
-
-                        result.errors.forEach {
-                            append(it)
-
-                            if (result.errors.last() != it) {
-                                append("\n\n")
-                            }
-                        }
-                    }
-
-                    showDialog(
-                        title = getString(R.string.import_title),
-                        message = message,
-                    )
-                }.onFailure {
-                    showErrorDialog(it)
-                }
-            }
+            model.importOpml(requireContext().contentResolver.openInputStream(uri)!!)
         }
     }
 

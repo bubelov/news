@@ -1,24 +1,35 @@
 package feeds
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.appreactor.feedk.AtomLinkRel
 import conf.ConfRepo
 import db.SelectAllWithUnreadEntryCount
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import opml.OpmlDocument
 import opml.OpmlOutline
 import opml.OpmlVersion
 import opml.leafOutlines
 import opml.toOpml
 import org.koin.android.annotation.KoinViewModel
-import java.util.concurrent.atomic.AtomicInteger
+import java.io.InputStream
+import javax.xml.parsers.DocumentBuilderFactory
 
 @KoinViewModel
 class FeedsModel(
@@ -31,13 +42,20 @@ class FeedsModel(
 
     private val actionInProgress = MutableStateFlow(false)
     private val importProgress = MutableStateFlow<ImportProgress?>(null)
+    private val importErrors = MutableStateFlow<Collection<String>>(emptyList())
 
     init {
         combine(
             feedsRepo.selectAllWithUnreadEntryCount(),
             actionInProgress,
             importProgress,
-        ) { feeds, actionInProgress, importProgress ->
+            importErrors,
+        ) { feeds, actionInProgress, importProgress, importErrors ->
+            if (importErrors.isNotEmpty()) {
+                _state.update { State.ShowingImportErrors(importErrors) }
+                return@combine
+            }
+
             if (importProgress != null) {
                 _state.update { State.ImportingFeeds(importProgress) }
                 return@combine
@@ -52,61 +70,102 @@ class FeedsModel(
         }.launchIn(viewModelScope)
     }
 
-    suspend fun importOpml(xml: String): ImportResult {
+    fun onImportErrorsAcknowledged() {
+        importErrors.update { emptyList() }
+    }
+
+    fun importOpml(document: InputStream) {
         actionInProgress.update { true }
 
-        return runCatching {
-            val leafOutlines = xml.toOpml().leafOutlines()
-            importProgress.update { ImportProgress(0, leafOutlines.size) }
+        viewModelScope.launch {
+            val outlines = runCatching {
+                withContext(Dispatchers.Default) {
+                    DocumentBuilderFactory
+                        .newInstance()
+                        .newDocumentBuilder()
+                        .parse(document)
+                        .toOpml()
+                        .leafOutlines()
+                }
+            }.getOrElse { error ->
+                importErrors.update { listOf(error.message ?: "") }
+                return@launch
+            }
 
-            val added = AtomicInteger()
-            val exists = AtomicInteger()
-            val failed = AtomicInteger()
+            importProgress.update { ImportProgress(0, outlines.size) }
+
+            var feedsImported = 0
+            var feedsExisted = 0
+            var feedsFailed = 0
             val errors = mutableListOf<String>()
 
+            val mutex = Mutex()
+
+            val outlinesChannel = produce { outlines.forEach { send(it) } }
             val existingLinks = feedsRepo.selectLinks().first()
 
-            leafOutlines.forEach { outline ->
-                val outlineUrl = outline.xmlUrl!!.toHttpUrl()
+            val workers = buildList {
+                repeat(15) {
+                    add(
+                        async {
+                            for (outline in outlinesChannel) {
+                                val outlineUrl = (outline.xmlUrl ?: "").toHttpUrlOrNull()
 
-                val feedAlreadyExists = existingLinks.any {
-                    it.href.toUri().normalize() == outlineUrl.toUri().normalize()
-                }
+                                if (outlineUrl == null) {
+                                    mutex.withLock {
+                                        errors += "Invalid URL: ${outline.xmlUrl}"
+                                        feedsFailed++
+                                    }
 
-                if (feedAlreadyExists) {
-                    exists.incrementAndGet()
-                } else {
-                    runCatching {
-                        feedsRepo.insertByUrl(outlineUrl)
-                    }.onSuccess {
-                        added.incrementAndGet()
-                    }.onFailure {
-                        errors += "Failed to import feed ${outline.xmlUrl}\nReason: ${it.message}"
-                        failed.incrementAndGet()
-                    }
+                                    continue
+                                }
 
-                    importProgress.update {
-                        ImportProgress(
-                            imported = added.get() + exists.get() + failed.get(),
-                            total = leafOutlines.size,
-                        )
-                    }
+                                val feedAlreadyExists = existingLinks.any {
+                                    it.href.toUri().normalize() == outlineUrl.toUri().normalize()
+                                }
+
+                                if (feedAlreadyExists) {
+                                    mutex.withLock { feedsExisted++ }
+                                } else {
+                                    runCatching {
+                                        feedsRepo.insertByUrl(outlineUrl)
+                                    }.onSuccess {
+                                        mutex.withLock { feedsImported++ }
+                                    }.onFailure {
+                                        mutex.withLock {
+                                            errors += "Failed to import feed ${outline.xmlUrl}\nReason: ${it.message}"
+                                            feedsFailed++
+                                        }
+                                    }
+
+                                    importProgress.update {
+                                        ImportProgress(
+                                            imported = feedsImported + feedsExisted + feedsFailed,
+                                            total = outlines.size,
+                                        )
+                                    }
+
+                                    Log.d("feeds", "Progress: ${importProgress.value}")
+                                    Log.d(
+                                        "feeds",
+                                        "Imported: $feedsImported, existed: $feedsExisted, failed: $feedsFailed"
+                                    )
+                                }
+                            }
+                        }
+
+                    )
                 }
             }
 
-            ImportResult(
-                feedsAdded = added.get(),
-                feedsUpdated = exists.get(),
-                feedsFailed = failed.get(),
-                errors = errors,
-            )
-        }.onSuccess {
+            workers.awaitAll()
+
+            if (errors.isNotEmpty()) {
+                importErrors.update { errors }
+            }
+
             importProgress.update { null }
             actionInProgress.update { false }
-        }.getOrElse {
-            importProgress.update { null }
-            actionInProgress.update { false }
-            throw it
         }
     }
 
@@ -181,17 +240,11 @@ class FeedsModel(
         object Loading : State()
         data class ShowingFeeds(val feeds: List<FeedsAdapter.Item>) : State()
         data class ImportingFeeds(val progress: ImportProgress) : State()
+        data class ShowingImportErrors(val errors: Collection<String>) : State()
     }
 
     data class ImportProgress(
         val imported: Int,
         val total: Int,
-    )
-
-    data class ImportResult(
-        val feedsAdded: Int,
-        val feedsUpdated: Int,
-        val feedsFailed: Int,
-        val errors: List<String>,
     )
 }
