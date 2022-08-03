@@ -90,9 +90,12 @@ class EntriesModel(
                         )
                     }
                 } else {
+                    val includeRead = (conf.showReadEntries || filter is EntriesFilter.Bookmarked)
+                    val includeBookmarked = filter is EntriesFilter.Bookmarked
+
                     val rows = entriesRepo.selectByReadAndBookmarked(
-                        read = if (conf.showReadEntries) listOf(true, false) else listOf(false),
-                        bookmarked = filter is EntriesFilter.Bookmarked,
+                        read = if (includeRead) listOf(true, false) else listOf(false),
+                        bookmarked = includeBookmarked,
                     ).first()
 
                     val sortedRows = when (conf.sortOrder) {
