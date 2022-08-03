@@ -3,7 +3,6 @@ package entry
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Rect
-import android.os.Build
 import android.os.Bundle
 import android.text.SpannableStringBuilder
 import android.text.method.LinkMovementMethod
@@ -136,7 +135,7 @@ class EntryFragment : Fragment() {
                     updateBookmarkedButton(state.entry.bookmarked)
                     title.text = state.entry.title
                     val format =
-                        DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
+                        DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)
                     date.text = format.format(state.entry.published)
                     state.parsedContent.applyStyle(summaryView)
                     summaryView.text = state.parsedContent
@@ -275,14 +274,8 @@ class EntryFragment : Fragment() {
                     val radius = resources.getDimension(R.dimen.bullet_radius).toInt()
                     val gap = resources.getDimension(R.dimen.bullet_gap).toInt()
 
-                    val span = if (Build.VERSION.SDK_INT >= 28) {
-                        BulletSpan(gap, textView.currentTextColor, radius)
-                    } else {
-                        BulletSpan(gap, textView.currentTextColor)
-                    }
-
                     setSpan(
-                        span,
+                        BulletSpan(gap, textView.currentTextColor, radius),
                         getSpanStart(it),
                         getSpanEnd(it),
                         0
@@ -296,14 +289,8 @@ class EntryFragment : Fragment() {
                     val stripe = resources.getDimension(R.dimen.quote_stripe_width).toInt()
                     val gap = resources.getDimension(R.dimen.quote_gap).toInt()
 
-                    val span = if (Build.VERSION.SDK_INT >= 28) {
-                        QuoteSpan(color, stripe, gap)
-                    } else {
-                        QuoteSpan(color)
-                    }
-
                     setSpan(
-                        span,
+                        QuoteSpan(color, stripe, gap),
                         getSpanStart(it),
                         getSpanEnd(it),
                         0
