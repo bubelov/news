@@ -110,9 +110,9 @@ class OpmlTest {
             outlines = outlines,
         )
 
-        assertTrue(opmlDocument.toDocument().format().lines().size > 1)
+        assertTrue(opmlDocument.toXmlDocument().toPrettyString().lines().size > 1)
 
-        opmlDocument = opmlDocument.toDocument().format().toOpml()
+        opmlDocument = opmlDocument.toXmlDocument().toPrettyString().toOpml()
 
         assertContentEquals(sampleElements.toTypedArray(), opmlDocument.outlines.toTypedArray())
     }

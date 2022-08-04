@@ -1,6 +1,5 @@
 package feeds
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.appreactor.feedk.AtomLinkRel
@@ -27,8 +26,11 @@ import opml.OpmlOutline
 import opml.OpmlVersion
 import opml.leafOutlines
 import opml.toOpml
+import opml.toPrettyString
+import opml.toXmlDocument
 import org.koin.android.annotation.KoinViewModel
 import java.io.InputStream
+import java.io.OutputStream
 import javax.xml.parsers.DocumentBuilderFactory
 
 @KoinViewModel
@@ -40,28 +42,28 @@ class FeedsModel(
     private val _state = MutableStateFlow<State>(State.Loading)
     val state = _state.asStateFlow()
 
-    private val actionInProgress = MutableStateFlow(false)
-    private val importProgress = MutableStateFlow<ImportProgress?>(null)
-    private val importErrors = MutableStateFlow<Collection<String>>(emptyList())
+    private val hasActionInProgress = MutableStateFlow(false)
+    private val importState = MutableStateFlow<ImportState?>(null)
+    private val error = MutableStateFlow<Throwable?>(null)
 
     init {
         combine(
             feedsRepo.selectAllWithUnreadEntryCount(),
-            actionInProgress,
-            importProgress,
-            importErrors,
-        ) { feeds, actionInProgress, importProgress, importErrors ->
-            if (importErrors.isNotEmpty()) {
-                _state.update { State.ShowingImportErrors(importErrors) }
+            hasActionInProgress,
+            importState,
+            error,
+        ) { feeds, hasActionInProgress, importState, error ->
+            if (error != null) {
+                _state.update { State.ShowingError(error) }
                 return@combine
             }
 
-            if (importProgress != null) {
-                _state.update { State.ImportingFeeds(importProgress) }
+            if (importState != null) {
+                _state.update { State.ImportingFeeds(importState) }
                 return@combine
             }
 
-            if (actionInProgress) {
+            if (hasActionInProgress) {
                 _state.update { State.Loading }
                 return@combine
             }
@@ -70,13 +72,7 @@ class FeedsModel(
         }.launchIn(viewModelScope)
     }
 
-    fun onImportErrorsAcknowledged() {
-        importErrors.update { emptyList() }
-    }
-
     fun importOpml(document: InputStream) {
-        actionInProgress.update { true }
-
         viewModelScope.launch {
             val outlines = runCatching {
                 withContext(Dispatchers.Default) {
@@ -87,12 +83,12 @@ class FeedsModel(
                         .toOpml()
                         .leafOutlines()
                 }
-            }.getOrElse { error ->
-                importErrors.update { listOf(error.message ?: "") }
+            }.getOrElse { e ->
+                error.update { e }
                 return@launch
             }
 
-            importProgress.update { ImportProgress(0, outlines.size) }
+            importState.update { ImportState(0, outlines.size) }
 
             var feedsImported = 0
             var feedsExisted = 0
@@ -138,18 +134,12 @@ class FeedsModel(
                                         }
                                     }
 
-                                    importProgress.update {
-                                        ImportProgress(
+                                    importState.update {
+                                        ImportState(
                                             imported = feedsImported + feedsExisted + feedsFailed,
                                             total = outlines.size,
                                         )
                                     }
-
-                                    Log.d("feeds", "Progress: ${importProgress.value}")
-                                    Log.d(
-                                        "feeds",
-                                        "Imported: $feedsImported, existed: $feedsExisted, failed: $feedsFailed"
-                                    )
                                 }
                             }
                         }
@@ -161,68 +151,86 @@ class FeedsModel(
             workers.awaitAll()
 
             if (errors.isNotEmpty()) {
-                importErrors.update { errors }
+                val message = buildString {
+                    errors.forEach {
+                        append(it)
+
+                        if (errors.last() != it) {
+                            append("\n\n")
+                        }
+                    }
+                }
+
+                error.update { Exception(message) }
             }
 
-            importProgress.update { null }
-            actionInProgress.update { false }
+            importState.update { null }
         }
     }
 
-    suspend fun generateOpml(): OpmlDocument {
-        val outlines = feedsRepo.selectAll().first().map { feed ->
-            OpmlOutline(
-                text = feed.title,
-                outlines = emptyList(),
-                xmlUrl = feed.links.first { it.rel is AtomLinkRel.Self }.href.toString(),
-                htmlUrl = feed.links.first { it.rel is AtomLinkRel.Alternate }.href.toString(),
-                extOpenEntriesInBrowser = feed.openEntriesInBrowser,
-                extShowPreviewImages = feed.showPreviewImages,
-                extBlockedWords = feed.blockedWords,
+    fun exportOpml(out: OutputStream) {
+        viewModelScope.launch {
+            val feeds = feedsRepo.selectAll().first()
+
+            val outlines = feeds.map { feed ->
+                OpmlOutline(
+                    text = feed.title,
+                    outlines = emptyList(),
+                    xmlUrl = feed.links.first { it.rel is AtomLinkRel.Self }.href.toString(),
+                    htmlUrl = feed.links.first { it.rel is AtomLinkRel.Alternate }.href.toString(),
+                    extOpenEntriesInBrowser = feed.openEntriesInBrowser,
+                    extShowPreviewImages = feed.showPreviewImages,
+                    extBlockedWords = feed.blockedWords,
+                )
+            }
+
+            val opmlDocument = OpmlDocument(
+                version = OpmlVersion.V_2_0,
+                outlines = outlines,
             )
+
+            withContext(Dispatchers.Default) {
+                out.write(opmlDocument.toXmlDocument().toPrettyString().toByteArray())
+            }
         }
-
-        return OpmlDocument(
-            version = OpmlVersion.V_2_0,
-            outlines = outlines,
-        )
     }
 
-    suspend fun addFeed(url: String) {
-        actionInProgress.update { true }
-        val fullUrl = if (!url.startsWith("http")) "https://$url" else url
-
-        runCatching {
-            feedsRepo.insertByUrl(fullUrl.toHttpUrl())
-        }.onSuccess {
-            actionInProgress.update { false }
-        }.onFailure {
-            actionInProgress.update { false }
-        }.getOrThrow()
+    fun onErrorAcknowledged() {
+        error.update { null }
     }
 
-    suspend fun rename(feedId: String, newTitle: String) {
-        actionInProgress.update { true }
+    fun addFeed(url: String) {
+        viewModelScope.launch {
+            runCatching {
+                hasActionInProgress.update { true }
+                val fullUrl = if (!url.startsWith("http")) "https://$url" else url
+                feedsRepo.insertByUrl(fullUrl.toHttpUrl())
+            }.onFailure { e -> error.update { e } }
 
-        runCatching {
-            feedsRepo.updateTitle(feedId, newTitle)
-        }.onSuccess {
-            actionInProgress.update { false }
-        }.onFailure {
-            actionInProgress.update { false }
-        }.getOrThrow()
+            hasActionInProgress.update { false }
+        }
     }
 
-    suspend fun delete(feedId: String) {
-        actionInProgress.update { true }
+    fun renameFeed(feedId: String, newTitle: String) {
+        viewModelScope.launch {
+            runCatching {
+                hasActionInProgress.update { true }
+                feedsRepo.updateTitle(feedId, newTitle)
+            }.onFailure { e -> error.update { e } }
 
-        runCatching {
-            feedsRepo.deleteById(feedId)
-        }.onSuccess {
-            actionInProgress.update { false }
-        }.onFailure {
-            actionInProgress.update { false }
-        }.getOrThrow()
+            hasActionInProgress.update { false }
+        }
+    }
+
+    fun deleteFeed(feedId: String) {
+        viewModelScope.launch {
+            runCatching {
+                hasActionInProgress.update { true }
+                feedsRepo.deleteById(feedId)
+            }.onFailure { e -> error.update { e } }
+
+            hasActionInProgress.update { false }
+        }
     }
 
     private fun SelectAllWithUnreadEntryCount.toItem(): FeedsAdapter.Item {
@@ -239,11 +247,11 @@ class FeedsModel(
     sealed class State {
         object Loading : State()
         data class ShowingFeeds(val feeds: List<FeedsAdapter.Item>) : State()
-        data class ImportingFeeds(val progress: ImportProgress) : State()
-        data class ShowingImportErrors(val errors: Collection<String>) : State()
+        data class ImportingFeeds(val progress: ImportState) : State()
+        data class ShowingError(val error: Throwable) : State()
     }
 
-    data class ImportProgress(
+    data class ImportState(
         val imported: Int,
         val total: Int,
     )

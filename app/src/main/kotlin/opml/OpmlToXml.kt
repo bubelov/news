@@ -8,7 +8,7 @@ import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
 
-fun OpmlDocument.toDocument(): Document {
+fun OpmlDocument.toXmlDocument(): Document {
     val builderFactory = DocumentBuilderFactory.newInstance().apply { isNamespaceAware = true }
     val document = builderFactory.newDocumentBuilder().newDocument()
 
@@ -43,13 +43,13 @@ fun OpmlDocument.toDocument(): Document {
     return document
 }
 
-fun Document.format(): String {
+fun Document.toPrettyString(): String {
     val result = StringWriter()
 
     TransformerFactory.newInstance().newTransformer().apply {
         setOutputProperty(OutputKeys.INDENT, "yes")
         setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4")
-        transform(DOMSource(this@format), StreamResult(result))
+        transform(DOMSource(this@toPrettyString), StreamResult(result))
     }
 
     return result.toString()

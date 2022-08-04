@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.DialogInterface
 import android.graphics.Rect
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -15,7 +16,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,19 +26,11 @@ import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentFeedsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
-import dialog.showDialog
 import dialog.showErrorDialog
 import entries.EntriesFilter
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import navigation.openUrl
 import navigation.showKeyboard
-import opml.format
-import opml.toDocument
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class FeedsFragment : Fragment() {
@@ -68,10 +63,11 @@ class FeedsFragment : Fragment() {
         initImportButton()
         initFab()
 
-        model.state
-            .onEach { setState(it) }
-            .catch { showErrorDialog(it) }
-            .launchIn(viewLifecycleOwner.lifecycleScope)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                model.state.collect { binding.setState(it) }
+            }
+        }
 
         handleAddFeedIntent()
     }
@@ -84,13 +80,8 @@ class FeedsFragment : Fragment() {
     private fun initToolbar() {
         binding.toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
-                R.id.importFeeds -> {
-                    importFeedsLauncher.launch("*/*")
-                }
-
-                R.id.exportFeeds -> {
-                    exportFeedsLauncher.launch("feeds.opml")
-                }
+                R.id.importFeeds -> importFeedsLauncher.launch("*/*")
+                R.id.exportFeeds -> exportFeedsLauncher.launch("feeds.opml")
             }
 
             true
@@ -122,50 +113,37 @@ class FeedsFragment : Fragment() {
 
     private fun initFab() {
         binding.fab.setOnClickListener {
-            val dialog = MaterialAlertDialogBuilder(requireContext())
-                .setTitle(getString(R.string.add_feed))
+            val dialog = MaterialAlertDialogBuilder(requireContext()).setTitle(getString(R.string.add_feed))
                 .setView(R.layout.dialog_add_feed)
                 .setPositiveButton(R.string.add) { dialogInterface, _ -> onAddClick(dialogInterface) }
-                .setNegativeButton(R.string.cancel, null)
-                .show()
+                .setNegativeButton(R.string.cancel, null).show()
 
-            val url = dialog.findViewById<EditText>(R.id.url)!!
+            val urlView = dialog.findViewById<EditText>(R.id.url)!!
 
-            url.setOnEditorActionListener { _, actionId, keyEvent ->
+            urlView.setOnEditorActionListener { _, actionId, keyEvent ->
                 if (actionId == EditorInfo.IME_ACTION_DONE || keyEvent.keyCode == KeyEvent.KEYCODE_ENTER) {
                     dialog.dismiss()
-
-                    viewLifecycleOwner.lifecycleScope.launch {
-                        runCatching { model.addFeed(url.text.toString()) }
-                            .onFailure { showErrorDialog(it) }
-                    }
-
+                    model.addFeed(urlView.text.toString())
                     return@setOnEditorActionListener true
                 }
 
                 false
             }
 
-            url.requestFocus()
-            url.postDelayed({ showKeyboard(url) }, 300)
+            urlView.requestFocus()
+            urlView.postDelayed({ showKeyboard(urlView) }, 300)
         }
     }
 
-    private fun setState(state: FeedsModel.State) = binding.apply {
+    private fun FragmentFeedsBinding.setState(state: FeedsModel.State) {
+        views().forEach { it.isVisible = false }
+        visibleViews(state).forEach { it.isVisible = true }
+
         when (state) {
-            FeedsModel.State.Loading -> {
-                list.isVisible = false
-                progress.isVisible = true
-                message.isVisible = false
-                importOpml.isVisible = false
-                fab.hide()
-            }
+            is FeedsModel.State.Loading -> {}
 
             is FeedsModel.State.ShowingFeeds -> {
                 listAdapter.submitList(state.feeds)
-                list.isVisible = true
-                progress.isVisible = false
-                message.isVisible = false
 
                 if (state.feeds.isEmpty()) {
                     message.isVisible = true
@@ -175,50 +153,33 @@ class FeedsFragment : Fragment() {
                     message.isVisible = false
                     importOpml.isVisible = false
                 }
-
-                fab.show()
             }
 
             is FeedsModel.State.ImportingFeeds -> {
-                list.isVisible = false
-
-                progress.isVisible = true
-                message.isVisible = true
-
                 message.text = getString(
                     R.string.importing_feeds_n_of_n,
                     state.progress.imported,
                     state.progress.total,
                 )
-
-                importOpml.isVisible = false
-                fab.hide()
             }
 
-            is FeedsModel.State.ShowingImportErrors -> {
-                list.isVisible = false
-                progress.isVisible = false
-                message.isVisible = false
-                importOpml.isVisible = false
-                fab.hide()
-
-                val message = buildString {
-                    state.errors.forEach {
-                        append(it)
-
-                        if (state.errors.last() != it) {
-                            append("\n\n")
-                        }
-                    }
-                }
-
-                showDialog(
-                    title = getString(R.string.import_title),
-                    message = message,
-                ) {
-                    model.onImportErrorsAcknowledged()
-                }
+            is FeedsModel.State.ShowingError -> {
+                Log.d("feeds", "Showing error!")
+                showErrorDialog(state.error) { model.onErrorAcknowledged() }
             }
+        }
+    }
+
+    private fun FragmentFeedsBinding.views(): List<View> {
+        return listOf(toolbar, list, progress, message, importOpml, fab)
+    }
+
+    private fun FragmentFeedsBinding.visibleViews(state: FeedsModel.State): List<View> {
+        return when (state) {
+            is FeedsModel.State.Loading -> listOf(toolbar, progress)
+            is FeedsModel.State.ShowingFeeds -> listOf(toolbar, list, message, importOpml, fab)
+            is FeedsModel.State.ImportingFeeds -> listOf(toolbar, message)
+            is FeedsModel.State.ShowingError -> listOf(toolbar)
         }
     }
 
@@ -226,29 +187,18 @@ class FeedsFragment : Fragment() {
         val args = FeedsFragmentArgs.fromBundle(requireArguments())
 
         if (args.url.isNotBlank()) {
-            viewLifecycleOwner.lifecycleScope.launch {
-                runCatching { model.addFeed(args.url) }
-                    .onFailure { showErrorDialog(it) }
-            }
+            model.addFeed(args.url)
         }
     }
 
     private fun onAddClick(dialogInterface: DialogInterface) {
         val url = (dialogInterface as AlertDialog).findViewById<TextInputEditText>(R.id.url)?.text.toString()
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            runCatching { model.addFeed(url) }
-                .onFailure { showErrorDialog(it) }
-        }
+        model.addFeed(url)
     }
 
     private fun onRenameClick(feedId: String, dialogInterface: DialogInterface) {
         val title = (dialogInterface as AlertDialog).findViewById<TextInputEditText>(R.id.title)!!
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            runCatching { model.rename(feedId, title.text.toString()) }
-                .onFailure { showErrorDialog(it) }
-        }
+        model.renameFeed(feedId, title.text.toString())
     }
 
     private fun createFeedsAdapter(): FeedsAdapter {
@@ -284,17 +234,13 @@ class FeedsFragment : Fragment() {
             }
 
             override fun onRenameClick(item: FeedsAdapter.Item) {
-                val dialog = MaterialAlertDialogBuilder(requireContext())
-                    .setTitle(getString(R.string.rename))
-                    .setView(R.layout.dialog_rename_feed)
-                    .setPositiveButton(R.string.rename) { dialogInterface, _ ->
+                val dialog = MaterialAlertDialogBuilder(requireContext()).setTitle(getString(R.string.rename))
+                    .setView(R.layout.dialog_rename_feed).setPositiveButton(R.string.rename) { dialogInterface, _ ->
                         onRenameClick(
                             feedId = item.id,
                             dialogInterface = dialogInterface,
                         )
-                    }
-                    .setNegativeButton(R.string.cancel, null)
-                    .show()
+                    }.setNegativeButton(R.string.cancel, null).show()
 
                 val title = dialog.findViewById<TextInputEditText>(R.id.title)!!
                 title.append(item.title)
@@ -304,10 +250,7 @@ class FeedsFragment : Fragment() {
             }
 
             override fun onDeleteClick(item: FeedsAdapter.Item) {
-                viewLifecycleOwner.lifecycleScope.launch {
-                    runCatching { model.delete(item.id) }
-                        .onFailure { showErrorDialog(it) }
-                }
+                model.deleteFeed(item.id)
             }
         })
     }
@@ -324,12 +267,8 @@ class FeedsFragment : Fragment() {
 
     private fun createExportFeedsLauncher(): ActivityResultLauncher<String> {
         return registerForActivityResult(ActivityResultContracts.CreateDocument()) { uri ->
-            lifecycleScope.launchWhenResumed {
-                withContext(Dispatchers.Default) {
-                    requireContext().contentResolver.openOutputStream(uri!!)?.use {
-                        it.write(model.generateOpml().toDocument().format().toByteArray())
-                    }
-                }
+            if (uri != null) {
+                model.exportOpml(requireContext().contentResolver.openOutputStream(uri)!!)
             }
         }
     }
