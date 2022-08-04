@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.DialogInterface
 import android.graphics.Rect
 import android.os.Bundle
-import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -14,7 +13,6 @@ import android.widget.EditText
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -22,6 +20,8 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import anim.animateVisibilityChanges
+import anim.showSmooth
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentFeedsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -136,8 +136,15 @@ class FeedsFragment : Fragment() {
     }
 
     private fun FragmentFeedsBinding.setState(state: FeedsModel.State) {
-        views().forEach { it.isVisible = false }
-        visibleViews(state).forEach { it.isVisible = true }
+        animateVisibilityChanges(
+            views = listOf(toolbar, list, progress, message, importOpml, fab),
+            visibleViews = when (state) {
+                is FeedsModel.State.Loading -> listOf(toolbar, progress)
+                is FeedsModel.State.ShowingFeeds -> listOf(toolbar, list, fab)
+                is FeedsModel.State.ImportingFeeds -> listOf(toolbar, message)
+                is FeedsModel.State.ShowingError -> listOf(toolbar)
+            },
+        )
 
         when (state) {
             is FeedsModel.State.Loading -> {}
@@ -146,12 +153,9 @@ class FeedsFragment : Fragment() {
                 listAdapter.submitList(state.feeds)
 
                 if (state.feeds.isEmpty()) {
-                    message.isVisible = true
+                    message.showSmooth()
                     message.text = getString(R.string.you_have_no_feeds)
-                    importOpml.isVisible = true
-                } else {
-                    message.isVisible = false
-                    importOpml.isVisible = false
+                    importOpml.showSmooth()
                 }
             }
 
@@ -164,22 +168,8 @@ class FeedsFragment : Fragment() {
             }
 
             is FeedsModel.State.ShowingError -> {
-                Log.d("feeds", "Showing error!")
                 showErrorDialog(state.error) { model.onErrorAcknowledged() }
             }
-        }
-    }
-
-    private fun FragmentFeedsBinding.views(): List<View> {
-        return listOf(toolbar, list, progress, message, importOpml, fab)
-    }
-
-    private fun FragmentFeedsBinding.visibleViews(state: FeedsModel.State): List<View> {
-        return when (state) {
-            is FeedsModel.State.Loading -> listOf(toolbar, progress)
-            is FeedsModel.State.ShowingFeeds -> listOf(toolbar, list, message, importOpml, fab)
-            is FeedsModel.State.ImportingFeeds -> listOf(toolbar, message)
-            is FeedsModel.State.ShowingError -> listOf(toolbar)
         }
     }
 

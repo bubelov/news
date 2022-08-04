@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -18,6 +17,8 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.OnScrollListener
+import anim.animateVisibilityChanges
+import anim.showSmooth
 import co.appreactor.feedk.AtomLinkRel
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentEntriesBinding
@@ -131,15 +132,24 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
     }
 
     private fun FragmentEntriesBinding.setState(state: EntriesModel.State) {
-        views().forEach { it.isVisible = false }
-        visibleViews(state).forEach { it.isVisible = true }
+        animateVisibilityChanges(
+            views = listOf(toolbar, progress, message, retry, swipeRefresh),
+            visibleViews = when (state) {
+                is EntriesModel.State.InitialSync -> listOf(toolbar, progress)
+                is EntriesModel.State.FailedToSync -> listOf(toolbar, retry)
+                is EntriesModel.State.LoadingCachedEntries -> listOf(toolbar, progress)
+                is EntriesModel.State.ShowingCachedEntries -> listOf(toolbar, swipeRefresh)
+            },
+        )
 
         updateToolbar(state)
 
         when (state) {
             is EntriesModel.State.InitialSync -> {
-                message.text = state.message
-                message.isVisible = state.message.isNotEmpty()
+                if (state.message.isNotEmpty()) {
+                    message.showSmooth()
+                    message.text = state.message
+                }
             }
 
             is EntriesModel.State.FailedToSync -> {
@@ -147,17 +157,14 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
                 showErrorDialog(state.cause)
             }
 
-            EntriesModel.State.LoadingCachedEntries -> {
-
-            }
+            EntriesModel.State.LoadingCachedEntries -> {}
 
             is EntriesModel.State.ShowingCachedEntries -> {
                 swipeRefresh.isRefreshing = state.showBackgroundProgress
 
                 if (state.entries.isEmpty()) {
+                    message.showSmooth()
                     message.text = getEmptyMessage()
-                } else {
-                    message.text = ""
                 }
 
                 seenEntries.clear()
@@ -282,19 +289,6 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
 
     private fun scrollToTop() {
         binding.list.layoutManager?.scrollToPosition(0)
-    }
-
-    private fun FragmentEntriesBinding.views(): List<View> {
-        return listOf(toolbar, progress, message, retry, swipeRefresh)
-    }
-
-    private fun FragmentEntriesBinding.visibleViews(state: EntriesModel.State): List<View> {
-        return when (state) {
-            is EntriesModel.State.InitialSync -> listOf(toolbar, progress, message)
-            is EntriesModel.State.FailedToSync -> listOf(toolbar, retry)
-            is EntriesModel.State.LoadingCachedEntries -> listOf(toolbar, progress)
-            is EntriesModel.State.ShowingCachedEntries -> listOf(toolbar, swipeRefresh, message)
-        }
     }
 
     private fun getShowReadEntriesButtonVisibility(): Boolean {
