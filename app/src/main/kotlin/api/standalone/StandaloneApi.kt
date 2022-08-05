@@ -20,7 +20,12 @@ import db.EntryWithoutContent
 import db.Feed
 import db.Link
 import http.await
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
@@ -34,6 +39,7 @@ import org.jsoup.Jsoup
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.time.OffsetDateTime
+import java.util.Collections
 import java.util.Date
 import java.util.Locale
 
@@ -140,19 +146,29 @@ class StandaloneNewsApi(
         maxEntryUpdated: OffsetDateTime?,
         lastSync: OffsetDateTime?,
     ): Result<List<Entry>> {
-        val entries = mutableListOf<Entry>()
-
         return runCatching {
-            db.feedQueries.selectAll().asFlow().mapToList().first().forEach { feed ->
-                runCatching {
-                    entries += fetchEntries(feed)
-                }.onFailure {
-                    Log.e(TAG, "Failed to fetch entries for feed: $feed", it)
-                }
-            }
+            val entries = Collections.synchronizedList(mutableListOf<Entry>())
 
-            db.transaction {
-                entries.removeAll { db.entryQueries.selectById(it.id).executeAsOneOrNull() != null }
+            withContext(Dispatchers.Default) {
+                val feeds = produce { db.feedQueries.selectAll().asFlow().mapToList().first().forEach { send(it) } }
+
+                suspend fun processFeedsAsync(feeds: ReceiveChannel<Feed>): Deferred<Unit> {
+                    return async {
+                        for (feed in feeds) {
+                            runCatching {
+                                entries += fetchEntries(feed)
+                            }.onFailure {
+                                Log.e(TAG, "Failed to fetch entries for feed: $feed", it)
+                            }
+                        }
+                    }
+                }
+
+                buildList { repeat(15) { add(processFeedsAsync(feeds)) } }.awaitAll()
+
+                db.transaction {
+                    entries.removeAll { db.entryQueries.selectById(it.id).executeAsOneOrNull() != null }
+                }
             }
 
             entries
