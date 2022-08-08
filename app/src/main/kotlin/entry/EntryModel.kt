@@ -93,15 +93,17 @@ class EntryModel(
         this.args.update { args }
     }
 
-    fun setBookmarked(entryId: String, bookmarked: Boolean) {
-        val prevState = state.value
-
-        if (prevState is State.Success) {
-            viewModelScope.launch { entriesRepository.setBookmarked(entryId, bookmarked, false) }
-            _state.update { prevState.copy(entry = prevState.entry.copy(bookmarked = bookmarked)) }
-        }
-
+    fun setBookmarked(
+        entryId: String,
+        bookmarked: Boolean,
+    ) {
         viewModelScope.launch {
+            entriesRepository.setBookmarked(
+                id = entryId,
+                bookmarked = bookmarked,
+                bookmarkedSynced = false,
+            )
+
             newsApiSync.run(
                 Sync.Args(
                     syncFeeds = false,

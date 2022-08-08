@@ -20,7 +20,6 @@ import entries.EntriesAdapter
 import entries.EntriesAdapterItem
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import navigation.hideKeyboard
 import navigation.openUrl
 import navigation.showKeyboard
@@ -130,18 +129,16 @@ class SearchFragment : Fragment() {
     }
 
     private fun onListItemClick(item: EntriesAdapterItem) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            model.markAsRead(item.id)
+        model.markAsRead(item.id)
 
-            if (item.openInBrowser) {
-                openUrl(
-                    url = item.links.first { it.rel is AtomLinkRel.Alternate && it.type == "text/html" }.href.toString(),
-                    useBuiltInBrowser = item.useBuiltInBrowser,
-                )
-            } else {
-                val action = SearchFragmentDirections.actionSearchFragmentToEntryFragment(item.id)
-                findNavController().navigate(action)
-            }
+        if (item.openInBrowser) {
+            openUrl(
+                url = item.links.first { it.rel is AtomLinkRel.Alternate && it.type == "text/html" }.href.toString(),
+                useBuiltInBrowser = item.useBuiltInBrowser,
+            )
+        } else {
+            val action = SearchFragmentDirections.actionSearchFragmentToEntryFragment(item.id)
+            findNavController().navigate(action)
         }
     }
 

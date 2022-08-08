@@ -100,7 +100,7 @@ class SearchModel(
             subtitle = "${feed.title} · ${DATE_TIME_FORMAT.format(published)}",
             summary = "",
             read = read,
-            openInBrowser = conf.useBuiltInBrowser,
+            openInBrowser = feed.openEntriesInBrowser,
             useBuiltInBrowser = conf.useBuiltInBrowser,
             links = links,
         )
