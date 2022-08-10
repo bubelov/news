@@ -52,6 +52,7 @@
         android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:alpha="0"
         android:scrollbars="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar" />
@@ -69,12 +70,14 @@
         <ProgressBar
             android:id="@+id/progress"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:alpha="0" />
 
         <TextView
             android:id="@+id/message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:alpha="0"
             android:gravity="center"
             android:paddingStart="40dp"
             android:paddingTop="8dp"

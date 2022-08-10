@@ -4,12 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import conf.ConfRepo
 import db.Conf
-import db.Entry
-import db.Feed
+import db.SelectByIdIn
 import entries.EntriesAdapterItem
-import entries.EntriesFilter
 import entries.EntriesRepo
-import feeds.FeedsRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -27,7 +24,6 @@ import java.time.format.FormatStyle
 class SearchModel(
     confRepo: ConfRepo,
     private val entriesRepo: EntriesRepo,
-    private val feedsRepo: FeedsRepo,
     private val sync: Sync,
 ) : ViewModel() {
 
@@ -49,20 +45,11 @@ class SearchModel(
 
             _state.update { State.RunningQuery }
 
-            val entries = when (args.filter) {
-                EntriesFilter.NotBookmarked -> entriesRepo.selectByQuery(args.query)
-                EntriesFilter.Bookmarked -> entriesRepo.selectByQueryAndBookmarked(args.query, true)
-                is EntriesFilter.BelongToFeed -> entriesRepo.selectByQueryAndFeedId(args.query, args.filter.feedId)
-            }
+            val entryIds = entriesRepo.selectByFtsQuery(args.query).first()
+            val entries = entriesRepo.selectByIdIn(entryIds).first()
+            val items = entries.map { it.toItem(conf) }
 
-            val feeds = feedsRepo.selectAll().first()
-
-            val results = entries.first().map { entry ->
-                val feed = feeds.single { feed -> feed.id == entry.feedId }
-                entry.toRow(feed, conf)
-            }
-
-            _state.update { State.ShowingQueryResults(results) }
+            _state.update { State.ShowingQueryResults(items) }
         }.launchIn(viewModelScope)
     }
 
@@ -75,7 +62,7 @@ class SearchModel(
             entriesRepo.setRead(
                 id = entryId,
                 read = true,
-                readSynced = false
+                readSynced = false,
             )
 
             sync.run(
@@ -88,26 +75,25 @@ class SearchModel(
         }
     }
 
-    private fun Entry.toRow(feed: Feed, conf: Conf): EntriesAdapterItem {
+    private fun SelectByIdIn.toItem(conf: Conf): EntriesAdapterItem {
         return EntriesAdapterItem(
             id = id,
-            showImage = false,
-            cropImage = false,
-            imageUrl = "",
-            imageWidth = 0,
-            imageHeight = 0,
+            showImage = showPreviewImages ?: conf.showPreviewImages,
+            cropImage = conf.cropPreviewImages,
+            imageUrl = ogImageUrl,
+            imageWidth = ogImageWidth.toInt(),
+            imageHeight = ogImageHeight.toInt(),
             title = title,
-            subtitle = "${feed.title} · ${DATE_TIME_FORMAT.format(published)}",
-            summary = "",
+            subtitle = "$feedTitle · ${DATE_TIME_FORMAT.format(published)}",
+            summary = summary ?: "",
             read = read,
-            openInBrowser = feed.openEntriesInBrowser,
+            openInBrowser = openEntriesInBrowser,
             useBuiltInBrowser = conf.useBuiltInBrowser,
             links = links,
         )
     }
 
     data class Args(
-        val filter: EntriesFilter,
         val query: String,
     )
 

@@ -89,6 +89,14 @@ SELECT *
 FROM Entry
 WHERE id = ?;
 
+selectByIdIn:
+SELECT e.id, f.showPreviewImages, e.ogImageUrl, e.ogImageWidth, e.ogImageHeight, e.title, f.title AS feedTitle, e.published, e.summary, e.read, f.openEntriesInBrowser, e.links
+FROM Entry e
+JOIN Feed f
+ON f.id = e.feedId
+WHERE e.id IN :ids
+ORDER BY e.published DESC;
+
 selectByFeedId:
 SELECT *
 FROM EntryWithoutContent

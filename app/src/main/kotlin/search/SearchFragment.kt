@@ -8,26 +8,26 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import anim.animateVisibilityChanges
 import co.appreactor.feedk.AtomLinkRel
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentSearchBinding
 import com.google.android.material.internal.TextWatcherAdapter
 import entries.EntriesAdapter
 import entries.EntriesAdapterItem
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import navigation.hideKeyboard
 import navigation.openUrl
 import navigation.showKeyboard
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SearchFragment : Fragment() {
-
-    private val args by lazy { SearchFragmentArgs.fromBundle(requireArguments()) }
 
     private val model: SearchModel by viewModel()
 
@@ -53,9 +53,11 @@ class SearchFragment : Fragment() {
         initToolbar()
         initList()
 
-        model.state
-            .onEach { setState(it) }
-            .launchIn(viewLifecycleOwner.lifecycleScope)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                model.state.collect { binding.setState(it) }
+            }
+        }
     }
 
     override fun onDestroyView() {
@@ -72,13 +74,7 @@ class SearchFragment : Fragment() {
         binding.query.addTextChangedListener(object : TextWatcherAdapter() {
             override fun afterTextChanged(s: Editable) {
                 binding.clear.isVisible = s.isNotEmpty()
-
-                model.setArgs(
-                    SearchModel.Args(
-                        filter = args.filter!!,
-                        query = s.toString(),
-                    )
-                )
+                model.setArgs(SearchModel.Args(query = s.toString()))
             }
         })
 
@@ -93,38 +89,24 @@ class SearchFragment : Fragment() {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(context)
             this.adapter = this@SearchFragment.adapter
-
-            addItemDecoration(
-                CardListAdapterDecoration(
-                    resources.getDimensionPixelSize(
-                        R.dimen.entries_cards_gap
-                    )
-                )
-            )
+            val cardsGapPx = resources.getDimensionPixelSize(R.dimen.entries_cards_gap)
+            addItemDecoration(CardListAdapterDecoration(cardsGapPx))
         }
     }
 
-    private fun setState(state: SearchModel.State) {
-        when (state) {
-            SearchModel.State.QueryIsEmpty,
-            SearchModel.State.QueryIsTooShort -> {
-                binding.list.isVisible = false
-                binding.progress.isVisible = false
-                binding.message.isVisible = false
-            }
+    private fun FragmentSearchBinding.setState(state: SearchModel.State) {
+        animateVisibilityChanges(
+            views = listOf(toolbar, list, progress, message),
+            visibleViews = when (state) {
+                is SearchModel.State.QueryIsEmpty,
+                is SearchModel.State.QueryIsTooShort -> listOf(toolbar)
+                is SearchModel.State.RunningQuery -> listOf(toolbar, progress)
+                is SearchModel.State.ShowingQueryResults -> listOf(toolbar, list)
+            },
+        )
 
-            SearchModel.State.RunningQuery -> {
-                binding.list.isVisible = false
-                binding.progress.isVisible = true
-                binding.message.isVisible = false
-            }
-
-            is SearchModel.State.ShowingQueryResults -> {
-                binding.list.isVisible = true
-                adapter.submitList(state.items)
-                binding.progress.isVisible = false
-                binding.message.isVisible = false
-            }
+        if (state is SearchModel.State.ShowingQueryResults) {
+            adapter.submitList(state.items)
         }
     }
 

@@ -1,0 +1,17 @@
+CREATE VIRTUAL TABLE EntrySearch USING FTS5(
+    id TEXT NOT NULL,
+    title TEXT,
+    summary TEXT,
+    content TEXT
+);
+
+insertOrReplace:
+INSERT OR REPLACE
+INTO EntrySearch(id, title, summary, content)
+VALUES (:id, :title, :summary, :content);
+
+search:
+SELECT id
+FROM EntrySearch
+WHERE EntrySearch MATCH :query
+LIMIT 500;

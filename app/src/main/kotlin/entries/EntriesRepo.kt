@@ -10,6 +10,7 @@ import db.Entry
 import db.EntryWithoutContent
 import db.Feed
 import db.SelectByFeedIdAndReadAndBookmarked
+import db.SelectByIdIn
 import db.SelectByReadAndBookmarked
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -32,6 +33,10 @@ class EntriesRepo(
 
     fun selectById(entryId: String): Flow<Entry?> {
         return db.entryQueries.selectById(entryId).asFlow().mapToOneOrNull()
+    }
+
+    fun selectByIdIn(ids: Collection<String>): Flow<List<SelectByIdIn>> {
+        return db.entryQueries.selectByIdIn(ids).asFlow().mapToList()
     }
 
     fun selectByFeedId(feedId: String): Flow<List<EntryWithoutContent>> {
@@ -125,6 +130,10 @@ class EntriesRepo(
 
     fun selectByQueryAndFeedId(query: String, feedId: String): Flow<List<Entry>> {
         return db.entryQueries.selectByQueryAndFeedId(feedId, query).asFlow().mapToList()
+    }
+
+    fun selectByFtsQuery(query: String): Flow<List<String>> {
+        return db.entrySearchQueries.search(query).asFlow().mapToList()
     }
 
     fun selectCount() = db.entryQueries.selectCount().asFlow().mapToOne()
@@ -278,6 +287,13 @@ class EntriesRepo(
                 processedEntry = processedEntry.copy(read = true)
             }
         }
+
+        db.entrySearchQueries.insertOrReplace(
+            id = processedEntry.id,
+            title = processedEntry.title,
+            summary = processedEntry.summary,
+            content = processedEntry.contentText,
+        )
 
         return processedEntry
     }

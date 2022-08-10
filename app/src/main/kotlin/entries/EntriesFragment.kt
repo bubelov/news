@@ -210,11 +210,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
 
     private fun updateSearchButton() {
         binding.toolbar.menu!!.findItem(R.id.search).setOnMenuItemClickListener {
-            findNavController().navigate(
-                EntriesFragmentDirections.actionEntriesFragmentToSearchFragment(
-                    args.filter!!
-                )
-            )
+            findNavController().navigate(R.id.action_entriesFragment_to_searchFragment)
             true
         }
     }

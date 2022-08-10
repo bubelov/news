@@ -220,10 +220,6 @@
         android:name="search.SearchFragment"
         android:label="SearchFragment"
         tools:layout="@layout/fragment_search">
-        <argument
-            android:name="filter"
-            app:argType="entries.EntriesFilter"
-            app:nullable="true" />
         <action
             android:id="@+id/action_searchFragment_to_entryFragment"
             app:destination="@id/entryFragment"

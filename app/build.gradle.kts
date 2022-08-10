@@ -131,7 +131,7 @@ dependencies {
     testImplementation("com.squareup.okhttp3:mockwebserver")
 
     // Bundle SQLite binaries
-    implementation("com.github.requery:sqlite-android:3.36.0")
+    implementation("com.github.requery:sqlite-android:3.39.2")
 
     // SQLDelight generates typesafe kotlin APIs from SQL statements
     val sqlDelightVer = "1.5.3"
