@@ -144,9 +144,15 @@ class EntriesModel(
         }
     }
 
-    fun setRead(entryIds: Collection<String>, value: Boolean) {
+    fun setRead(entryIds: Collection<String>, read: Boolean) {
         viewModelScope.launch {
-            entryIds.forEach { entriesRepo.setRead(it, value, false) }
+            entryIds.forEach {
+                entriesRepo.updateReadAndReadSynced(
+                    id = it,
+                    read = read,
+                    readSynced = false,
+                )
+            }
 
             newsApiSync.run(
                 Sync.Args(
@@ -160,7 +166,11 @@ class EntriesModel(
 
     fun setBookmarked(entryId: String, bookmarked: Boolean) {
         viewModelScope.launch {
-            entriesRepo.setBookmarked(entryId, bookmarked, false)
+            entriesRepo.updateBookmarkedAndBookmaredSynced(
+                id = entryId,
+                bookmarked = bookmarked,
+                bookmarkedSynced = false
+            )
 
             newsApiSync.run(
                 Sync.Args(

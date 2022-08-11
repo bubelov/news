@@ -10,7 +10,7 @@ import db.Entry
 import db.EntryWithoutContent
 import db.Feed
 import db.SelectByFeedIdAndReadAndBookmarked
-import db.SelectByIdIn
+import db.SelectByQuery
 import db.SelectByReadAndBookmarked
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -33,10 +33,6 @@ class EntriesRepo(
 
     fun selectById(entryId: String): Flow<Entry?> {
         return db.entryQueries.selectById(entryId).asFlow().mapToOneOrNull()
-    }
-
-    fun selectByIdIn(ids: Collection<String>): Flow<List<SelectByIdIn>> {
-        return db.entryQueries.selectByIdIn(ids).asFlow().mapToList()
     }
 
     fun selectByFeedId(feedId: String): Flow<List<EntryWithoutContent>> {
@@ -76,6 +72,20 @@ class EntriesRepo(
         return db.entryQueries.selectByRead(read).asFlow().mapToList()
     }
 
+    fun selectCount() = db.entryQueries.selectCount().asFlow().mapToOne()
+
+    private fun selectMaxId(): Flow<String?> {
+        return db.entryQueries.selectMaxId().asFlow().mapToOneOrNull().map { it?.MAX }
+    }
+
+    private fun selectMaxUpdated(): Flow<String?> {
+        return db.entryQueries.selectMaxUpdated().asFlow().mapToOneOrNull().map { it?.MAX }
+    }
+
+    fun selectByFtsQuery(query: String): Flow<List<SelectByQuery>> {
+        return db.entrySearchQueries.selectByQuery(query).asFlow().mapToList()
+    }
+
     suspend fun updateReadByFeedId(read: Boolean, feedId: String) {
         withContext(Dispatchers.Default) {
             db.entryQueries.updateReadByFeedId(read, feedId)
@@ -88,7 +98,7 @@ class EntriesRepo(
         }
     }
 
-    suspend fun setRead(id: String, read: Boolean, readSynced: Boolean) {
+    suspend fun updateReadAndReadSynced(id: String, read: Boolean, readSynced: Boolean) {
         withContext(Dispatchers.Default) {
             db.entryQueries.updateReadAndReadSynced(
                 id = id,
@@ -98,7 +108,7 @@ class EntriesRepo(
         }
     }
 
-    suspend fun setBookmarked(
+    suspend fun updateBookmarkedAndBookmaredSynced(
         id: String,
         bookmarked: Boolean,
         bookmarkedSynced: Boolean,
@@ -111,32 +121,6 @@ class EntriesRepo(
             )
         }
     }
-
-    private fun getMaxId(): Flow<String?> {
-        return db.entryQueries.selectMaxId().asFlow().mapToOneOrNull().map { it?.MAX }
-    }
-
-    private fun getMaxUpdated(): Flow<String?> {
-        return db.entryQueries.selectMaxUpdaded().asFlow().mapToOneOrNull().map { it?.MAX }
-    }
-
-    fun selectByQuery(query: String): Flow<List<Entry>> {
-        return db.entryQueries.selectByQuery(query).asFlow().mapToList()
-    }
-
-    fun selectByQueryAndBookmarked(query: String, bookmarked: Boolean): Flow<List<Entry>> {
-        return db.entryQueries.selectByQueryAndBookmarked(bookmarked, query).asFlow().mapToList()
-    }
-
-    fun selectByQueryAndFeedId(query: String, feedId: String): Flow<List<Entry>> {
-        return db.entryQueries.selectByQueryAndFeedId(feedId, query).asFlow().mapToList()
-    }
-
-    fun selectByFtsQuery(query: String): Flow<List<String>> {
-        return db.entrySearchQueries.search(query).asFlow().mapToList()
-    }
-
-    fun selectCount() = db.entryQueries.selectCount().asFlow().mapToOne()
 
     suspend fun syncAll(): Flow<SyncProgress> = flow {
         emit(SyncProgress(0L))
@@ -244,7 +228,7 @@ class EntriesRepo(
                 null
             }
 
-            val maxUpdated = getMaxUpdated().first()
+            val maxUpdated = selectMaxUpdated().first()
 
             val maxUpdatedInstant = if (maxUpdated != null) {
                 OffsetDateTime.parse(maxUpdated)
@@ -254,7 +238,7 @@ class EntriesRepo(
 
             val entries = api.getNewAndUpdatedEntries(
                 lastSync = lastSyncInstant,
-                maxEntryId = getMaxId().first(),
+                maxEntryId = selectMaxId().first(),
                 maxEntryUpdated = maxUpdatedInstant,
             ).getOrThrow()
 
@@ -287,13 +271,6 @@ class EntriesRepo(
                 processedEntry = processedEntry.copy(read = true)
             }
         }
-
-        db.entrySearchQueries.insertOrReplace(
-            id = processedEntry.id,
-            title = processedEntry.title,
-            summary = processedEntry.summary,
-            content = processedEntry.contentText,
-        )
 
         return processedEntry
     }

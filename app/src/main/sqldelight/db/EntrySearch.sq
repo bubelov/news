@@ -1,17 +1,43 @@
-CREATE VIRTUAL TABLE EntrySearch USING FTS5(
+-- https://www.sqlite.org/fts5.html
+-- > It is an error to add types
+-- However, SQLDelight insists on typing every field but it will strip types from the real schema
+CREATE VIRTUAL TABLE entry_search USING fts5(
     id TEXT NOT NULL,
     title TEXT,
     summary TEXT,
-    content TEXT
+    content_text TEXT,
+    content=Entry,
+    tokenize='trigram'
 );
 
-insertOrReplace:
-INSERT OR REPLACE
-INTO EntrySearch(id, title, summary, content)
-VALUES (:id, :title, :summary, :content);
+CREATE TRIGGER entry_fts_after_insert AFTER INSERT ON Entry BEGIN
+    INSERT
+    INTO entry_search(rowid, id, title, summary, content_text)
+    VALUES (new.rowid, new.id, new.title, new.summary, new.contentText);
+END;
 
-search:
-SELECT id
-FROM EntrySearch
-WHERE EntrySearch MATCH :query
+CREATE TRIGGER entry_fts_after_delete AFTER DELETE ON Entry BEGIN
+    INSERT
+    INTO entry_search(entry_search, rowid, id, title, summary, content_text)
+    VALUES ('delete', old.rowid, old.id, old.title, old.summary, old.contentText);
+END;
+
+CREATE TRIGGER entry_fts_after_update AFTER UPDATE ON Entry BEGIN
+    INSERT
+    INTO entry_search(entry_search, rowid, id, title, summary, content_text)
+    VALUES ('delete', old.rowid, old.id, old.title, old.summary, old.contentText);
+
+    INSERT
+    INTO entry_search(rowid, id, title, summary, content_text)
+    VALUES (new.rowid, new.id, new.title, new.summary, new.contentText);
+END;
+
+selectByQuery:
+SELECT e.id, f.showPreviewImages, e.ogImageUrl, e.ogImageWidth, e.ogImageHeight, e.title, f.title AS feedTitle, e.published, e.summary, e.read, f.openEntriesInBrowser, e.links
+FROM entry_search es
+JOIN Entry e ON e.id = es.id
+JOIN Feed f ON f.id = e.feedId
+WHERE es.title MATCH :query
+OR es.summary MATCH :query
+OR es.content_text MATCH :query
 LIMIT 500;

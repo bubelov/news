@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import conf.ConfRepo
 import db.Conf
-import db.SelectByIdIn
+import db.SelectByQuery
 import entries.EntriesAdapterItem
 import entries.EntriesRepo
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,9 +45,8 @@ class SearchModel(
 
             _state.update { State.RunningQuery }
 
-            val entryIds = entriesRepo.selectByFtsQuery(args.query).first()
-            val entries = entriesRepo.selectByIdIn(entryIds).first()
-            val items = entries.map { it.toItem(conf) }
+            val rows = entriesRepo.selectByFtsQuery(args.query).first()
+            val items = rows.map { it.toItem(conf) }
 
             _state.update { State.ShowingQueryResults(items) }
         }.launchIn(viewModelScope)
@@ -59,7 +58,7 @@ class SearchModel(
 
     fun markAsRead(entryId: String) {
         viewModelScope.launch {
-            entriesRepo.setRead(
+            entriesRepo.updateReadAndReadSynced(
                 id = entryId,
                 read = true,
                 readSynced = false,
@@ -75,7 +74,7 @@ class SearchModel(
         }
     }
 
-    private fun SelectByIdIn.toItem(conf: Conf): EntriesAdapterItem {
+    private fun SelectByQuery.toItem(conf: Conf): EntriesAdapterItem {
         return EntriesAdapterItem(
             id = id,
             showImage = showPreviewImages ?: conf.showPreviewImages,

@@ -98,7 +98,7 @@ class EntryModel(
         bookmarked: Boolean,
     ) {
         viewModelScope.launch {
-            entriesRepository.setBookmarked(
+            entriesRepository.updateBookmarkedAndBookmaredSynced(
                 id = entryId,
                 bookmarked = bookmarked,
                 bookmarkedSynced = false,

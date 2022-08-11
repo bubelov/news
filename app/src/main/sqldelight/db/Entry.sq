@@ -2,23 +2,6 @@ import db.Link;
 import java.time.OffsetDateTime;
 import kotlin.collections.List;
 
---    atomEntry =
---       element atom:entry {
---          atomCommonAttributes,
---          (atomAuthor*
---           & atomCategory*
---           & atomContent?
---           & atomContributor*
---           & atomId
---           & atomLink*
---           & atomPublished?
---           & atomRights?
---           & atomSource?
---           & atomSummary?
---           & atomTitle
---           & atomUpdated
---           & extensionElement*)
---       }
 CREATE TABLE Entry (
     contentType TEXT,
     contentSrc TEXT,
@@ -89,14 +72,6 @@ SELECT *
 FROM Entry
 WHERE id = ?;
 
-selectByIdIn:
-SELECT e.id, f.showPreviewImages, e.ogImageUrl, e.ogImageWidth, e.ogImageHeight, e.title, f.title AS feedTitle, e.published, e.summary, e.read, f.openEntriesInBrowser, e.links
-FROM Entry e
-JOIN Feed f
-ON f.id = e.feedId
-WHERE e.id IN :ids
-ORDER BY e.published DESC;
-
 selectByFeedId:
 SELECT *
 FROM EntryWithoutContent
@@ -152,27 +127,6 @@ FROM EntryWithoutContent
 WHERE bookmarkedSynced = ?
 ORDER BY published DESC;
 
-selectByQuery:
-SELECT *
-FROM Entry
-WHERE UPPER(title) LIKE '%' || UPPER(:query) || '%'
-OR UPPER(contentText) LIKE '%' || UPPER(:query) || '%'
-ORDER BY published DESC;
-
-selectByQueryAndBookmarked:
-SELECT *
-FROM Entry
-WHERE bookmarked = :bookmarked
-AND (UPPER(title) LIKE '%' || UPPER(:query) || '%'OR UPPER(contentText) LIKE '%' || UPPER(:query) || '%')
-ORDER BY published DESC;
-
-selectByQueryAndFeedId:
-SELECT *
-FROM Entry
-WHERE feedId = :feedId
-AND (UPPER(title) LIKE '%' || UPPER(:query) || '%'OR UPPER(contentText) LIKE '%' || UPPER(:query) || '%')
-ORDER BY published DESC;
-
 selectByOgImageChecked:
 SELECT *
 FROM EntryWithoutContent
@@ -191,7 +145,7 @@ FROM Entry;
 selectMaxId:
 SELECT MAX(id + 0) FROM Entry;
 
-selectMaxUpdaded:
+selectMaxUpdated:
 SELECT MAX(updated)
 FROM Entry;
 
