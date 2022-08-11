@@ -16,7 +16,7 @@ class EntriesAdapterViewHolder(
 
     private var setStrokeAlpha = false
 
-    fun bind(item: EntriesAdapterItem) = binding.apply {
+    fun bind(item: EntriesAdapter.Item) = binding.apply {
         if (!setStrokeAlpha) {
             card.setStrokeColor(card.strokeColorStateList!!.withAlpha(32))
             setStrokeAlpha = true

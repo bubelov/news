@@ -40,7 +40,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
     private var _binding: FragmentEntriesBinding? = null
     private val binding get() = _binding!!
 
-    private val seenEntries = mutableSetOf<EntriesAdapterItem>()
+    private val seenEntries = mutableSetOf<EntriesAdapter.Item>()
 
     private val snackbar by lazy {
         Snackbar.make(binding.root, "", Snackbar.LENGTH_SHORT).apply {
@@ -319,7 +319,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         }
     }
 
-    private fun onListItemClick(item: EntriesAdapterItem) {
+    private fun onListItemClick(item: EntriesAdapter.Item) {
         model.setRead(listOf(item.id), true)
 
         if (item.openInBrowser) {

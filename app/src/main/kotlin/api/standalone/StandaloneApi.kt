@@ -333,7 +333,7 @@ class StandaloneNewsApi(
         return Entry(
             contentType = content.type.toString(),
             contentSrc = content.src,
-            contentText = content.text,
+            content_text = content.text,
             links = links,
             summary = summary?.text ?: "",
             id = id,
@@ -406,7 +406,7 @@ class StandaloneNewsApi(
         return Entry(
             contentType = "html",
             contentSrc = "",
-            contentText = description ?: "",
+            content_text = description ?: "",
             links = links,
             summary = if ((description?.length ?: 0) < maxSummaryLength) description else "",
             id = id,

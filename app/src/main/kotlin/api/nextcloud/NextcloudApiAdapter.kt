@@ -203,7 +203,7 @@ class NextcloudApiAdapter(
         return Entry(
             contentType = "html",
             contentSrc = "",
-            contentText = body ?: "",
+            content_text = body ?: "",
             links = links,
             summary = "",
             id = id.toString(),

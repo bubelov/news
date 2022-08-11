@@ -200,7 +200,7 @@ class MinifluxApiAdapter(
         return Entry(
             contentType = null,
             contentSrc = null,
-            contentText = null,
+            content_text = null,
             links = links,
             summary = null,
             id = id.toString(),

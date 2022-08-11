@@ -6,12 +6,11 @@ import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOne
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import db.Db
+import db.EntriesAdapterRow
 import db.Entry
 import db.EntryWithoutContent
 import db.Feed
-import db.SelectByFeedIdAndReadAndBookmarked
 import db.SelectByQuery
-import db.SelectByReadAndBookmarked
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -27,23 +26,15 @@ class EntriesRepo(
     private val db: Db,
 ) {
 
-    fun selectAll(): Flow<List<EntryWithoutContent>> {
-        return db.entryQueries.selectAll().asFlow().mapToList()
-    }
-
     fun selectById(entryId: String): Flow<Entry?> {
         return db.entryQueries.selectById(entryId).asFlow().mapToOneOrNull()
-    }
-
-    fun selectByFeedId(feedId: String): Flow<List<EntryWithoutContent>> {
-        return db.entryQueries.selectByFeedId(feedId).asFlow().mapToList()
     }
 
     fun selectByFeedIdAndReadAndBookmarked(
         feedId: String,
         read: Collection<Boolean>,
         bookmarked: Boolean,
-    ): Flow<List<SelectByFeedIdAndReadAndBookmarked>> {
+    ): Flow<List<EntriesAdapterRow>> {
         return db.entryQueries.selectByFeedIdAndReadAndBookmarked(
             feedId = feedId,
             read = read,
@@ -54,7 +45,7 @@ class EntriesRepo(
     fun selectByReadAndBookmarked(
         read: Collection<Boolean>,
         bookmarked: Boolean,
-    ): Flow<List<SelectByReadAndBookmarked>> {
+    ): Flow<List<EntriesAdapterRow>> {
         return db.entryQueries.selectByReadAndBookmarked(
             read = read,
             bookmarked = bookmarked,
@@ -262,8 +253,8 @@ class EntriesRepo(
     private fun Entry.postProcess(feed: Feed? = null): Entry {
         var processedEntry = this
 
-        if (contentText != null && contentText.toByteArray().size / 1024 > 250) {
-            processedEntry = processedEntry.copy(contentText = "Content is too large")
+        if (content_text != null && content_text.toByteArray().size / 1024 > 250) {
+            processedEntry = processedEntry.copy(content_text = "Content is too large")
         }
 
         feed?.blockedWords?.split(",")?.filter { it.isNotBlank() }?.forEach { word ->

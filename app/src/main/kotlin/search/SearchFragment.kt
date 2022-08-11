@@ -20,7 +20,6 @@ import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentSearchBinding
 import com.google.android.material.internal.TextWatcherAdapter
 import entries.EntriesAdapter
-import entries.EntriesAdapterItem
 import kotlinx.coroutines.launch
 import navigation.hideKeyboard
 import navigation.openUrl
@@ -110,7 +109,7 @@ class SearchFragment : Fragment() {
         }
     }
 
-    private fun onListItemClick(item: EntriesAdapterItem) {
+    private fun onListItemClick(item: EntriesAdapter.Item) {
         model.markAsRead(item.id)
 
         if (item.openInBrowser) {

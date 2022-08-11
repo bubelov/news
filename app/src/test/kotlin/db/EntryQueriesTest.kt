@@ -28,7 +28,7 @@ class EntryQueriesTest {
         items.forEach { db.entryQueries.insertOrReplace(it) }
 
         assertEquals(
-            items.map { it.withoutContent() }.reversed(),
+            items.reversed(),
             db.entryQueries.selectAll().executeAsList()
         )
     }
@@ -44,21 +44,6 @@ class EntryQueriesTest {
         assertEquals(
             items[1],
             db.entryQueries.selectById(items[1].id).executeAsOneOrNull(),
-        )
-    }
-
-    @Test
-    fun selectByFeedId() {
-        val feed1 = UUID.randomUUID().toString()
-        val feed2 = UUID.randomUUID().toString()
-
-        db.entryQueries.insertOrReplace(entry().copy(feedId = feed1))
-        db.entryQueries.insertOrReplace(entry().copy(feedId = feed1))
-        db.entryQueries.insertOrReplace(entry().copy(feedId = feed2))
-
-        assertEquals(
-            1,
-            db.entryQueries.selectByFeedId(feed2).executeAsList().size,
         )
     }
 
@@ -216,7 +201,7 @@ fun EntryQueries.insertOrReplace(): Entry {
 fun entry() = Entry(
     contentType = "",
     contentSrc = "",
-    contentText = "",
+    content_text = "",
     links = emptyList(),
     summary = "",
     id = UUID.randomUUID().toString(),
@@ -283,7 +268,7 @@ fun EntryWithoutContent.toEntry(): Entry {
     return Entry(
         contentType = "",
         contentSrc = "",
-        contentText = "",
+        content_text = "",
         links = links,
         summary = summary,
         id = id,

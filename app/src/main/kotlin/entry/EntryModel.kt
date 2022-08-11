@@ -74,7 +74,7 @@ class EntryModel(
                         entry = entry,
                         entryLinks = entry.links,
                         parsedContent = parseEntryContent(
-                            entry.contentText ?: "",
+                            entry.content_text ?: "",
                             TextViewImageGetter(
                                 textView = args.summaryView,
                                 scope = args.lifecycleScope,

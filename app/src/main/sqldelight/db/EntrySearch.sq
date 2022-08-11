@@ -13,23 +13,23 @@ CREATE VIRTUAL TABLE entry_search USING fts5(
 CREATE TRIGGER entry_fts_after_insert AFTER INSERT ON Entry BEGIN
     INSERT
     INTO entry_search(rowid, id, title, summary, content_text)
-    VALUES (new.rowid, new.id, new.title, new.summary, new.contentText);
+    VALUES (new.rowid, new.id, new.title, new.summary, new.content_text);
 END;
 
 CREATE TRIGGER entry_fts_after_delete AFTER DELETE ON Entry BEGIN
     INSERT
     INTO entry_search(entry_search, rowid, id, title, summary, content_text)
-    VALUES ('delete', old.rowid, old.id, old.title, old.summary, old.contentText);
+    VALUES ('delete', old.rowid, old.id, old.title, old.summary, old.content_text);
 END;
 
 CREATE TRIGGER entry_fts_after_update AFTER UPDATE ON Entry BEGIN
     INSERT
     INTO entry_search(entry_search, rowid, id, title, summary, content_text)
-    VALUES ('delete', old.rowid, old.id, old.title, old.summary, old.contentText);
+    VALUES ('delete', old.rowid, old.id, old.title, old.summary, old.content_text);
 
     INSERT
     INTO entry_search(rowid, id, title, summary, content_text)
-    VALUES (new.rowid, new.id, new.title, new.summary, new.contentText);
+    VALUES (new.rowid, new.id, new.title, new.summary, new.content_text);
 END;
 
 selectByQuery:
@@ -37,7 +37,7 @@ SELECT e.id, f.showPreviewImages, e.ogImageUrl, e.ogImageWidth, e.ogImageHeight,
 FROM entry_search es
 JOIN Entry e ON e.id = es.id
 JOIN Feed f ON f.id = e.feedId
-WHERE es.title MATCH :query
-OR es.summary MATCH :query
-OR es.content_text MATCH :query
+WHERE es.title LIKE '%' || :query || '%'
+OR es.summary LIKE '%' || :query || '%'
+OR es.content_text LIKE '%' || :query || '%'
 LIMIT 500;

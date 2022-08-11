@@ -9,11 +9,12 @@ import androidx.core.content.getSystemService
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.ListAdapter
 import co.appreactor.news.databinding.ListItemEntryBinding
+import db.Link
 
 class EntriesAdapter(
     private val activity: FragmentActivity,
     private val callback: EntriesAdapterCallback,
-) : ListAdapter<EntriesAdapterItem, EntriesAdapterViewHolder>(EntriesAdapterDiffCallback()) {
+) : ListAdapter<EntriesAdapter.Item, EntriesAdapterViewHolder>(EntriesAdapterDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EntriesAdapterViewHolder {
         val binding = ListItemEntryBinding.inflate(
@@ -53,4 +54,20 @@ class EntriesAdapter(
             }
         }
     }
+
+    data class Item(
+        val id: String,
+        val showImage: Boolean,
+        val cropImage: Boolean,
+        val imageUrl: String,
+        val imageWidth: Int,
+        val imageHeight: Int,
+        val title: String,
+        val subtitle: String,
+        val summary: String,
+        var read: Boolean,
+        val openInBrowser: Boolean,
+        val useBuiltInBrowser: Boolean,
+        val links: List<Link>,
+    )
 }

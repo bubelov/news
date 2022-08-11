@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import conf.ConfRepo
 import db.Conf
 import db.SelectByQuery
-import entries.EntriesAdapterItem
+import entries.EntriesAdapter
 import entries.EntriesRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -74,8 +74,8 @@ class SearchModel(
         }
     }
 
-    private fun SelectByQuery.toItem(conf: Conf): EntriesAdapterItem {
-        return EntriesAdapterItem(
+    private fun SelectByQuery.toItem(conf: Conf): EntriesAdapter.Item {
+        return EntriesAdapter.Item(
             id = id,
             showImage = showPreviewImages ?: conf.showPreviewImages,
             cropImage = conf.cropPreviewImages,
@@ -100,7 +100,7 @@ class SearchModel(
         object QueryIsEmpty : State()
         object QueryIsTooShort : State()
         object RunningQuery : State()
-        data class ShowingQueryResults(val items: List<EntriesAdapterItem>) : State()
+        data class ShowingQueryResults(val items: List<EntriesAdapter.Item>) : State()
     }
 
     companion object {

@@ -8,26 +8,10 @@ import db.toEntry
 import io.mockk.mockk
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class EntriesRepositoryTest {
-
-    @Test
-    fun selectAll(): Unit = runBlocking {
-        val db = testDb()
-
-        val repo = EntriesRepo(
-            db = db,
-            api = mockk(),
-        )
-
-        val entries = listOf(entryWithoutContent())
-        entries.forEach { db.entryQueries.insertOrReplace(it.toEntry()) }
-
-        assertEquals(entries, repo.selectAll().first())
-    }
 
     @Test
     fun selectById(): Unit = runBlocking {
@@ -44,29 +28,6 @@ class EntriesRepositoryTest {
         val randomEntry = entries.random()
 
         assertEquals(randomEntry, repo.selectById(randomEntry.id).first())
-    }
-
-    @Test
-    fun selectByFeedId(): Unit = runBlocking {
-        val db = testDb()
-
-        val repo = EntriesRepo(
-            db = db,
-            api = mockk(),
-        )
-
-        val feedId = UUID.randomUUID().toString()
-
-        val entries = listOf(
-            entryWithoutContent().copy(feedId = UUID.randomUUID().toString()),
-            entryWithoutContent().copy(feedId = feedId),
-            entryWithoutContent().copy(feedId = feedId),
-            entryWithoutContent().copy(feedId = UUID.randomUUID().toString()),
-        )
-
-        entries.forEach { db.entryQueries.insertOrReplace(it.toEntry()) }
-
-        assertEquals(entries.filter { it.feedId == feedId }, repo.selectByFeedId(feedId).first())
     }
 
     @Test

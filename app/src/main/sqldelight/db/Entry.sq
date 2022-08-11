@@ -5,7 +5,7 @@ import kotlin.collections.List;
 CREATE TABLE Entry (
     contentType TEXT,
     contentSrc TEXT,
-    contentText TEXT,
+    content_text TEXT,
     links TEXT AS List<Link> NOT NULL,
     summary TEXT,
     id TEXT PRIMARY KEY NOT NULL,
@@ -57,14 +57,21 @@ SELECT
     ogImageHeight
 FROM Entry;
 
+CREATE VIEW EntriesAdapterRow
+AS
+SELECT e.id, e.feedId, e.bookmarked, f.showPreviewImages, e.ogImageUrl, e.ogImageWidth, e.ogImageHeight, e.title, f.title AS feedTitle, e.published, e.summary, e.read, f.openEntriesInBrowser, e.links
+FROM Entry e
+JOIN Feed f
+ON f.id = e.feedId;
+
 insertOrReplace:
 INSERT OR REPLACE
-INTO Entry(contentType, contentSrc, contentText, links, summary, id, feedId, title, published, updated, authorName, read, readSynced, bookmarked, bookmarkedSynced, guidHash, commentsUrl, ogImageChecked, ogImageUrl, ogImageWidth, ogImageHeight)
+INTO Entry(contentType, contentSrc, content_text, links, summary, id, feedId, title, published, updated, authorName, read, readSynced, bookmarked, bookmarkedSynced, guidHash, commentsUrl, ogImageChecked, ogImageUrl, ogImageWidth, ogImageHeight)
 VALUES ?;
 
 selectAll:
 SELECT *
-FROM EntryWithoutContent
+FROM Entry
 ORDER BY published DESC;
 
 selectById:
@@ -72,27 +79,18 @@ SELECT *
 FROM Entry
 WHERE id = ?;
 
-selectByFeedId:
-SELECT *
-FROM EntryWithoutContent
-WHERE feedId = ?;
-
 selectByFeedIdAndReadAndBookmarked:
-SELECT e.id, f.showPreviewImages, e.ogImageUrl, e.ogImageWidth, e.ogImageHeight, e.title, f.title AS feedTitle, e.published, e.summary, e.read, f.openEntriesInBrowser, e.links
-FROM Entry e
-JOIN Feed f
-ON f.id = e.feedId
+SELECT *
+FROM EntriesAdapterRow e
 WHERE e.feedId = ?
 AND e.read IN ?
 AND e.bookmarked = ?
 ORDER BY e.published DESC;
 
 selectByReadAndBookmarked:
-SELECT e.id, f.showPreviewImages, e.ogImageUrl, e.ogImageWidth, e.ogImageHeight, e.title, f.title AS feedTitle, e.published, e.summary, e.read, f.openEntriesInBrowser, e.links
-FROM Entry e
-JOIN Feed f
-ON f.id = e.feedId
-AND e.read IN ?
+SELECT *
+FROM EntriesAdapterRow e
+WHERE e.read IN ?
 AND e.bookmarked = ?
 ORDER BY e.published DESC
 LIMIT 500;

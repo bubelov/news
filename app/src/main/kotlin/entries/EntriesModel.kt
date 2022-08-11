@@ -6,9 +6,8 @@ import conf.ConfRepo
 import conf.ConfRepo.Companion.SORT_ORDER_ASCENDING
 import conf.ConfRepo.Companion.SORT_ORDER_DESCENDING
 import db.Conf
+import db.EntriesAdapterRow
 import db.Feed
-import db.SelectByFeedIdAndReadAndBookmarked
-import db.SelectByReadAndBookmarked
 import feeds.FeedsRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -67,52 +66,41 @@ class EntriesModel(
                 val scrollToTop = scrollToTopNextTime
                 scrollToTopNextTime = false
 
-                if (filter is EntriesFilter.BelongToFeed) {
-                    val rows = entriesRepo.selectByFeedIdAndReadAndBookmarked(
+                val rows: List<EntriesAdapterRow> = if (filter is EntriesFilter.BelongToFeed) {
+                    entriesRepo.selectByFeedIdAndReadAndBookmarked(
                         feedId = filter.feedId,
                         read = if (conf.showReadEntries) listOf(true, false) else listOf(false),
                         bookmarked = false,
                     ).first()
-
-                    val sortedRows = when (conf.sortOrder) {
-                        SORT_ORDER_ASCENDING -> rows.sortedBy { it.published }
-                        SORT_ORDER_DESCENDING -> rows.sortedByDescending { it.published }
-                        else -> throw Exception()
-                    }
-
-                    _state.update {
-                        State.ShowingCachedEntries(
-                            feed = feedsRepo.selectById(filter.feedId).first(),
-                            entries = sortedRows.map { it.toAdapterItem(conf) },
-                            showBackgroundProgress = showBgProgress,
-                            scrollToTop = scrollToTop,
-                            conf = conf,
-                        )
-                    }
                 } else {
                     val includeRead = (conf.showReadEntries || filter is EntriesFilter.Bookmarked)
                     val includeBookmarked = filter is EntriesFilter.Bookmarked
 
-                    val rows = entriesRepo.selectByReadAndBookmarked(
+                    entriesRepo.selectByReadAndBookmarked(
                         read = if (includeRead) listOf(true, false) else listOf(false),
                         bookmarked = includeBookmarked,
                     ).first()
+                }
 
-                    val sortedRows = when (conf.sortOrder) {
-                        SORT_ORDER_ASCENDING -> rows.sortedBy { it.published }
-                        SORT_ORDER_DESCENDING -> rows.sortedByDescending { it.published }
-                        else -> throw Exception()
-                    }
+                val sortedRows = when (conf.sortOrder) {
+                    SORT_ORDER_ASCENDING -> rows.sortedBy { it.published }
+                    SORT_ORDER_DESCENDING -> rows.sortedByDescending { it.published }
+                    else -> throw Exception()
+                }
 
-                    _state.update {
-                        State.ShowingCachedEntries(
-                            feed = null,
-                            entries = sortedRows.map { it.toAdapterItem(conf) },
-                            showBackgroundProgress = showBgProgress,
-                            scrollToTop = scrollToTop,
-                            conf = conf,
-                        )
-                    }
+                _state.update {
+                    State.ShowingCachedEntries(
+                        feed = if (filter is EntriesFilter.BelongToFeed) {
+                            feedsRepo.selectById(filter.feedId)
+                                .first()
+                        } else {
+                            null
+                        },
+                        entries = sortedRows.map { it.toItem(conf) },
+                        showBackgroundProgress = showBgProgress,
+                        scrollToTop = scrollToTop,
+                        conf = conf,
+                    )
                 }
             }
         }
@@ -219,26 +207,8 @@ class EntriesModel(
         }
     }
 
-    private fun SelectByFeedIdAndReadAndBookmarked.toAdapterItem(conf: Conf): EntriesAdapterItem {
-        return EntriesAdapterItem(
-            id = id,
-            showImage = showPreviewImages ?: conf.showPreviewImages,
-            cropImage = conf.cropPreviewImages,
-            imageUrl = ogImageUrl,
-            imageWidth = ogImageWidth.toInt(),
-            imageHeight = ogImageHeight.toInt(),
-            title = title,
-            subtitle = "$feedTitle · ${DATE_TIME_FORMAT.format(published)}",
-            summary = summary ?: "",
-            read = read,
-            openInBrowser = openEntriesInBrowser,
-            useBuiltInBrowser = conf.useBuiltInBrowser,
-            links = links,
-        )
-    }
-
-    private fun SelectByReadAndBookmarked.toAdapterItem(conf: Conf): EntriesAdapterItem {
-        return EntriesAdapterItem(
+    private fun EntriesAdapterRow.toItem(conf: Conf): EntriesAdapter.Item {
+        return EntriesAdapter.Item(
             id = id,
             showImage = showPreviewImages ?: conf.showPreviewImages,
             cropImage = conf.cropPreviewImages,
@@ -263,7 +233,7 @@ class EntriesModel(
 
         data class ShowingCachedEntries(
             val feed: Feed?,
-            val entries: List<EntriesAdapterItem>,
+            val entries: List<EntriesAdapter.Item>,
             val showBackgroundProgress: Boolean,
             val scrollToTop: Boolean = false,
             val conf: Conf,
