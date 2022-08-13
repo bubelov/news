@@ -3,21 +3,16 @@ import kotlin.collections.List;
 
 CREATE TABLE Feed (
     id TEXT PRIMARY KEY NOT NULL,
-    title TEXT NOT NULL,
     links TEXT AS List<Link> NOT NULL,
-    openEntriesInBrowser INTEGER AS Boolean NOT NULL DEFAULT 0,
-    blockedWords TEXT NOT NULL DEFAULT '',
-    showPreviewImages INTEGER AS Boolean
+    title TEXT NOT NULL,
+    ext_open_entries_in_browser INTEGER AS Boolean,
+    ext_blocked_words TEXT NOT NULL,
+    ext_show_preview_images INTEGER AS Boolean
 );
-
-insert:
-INSERT
-INTO Feed(id, title, links, openEntriesInBrowser, blockedWords, showPreviewImages)
-VALUES ?;
 
 insertOrReplace:
 INSERT OR REPLACE
-INTO Feed(id, title, links, openEntriesInBrowser, blockedWords, showPreviewImages)
+INTO Feed(id, links, title, ext_open_entries_in_browser, ext_blocked_words, ext_show_preview_images)
 VALUES ?;
 
 selectAll:
@@ -26,7 +21,7 @@ FROM Feed
 ORDER BY title;
 
 selectAllWithUnreadEntryCount:
-SELECT f.id, f.title, f.links, COUNT(e.id) AS unreadEntries
+SELECT f.id, f.links, f.title, count(*) AS unread_entries
 FROM Feed f
 LEFT JOIN Entry e ON e.feedId = f.id AND e.read = 0 AND e.bookmarked = 0
 GROUP BY f.id

@@ -152,11 +152,11 @@ class NextcloudApiAdapter(
 
         return Feed(
             id = feedId,
-            title = title ?: "Untitled",
             links = listOf(selfLink, alternateLink),
-            openEntriesInBrowser = false,
-            blockedWords = "",
-            showPreviewImages = null,
+            title = title ?: "Untitled",
+            ext_open_entries_in_browser = false,
+            ext_blocked_words = "",
+            ext_show_preview_images = null,
         )
     }
 

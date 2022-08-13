@@ -49,8 +49,7 @@ class EntryQueriesTest {
 
     @Test
     fun selectByReadAndBookmarked() {
-        val feed = feed()
-        db.feedQueries.insertOrReplace(feed)
+        val feed = db.insertRandomFeed()
         
         val all = listOf(
             entry().copy(feedId = feed.id, read = true, bookmarked = true),

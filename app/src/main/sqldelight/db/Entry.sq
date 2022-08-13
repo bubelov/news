@@ -59,7 +59,21 @@ FROM Entry;
 
 CREATE VIEW EntriesAdapterRow
 AS
-SELECT e.id, e.feedId, e.bookmarked, f.showPreviewImages, e.ogImageUrl, e.ogImageWidth, e.ogImageHeight, e.title, f.title AS feedTitle, e.published, e.summary, e.read, f.openEntriesInBrowser, e.links
+SELECT
+    e.id,
+    e.feedId,
+    e.bookmarked,
+    f.ext_show_preview_images,
+    e.ogImageUrl,
+    e.ogImageWidth,
+    e.ogImageHeight,
+    e.title,
+    f.title AS feedTitle,
+    e.published,
+    e.summary,
+    e.read,
+    f.ext_open_entries_in_browser,
+    e.links
 FROM Entry e
 JOIN Feed f
 ON f.id = e.feedId;

@@ -9,9 +9,7 @@ class EntrySearchQueriesTest {
     @Test
     fun selectByQuery() {
         val db = testDb()
-
-        val feed = feed()
-        db.feedQueries.insertOrReplace(feed)
+        val feed = db.insertRandomFeed()
 
         val entries = listOf(
             entry().copy(feedId = feed.id, content_text = "Linux 5.19 introduces RSS API"),
@@ -32,9 +30,7 @@ class EntrySearchQueriesTest {
     @Ignore("Won't work without icu, see https://github.com/requery/sqlite-android/issues/55")
     fun selectByQuery_inRussian() {
         val db = testDb()
-
-        val feed = feed()
-        db.feedQueries.insertOrReplace(feed)
+        val feed = db.insertRandomFeed()
 
         val entries = listOf(
             entry().copy(feedId = feed.id, content_text = "Роулинг рулет гуляш"),

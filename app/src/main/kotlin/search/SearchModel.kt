@@ -77,7 +77,7 @@ class SearchModel(
     private fun SelectByQuery.toItem(conf: Conf): EntriesAdapter.Item {
         return EntriesAdapter.Item(
             id = id,
-            showImage = showPreviewImages ?: conf.showPreviewImages,
+            showImage = ext_show_preview_images ?: conf.showPreviewImages,
             cropImage = conf.cropPreviewImages,
             imageUrl = ogImageUrl,
             imageWidth = ogImageWidth.toInt(),
@@ -86,7 +86,7 @@ class SearchModel(
             subtitle = "$feedTitle · ${DATE_TIME_FORMAT.format(published)}",
             summary = summary ?: "",
             read = read,
-            openInBrowser = openEntriesInBrowser,
+            openInBrowser = ext_open_entries_in_browser ?: false,
             useBuiltInBrowser = conf.useBuiltInBrowser,
             links = links,
         )

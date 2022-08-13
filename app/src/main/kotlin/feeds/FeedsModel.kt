@@ -178,9 +178,9 @@ class FeedsModel(
                     outlines = emptyList(),
                     xmlUrl = feed.links.first { it.rel is AtomLinkRel.Self }.href.toString(),
                     htmlUrl = feed.links.first { it.rel is AtomLinkRel.Alternate }.href.toString(),
-                    extOpenEntriesInBrowser = feed.openEntriesInBrowser,
-                    extShowPreviewImages = feed.showPreviewImages,
-                    extBlockedWords = feed.blockedWords,
+                    extOpenEntriesInBrowser = feed.ext_open_entries_in_browser,
+                    extShowPreviewImages = feed.ext_show_preview_images,
+                    extBlockedWords = feed.ext_blocked_words,
                 )
             }
 
@@ -239,7 +239,7 @@ class FeedsModel(
             title = title,
             selfLink = links.single { it.rel is AtomLinkRel.Self }.href,
             alternateLink = links.firstOrNull { it.rel is AtomLinkRel.Alternate }?.href,
-            unreadCount = unreadEntries,
+            unreadCount = unread_entries,
             confUseBuiltInBrowser = confRepo.conf.value.useBuiltInBrowser,
         )
     }

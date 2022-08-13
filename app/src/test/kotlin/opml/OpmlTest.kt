@@ -83,11 +83,11 @@ class OpmlTest {
 
             val feed = Feed(
                 id = UUID.randomUUID().toString(),
-                title = it.text,
                 links = listOf(selfLink, alternateLink),
-                openEntriesInBrowser = it.extOpenEntriesInBrowser!!,
-                blockedWords = it.extBlockedWords!!,
-                showPreviewImages = it.extShowPreviewImages,
+                title = it.text,
+                ext_open_entries_in_browser = it.extOpenEntriesInBrowser!!,
+                ext_blocked_words = it.extBlockedWords!!,
+                ext_show_preview_images = it.extShowPreviewImages,
             )
 
             feed
@@ -99,9 +99,9 @@ class OpmlTest {
                 outlines = emptyList(),
                 xmlUrl = feed.links.first { it.rel is AtomLinkRel.Self }.href.toString(),
                 htmlUrl = feed.links.first { it.rel is AtomLinkRel.Alternate }.href.toString(),
-                extOpenEntriesInBrowser = feed.openEntriesInBrowser,
-                extShowPreviewImages = feed.showPreviewImages,
-                extBlockedWords = feed.blockedWords,
+                extOpenEntriesInBrowser = feed.ext_open_entries_in_browser,
+                extBlockedWords = feed.ext_blocked_words,
+                extShowPreviewImages = feed.ext_show_preview_images,
             )
         }
 

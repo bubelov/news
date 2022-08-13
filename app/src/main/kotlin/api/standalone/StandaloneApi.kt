@@ -261,11 +261,11 @@ class StandaloneNewsApi(
 
                 val feed = Feed(
                     id = selfLink.href,
-                    title = title,
                     links = links,
-                    openEntriesInBrowser = false,
-                    blockedWords = "",
-                    showPreviewImages = null,
+                    title = title,
+                    ext_open_entries_in_browser = false,
+                    ext_blocked_words = "",
+                    ext_show_preview_images = null,
                 )
 
                 feed
@@ -299,11 +299,11 @@ class StandaloneNewsApi(
 
                 Feed(
                     id = channel.link,
-                    title = channel.title,
                     links = listOf(selfLink, alternateLink),
-                    openEntriesInBrowser = false,
-                    blockedWords = "",
-                    showPreviewImages = null,
+                    title = channel.title,
+                    ext_open_entries_in_browser = false,
+                    ext_blocked_words = "",
+                    ext_show_preview_images = null,
                 )
             }
         }

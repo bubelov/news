@@ -2,7 +2,7 @@ package entries
 
 import db.entry
 import db.entryWithoutContent
-import db.feed
+import db.insertRandomFeed
 import db.testDb
 import db.toEntry
 import io.mockk.mockk
@@ -16,31 +16,18 @@ class EntriesRepositoryTest {
     @Test
     fun selectById(): Unit = runBlocking {
         val db = testDb()
-
-        val repo = EntriesRepo(
-            db = db,
-            api = mockk(),
-        )
-
+        val repo = EntriesRepo(db = db, api = mockk())
         val entries = listOf(entry(), entry(), entry())
         entries.forEach { db.entryQueries.insertOrReplace(it) }
-
         val randomEntry = entries.random()
-
         assertEquals(randomEntry, repo.selectById(randomEntry.id).first())
     }
 
     @Test
     fun selectByReadAndBookmarked(): Unit = runBlocking {
         val db = testDb()
-
-        val feed = feed()
-        db.feedQueries.insertOrReplace(feed)
-
-        val repo = EntriesRepo(
-            db = db,
-            api = mockk(),
-        )
+        val feed = db.insertRandomFeed()
+        val repo = EntriesRepo(db = db, api = mockk())
 
         val entries = listOf(
             entryWithoutContent().copy(feedId = feed.id, read = true, bookmarked = true),
@@ -75,11 +62,7 @@ class EntriesRepositoryTest {
     @Test
     fun selectByReadOrBookmarked(): Unit = runBlocking {
         val db = testDb()
-
-        val repo = EntriesRepo(
-            db = db,
-            api = mockk(),
-        )
+        val repo = EntriesRepo(db = db, api = mockk())
 
         val entries = listOf(
             entryWithoutContent().copy(read = true, bookmarked = true),
@@ -114,11 +97,7 @@ class EntriesRepositoryTest {
     @Test
     fun selectByRead(): Unit = runBlocking {
         val db = testDb()
-
-        val repo = EntriesRepo(
-            db = db,
-            api = mockk(),
-        )
+        val repo = EntriesRepo(db = db, api = mockk())
 
         val entries = listOf(
             entryWithoutContent().copy(read = true),

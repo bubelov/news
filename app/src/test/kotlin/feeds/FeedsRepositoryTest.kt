@@ -2,7 +2,8 @@ package feeds
 
 import api.Api
 import db.Db
-import db.feed
+import db.Feed
+import db.insertRandomFeed
 import db.testDb
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -11,6 +12,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import java.util.UUID
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -35,7 +37,15 @@ class FeedsRepositoryTest {
 
     @Test
     fun insertOrReplace() = runBlocking {
-        val feed = feed()
+        val feed = Feed(
+            id = UUID.randomUUID().toString(),
+            links = emptyList(),
+            title = "",
+            ext_open_entries_in_browser = null,
+            ext_blocked_words = "",
+            ext_show_preview_images = null,
+        )
+
         repo.insertOrReplace(feed)
 
         assertEquals(
@@ -47,7 +57,15 @@ class FeedsRepositoryTest {
     @Test
     fun insertByUrl() = runBlocking {
         val feedUrl = "https://example.com/".toHttpUrl()
-        val feed = feed()
+
+        val feed = Feed(
+            id = UUID.randomUUID().toString(),
+            links = emptyList(),
+            title = "",
+            ext_open_entries_in_browser = null,
+            ext_blocked_words = "",
+            ext_show_preview_images = null,
+        )
 
         coEvery { api.addFeed(feedUrl) } returns Result.success(feed)
 
@@ -64,22 +82,28 @@ class FeedsRepositoryTest {
 
     @Test
     fun selectAll() = runBlocking {
-        val feeds = listOf(feed(), feed())
-        feeds.forEach { db.feedQueries.insertOrReplace(it) }
+        val feeds = buildList { repeat(5) { add(db.insertRandomFeed()) } }
         assertEquals(feeds.sortedBy { it.title }, repo.selectAll().first())
     }
 
     @Test
     fun selectById() = runBlocking {
-        val feeds = listOf(feed(), feed(), feed())
-        feeds.forEach { db.feedQueries.insertOrReplace(it) }
+        val feeds = buildList { repeat(5) { add(db.insertRandomFeed()) } }
         val randomFeed = feeds.random()
         assertEquals(randomFeed, repo.selectById(randomFeed.id).first())
     }
 
     @Test
     fun updateTitle() = runBlocking {
-        val feed = feed()
+        val feed = Feed(
+            id = UUID.randomUUID().toString(),
+            links = emptyList(),
+            title = "",
+            ext_open_entries_in_browser = null,
+            ext_blocked_words = "",
+            ext_show_preview_images = null,
+        )
+
         val newTitle = "  ${feed.title}_modified "
         val trimmedNewTitle = newTitle.trim()
 
@@ -100,7 +124,7 @@ class FeedsRepositoryTest {
 
     @Test
     fun deleteById() = runBlocking {
-        val feeds = listOf(feed(), feed(), feed())
+        val feeds = buildList { repeat(5) { add(db.insertRandomFeed()) } }
         val randomFeed = feeds.random()
 
         coEvery { api.deleteFeed(randomFeed.id) } returns Result.success(Unit)

@@ -67,9 +67,9 @@ class FeedSettingsFragment : Fragment() {
                 progress.isVisible = false
                 settings.isVisible = true
 
-                syncOpenEntriesInBrowser(state.feed.openEntriesInBrowser)
-                syncShowPreviewImages(state.feed.showPreviewImages)
-                syncBlockedWords(state.feed.blockedWords)
+                syncOpenEntriesInBrowser(state.feed.ext_open_entries_in_browser ?: false)
+                syncBlockedWords(state.feed.ext_blocked_words)
+                syncShowPreviewImages(state.feed.ext_show_preview_images)
             }
         }
     }
@@ -84,6 +84,36 @@ class FeedSettingsFragment : Fragment() {
                         .onFailure { showErrorDialog(it) }
                 }
             }
+        }
+    }
+
+    private fun syncBlockedWords(blockedWords: String) {
+        binding.blockedWords.text = model.formatBlockedWords(blockedWords)
+
+        binding.blockedWordsPanel.setOnClickListener {
+            val dialog = MaterialAlertDialogBuilder(requireContext())
+                .setTitle(getString(R.string.blocked_words))
+                .setView(R.layout.dialog_blocked_words)
+                .setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        runCatching {
+                            val dialog = dialogInterface as AlertDialog
+                            val blockedWordsView = dialog.findViewById<TextInputEditText>(R.id.blockedWords)!!
+                            val formattedBlockedWords = model.formatBlockedWords(blockedWordsView.text.toString())
+                            model.setBlockedWords(args.feedId, formattedBlockedWords)
+                            binding.blockedWords.text = formattedBlockedWords.replace(",", ", ")
+                        }.onFailure {
+                            showErrorDialog(it)
+                        }
+                    }
+                }
+                .setNegativeButton(R.string.cancel, null)
+                .show()
+
+            val blockedWordsView = dialog.findViewById<TextInputEditText>(R.id.blockedWords)!!
+            blockedWordsView.append(blockedWords)
+            blockedWordsView.requestFocus()
+            blockedWordsView.postDelayed({ showKeyboard(blockedWordsView) }, 300)
         }
     }
 
@@ -127,36 +157,6 @@ class FeedSettingsFragment : Fragment() {
                 btnHide.setOnClickListener { saveValue.invoke(false) }
                 btnFollowSettings.setOnClickListener { saveValue.invoke(null) }
             }
-        }
-    }
-
-    private fun syncBlockedWords(blockedWords: String) {
-        binding.blockedWords.text = model.formatBlockedWords(blockedWords)
-
-        binding.blockedWordsPanel.setOnClickListener {
-            val dialog = MaterialAlertDialogBuilder(requireContext())
-                .setTitle(getString(R.string.blocked_words))
-                .setView(R.layout.dialog_blocked_words)
-                .setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
-                    viewLifecycleOwner.lifecycleScope.launch {
-                        runCatching {
-                            val dialog = dialogInterface as AlertDialog
-                            val blockedWordsView = dialog.findViewById<TextInputEditText>(R.id.blockedWords)!!
-                            val formattedBlockedWords = model.formatBlockedWords(blockedWordsView.text.toString())
-                            model.setBlockedWords(args.feedId, formattedBlockedWords)
-                            binding.blockedWords.text = formattedBlockedWords.replace(",", ", ")
-                        }.onFailure {
-                            showErrorDialog(it)
-                        }
-                    }
-                }
-                .setNegativeButton(R.string.cancel, null)
-                .show()
-
-            val blockedWordsView = dialog.findViewById<TextInputEditText>(R.id.blockedWords)!!
-            blockedWordsView.append(blockedWords)
-            blockedWordsView.requestFocus()
-            blockedWordsView.postDelayed({ showKeyboard(blockedWordsView) }, 300)
         }
     }
 }

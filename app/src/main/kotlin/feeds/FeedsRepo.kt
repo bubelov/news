@@ -87,9 +87,9 @@ class FeedsRepo(
 
                     db.feedQueries.insertOrReplace(
                         feed.copy(
-                            openEntriesInBrowser = cachedFeed?.openEntriesInBrowser ?: false,
-                            blockedWords = cachedFeed?.blockedWords ?: "",
-                            showPreviewImages = cachedFeed?.showPreviewImages,
+                            ext_open_entries_in_browser = cachedFeed?.ext_open_entries_in_browser ?: false,
+                            ext_blocked_words = cachedFeed?.ext_blocked_words ?: "",
+                            ext_show_preview_images = cachedFeed?.ext_show_preview_images,
                         )
                     )
                 }

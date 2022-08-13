@@ -33,7 +33,7 @@ CREATE TRIGGER entry_fts_after_update AFTER UPDATE ON Entry BEGIN
 END;
 
 selectByQuery:
-SELECT e.id, f.showPreviewImages, e.ogImageUrl, e.ogImageWidth, e.ogImageHeight, e.title, f.title AS feedTitle, e.published, e.summary, e.read, f.openEntriesInBrowser, e.links
+SELECT e.id, f.ext_show_preview_images, e.ogImageUrl, e.ogImageWidth, e.ogImageHeight, e.title, f.title AS feedTitle, e.published, e.summary, e.read, f.ext_open_entries_in_browser, e.links
 FROM entry_search es
 JOIN Entry e ON e.id = es.id
 JOIN Feed f ON f.id = e.feedId

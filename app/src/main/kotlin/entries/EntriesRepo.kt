@@ -257,7 +257,7 @@ class EntriesRepo(
             processedEntry = processedEntry.copy(content_text = "Content is too large")
         }
 
-        feed?.blockedWords?.split(",")?.filter { it.isNotBlank() }?.forEach { word ->
+        feed?.ext_blocked_words?.split(",")?.filter { it.isNotBlank() }?.forEach { word ->
             if (processedEntry.title.contains(word, ignoreCase = true)) {
                 processedEntry = processedEntry.copy(read = true)
             }

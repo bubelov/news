@@ -1,6 +1,6 @@
 package feedsettings
 
-import db.feed
+import db.insertRandomFeed
 import db.testDb
 import feeds.FeedsRepo
 import io.mockk.mockk
@@ -36,13 +36,10 @@ class FeedSettingsModelTest {
     @Test
     fun loadFeed(): Unit = runBlocking {
         val db = testDb()
-        val feedsRepo = FeedsRepo(mockk(), db)
-
-        val feed = feed()
-        feedsRepo.insertOrReplace(feed)
+        val feed = db.insertRandomFeed()
 
         val model = FeedSettingsModel(
-            feedsRepo = feedsRepo,
+            feedsRepo = FeedsRepo(mockk(), db),
         )
 
         assertEquals(FeedSettingsModel.State.LoadingFeed, model.state.value)
