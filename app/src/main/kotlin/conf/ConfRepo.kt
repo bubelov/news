@@ -20,7 +20,7 @@ class ConfRepo(
 ) {
 
     private val _conf: MutableStateFlow<Conf> = MutableStateFlow(
-        runBlocking { db.confQueries.selectAll().executeAsOneOrNull() ?: DEFAULT_CONF }
+        runBlocking { db.confQueries.select().executeAsOneOrNull() ?: DEFAULT_CONF }
     )
 
     val conf: StateFlow<Conf> = _conf.asStateFlow()
@@ -29,7 +29,7 @@ class ConfRepo(
         conf.onEach {
             withContext(Dispatchers.Default) {
                 db.transaction {
-                    db.confQueries.deleteAll()
+                    db.confQueries.delete()
                     db.confQueries.insert(it)
                 }
             }
@@ -50,27 +50,27 @@ class ConfRepo(
 
         val DEFAULT_CONF = Conf(
             backend = "",
-            nextcloudServerUrl = "",
-            nextcloudServerTrustSelfSignedCerts = false,
-            nextcloudServerUsername = "",
-            nextcloudServerPassword = "",
-            minifluxServerUrl = "",
-            minifluxServerTrustSelfSignedCerts = false,
-            minifluxServerUsername = "",
-            minifluxServerPassword = "",
-            initialSyncCompleted = false,
-            lastEntriesSyncDateTime = "",
-            showReadEntries = false,
-            sortOrder = SORT_ORDER_DESCENDING,
-            showPreviewImages = true,
-            cropPreviewImages = true,
-            markScrolledEntriesAsRead = false,
-            syncOnStartup = true,
-            syncInBackground = true,
-            backgroundSyncIntervalMillis = 10800000,
-            useBuiltInBrowser = true,
-            showPreviewText = true,
-            syncedOnStartup = false,
+            miniflux_server_url = "",
+            miniflux_server_trust_self_signed_certs = false,
+            miniflux_server_username = "",
+            miniflux_server_password = "",
+            nextcloud_server_url = "",
+            nextcloud_server_trust_self_signed_certs = false,
+            nextcloud_server_username = "",
+            nextcloud_server_password = "",
+            initial_sync_completed = false,
+            last_entries_sync_datetime = "",
+            show_read_entries = false,
+            sort_order = SORT_ORDER_DESCENDING,
+            show_preview_images = true,
+            crop_preview_images = true,
+            mark_scrolled_entries_as_read = false,
+            sync_on_startup = true,
+            sync_in_background = true,
+            background_sync_interval_millis = 10800000,
+            use_built_in_browser = true,
+            show_preview_text = true,
+            synced_on_startup = false,
         )
     }
 }

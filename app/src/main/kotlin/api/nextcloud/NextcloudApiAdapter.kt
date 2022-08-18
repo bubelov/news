@@ -111,7 +111,7 @@ class NextcloudApiAdapter(
         bookmarked: Boolean,
     ): Result<Unit> {
         return runCatching {
-            val args = PutStarredArgs(entries.map { PutStarredArgsItem(it.feedId.toLong(), it.guidHash) })
+            val args = PutStarredArgs(entries.map { PutStarredArgsItem(it.feed_id.toLong(), it.ext_nc_guid_hash) })
 
             if (bookmarked) {
                 api.putStarred(args)
@@ -201,31 +201,27 @@ class NextcloudApiAdapter(
         }
 
         return Entry(
-            contentType = "html",
-            contentSrc = "",
+            content_type = "html",
+            content_src = "",
             content_text = body ?: "",
             links = links,
             summary = "",
             id = id.toString(),
-            feedId = feedId?.toString() ?: "",
+            feed_id = feedId?.toString() ?: "",
             title = title ?: "Untitled",
             published = OffsetDateTime.parse(published),
             updated = OffsetDateTime.parse(updated),
-            authorName = author ?: "",
-
-            read = !unread,
-            readSynced = true,
-
-            bookmarked = starred,
-            bookmarkedSynced = true,
-
-            guidHash = guidHash ?: return null,
-            commentsUrl = "",
-
-            ogImageChecked = false,
-            ogImageUrl = "",
-            ogImageWidth = 0,
-            ogImageHeight = 0,
+            author_name = author ?: "",
+            ext_read = !unread,
+            ext_read_synced = true,
+            ext_bookmarked = starred,
+            ext_bookmarked_synced = true,
+            ext_nc_guid_hash = guidHash ?: return null,
+            ext_comments_url = "",
+            ext_og_image_checked = false,
+            ext_og_image_url = "",
+            ext_og_image_width = 0,
+            ext_og_image_height = 0,
         )
     }
 }

@@ -36,9 +36,9 @@ class EntriesRepo(
         bookmarked: Boolean,
     ): Flow<List<EntriesAdapterRow>> {
         return db.entryQueries.selectByFeedIdAndReadAndBookmarked(
-            feedId = feedId,
-            read = read,
-            bookmarked = bookmarked,
+            feed_id = feedId,
+            ext_read = read,
+            ext_bookmarked = bookmarked,
         ).asFlow().mapToList()
     }
 
@@ -47,8 +47,8 @@ class EntriesRepo(
         bookmarked: Boolean,
     ): Flow<List<EntriesAdapterRow>> {
         return db.entryQueries.selectByReadAndBookmarked(
-            read = read,
-            bookmarked = bookmarked,
+            ext_read = read,
+            ext_bookmarked = bookmarked,
         ).asFlow().mapToList()
     }
 
@@ -93,8 +93,8 @@ class EntriesRepo(
         withContext(Dispatchers.Default) {
             db.entryQueries.updateReadAndReadSynced(
                 id = id,
-                read = read,
-                readSynced = readSynced,
+                ext_read = read,
+                ext_read_synced = readSynced,
             )
         }
     }
@@ -107,8 +107,8 @@ class EntriesRepo(
         withContext(Dispatchers.Default) {
             db.entryQueries.updateBookmarkedAndBookmaredSynced(
                 id = id,
-                bookmarked = bookmarked,
-                bookmarkedSynced = bookmarkedSynced,
+                ext_bookmarked = bookmarked,
+                ext_bookmarked_synced = bookmarkedSynced,
             )
         }
     }
@@ -142,7 +142,7 @@ class EntriesRepo(
                 return@withContext
             }
 
-            val unsyncedReadEntries = unsyncedEntries.filter { it.read }
+            val unsyncedReadEntries = unsyncedEntries.filter { it.ext_read }
 
             if (unsyncedReadEntries.isNotEmpty()) {
                 api.markEntriesAsRead(
@@ -157,7 +157,7 @@ class EntriesRepo(
                 }
             }
 
-            val unsyncedUnreadEntries = unsyncedEntries.filter { !it.read }
+            val unsyncedUnreadEntries = unsyncedEntries.filter { !it.ext_read }
 
             if (unsyncedUnreadEntries.isNotEmpty()) {
                 api.markEntriesAsRead(
@@ -182,7 +182,7 @@ class EntriesRepo(
                 return@withContext
             }
 
-            val notSyncedBookmarkedEntries = notSyncedEntries.filter { it.bookmarked }
+            val notSyncedBookmarkedEntries = notSyncedEntries.filter { it.ext_bookmarked }
 
             if (notSyncedBookmarkedEntries.isNotEmpty()) {
                 api.markEntriesAsBookmarked(notSyncedBookmarkedEntries, true)
@@ -194,7 +194,7 @@ class EntriesRepo(
                 }
             }
 
-            val notSyncedNotBookmarkedEntries = notSyncedEntries.filterNot { it.bookmarked }
+            val notSyncedNotBookmarkedEntries = notSyncedEntries.filterNot { it.ext_bookmarked }
 
             if (notSyncedNotBookmarkedEntries.isNotEmpty()) {
                 api.markEntriesAsBookmarked(notSyncedNotBookmarkedEntries, false)
@@ -235,7 +235,7 @@ class EntriesRepo(
 
             db.entryQueries.transaction {
                 entries.forEach { newEntry ->
-                    val feed = feeds.firstOrNull { it.id == newEntry.feedId }
+                    val feed = feeds.firstOrNull { it.id == newEntry.feed_id }
 
                     db.transaction {
                         val oldEntry = db.entryQueries.selectById(newEntry.id).executeAsOneOrNull()
@@ -259,7 +259,7 @@ class EntriesRepo(
 
         feed?.ext_blocked_words?.split(",")?.filter { it.isNotBlank() }?.forEach { word ->
             if (processedEntry.title.contains(word, ignoreCase = true)) {
-                processedEntry = processedEntry.copy(read = true)
+                processedEntry = processedEntry.copy(ext_read = true)
             }
         }
 

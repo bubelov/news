@@ -3,31 +3,27 @@ import java.time.OffsetDateTime;
 import kotlin.collections.List;
 
 CREATE TABLE Entry (
-    contentType TEXT,
-    contentSrc TEXT,
+    content_type TEXT,
+    content_src TEXT,
     content_text TEXT,
     links TEXT AS List<Link> NOT NULL,
     summary TEXT,
     id TEXT PRIMARY KEY NOT NULL,
-    feedId TEXT NOT NULL,
+    feed_id TEXT NOT NULL,
     title TEXT NOT NULL,
     published TEXT AS OffsetDateTime NOT NULL,
     updated TEXT AS OffsetDateTime NOT NULL,
-    authorName TEXT NOT NULL,
-
-    read INTEGER AS Boolean NOT NULL,
-    readSynced INTEGER AS Boolean NOT NULL,
-
-    bookmarked INTEGER AS Boolean NOT NULL,
-    bookmarkedSynced INTEGER AS Boolean NOT NULL,
-
-    guidHash TEXT NOT NULL,
-    commentsUrl TEXT NOT NULL,
-
-    ogImageChecked INTEGER AS Boolean NOT NULL,
-    ogImageUrl TEXT NOT NULL,
-    ogImageWidth INTEGER NOT NULL,
-    ogImageHeight INTEGER NOT NULL
+    author_name TEXT NOT NULL,
+    ext_read INTEGER AS Boolean NOT NULL,
+    ext_read_synced INTEGER AS Boolean NOT NULL,
+    ext_bookmarked INTEGER AS Boolean NOT NULL,
+    ext_bookmarked_synced INTEGER AS Boolean NOT NULL,
+    ext_nc_guid_hash TEXT NOT NULL,
+    ext_comments_url TEXT NOT NULL,
+    ext_og_image_checked INTEGER AS Boolean NOT NULL,
+    ext_og_image_url TEXT NOT NULL,
+    ext_og_image_width INTEGER NOT NULL,
+    ext_og_image_height INTEGER NOT NULL
 );
 
 CREATE VIEW EntryWithoutContent
@@ -36,51 +32,69 @@ SELECT
     links,
     summary,
     id,
-    feedId,
+    feed_id,
     title,
     published,
     updated,
-    authorName,
-
-    read,
-    readSynced,
-
-    bookmarked,
-    bookmarkedSynced,
-
-    guidHash,
-    commentsUrl,
-
-    ogImageChecked,
-    ogImageUrl,
-    ogImageWidth,
-    ogImageHeight
+    author_name,
+    ext_read,
+    ext_read_synced,
+    ext_bookmarked,
+    ext_bookmarked_synced,
+    ext_nc_guid_hash,
+    ext_comments_url,
+    ext_og_image_checked,
+    ext_og_image_url,
+    ext_og_image_width,
+    ext_og_image_height
 FROM Entry;
 
 CREATE VIEW EntriesAdapterRow
 AS
 SELECT
     e.id,
-    e.feedId,
-    e.bookmarked,
+    e.feed_id,
+    e.ext_bookmarked,
     f.ext_show_preview_images,
-    e.ogImageUrl,
-    e.ogImageWidth,
-    e.ogImageHeight,
+    e.ext_og_image_url,
+    e.ext_og_image_width,
+    e.ext_og_image_height,
     e.title,
     f.title AS feedTitle,
     e.published,
     e.summary,
-    e.read,
+    e.ext_read,
     f.ext_open_entries_in_browser,
     e.links
 FROM Entry e
 JOIN Feed f
-ON f.id = e.feedId;
+ON f.id = e.feed_id;
 
 insertOrReplace:
 INSERT OR REPLACE
-INTO Entry(contentType, contentSrc, content_text, links, summary, id, feedId, title, published, updated, authorName, read, readSynced, bookmarked, bookmarkedSynced, guidHash, commentsUrl, ogImageChecked, ogImageUrl, ogImageWidth, ogImageHeight)
+INTO Entry(
+    content_type,
+    content_src,
+    content_text,
+    links,
+    summary,
+    id,
+    feed_id,
+    title,
+    published,
+    updated,
+    author_name,
+    ext_read,
+    ext_read_synced,
+    ext_bookmarked,
+    ext_bookmarked_synced,
+    ext_nc_guid_hash,
+    ext_comments_url,
+    ext_og_image_checked,
+    ext_og_image_url,
+    ext_og_image_width,
+    ext_og_image_height
+)
 VALUES ?;
 
 selectAll:
@@ -96,53 +110,53 @@ WHERE id = ?;
 selectByFeedIdAndReadAndBookmarked:
 SELECT *
 FROM EntriesAdapterRow e
-WHERE e.feedId = ?
-AND e.read IN ?
-AND e.bookmarked = ?
+WHERE e.feed_id = ?
+AND e.ext_read IN ?
+AND e.ext_bookmarked = ?
 ORDER BY e.published DESC;
 
 selectByReadAndBookmarked:
 SELECT *
 FROM EntriesAdapterRow e
-WHERE e.read IN ?
-AND e.bookmarked = ?
+WHERE e.ext_read IN ?
+AND e.ext_bookmarked = ?
 ORDER BY e.published DESC
 LIMIT 500;
 
 selectByReadOrBookmarked:
 SELECT *
 FROM EntryWithoutContent
-WHERE read = ? OR bookmarked = ?
+WHERE ext_read = ? OR ext_bookmarked = ?
 ORDER BY published DESC;
 
 selectByRead:
 SELECT *
 FROM EntryWithoutContent
-WHERE read = ?
+WHERE ext_read = ?
 ORDER BY published DESC;
 
 selectByReadSynced:
 SELECT *
 FROM EntryWithoutContent
-WHERE readSynced = ?
+WHERE ext_read_synced = ?
 ORDER BY published DESC;
 
 selectByBookmarked:
 SELECT *
 FROM EntryWithoutContent
-WHERE bookmarked = ?
+WHERE ext_bookmarked = ?
 ORDER BY published DESC;
 
 selectByBookmarkedSynced:
 SELECT *
 FROM EntryWithoutContent
-WHERE bookmarkedSynced = ?
+WHERE ext_bookmarked_synced = ?
 ORDER BY published DESC;
 
 selectByOgImageChecked:
 SELECT *
 FROM EntryWithoutContent
-WHERE ogImageChecked = :ogImageChecked
+WHERE ext_og_image_checked = :ogImageChecked
 ORDER BY published DESC
 LIMIT :limit;
 
@@ -163,42 +177,42 @@ FROM Entry;
 
 updateReadByFeedId:
 UPDATE Entry
-SET read = :read, readSynced = 0
-WHERE read != :read AND feedId = :feedId;
+SET ext_read = :read, ext_read_synced = 0
+WHERE ext_read != :read AND feed_id = :feedId;
 
 updateReadByBookmarked:
 UPDATE Entry
-SET read = :read, readSynced = 0
-WHERE read != :read AND bookmarked = :bookmarked;
+SET ext_read = :read, ext_read_synced = 0
+WHERE ext_read != :read AND ext_bookmarked = :bookmarked;
 
 updateReadAndReadSynced:
 UPDATE Entry
-SET read = ?, readSynced = ?
+SET ext_read = ?, ext_read_synced = ?
 WHERE id = ?;
 
 updateReadSynced:
 UPDATE Entry
-SET readSynced = ?
+SET ext_read_synced = ?
 WHERE id = ?;
 
 updateBookmarkedAndBookmaredSynced:
 UPDATE Entry
-SET bookmarked = ?, bookmarkedSynced = ?
+SET ext_bookmarked = ?, ext_bookmarked_synced = ?
 WHERE id = ?;
 
 updateBookmarkedSynced:
 UPDATE Entry
-SET bookmarkedSynced = ?
+SET ext_bookmarked_synced = ?
 WHERE id = ?;
 
 updateOgImageChecked:
 UPDATE Entry
-SET ogImageChecked = ?
+SET ext_og_image_checked = ?
 WHERE id = ?;
 
 updateOgImage:
 UPDATE Entry
-SET ogImageUrl = ?, ogImageWidth = ?, ogImageHeight = ?, ogImageChecked = 1
+SET ext_og_image_url = ?, ext_og_image_width = ?, ext_og_image_height = ?, ext_og_image_checked = 1
 WHERE id = ?;
 
 updateLinks:
@@ -213,4 +227,4 @@ FROM Entry;
 deleteByFeedId:
 DELETE
 FROM Entry
-WHERE feedId = ?;
+WHERE feed_id = ?;

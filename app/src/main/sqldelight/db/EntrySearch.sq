@@ -33,10 +33,22 @@ CREATE TRIGGER entry_fts_after_update AFTER UPDATE ON Entry BEGIN
 END;
 
 selectByQuery:
-SELECT e.id, f.ext_show_preview_images, e.ogImageUrl, e.ogImageWidth, e.ogImageHeight, e.title, f.title AS feedTitle, e.published, e.summary, e.read, f.ext_open_entries_in_browser, e.links
+SELECT
+    e.id,
+    f.ext_show_preview_images,
+    e.ext_og_image_url,
+    e.ext_og_image_width,
+    e.ext_og_image_height,
+    e.title,
+    f.title AS feedTitle,
+    e.published,
+    e.summary,
+    e.ext_read,
+    f.ext_open_entries_in_browser,
+    e.links
 FROM entry_search es
 JOIN Entry e ON e.id = es.id
-JOIN Feed f ON f.id = e.feedId
+JOIN Feed f ON f.id = e.feed_id
 WHERE es.title LIKE '%' || :query || '%'
 OR es.summary LIKE '%' || :query || '%'
 OR es.content_text LIKE '%' || :query || '%'

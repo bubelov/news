@@ -198,31 +198,27 @@ class MinifluxApiAdapter(
         }
 
         return Entry(
-            contentType = null,
-            contentSrc = null,
+            content_type = null,
+            content_src = null,
             content_text = null,
             links = links,
             summary = null,
             id = id.toString(),
-            feedId = feed_id.toString(),
+            feed_id = feed_id.toString(),
             title = title,
             published = OffsetDateTime.parse(published_at),
             updated = OffsetDateTime.parse(changed_at),
-            authorName = author,
-
-            read = status == "read",
-            readSynced = true,
-
-            bookmarked = starred,
-            bookmarkedSynced = true,
-
-            guidHash = "",
-            commentsUrl = comments_url,
-
-            ogImageChecked = false,
-            ogImageUrl = "",
-            ogImageWidth = 0,
-            ogImageHeight = 0,
+            author_name = author,
+            ext_read = status == "read",
+            ext_read_synced = true,
+            ext_bookmarked = starred,
+            ext_bookmarked_synced = true,
+            ext_nc_guid_hash = "",
+            ext_comments_url = comments_url,
+            ext_og_image_checked = false,
+            ext_og_image_url = "",
+            ext_og_image_width = 0,
+            ext_og_image_height = 0,
         )
     }
 }

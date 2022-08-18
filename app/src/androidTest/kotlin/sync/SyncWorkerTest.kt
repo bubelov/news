@@ -23,7 +23,7 @@ class SyncWorkerTest {
     @Test
     fun retryIfInitialSyncIncomplete() {
         val confRepo = app.get<ConfRepo>()
-        confRepo.update { it.copy(initialSyncCompleted = false) }
+        confRepo.update { it.copy(initial_sync_completed = false) }
         val workerBuilder = TestWorkerBuilder.from(app, SyncWorker::class.java)
         val worker = workerBuilder.build()
         val result = worker.doWork()

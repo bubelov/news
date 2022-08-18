@@ -53,7 +53,7 @@ class OpenGraphImagesRepo(
         val sentEntryIds = mutableSetOf<String>()
 
         confRepo.conf
-            .map { it.showPreviewImages }
+            .map { it.show_preview_images }
             .distinctUntilChanged()
             .collectLatest { showPreviewImages ->
                 if (showPreviewImages) {
@@ -138,9 +138,9 @@ class OpenGraphImagesRepo(
             }
 
             db.entryQueries.updateOgImage(
-                ogImageUrl = imageUrl,
-                ogImageWidth = bitmap.width.toLong(),
-                ogImageHeight = bitmap.height.toLong(),
+                ext_og_image_url = imageUrl,
+                ext_og_image_width = bitmap.width.toLong(),
+                ext_og_image_height = bitmap.height.toLong(),
                 id = entry.id,
             )
         }

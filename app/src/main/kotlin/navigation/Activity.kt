@@ -30,7 +30,7 @@ class Activity : AppCompatActivity() {
         binding = ActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        get<ConfRepo>().update { it.copy(syncedOnStartup = false) }
+        get<ConfRepo>().update { it.copy(synced_on_startup = false) }
         lifecycleScope.launch { get<OpenGraphImagesRepo>().fetchEntryImages() }
     }
 

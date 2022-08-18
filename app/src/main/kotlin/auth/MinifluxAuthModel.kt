@@ -38,10 +38,10 @@ class MinifluxAuthModel(
         confRepo.update {
             it.copy(
                 backend = ConfRepo.BACKEND_MINIFLUX,
-                minifluxServerUrl = url.toString().trim('/'),
-                minifluxServerTrustSelfSignedCerts = trustSelfSignedCerts,
-                minifluxServerUsername = username,
-                minifluxServerPassword = password,
+                miniflux_server_url = url.toString().trim('/'),
+                miniflux_server_trust_self_signed_certs = trustSelfSignedCerts,
+                miniflux_server_username = username,
+                miniflux_server_password = password,
             )
         }
 

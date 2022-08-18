@@ -52,52 +52,52 @@ class EntryQueriesTest {
         val feed = db.insertRandomFeed()
         
         val all = listOf(
-            entry().copy(feedId = feed.id, read = true, bookmarked = true),
-            entry().copy(feedId = feed.id, read = true, bookmarked = false),
-            entry().copy(feedId = feed.id, read = false, bookmarked = false),
+            entry().copy(feed_id = feed.id, ext_read = true, ext_bookmarked = true),
+            entry().copy(feed_id = feed.id, ext_read = true, ext_bookmarked = false),
+            entry().copy(feed_id = feed.id, ext_read = false, ext_bookmarked = false),
         )
 
         all.forEach { db.entryQueries.insertOrReplace(it) }
 
         assertEquals(
-            all.filter { !it.read && !it.bookmarked }.map { it.id },
-            db.entryQueries.selectByReadAndBookmarked(read = listOf(false), bookmarked = false).executeAsList().map { it.id },
+            all.filter { !it.ext_read && !it.ext_bookmarked }.map { it.id },
+            db.entryQueries.selectByReadAndBookmarked(ext_read = listOf(false), ext_bookmarked = false).executeAsList().map { it.id },
         )
     }
 
     @Test
     fun selectByReadOrBookmarked() {
         val all = listOf(
-            entry().copy(read = true, bookmarked = true),
-            entry().copy(read = true, bookmarked = false),
-            entry().copy(read = false, bookmarked = false),
+            entry().copy(ext_read = true, ext_bookmarked = true),
+            entry().copy(ext_read = true, ext_bookmarked = false),
+            entry().copy(ext_read = false, ext_bookmarked = false),
         )
 
         all.forEach { db.entryQueries.insertOrReplace(it) }
 
         assertEquals(
-            all.filter { !it.read || it.bookmarked }.map { it.withoutContent() }.reversed(),
-            db.entryQueries.selectByReadOrBookmarked(read = false, bookmarked = true).executeAsList(),
+            all.filter { !it.ext_read || it.ext_bookmarked }.map { it.withoutContent() }.reversed(),
+            db.entryQueries.selectByReadOrBookmarked(ext_read = false, ext_bookmarked = true).executeAsList(),
         )
     }
 
     @Test
     fun selectByRead() {
         val all = listOf(
-            entry().copy(read = true),
-            entry().copy(read = true),
-            entry().copy(read = false),
+            entry().copy(ext_read = true),
+            entry().copy(ext_read = true),
+            entry().copy(ext_read = false),
         )
 
         all.forEach { db.entryQueries.insertOrReplace(it) }
 
         assertEquals(
-            all.filter { it.read }.map { it.withoutContent() }.sortedByDescending { it.published },
+            all.filter { it.ext_read }.map { it.withoutContent() }.sortedByDescending { it.published },
             db.entryQueries.selectByRead(true).executeAsList(),
         )
 
         assertEquals(
-            all.filter { !it.read }.map { it.withoutContent() }.sortedByDescending { it.published },
+            all.filter { !it.ext_read }.map { it.withoutContent() }.sortedByDescending { it.published },
             db.entryQueries.selectByRead(false).executeAsList(),
         )
     }
@@ -105,20 +105,20 @@ class EntryQueriesTest {
     @Test
     fun selectByReadSynced() {
         val all = listOf(
-            entry().copy(readSynced = true),
-            entry().copy(readSynced = false),
-            entry().copy(readSynced = true),
+            entry().copy(ext_read_synced = true),
+            entry().copy(ext_read_synced = false),
+            entry().copy(ext_read_synced = true),
         )
 
         all.forEach { db.entryQueries.insertOrReplace(it) }
 
         assertEquals(
-            all.filter { it.readSynced }.map { it.withoutContent() }.sortedByDescending { it.published },
+            all.filter { it.ext_read_synced }.map { it.withoutContent() }.sortedByDescending { it.published },
             db.entryQueries.selectByReadSynced(true).executeAsList(),
         )
 
         assertEquals(
-            all.filter { !it.readSynced }.map { it.withoutContent() }.sortedByDescending { it.published },
+            all.filter { !it.ext_read_synced }.map { it.withoutContent() }.sortedByDescending { it.published },
             db.entryQueries.selectByReadSynced(false).executeAsList(),
         )
     }
@@ -126,20 +126,20 @@ class EntryQueriesTest {
     @Test
     fun selectByBookmarked() {
         val all = listOf(
-            entry().copy(bookmarked = true),
-            entry().copy(bookmarked = false),
-            entry().copy(bookmarked = false),
+            entry().copy(ext_bookmarked = true),
+            entry().copy(ext_bookmarked = false),
+            entry().copy(ext_bookmarked = false),
         )
 
         all.forEach { db.entryQueries.insertOrReplace(it) }
 
         assertEquals(
-            all.filter { it.bookmarked }.map { it.withoutContent() }.sortedByDescending { it.published },
+            all.filter { it.ext_bookmarked }.map { it.withoutContent() }.sortedByDescending { it.published },
             db.entryQueries.selectByBookmarked(true).executeAsList(),
         )
 
         assertEquals(
-            all.filter { !it.bookmarked }.map { it.withoutContent() }.sortedByDescending { it.published },
+            all.filter { !it.ext_bookmarked }.map { it.withoutContent() }.sortedByDescending { it.published },
             db.entryQueries.selectByBookmarked(false).executeAsList(),
         )
     }
@@ -149,10 +149,10 @@ class EntryQueriesTest {
         val feedId = UUID.randomUUID().toString()
 
         val all = listOf(
-            entry().copy(feedId = feedId, read = true),
-            entry().copy(read = true),
-            entry().copy(feedId = feedId, read = false),
-            entry().copy(read = false),
+            entry().copy(feed_id = feedId, ext_read = true),
+            entry().copy(ext_read = true),
+            entry().copy(feed_id = feedId, ext_read = false),
+            entry().copy(ext_read = false),
         )
 
         db.apply {
@@ -161,8 +161,8 @@ class EntryQueriesTest {
             entryQueries.updateReadByFeedId(read = true, feedId = feedId)
 
             entryQueries.selectAll().executeAsList().apply {
-                assertEquals(1, filter { !it.readSynced }.size)
-                assertEquals(2, filter { it.feedId == feedId && it.read }.size)
+                assertEquals(1, filter { !it.ext_read_synced }.size)
+                assertEquals(2, filter { it.feed_id == feedId && it.ext_read }.size)
             }
         }
     }
@@ -172,10 +172,10 @@ class EntryQueriesTest {
         val bookmarked = true
 
         val all = listOf(
-            entry().copy(bookmarked = true, read = true),
-            entry().copy(read = true),
-            entry().copy(bookmarked = true, read = false),
-            entry().copy(read = false),
+            entry().copy(ext_bookmarked = true, ext_read = true),
+            entry().copy(ext_read = true),
+            entry().copy(ext_bookmarked = true, ext_read = false),
+            entry().copy(ext_read = false),
         )
 
         db.apply {
@@ -184,8 +184,8 @@ class EntryQueriesTest {
             entryQueries.updateReadByBookmarked(read = true, bookmarked = bookmarked)
 
             entryQueries.selectAll().executeAsList().apply {
-                assertEquals(1, filterNot { it.readSynced }.size)
-                assertEquals(2, filter { it.bookmarked && it.read }.size)
+                assertEquals(1, filterNot { it.ext_read_synced }.size)
+                assertEquals(2, filter { it.ext_bookmarked && it.ext_read }.size)
             }
         }
     }
@@ -198,93 +198,93 @@ fun EntryQueries.insertOrReplace(): Entry {
 }
 
 fun entry() = Entry(
-    contentType = "",
-    contentSrc = "",
+    content_type = "",
+    content_src = "",
     content_text = "",
     links = emptyList(),
     summary = "",
     id = UUID.randomUUID().toString(),
-    feedId = "",
+    feed_id = "",
     title = "",
     published = OffsetDateTime.now(),
     updated = OffsetDateTime.now(),
-    authorName = "",
-    read = false,
-    readSynced = true,
-    bookmarked = false,
-    bookmarkedSynced = true,
-    guidHash = "",
-    commentsUrl = "",
-    ogImageChecked = true,
-    ogImageUrl = "",
-    ogImageWidth = 0,
-    ogImageHeight = 0,
+    author_name = "",
+    ext_read = false,
+    ext_read_synced = true,
+    ext_bookmarked = false,
+    ext_bookmarked_synced = true,
+    ext_nc_guid_hash = "",
+    ext_comments_url = "",
+    ext_og_image_checked = true,
+    ext_og_image_url = "",
+    ext_og_image_width = 0,
+    ext_og_image_height = 0,
 )
 
 fun entryWithoutContent() = EntryWithoutContent(
     links = emptyList(),
     summary = "",
     id = UUID.randomUUID().toString(),
-    feedId = "",
+    feed_id = "",
     title = "",
     published = OffsetDateTime.now(),
     updated = OffsetDateTime.now(),
-    authorName = "",
-    read = false,
-    readSynced = true,
-    bookmarked = false,
-    bookmarkedSynced = true,
-    guidHash = "",
-    commentsUrl = "",
-    ogImageChecked = true,
-    ogImageUrl = "",
-    ogImageWidth = 0,
-    ogImageHeight = 0,
+    author_name = "",
+    ext_read = false,
+    ext_read_synced = true,
+    ext_bookmarked = false,
+    ext_bookmarked_synced = true,
+    ext_nc_guid_hash = "",
+    ext_comments_url = "",
+    ext_og_image_checked = true,
+    ext_og_image_url = "",
+    ext_og_image_width = 0,
+    ext_og_image_height = 0,
 )
 
 fun Entry.withoutContent() = EntryWithoutContent(
     links = links,
     summary = "",
     id = id,
-    feedId = feedId,
+    feed_id = feed_id,
     title = title,
     published = published,
     updated = updated,
-    authorName = authorName,
-    read = read,
-    readSynced = readSynced,
-    bookmarked = bookmarked,
-    bookmarkedSynced = bookmarkedSynced,
-    guidHash = guidHash,
-    commentsUrl = commentsUrl,
-    ogImageChecked = true,
-    ogImageUrl = "",
-    ogImageWidth = 0,
-    ogImageHeight = 0,
+    author_name = author_name,
+    ext_read = ext_read,
+    ext_read_synced = ext_read_synced,
+    ext_bookmarked = ext_bookmarked,
+    ext_bookmarked_synced = ext_bookmarked_synced,
+    ext_nc_guid_hash = ext_nc_guid_hash,
+    ext_comments_url = ext_comments_url,
+    ext_og_image_checked = true,
+    ext_og_image_url = "",
+    ext_og_image_width = 0,
+    ext_og_image_height = 0,
 )
 
 fun EntryWithoutContent.toEntry(): Entry {
     return Entry(
-        contentType = "",
-        contentSrc = "",
+        content_type = "",
+        content_src = "",
         content_text = "",
         links = links,
         summary = summary,
         id = id,
-        feedId = feedId,
+        feed_id = feed_id,
         title = title,
         published = published,
         updated = updated,
-        authorName = authorName,
-        read = read,
-        readSynced = readSynced,
-        bookmarked = bookmarked,
-        bookmarkedSynced = bookmarkedSynced,
-        guidHash = guidHash,
-        commentsUrl = commentsUrl,
-        ogImageChecked = ogImageChecked,
-        ogImageUrl = ogImageUrl,
-        ogImageWidth = ogImageWidth,
-        ogImageHeight = ogImageHeight,
+        author_name = author_name,
+        ext_read = ext_read,
+        ext_read_synced = ext_read_synced,
+        ext_bookmarked = ext_bookmarked,
+        ext_bookmarked_synced = ext_bookmarked_synced,
+        ext_nc_guid_hash = ext_nc_guid_hash,
+        ext_comments_url = ext_comments_url,
+        ext_og_image_checked = ext_og_image_checked,
+        ext_og_image_url = ext_og_image_url,
+        ext_og_image_width = ext_og_image_width,
+        ext_og_image_height = ext_og_image_height,
     )
 }

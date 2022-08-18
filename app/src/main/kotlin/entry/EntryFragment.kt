@@ -112,9 +112,9 @@ class EntryFragment : Fragment() {
                 is EntryModel.State.Success -> {
                     menu.findItem(R.id.toggleBookmarked)?.isVisible = true
                     menu.findItem(R.id.comments)?.apply {
-                        isVisible = state.entry.commentsUrl.isNotBlank()
+                        isVisible = state.entry.ext_comments_url.isNotBlank()
                         setOnMenuItemClickListener {
-                            openUrl(state.entry.commentsUrl, model.conf.value.useBuiltInBrowser)
+                            openUrl(state.entry.ext_comments_url, model.conf.value.use_built_in_browser)
                             true
                         }
                     }
@@ -132,7 +132,7 @@ class EntryFragment : Fragment() {
                         )
                     }
 
-                    updateBookmarkedButton(state.entry.bookmarked)
+                    updateBookmarkedButton(state.entry.ext_bookmarked)
                     title.text = state.entry.title
                     val format =
                         DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)
@@ -164,7 +164,7 @@ class EntryFragment : Fragment() {
                         fab.setOnClickListener {
                             openUrl(
                                 firstHtmlLink.href.toString(),
-                                model.conf.value.useBuiltInBrowser
+                                model.conf.value.use_built_in_browser
                             )
                         }
                     }
@@ -189,7 +189,7 @@ class EntryFragment : Fragment() {
                 lifecycleScope.launchWhenResumed {
                     model.setBookmarked(
                         entry.id,
-                        !entry.bookmarked,
+                        !entry.ext_bookmarked,
                     )
                 }
 
@@ -199,7 +199,7 @@ class EntryFragment : Fragment() {
             R.id.feedSettings -> {
                 findNavController().navigate(
                     EntryFragmentDirections.actionEntryFragmentToFeedSettingsFragment(
-                        feedId = entry.feedId,
+                        feedId = entry.feed_id,
                     )
                 )
 

@@ -12,10 +12,10 @@ class EntrySearchQueriesTest {
         val feed = db.insertRandomFeed()
 
         val entries = listOf(
-            entry().copy(feedId = feed.id, content_text = "Linux 5.19 introduces RSS API"),
-            entry().copy(feedId = feed.id, content_text = "LinuX 5.19 introduces RSS API"),
-            entry().copy(feedId = feed.id, content_text = "linux 5.19 introduces RSS API"),
-            entry().copy(feedId = feed.id, content_text = "Injured Irons Destroy Specifically")
+            entry().copy(feed_id = feed.id, content_text = "Linux 5.19 introduces RSS API"),
+            entry().copy(feed_id = feed.id, content_text = "LinuX 5.19 introduces RSS API"),
+            entry().copy(feed_id = feed.id, content_text = "linux 5.19 introduces RSS API"),
+            entry().copy(feed_id = feed.id, content_text = "Injured Irons Destroy Specifically")
         )
 
         entries.forEach { db.entryQueries.insertOrReplace(it) }
@@ -33,9 +33,9 @@ class EntrySearchQueriesTest {
         val feed = db.insertRandomFeed()
 
         val entries = listOf(
-            entry().copy(feedId = feed.id, content_text = "Роулинг рулет гуляш"),
-            entry().copy(feedId = feed.id, content_text = "РоулинГ рулет гуляш"),
-            entry().copy(feedId = feed.id, content_text = "роулинг рулет гуляш"),
+            entry().copy(feed_id = feed.id, content_text = "Роулинг рулет гуляш"),
+            entry().copy(feed_id = feed.id, content_text = "РоулинГ рулет гуляш"),
+            entry().copy(feed_id = feed.id, content_text = "роулинг рулет гуляш"),
         )
 
         entries.forEach { db.entryQueries.insertOrReplace(it) }

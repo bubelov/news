@@ -87,7 +87,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
 
         val state = model.state.value
 
-        if (state is EntriesModel.State.ShowingCachedEntries && state.conf.markScrolledEntriesAsRead) {
+        if (state is EntriesModel.State.ShowingCachedEntries && state.conf.mark_scrolled_entries_as_read) {
             model.setRead(
                 entryIds = seenEntries.map { it.id },
                 read = true,
@@ -171,7 +171,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
                 adapter.submitList(state.entries) { if (state.scrollToTop) scrollToTop() }
 
                 if (
-                    state.conf.markScrolledEntriesAsRead
+                    state.conf.mark_scrolled_entries_as_read
                     && (args.filter is EntriesFilter.NotBookmarked || args.filter is EntriesFilter.BelongToFeed)
                 ) {
                     binding.list.addOnScrollListener(trackingListener)
@@ -224,7 +224,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
             return
         }
 
-        if (state.conf.showReadEntries) {
+        if (state.conf.show_read_entries) {
             button.setIcon(R.drawable.ic_baseline_visibility_24)
             button.title = getString(R.string.hide_read_news)
             touchHelper?.attachToRecyclerView(null)
@@ -235,7 +235,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         }
 
         button.setOnMenuItemClickListener {
-            model.saveConf { it.copy(showReadEntries = !it.showReadEntries) }
+            model.saveConf { it.copy(show_read_entries = !it.show_read_entries) }
             true
         }
     }
@@ -250,7 +250,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
             button.isVisible = true
         }
 
-        when (state.conf.sortOrder) {
+        when (state.conf.sort_order) {
             ConfRepo.SORT_ORDER_ASCENDING -> {
                 button.setIcon(R.drawable.ic_clock_forward)
                 button.title = getString(R.string.show_newest_first)

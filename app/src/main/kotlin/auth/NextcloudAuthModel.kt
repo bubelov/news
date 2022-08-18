@@ -38,10 +38,10 @@ class NextcloudAuthModel(
         confRepo.update {
             it.copy(
                 backend = ConfRepo.BACKEND_NEXTCLOUD,
-                nextcloudServerUrl = url.toString().trim('/'),
-                nextcloudServerTrustSelfSignedCerts = trustSelfSignedCerts,
-                nextcloudServerUsername = username,
-                nextcloudServerPassword = password,
+                nextcloud_server_url = url.toString().trim('/'),
+                nextcloud_server_trust_self_signed_certs = trustSelfSignedCerts,
+                nextcloud_server_username = username,
+                nextcloud_server_password = password,
             )
         }
 

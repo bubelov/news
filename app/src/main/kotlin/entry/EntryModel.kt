@@ -60,10 +60,10 @@ class EntryModel(
                     return@combine
                 }
 
-                val feed = feedsRepository.selectById(entry.feedId).first()
+                val feed = feedsRepository.selectById(entry.feed_id).first()
 
                 if (feed == null) {
-                    val message = app.getString(R.string.cannot_find_feed_with_id_s, entry.feedId)
+                    val message = app.getString(R.string.cannot_find_feed_with_id_s, entry.feed_id)
                     _state.update { State.Error(message) }
                     return@combine
                 }

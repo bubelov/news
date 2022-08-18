@@ -240,7 +240,7 @@ class FeedsModel(
             selfLink = links.single { it.rel is AtomLinkRel.Self }.href,
             alternateLink = links.firstOrNull { it.rel is AtomLinkRel.Alternate }?.href,
             unreadCount = unread_entries,
-            confUseBuiltInBrowser = confRepo.conf.value.useBuiltInBrowser,
+            confUseBuiltInBrowser = confRepo.conf.value.use_built_in_browser,
         )
     }
 

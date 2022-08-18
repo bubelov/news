@@ -37,10 +37,10 @@ class HotSwapApi(
                     ConfRepo.BACKEND_MINIFLUX -> {
                         api = MinifluxApiAdapter(
                             MinifluxApiBuilder().build(
-                                url = conf.minifluxServerUrl,
-                                username = conf.minifluxServerUsername,
-                                password = conf.minifluxServerPassword,
-                                trustSelfSignedCerts = conf.minifluxServerTrustSelfSignedCerts,
+                                url = conf.miniflux_server_url,
+                                username = conf.miniflux_server_username,
+                                password = conf.miniflux_server_password,
+                                trustSelfSignedCerts = conf.miniflux_server_trust_self_signed_certs,
                             )
                         )
                     }
@@ -48,10 +48,10 @@ class HotSwapApi(
                     ConfRepo.BACKEND_NEXTCLOUD -> {
                         api = NextcloudApiAdapter(
                             NextcloudApiBuilder().build(
-                                url = conf.nextcloudServerUrl,
-                                username = conf.nextcloudServerUsername,
-                                password = conf.nextcloudServerPassword,
-                                trustSelfSignedCerts = conf.nextcloudServerTrustSelfSignedCerts,
+                                url = conf.nextcloud_server_url,
+                                username = conf.nextcloud_server_username,
+                                password = conf.nextcloud_server_password,
+                                trustSelfSignedCerts = conf.nextcloud_server_trust_self_signed_certs,
                             )
                         )
                     }

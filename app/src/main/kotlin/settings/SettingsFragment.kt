@@ -89,8 +89,8 @@ class SettingsFragment : Fragment() {
         settings.isVisible = true
 
         syncInBackground.apply {
-            isChecked = state.conf.syncInBackground
-            backgroundSyncIntervalButton.isVisible = state.conf.syncInBackground
+            isChecked = state.conf.sync_in_background
+            backgroundSyncIntervalButton.isVisible = state.conf.sync_in_background
 
             setOnCheckedChangeListener { _, isChecked ->
                 model.setSyncInBackground(isChecked)
@@ -109,7 +109,7 @@ class SettingsFragment : Fragment() {
 
                 text = resources.getQuantityString(R.plurals.d_hours, hours, hours)
                 val millis = TimeUnit.HOURS.toMillis(hours.toLong())
-                isChecked = state.conf.backgroundSyncIntervalMillis == millis
+                isChecked = state.conf.background_sync_interval_millis == millis
 
                 setOnCheckedChangeListener { _, isChecked ->
                     if (isChecked) {
@@ -131,42 +131,42 @@ class SettingsFragment : Fragment() {
 
         backgroundSyncInterval.text = resources.getQuantityString(
             R.plurals.d_hours,
-            TimeUnit.MILLISECONDS.toHours(state.conf.backgroundSyncIntervalMillis).toInt(),
-            TimeUnit.MILLISECONDS.toHours(state.conf.backgroundSyncIntervalMillis).toInt(),
+            TimeUnit.MILLISECONDS.toHours(state.conf.background_sync_interval_millis).toInt(),
+            TimeUnit.MILLISECONDS.toHours(state.conf.background_sync_interval_millis).toInt(),
         )
 
         syncOnStartup.apply {
-            isChecked = state.conf.syncOnStartup
+            isChecked = state.conf.sync_on_startup
             setOnCheckedChangeListener { _, isChecked -> model.setSyncOnStartup(isChecked) }
         }
 
         showOpenedEntries.apply {
-            isChecked = state.conf.showReadEntries
+            isChecked = state.conf.show_read_entries
             setOnCheckedChangeListener { _, isChecked -> model.setShowReadEntries(isChecked) }
         }
 
         showPreviewImages.apply {
-            isChecked = state.conf.showPreviewImages
+            isChecked = state.conf.show_preview_images
             setOnCheckedChangeListener { _, isChecked -> model.setShowPreviewImages(isChecked) }
         }
 
         cropPreviewImages.apply {
-            isChecked = state.conf.cropPreviewImages
+            isChecked = state.conf.crop_preview_images
             setOnCheckedChangeListener { _, isChecked -> model.setCropPreviewImages(isChecked) }
         }
 
         showPreviewText.apply {
-            isChecked = state.conf.showPreviewText
+            isChecked = state.conf.show_preview_text
             setOnCheckedChangeListener { _, isChecked -> model.setShowPreviewText(isChecked) }
         }
 
         markScrolledEntriesAsRead.apply {
-            isChecked = state.conf.markScrolledEntriesAsRead
+            isChecked = state.conf.mark_scrolled_entries_as_read
             setOnCheckedChangeListener { _, isChecked -> model.setMarkScrolledEntriesAsRead(isChecked) }
         }
 
         useBuiltInBrowser.apply {
-            isChecked = state.conf.useBuiltInBrowser
+            isChecked = state.conf.use_built_in_browser
             setOnCheckedChangeListener { _, isChecked -> model.setUseBuiltInBrowser(isChecked) }
         }
 

@@ -30,31 +30,31 @@ class EntriesRepositoryTest {
         val repo = EntriesRepo(db = db, api = mockk())
 
         val entries = listOf(
-            entryWithoutContent().copy(feedId = feed.id, read = true, bookmarked = true),
-            entryWithoutContent().copy(feedId = feed.id, read = true, bookmarked = false),
-            entryWithoutContent().copy(feedId = feed.id, read = false, bookmarked = true),
-            entryWithoutContent().copy(feedId = feed.id, read = false, bookmarked = false),
+            entryWithoutContent().copy(feed_id = feed.id, ext_read = true, ext_bookmarked = true),
+            entryWithoutContent().copy(feed_id = feed.id, ext_read = true, ext_bookmarked = false),
+            entryWithoutContent().copy(feed_id = feed.id, ext_read = false, ext_bookmarked = true),
+            entryWithoutContent().copy(feed_id = feed.id, ext_read = false, ext_bookmarked = false),
         )
 
         entries.forEach { db.entryQueries.insertOrReplace(it.toEntry()) }
 
         assertEquals(
-            entries.filter { it.read && it.bookmarked }.map { it.id },
+            entries.filter { it.ext_read && it.ext_bookmarked }.map { it.id },
             repo.selectByReadAndBookmarked(read = listOf(true), bookmarked = true).first().map { it.id },
         )
 
         assertEquals(
-            entries.filter { it.read && !it.bookmarked }.map { it.id },
+            entries.filter { it.ext_read && !it.ext_bookmarked }.map { it.id },
             repo.selectByReadAndBookmarked(read = listOf(true), bookmarked = false).first().map { it.id },
         )
 
         assertEquals(
-            entries.filter { !it.read && it.bookmarked }.map { it.id },
+            entries.filter { !it.ext_read && it.ext_bookmarked }.map { it.id },
             repo.selectByReadAndBookmarked(read = listOf(false), bookmarked = true).first().map { it.id },
         )
 
         assertEquals(
-            entries.filter { !it.read && !it.bookmarked }.map { it.id },
+            entries.filter { !it.ext_read && !it.ext_bookmarked }.map { it.id },
             repo.selectByReadAndBookmarked(read = listOf(false), bookmarked = false).first().map { it.id },
         )
     }
@@ -65,31 +65,31 @@ class EntriesRepositoryTest {
         val repo = EntriesRepo(db = db, api = mockk())
 
         val entries = listOf(
-            entryWithoutContent().copy(read = true, bookmarked = true),
-            entryWithoutContent().copy(read = true, bookmarked = false),
-            entryWithoutContent().copy(read = false, bookmarked = true),
-            entryWithoutContent().copy(read = false, bookmarked = false),
+            entryWithoutContent().copy(ext_read = true, ext_bookmarked = true),
+            entryWithoutContent().copy(ext_read = true, ext_bookmarked = false),
+            entryWithoutContent().copy(ext_read = false, ext_bookmarked = true),
+            entryWithoutContent().copy(ext_read = false, ext_bookmarked = false),
         ).sortedByDescending { it.published }
 
         entries.forEach { db.entryQueries.insertOrReplace(it.toEntry()) }
 
         assertEquals(
-            entries.filter { it.read || it.bookmarked },
+            entries.filter { it.ext_read || it.ext_bookmarked },
             repo.selectByReadOrBookmarked(read = true, bookmarked = true).first(),
         )
 
         assertEquals(
-            entries.filter { it.read || !it.bookmarked },
+            entries.filter { it.ext_read || !it.ext_bookmarked },
             repo.selectByReadOrBookmarked(read = true, bookmarked = false).first(),
         )
 
         assertEquals(
-            entries.filter { !it.read || it.bookmarked },
+            entries.filter { !it.ext_read || it.ext_bookmarked },
             repo.selectByReadOrBookmarked(read = false, bookmarked = true).first(),
         )
 
         assertEquals(
-            entries.filter { !it.read || !it.bookmarked },
+            entries.filter { !it.ext_read || !it.ext_bookmarked },
             repo.selectByReadOrBookmarked(read = false, bookmarked = false).first(),
         )
     }
@@ -100,21 +100,21 @@ class EntriesRepositoryTest {
         val repo = EntriesRepo(db = db, api = mockk())
 
         val entries = listOf(
-            entryWithoutContent().copy(read = true),
-            entryWithoutContent().copy(read = false),
-            entryWithoutContent().copy(read = false),
-            entryWithoutContent().copy(read = false),
+            entryWithoutContent().copy(ext_read = true),
+            entryWithoutContent().copy(ext_read = false),
+            entryWithoutContent().copy(ext_read = false),
+            entryWithoutContent().copy(ext_read = false),
         ).sortedByDescending { it.published }
 
         entries.forEach { db.entryQueries.insertOrReplace(it.toEntry()) }
 
         assertEquals(
-            entries.filter { it.read },
+            entries.filter { it.ext_read },
             repo.selectByRead(true).first(),
         )
 
         assertEquals(
-            entries.filter { !it.read },
+            entries.filter { !it.ext_read },
             repo.selectByRead(false).first(),
         )
     }
