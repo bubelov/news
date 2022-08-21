@@ -102,6 +102,7 @@
     <string name="audio_n">Audio %1$d</string>
     <string name="crash_title">The app has crashed</string>
     <string name="crash_summary">You can let us know about that by sharing your crash report</string>
+    <string name="this_entry_doesnt_have_any_external_links">This entry doesn\'t have any external links</string>
     <plurals name="d_hours">
         <item quantity="one">%d hour</item>
         <item quantity="other">%d hours</item>

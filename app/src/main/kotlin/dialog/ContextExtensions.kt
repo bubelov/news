@@ -7,6 +7,29 @@ import androidx.annotation.StringRes
 import co.appreactor.news.R
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
+fun Context.showErrorDialog(
+    t: Throwable,
+    onDismissListener: DialogInterface.OnDismissListener? = null,
+) {
+    Log.e(javaClass.simpleName, t.message, t)
+    val message = t.message ?: getString(R.string.got_exception_of_class_s, t.javaClass.simpleName)
+    showDialog(R.string.error, message, onDismissListener)
+}
+
+fun Context.showErrorDialog(
+    @StringRes message: Int,
+    onDismissListener: DialogInterface.OnDismissListener? = null,
+) {
+    showDialog(R.string.error, getString(message), onDismissListener)
+}
+
+fun Context.showErrorDialog(
+    message: String,
+    onDismissListener: DialogInterface.OnDismissListener? = null,
+) {
+    showDialog(R.string.error, message, onDismissListener)
+}
+
 fun Context.showDialog(
     @StringRes titleId: Int,
     message: String,
@@ -30,20 +53,4 @@ fun Context.showDialog(
         .setPositiveButton(android.R.string.ok, null)
         .setOnDismissListener(onDismissListener)
         .show()
-}
-
-fun Context.showErrorDialog(
-    t: Throwable,
-    onDismissListener: DialogInterface.OnDismissListener? = null,
-) {
-    Log.e(javaClass.simpleName, t.message, t)
-    val message = t.message ?: getString(R.string.got_exception_of_class_s, t.javaClass.simpleName)
-    showDialog(R.string.error, message, onDismissListener)
-}
-
-fun Context.showErrorDialog(
-    message: String,
-    onDismissListener: DialogInterface.OnDismissListener? = null,
-) {
-    showDialog(R.string.error, message, onDismissListener)
 }

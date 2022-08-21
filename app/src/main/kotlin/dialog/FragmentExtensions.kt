@@ -1,19 +1,8 @@
 package dialog
 
 import android.content.DialogInterface
+import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
-
-fun Fragment.showDialog(
-    title: String,
-    message: String,
-    onDismissListener: DialogInterface.OnDismissListener? = null,
-) {
-    requireContext().showDialog(
-        title = title,
-        message = message,
-        onDismissListener = onDismissListener,
-    )
-}
 
 fun Fragment.showErrorDialog(
     t: Throwable,
@@ -21,6 +10,16 @@ fun Fragment.showErrorDialog(
 ) {
     requireContext().showErrorDialog(
         t = t,
+        onDismissListener = onDismissListener,
+    )
+}
+
+fun Fragment.showErrorDialog(
+    @StringRes message: Int,
+    onDismissListener: DialogInterface.OnDismissListener? = null,
+) {
+    requireContext().showErrorDialog(
+        message = message,
         onDismissListener = onDismissListener,
     )
 }

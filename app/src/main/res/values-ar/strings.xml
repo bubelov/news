@@ -102,6 +102,7 @@
     <string name="audio_n">صوت %1$d</string>
     <string name="crash_title">لقد تعطل التطبيق</string>
     <string name="crash_summary">يمكنك إخبارنا بذلك من خلال مشاركة تقرير الأعطال</string>
+    <string name="this_entry_doesnt_have_any_external_links">This entry doesn\'t have any external links</string>
     <plurals name="d_hours">
         <item quantity="zero">%d ساعات</item>
         <item quantity="one">%d ساعة</item>

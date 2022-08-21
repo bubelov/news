@@ -320,11 +320,24 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
     }
 
     private fun onListItemClick(item: EntriesAdapter.Item) {
-        model.setRead(listOf(item.id), true)
+        model.setRead(
+            entryIds = listOf(item.id),
+            read = true,
+        )
 
         if (item.openInBrowser) {
+            val alternateLinks = item.links.filter { it.rel is AtomLinkRel.Alternate }
+
+            if (alternateLinks.isEmpty()) {
+                showErrorDialog(R.string.this_entry_doesnt_have_any_external_links)
+                return
+            }
+
+            val alternateHtmlLink = alternateLinks.firstOrNull { it.type == "text/html" }
+            val linkToOpen = alternateHtmlLink ?: alternateLinks.first()
+
             openUrl(
-                url = item.links.first { it.rel is AtomLinkRel.Alternate && it.type == "text/html" }.href.toString(),
+                url = linkToOpen.href.toString(),
                 useBuiltInBrowser = item.useBuiltInBrowser,
             )
         } else {
