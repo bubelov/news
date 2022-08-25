@@ -76,7 +76,7 @@
     <string name="trust_self_signed_certificates">Selbstsignierten Zertifikaten vertrauen</string>
     <string name="you_have_no_feeds">Du hast keine Feeds</string>
     <string name="export_database">Datenbank exportieren</string>
-    <string name="invalid_url_s">Ungülitge Url: %1$s</string>
+    <string name="invalid_url_s">Ungülitge URL: %1$s</string>
     <string name="preview_images">Vorschaubilder</string>
     <string name="show">anzeigen</string>
     <string name="hide">verstecken</string>
@@ -87,28 +87,37 @@
     <string name="close">Schließen</string>
     <string name="miniflux_login">Miniflux Login</string>
     <string name="miniflux">Miniflux</string>
-    <string name="opml_file_is_invalid">OPML file is invalid</string>
+    <string name="opml_file_is_invalid">Ungültige OPML-Datei</string>
     <string name="feed_url">Feed URL</string>
-    <string name="view_comments">View comments</string>
-    <string name="use_built_in_browser">Use built-in browser</string>
-    <string name="show_preview_text">Show preview text</string>
-    <string name="enclosures">Enclosures</string>
-    <string name="manage_enclosures">Manage enclosures</string>
-    <string name="crash">Crash</string>
-    <string name="connect_to_miniflux">Connect to Miniflux</string>
-    <string name="connect_to_nextcloud">Connect to Nextcloud</string>
-    <string name="connect">Connect</string>
-    <string name="invalid_url">Invalid URL</string>
+    <string name="view_comments">Kommentare anzeigen</string>
+    <string name="use_built_in_browser">Integrierten Browser verwenden</string>
+    <string name="show_preview_text">Vorschautext anzeigen</string>
+    <string name="enclosures">Anhänge</string>
+    <string name="manage_enclosures">Anhänge verwalten</string>
+    <string name="crash">Absturz</string>
+    <string name="connect_to_miniflux">Verbindung zu Miniflux</string>
+    <string name="connect_to_nextcloud">Verbindung zu Nextcloud</string>
+    <string name="connect">Verbinden</string>
+    <string name="invalid_url">Ungültige URL</string>
     <string name="audio_n">Audio %1$d</string>
-    <string name="crash_title">The app has crashed</string>
-    <string name="crash_summary">You can let us know about that by sharing your crash report</string>
-    <string name="this_entry_doesnt_have_any_external_links">This entry doesn\'t have any external links</string>
+    <string name="crash_report_email" translatable="false">igor@bubelov.com</string>
+    <string name="crash_title">Die App ist abgestürzt</string>
+    <string name="crash_summary">Du kannst uns darüber informieren, indem du uns den Absturzbericht zukommen lässt</string>
+    <string name="this_entry_doesnt_have_any_external_links">Dieser Eintrag hat keine externen Links</string>
     <plurals name="d_hours">
+        <item quantity="zero">%d Stunden</item>
         <item quantity="one">%d Stunde</item>
+        <item quantity="two">%d Stunden</item>
+        <item quantity="few">%d Stunden</item>
+        <item quantity="many">%d Stunden</item>
         <item quantity="other">%d Stunden</item>
     </plurals>
     <plurals name="you_have_d_unread_news">
-        <item quantity="one">Du hast %d ungelesene Nachrichten</item>
+        <item quantity="zero">Du hast %d ungelesene Nachrichten</item>
+        <item quantity="one">You have %d unread news</item>
+        <item quantity="two">Du hast %d ungelesene Nachrichten</item>
+        <item quantity="few">Du hast %d ungelesene Nachrichten</item>
+        <item quantity="many">Du hast %d ungelesene Nachrichten</item>
         <item quantity="other">Du hast %d ungelesene Nachrichten</item>
     </plurals>
 </resources>
