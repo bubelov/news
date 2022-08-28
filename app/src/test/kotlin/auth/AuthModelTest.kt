@@ -12,21 +12,6 @@ import kotlin.test.assertEquals
 class AuthModelTest {
 
     @Test
-    fun hasBackend() {
-        val db = testDb()
-        val confRepo = ConfRepo(db)
-
-        val model = AuthModel(
-            confRepo = confRepo,
-            syncScheduler = mockk(),
-        )
-
-        assertEquals(model.hasBackend(), false)
-        confRepo.update { it.copy(backend = ConfRepo.BACKEND_STANDALONE) }
-        assertEquals(model.hasBackend(), true)
-    }
-
-    @Test
     fun setStandaloneBackend() {
         val db = testDb()
         val confRepo = ConfRepo(db)

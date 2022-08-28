@@ -1,5 +1,6 @@
 package entries
 
+import android.content.Intent
 import android.graphics.Rect
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,10 +9,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -61,9 +64,31 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View {
-        _binding = FragmentEntriesBinding.inflate(inflater, container, false)
-        return binding.root
+    ): View? {
+        return if (model.hasBackend()) {
+            val intent = requireActivity().intent
+            val sharedFeedUrl = (intent?.dataString ?: intent?.getStringExtra(Intent.EXTRA_TEXT))?.trim() ?: ""
+            intent.removeExtra(Intent.EXTRA_TEXT)
+
+            if (sharedFeedUrl.isNotBlank()) {
+                findNavController().navigate(
+                    resId = R.id.feedsFragment,
+                    args = bundleOf(Pair("url", sharedFeedUrl)),
+                    navOptions = NavOptions.Builder().setPopUpTo(R.id.nav_graph, true).build(),
+                )
+            }
+
+            if (!arguments!!.containsKey("filter")) {
+                arguments!!.putParcelable("filter", EntriesFilter.NotBookmarked)
+            }
+
+            _binding = FragmentEntriesBinding.inflate(inflater, container, false)
+            binding.root
+        } else {
+            val builder = NavOptions.Builder().setPopUpTo(R.id.nav_graph, true)
+            findNavController().navigate(R.id.authFragment, null, builder.build())
+            null
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

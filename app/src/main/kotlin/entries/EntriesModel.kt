@@ -48,6 +48,8 @@ class EntriesModel(
         }
     }
 
+    fun hasBackend() = confRepo.conf.value.backend.isNotBlank()
+
     private suspend fun updateState(filter: EntriesFilter, conf: Conf, syncState: Sync.State) {
         if (!conf.initial_sync_completed || (conf.sync_on_startup && !conf.synced_on_startup)) {
             confRepo.update { it.copy(synced_on_startup = true) }

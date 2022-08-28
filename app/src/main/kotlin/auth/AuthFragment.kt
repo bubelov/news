@@ -1,6 +1,5 @@
 package auth
 
-import android.content.Intent
 import android.graphics.drawable.Animatable
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -24,24 +23,9 @@ class AuthFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View? {
-        return if (model.hasBackend()) {
-            val intent = requireActivity().intent
-            val sharedFeedUrl = (intent?.dataString ?: intent?.getStringExtra(Intent.EXTRA_TEXT))?.trim()
-
-            if (sharedFeedUrl.isNullOrBlank()) {
-                val directions = AuthFragmentDirections.actionAuthFragmentToNewsFragment(EntriesFilter.NotBookmarked)
-                findNavController().navigate(directions)
-            } else {
-                val directions = AuthFragmentDirections.actionAuthFragmentToFeedsFragment(sharedFeedUrl)
-                findNavController().navigate(directions)
-            }
-
-            null
-        } else {
-            _binding = FragmentAuthBinding.inflate(inflater, container, false)
-            binding.root
-        }
+    ): View {
+        _binding = FragmentAuthBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

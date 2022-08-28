@@ -178,6 +178,7 @@ class FeedsFragment : Fragment() {
 
         if (args.url.isNotBlank()) {
             model.addFeed(args.url)
+            requireArguments().clear()
         }
     }
 

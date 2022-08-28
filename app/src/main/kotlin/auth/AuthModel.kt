@@ -12,8 +12,6 @@ class AuthModel(
     private val syncScheduler: BackgroundSyncScheduler,
 ) : ViewModel() {
 
-    fun hasBackend() = confRepo.conf.value.backend.isNotBlank()
-
     fun setStandaloneBackend() {
         confRepo.update {
             it.copy(
