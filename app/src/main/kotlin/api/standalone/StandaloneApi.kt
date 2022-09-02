@@ -166,9 +166,8 @@ class StandaloneNewsApi(
 
                 buildList { repeat(15) { add(processFeedsAsync(feeds)) } }.awaitAll()
 
-                db.transaction {
-                    entries.removeAll { db.entryQueries.selectById(it.id).executeAsOneOrNull() != null }
-                }
+                val prevCachedEntryIds = db.entryQueries.selectByIds(entries.map { it.id }).executeAsList()
+                entries.removeAll { prevCachedEntryIds.contains(it.id) }
             }
 
             entries

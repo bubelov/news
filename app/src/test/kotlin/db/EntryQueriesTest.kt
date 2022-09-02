@@ -34,6 +34,24 @@ class EntryQueriesTest {
     }
 
     @Test
+    fun selectByIds() {
+        val items = listOf(
+            db.entryQueries.insertOrReplace(),
+            db.entryQueries.insertOrReplace(),
+            db.entryQueries.insertOrReplace(),
+        )
+
+        db.entryQueries.deleteById(items[1].id)
+
+        repeat(10) { db.entryQueries.insertOrReplace() }
+
+        assertEquals(
+            listOf(items[0].id, items[2].id).sorted(),
+            db.entryQueries.selectByIds(items.map { it.id }).executeAsList().sorted(),
+        )
+    }
+
+    @Test
     fun selectById() {
         val items = listOf(
             db.entryQueries.insertOrReplace(),

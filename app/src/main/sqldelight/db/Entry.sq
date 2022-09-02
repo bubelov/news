@@ -102,6 +102,11 @@ SELECT *
 FROM Entry
 ORDER BY published DESC;
 
+selectByIds:
+SELECT id
+FROM Entry
+WHERE id IN :ids;
+
 selectById:
 SELECT *
 FROM Entry
@@ -223,6 +228,11 @@ WHERE id = ?;
 deleteAll:
 DELETE
 FROM Entry;
+
+deleteById:
+DELETE
+FROM Entry
+WHERE id = ?;
 
 deleteByFeedId:
 DELETE
