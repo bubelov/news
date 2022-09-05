@@ -46,6 +46,13 @@ android {
                 keyPassword = signingProperties["releaseKeyPassword"] as String
             }
         }
+
+        create("selfSignedRelease") {
+            storeFile = File(rootDir, "release.jks")
+            storePassword = "news-android"
+            keyAlias = "news-android"
+            keyPassword = "news-android"
+        }
     }
 
     buildTypes {
@@ -59,6 +66,10 @@ android {
                 signingProperties.load(FileInputStream(signingPropertiesFile))
                 signingConfig = signingConfigs.getByName("release")
             }
+        }
+
+        create("selfSignedRelease") {
+            signingConfig = signingConfigs.getByName("selfSignedRelease")
         }
     }
 
