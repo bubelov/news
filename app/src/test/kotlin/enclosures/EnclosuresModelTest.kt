@@ -8,6 +8,7 @@ import co.appreactor.feedk.AtomLinkRel
 import db.Link
 import db.entry
 import db.testDb
+import entries.EntriesRepo
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -84,9 +85,14 @@ class EnclosuresModelTest {
             db = db,
         )
 
-        val model = EnclosuresModel(
+        val entriesRepo = EntriesRepo(
+            api = mockk(),
             db = db,
+        )
+
+        val model = EnclosuresModel(
             enclosuresRepo = enclosuresRepo,
+            entriesRepo = entriesRepo,
         )
 
         withTimeout(1000) {
