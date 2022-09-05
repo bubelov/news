@@ -28,12 +28,6 @@ jobs:
 
     - name: Assemble APK
       run: ./gradlew assembleDebug
-
-    - name: Upload APK artifact
-      uses: actions/upload-artifact@v2.2.0
-      with:
-        name: news-debug
-        path: app/build/outputs/apk/debug/news-*.apk
         
     - uses: "marvinpinto/action-automatic-releases@latest"
       with:
@@ -41,4 +35,4 @@ jobs:
         automatic_release_tag: "preview"
         prerelease: true
         title: "preview"
-        files: "app/build/outputs/apk/debug/news-*.apk"
+        files: "app/build/outputs/apk/selfSignedRelease/news-*.apk"
