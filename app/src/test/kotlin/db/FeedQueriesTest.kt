@@ -27,6 +27,7 @@ class FeedQueriesTest {
     fun selectAllWithUnreadEntryCount() {
         val db = testDb()
         val feed = db.insertRandomFeed()
+        assertEquals(0, db.feedQueries.selectAllWithUnreadEntryCount().executeAsList().first().unread_entries)
         val readEntries = buildList { repeat(7) { add(entry().copy(feed_id = feed.id, ext_read = true)) } }
         val unreadEntries = buildList { repeat(3) { add(entry().copy(feed_id = feed.id, ext_read = false)) } }
         (readEntries + unreadEntries).forEach { db.entryQueries.insertOrReplace(it) }
