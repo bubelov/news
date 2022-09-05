@@ -80,7 +80,7 @@ class NextcloudAuthFragment : Fragment() {
                     trustSelfSignedCerts = trustSelfSignedCerts,
                 )
 
-                findNavController().navigate(R.id.action_minifluxAuthFragment_to_newsFragment)
+                findNavController().navigate(R.id.action_nextcloudAuthFragment_to_newsFragment)
             }.onFailure {
                 binding.progress.isVisible = false
                 showErrorDialog(it.message ?: getString(R.string.direct_login_failed))
