@@ -27,7 +27,7 @@ jobs:
       run: ./gradlew testDebugUnitTest
 
     - name: Assemble APK
-      run: ./gradlew assembleDebug
+      run: ./gradlew assembleSelfSignedRelease
         
     - uses: "marvinpinto/action-automatic-releases@latest"
       with:
