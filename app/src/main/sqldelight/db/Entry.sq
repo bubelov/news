@@ -102,6 +102,11 @@ SELECT *
 FROM Entry
 ORDER BY published DESC;
 
+selectAllLinksPublishedAndTitle:
+SELECT links, published, title
+FROM Entry
+ORDER BY published DESC;
+
 selectByIds:
 SELECT id
 FROM Entry

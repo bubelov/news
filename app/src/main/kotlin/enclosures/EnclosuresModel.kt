@@ -3,27 +3,21 @@ package enclosures
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.appreactor.feedk.AtomLinkRel
-import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToList
-import db.Db
-import db.Entry
 import db.Link
-import kotlinx.coroutines.Dispatchers
+import entries.EntriesRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.koin.android.annotation.KoinViewModel
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 @KoinViewModel
 class EnclosuresModel(
-    private val db: Db,
     private val enclosuresRepo: EnclosuresRepo,
+    private val entriesRepo: EntriesRepo,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<State>(State.LoadingEnclosures)
@@ -32,12 +26,23 @@ class EnclosuresModel(
     init {
         viewModelScope.launch {
             enclosuresRepo.deletePartialDownloads()
+            val entries = entriesRepo.selectAllLinksPublishedAndTitle().first()
+            val enclosures = mutableListOf<EnclosuresAdapter.Item>()
 
-            db.entryQueries.selectLinks()
-                .asFlow()
-                .mapToList()
-                .map { list -> list.flatten().filter { it.rel is AtomLinkRel.Enclosure } }
-                .collectLatest { onLoadEnclosures(it) }
+            entries.forEach { entry ->
+                val entryEnclosures = entry.links.filter { it.rel is AtomLinkRel.Enclosure }
+
+                enclosures += entryEnclosures.map {
+                    EnclosuresAdapter.Item(
+                        entryId = it.entryId!!,
+                        enclosure = it,
+                        primaryText = entry.title,
+                        secondaryText = DATE_TIME_FORMAT.format(entry.published),
+                    )
+                }
+            }
+
+            _state.update { State.ShowingEnclosures(enclosures) }
         }
     }
 
@@ -47,30 +52,6 @@ class EnclosuresModel(
 
     suspend fun deleteEnclosure(enclosure: Link) {
         enclosuresRepo.deleteFromCache(enclosure)
-    }
-
-    private suspend fun onLoadEnclosures(enclosures: List<Link>) {
-        withContext(Dispatchers.Default) {
-            db.transaction {
-                _state.update {
-                    State.ShowingEnclosures(
-                        enclosures
-                            .map { Pair(it, db.entryQueries.selectById(it.entryId!!).executeAsOne()) }
-                            .sortedByDescending { it.second.published }
-                            .map { item(it.first, it.second) }
-                    )
-                }
-            }
-        }
-    }
-
-    private fun item(enclosure: Link, entry: Entry): EnclosuresAdapter.Item {
-        return EnclosuresAdapter.Item(
-            entryId = entry.id,
-            enclosure = enclosure,
-            primaryText = entry.title,
-            secondaryText = DATE_TIME_FORMAT.format(entry.published),
-        )
     }
 
     sealed class State {

@@ -10,6 +10,7 @@ import db.EntriesAdapterRow
 import db.Entry
 import db.EntryWithoutContent
 import db.Feed
+import db.SelectAllLinksPublishedAndTitle
 import db.SelectByQuery
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -25,6 +26,10 @@ class EntriesRepo(
     private val api: Api,
     private val db: Db,
 ) {
+
+    fun selectAllLinksPublishedAndTitle(): Flow<List<SelectAllLinksPublishedAndTitle>> {
+        return db.entryQueries.selectAllLinksPublishedAndTitle().asFlow().mapToList()
+    }
 
     fun selectById(entryId: String): Flow<Entry?> {
         return db.entryQueries.selectById(entryId).asFlow().mapToOneOrNull()
