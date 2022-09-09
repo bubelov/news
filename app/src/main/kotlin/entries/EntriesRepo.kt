@@ -243,10 +243,12 @@ class EntriesRepo(
                     val feed = feeds.firstOrNull { it.id == newEntry.feed_id }
 
                     db.transaction {
-                        val oldEntry = db.entryQueries.selectById(newEntry.id).executeAsOneOrNull()
-                        val links = oldEntry?.links ?: newEntry.links
                         val postProcessedEntry = newEntry.postProcess(feed)
-                        db.entryQueries.insertOrReplace(postProcessedEntry.copy(links = links))
+                        val oldLinks = db.entryQueries.selectLinksById(newEntry.id).executeAsOne()
+
+                        db.entryQueries.insertOrReplace(
+                            postProcessedEntry.copy(links = oldLinks.ifEmpty { newEntry.links })
+                        )
                     }
                 }
             }
