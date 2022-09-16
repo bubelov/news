@@ -1,14 +1,21 @@
 package entries
 
 import androidx.fragment.app.testing.launchFragmentInContainer
+import androidx.test.platform.app.InstrumentationRegistry
 import auth.AuthFragmentDirections
 import co.appreactor.news.R
-import kotlin.test.Test
+import conf.ConfRepo
+import db.db
+import org.junit.Test
 
 class EntriesFragmentTest {
 
     @Test
     fun launch() {
+        val db = db(InstrumentationRegistry.getInstrumentation().targetContext)
+        val confRepo = ConfRepo(db)
+        confRepo.update { it.copy(backend = ConfRepo.BACKEND_STANDALONE) }
+
         val directions =
             AuthFragmentDirections.actionAuthFragmentToNewsFragment(EntriesFilter.NotBookmarked)
 

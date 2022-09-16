@@ -1,9 +1,9 @@
 package db
 
 import java.util.UUID
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import org.junit.Test
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 
 class FeedQueriesTest {
 
@@ -57,7 +57,7 @@ class FeedQueriesTest {
         val feeds = buildList { repeat(5) { add(db.insertRandomFeed()) } }
         val randomFeed = feeds.random()
         db.feedQueries.deleteById(randomFeed.id)
-        assertTrue { db.feedQueries.selectById(randomFeed.id).executeAsOneOrNull() == null }
+        assertTrue(db.feedQueries.selectById(randomFeed.id).executeAsOneOrNull() == null)
     }
 }
 

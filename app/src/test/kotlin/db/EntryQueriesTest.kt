@@ -2,15 +2,15 @@ package db
 
 import java.time.OffsetDateTime
 import java.util.UUID
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
+import org.junit.Test
+import org.junit.Assert.assertEquals
+import org.junit.Before
 
 class EntryQueriesTest {
 
     private lateinit var db: Db
 
-    @BeforeTest
+    @Before
     fun before() {
         db = testDb()
     }
@@ -80,43 +80,6 @@ class EntryQueriesTest {
         assertEquals(
             all.filter { !it.ext_read && !it.ext_bookmarked }.map { it.id },
             db.entryQueries.selectByReadAndBookmarked(ext_read = listOf(false), ext_bookmarked = false).executeAsList().map { it.id },
-        )
-    }
-
-    @Test
-    fun selectByReadOrBookmarked() {
-        val all = listOf(
-            entry().copy(ext_read = true, ext_bookmarked = true),
-            entry().copy(ext_read = true, ext_bookmarked = false),
-            entry().copy(ext_read = false, ext_bookmarked = false),
-        )
-
-        all.forEach { db.entryQueries.insertOrReplace(it) }
-
-        assertEquals(
-            all.filter { !it.ext_read || it.ext_bookmarked }.map { it.withoutContent() }.reversed(),
-            db.entryQueries.selectByReadOrBookmarked(ext_read = false, ext_bookmarked = true).executeAsList(),
-        )
-    }
-
-    @Test
-    fun selectByRead() {
-        val all = listOf(
-            entry().copy(ext_read = true),
-            entry().copy(ext_read = true),
-            entry().copy(ext_read = false),
-        )
-
-        all.forEach { db.entryQueries.insertOrReplace(it) }
-
-        assertEquals(
-            all.filter { it.ext_read }.map { it.withoutContent() }.sortedByDescending { it.published },
-            db.entryQueries.selectByRead(true).executeAsList(),
-        )
-
-        assertEquals(
-            all.filter { !it.ext_read }.map { it.withoutContent() }.sortedByDescending { it.published },
-            db.entryQueries.selectByRead(false).executeAsList(),
         )
     }
 

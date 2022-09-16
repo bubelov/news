@@ -13,21 +13,21 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withTimeout
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
+import org.junit.After
+import org.junit.Test
+import org.junit.Assert.assertEquals
+import org.junit.Before
 
 class FeedSettingsModelTest {
 
     private val mainDispatcher = newSingleThreadContext("UI")
 
-    @BeforeTest
+    @Before
     fun before() {
         Dispatchers.setMain(mainDispatcher)
     }
 
-    @AfterTest
+    @After
     fun after() {
         Dispatchers.resetMain()
         mainDispatcher.close()

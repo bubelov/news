@@ -6,8 +6,8 @@ import io.mockk.coVerifySequence
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import org.junit.Test
 import kotlin.random.Random
-import kotlin.test.Test
 
 class MinifluxApiAdapterTest {
 

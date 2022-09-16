@@ -176,13 +176,13 @@ dependencies {
     implementation("ch.acra:acra-dialog:$acraVer")
 
     // Core test infrastructure
-    testImplementation(kotlin("test"))
+    testImplementation("junit:junit:4.13.2")
 
     // Mocking library, better to go easy on that
     testImplementation("io.mockk:mockk:1.12.4")
 
     // Core test infrastructure
-    androidTestImplementation(kotlin("test"))
+    androidTestImplementation("junit:junit:4.13.2")
 
     // An instrumentation that runs various types of test cases
     androidTestImplementation("androidx.test:runner:1.4.0")

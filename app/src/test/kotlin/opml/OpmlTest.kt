@@ -4,13 +4,11 @@ import co.appreactor.feedk.AtomLinkRel
 import db.Feed
 import db.Link
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import org.junit.Assert.*
 import java.io.InputStream
 import java.nio.charset.Charset
 import java.util.UUID
-import kotlin.test.Test
-import kotlin.test.assertContentEquals
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import org.junit.Test
 
 class OpmlTest {
 
@@ -47,7 +45,7 @@ class OpmlTest {
     @Test
     fun readsSampleDocument() {
         val doc = readFile("sample.opml").toOpml()
-        assertContentEquals(sampleElements, doc.outlines)
+        assertArrayEquals(sampleElements.toTypedArray(), doc.outlines.toTypedArray())
     }
 
     @Test
@@ -114,7 +112,7 @@ class OpmlTest {
 
         opmlDocument = opmlDocument.toXmlDocument().toPrettyString().toOpml()
 
-        assertContentEquals(sampleElements.toTypedArray(), opmlDocument.outlines.toTypedArray())
+        assertArrayEquals(sampleElements.toTypedArray(), opmlDocument.outlines.toTypedArray())
     }
 
     @Test

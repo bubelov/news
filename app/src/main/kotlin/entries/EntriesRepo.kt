@@ -8,7 +8,6 @@ import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import db.Db
 import db.EntriesAdapterRow
 import db.Entry
-import db.EntryWithoutContent
 import db.Feed
 import db.SelectAllLinksPublishedAndTitle
 import db.SelectByQuery
@@ -55,17 +54,6 @@ class EntriesRepo(
             ext_read = read,
             ext_bookmarked = bookmarked,
         ).asFlow().mapToList()
-    }
-
-    fun selectByReadOrBookmarked(
-        read: Boolean,
-        bookmarked: Boolean,
-    ): Flow<List<EntryWithoutContent>> {
-        return db.entryQueries.selectByReadOrBookmarked(read, bookmarked).asFlow().mapToList()
-    }
-
-    fun selectByRead(read: Boolean): Flow<List<EntryWithoutContent>> {
-        return db.entryQueries.selectByRead(read).asFlow().mapToList()
     }
 
     fun selectCount() = db.entryQueries.selectCount().asFlow().mapToOne()

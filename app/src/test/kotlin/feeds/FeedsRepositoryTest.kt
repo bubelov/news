@@ -13,10 +13,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import java.util.UUID
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import org.junit.Test
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Before
 
 class FeedsRepositoryTest {
 
@@ -24,7 +24,7 @@ class FeedsRepositoryTest {
     private lateinit var api: Api
     private lateinit var repo: FeedsRepo
 
-    @BeforeTest
+    @Before
     fun before() {
         db = testDb()
         api = mockk()
@@ -48,10 +48,7 @@ class FeedsRepositoryTest {
 
         repo.insertOrReplace(feed)
 
-        assertEquals(
-            expected = feed,
-            actual = db.feedQueries.selectAll().executeAsList().single(),
-        )
+        assertEquals(feed, db.feedQueries.selectAll().executeAsList().single())
     }
 
     @Test
@@ -71,10 +68,7 @@ class FeedsRepositoryTest {
 
         repo.insertByUrl(feedUrl)
 
-        assertEquals(
-            expected = feed,
-            actual = db.feedQueries.selectAll().executeAsList().single(),
-        )
+        assertEquals(feed, db.feedQueries.selectAll().executeAsList().single())
 
         coVerify { api.addFeed(feedUrl) }
         confirmVerified(api)
@@ -116,10 +110,7 @@ class FeedsRepositoryTest {
             newTitle = newTitle,
         )
 
-        assertEquals(
-            expected = feed.copy(title = trimmedNewTitle),
-            actual = repo.selectAll().first().single(),
-        )
+        assertEquals(feed.copy(title = trimmedNewTitle), repo.selectAll().first().single())
     }
 
     @Test
@@ -133,6 +124,6 @@ class FeedsRepositoryTest {
 
         repo.deleteById(randomFeed.id)
 
-        assertTrue { db.feedQueries.selectById(randomFeed.id).executeAsOneOrNull() == null }
+        assertTrue(db.feedQueries.selectById(randomFeed.id).executeAsOneOrNull() == null)
     }
 }

@@ -5,9 +5,9 @@ import db.testDb
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Test
 
 class StandaloneApiTest {
 
@@ -18,7 +18,7 @@ class StandaloneApiTest {
         server.start()
 
         val result = StandaloneNewsApi(testDb()).addFeed(server.url("/feed.atom"))
-        assertTrue { result.isFailure }
+        assertTrue(result.isFailure)
 
         server.shutdown()
     }

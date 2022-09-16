@@ -2,7 +2,7 @@ package settings
 
 import androidx.fragment.app.testing.launchFragmentInContainer
 import co.appreactor.news.R
-import kotlin.test.Test
+import org.junit.Test
 
 class SettingsFragmentTest {
 

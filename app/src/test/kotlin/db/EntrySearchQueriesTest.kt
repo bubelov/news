@@ -1,8 +1,8 @@
 package db
 
-import kotlin.test.Ignore
-import kotlin.test.Test
-import kotlin.test.assertEquals
+import org.junit.Test
+import org.junit.Assert.assertEquals
+import org.junit.Ignore
 
 class EntrySearchQueriesTest {
 

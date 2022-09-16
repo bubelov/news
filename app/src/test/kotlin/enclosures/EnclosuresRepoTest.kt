@@ -7,8 +7,8 @@ import db.testDb
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import okhttp3.HttpUrl.Companion.toHttpUrl
-import kotlin.test.Test
-import kotlin.test.assertTrue
+import org.junit.Test
+import org.junit.Assert.assertTrue
 
 class EnclosuresRepoTest {
 
@@ -37,7 +37,7 @@ class EnclosuresRepoTest {
         )
 
         val res = runCatching { repo.downloadAudioEnclosure(link) }
-        assertTrue { res.isFailure }
-        assertTrue { res.exceptionOrNull()?.message?.startsWith("Invalid link rel") ?: false }
+        assertTrue(res.isFailure)
+        assertTrue(res.exceptionOrNull()?.message?.startsWith("Invalid link rel") ?: false)
     }
 }

@@ -5,16 +5,15 @@ import androidx.work.ListenableWorker
 import androidx.work.testing.TestWorkerBuilder
 import app.App
 import conf.ConfRepo
+import org.junit.Before
 import org.koin.android.ext.android.get
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertIs
+import org.junit.Test
 
 class SyncWorkerTest {
 
     private lateinit var app: App
 
-    @BeforeTest
+    @Before
     fun setup() {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         app = instrumentation.targetContext.applicationContext as App
@@ -27,6 +26,6 @@ class SyncWorkerTest {
         val workerBuilder = TestWorkerBuilder.from(app, SyncWorker::class.java)
         val worker = workerBuilder.build()
         val result = worker.doWork()
-        assertIs<ListenableWorker.Result.Retry>(result)
+        assert(result is ListenableWorker.Result.Retry)
     }
 }

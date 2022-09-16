@@ -3,7 +3,7 @@ package entry
 import androidx.fragment.app.testing.launchFragmentInContainer
 import co.appreactor.news.R
 import entries.EntriesFragmentDirections
-import kotlin.test.Test
+import org.junit.Test
 
 class EntryFragmentTest {
 

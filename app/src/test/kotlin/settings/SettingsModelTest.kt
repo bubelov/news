@@ -10,21 +10,21 @@ import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
+import org.junit.After
+import org.junit.Test
+import org.junit.Assert.assertEquals
+import org.junit.Before
 
 class SettingsModelTest {
 
     private val mainDispatcher = newSingleThreadContext("UI")
 
-    @BeforeTest
+    @Before
     fun before() {
         Dispatchers.setMain(mainDispatcher)
     }
 
-    @AfterTest
+    @After
     fun after() {
         Dispatchers.resetMain()
         mainDispatcher.close()
@@ -50,10 +50,7 @@ class SettingsModelTest {
 
         var state = model.state.filterIsInstance<SettingsModel.State.ShowingSettings>().first()
 
-        assertEquals(
-            expected = "@acme.com",
-            state.logOutSubtitle,
-        )
+        assertEquals("@acme.com", state.logOutSubtitle)
 
         confRepo.update {
             it.copy(
@@ -70,9 +67,6 @@ class SettingsModelTest {
 
         state = model.state.filterIsInstance<SettingsModel.State.ShowingSettings>().first()
 
-        assertEquals(
-            expected = "@acme.com",
-            state.logOutSubtitle,
-        )
+        assertEquals("@acme.com", state.logOutSubtitle)
     }
 }

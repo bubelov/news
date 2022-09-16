@@ -4,8 +4,8 @@ import conf.ConfRepo
 import db.testDb
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import kotlin.test.Test
-import kotlin.test.assertEquals
+import org.junit.Test
+import org.junit.Assert.assertEquals
 
 class HotSwapApiTest {
 

@@ -9,8 +9,8 @@ import io.mockk.mockkStatic
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import kotlin.test.Test
-import kotlin.test.assertTrue
+import org.junit.Test
+import org.junit.Assert.assertTrue
 
 class MinifluxAuthModelTest {
 

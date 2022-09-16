@@ -6,8 +6,8 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import sync.BackgroundSyncScheduler
 import java.util.concurrent.TimeUnit
-import kotlin.test.Test
-import kotlin.test.assertEquals
+import org.junit.Test
+import org.junit.Assert.assertEquals
 
 class AuthModelTest {
 

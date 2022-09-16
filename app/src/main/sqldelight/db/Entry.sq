@@ -138,18 +138,6 @@ AND e.ext_bookmarked = ?
 ORDER BY e.published DESC
 LIMIT 500;
 
-selectByReadOrBookmarked:
-SELECT *
-FROM EntryWithoutContent
-WHERE ext_read = ? OR ext_bookmarked = ?
-ORDER BY published DESC;
-
-selectByRead:
-SELECT *
-FROM EntryWithoutContent
-WHERE ext_read = ?
-ORDER BY published DESC;
-
 selectByReadSynced:
 SELECT *
 FROM EntryWithoutContent

@@ -22,21 +22,21 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withTimeout
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import org.junit.After
+import org.junit.Before
 import java.util.UUID
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.Test
+import org.junit.Test
 
 class EnclosuresModelTest {
 
     private val mainDispatcher = newSingleThreadContext("UI")
 
-    @BeforeTest
+    @Before
     fun before() {
         Dispatchers.setMain(mainDispatcher)
     }
 
-    @AfterTest
+    @After
     fun after() {
         Dispatchers.resetMain()
         mainDispatcher.close()
