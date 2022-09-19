@@ -1,13 +1,11 @@
 <h2 align="center"><b>News</b></h2>
 <h4 align="center">Feed Reader 📰 and Podcast Player 🎧 for Android 🤖</h4>
 
-
 <p align="center">
   <a href="https://f-droid.org/packages/co.appreactor.news/">
     <img src="graphics/get-it-on-fdroid.svg" alt="Get it on F-Droid" height="60">
   </a>
 </p>
-
 
 <p align="center">
 <a href="https://github.com/bubelov/news/releases" alt="GitHub release"><img src="https://img.shields.io/github/release/bubelov/news.svg" ></a>
@@ -39,13 +37,7 @@
 - Both light and dark themes are supported
 - This is an open source app which respects your privacy
 
-## 🪙 Support News With Bitcoins
-
-bc1qng60mcufjnmz6330gze5yt4m6enzra7lywns2d
-
-<img src="https://github.com/bubelov/btcmap-android/raw/master/app/src/main/res/drawable-nodpi/btc_address.png" width="204">
-
-## 🌍 Help Us Translate
+## 🌍 Help with Translation
 
 - [Afrikaans](app/src/main/res/values-af/strings.xml)
 - [Arabic](/app/src/main/res/values-ar/strings.xml)
@@ -77,4 +69,4 @@ bc1qng60mcufjnmz6330gze5yt4m6enzra7lywns2d
 - [Ukrainian](/app/src/main/res/values-uk/strings.xml)
 - [Vietnamese](/app/src/main/res/values-vi/strings.xml)
 
-Feel free to open an issue if you can't find your language or regional dialect
+Feel free to open an issue if you can't find your language or regional dialect.
