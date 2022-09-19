@@ -13,12 +13,13 @@ plugins {
 val signingPropertiesFile = rootProject.file("signing.properties")
 
 android {
-    compileSdk = 31
+    namespace = "co.appreactor.news"
+    compileSdk = 33
 
     defaultConfig {
         applicationId = "co.appreactor.news"
         minSdk = 29
-        targetSdk = 31
+        targetSdk = 33
         versionCode = 20
         versionName = "0.3.4"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -97,14 +98,14 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVer")
 
     // KTX extensions provide concise, idiomatic Kotlin to Jetpack, Android platform, and other APIs
-    implementation("androidx.core:core-ktx:1.8.0")
+    implementation("androidx.core:core-ktx:1.9.0")
 
     val fragmentVer = "1.4.1"
     implementation("androidx.fragment:fragment-ktx:$fragmentVer")
     debugImplementation("androidx.fragment:fragment-testing:$fragmentVer")
 
     // Simplifies in-app navigation, assumes single activity pattern
-    val navVer = "2.4.2"
+    val navVer = "2.5.2"
     implementation("androidx.navigation:navigation-fragment-ktx:$navVer")
     implementation("androidx.navigation:navigation-ui-ktx:$navVer")
 

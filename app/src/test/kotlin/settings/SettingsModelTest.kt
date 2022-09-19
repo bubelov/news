@@ -1,5 +1,6 @@
 package settings
 
+import android.app.Application
 import conf.ConfRepo
 import db.testDb
 import io.mockk.mockk
@@ -32,6 +33,8 @@ class SettingsModelTest {
 
     @Test
     fun removeProtocolPrefixFromAccountName() = runBlocking {
+        val app: Application = mockk(relaxed = true)
+
         val db = testDb()
         val confRepo = ConfRepo(db)
 
@@ -43,6 +46,7 @@ class SettingsModelTest {
         }
 
         var model = SettingsModel(
+            app = app,
             confRepo = confRepo,
             db = db,
             syncScheduler = mockk(),
@@ -60,6 +64,7 @@ class SettingsModelTest {
         }
 
         model = SettingsModel(
+            app = app,
             confRepo = confRepo,
             db = db,
             syncScheduler = mockk(),

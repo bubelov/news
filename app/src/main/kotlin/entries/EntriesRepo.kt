@@ -226,18 +226,17 @@ class EntriesRepo(
                 maxEntryUpdated = maxUpdatedInstant,
             ).getOrThrow()
 
-            db.entryQueries.transaction {
+            db.transaction {
                 entries.forEach { newEntry ->
                     val feed = feeds.firstOrNull { it.id == newEntry.feed_id }
+                    val postProcessedEntry = newEntry.postProcess(feed)
 
-                    db.transaction {
-                        val postProcessedEntry = newEntry.postProcess(feed)
-                        val oldLinks = db.entryQueries.selectLinksById(newEntry.id).executeAsOne()
+                    val oldLinks = db.entryQueries.selectLinksById(newEntry.id).executeAsOneOrNull()
+                        ?: emptyList()
 
-                        db.entryQueries.insertOrReplace(
-                            postProcessedEntry.copy(links = oldLinks.ifEmpty { newEntry.links })
-                        )
-                    }
+                    db.entryQueries.insertOrReplace(
+                        postProcessedEntry.copy(links = oldLinks.ifEmpty { newEntry.links })
+                    )
                 }
             }
 

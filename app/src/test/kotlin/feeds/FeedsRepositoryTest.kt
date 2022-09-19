@@ -1,7 +1,6 @@
 package feeds
 
 import api.Api
-import db.Db
 import db.Feed
 import db.insertRandomFeed
 import db.testDb
@@ -16,27 +15,15 @@ import java.util.UUID
 import org.junit.Test
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
-import org.junit.Before
 
 class FeedsRepositoryTest {
 
-    private lateinit var db: Db
-    private lateinit var api: Api
-    private lateinit var repo: FeedsRepo
-
-    @Before
-    fun before() {
-        db = testDb()
-        api = mockk()
-
-        repo = FeedsRepo(
-            db = db,
-            api = api,
-        )
-    }
-
     @Test
     fun insertOrReplace() = runBlocking {
+        val db = testDb()
+        val api: Api = mockk()
+        val repo = FeedsRepo(api, db)
+
         val feed = Feed(
             id = UUID.randomUUID().toString(),
             links = emptyList(),
@@ -53,6 +40,9 @@ class FeedsRepositoryTest {
 
     @Test
     fun insertByUrl() = runBlocking {
+        val db = testDb()
+        val api: Api = mockk()
+        val repo = FeedsRepo(api, db)
         val feedUrl = "https://example.com/".toHttpUrl()
 
         val feed = Feed(
@@ -76,12 +66,18 @@ class FeedsRepositoryTest {
 
     @Test
     fun selectAll() = runBlocking {
+        val db = testDb()
+        val api: Api = mockk()
+        val repo = FeedsRepo(api, db)
         val feeds = buildList { repeat(5) { add(db.insertRandomFeed()) } }
         assertEquals(feeds.sortedBy { it.title }, repo.selectAll().first())
     }
 
     @Test
     fun selectById() = runBlocking {
+        val db = testDb()
+        val api: Api = mockk()
+        val repo = FeedsRepo(api, db)
         val feeds = buildList { repeat(5) { add(db.insertRandomFeed()) } }
         val randomFeed = feeds.random()
         assertEquals(randomFeed, repo.selectById(randomFeed.id).first())
@@ -89,6 +85,10 @@ class FeedsRepositoryTest {
 
     @Test
     fun updateTitle() = runBlocking {
+        val db = testDb()
+        val api: Api = mockk()
+        val repo = FeedsRepo(api, db)
+
         val feed = Feed(
             id = UUID.randomUUID().toString(),
             links = emptyList(),
@@ -115,6 +115,9 @@ class FeedsRepositoryTest {
 
     @Test
     fun deleteById() = runBlocking {
+        val db = testDb()
+        val api: Api = mockk()
+        val repo = FeedsRepo(api, db)
         val feeds = buildList { repeat(5) { add(db.insertRandomFeed()) } }
         val randomFeed = feeds.random()
 

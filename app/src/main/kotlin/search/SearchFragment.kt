@@ -2,11 +2,11 @@ package search
 
 import android.graphics.Rect
 import android.os.Bundle
-import android.text.Editable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -18,7 +18,6 @@ import anim.animateVisibilityChanges
 import co.appreactor.feedk.AtomLinkRel
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentSearchBinding
-import com.google.android.material.internal.TextWatcherAdapter
 import entries.EntriesAdapter
 import kotlinx.coroutines.launch
 import navigation.hideKeyboard
@@ -70,12 +69,12 @@ class SearchFragment : Fragment() {
             findNavController().popBackStack()
         }
 
-        binding.query.addTextChangedListener(object : TextWatcherAdapter() {
-            override fun afterTextChanged(s: Editable) {
-                binding.clear.isVisible = s.isNotEmpty()
-                model.setArgs(SearchModel.Args(query = s.toString()))
+        binding.query.addTextChangedListener(
+            afterTextChanged = {
+                binding.clear.isVisible = it!!.isNotEmpty()
+                model.setArgs(SearchModel.Args(query = it.toString()))
             }
-        })
+        )
 
         binding.query.requestFocus()
         showKeyboard(binding.query)
@@ -123,7 +122,8 @@ class SearchFragment : Fragment() {
         }
     }
 
-    private class CardListAdapterDecoration(private val gapInPixels: Int) : RecyclerView.ItemDecoration() {
+    private class CardListAdapterDecoration(private val gapInPixels: Int) :
+        RecyclerView.ItemDecoration() {
 
         override fun getItemOffsets(
             outRect: Rect,

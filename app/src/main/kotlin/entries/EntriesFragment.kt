@@ -78,8 +78,8 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
                 )
             }
 
-            if (!arguments!!.containsKey("filter")) {
-                arguments!!.putParcelable("filter", EntriesFilter.NotBookmarked)
+            if (!requireArguments().containsKey("filter")) {
+                requireArguments().putParcelable("filter", EntriesFilter.NotBookmarked)
             }
 
             _binding = FragmentEntriesBinding.inflate(inflater, container, false)

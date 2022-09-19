@@ -13,7 +13,7 @@
     <style name="AppTheme" parent="BaseAppTheme">
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:navigationBarColor">?colorSurface</item>
-        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
     </style>
 
 </resources>

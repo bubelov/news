@@ -1,7 +1,9 @@
 package settings
 
+import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.appreactor.news.R
 import conf.ConfRepo
 import db.Conf
 import db.Db
@@ -15,6 +17,7 @@ import sync.BackgroundSyncScheduler
 
 @KoinViewModel
 class SettingsModel(
+    private val app: Application,
     private val confRepo: ConfRepo,
     private val db: Db,
     private val syncScheduler: BackgroundSyncScheduler,
@@ -31,11 +34,11 @@ class SettingsModel(
 
                 when (conf.backend) {
                     ConfRepo.BACKEND_STANDALONE -> {
-                        logOutTitle = "Delete all data"
+                        logOutTitle = app.getString(R.string.delete_all_data)
                         logOutSubtitle = ""
                     }
                     else -> {
-                        logOutTitle = "Log out"
+                        logOutTitle = app.getString(R.string.log_out)
                         logOutSubtitle = conf.accountName()
                     }
                 }
