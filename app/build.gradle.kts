@@ -146,7 +146,7 @@ dependencies {
     implementation("com.github.requery:sqlite-android:3.39.2")
 
     // SQLDelight generates typesafe kotlin APIs from SQL statements
-    val sqlDelightVer = "1.5.3"
+    val sqlDelightVer = "1.5.4"
     implementation("com.squareup.sqldelight:coroutines-extensions:$sqlDelightVer")
     implementation("com.squareup.sqldelight:android-driver:$sqlDelightVer")
     testImplementation("com.squareup.sqldelight:sqlite-driver:$sqlDelightVer")
