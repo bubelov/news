@@ -172,18 +172,20 @@ class NextcloudApiAdapter(
 
         val links = mutableListOf<Link>()
 
-        links += Link(
-            feedId = null,
-            entryId = id.toString(),
-            href = url!!.toHttpUrl(),
-            rel = AtomLinkRel.Alternate,
-            type = "",
-            hreflang = "",
-            title = "",
-            length = null,
-            extEnclosureDownloadProgress = null,
-            extCacheUri = null,
-        )
+        if (url != null) {
+            links += Link(
+                feedId = null,
+                entryId = id.toString(),
+                href = url.toHttpUrl(),
+                rel = AtomLinkRel.Alternate,
+                type = "",
+                hreflang = "",
+                title = "",
+                length = null,
+                extEnclosureDownloadProgress = null,
+                extCacheUri = null,
+            )
+        }
 
         if (!enclosureLink.isNullOrBlank()) {
             links += Link(
