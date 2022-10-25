@@ -124,35 +124,41 @@ class NextcloudApiAdapter(
     private fun FeedJson.toFeed(): Feed? {
         val feedId = id?.toString() ?: return null
 
-        val selfLink = Link(
-            feedId = feedId,
-            entryId = null,
-            href = url!!.toHttpUrl(),
-            rel = AtomLinkRel.Self,
-            type = null,
-            hreflang = null,
-            title = null,
-            length = null,
-            extEnclosureDownloadProgress = null,
-            extCacheUri = null,
-        )
+        val links = mutableListOf<Link>()
 
-        val alternateLink = Link(
-            feedId = feedId,
-            entryId = null,
-            href = link!!.toHttpUrl(),
-            rel = AtomLinkRel.Alternate,
-            type = null,
-            hreflang = null,
-            title = null,
-            length = null,
-            extEnclosureDownloadProgress = null,
-            extCacheUri = null,
-        )
+        if (!url.isNullOrBlank()) {
+            links += Link(
+                feedId = feedId,
+                entryId = null,
+                href = url.toHttpUrl(),
+                rel = AtomLinkRel.Self,
+                type = null,
+                hreflang = null,
+                title = null,
+                length = null,
+                extEnclosureDownloadProgress = null,
+                extCacheUri = null,
+            )
+        }
+
+        if (!link.isNullOrBlank()) {
+            links += Link(
+                feedId = feedId,
+                entryId = null,
+                href = link.toHttpUrl(),
+                rel = AtomLinkRel.Alternate,
+                type = null,
+                hreflang = null,
+                title = null,
+                length = null,
+                extEnclosureDownloadProgress = null,
+                extCacheUri = null,
+            )
+        }
 
         return Feed(
             id = feedId,
-            links = listOf(selfLink, alternateLink),
+            links = links,
             title = title ?: "Untitled",
             ext_open_entries_in_browser = false,
             ext_blocked_words = "",
@@ -172,13 +178,13 @@ class NextcloudApiAdapter(
 
         val links = mutableListOf<Link>()
 
-        if (url != null) {
+        if (!url.isNullOrBlank()) {
             links += Link(
                 feedId = null,
                 entryId = id.toString(),
                 href = url.toHttpUrl(),
                 rel = AtomLinkRel.Alternate,
-                type = "",
+                type = "text/html",
                 hreflang = "",
                 title = "",
                 length = null,
