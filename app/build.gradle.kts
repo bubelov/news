@@ -153,12 +153,12 @@ dependencies {
 
     // Dependency injection framework
     val koinAnnotationsVer = "1.0.0"
-    implementation("io.insert-koin:koin-android:3.2.0")
+    implementation("io.insert-koin:koin-android:3.2.2")
     implementation("io.insert-koin:koin-annotations:$koinAnnotationsVer")
     ksp("io.insert-koin:koin-ksp-compiler:$koinAnnotationsVer")
 
     // Material design components
-    implementation("com.google.android.material:material:1.6.1")
+    implementation("com.google.android.material:material:1.7.0")
 
     // Used to download, cache and display images
     implementation("com.squareup.picasso:picasso:2.71828")
