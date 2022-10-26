@@ -169,7 +169,7 @@ dependencies {
 
     // Feed parser
     // Used in standalone mode
-    implementation("co.appreactor:feedk:0.2.5")
+    implementation("co.appreactor:feedk:0.2.6")
 
     // Custom global exception handler
     val acraVer = "5.9.5"

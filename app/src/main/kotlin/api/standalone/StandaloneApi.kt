@@ -150,7 +150,9 @@ class StandaloneNewsApi(
             val entries = Collections.synchronizedList(mutableListOf<Entry>())
 
             withContext(Dispatchers.Default) {
-                val feeds = produce { db.feedQueries.selectAll().asFlow().mapToList().first().forEach { send(it) } }
+                val feeds = produce {
+                    db.feedQueries.selectAll().asFlow().mapToList().first().forEach { send(it) }
+                }
 
                 suspend fun processFeedsAsync(feeds: ReceiveChannel<Feed>): Deferred<Unit> {
                     return async {
@@ -166,7 +168,8 @@ class StandaloneNewsApi(
 
                 buildList { repeat(15) { add(processFeedsAsync(feeds)) } }.awaitAll()
 
-                val prevCachedEntryIds = db.entryQueries.selectByIds(entries.map { it.id }).executeAsList()
+                val prevCachedEntryIds =
+                    db.entryQueries.selectByIds(entries.map { it.id }).executeAsList()
                 entries.removeAll { prevCachedEntryIds.contains(it.id) }
             }
 
@@ -198,7 +201,6 @@ class StandaloneNewsApi(
                     when (val parsedFeed = feedResult.feed) {
                         is AtomFeed -> {
                             parsedFeed.entries
-                                .getOrElse { return emptyList() }
                                 .mapNotNull { atomEntry ->
                                     runCatching {
                                         atomEntry.toEntry(feed.id)
