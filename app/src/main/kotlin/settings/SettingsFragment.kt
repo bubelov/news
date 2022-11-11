@@ -60,13 +60,19 @@ class SettingsFragment : Fragment() {
 
     private fun createExportDbLauncher(): ActivityResultLauncher<String> {
         return registerForActivityResult(ActivityResultContracts.CreateDocument()) { uri ->
+            if (uri == null) {
+                return@registerForActivityResult
+            }
+
             viewLifecycleOwner.lifecycleScope.launch {
-                withContext(Dispatchers.Default) {
-                    runCatching {
+                runCatching {
+                    withContext(Dispatchers.IO) {
                         requireContext().contentResolver.openOutputStream(uri!!)?.use {
                             requireContext().databaseFile().inputStream().copyTo(it)
                         }
-                    }.onFailure { showErrorDialog(it) }
+                    }
+                }.onFailure {
+                    showErrorDialog(it)
                 }
             }
         }
@@ -162,7 +168,11 @@ class SettingsFragment : Fragment() {
 
         markScrolledEntriesAsRead.apply {
             isChecked = state.conf.mark_scrolled_entries_as_read
-            setOnCheckedChangeListener { _, isChecked -> model.setMarkScrolledEntriesAsRead(isChecked) }
+            setOnCheckedChangeListener { _, isChecked ->
+                model.setMarkScrolledEntriesAsRead(
+                    isChecked
+                )
+            }
         }
 
         useBuiltInBrowser.apply {
