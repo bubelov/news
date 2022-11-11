@@ -5,10 +5,7 @@ import androidx.lifecycle.viewModelScope
 import co.appreactor.feedk.AtomLinkRel
 import db.Link
 import entries.EntriesRepo
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 import java.time.format.DateTimeFormatter
@@ -26,23 +23,26 @@ class EnclosuresModel(
     init {
         viewModelScope.launch {
             enclosuresRepo.deletePartialDownloads()
-            val entries = entriesRepo.selectAllLinksPublishedAndTitle().first()
-            val enclosures = mutableListOf<EnclosuresAdapter.Item>()
 
-            entries.forEach { entry ->
-                val entryEnclosures = entry.links.filter { it.rel is AtomLinkRel.Enclosure }
+            entriesRepo.selectCount().collect {
+                val entries = entriesRepo.selectAllLinksPublishedAndTitle().first()
+                val enclosures = mutableListOf<EnclosuresAdapter.Item>()
 
-                enclosures += entryEnclosures.map {
-                    EnclosuresAdapter.Item(
-                        entryId = it.entryId!!,
-                        enclosure = it,
-                        primaryText = entry.title,
-                        secondaryText = DATE_TIME_FORMAT.format(entry.published),
-                    )
+                entries.forEach { entry ->
+                    val entryEnclosures = entry.links.filter { it.rel is AtomLinkRel.Enclosure }
+
+                    enclosures += entryEnclosures.map {
+                        EnclosuresAdapter.Item(
+                            entryId = it.entryId!!,
+                            enclosure = it,
+                            primaryText = entry.title,
+                            secondaryText = DATE_TIME_FORMAT.format(entry.published),
+                        )
+                    }
                 }
-            }
 
-            _state.update { State.ShowingEnclosures(enclosures) }
+                _state.update { State.ShowingEnclosures(enclosures) }
+            }
         }
     }
 
