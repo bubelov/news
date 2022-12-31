@@ -198,9 +198,9 @@ class MinifluxApiAdapter(
         }
 
         return Entry(
-            content_type = null,
-            content_src = null,
-            content_text = null,
+            content_type = "html",
+            content_src = "",
+            content_text = content,
             links = links,
             summary = null,
             id = id.toString(),
