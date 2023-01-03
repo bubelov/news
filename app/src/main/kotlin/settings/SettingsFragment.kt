@@ -9,7 +9,9 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentSettingsBinding
@@ -65,14 +67,16 @@ class SettingsFragment : Fragment() {
             }
 
             viewLifecycleOwner.lifecycleScope.launch {
-                runCatching {
-                    withContext(Dispatchers.IO) {
-                        requireContext().contentResolver.openOutputStream(uri!!)?.use {
-                            requireContext().databaseFile().inputStream().copyTo(it)
+                repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                    runCatching {
+                        withContext(Dispatchers.IO) {
+                            requireContext().contentResolver.openOutputStream(uri)?.use {
+                                requireContext().databaseFile().inputStream().copyTo(it)
+                            }
                         }
+                    }.onFailure {
+                        showErrorDialog(it)
                     }
-                }.onFailure {
-                    showErrorDialog(it)
                 }
             }
         }
