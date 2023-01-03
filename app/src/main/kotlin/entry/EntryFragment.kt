@@ -18,7 +18,9 @@ import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.core.view.iterator
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -114,7 +116,10 @@ class EntryFragment : Fragment() {
                     menu.findItem(R.id.comments)?.apply {
                         isVisible = state.entry.ext_comments_url.isNotBlank()
                         setOnMenuItemClickListener {
-                            openUrl(state.entry.ext_comments_url, model.conf.value.use_built_in_browser)
+                            openUrl(
+                                state.entry.ext_comments_url,
+                                model.conf.value.use_built_in_browser
+                            )
                             true
                         }
                     }
@@ -207,7 +212,8 @@ class EntryFragment : Fragment() {
             }
 
             R.id.share -> {
-                val firstAlternateLink = entryLinks.firstOrNull { it.rel is AtomLinkRel.Alternate } ?: return true
+                val firstAlternateLink =
+                    entryLinks.firstOrNull { it.rel is AtomLinkRel.Alternate } ?: return true
 
                 val intent = Intent().apply {
                     action = Intent.ACTION_SEND
@@ -238,8 +244,10 @@ class EntryFragment : Fragment() {
 
     fun downloadAudioEnclosure(enclosure: Link) {
         viewLifecycleOwner.lifecycleScope.launch {
-            runCatching { model.downloadAudioEnclosure(enclosure) }
-                .onFailure { showErrorDialog(it) }
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                runCatching { model.downloadAudioEnclosure(enclosure) }
+                    .onFailure { showErrorDialog(it) }
+            }
         }
     }
 
@@ -324,7 +332,8 @@ class EntryFragment : Fragment() {
         })
     }
 
-    private class CardListAdapterDecoration(private val gapInPixels: Int) : RecyclerView.ItemDecoration() {
+    private class CardListAdapterDecoration(private val gapInPixels: Int) :
+        RecyclerView.ItemDecoration() {
 
         override fun getItemOffsets(
             outRect: Rect,
