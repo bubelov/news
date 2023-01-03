@@ -44,8 +44,9 @@ class EnclosuresRepo(
             throw Exception("Invalid link type: ${enclosure.type}")
         }
 
-        val entry = db.entryQueries.selectById(enclosure.entryId!!).asFlow().mapToOneOrNull().first()
-            ?: throw Exception("Entry ${enclosure.entryId} does not exist")
+        val entry =
+            db.entryQueries.selectById(enclosure.entryId!!).asFlow().mapToOneOrNull().first()
+                ?: throw Exception("Entry ${enclosure.entryId} does not exist")
 
         updateLink(
             link = enclosure.copy(extEnclosureDownloadProgress = 0.0),
@@ -126,7 +127,10 @@ class EnclosuresRepo(
                         progressBytes += buffer
                         progress = progressBytes.toDouble() / bytesInBody.toDouble()
 
-                        if (System.nanoTime() - lastNotificationNanos > TimeUnit.MILLISECONDS.toNanos(100)) {
+                        if (System.nanoTime() - lastNotificationNanos > TimeUnit.MILLISECONDS.toNanos(
+                                100
+                            )
+                        ) {
                             updateLink(
                                 link = enclosure.copy(
                                     extEnclosureDownloadProgress = progress,
@@ -190,8 +194,15 @@ class EnclosuresRepo(
             TODO()
         }
 
+        // TODO
         val rowsDeleted = withContext(Dispatchers.Default) {
-            context.contentResolver.delete(enclosure.extCacheUri.toUri(), null, null)
+            runCatching {
+                context.contentResolver.delete(
+                    enclosure.extCacheUri.toUri(),
+                    null,
+                    null,
+                )
+            }.getOrDefault(1)
         }
 
         if (rowsDeleted != 1) {
@@ -212,7 +223,8 @@ class EnclosuresRepo(
         }
 
         if (link.entryId != null) {
-            val entry = db.entryQueries.selectById(link.entryId).asFlow().mapToOneOrNull().first() ?: TODO()
+            val entry =
+                db.entryQueries.selectById(link.entryId).asFlow().mapToOneOrNull().first() ?: TODO()
             updateLink(link, entry)
         }
     }
