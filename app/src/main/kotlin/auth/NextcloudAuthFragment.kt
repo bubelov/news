@@ -40,7 +40,7 @@ class NextcloudAuthFragment : Fragment() {
             toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
             password.setOnEditorActionListener { _, actionId, keyEvent ->
-                if (actionId == EditorInfo.IME_ACTION_DONE || keyEvent.keyCode == KeyEvent.KEYCODE_ENTER) {
+                if (actionId == EditorInfo.IME_ACTION_DONE || keyEvent?.keyCode == KeyEvent.KEYCODE_ENTER) {
                     connect()
                     return@setOnEditorActionListener true
                 }

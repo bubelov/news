@@ -121,7 +121,7 @@ class FeedsFragment : Fragment() {
             val urlView = dialog.findViewById<EditText>(R.id.url)!!
 
             urlView.setOnEditorActionListener { _, actionId, keyEvent ->
-                if (actionId == EditorInfo.IME_ACTION_DONE || keyEvent.keyCode == KeyEvent.KEYCODE_ENTER) {
+                if (actionId == EditorInfo.IME_ACTION_DONE || keyEvent?.keyCode == KeyEvent.KEYCODE_ENTER) {
                     dialog.dismiss()
                     model.addFeed(urlView.text.toString())
                     return@setOnEditorActionListener true
