@@ -177,7 +177,7 @@ class FeedsModel(
                     text = feed.title,
                     outlines = emptyList(),
                     xmlUrl = feed.links.first { it.rel is AtomLinkRel.Self }.href.toString(),
-                    htmlUrl = feed.links.first { it.rel is AtomLinkRel.Alternate }.href.toString(),
+                    htmlUrl = feed.links.firstOrNull { it.rel is AtomLinkRel.Alternate }?.href?.toString(),
                     extOpenEntriesInBrowser = feed.ext_open_entries_in_browser,
                     extShowPreviewImages = feed.ext_show_preview_images,
                     extBlockedWords = feed.ext_blocked_words,
@@ -189,7 +189,7 @@ class FeedsModel(
                 outlines = outlines,
             )
 
-            withContext(Dispatchers.Default) {
+            withContext(Dispatchers.IO) {
                 out.write(opmlDocument.toXmlDocument().toPrettyString().toByteArray())
             }
         }
