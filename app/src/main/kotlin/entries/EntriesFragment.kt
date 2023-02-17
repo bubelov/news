@@ -129,7 +129,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
     private fun initSwipeRefresh() {
         binding.swipeRefresh.apply {
             when (args.filter) {
-                is EntriesFilter.NotBookmarked -> {
+                is EntriesFilter.NotBookmarked, is EntriesFilter.BelongToFeed -> {
                     isEnabled = true
                     setOnRefreshListener { model.onPullRefresh() }
                 }
