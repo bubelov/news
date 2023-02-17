@@ -373,7 +373,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
 
     private fun createTouchHelper(): ItemTouchHelper? {
         return when (args.filter) {
-            EntriesFilter.NotBookmarked -> {
+            EntriesFilter.NotBookmarked, is EntriesFilter.BelongToFeed -> {
                 ItemTouchHelper(object : SwipeHelper(
                     requireContext(),
                     R.drawable.ic_baseline_visibility_24,
