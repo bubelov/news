@@ -129,7 +129,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
     private fun initSwipeRefresh() {
         binding.swipeRefresh.apply {
             when (args.filter) {
-                is EntriesFilter.NotBookmarked -> {
+                is EntriesFilter.NotBookmarked, is EntriesFilter.BelongToFeed -> {
                     isEnabled = true
                     setOnRefreshListener { model.onPullRefresh() }
                 }
@@ -373,7 +373,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
 
     private fun createTouchHelper(): ItemTouchHelper? {
         return when (args.filter) {
-            EntriesFilter.NotBookmarked -> {
+            EntriesFilter.NotBookmarked, is EntriesFilter.BelongToFeed -> {
                 ItemTouchHelper(object : SwipeHelper(
                     requireContext(),
                     R.drawable.ic_baseline_visibility_24,
