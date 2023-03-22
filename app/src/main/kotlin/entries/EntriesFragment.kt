@@ -471,6 +471,10 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
     private fun EntriesAdapter.scrollToTopOnInsert() {
         registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
             override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                if (_binding == null) {
+                    return
+                }
+
                 if (positionStart == 0) {
                     (binding.list.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
                         0,
