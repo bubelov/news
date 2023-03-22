@@ -191,7 +191,8 @@ class EnclosuresRepo(
 
     suspend fun deleteFromCache(enclosure: Link) {
         if (enclosure.extCacheUri == null) {
-            TODO()
+            updateLink(enclosure.copy(extEnclosureDownloadProgress = null))
+            return
         }
 
         // TODO
