@@ -7,7 +7,7 @@ plugins {
     id("kotlin-parcelize")
     id("androidx.navigation.safeargs.kotlin")
     id("com.squareup.sqldelight")
-    id("com.google.devtools.ksp") version "1.6.21-1.0.5"
+    id("com.google.devtools.ksp") version "1.8.20-1.0.10"
 }
 
 val signingPropertiesFile = rootProject.file("signing.properties")
@@ -98,7 +98,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVer")
 
     // KTX extensions provide concise, idiomatic Kotlin to Jetpack, Android platform, and other APIs
-    implementation("androidx.core:core-ktx:1.9.0")
+    implementation("androidx.core:core-ktx:1.10.0")
 
     val fragmentVer = "1.4.1"
     implementation("androidx.fragment:fragment-ktx:$fragmentVer")
@@ -116,7 +116,7 @@ dependencies {
     androidTestImplementation("androidx.work:work-testing:$workVer")
 
     // In-app browser, it's about 2x faster than calling an external browser
-    implementation("androidx.browser:browser:1.4.0")
+    implementation("androidx.browser:browser:1.5.0")
 
     // Provides lifecycle-aware coroutine scopes
     val lifecycleVer = "2.5.1"
@@ -127,7 +127,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 
     // List widget
-    implementation("androidx.recyclerview:recyclerview:1.2.1")
+    implementation("androidx.recyclerview:recyclerview:1.3.0")
 
     // Enables swipe to refresh pattern
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
@@ -158,7 +158,7 @@ dependencies {
     ksp("io.insert-koin:koin-ksp-compiler:$koinAnnotationsVer")
 
     // Material design components
-    implementation("com.google.android.material:material:1.7.0")
+    implementation("com.google.android.material:material:1.8.0")
 
     // Used to download, cache and display images
     implementation("com.squareup.picasso:picasso:2.71828")
@@ -186,8 +186,8 @@ dependencies {
     androidTestImplementation("junit:junit:4.13.2")
 
     // An instrumentation that runs various types of test cases
-    androidTestImplementation("androidx.test:runner:1.4.0")
+    androidTestImplementation("androidx.test:runner:1.5.2")
 
     // UI testing framework
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 }
