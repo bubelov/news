@@ -13,7 +13,7 @@ class AuthFragmentTest {
     @Test
     fun test() {
         launchFragmentInContainer<AuthFragment>(
-            themeResId = R.style.Theme_Material3_DynamicColors_DayNight,
+            themeResId = com.google.android.material.R.style.Theme_Material3_DynamicColors_DayNight,
         ).use {
             onView(withId(R.id.useStandaloneBackend)).check(matches(isDisplayed()))
             onView(withId(R.id.useMinifluxBackend)).check(matches(isDisplayed()))

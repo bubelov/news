@@ -1,7 +1,6 @@
 package entry
 
 import androidx.fragment.app.testing.launchFragmentInContainer
-import co.appreactor.news.R
 import entries.EntriesFragmentDirections
 import org.junit.Test
 
@@ -13,7 +12,7 @@ class EntryFragmentTest {
             EntriesFragmentDirections.actionEntriesFragmentToEntryFragment("")
 
         launchFragmentInContainer<EntryFragment>(
-            themeResId = R.style.Theme_Material3_DynamicColors_DayNight,
+            themeResId = com.google.android.material.R.style.Theme_Material3_DynamicColors_DayNight,
             fragmentArgs = directions.arguments,
         )
     }
