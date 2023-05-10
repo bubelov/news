@@ -5,7 +5,7 @@ buildscript {
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:7.3.1")
+        classpath("com.android.tools.build:gradle:8.0.1")
         classpath(kotlin("gradle-plugin", version = "1.8.20"))
         classpath("androidx.navigation:navigation-safe-args-gradle-plugin:2.5.3")
         classpath("com.squareup.sqldelight:gradle-plugin:1.5.4")

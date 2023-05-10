@@ -7,7 +7,7 @@ plugins {
     id("kotlin-parcelize")
     id("androidx.navigation.safeargs.kotlin")
     id("com.squareup.sqldelight")
-    id("com.google.devtools.ksp") version "1.8.20-1.0.10"
+    id("com.google.devtools.ksp") version "1.8.20-1.0.11"
 }
 
 val signingPropertiesFile = rootProject.file("signing.properties")
@@ -89,6 +89,10 @@ sqldelight {
         schemaOutputDirectory = file("src/main/sqldelight/$packageName/schemas")
         dialect = "sqlite:3.25"
     }
+}
+
+kotlin {
+    jvmToolchain(11)
 }
 
 dependencies {
