@@ -1,10 +1,8 @@
 package api.miniflux
 
-import co.appreactor.news.BuildConfig
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import http.authInterceptor
-import http.loggingInterceptor
 import http.trustSelfSignedCerts
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -30,10 +28,6 @@ class MinifluxApiBuilder {
 
         if (trustSelfSignedCerts) {
             builder.trustSelfSignedCerts()
-        }
-
-        if (BuildConfig.DEBUG) {
-            builder.addInterceptor(loggingInterceptor("miniflux"))
         }
 
         return Retrofit.Builder()

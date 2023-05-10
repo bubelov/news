@@ -1,8 +1,6 @@
 package api.nextcloud
 
-import co.appreactor.news.BuildConfig
 import http.authInterceptor
-import http.loggingInterceptor
 import http.trustSelfSignedCerts
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -25,10 +23,6 @@ class NextcloudApiBuilder {
 
         if (trustSelfSignedCerts) {
             clientBuilder.trustSelfSignedCerts()
-        }
-
-        if (BuildConfig.DEBUG) {
-            clientBuilder.addInterceptor(loggingInterceptor("miniflux"))
         }
 
         return Retrofit.Builder()
