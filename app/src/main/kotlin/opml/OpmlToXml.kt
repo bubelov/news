@@ -32,8 +32,8 @@ fun OpmlDocument.toXmlDocument(): Document {
     leafOutlines().forEach { outline ->
         bodyElement.appendChild(document.createElement("outline").apply {
             setAttribute("text", outline.text)
-            setAttribute("xmlUrl", outline.xmlUrl)
-            setAttribute("htmlUrl", outline.htmlUrl)
+            setAttribute("xmlUrl", outline.xmlUrl ?: "")
+            setAttribute("htmlUrl", outline.htmlUrl ?: "")
             setAttribute("news:openEntriesInBrowser", outline.extOpenEntriesInBrowser.toString())
             setAttribute("news:blockedWords", outline.extBlockedWords)
             setAttribute("news:showPreviewImages", outline.extShowPreviewImages.toString())
