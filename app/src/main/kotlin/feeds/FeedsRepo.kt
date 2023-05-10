@@ -23,7 +23,7 @@ class FeedsRepo(
 ) {
 
     suspend fun insertOrReplace(feed: Feed) {
-        withContext(Dispatchers.Default) {
+        withContext(Dispatchers.IO) {
             db.feedQueries.insertOrReplace(feed)
         }
     }
@@ -31,7 +31,7 @@ class FeedsRepo(
     suspend fun insertByUrl(url: HttpUrl): Feed {
         val feed = api.addFeed(url).getOrThrow()
 
-        return withContext(Dispatchers.Default) {
+        return withContext(Dispatchers.IO) {
             db.feedQueries.insertOrReplace(feed)
             feed
         }
@@ -54,7 +54,7 @@ class FeedsRepo(
     }
 
     suspend fun updateTitle(feedId: String, newTitle: String) {
-        withContext(Dispatchers.Default) {
+        withContext(Dispatchers.IO) {
             val feed = db.feedQueries.selectById(feedId).executeAsOneOrNull()
                 ?: throw Exception("Cannot find feed $feedId in cache")
             val trimmedNewTitle = newTitle.trim()
@@ -66,7 +66,7 @@ class FeedsRepo(
     suspend fun deleteById(id: String) {
         api.deleteFeed(id)
 
-        withContext(Dispatchers.Default) {
+        withContext(Dispatchers.IO) {
             db.transaction {
                 db.feedQueries.deleteById(id)
                 db.entryQueries.deleteByFeedId(id)
@@ -75,7 +75,7 @@ class FeedsRepo(
     }
 
     suspend fun sync() {
-        withContext(Dispatchers.Default) {
+        withContext(Dispatchers.IO) {
             val newFeeds = api.getFeeds().getOrThrow().sortedBy { it.id }
             val cachedFeeds = selectAll().first().sortedBy { it.id }
 

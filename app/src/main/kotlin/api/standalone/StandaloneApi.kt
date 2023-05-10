@@ -67,7 +67,7 @@ class StandaloneNewsApi(
 
             if (contentType.startsWith("text/html")) {
                 val html = runCatching {
-                    withContext(Dispatchers.Default) {
+                    withContext(Dispatchers.IO) {
                         Jsoup.parse(response.body!!.string())
                     }
                 }.getOrElse {
@@ -93,7 +93,7 @@ class StandaloneNewsApi(
                 }
             } else {
                 val result = runCatching {
-                    withContext(Dispatchers.Default) {
+                    withContext(Dispatchers.IO) {
                         feed(response.body!!.byteStream(), contentType)
                     }
                 }.getOrElse {
@@ -149,7 +149,7 @@ class StandaloneNewsApi(
         return runCatching {
             val entries = Collections.synchronizedList(mutableListOf<Entry>())
 
-            withContext(Dispatchers.Default) {
+            withContext(Dispatchers.IO) {
                 val feeds = produce {
                     db.feedQueries.selectAll().asFlow().mapToList().first().forEach { send(it) }
                 }

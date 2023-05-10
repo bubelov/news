@@ -39,7 +39,7 @@ class OpenGraphImagesRepo(
         .build()
 
     suspend fun fetchEntryImages() {
-        withContext(Dispatchers.Default) {
+        withContext(Dispatchers.IO) {
             runCatching {
                 consumePendingEntries(producePendingEntries())
             }.onFailure {
@@ -84,7 +84,7 @@ class OpenGraphImagesRepo(
     }
 
     private suspend fun fetchImage(entry: EntryWithoutContent) {
-        withContext(Dispatchers.Default) {
+        withContext(Dispatchers.IO) {
             val link = entry.links.firstOrNull { it.rel is AtomLinkRel.Alternate && it.type == "text/html" }
                 ?: entry.links.firstOrNull { it.rel is AtomLinkRel.Alternate }
 

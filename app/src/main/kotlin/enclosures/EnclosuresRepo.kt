@@ -80,7 +80,7 @@ class EnclosuresRepo(
         val fileName = "${UUID.randomUUID()}.$fileExtension"
 
         val cacheUri = kotlin.runCatching {
-            withContext(Dispatchers.Default) {
+            withContext(Dispatchers.IO) {
                 context.contentResolver.insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     ContentValues().apply {
                         put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
@@ -94,7 +94,7 @@ class EnclosuresRepo(
         }
 
         runCatching {
-            val outputStream = withContext(Dispatchers.Default) {
+            val outputStream = withContext(Dispatchers.IO) {
                 context.contentResolver.openOutputStream(cacheUri)
                     ?: throw Exception("Failed to open an output stream for URI $cacheUri")
             }
@@ -196,7 +196,7 @@ class EnclosuresRepo(
         }
 
         // TODO
-        val rowsDeleted = withContext(Dispatchers.Default) {
+        val rowsDeleted = withContext(Dispatchers.IO) {
             runCatching {
                 context.contentResolver.delete(
                     enclosure.extCacheUri.toUri(),
@@ -231,7 +231,7 @@ class EnclosuresRepo(
     }
 
     private suspend fun updateLink(link: Link, entry: Entry): Link {
-        withContext(Dispatchers.Default) {
+        withContext(Dispatchers.IO) {
             db.entryQueries.updateLinks(
                 id = entry.id,
                 links = entry.links.map {

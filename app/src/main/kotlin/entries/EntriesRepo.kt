@@ -71,19 +71,19 @@ class EntriesRepo(
     }
 
     suspend fun updateReadByFeedId(read: Boolean, feedId: String) {
-        withContext(Dispatchers.Default) {
+        withContext(Dispatchers.IO) {
             db.entryQueries.updateReadByFeedId(read, feedId)
         }
     }
 
     suspend fun updateReadByBookmarked(read: Boolean, bookmarked: Boolean) {
-        withContext(Dispatchers.Default) {
+        withContext(Dispatchers.IO) {
             db.entryQueries.updateReadByBookmarked(read = read, bookmarked = bookmarked)
         }
     }
 
     suspend fun updateReadAndReadSynced(id: String, read: Boolean, readSynced: Boolean) {
-        withContext(Dispatchers.Default) {
+        withContext(Dispatchers.IO) {
             db.entryQueries.updateReadAndReadSynced(
                 id = id,
                 ext_read = read,
@@ -97,7 +97,7 @@ class EntriesRepo(
         bookmarked: Boolean,
         bookmarkedSynced: Boolean,
     ) {
-        withContext(Dispatchers.Default) {
+        withContext(Dispatchers.IO) {
             db.entryQueries.updateBookmarkedAndBookmaredSynced(
                 id = id,
                 ext_bookmarked = bookmarked,
@@ -116,7 +116,7 @@ class EntriesRepo(
             entriesLoaded += batch.getOrThrow().size
             emit(SyncProgress(entriesLoaded))
 
-            withContext(Dispatchers.Default) {
+            withContext(Dispatchers.IO) {
                 db.entryQueries.transaction {
                     batch.getOrThrow().forEach { entry ->
                         val postProcessedEntry = entry.postProcess()
@@ -128,7 +128,7 @@ class EntriesRepo(
     }
 
     suspend fun syncReadEntries() {
-        withContext(Dispatchers.Default) {
+        withContext(Dispatchers.IO) {
             val unsyncedEntries = db.entryQueries.selectByReadSynced(false).executeAsList()
 
             if (unsyncedEntries.isEmpty()) {
@@ -168,7 +168,7 @@ class EntriesRepo(
     }
 
     suspend fun syncBookmarkedEntries() {
-        withContext(Dispatchers.Default) {
+        withContext(Dispatchers.IO) {
             val notSyncedEntries = db.entryQueries.selectByBookmarkedSynced(false).executeAsList()
 
             if (notSyncedEntries.isEmpty()) {
@@ -205,7 +205,7 @@ class EntriesRepo(
         lastEntriesSyncDateTime: String,
         feeds: List<Feed>,
     ): Int {
-        return withContext(Dispatchers.Default) {
+        return withContext(Dispatchers.IO) {
             val lastSyncInstant = if (lastEntriesSyncDateTime.isNotBlank()) {
                 OffsetDateTime.parse(lastEntriesSyncDateTime)
             } else {

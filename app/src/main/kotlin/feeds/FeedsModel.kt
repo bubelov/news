@@ -75,7 +75,7 @@ class FeedsModel(
     fun importOpml(document: InputStream) {
         viewModelScope.launch {
             val outlines = runCatching {
-                withContext(Dispatchers.Default) {
+                withContext(Dispatchers.IO) {
                     DocumentBuilderFactory
                         .newInstance()
                         .newDocumentBuilder()

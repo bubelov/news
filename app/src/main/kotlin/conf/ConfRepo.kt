@@ -27,7 +27,7 @@ class ConfRepo(
 
     init {
         conf.onEach {
-            withContext(Dispatchers.Default) {
+            withContext(Dispatchers.IO) {
                 db.transaction {
                     db.confQueries.delete()
                     db.confQueries.insert(it)

@@ -97,7 +97,8 @@ kotlin {
 
 dependencies {
     // Simplifies non-blocking programming
-    val coroutinesVer = "1.6.2"
+    // https://github.com/Kotlin/kotlinx.coroutines/releases
+    val coroutinesVer = "1.7.0"
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVer")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVer")
 
