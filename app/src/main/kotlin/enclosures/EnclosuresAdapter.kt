@@ -47,17 +47,7 @@ class EnclosuresAdapter(
         private val binding: ListItemEnclosureBinding,
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        private var setStrokeAlpha = false
-
         fun bind(item: Item, callback: Callback) = binding.apply {
-            if (!setStrokeAlpha) {
-                card.setStrokeColor(card.strokeColorStateList!!.withAlpha(32))
-                download.strokeColor = download.strokeColor.withAlpha(32)
-                play.strokeColor = play.strokeColor.withAlpha(32)
-                delete.strokeColor = delete.strokeColor.withAlpha(32)
-                setStrokeAlpha = true
-            }
-
             binding.primaryText.text = item.primaryText
             binding.secondaryText.text = item.secondaryText
             binding.supportingText.isVisible = false
