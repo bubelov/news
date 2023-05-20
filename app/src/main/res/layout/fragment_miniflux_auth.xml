@@ -30,7 +30,7 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <androidx.appcompat.widget.SwitchCompat
+    <com.google.android.material.materialswitch.MaterialSwitch
         android:id="@+id/trustSelfSignedCerts"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
