@@ -112,10 +112,17 @@ class SearchFragment : Fragment() {
         model.markAsRead(item.id)
 
         if (item.openInBrowser) {
-            openUrl(
-                url = item.links.first { it.rel is AtomLinkRel.Alternate && it.type == "text/html" }.href.toString(),
-                useBuiltInBrowser = item.useBuiltInBrowser,
-            )
+            val htmlLink = item.links.firstOrNull { it.rel is AtomLinkRel.Alternate && it.type == "text/html" }
+
+            if (htmlLink != null) {
+                openUrl(
+                    url = htmlLink.href.toString(),
+                    useBuiltInBrowser = item.useBuiltInBrowser,
+                )
+            } else {
+                val action = SearchFragmentDirections.actionSearchFragmentToEntryFragment(item.id)
+                findNavController().navigate(action)
+            }
         } else {
             val action = SearchFragmentDirections.actionSearchFragmentToEntryFragment(item.id)
             findNavController().navigate(action)
