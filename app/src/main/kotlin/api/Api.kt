@@ -9,7 +9,7 @@ import java.time.OffsetDateTime
 
 interface Api {
 
-    suspend fun addFeed(url: HttpUrl): Result<Feed>
+    suspend fun addFeed(url: HttpUrl): Result<Pair<Feed, List<Entry>>>
 
     suspend fun getFeeds(): Result<List<Feed>>
 

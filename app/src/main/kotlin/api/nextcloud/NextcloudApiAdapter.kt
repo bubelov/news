@@ -17,7 +17,7 @@ class NextcloudApiAdapter(
     private val api: NextcloudApi,
 ) : Api {
 
-    override suspend fun addFeed(url: HttpUrl): Result<Feed> {
+    override suspend fun addFeed(url: HttpUrl): Result<Pair<Feed, List<Entry>>> {
         return runCatching {
             val response = api.postFeed(
                 PostFeedArgs(
@@ -26,7 +26,7 @@ class NextcloudApiAdapter(
                 )
             )
 
-            response.feeds.single().toFeed()!!
+            Pair(response.feeds.single().toFeed()!!, emptyList())
         }
     }
 

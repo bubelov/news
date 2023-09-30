@@ -60,7 +60,7 @@ class HotSwapApi(
         }
     }
 
-    override suspend fun addFeed(url: HttpUrl): Result<Feed> {
+    override suspend fun addFeed(url: HttpUrl): Result<Pair<Feed, List<Entry>>> {
         return api.addFeed(url)
     }
 

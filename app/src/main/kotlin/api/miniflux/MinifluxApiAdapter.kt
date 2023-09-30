@@ -16,7 +16,7 @@ class MinifluxApiAdapter(
     private val api: MinifluxApi,
 ) : Api {
 
-    override suspend fun addFeed(url: HttpUrl): Result<Feed> {
+    override suspend fun addFeed(url: HttpUrl): Result<Pair<Feed, List<Entry>>> {
         return runCatching {
             val categories = api.getCategories()
 
@@ -34,7 +34,7 @@ class MinifluxApiAdapter(
                 )
             )
 
-            api.getFeed(response.feed_id).toFeed()!!
+            Pair(api.getFeed(response.feed_id).toFeed()!!, emptyList())
         }
     }
 

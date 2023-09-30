@@ -26,6 +26,17 @@ class EntriesRepo(
     private val db: Db,
 ) {
 
+    suspend fun insertOrReplace(entries: List<Entry>) {
+        withContext(Dispatchers.IO) {
+            db.entryQueries.transaction {
+                entries.forEach { entry ->
+                    val postProcessedEntry = entry.postProcess()
+                    db.entryQueries.insertOrReplace(postProcessedEntry)
+                }
+            }
+        }
+    }
+
     fun selectAllLinksPublishedAndTitle(): Flow<List<SelectAllLinksPublishedAndTitle>> {
         return db.entryQueries.selectAllLinksPublishedAndTitle().asFlow().mapToList()
     }
@@ -115,15 +126,7 @@ class EntriesRepo(
         api.getEntries(false).collect { batch ->
             entriesLoaded += batch.getOrThrow().size
             emit(SyncProgress(entriesLoaded))
-
-            withContext(Dispatchers.IO) {
-                db.entryQueries.transaction {
-                    batch.getOrThrow().forEach { entry ->
-                        val postProcessedEntry = entry.postProcess()
-                        db.entryQueries.insertOrReplace(postProcessedEntry)
-                    }
-                }
-            }
+            insertOrReplace(batch.getOrThrow())
         }
     }
 

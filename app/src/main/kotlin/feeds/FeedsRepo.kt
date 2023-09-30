@@ -5,6 +5,7 @@ import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import db.Db
+import db.Entry
 import db.Feed
 import db.Link
 import db.SelectAllWithUnreadEntryCount
@@ -28,12 +29,12 @@ class FeedsRepo(
         }
     }
 
-    suspend fun insertByUrl(url: HttpUrl): Feed {
-        val feed = api.addFeed(url).getOrThrow()
+    suspend fun insertByUrl(url: HttpUrl): Pair<Feed, List<Entry>> {
+        val feedWithEntries = api.addFeed(url).getOrThrow()
 
         return withContext(Dispatchers.IO) {
-            db.feedQueries.insertOrReplace(feed)
-            feed
+            db.feedQueries.insertOrReplace(feedWithEntries.first)
+            feedWithEntries
         }
     }
 

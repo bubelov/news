@@ -51,7 +51,7 @@ class StandaloneNewsApi(
 
     private val httpClient = OkHttpClient()
 
-    override suspend fun addFeed(url: HttpUrl): Result<Feed> {
+    override suspend fun addFeed(url: HttpUrl): Result<Pair<Feed, List<Entry>>> {
         val request = Request.Builder().url(url).build()
 
         runCatching {
@@ -102,7 +102,8 @@ class StandaloneNewsApi(
 
                 return when (result) {
                     is FeedResult.Success -> {
-                        Result.success(result.feed.toFeed(url))
+                        val feed = result.feed.toFeed(url)
+                        Result.success(Pair(feed, result.feed.getEntries(feed.id)))
                     }
 
                     is FeedResult.UnsupportedMediaType -> {
@@ -209,6 +210,7 @@ class StandaloneNewsApi(
                                     }.getOrNull()
                                 }
                         }
+
                         is RssFeed -> {
                             parsedFeed.channel.items
                                 .getOrElse { return emptyList() }
@@ -271,6 +273,7 @@ class StandaloneNewsApi(
 
                 feed
             }
+
             is RssFeed -> {
                 val selfLink = Link(
                     feedId = channel.link,
@@ -436,6 +439,21 @@ class StandaloneNewsApi(
     }
 
     private fun Date.toIsoString(): String = ISO.format(this)
+
+    private fun ParsedFeed.getEntries(feedId: String): List<Entry> {
+        return when (this) {
+            is RssFeed -> {
+                this.channel.items
+                    .getOrElse { emptyList() }
+                    .filter { it.isSuccess }
+                    .map { it.getOrThrow().toEntry(feedId) }
+            }
+
+            is AtomFeed -> {
+                this.entries.map { it.toEntry(feedId) }
+            }
+        }
+    }
 
     companion object {
         private val TAG = "api"

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import co.appreactor.feedk.AtomLinkRel
 import conf.ConfRepo
 import db.SelectAllWithUnreadEntryCount
+import entries.EntriesRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -37,6 +38,7 @@ import javax.xml.parsers.DocumentBuilderFactory
 class FeedsModel(
     private val confRepo: ConfRepo,
     private val feedsRepo: FeedsRepo,
+    private val entriesRepo: EntriesRepo,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<State>(State.Loading)
@@ -199,15 +201,26 @@ class FeedsModel(
         error.update { null }
     }
 
-    fun addFeed(url: String) {
+    fun addFeed(unvalidatedUrl: String) {
         viewModelScope.launch {
             runCatching {
                 hasActionInProgress.update { true }
-                val fullUrl = if (!url.startsWith("http")) "https://$url" else url
-                feedsRepo.insertByUrl(fullUrl.toHttpUrl())
-            }.onFailure { e -> error.update { e } }
 
-            hasActionInProgress.update { false }
+                val hasHttpPrefix = unvalidatedUrl.startsWith("http") or unvalidatedUrl.startsWith("https")
+
+                val entries = if (hasHttpPrefix) {
+                    feedsRepo.insertByUrl(unvalidatedUrl.toHttpUrl()).second
+                } else {
+                    feedsRepo.insertByUrl("https://$unvalidatedUrl".toHttpUrl()).second
+                }
+
+                entriesRepo.insertOrReplace(entries)
+            }.onSuccess {
+                hasActionInProgress.update { false }
+            }.onFailure { e ->
+                hasActionInProgress.update { false }
+                error.update { e }
+            }
         }
     }
 
