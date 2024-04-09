@@ -1,5 +1,6 @@
 package api.miniflux
 
+import android.util.Log
 import api.Api
 import co.appreactor.feedk.AtomLinkRel
 import db.Entry
@@ -39,7 +40,16 @@ class MinifluxApiAdapter(
     }
 
     override suspend fun getFeeds(): Result<List<Feed>> {
-        return runCatching { api.getFeeds().mapNotNull { it.toFeed() } }
+        return runCatching {
+            api.getFeeds().mapNotNull {
+                try {
+                    it.toFeed()
+                } catch (e: Exception) {
+                    Log.w("MinifluxApiAdapter", "Failed to parse feed ${it.feed_url}", e)
+                    null
+                }
+            }
+        }
     }
 
     override suspend fun updateFeedTitle(feedId: String, newTitle: String): Result<Unit> {
@@ -143,22 +153,27 @@ class MinifluxApiAdapter(
             extCacheUri = null,
         )
 
-        val alternateLink = Link(
-            feedId = feedId,
-            entryId = null,
-            href = site_url.toHttpUrl(),
-            rel = AtomLinkRel.Alternate,
-            type = "text/html",
-            hreflang = null,
-            title = null,
-            length = null,
-            extEnclosureDownloadProgress = null,
-            extCacheUri = null,
-        )
+        val alternateLink = try {
+            Link(
+                feedId = feedId,
+                entryId = null,
+                href = site_url.toHttpUrl(),
+                rel = AtomLinkRel.Alternate,
+                type = "text/html",
+                hreflang = null,
+                title = null,
+                length = null,
+                extEnclosureDownloadProgress = null,
+                extCacheUri = null,
+            )
+        } catch (e: Exception) {
+            Log.d("MinifluxApiAdapter", "Failed to parse alternate link for feed $feed_url", e)
+            null
+        }
 
         return Feed(
             id = feedId,
-            links = listOf(selfLink, alternateLink),
+            links = listOfNotNull(selfLink, alternateLink),
             title = title,
             ext_open_entries_in_browser = false,
             ext_blocked_words = "",
