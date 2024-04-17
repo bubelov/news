@@ -5,10 +5,14 @@ buildscript {
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:8.1.2")
-        classpath(kotlin("gradle-plugin", version = "1.8.20"))
-        classpath("androidx.navigation:navigation-safe-args-gradle-plugin:2.5.3")
-        classpath("com.squareup.sqldelight:gradle-plugin:1.5.4")
+        // https://developer.android.com/build/releases/gradle-plugin
+        classpath("com.android.tools.build:gradle:8.3.2")
+        // https://github.com/JetBrains/kotlin/releases
+        classpath(kotlin("gradle-plugin", version = "1.9.23"))
+        // https://developer.android.com/jetpack/androidx/releases/navigation
+        classpath("androidx.navigation:navigation-safe-args-gradle-plugin:2.7.7")
+        // https://github.com/cashapp/sqldelight/releases
+        classpath("com.squareup.sqldelight:gradle-plugin:1.5.5")
     }
 }
 

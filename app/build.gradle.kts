@@ -7,19 +7,20 @@ plugins {
     id("kotlin-parcelize")
     id("androidx.navigation.safeargs.kotlin")
     id("com.squareup.sqldelight")
-    id("com.google.devtools.ksp") version "1.8.20-1.0.11"
+    // https://github.com/google/ksp/releases
+    id("com.google.devtools.ksp") version "1.9.23-1.0.20"
 }
 
 val signingPropertiesFile = rootProject.file("signing.properties")
 
 android {
     namespace = "co.appreactor.news"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "co.appreactor.news"
         minSdk = 29
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 24
         versionName = "0.4.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -98,22 +99,23 @@ kotlin {
 dependencies {
     // Simplifies non-blocking programming
     // https://github.com/Kotlin/kotlinx.coroutines/releases
-    val coroutinesVer = "1.7.0"
+    val coroutinesVer = "1.8.0"
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVer")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVer")
 
     // KTX extensions provide concise, idiomatic Kotlin to Jetpack, Android platform, and other APIs
     // https://developer.android.com/kotlin/ktx/extensions-list#dependency_6
-    implementation("androidx.core:core-ktx:1.10.0")
+    implementation("androidx.core:core-ktx:1.12.0")
 
     // Helps to segment the app into multiple, independent screens that are hosted within an Activity
     // https://developer.android.com/jetpack/androidx/releases/fragment
-    val fragmentVer = "1.5.7"
+    val fragmentVer = "1.6.2"
     implementation("androidx.fragment:fragment-ktx:$fragmentVer")
     debugImplementation("androidx.fragment:fragment-testing:$fragmentVer")
 
     // Simplifies in-app navigation, assumes single activity pattern
     // https://developer.android.com/jetpack/androidx/releases/navigation
+    // TODO fix upgrade to 2.7.7, it breaks the bookmarks tab
     val navVer = "2.5.3"
     implementation("androidx.navigation:navigation-fragment-ktx:$navVer")
     implementation("androidx.navigation:navigation-ui-ktx:$navVer")
@@ -121,17 +123,17 @@ dependencies {
     // Background job scheduler
     // Used to fetch new data in background
     // https://developer.android.com/jetpack/androidx/releases/work
-    val workVer = "2.8.1"
+    val workVer = "2.9.0"
     implementation("androidx.work:work-runtime-ktx:$workVer")
     androidTestImplementation("androidx.work:work-testing:$workVer")
 
     // In-app browser, it's about 2x faster than calling an external browser
     // https://developer.android.com/jetpack/androidx/releases/browser
-    implementation("androidx.browser:browser:1.5.0")
+    implementation("androidx.browser:browser:1.8.0")
 
     // Provides lifecycle-aware coroutine scopes
     // https://developer.android.com/jetpack/androidx/releases/lifecycle
-    val lifecycleVer = "2.6.1"
+    val lifecycleVer = "2.7.0"
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVer")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVer")
 
@@ -141,7 +143,7 @@ dependencies {
 
     // List widget
     // https://developer.android.com/jetpack/androidx/releases/recyclerview
-    implementation("androidx.recyclerview:recyclerview:1.3.0")
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
 
     // Enables swipe to refresh pattern
     // https://developer.android.com/jetpack/androidx/releases/swiperefreshlayout
@@ -150,19 +152,19 @@ dependencies {
     // Retrofit turns HTTP APIs into Java interfaces
     // Used to communicate with remote backends
     // https://github.com/square/retrofit/blob/master/CHANGELOG.md
-    val retrofitVer = "2.9.0"
+    val retrofitVer = "2.11.0"
     implementation("com.squareup.retrofit2:retrofit:$retrofitVer")
     implementation("com.squareup.retrofit2:converter-gson:$retrofitVer")
 
     // Modern HTTP client
     // https://github.com/square/okhttp/blob/master/CHANGELOG.md
-    implementation(platform("com.squareup.okhttp3:okhttp-bom:4.10.0"))
+    implementation(platform("com.squareup.okhttp3:okhttp-bom:4.12.0"))
     implementation("com.squareup.okhttp3:okhttp")
     testImplementation("com.squareup.okhttp3:mockwebserver")
 
     // Bundle SQLite binaries
     // https://github.com/requery/sqlite-android/releases
-    implementation("com.github.requery:sqlite-android:3.41.1")
+    implementation("com.github.requery:sqlite-android:3.45.0")
 
     // SQLDelight generates typesafe kotlin APIs from SQL statements
     // https://github.com/cashapp/sqldelight/releases
@@ -174,12 +176,13 @@ dependencies {
     // Dependency injection framework
     // https://github.com/InsertKoinIO/koin/tags
     val koinAnnotationsVer = "1.0.0"
-    implementation("io.insert-koin:koin-android:3.4.0")
+    implementation("io.insert-koin:koin-android:3.5.0")
     implementation("io.insert-koin:koin-annotations:$koinAnnotationsVer")
     ksp("io.insert-koin:koin-ksp-compiler:$koinAnnotationsVer")
 
     // Material design components
     // https://github.com/material-components/material-components-android/releases
+    // TODO fix upgrade to 1.11.0, it makes the bottom navigation panel ugly
     implementation("com.google.android.material:material:1.9.0")
 
     // Used to download, cache and display images
@@ -189,7 +192,7 @@ dependencies {
     // Java HTML parser
     // Used to auto-discover feed links
     // https://github.com/jhy/jsoup/releases
-    implementation("org.jsoup:jsoup:1.16.1")
+    implementation("org.jsoup:jsoup:1.17.2")
 
     // Feed parser
     // Used in standalone mode
@@ -198,7 +201,7 @@ dependencies {
 
     // Custom global exception handler
     // https://github.com/ACRA/acra/releases
-    val acraVer = "5.10.0-beta03"
+    val acraVer = "5.11.3"
     implementation("ch.acra:acra-mail:$acraVer")
     implementation("ch.acra:acra-dialog:$acraVer")
 
@@ -208,7 +211,7 @@ dependencies {
 
     // Mocking library, better to go easy on that
     // https://github.com/mockk/mockk/releases
-    testImplementation("io.mockk:mockk:1.13.5")
+    testImplementation("io.mockk:mockk:1.13.10")
 
     // Core test infrastructure
     // https://junit.org/junit4/
