@@ -1,6 +1,7 @@
 package feeds
 
 import api.Api
+import db.Entry
 import db.Feed
 import db.insertRandomFeed
 import db.testDb
@@ -54,7 +55,11 @@ class FeedsRepositoryTest {
             ext_show_preview_images = null,
         )
 
-        coEvery { api.addFeed(feedUrl) } returns Result.success(feed)
+        val entries = listOf<Entry>()
+
+        val res = Pair(feed, entries)
+
+        coEvery { api.addFeed(feedUrl) } returns Result.success(res)
 
         repo.insertByUrl(feedUrl)
 
