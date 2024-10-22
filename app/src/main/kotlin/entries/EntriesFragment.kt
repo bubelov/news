@@ -106,9 +106,8 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    override fun onStop() {
+        super.onStop()
 
         val state = model.state.value
 
@@ -120,6 +119,12 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
 
             seenEntries.clear()
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        _binding = null
     }
 
     override fun onNavigationItemReselected(item: MenuItem) {
