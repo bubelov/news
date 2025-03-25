@@ -26,50 +26,6 @@ CREATE TABLE Entry (
     ext_og_image_height INTEGER NOT NULL
 );
 
-CREATE VIEW EntryWithoutContent
-AS
-SELECT
-    links,
-    summary,
-    id,
-    feed_id,
-    title,
-    published,
-    updated,
-    author_name,
-    ext_read,
-    ext_read_synced,
-    ext_bookmarked,
-    ext_bookmarked_synced,
-    ext_nc_guid_hash,
-    ext_comments_url,
-    ext_og_image_checked,
-    ext_og_image_url,
-    ext_og_image_width,
-    ext_og_image_height
-FROM Entry;
-
-CREATE VIEW EntriesAdapterRow
-AS
-SELECT
-    e.id,
-    e.feed_id,
-    e.ext_bookmarked,
-    f.ext_show_preview_images,
-    e.ext_og_image_url,
-    e.ext_og_image_width,
-    e.ext_og_image_height,
-    e.title,
-    f.title AS feedTitle,
-    e.published,
-    e.summary,
-    e.ext_read,
-    f.ext_open_entries_in_browser,
-    e.links
-FROM Entry e
-JOIN Feed f
-ON f.id = e.feed_id;
-
 insertOrReplace:
 INSERT OR REPLACE
 INTO Entry(

@@ -175,9 +175,9 @@ class MinifluxApiAdapter(
             id = feedId,
             links = listOfNotNull(selfLink, alternateLink),
             title = title,
-            ext_open_entries_in_browser = false,
-            ext_blocked_words = "",
-            ext_show_preview_images = null,
+            extOpenEntriesInBrowser = false,
+            extBlockedWords = "",
+            extShowPreviewImages = null,
         )
     }
 
@@ -213,27 +213,27 @@ class MinifluxApiAdapter(
         }
 
         return Entry(
-            content_type = "html",
-            content_src = "",
-            content_text = content,
+            contentType = "html",
+            contentSrc = "",
+            contentText = content,
             links = links,
             summary = null,
             id = id.toString(),
-            feed_id = feed_id.toString(),
+            feedId = feed_id.toString(),
             title = title,
             published = OffsetDateTime.parse(published_at),
             updated = OffsetDateTime.parse(changed_at),
-            author_name = author,
-            ext_read = status == "read",
-            ext_read_synced = true,
-            ext_bookmarked = starred,
-            ext_bookmarked_synced = true,
-            ext_nc_guid_hash = "",
-            ext_comments_url = comments_url,
-            ext_og_image_checked = false,
-            ext_og_image_url = "",
-            ext_og_image_width = 0,
-            ext_og_image_height = 0,
+            authorName = author,
+            extRead = status == "read",
+            extReadSynced = true,
+            extBookmarked = starred,
+            extBookmarkedSynced = true,
+            extNextcloudGuidHash = "",
+            extCommentsUrl = comments_url,
+            extOpenGraphImageChecked = false,
+            extOpenGraphImageUrl = "",
+            extOpenGraphImageWidth = 0,
+            extOpenGraphImageHeight = 0,
         )
     }
 }

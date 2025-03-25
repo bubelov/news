@@ -76,7 +76,8 @@ class NextcloudApiAdapter(
                 if (currentBatch.size < batchSize) {
                     break
                 } else {
-                    oldestEntryId = currentBatch.minOfOrNull { it.id ?: Long.MAX_VALUE }?.toLong() ?: 0L
+                    oldestEntryId =
+                        currentBatch.minOfOrNull { it.id ?: Long.MAX_VALUE }?.toLong() ?: 0L
                     currentBatch.clear()
                 }
             }
@@ -111,7 +112,12 @@ class NextcloudApiAdapter(
         bookmarked: Boolean,
     ): Result<Unit> {
         return runCatching {
-            val args = PutStarredArgs(entries.map { PutStarredArgsItem(it.feed_id.toLong(), it.ext_nc_guid_hash) })
+            val args = PutStarredArgs(entries.map {
+                PutStarredArgsItem(
+                    it.feedId.toLong(),
+                    it.extNextcloudGuidHash
+                )
+            })
 
             if (bookmarked) {
                 api.putStarred(args)
@@ -160,9 +166,9 @@ class NextcloudApiAdapter(
             id = feedId,
             links = links,
             title = title ?: "Untitled",
-            ext_open_entries_in_browser = false,
-            ext_blocked_words = "",
-            ext_show_preview_images = null,
+            extOpenEntriesInBrowser = false,
+            extBlockedWords = "",
+            extShowPreviewImages = null,
         )
     }
 
@@ -209,27 +215,27 @@ class NextcloudApiAdapter(
         }
 
         return Entry(
-            content_type = "html",
-            content_src = "",
-            content_text = body ?: "",
+            contentType = "html",
+            contentSrc = "",
+            contentText = body ?: "",
             links = links,
             summary = "",
             id = id.toString(),
-            feed_id = feedId?.toString() ?: "",
+            feedId = feedId?.toString() ?: "",
             title = title ?: "Untitled",
             published = OffsetDateTime.parse(published),
             updated = OffsetDateTime.parse(updated),
-            author_name = author ?: "",
-            ext_read = !unread,
-            ext_read_synced = true,
-            ext_bookmarked = starred,
-            ext_bookmarked_synced = true,
-            ext_nc_guid_hash = guidHash ?: return null,
-            ext_comments_url = "",
-            ext_og_image_checked = false,
-            ext_og_image_url = "",
-            ext_og_image_width = 0,
-            ext_og_image_height = 0,
+            authorName = author ?: "",
+            extRead = !unread,
+            extReadSynced = true,
+            extBookmarked = starred,
+            extBookmarkedSynced = true,
+            extNextcloudGuidHash = guidHash ?: return null,
+            extCommentsUrl = "",
+            extOpenGraphImageChecked = false,
+            extOpenGraphImageUrl = "",
+            extOpenGraphImageWidth = 0,
+            extOpenGraphImageHeight = 0,
         )
     }
 }

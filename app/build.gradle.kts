@@ -6,7 +6,6 @@ plugins {
     kotlin("android")
     id("kotlin-parcelize")
     id("androidx.navigation.safeargs.kotlin")
-    id("com.squareup.sqldelight")
     // https://github.com/google/ksp/releases
     id("com.google.devtools.ksp") version "1.9.23-1.0.20"
 }
@@ -84,14 +83,6 @@ android {
     }
 }
 
-sqldelight {
-    database("Db") {
-        packageName = "db"
-        schemaOutputDirectory = file("src/main/sqldelight/$packageName/schemas")
-        dialect = "sqlite:3.25"
-    }
-}
-
 dependencies {
     // Simplifies non-blocking programming
     // https://github.com/Kotlin/kotlinx.coroutines/releases
@@ -161,13 +152,6 @@ dependencies {
     // Bundle SQLite binaries
     // https://github.com/requery/sqlite-android/releases
     implementation("com.github.requery:sqlite-android:3.45.0")
-
-    // SQLDelight generates typesafe kotlin APIs from SQL statements
-    // https://github.com/cashapp/sqldelight/releases
-    val sqlDelightVer = "1.5.5"
-    implementation("com.squareup.sqldelight:coroutines-extensions:$sqlDelightVer")
-    implementation("com.squareup.sqldelight:android-driver:$sqlDelightVer")
-    testImplementation("com.squareup.sqldelight:sqlite-driver:$sqlDelightVer")
 
     // Dependency injection framework
     // https://github.com/InsertKoinIO/koin/tags

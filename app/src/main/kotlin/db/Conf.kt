@@ -1,0 +1,26 @@
+package db
+
+data class Conf(
+    val backend: String,
+    val minifluxServerUrl: String,
+    val minifluxServerTrustSelfSignedCerts: Boolean,
+    val minifluxServerUsername: String,
+    val minifluxServerPassword: String,
+    val nextcloudServerUrl: String,
+    val nextcloudServerTrustSelfSignedCerts: Boolean,
+    val nextcloudServerUsername: String,
+    val nextcloudServerPassword: String,
+    val initialSyncCompleted: Boolean,
+    val lastEntriesSyncDatetime: String,
+    val showReadEntries: Boolean,
+    val sortOrder: String,
+    val showPreviewImages: Boolean,
+    val cropPreviewImages: Boolean,
+    val markScrolledEntriesAsRead: Boolean,
+    val syncOnStartup: Boolean,
+    val syncInBackground: Boolean,
+    val backgroundSyncIntervalMillis: Long,
+    val useBuiltInBrowser: Boolean,
+    val showPreviewText: Boolean,
+    val syncedOnStartup: Boolean,
+)

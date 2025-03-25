@@ -1,5 +1,6 @@
 package api.standalone
 
+import android.database.sqlite.SQLiteDatabase
 import android.util.Base64
 import android.util.Log
 import api.Api
@@ -12,9 +13,6 @@ import co.appreactor.feedk.RssFeed
 import co.appreactor.feedk.RssItem
 import co.appreactor.feedk.RssItemGuid
 import co.appreactor.feedk.feed
-import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToList
-import db.Db
 import db.Entry
 import db.EntryWithoutContent
 import db.Feed
@@ -46,7 +44,7 @@ import java.util.Locale
 typealias ParsedFeed = co.appreactor.feedk.Feed
 
 class StandaloneNewsApi(
-    private val db: Db,
+    private val db: SQLiteDatabase,
 ) : Api {
 
     private val httpClient = OkHttpClient()

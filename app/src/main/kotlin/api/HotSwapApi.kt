@@ -1,12 +1,12 @@
 package api
 
+import android.database.sqlite.SQLiteDatabase
 import api.miniflux.MinifluxApiAdapter
 import api.miniflux.MinifluxApiBuilder
 import api.nextcloud.NextcloudApiAdapter
 import api.nextcloud.NextcloudApiBuilder
 import api.standalone.StandaloneNewsApi
 import conf.ConfRepo
-import db.Db
 import db.Entry
 import db.EntryWithoutContent
 import db.Feed
@@ -21,7 +21,7 @@ import java.time.OffsetDateTime
 @Single(binds = [Api::class])
 class HotSwapApi(
     private val confRepo: ConfRepo,
-    private val db: Db,
+    private val db: SQLiteDatabase,
 ) : Api {
 
     private lateinit var api: Api
@@ -37,10 +37,10 @@ class HotSwapApi(
                     ConfRepo.BACKEND_MINIFLUX -> {
                         api = MinifluxApiAdapter(
                             MinifluxApiBuilder().build(
-                                url = conf.miniflux_server_url,
-                                username = conf.miniflux_server_username,
-                                password = conf.miniflux_server_password,
-                                trustSelfSignedCerts = conf.miniflux_server_trust_self_signed_certs,
+                                url = conf.minifluxServerUrl,
+                                username = conf.minifluxServerUsername,
+                                password = conf.minifluxServerPassword,
+                                trustSelfSignedCerts = conf.minifluxServerTrustSelfSignedCerts,
                             )
                         )
                     }
@@ -48,10 +48,10 @@ class HotSwapApi(
                     ConfRepo.BACKEND_NEXTCLOUD -> {
                         api = NextcloudApiAdapter(
                             NextcloudApiBuilder().build(
-                                url = conf.nextcloud_server_url,
-                                username = conf.nextcloud_server_username,
-                                password = conf.nextcloud_server_password,
-                                trustSelfSignedCerts = conf.nextcloud_server_trust_self_signed_certs,
+                                url = conf.nextcloudServerUrl,
+                                username = conf.nextcloudServerUsername,
+                                password = conf.nextcloudServerPassword,
+                                trustSelfSignedCerts = conf.nextcloudServerTrustSelfSignedCerts,
                             )
                         )
                     }

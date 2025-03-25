@@ -11,8 +11,6 @@ buildscript {
         classpath(kotlin("gradle-plugin", version = "1.9.23"))
         // https://developer.android.com/jetpack/androidx/releases/navigation
         classpath("androidx.navigation:navigation-safe-args-gradle-plugin:2.7.7")
-        // https://github.com/cashapp/sqldelight/releases
-        classpath("com.squareup.sqldelight:gradle-plugin:1.5.5")
     }
 }
 
