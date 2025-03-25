@@ -6,7 +6,7 @@ buildscript {
 
     dependencies {
         // https://developer.android.com/build/releases/gradle-plugin
-        classpath("com.android.tools.build:gradle:8.3.2")
+        classpath("com.android.tools.build:gradle:8.9.1")
         // https://github.com/JetBrains/kotlin/releases
         classpath(kotlin("gradle-plugin", version = "1.9.23"))
         // https://developer.android.com/jetpack/androidx/releases/navigation

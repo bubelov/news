@@ -28,12 +28,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = "11"
         freeCompilerArgs += "-opt-in=kotlinx.coroutines.DelicateCoroutinesApi"
     }
 
@@ -90,10 +90,6 @@ sqldelight {
         schemaOutputDirectory = file("src/main/sqldelight/$packageName/schemas")
         dialect = "sqlite:3.25"
     }
-}
-
-kotlin {
-    jvmToolchain(17)
 }
 
 dependencies {
