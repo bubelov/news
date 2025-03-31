@@ -1,5 +1,7 @@
 package entries
 
+import android.database.sqlite.SQLiteDatabase
+import androidx.core.database.sqlite.transaction
 import api.Api
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
@@ -11,10 +13,13 @@ import db.Entry
 import db.Feed
 import db.SelectAllLinksPublishedAndTitle
 import db.SelectByQuery
+import db.ShortEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
@@ -23,26 +28,100 @@ import java.time.OffsetDateTime
 @Single
 class EntriesRepo(
     private val api: Api,
-    private val db: Db,
+    private val db: SQLiteDatabase,
 ) {
+
+//    CREATE TABLE Entry (
+//    content_type TEXT,
+//    content_src TEXT,
+//    content_text TEXT,
+//    links TEXT AS List<Link> NOT NULL,
+//    summary TEXT,
+//    id TEXT PRIMARY KEY NOT NULL,
+//    feed_id TEXT NOT NULL,
+//    title TEXT NOT NULL,
+//    published TEXT AS OffsetDateTime NOT NULL,
+//    updated TEXT AS OffsetDateTime NOT NULL,
+//    author_name TEXT NOT NULL,
+//    ext_read INTEGER AS Boolean NOT NULL,
+//    ext_read_synced INTEGER AS Boolean NOT NULL,
+//    ext_bookmarked INTEGER AS Boolean NOT NULL,
+//    ext_bookmarked_synced INTEGER AS Boolean NOT NULL,
+//    ext_nc_guid_hash TEXT NOT NULL,
+//    ext_comments_url TEXT NOT NULL,
+//    ext_og_image_checked INTEGER AS Boolean NOT NULL,
+//    ext_og_image_url TEXT NOT NULL,
+//    ext_og_image_width INTEGER NOT NULL,
+//    ext_og_image_height INTEGER NOT NULL
+//    );
+
+    fun insertOrReplace(entry: Entry) {
+//        INSERT OR REPLACE
+//        INTO Entry(
+//                content_type,
+//        content_src,
+//        content_text,
+//        links,
+//        summary,
+//        id,
+//        feed_id,
+//        title,
+//        published,
+//        updated,
+//        author_name,
+//        ext_read,
+//        ext_read_synced,
+//        ext_bookmarked,
+//        ext_bookmarked_synced,
+//        ext_nc_guid_hash,
+//        ext_comments_url,
+//        ext_og_image_checked,
+//        ext_og_image_url,
+//        ext_og_image_width,
+//        ext_og_image_height
+//        )
+//        VALUES ?;
+    }
+
+    fun selectAll(): List<Entry> {
+//        SELECT *
+//        FROM Entry
+//        ORDER BY published DESC;
+        return emptyList()
+    }
 
     suspend fun insertOrReplace(entries: List<Entry>) {
         withContext(Dispatchers.IO) {
-            db.entryQueries.transaction {
+            db.transaction {
                 entries.forEach { entry ->
                     val postProcessedEntry = entry.postProcess()
-                    db.entryQueries.insertOrReplace(postProcessedEntry)
+                    insertOrReplace(postProcessedEntry)
                 }
             }
         }
     }
 
-    fun selectAllLinksPublishedAndTitle(): Flow<List<SelectAllLinksPublishedAndTitle>> {
-        return db.entryQueries.selectAllLinksPublishedAndTitle().asFlow().mapToList()
+    fun selectAllLinksPublishedAndTitle(): Flow<List<ShortEntry>> {
+//        selectAllLinksPublishedAndTitle:
+//        SELECT links, published, title
+//        FROM Entry
+//        ORDER BY published DESC;
+        //return db.entryQueries.selectAllLinksPublishedAndTitle().asFlow().mapToList()
+        return flowOf(emptyList())
     }
 
+//    selectByIds:
+//    SELECT id
+//    FROM Entry
+//    WHERE id IN :ids;
+
     fun selectById(entryId: String): Flow<Entry?> {
-        return db.entryQueries.selectById(entryId).asFlow().mapToOneOrNull()
+//        selectById:
+//        SELECT *
+//        FROM Entry
+//        WHERE id = ?;
+        //return db.entryQueries.selectById(entryId).asFlow().mapToOneOrNull()
+        return flowOf(null)
     }
 
     fun selectByFeedIdAndReadAndBookmarked(
@@ -50,26 +129,47 @@ class EntriesRepo(
         read: Collection<Boolean>,
         bookmarked: Boolean,
     ): Flow<List<EntriesAdapterRow>> {
-        return db.entryQueries.selectByFeedIdAndReadAndBookmarked(
-            feed_id = feedId,
-            ext_read = read,
-            ext_bookmarked = bookmarked,
-        ).asFlow().mapToList()
+//        selectByFeedIdAndReadAndBookmarked:
+//        SELECT *
+//                FROM EntriesAdapterRow e
+//        WHERE e.feed_id = ?
+//        AND e.ext_read IN ?
+//        AND e.ext_bookmarked = ?
+//        ORDER BY e.published DESC;
+//        return db.entryQueries.selectByFeedIdAndReadAndBookmarked(
+//            feed_id = feedId,
+//            ext_read = read,
+//            ext_bookmarked = bookmarked,
+//        ).asFlow().mapToList()
+        return flowOf(emptyList())
     }
 
     fun selectByReadAndBookmarked(
         read: Collection<Boolean>,
         bookmarked: Boolean,
     ): Flow<List<EntriesAdapterRow>> {
-        return db.entryQueries.selectByReadAndBookmarked(
-            ext_read = read,
-            ext_bookmarked = bookmarked,
-        ).asFlow().mapToList()
+//        selectByReadAndBookmarked:
+//        SELECT *
+//                FROM EntriesAdapterRow e
+//        WHERE e.ext_read IN ?
+//        AND e.ext_bookmarked = ?
+//        ORDER BY e.published DESC
+//        LIMIT 500;
+//        return db.entryQueries.selectByReadAndBookmarked(
+//            ext_read = read,
+//            ext_bookmarked = bookmarked,
+//        ).asFlow().mapToList()
+        return flowOf(emptyList())
     }
 
+//    selectCount:
+//    SELECT COUNT(*)
+//    FROM Entry;
     fun selectCount() = db.entryQueries.selectCount().asFlow().mapToOne()
 
     private fun selectMaxId(): Flow<String?> {
+//        selectMaxId:
+//        SELECT MAX(id + 0) FROM Entry;
         return db.entryQueries.selectMaxId().asFlow().mapToOneOrNull().map { it?.MAX }
     }
 
@@ -132,6 +232,11 @@ class EntriesRepo(
 
     suspend fun syncReadEntries() {
         withContext(Dispatchers.IO) {
+//            selectByReadSynced:
+//            SELECT *
+//            FROM EntryWithoutContent
+//            WHERE ext_read_synced = ?
+//            ORDER BY published DESC;
             val unsyncedEntries = db.entryQueries.selectByReadSynced(false).executeAsList()
 
             if (unsyncedEntries.isEmpty()) {
@@ -172,6 +277,17 @@ class EntriesRepo(
 
     suspend fun syncBookmarkedEntries() {
         withContext(Dispatchers.IO) {
+//            selectByBookmarked:
+//            SELECT *
+//            FROM EntryWithoutContent
+//            WHERE ext_bookmarked = ?
+//            ORDER BY published DESC;
+
+//            selectByBookmarkedSynced:
+//            SELECT *
+//            FROM EntryWithoutContent
+//            WHERE ext_bookmarked_synced = ?
+//            ORDER BY published DESC;
             val notSyncedEntries = db.entryQueries.selectByBookmarkedSynced(false).executeAsList()
 
             if (notSyncedEntries.isEmpty()) {
@@ -233,6 +349,11 @@ class EntriesRepo(
                 entries.forEach { newEntry ->
                     val feed = feeds.firstOrNull { it.id == newEntry.feed_id }
                     val postProcessedEntry = newEntry.postProcess(feed)
+
+//                    selectLinksById:
+//                    SELECT links
+//                    FROM Entry
+//                    WHERE id = ?;
 
                     val oldLinks = db.entryQueries.selectLinksById(newEntry.id).executeAsOneOrNull()
                         ?: emptyList()

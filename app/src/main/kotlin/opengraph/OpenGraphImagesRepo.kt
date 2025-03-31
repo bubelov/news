@@ -57,6 +57,12 @@ class OpenGraphImagesRepo(
             .distinctUntilChanged()
             .collectLatest { showPreviewImages ->
                 if (showPreviewImages) {
+//                    selectByOgImageChecked:
+//                    SELECT *
+//                    FROM EntryWithoutContent
+//                    WHERE ext_og_image_checked = :ogImageChecked
+//                    ORDER BY published DESC
+//                    LIMIT :limit;
                     db.entryQueries.selectByOgImageChecked(false, BATCH_SIZE * 2L)
                         .asFlow()
                         .mapToList()

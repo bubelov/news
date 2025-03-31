@@ -51,6 +51,9 @@ class FeedsRepo(
     }
 
     fun selectLinks(): Flow<List<Link>> {
+//        selectLinks:
+//        SELECT links
+//        FROM Entry;
         return db.feedQueries.selectLinks().asFlow().mapToList().map { it.flatten() }
     }
 
