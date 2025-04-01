@@ -17,6 +17,15 @@ import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl
 import org.koin.core.annotation.Single
 
+//CREATE TABLE Feed (
+//id TEXT PRIMARY KEY NOT NULL,
+//links TEXT AS List<Link> NOT NULL,
+//title TEXT NOT NULL,
+//ext_open_entries_in_browser INTEGER AS Boolean,
+//ext_blocked_words TEXT NOT NULL,
+//ext_show_preview_images INTEGER AS Boolean
+//);
+
 @Single
 class FeedsRepo(
     private val api: Api,
@@ -24,6 +33,10 @@ class FeedsRepo(
 ) {
 
     suspend fun insertOrReplace(feed: Feed) {
+//        insertOrReplace:
+//        INSERT OR REPLACE
+//        INTO Feed(id, links, title, ext_open_entries_in_browser, ext_blocked_words, ext_show_preview_images)
+//        VALUES ?;
         withContext(Dispatchers.IO) {
             db.feedQueries.insertOrReplace(feed)
         }
@@ -39,14 +52,28 @@ class FeedsRepo(
     }
 
     fun selectAll(): Flow<List<Feed>> {
+//        selectAll:
+//        SELECT *
+//        FROM Feed
+//        ORDER BY title;
         return db.feedQueries.selectAll().asFlow().mapToList()
     }
 
     fun selectAllWithUnreadEntryCount(): Flow<List<SelectAllWithUnreadEntryCount>> {
+//        selectAllWithUnreadEntryCount:
+//        SELECT f.id, f.links, f.title, count(e.id) AS unread_entries
+//        FROM Feed f
+//        LEFT JOIN Entry e ON e.feed_id = f.id AND e.ext_read = 0 AND e.ext_bookmarked = 0
+//        GROUP BY f.id
+//        ORDER BY f.title;
         return db.feedQueries.selectAllWithUnreadEntryCount().asFlow().mapToList()
     }
 
     fun selectById(id: String): Flow<Feed?> {
+//        selectById:
+//        SELECT *
+//        FROM Feed
+//        WHERE id = ?;
         return db.feedQueries.selectById(id).asFlow().mapToOneOrNull()
     }
 
@@ -73,6 +100,10 @@ class FeedsRepo(
         withContext(Dispatchers.IO) {
             db.transaction {
                 db.feedQueries.deleteById(id)
+//                deleteByFeedId:
+//                DELETE
+//                FROM Entry
+//                WHERE feed_id = ?;
                 db.entryQueries.deleteByFeedId(id)
             }
         }

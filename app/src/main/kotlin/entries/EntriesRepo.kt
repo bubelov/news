@@ -174,26 +174,96 @@ class EntriesRepo(
     }
 
     private fun selectMaxUpdated(): Flow<String?> {
+//        selectMaxUpdated:
+//        SELECT MAX(updated)
+//        FROM Entry;
         return db.entryQueries.selectMaxUpdated().asFlow().mapToOneOrNull().map { it?.MAX }
     }
 
     fun selectByFtsQuery(query: String): Flow<List<SelectByQuery>> {
+//        -- https://www.sqlite.org/fts5.html
+//        -- > It is an error to add types
+//                -- However, SQLDelight insists on typing every field but it will strip types from the real schema
+//        CREATE VIRTUAL TABLE entry_search USING fts5(
+//                id TEXT NOT NULL,
+//        title TEXT,
+//        summary TEXT,
+//        content_text TEXT,
+//        content=Entry,
+//        tokenize='trigram'
+//        );
+//
+//        CREATE TRIGGER entry_fts_after_insert AFTER INSERT ON Entry BEGIN
+//                INSERT
+//        INTO entry_search(rowid, id, title, summary, content_text)
+//        VALUES (new.rowid, new.id, new.title, new.summary, new.content_text);
+//        END;
+//
+//        CREATE TRIGGER entry_fts_after_delete AFTER DELETE ON Entry BEGIN
+//                INSERT
+//        INTO entry_search(entry_search, rowid, id, title, summary, content_text)
+//        VALUES ('delete', old.rowid, old.id, old.title, old.summary, old.content_text);
+//        END;
+//
+//        CREATE TRIGGER entry_fts_after_update AFTER UPDATE ON Entry BEGIN
+//                INSERT
+//        INTO entry_search(entry_search, rowid, id, title, summary, content_text)
+//        VALUES ('delete', old.rowid, old.id, old.title, old.summary, old.content_text);
+//
+//        INSERT
+//        INTO entry_search(rowid, id, title, summary, content_text)
+//        VALUES (new.rowid, new.id, new.title, new.summary, new.content_text);
+//        END;
+//
+//        selectByQuery:
+//        SELECT
+//        e.id,
+//        f.ext_show_preview_images,
+//        e.ext_og_image_url,
+//        e.ext_og_image_width,
+//        e.ext_og_image_height,
+//        e.title,
+//        f.title AS feedTitle,
+//        e.published,
+//        e.summary,
+//        e.ext_read,
+//        f.ext_open_entries_in_browser,
+//        e.links
+//        FROM entry_search es
+//        JOIN Entry e ON e.id = es.id
+//        JOIN Feed f ON f.id = e.feed_id
+//        WHERE es.title LIKE '%' || :query || '%'
+//        OR es.summary LIKE '%' || :query || '%'
+//        OR es.content_text LIKE '%' || :query || '%'
+//        LIMIT 500;
         return db.entrySearchQueries.selectByQuery(query).asFlow().mapToList()
     }
 
     suspend fun updateReadByFeedId(read: Boolean, feedId: String) {
+//        updateReadByFeedId:
+//        UPDATE Entry
+//        SET ext_read = :read, ext_read_synced = 0
+//        WHERE ext_read != :read AND feed_id = :feedId;
         withContext(Dispatchers.IO) {
             db.entryQueries.updateReadByFeedId(read, feedId)
         }
     }
 
     suspend fun updateReadByBookmarked(read: Boolean, bookmarked: Boolean) {
+//        updateReadByBookmarked:
+//        UPDATE Entry
+//        SET ext_read = :read, ext_read_synced = 0
+//        WHERE ext_read != :read AND ext_bookmarked = :bookmarked;
         withContext(Dispatchers.IO) {
             db.entryQueries.updateReadByBookmarked(read = read, bookmarked = bookmarked)
         }
     }
 
     suspend fun updateReadAndReadSynced(id: String, read: Boolean, readSynced: Boolean) {
+//        updateReadAndReadSynced:
+//        UPDATE Entry
+//        SET ext_read = ?, ext_read_synced = ?
+//        WHERE id = ?;
         withContext(Dispatchers.IO) {
             db.entryQueries.updateReadAndReadSynced(
                 id = id,
@@ -208,6 +278,10 @@ class EntriesRepo(
         bookmarked: Boolean,
         bookmarkedSynced: Boolean,
     ) {
+//        updateBookmarkedAndBookmaredSynced:
+//        UPDATE Entry
+//        SET ext_bookmarked = ?, ext_bookmarked_synced = ?
+//        WHERE id = ?;
         withContext(Dispatchers.IO) {
             db.entryQueries.updateBookmarkedAndBookmaredSynced(
                 id = id,
@@ -253,6 +327,10 @@ class EntriesRepo(
 
                 db.entryQueries.transaction {
                     unsyncedReadEntries.forEach {
+//                        updateReadSynced:
+//                        UPDATE Entry
+//                        SET ext_read_synced = ?
+//                        WHERE id = ?;
                         db.entryQueries.updateReadSynced(true, it.id)
                     }
                 }
@@ -301,6 +379,10 @@ class EntriesRepo(
 
                 db.entryQueries.transaction {
                     notSyncedBookmarkedEntries.forEach {
+//                        updateBookmarkedSynced:
+//                        UPDATE Entry
+//                        SET ext_bookmarked_synced = ?
+//                        WHERE id = ?;
                         db.entryQueries.updateBookmarkedSynced(true, it.id)
                     }
                 }

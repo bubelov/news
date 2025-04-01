@@ -95,6 +95,10 @@ class OpenGraphImagesRepo(
                 ?: entry.links.firstOrNull { it.rel is AtomLinkRel.Alternate }
 
             if (link == null) {
+//                updateOgImageChecked:
+//                UPDATE Entry
+//                SET ext_og_image_checked = ?
+//                WHERE id = ?;
                 db.entryQueries.updateOgImageChecked(true, entry.id)
                 return@withContext
             }
@@ -143,6 +147,10 @@ class OpenGraphImagesRepo(
                 return@withContext
             }
 
+//            updateOgImage:
+//            UPDATE Entry
+//            SET ext_og_image_url = ?, ext_og_image_width = ?, ext_og_image_height = ?, ext_og_image_checked = 1
+//            WHERE id = ?;
             db.entryQueries.updateOgImage(
                 ext_og_image_url = imageUrl,
                 ext_og_image_width = bitmap.width.toLong(),

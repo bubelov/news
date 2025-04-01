@@ -95,7 +95,13 @@ class SettingsModel(
 
         db.apply {
             transaction {
+//                deleteAll:
+//                DELETE
+//                FROM Feed;
                 feedQueries.deleteAll()
+//                deleteAll:
+//                DELETE
+//                FROM Entry;
                 entryQueries.deleteAll()
             }
         }

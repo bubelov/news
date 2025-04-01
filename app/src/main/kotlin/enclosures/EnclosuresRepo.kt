@@ -232,6 +232,10 @@ class EnclosuresRepo(
 
     private suspend fun updateLink(link: Link, entry: Entry): Link {
         withContext(Dispatchers.IO) {
+//            updateLinks:
+//            UPDATE Entry
+//            SET links = ?
+//            WHERE id = ?;
             db.entryQueries.updateLinks(
                 id = entry.id,
                 links = entry.links.map {
