@@ -17,6 +17,7 @@ import db.Entry
 import db.EntryWithoutContent
 import db.Feed
 import db.Link
+import feeds.FeedQueries
 import http.await
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -125,7 +126,7 @@ class StandaloneNewsApi(
     }
 
     override suspend fun getFeeds(): Result<List<Feed>> {
-        return runCatching { db.feedQueries.selectAll().asFlow().mapToList().first() }
+        return runCatching { FeedQueries(db).selectAll() }
     }
 
     override suspend fun updateFeedTitle(feedId: String, newTitle: String): Result<Unit> {
