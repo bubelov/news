@@ -45,7 +45,8 @@ SELECT
     e.summary,
     e.ext_read,
     f.ext_open_entries_in_browser,
-    e.links
+    e.links,
+    e.downloaded
 FROM entry_search es
 JOIN Entry e ON e.id = es.id
 JOIN Feed f ON f.id = e.feed_id

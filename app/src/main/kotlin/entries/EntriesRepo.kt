@@ -81,6 +81,12 @@ class EntriesRepo(
         return db.entrySearchQueries.selectByQuery(query).asFlow().mapToList()
     }
 
+    suspend fun updateDownloadedByEntryId(entryId: String, downloaded: Boolean)  {
+        withContext(Dispatchers.IO) {
+            db.entryQueries.updateDownload(downloaded,entryId);
+        }
+    }
+
     suspend fun updateReadByFeedIdAndPublished(read: Boolean, feedId: String, published: OffsetDateTime) {
         withContext(Dispatchers.IO) {
             db.entryQueries.updateReadByFeedIdAndPublished(read, feedId,published)

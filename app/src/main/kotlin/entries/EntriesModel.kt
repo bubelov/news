@@ -154,6 +154,11 @@ class EntriesModel(
         }
     }
 
+    fun updateDownloadedByEntryId(entryId: String, downloaded: Boolean){
+        viewModelScope.launch {
+            entriesRepo.updateDownloadedByEntryId(entryId, downloaded)
+        }
+    }
     fun setBookmarked(entryId: String, bookmarked: Boolean) {
         viewModelScope.launch {
             entriesRepo.updateBookmarkedAndBookmaredSynced(
@@ -253,6 +258,7 @@ class EntriesModel(
             openInBrowser = ext_open_entries_in_browser ?: false,
             useBuiltInBrowser = conf.use_built_in_browser,
             links = links,
+            downloaded  = downloaded
         )
     }
 

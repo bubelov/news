@@ -23,7 +23,8 @@ CREATE TABLE Entry (
     ext_og_image_checked INTEGER AS Boolean NOT NULL,
     ext_og_image_url TEXT NOT NULL,
     ext_og_image_width INTEGER NOT NULL,
-    ext_og_image_height INTEGER NOT NULL
+    ext_og_image_height INTEGER NOT NULL,
+    downloaded INTEGER AS Boolean NOT NULL
 );
 
 CREATE VIEW EntryWithoutContent
@@ -46,7 +47,8 @@ SELECT
     ext_og_image_checked,
     ext_og_image_url,
     ext_og_image_width,
-    ext_og_image_height
+    ext_og_image_height,
+    downloaded
 FROM Entry;
 
 CREATE VIEW EntriesAdapterRow
@@ -65,7 +67,8 @@ SELECT
     e.summary,
     e.ext_read,
     f.ext_open_entries_in_browser,
-    e.links
+    e.links,
+    e.downloaded
 FROM Entry e
 JOIN Feed f
 ON f.id = e.feed_id;
@@ -93,7 +96,8 @@ INTO Entry(
     ext_og_image_checked,
     ext_og_image_url,
     ext_og_image_width,
-    ext_og_image_height
+    ext_og_image_height,
+    downloaded
 )
 VALUES ?;
 
@@ -231,6 +235,11 @@ WHERE id = ?;
 updateLinks:
 UPDATE Entry
 SET links = ?
+WHERE id = ?;
+
+updateDownload:
+UPDATE Entry
+SET downloaded = ?
 WHERE id = ?;
 
 deleteAll:

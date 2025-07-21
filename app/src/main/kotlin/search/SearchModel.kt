@@ -89,6 +89,7 @@ class SearchModel(
             openInBrowser = ext_open_entries_in_browser ?: false,
             useBuiltInBrowser = conf.use_built_in_browser,
             links = links,
+            downloaded = downloaded
         )
     }
 

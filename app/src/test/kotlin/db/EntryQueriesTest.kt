@@ -200,6 +200,7 @@ fun entry() = Entry(
     ext_og_image_url = "",
     ext_og_image_width = 0,
     ext_og_image_height = 0,
+    downloaded = true
 )
 
 fun entryWithoutContent() = EntryWithoutContent(
@@ -221,6 +222,7 @@ fun entryWithoutContent() = EntryWithoutContent(
     ext_og_image_url = "",
     ext_og_image_width = 0,
     ext_og_image_height = 0,
+    downloaded = false,
 )
 
 fun Entry.withoutContent() = EntryWithoutContent(
@@ -242,6 +244,7 @@ fun Entry.withoutContent() = EntryWithoutContent(
     ext_og_image_url = "",
     ext_og_image_width = 0,
     ext_og_image_height = 0,
+    downloaded = false,
 )
 
 fun EntryWithoutContent.toEntry(): Entry {
@@ -267,5 +270,6 @@ fun EntryWithoutContent.toEntry(): Entry {
         ext_og_image_url = ext_og_image_url,
         ext_og_image_width = ext_og_image_width,
         ext_og_image_height = ext_og_image_height,
+        downloaded = downloaded
     )
 }
