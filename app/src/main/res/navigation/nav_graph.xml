@@ -213,6 +213,13 @@
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_entriesFragment_to_hnEntriesFragment"
+            app:destination="@id/hnEntriesFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
 
     <fragment
@@ -290,5 +297,28 @@
         android:name="enclosures.EnclosuresFragment"
         android:label="EnclosuresFragment"
         tools:layout="@layout/fragment_enclosures" />
+
+    <fragment
+        android:id="@+id/hnEntriesFragment"
+        android:name="hnentries.HnEntriesFragment"
+        android:label="HnEntriesFragment"
+        tools:layout="@layout/fragment_hn_entries">
+        <action
+            android:id="@+id/action_hnEntriesFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_hnEntriesFragment_self"
+            app:destination="@id/hnEntriesFragment"
+            app:popUpTo="@id/hnEntriesFragment"
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+    </fragment>
 
 </navigation>
