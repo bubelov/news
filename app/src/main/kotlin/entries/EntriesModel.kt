@@ -291,7 +291,7 @@ class EntriesModel(
             imageWidth = ext_og_image_width.toInt(),
             imageHeight = ext_og_image_height.toInt(),
             title = title,
-            subtitle = "$feedTitle · ${DATE_TIME_FORMAT.format(published)}",
+            subtitle = "$feedTitle · ${links[0].href} · ${DATE_TIME_FORMAT.format(published)}",
             summary = summary ?: "",
             read = ext_read,
             openInBrowser = ext_open_entries_in_browser ?: false,
