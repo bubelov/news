@@ -356,6 +356,7 @@ class StandaloneNewsApi(
             ext_og_image_url = "",
             ext_og_image_width = 0,
             ext_og_image_height = 0,
+            downloaded = false
         )
     }
 
@@ -429,6 +430,7 @@ class StandaloneNewsApi(
             ext_og_image_url = "",
             ext_og_image_width = 0,
             ext_og_image_height = 0,
+            downloaded = false
         )
     }
 

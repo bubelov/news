@@ -79,6 +79,8 @@ class EntriesAdapterViewHolder(
         secondaryText.isEnabled = !item.read
         supportingText.isEnabled = !item.read
 
+        downloadedText.text = if (item.downloaded) "DOWNLOADED" else "NOT DOWNLOADED"
+
         root.setOnClickListener { callback.onItemClick(item) }
     }
 }

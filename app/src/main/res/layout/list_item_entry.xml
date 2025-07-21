@@ -62,6 +62,15 @@
                 android:textColor="?android:attr/textColorSecondary"
                 tools:text="Supporting text" />
 
+            <TextView
+                android:id="@+id/downloadedText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?android:attr/textColorSecondary"
+                tools:text="Downloaded text" />
+
         </LinearLayout>
 
     </LinearLayout>

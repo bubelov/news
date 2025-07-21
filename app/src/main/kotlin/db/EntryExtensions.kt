@@ -20,5 +20,6 @@ fun Entry.withoutContent(): EntryWithoutContent {
         ext_og_image_url,
         ext_og_image_width,
         ext_og_image_height,
+        downloaded,
     )
 }

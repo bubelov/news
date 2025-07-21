@@ -69,5 +69,6 @@ class EntriesAdapter(
         val openInBrowser: Boolean,
         val useBuiltInBrowser: Boolean,
         val links: List<Link>,
+        val downloaded: Boolean,
     )
 }
