@@ -191,6 +191,20 @@ class EntriesModel(
                 bookmarked = bookmarked,
                 bookmarkedSynced = false
             )
+            if (!bookmarked){
+                hnEntriesRepo.deleteByEntryId(entryId)
+            }
+
+            newsApiSync.run(
+                Sync.Args(
+                    syncFeeds = false,
+                    syncFlags = true,
+                    syncEntries = false,
+                )
+            )
+        }
+    }
+
     fun markTillDateAsRead(published: OffsetDateTime) {
         viewModelScope.launch {
             when (val filter = args.value) {

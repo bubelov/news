@@ -192,8 +192,8 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
             touchHelper?.attachToRecyclerView(binding.list)
         }
     }
-    private fun FragmentEntriesBinding.setHnState(state: HnDownload.State) {
 
+    private fun FragmentEntriesBinding.setHnState(state: HnDownload.State) {
         when (state) {
             is HnDownload.State.StartSync -> {
                 progressDialog?.show()
