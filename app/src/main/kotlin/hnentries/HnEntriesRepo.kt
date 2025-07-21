@@ -24,7 +24,7 @@ class HnEntriesRepo(
         }
     }
 
-    fun deleteByFeedId(entryId: String) {
+    fun deleteByEntryId(entryId: String) {
         db.hnEntryQueries.deleteByMfEntryId(entryId)
     }
     fun selectById(entryId: Long): Flow<HnEntry?> {
