@@ -234,6 +234,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
             updateShowReadEntriesButton(state)
             updateSortOrderButton(state)
             updateMarkAllAsReadButton()
+            updateMarkAsReadOlderThan()
             updateSettingsButton()
         }
     }
@@ -296,6 +297,22 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
             model.changeSortOrder()
             scrollToTop()
             true
+        }
+    }
+    private fun updateMarkAsReadOlderThan() {
+        binding.toolbar.menu!!.findItem(R.id.markAsReadOlderThan).setOnMenuItemClickListener {
+            val materialDatePicker = MaterialDatePicker.Builder.datePicker()
+                .setTitleText("Select Date")
+                .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+                .build()
+
+            materialDatePicker.show(parentFragmentManager, "MATERIAL_DATE_PICKER")
+            materialDatePicker.addOnPositiveButtonClickListener { selection ->
+                val date = Date(selection)
+                model.markTillDateAsRead(date.toInstant().atOffset(ZoneOffset.UTC))
+            }
+            materialDatePicker.addOnNegativeButtonClickListener {
+            }
         }
     }
 

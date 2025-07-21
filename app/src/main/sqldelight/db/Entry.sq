@@ -178,6 +178,16 @@ selectMaxUpdated:
 SELECT MAX(updated)
 FROM Entry;
 
+updateReadByFeedIdAndPublished:
+UPDATE Entry
+SET ext_read = :read, ext_read_synced = 0
+WHERE ext_read != :read AND feed_id = :feedId AND published <= :published;
+
+updateReadByBookmarkedAndPublished:
+UPDATE Entry
+SET ext_read = :read, ext_read_synced = 0
+WHERE ext_read != :read AND ext_bookmarked = :bookmarked AND published <= :published;
+
 updateReadByFeedId:
 UPDATE Entry
 SET ext_read = :read, ext_read_synced = 0

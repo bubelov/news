@@ -161,6 +161,35 @@ class EntriesModel(
                 bookmarked = bookmarked,
                 bookmarkedSynced = false
             )
+    fun markTillDateAsRead(published: OffsetDateTime) {
+        viewModelScope.launch {
+            when (val filter = args.value) {
+                null -> {}
+
+                is EntriesFilter.NotBookmarked -> {
+                    entriesRepo.updateReadByBookmarkedAndPublished(
+                        read = true,
+                        bookmarked = false,
+                        published = published
+                    )
+                }
+
+                is EntriesFilter.Bookmarked -> {
+                    entriesRepo.updateReadByBookmarkedAndPublished(
+                        read = true,
+                        bookmarked = true,
+                        published = published
+                    )
+                }
+
+                is EntriesFilter.BelongToFeed -> {
+                    entriesRepo.updateReadByFeedIdAndPublished(
+                        read = true,
+                        feedId = filter.feedId,
+                        published = published
+                    )
+                }
+            }
 
             newsApiSync.run(
                 Sync.Args(

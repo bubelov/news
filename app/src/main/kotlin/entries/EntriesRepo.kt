@@ -81,6 +81,18 @@ class EntriesRepo(
         return db.entrySearchQueries.selectByQuery(query).asFlow().mapToList()
     }
 
+    suspend fun updateReadByFeedIdAndPublished(read: Boolean, feedId: String, published: OffsetDateTime) {
+        withContext(Dispatchers.IO) {
+            db.entryQueries.updateReadByFeedIdAndPublished(read, feedId,published)
+        }
+    }
+
+    suspend fun updateReadByBookmarkedAndPublished(read: Boolean, bookmarked: Boolean, published: OffsetDateTime) {
+        withContext(Dispatchers.IO) {
+            db.entryQueries.updateReadByBookmarkedAndPublished(read = read, bookmarked = bookmarked, published = published)
+        }
+    }
+
     suspend fun updateReadByFeedId(read: Boolean, feedId: String) {
         withContext(Dispatchers.IO) {
             db.entryQueries.updateReadByFeedId(read, feedId)
