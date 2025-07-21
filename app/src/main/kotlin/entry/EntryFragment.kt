@@ -121,7 +121,7 @@ class EntryFragment : Fragment() {
                             if (state.entry.ext_comments_url.contains("https://news.ycombinator.com/item")) {
                                 val currentHnId =state.entry.ext_comments_url.substringAfter("id=").toLong()
                                 get<ConfRepo>().update { it.copy(current_hn_id = currentHnId, mf_entry_id = state.entry.id) }
-                                val action = EntryFragmentDirections.actionEntriesFragmentToHnEntriesFragment(currentHnId)
+                                val action = EntryFragmentDirections.actionEntriesFragmentToHnEntriesFragment()
                                 findNavController().navigate(action)
                             }else{
                                 openUrl(

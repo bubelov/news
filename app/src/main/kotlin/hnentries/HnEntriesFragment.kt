@@ -178,7 +178,7 @@ class HnEntriesFragment : Fragment(), OnItemReselectedListener {
     private fun onListItemClick(item: HnEntriesAdapter.Item) {
         if (item.kidsCount > 0) {
             get<ConfRepo>().update { it.copy(current_hn_id = item.id) }
-            val action = HnEntriesFragmentDirections.actionHnEntriesFragmentSelf(item.id)
+            val action = HnEntriesFragmentDirections.actionHnEntriesFragmentSelf()
             findNavController().navigate(action)
         }else{
             Toast.makeText(activity, "Item has no kids.", Toast.LENGTH_SHORT).show()
