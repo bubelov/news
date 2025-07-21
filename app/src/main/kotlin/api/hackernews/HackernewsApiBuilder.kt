@@ -1,0 +1,50 @@
+package api.miniflux
+
+import com.google.gson.Gson
+import com.google.gson.JsonObject
+import okhttp3.Interceptor
+import okhttp3.OkHttpClient
+import okio.IOException
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
+
+class HackernewsApiBuilder {
+
+    fun build(): HackernewsApi {
+        val builder = OkHttpClient.Builder()
+            .addInterceptor(errorInterceptor())
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(20, TimeUnit.SECONDS)
+            .writeTimeout(20, TimeUnit.SECONDS)
+
+        return Retrofit.Builder()
+            .baseUrl("https://hacker-news.firebaseio.com/v0/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(builder.build())
+            .build()
+            .create(HackernewsApi::class.java)
+    }
+
+    private fun errorInterceptor(): Interceptor {
+        return Interceptor {
+            val response = it.proceed(it.request())
+
+            if (!response.isSuccessful && response.body != null) {
+                val json = runCatching {
+                    Gson().fromJson(response.body!!.string(), JsonObject::class.java)
+                }.getOrNull()
+
+                val errorMessage = if (json != null && json.has("error_message")) {
+                    json["error_message"].asString
+                } else {
+                    "Endpoint ${it.request().url} failed with response code ${response.code}"
+                }
+
+                throw IOException(errorMessage)
+            }
+
+            response
+        }
+    }
+}
