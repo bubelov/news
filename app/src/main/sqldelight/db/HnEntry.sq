@@ -1,0 +1,62 @@
+import db.Link;
+import java.time.OffsetDateTime;
+import kotlin.Boolean;
+import kotlin.collections.List;
+
+CREATE TABLE HnEntry (
+    by TEXT NOT NULL,
+    id INTEGER PRIMARY KEY NOT NULL,
+    parent INTEGER NOT NULL,
+    time INTEGER NOT NULL,
+    type TEXT NOT NULL,
+    text TEXT,
+    dead INTEGER AS Boolean,
+    kids TEXT,
+    title TEXT,
+    descendants INTEGER,
+    mfEntryId TEXT NOT NULL
+);
+
+insertOrReplace:
+INSERT OR REPLACE
+INTO HnEntry(
+    by,
+    id,
+    parent,
+    time,
+    type,
+    text,
+    dead,
+    kids,
+    title,
+    descendants,
+    mfEntryId
+)
+VALUES ?;
+
+selectById:
+SELECT *
+FROM HnEntry
+WHERE id = ?;
+
+existsById:
+SELECT COUNT(*) > 0 FROM HnEntry WHERE id = ?;
+
+selectByIds:
+SELECT *
+FROM HnEntry
+WHERE id IN :ids;
+
+deleteAll:
+DELETE
+FROM HnEntry;
+
+deleteById:
+DELETE
+FROM HnEntry
+WHERE id = ?;
+
+deleteByMfEntryId:
+DELETE
+FROM HnEntry
+WHERE mfEntryId = ?;

@@ -15,7 +15,7 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import java.io.File
 import java.time.OffsetDateTime
 
-private const val FILE_NAME = "news-v6.db"
+private const val FILE_NAME = "news-v7.db"
 
 fun db(context: Context): Db {
     val driver = AndroidSqliteDriver(
