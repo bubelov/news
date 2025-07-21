@@ -4,6 +4,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/download"
+        android:icon="@drawable/ic_baseline_open_in_browser_24"
+        android:title="@string/download"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/search"
         android:icon="@drawable/ic_baseline_search_24"
         android:title="@string/search"

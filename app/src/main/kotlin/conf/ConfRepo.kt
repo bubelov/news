@@ -71,6 +71,8 @@ class ConfRepo(
             use_built_in_browser = true,
             show_preview_text = true,
             synced_on_startup = false,
+            mf_entry_id = "",
+            current_hn_id = 0,
         )
     }
 }

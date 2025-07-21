@@ -1,5 +1,6 @@
 package entries
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Rect
 import android.os.Bundle
@@ -7,6 +8,9 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
+import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.os.bundleOf
@@ -25,6 +29,7 @@ import anim.showSmooth
 import co.appreactor.feedk.AtomLinkRel
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentEntriesBinding
+import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.navigation.NavigationBarView.OnItemReselectedListener
 import com.google.android.material.snackbar.Snackbar
 import conf.ConfRepo
@@ -33,6 +38,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import navigation.openUrl
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import sync.HnDownload
+import java.time.ZoneOffset
+import java.util.Date
+
 
 class EntriesFragment : Fragment(), OnItemReselectedListener {
 
@@ -42,6 +51,10 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
 
     private var _binding: FragmentEntriesBinding? = null
     private val binding get() = _binding!!
+    private var progressDialog: AlertDialog? = null
+    private var progressBar: ProgressBar? = null
+    private var progressText: TextView? = null
+    private var stateTotal = 0
 
     private val seenEntries = mutableSetOf<EntriesAdapter.Item>()
 
@@ -96,9 +109,15 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
 
         initSwipeRefresh()
         initList()
+        createProgressDialog()
 
         model.args.update { args.filter!! }
 
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                model.hnDownload.state.collect { binding.setHnState(it) }
+            }
+        }
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 model.state.collect { binding.setState(it) }
@@ -131,6 +150,19 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         scrollToTop()
     }
 
+    private fun createProgressDialog() {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_progress_download, null)
+
+        progressBar = dialogView.findViewById(R.id.progressBar)
+        progressText = dialogView.findViewById(R.id.tvProgressText)
+        progressDialog = AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .setTitle("Downloading")
+            .setMessage("Please wait...")
+            .setCancelable(false)
+            .create()
+    }
+
     private fun initSwipeRefresh() {
         binding.swipeRefresh.apply {
             when (args.filter) {
@@ -160,6 +192,38 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
             touchHelper?.attachToRecyclerView(binding.list)
         }
     }
+    private fun FragmentEntriesBinding.setHnState(state: HnDownload.State) {
+
+        when (state) {
+            is HnDownload.State.StartSync -> {
+                progressDialog?.show()
+                stateTotal = state.total
+                progressDialog?.setMessage(state.parentTitle)
+                progressBar?.max = stateTotal
+            }
+            is HnDownload.State.InitialSync -> {
+                var message = "Getting ${state.current} of ${stateTotal} comments."
+
+                progressBar?.progress = state.current.toInt()
+                progressText?.text = message
+                progressText?.visibility = View.VISIBLE
+            }
+            is HnDownload.State.Updated -> {
+                if (state.gotKids)
+                {
+                    model.updateDownloadedByEntryId(state.MfEntryId,true)
+                    progressDialog?.hide()
+                }
+            }
+            is HnDownload.State.FailedToSync -> {
+                Toast.makeText(activity, state.cause, Toast.LENGTH_SHORT).show()
+            }
+            else  -> {
+
+            }
+
+        }
+    }
 
     private fun FragmentEntriesBinding.setState(state: EntriesModel.State) {
         animateVisibilityChanges(
@@ -184,7 +248,6 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
 
             is EntriesModel.State.FailedToSync -> {
                 retry.setOnClickListener { model.onRetry() }
-                showErrorDialog(state.cause)
             }
 
             EntriesModel.State.LoadingCachedEntries -> {}
@@ -231,11 +294,20 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
             }
 
             updateSearchButton()
+            updateDownloadButton()
             updateShowReadEntriesButton(state)
             updateSortOrderButton(state)
             updateMarkAllAsReadButton()
             updateMarkAsReadOlderThan()
             updateSettingsButton()
+        }
+    }
+
+    private fun updateDownloadButton() {
+        binding.toolbar.menu!!.findItem(R.id.download).setOnMenuItemClickListener {
+            stateTotal = 0
+            model.download()
+            true
         }
     }
 

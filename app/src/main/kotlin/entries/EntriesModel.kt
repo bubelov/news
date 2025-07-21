@@ -9,6 +9,7 @@ import db.Conf
 import db.EntriesAdapterRow
 import db.Feed
 import feeds.FeedsRepo
+import hnentries.HnEntriesRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -18,7 +19,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
+import sync.HnDownload
 import sync.Sync
+import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
@@ -26,6 +29,8 @@ import java.time.format.FormatStyle
 class EntriesModel(
     private val confRepo: ConfRepo,
     private val entriesRepo: EntriesRepo,
+    val hnDownload: HnDownload,
+    private val hnEntriesRepo: HnEntriesRepo,
     private val feedsRepo: FeedsRepo,
     private val newsApiSync: Sync,
 ) : ViewModel() {
@@ -159,6 +164,26 @@ class EntriesModel(
             entriesRepo.updateDownloadedByEntryId(entryId, downloaded)
         }
     }
+
+    fun download(){
+        viewModelScope.launch {
+            val entries = entriesRepo.selectByBookmarked(true).first()
+
+            for (entry in entries)
+            {
+                if (!entry.downloaded)
+                {
+                    if (entry.ext_comments_url.contains("https://news.ycombinator.com/item")) {
+
+                        val id = entry.ext_comments_url.substringAfter("id=").toLong()
+                        hnDownload.down(id, entry.id)
+                    }
+                }
+            }
+        }
+
+    }
+
     fun setBookmarked(entryId: String, bookmarked: Boolean) {
         viewModelScope.launch {
             entriesRepo.updateBookmarkedAndBookmaredSynced(
