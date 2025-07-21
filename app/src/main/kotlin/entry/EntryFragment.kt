@@ -28,6 +28,7 @@ import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.feedk.AtomLinkRel
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentEntryBinding
+import conf.ConfRepo
 import db.Entry
 import db.Link
 import dialog.showErrorDialog
@@ -36,6 +37,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import navigation.openUrl
+import org.koin.android.ext.android.get
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -116,10 +118,17 @@ class EntryFragment : Fragment() {
                     menu.findItem(R.id.comments)?.apply {
                         isVisible = state.entry.ext_comments_url.isNotBlank()
                         setOnMenuItemClickListener {
-                            openUrl(
-                                state.entry.ext_comments_url,
-                                model.conf.value.use_built_in_browser
-                            )
+                            if (state.entry.ext_comments_url.contains("https://news.ycombinator.com/item")) {
+                                val currentHnId =state.entry.ext_comments_url.substringAfter("id=").toLong()
+                                get<ConfRepo>().update { it.copy(current_hn_id = currentHnId, mf_entry_id = state.entry.id) }
+                                val action = EntryFragmentDirections.actionEntriesFragmentToHnEntriesFragment(currentHnId)
+                                findNavController().navigate(action)
+                            }else{
+                                openUrl(
+                                    state.entry.ext_comments_url,
+                                    model.conf.value.use_built_in_browser
+                                )
+                            }
                             true
                         }
                     }
