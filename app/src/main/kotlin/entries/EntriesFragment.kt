@@ -318,7 +318,18 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
 
     private fun updateMarkAllAsReadButton() {
         binding.toolbar.menu!!.findItem(R.id.markAllAsRead).setOnMenuItemClickListener {
-            model.markAllAsRead()
+            AlertDialog.Builder(context)
+                .setTitle("Action")
+                .setMessage("Do you want to mark all current entries as read?")
+                .setPositiveButton("Proceed") { dialog, _ ->
+                    model.markAllAsRead()
+                    dialog.dismiss()
+                }
+                .setNegativeButton("Cancel") { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .setCancelable(false)
+                .show()
             true
         }
     }
