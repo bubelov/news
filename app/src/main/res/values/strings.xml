@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-    <string name="app_name">News</string>
+    <string name="app_name">Vesti</string>
     <string name="post_image">Post image</string>
     <string name="settings">Settings</string>
     <string name="news">News</string>

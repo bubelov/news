@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-    <string name="app_name">Новости</string>
+    <string name="app_name">Вести</string>
     <string name="post_image">Изображение публикации</string>
     <string name="settings">Настройки</string>
     <string name="news">Новости</string>
