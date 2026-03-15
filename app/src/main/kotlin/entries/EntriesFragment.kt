@@ -10,6 +10,9 @@ import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.os.bundleOf
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -99,6 +102,13 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { v, insets ->
+            insets.getInsets(WindowInsetsCompat.Type.statusBars()).let {
+                v.updatePadding(top = it.top)
+            }
+            insets
+        }
 
         initSwipeRefresh()
         initList()

@@ -4,8 +4,11 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.forEach
 import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
 import co.appreactor.news.R
@@ -32,6 +35,13 @@ class Activity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.bottomNav.isVisible = false
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNav) { v, insets ->
+            insets.getInsets(WindowInsetsCompat.Type.navigationBars()).let {
+                v.updatePadding(bottom = it.bottom)
+            }
+            insets
+        }
 
         get<ConfRepo>().update { it.copy(syncedOnStartup = false) }
         lifecycleScope.launch { get<OpenGraphImagesRepo>().fetchEntryImages() }
