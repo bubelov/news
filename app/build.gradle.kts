@@ -89,7 +89,7 @@ dependencies {
     // AndroidX
     implementation(libs.androidx.fragment)
     debugImplementation(libs.androidx.fragment.testing)
-    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.work)
     androidTestImplementation(libs.androidx.work.testing)
     implementation(libs.androidx.browser)
     implementation(libs.androidx.lifecycle.runtime.ktx)
