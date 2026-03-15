@@ -97,6 +97,11 @@ class NavController private constructor(private val fragmentManager: FragmentMan
             if (backStack.isNotEmpty()) {
                 backStack.removeAt(backStack.size - 1)
             }
+
+            val currentDestinationId = if (backStack.isNotEmpty()) backStack.last() else 0
+            handler.post {
+                onDestinationChangedListener?.invoke(currentDestinationId, null)
+            }
             return true
         }
         return false

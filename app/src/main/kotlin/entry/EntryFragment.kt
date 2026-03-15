@@ -15,8 +15,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.net.toUri
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.core.view.iterator
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -92,6 +96,29 @@ class EntryFragment : Fragment() {
                 } else {
                     fab.hide()
                 }
+            }
+
+            ViewCompat.setOnApplyWindowInsetsListener(toolbar) { v, insets ->
+                insets.getInsets(WindowInsetsCompat.Type.statusBars()).let {
+                    v.updatePadding(top = it.top)
+                }
+                insets
+            }
+
+            ViewCompat.setOnApplyWindowInsetsListener(scrollView) { v, insets ->
+                insets.getInsets(WindowInsetsCompat.Type.navigationBars()).let {
+                    v.updatePadding(bottom = it.bottom)
+                }
+                insets
+            }
+
+            ViewCompat.setOnApplyWindowInsetsListener(fab) { v, insets ->
+                insets.getInsets(WindowInsetsCompat.Type.navigationBars()).let {
+                    v.updateLayoutParams<androidx.constraintlayout.widget.ConstraintLayout.LayoutParams> {
+                        bottomMargin = it.bottom + resources.getDimensionPixelSize(R.dimen.dp_16)
+                    }
+                }
+                insets
             }
         }
     }
