@@ -35,9 +35,6 @@ swiperefreshlayout = "1.2.0"
 retrofit = "2.11.0"
 okhttp = "4.12.0"
 
-# Database
-sqlite-android = "3.49.0"
-
 # DI
 koin = "3.5.0"
 koin-annotations = "1.0.0"
@@ -87,9 +84,6 @@ retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-
 okhttp-bom = { group = "com.squareup.okhttp3", name = "okhttp-bom", version.ref = "okhttp" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 okhttp-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
-
-# Database
-sqlite-android = { group = "com.github.requery", name = "sqlite-android", version.ref = "sqlite-android" }
 
 # DI
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }

@@ -105,9 +105,6 @@ dependencies {
     implementation(libs.okhttp)
     testImplementation(libs.okhttp.mockwebserver)
 
-    // Database
-    implementation(libs.sqlite.android)
-
     // DI
     implementation(libs.koin.android)
     implementation(libs.koin.annotations)
