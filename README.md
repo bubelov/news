@@ -20,11 +20,10 @@
 <img alt="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width="204">
 </div>
 
-## 🔌 Supported Backends
+## 🔌 Integrations
 
-- Miniflux
-- Nextcloud
-- Standalone (built-in)
+- Miniflux (active)
+- Nextcloud (needs maintainers)
 
 ## ✨ Main Features:
 
