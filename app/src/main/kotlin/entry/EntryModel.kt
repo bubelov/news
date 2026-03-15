@@ -60,10 +60,10 @@ class EntryModel(
                     return@combine
                 }
 
-                val feed = feedsRepository.selectById(entry.feed_id).first()
+                val feed = feedsRepository.selectById(entry.feedId).first()
 
                 if (feed == null) {
-                    val message = app.getString(R.string.cannot_find_feed_with_id_s, entry.feed_id)
+                    val message = app.getString(R.string.cannot_find_feed_with_id_s, entry.feedId)
                     _state.update { State.Error(message) }
                     return@combine
                 }
@@ -74,7 +74,7 @@ class EntryModel(
                         entry = entry,
                         entryLinks = entry.links,
                         parsedContent = parseEntryContent(
-                            entry.content_text ?: "",
+                            entry.contentText ?: "",
                             TextViewImageGetter(
                                 textView = args.summaryView,
                                 scope = args.lifecycleScope,

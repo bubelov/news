@@ -53,57 +53,49 @@ class SettingsModel(
     }
 
     fun setSyncInBackground(value: Boolean) {
-        confRepo.update { it.copy(sync_in_background = value) }
+        confRepo.update { it.copy(syncInBackground = value) }
         syncScheduler.schedule()
     }
 
     fun setBackgroundSyncIntervalMillis(value: Long) {
-        confRepo.update { it.copy(background_sync_interval_millis = value) }
+        confRepo.update { it.copy(backgroundSyncIntervalMillis = value) }
         syncScheduler.schedule()
     }
 
     fun setSyncOnStartup(value: Boolean) {
-        confRepo.update { it.copy(sync_on_startup = value) }
+        confRepo.update { it.copy(syncOnStartup = value) }
     }
 
     fun setShowReadEntries(value: Boolean) {
-        confRepo.update { it.copy(show_read_entries = value) }
+        confRepo.update { it.copy(showReadEntries = value) }
     }
 
     fun setShowPreviewImages(value: Boolean) {
-        confRepo.update { it.copy(show_preview_images = value) }
+        confRepo.update { it.copy(showPreviewImages = value) }
     }
 
     fun setCropPreviewImages(value: Boolean) {
-        confRepo.update { it.copy(crop_preview_images = value) }
+        confRepo.update { it.copy(cropPreviewImages = value) }
     }
 
     fun setShowPreviewText(value: Boolean) {
-        confRepo.update { it.copy(show_preview_text = value) }
+        confRepo.update { it.copy(showPreviewText = value) }
     }
 
     fun setMarkScrolledEntriesAsRead(value: Boolean) {
-        confRepo.update { it.copy(mark_scrolled_entries_as_read = value) }
+        confRepo.update { it.copy(markScrolledEntriesAsRead = value) }
     }
 
     fun setUseBuiltInBrowser(value: Boolean) {
-        confRepo.update { it.copy(use_built_in_browser = value) }
+        confRepo.update { it.copy(useBuiltInBrowser = value) }
     }
 
     fun logOut() {
         confRepo.update { ConfRepo.DEFAULT_CONF }
 
-        db.apply {
-            transaction {
-//                deleteAll:
-//                DELETE
-//                FROM Feed;
-                feedQueries.deleteAll()
-//                deleteAll:
-//                DELETE
-//                FROM Entry;
-                entryQueries.deleteAll()
-            }
+        db.transaction {
+            db.feedQueries.deleteAll()
+            db.entryQueries.deleteAll()
         }
     }
 
@@ -111,12 +103,12 @@ class SettingsModel(
         return when (backend) {
             ConfRepo.BACKEND_STANDALONE -> ""
             ConfRepo.BACKEND_MINIFLUX -> {
-                val username = miniflux_server_username
-                "$username@${miniflux_server_url.extractDomain()}"
+                val username = minifluxServerUsername
+                "$username@${minifluxServerUrl.extractDomain()}"
             }
             ConfRepo.BACKEND_NEXTCLOUD -> {
-                val username = nextcloud_server_username
-                "$username@${nextcloud_server_url.extractDomain()}"
+                val username = nextcloudServerUsername
+                "$username@${nextcloudServerUrl.extractDomain()}"
             }
             else -> ""
         }

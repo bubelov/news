@@ -100,7 +100,7 @@ class FeedsModel(
             val mutex = Mutex()
 
             val outlinesChannel = produce { outlines.forEach { send(it) } }
-            val existingLinks = feedsRepo.selectLinks().first()
+            val existingLinks = feedsRepo.selectLinks().first().flatten()
 
             val workers = buildList {
                 repeat(15) {
@@ -175,14 +175,15 @@ class FeedsModel(
             val feeds = feedsRepo.selectAll().first()
 
             val outlines = feeds.map { feed ->
+                val selfLink = feed.links.firstOrNull { it.rel is AtomLinkRel.Self } ?: feed.links.firstOrNull()
                 OpmlOutline(
                     text = feed.title,
                     outlines = emptyList(),
-                    xmlUrl = feed.links.first { it.rel is AtomLinkRel.Self }.href.toString(),
+                    xmlUrl = selfLink?.href?.toString() ?: "",
                     htmlUrl = feed.links.firstOrNull { it.rel is AtomLinkRel.Alternate }?.href?.toString(),
-                    extOpenEntriesInBrowser = feed.ext_open_entries_in_browser,
-                    extShowPreviewImages = feed.ext_show_preview_images,
-                    extBlockedWords = feed.ext_blocked_words,
+                    extOpenEntriesInBrowser = feed.extOpenEntriesInBrowser,
+                    extShowPreviewImages = feed.extShowPreviewImages,
+                    extBlockedWords = feed.extBlockedWords,
                 )
             }
 
@@ -247,13 +248,17 @@ class FeedsModel(
     }
 
     private fun SelectAllWithUnreadEntryCount.toItem(): FeedsAdapter.Item {
+        val selfLink = links.firstOrNull { it.rel is AtomLinkRel.Self }?.href 
+            ?: links.firstOrNull()?.href
+            ?: "https://example.com".toHttpUrl()
+        
         return FeedsAdapter.Item(
             id = id,
             title = title,
-            selfLink = links.single { it.rel is AtomLinkRel.Self }.href,
+            selfLink = selfLink,
             alternateLink = links.firstOrNull { it.rel is AtomLinkRel.Alternate }?.href,
-            unreadCount = unread_entries,
-            confUseBuiltInBrowser = confRepo.conf.value.use_built_in_browser,
+            unreadCount = unreadEntries,
+            confUseBuiltInBrowser = confRepo.conf.value.useBuiltInBrowser,
         )
     }
 

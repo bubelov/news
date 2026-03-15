@@ -41,7 +41,7 @@ class App : Application() {
         startKoin {
             androidContext(this@App)
             defaultModule()
-            modules(module { single { db(this@App) } })
+            modules(module { single { this@App.db() } })
         }
     }
 }

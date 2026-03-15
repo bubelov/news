@@ -111,7 +111,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
 
         val state = model.state.value
 
-        if (state is EntriesModel.State.ShowingCachedEntries && state.conf.mark_scrolled_entries_as_read) {
+        if (state is EntriesModel.State.ShowingCachedEntries && state.conf.markScrolledEntriesAsRead) {
             model.setRead(
                 entryIds = seenEntries.map { it.id },
                 read = true,
@@ -201,7 +201,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
                 adapter.submitList(state.entries) { if (state.scrollToTop) scrollToTop() }
 
                 if (
-                    state.conf.mark_scrolled_entries_as_read
+                    state.conf.markScrolledEntriesAsRead
                     && (args.filter is EntriesFilter.NotBookmarked || args.filter is EntriesFilter.BelongToFeed)
                 ) {
                     binding.list.addOnScrollListener(trackingListener)
@@ -254,7 +254,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
             return
         }
 
-        if (state.conf.show_read_entries) {
+        if (state.conf.showReadEntries) {
             button.setIcon(R.drawable.ic_baseline_visibility_24)
             button.title = getString(R.string.hide_read_news)
             touchHelper?.attachToRecyclerView(null)
@@ -265,7 +265,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         }
 
         button.setOnMenuItemClickListener {
-            model.saveConf { it.copy(show_read_entries = !it.show_read_entries) }
+            model.saveConf { it.copy(showReadEntries = !it.showReadEntries) }
             true
         }
     }
@@ -280,7 +280,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
             button.isVisible = true
         }
 
-        when (state.conf.sort_order) {
+        when (state.conf.sortOrder) {
             ConfRepo.SORT_ORDER_ASCENDING -> {
                 button.setIcon(R.drawable.ic_clock_forward)
                 button.title = getString(R.string.show_newest_first)

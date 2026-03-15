@@ -1,12 +1,12 @@
 package api
 
-import android.database.sqlite.SQLiteDatabase
 import api.miniflux.MinifluxApiAdapter
 import api.miniflux.MinifluxApiBuilder
 import api.nextcloud.NextcloudApiAdapter
 import api.nextcloud.NextcloudApiBuilder
 import api.standalone.StandaloneNewsApi
 import conf.ConfRepo
+import db.Db
 import db.Entry
 import db.EntryWithoutContent
 import db.Feed
@@ -21,7 +21,7 @@ import java.time.OffsetDateTime
 @Single(binds = [Api::class])
 class HotSwapApi(
     private val confRepo: ConfRepo,
-    private val db: SQLiteDatabase,
+    private val db: Db,
 ) : Api {
 
     private lateinit var api: Api

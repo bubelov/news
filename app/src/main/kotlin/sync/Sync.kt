@@ -39,7 +39,7 @@ class Sync(
 
         val conf = confRepo.conf.value
 
-        if (!conf.initial_sync_completed) {
+        if (!conf.initialSyncCompleted) {
             _state.update { State.InitialSync() }
 
             runCatching {
@@ -66,8 +66,8 @@ class Sync(
 
             confRepo.update {
                 it.copy(
-                    initial_sync_completed = true,
-                    last_entries_sync_datetime = Instant.now().toString(),
+                    initialSyncCompleted = true,
+                    lastEntriesSyncDatetime = Instant.now().toString(),
                 )
             }
 
@@ -104,11 +104,11 @@ class Sync(
             return if (args.syncEntries) {
                 runCatching {
                     val newAndUpdatedEntries = entriesRepo.syncNewAndUpdated(
-                        lastEntriesSyncDateTime = confRepo.conf.value.last_entries_sync_datetime,
+                        lastEntriesSyncDateTime = confRepo.conf.value.lastEntriesSyncDatetime,
                         feeds = feedsRepo.selectAll().first(),
                     )
 
-                    confRepo.update { it.copy(last_entries_sync_datetime = Instant.now().toString()) }
+                    confRepo.update { it.copy(lastEntriesSyncDatetime = Instant.now().toString()) }
                     _state.update { State.Idle }
                     SyncResult.Success(newAndUpdatedEntries)
                 }.getOrElse {

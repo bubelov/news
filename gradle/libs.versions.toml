@@ -1,0 +1,121 @@
+[versions]
+# https://developer.android.com/build/releases/gradle-plugin
+agp = "9.1.0"
+# https://github.com/JetBrains/kotlin/releases
+kotlin = "2.3.10"
+# Enables suspending functions
+# https://github.com/Kotlin/kotlinx.coroutines/releases
+coroutines = "1.10.2"
+# Material design components
+# https://github.com/material-components/material-components-android/releases
+material = "1.14.0-alpha10"
+# Some handly fragment transition extensions
+# https://developer.android.com/jetpack/androidx/releases/fragment
+fragment = "1.8.9"
+
+
+
+
+# AndroidX
+androidx-navigation = "2.7.7"
+androidx-work = "2.9.0"
+androidx-browser = "1.8.0"
+androidx-lifecycle = "2.7.0"
+androidx-constraintlayout = "2.1.4"
+androidx-recyclerview = "1.3.2"
+androidx-swiperefreshlayout = "1.1.0"
+
+# Networking
+retrofit = "2.11.0"
+okhttp = "4.12.0"
+
+# Database
+sqlite-android = "3.49.0"
+
+# DI
+koin = "3.5.0"
+koin-annotations = "1.0.0"
+
+picasso = "2.8"
+
+# Parsing
+jsoup = "1.17.2"
+
+# Feed parser
+feedk = "0.2.6"
+
+# Crash reporting
+acra = "5.11.3"
+
+# Testing
+junit = "4.13.2"
+mockk = "1.13.10"
+androidx-test-runner = "1.5.2"
+androidx-test-espresso = "3.5.1"
+androidx-test-monitor = "1.6.1"
+
+[libraries]
+# Gradle
+android-gradle-plugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
+kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
+navigation-safe-args = { group = "androidx.navigation", name = "navigation-safe-args-gradle-plugin", version.ref = "androidx-navigation" }
+
+# Coroutines
+kotlinx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+androidx-fragment = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragment" }
+
+# AndroidX
+androidx-fragment-testing = { group = "androidx.fragment", name = "fragment-testing", version.ref = "fragment" }
+androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "androidx-navigation" }
+androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "androidx-navigation" }
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "androidx-work" }
+androidx-work-testing = { group = "androidx.work", name = "work-testing", version.ref = "androidx-work" }
+androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "androidx-browser" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidx-lifecycle" }
+androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "androidx-lifecycle" }
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "androidx-constraintlayout" }
+androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "androidx-recyclerview" }
+androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "androidx-swiperefreshlayout" }
+
+# Networking
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
+okhttp-bom = { group = "com.squareup.okhttp3", name = "okhttp-bom", version.ref = "okhttp" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+okhttp-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
+
+# Database
+sqlite-android = { group = "com.github.requery", name = "sqlite-android", version.ref = "sqlite-android" }
+
+# DI
+koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
+koin-annotations = { group = "io.insert-koin", name = "koin-annotations", version.ref = "koin-annotations" }
+koin-ksp-compiler = { group = "io.insert-koin", name = "koin-ksp-compiler", version.ref = "koin-annotations" }
+
+# UI
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+picasso = { group = "com.squareup.picasso", name = "picasso", version.ref = "picasso" }
+
+# Parsing
+jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
+
+# Feed parser
+feedk = { group = "co.appreactor", name = "feedk", version.ref = "feedk" }
+
+# Crash reporting
+acra-mail = { group = "ch.acra", name = "acra-mail", version.ref = "acra" }
+acra-dialog = { group = "ch.acra", name = "acra-dialog", version.ref = "acra" }
+
+# Testing
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidx-test-runner" }
+androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidx-test-espresso" }
+androidx-test-monitor = { group = "androidx.test", name = "monitor", version.ref = "androidx-test-monitor" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
+navigation-safeargs = { id = "androidx.navigation.safeargs.kotlin", version.ref = "androidx-navigation" }

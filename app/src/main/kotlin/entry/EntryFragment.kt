@@ -114,11 +114,11 @@ class EntryFragment : Fragment() {
                 is EntryModel.State.Success -> {
                     menu.findItem(R.id.toggleBookmarked)?.isVisible = true
                     menu.findItem(R.id.comments)?.apply {
-                        isVisible = state.entry.ext_comments_url.isNotBlank()
+                        isVisible = state.entry.extCommentsUrl.isNotBlank()
                         setOnMenuItemClickListener {
                             openUrl(
-                                state.entry.ext_comments_url,
-                                model.conf.value.use_built_in_browser
+                                state.entry.extCommentsUrl,
+                                model.conf.value.useBuiltInBrowser
                             )
                             true
                         }
@@ -137,7 +137,7 @@ class EntryFragment : Fragment() {
                         )
                     }
 
-                    updateBookmarkedButton(state.entry.ext_bookmarked)
+                    updateBookmarkedButton(state.entry.extBookmarked)
                     title.text = state.entry.title
                     val format =
                         DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)
@@ -169,7 +169,7 @@ class EntryFragment : Fragment() {
                         fab.setOnClickListener {
                             openUrl(
                                 firstHtmlLink.href.toString(),
-                                model.conf.value.use_built_in_browser
+                                model.conf.value.useBuiltInBrowser
                             )
                         }
                     }
@@ -194,7 +194,7 @@ class EntryFragment : Fragment() {
                 lifecycleScope.launchWhenResumed {
                     model.setBookmarked(
                         entry.id,
-                        !entry.ext_bookmarked,
+                        !entry.extBookmarked,
                     )
                 }
 
@@ -204,7 +204,7 @@ class EntryFragment : Fragment() {
             R.id.feedSettings -> {
                 findNavController().navigate(
                     EntryFragmentDirections.actionEntryFragmentToFeedSettingsFragment(
-                        feedId = entry.feed_id,
+                        feedId = entry.feedId,
                     )
                 )
 

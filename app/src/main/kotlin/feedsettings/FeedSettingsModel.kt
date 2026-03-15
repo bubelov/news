@@ -36,17 +36,17 @@ class FeedSettingsModel(
 
     suspend fun setOpenEntriesInBrowser(feedId: String, openEntriesInBrowser: Boolean) {
         val feed = feedsRepo.selectById(feedId).first()!!
-        feedsRepo.insertOrReplace(feed.copy(ext_open_entries_in_browser = openEntriesInBrowser))
+        feedsRepo.insertOrReplace(feed.copy(extOpenEntriesInBrowser = openEntriesInBrowser))
     }
 
     suspend fun setShowPreviewImages(feedId: String, value: Boolean?) {
         val feed = feedsRepo.selectById(feedId).first()!!
-        feedsRepo.insertOrReplace(feed.copy(ext_show_preview_images = value))
+        feedsRepo.insertOrReplace(feed.copy(extShowPreviewImages = value))
     }
 
     suspend fun setBlockedWords(feedId: String, blockedWords: String) {
         val feed = feedsRepo.selectById(feedId).first()!!
-        feedsRepo.insertOrReplace(feed.copy(ext_blocked_words = blockedWords))
+        feedsRepo.insertOrReplace(feed.copy(extBlockedWords = blockedWords))
     }
 
     fun formatBlockedWords(blockedWords: String): String {

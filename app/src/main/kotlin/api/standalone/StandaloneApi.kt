@@ -1,6 +1,5 @@
 package api.standalone
 
-import android.database.sqlite.SQLiteDatabase
 import android.util.Base64
 import android.util.Log
 import api.Api
@@ -13,18 +12,16 @@ import co.appreactor.feedk.RssFeed
 import co.appreactor.feedk.RssItem
 import co.appreactor.feedk.RssItemGuid
 import co.appreactor.feedk.feed
+import db.Db
 import db.Entry
 import db.EntryWithoutContent
 import db.Feed
 import db.Link
-import feeds.FeedQueries
 import http.await
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
@@ -45,7 +42,7 @@ import java.util.Locale
 typealias ParsedFeed = co.appreactor.feedk.Feed
 
 class StandaloneNewsApi(
-    private val db: SQLiteDatabase,
+    private val db: Db,
 ) : Api {
 
     private val httpClient = OkHttpClient()
@@ -126,7 +123,7 @@ class StandaloneNewsApi(
     }
 
     override suspend fun getFeeds(): Result<List<Feed>> {
-        return runCatching { FeedQueries(db).selectAll() }
+        return runCatching { db.feedQueries.selectAll() }
     }
 
     override suspend fun updateFeedTitle(feedId: String, newTitle: String): Result<Unit> {
@@ -150,26 +147,17 @@ class StandaloneNewsApi(
             val entries = Collections.synchronizedList(mutableListOf<Entry>())
 
             withContext(Dispatchers.IO) {
-                val feeds = produce {
-                    db.feedQueries.selectAll().asFlow().mapToList().first().forEach { send(it) }
-                }
+                val feeds = db.feedQueries.selectAll()
 
-                suspend fun processFeedsAsync(feeds: ReceiveChannel<Feed>): Deferred<Unit> {
-                    return async {
-                        for (feed in feeds) {
-                            runCatching {
-                                entries += fetchEntries(feed)
-                            }.onFailure {
-                                Log.e(TAG, "Failed to fetch entries for feed: $feed", it)
-                            }
-                        }
+                feeds.forEach { feed ->
+                    runCatching {
+                        entries += fetchEntries(feed)
+                    }.onFailure {
+                        Log.e(TAG, "Failed to fetch entries for feed: $feed", it)
                     }
                 }
 
-                buildList { repeat(15) { add(processFeedsAsync(feeds)) } }.awaitAll()
-
-                val prevCachedEntryIds =
-                    db.entryQueries.selectByIds(entries.map { it.id }).executeAsList()
+                val prevCachedEntryIds = db.entryQueries.selectByIds(entries.map { it.id }).map { it.id }
                 entries.removeAll { prevCachedEntryIds.contains(it.id) }
             }
 
@@ -178,7 +166,9 @@ class StandaloneNewsApi(
     }
 
     private suspend fun fetchEntries(feed: Feed): List<Entry> {
-        val url = feed.links.first { it.rel == AtomLinkRel.Self }.href
+        val url = feed.links.firstOrNull { it.rel == AtomLinkRel.Self }?.href
+            ?: feed.links.firstOrNull()?.href
+            ?: throw Exception("No links found for feed")
         val request = Request.Builder().url(url).build()
 
         val response = runCatching {
@@ -265,9 +255,9 @@ class StandaloneNewsApi(
                     id = selfLink.href,
                     links = links,
                     title = title,
-                    ext_open_entries_in_browser = false,
-                    ext_blocked_words = "",
-                    ext_show_preview_images = null,
+                    extOpenEntriesInBrowser = false,
+                    extBlockedWords = "",
+                    extShowPreviewImages = null,
                 )
 
                 feed
@@ -304,9 +294,9 @@ class StandaloneNewsApi(
                     id = channel.link,
                     links = listOf(selfLink, alternateLink),
                     title = channel.title,
-                    ext_open_entries_in_browser = false,
-                    ext_blocked_words = "",
-                    ext_show_preview_images = null,
+                    extOpenEntriesInBrowser = false,
+                    extBlockedWords = "",
+                    extShowPreviewImages = null,
                 )
             }
         }
@@ -334,27 +324,27 @@ class StandaloneNewsApi(
         val links = links.map { it.toLink(feedId = null, entryId = id) }
 
         return Entry(
-            content_type = content.type.toString(),
-            content_src = content.src,
-            content_text = content.text,
+            contentType = content.type.toString(),
+            contentSrc = content.src,
+            contentText = content.text,
             links = links,
             summary = summary?.text ?: "",
             id = id,
-            feed_id = feedId,
+            feedId = feedId,
             title = title,
             published = OffsetDateTime.parse(published),
             updated = OffsetDateTime.parse(updated),
-            author_name = authorName,
-            ext_read = false,
-            ext_read_synced = true,
-            ext_bookmarked = false,
-            ext_bookmarked_synced = true,
-            ext_nc_guid_hash = "",
-            ext_comments_url = "",
-            ext_og_image_checked = false,
-            ext_og_image_url = "",
-            ext_og_image_width = 0,
-            ext_og_image_height = 0,
+            authorName = authorName,
+            extRead = false,
+            extReadSynced = true,
+            extBookmarked = false,
+            extBookmarkedSynced = true,
+            extNextcloudGuidHash = "",
+            extCommentsUrl = "",
+            extOpenGraphImageChecked = false,
+            extOpenGraphImageUrl = "",
+            extOpenGraphImageWidth = 0,
+            extOpenGraphImageHeight = 0,
         )
     }
 
@@ -407,27 +397,27 @@ class StandaloneNewsApi(
         val maxSummaryLength = 180
 
         return Entry(
-            content_type = "html",
-            content_src = "",
-            content_text = description ?: "",
+            contentType = "html",
+            contentSrc = "",
+            contentText = description ?: "",
             links = links,
             summary = if ((description?.length ?: 0) < maxSummaryLength) description else "",
             id = id,
-            feed_id = feedId,
+            feedId = feedId,
             title = title ?: "",
             published = OffsetDateTime.parse((pubDate ?: Date()).toIsoString()),
             updated = OffsetDateTime.parse((pubDate ?: Date()).toIsoString()),
-            author_name = author ?: "",
-            ext_read = false,
-            ext_read_synced = true,
-            ext_bookmarked = false,
-            ext_bookmarked_synced = true,
-            ext_nc_guid_hash = "",
-            ext_comments_url = "",
-            ext_og_image_checked = false,
-            ext_og_image_url = "",
-            ext_og_image_width = 0,
-            ext_og_image_height = 0,
+            authorName = author ?: "",
+            extRead = false,
+            extReadSynced = true,
+            extBookmarked = false,
+            extBookmarkedSynced = true,
+            extNextcloudGuidHash = "",
+            extCommentsUrl = "",
+            extOpenGraphImageChecked = false,
+            extOpenGraphImageUrl = "",
+            extOpenGraphImageWidth = 0,
+            extOpenGraphImageHeight = 0,
         )
     }
 

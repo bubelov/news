@@ -16,8 +16,8 @@ class AuthModel(
         confRepo.update {
             it.copy(
                 backend = ConfRepo.BACKEND_STANDALONE,
-                sync_on_startup = false,
-                background_sync_interval_millis = TimeUnit.HOURS.toMillis(12),
+                syncOnStartup = false,
+                backgroundSyncIntervalMillis = TimeUnit.HOURS.toMillis(12),
             )
         }
 

@@ -7,9 +7,6 @@ import android.provider.MediaStore
 import android.util.Log
 import androidx.core.net.toUri
 import co.appreactor.feedk.AtomLinkRel
-import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToList
-import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import db.Db
 import db.Entry
 import db.Link
@@ -44,9 +41,8 @@ class EnclosuresRepo(
             throw Exception("Invalid link type: ${enclosure.type}")
         }
 
-        val entry =
-            db.entryQueries.selectById(enclosure.entryId!!).asFlow().mapToOneOrNull().first()
-                ?: throw Exception("Entry ${enclosure.entryId} does not exist")
+        val entry = db.entryQueries.selectById(enclosure.entryId!!)
+            ?: throw Exception("Entry ${enclosure.entryId} does not exist")
 
         updateLink(
             link = enclosure.copy(extEnclosureDownloadProgress = 0.0),
@@ -176,7 +172,7 @@ class EnclosuresRepo(
 
     suspend fun deletePartialDownloads() {
         Log.d(TAG, "Deleting partial downloads")
-        val links = db.entryQueries.selectLinks().asFlow().mapToList().first().flatten()
+        val links = db.entryQueries.selectAllLinks().flatten()
         Log.d(TAG, "Got ${links.size} links")
         val enclosures = links.filter { it.rel is AtomLinkRel.Enclosure }
         Log.d(TAG, "Of them, ${enclosures.size} are enclosures")
@@ -186,7 +182,7 @@ class EnclosuresRepo(
         }
 
         Log.d(TAG, "Number of partial downloads: ${partialDownloads.size}")
-        partialDownloads.forEach { deleteFromCache(it) }
+        partialDownloads.forEach { enclosure -> deleteFromCache(enclosure) }
     }
 
     suspend fun deleteFromCache(enclosure: Link) {
@@ -195,7 +191,6 @@ class EnclosuresRepo(
             return
         }
 
-        // TODO
         val rowsDeleted = withContext(Dispatchers.IO) {
             runCatching {
                 context.contentResolver.delete(
@@ -207,7 +202,7 @@ class EnclosuresRepo(
         }
 
         if (rowsDeleted != 1) {
-            TODO()
+            throw Exception("Failed to delete cache entry")
         }
 
         updateLink(
@@ -220,22 +215,17 @@ class EnclosuresRepo(
 
     private suspend fun updateLink(link: Link) {
         if (link.feedId != null) {
-            TODO()
+            throw Exception("Cannot update link with feedId")
         }
 
         if (link.entryId != null) {
-            val entry =
-                db.entryQueries.selectById(link.entryId).asFlow().mapToOneOrNull().first() ?: TODO()
+            val entry = db.entryQueries.selectById(link.entryId) ?: throw Exception("Entry not found")
             updateLink(link, entry)
         }
     }
 
     private suspend fun updateLink(link: Link, entry: Entry): Link {
         withContext(Dispatchers.IO) {
-//            updateLinks:
-//            UPDATE Entry
-//            SET links = ?
-//            WHERE id = ?;
             db.entryQueries.updateLinks(
                 id = entry.id,
                 links = entry.links.map {

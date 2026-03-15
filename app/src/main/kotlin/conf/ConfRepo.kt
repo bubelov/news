@@ -2,9 +2,8 @@ package conf
 
 import android.content.ContentValues
 import android.database.Cursor
-import android.database.sqlite.SQLiteDatabase
-import androidx.core.database.sqlite.transaction
 import db.Conf
+import db.Db
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,8 +18,10 @@ import org.koin.core.annotation.Single
 
 @Single
 class ConfRepo(
-    private val db: SQLiteDatabase,
+    private val db: Db,
 ) {
+
+    private val database = db.getDatabase()
 
     private val _conf: MutableStateFlow<Conf> = MutableStateFlow(
         runBlocking { select() ?: DEFAULT_CONF })
@@ -69,11 +70,11 @@ class ConfRepo(
             put("show_preview_text", conf.showPreviewText)
             put("synced_on_startup", conf.syncedOnStartup)
         }
-        db.insert("conf", null, values)
+        database.insert("conf", null, values)
     }
 
     fun select(): Conf? {
-        val cursor = db.query(
+        val cursor = database.query(
             "conf", arrayOf(
                 "backend",
                 "miniflux_server_url",
@@ -134,7 +135,7 @@ class ConfRepo(
     }
 
     fun delete() {
-        db.delete("conf", "", emptyArray())
+        database.delete("conf", "", emptyArray())
     }
 
     companion object {

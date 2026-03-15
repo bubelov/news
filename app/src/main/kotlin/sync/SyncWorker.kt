@@ -29,7 +29,7 @@ class SyncWorker(context: Context, workerParams: WorkerParameters) : Worker(cont
         val sync = app.get<Sync>()
         val entriesRepository = app.get<EntriesRepo>()
 
-        if (!conf.initial_sync_completed) {
+        if (!conf.initialSyncCompleted) {
             return Result.retry()
         }
 

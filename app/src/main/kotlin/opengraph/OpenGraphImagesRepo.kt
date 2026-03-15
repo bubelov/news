@@ -5,16 +5,11 @@ import android.graphics.Color
 import android.util.Log
 import co.appreactor.feedk.AtomLinkRel
 import com.squareup.picasso.Picasso
-import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToList
 import conf.ConfRepo
 import db.Db
-import db.EntryWithoutContent
 import http.await
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -41,7 +36,7 @@ class OpenGraphImagesRepo(
     suspend fun fetchEntryImages() {
         withContext(Dispatchers.IO) {
             runCatching {
-                consumePendingEntries(producePendingEntries())
+                fetchPendingEntries()
             }.onFailure {
                 delay(1000)
                 fetchEntryImages()
@@ -49,56 +44,24 @@ class OpenGraphImagesRepo(
         }
     }
 
-    private fun CoroutineScope.producePendingEntries(): ReceiveChannel<EntryWithoutContent> = produce {
-        val sentEntryIds = mutableSetOf<String>()
+    private suspend fun fetchPendingEntries() {
+        val showPreviewImages = confRepo.conf.value.showPreviewImages
+        if (!showPreviewImages) return
 
-        confRepo.conf
-            .map { it.show_preview_images }
-            .distinctUntilChanged()
-            .collectLatest { showPreviewImages ->
-                if (showPreviewImages) {
-//                    selectByOgImageChecked:
-//                    SELECT *
-//                    FROM EntryWithoutContent
-//                    WHERE ext_og_image_checked = :ogImageChecked
-//                    ORDER BY published DESC
-//                    LIMIT :limit;
-                    db.entryQueries.selectByOgImageChecked(false, BATCH_SIZE * 2L)
-                        .asFlow()
-                        .mapToList()
-                        .collectLatest { highPrioEntries ->
-                            highPrioEntries.forEach {
-                                if (!sentEntryIds.contains(it.id)) {
-                                    send(it)
-                                    sentEntryIds += it.id
-                                }
-                            }
-                        }
-                }
-            }
-    }
+        val entries = db.entryQueries.selectByOgImageChecked(false, BATCH_SIZE * 2L)
 
-    private fun CoroutineScope.consumePendingEntries(entries: ReceiveChannel<EntryWithoutContent>) {
-        repeat(BATCH_SIZE) {
-            launch {
-                for (entry in entries) {
-                    runCatching { fetchImage(entry) }
-                        .onFailure { Log.e("opengraph", "Failed to fetch image", it) }
-                }
-            }
+        for (entry in entries) {
+            runCatching { fetchImage(entry) }
+                .onFailure { Log.e("opengraph", "Failed to fetch image", it) }
         }
     }
 
-    private suspend fun fetchImage(entry: EntryWithoutContent) {
+    private suspend fun fetchImage(entry: db.EntryWithoutContent) {
         withContext(Dispatchers.IO) {
             val link = entry.links.firstOrNull { it.rel is AtomLinkRel.Alternate && it.type == "text/html" }
                 ?: entry.links.firstOrNull { it.rel is AtomLinkRel.Alternate }
 
             if (link == null) {
-//                updateOgImageChecked:
-//                UPDATE Entry
-//                SET ext_og_image_checked = ?
-//                WHERE id = ?;
                 db.entryQueries.updateOgImageChecked(true, entry.id)
                 return@withContext
             }
@@ -147,14 +110,10 @@ class OpenGraphImagesRepo(
                 return@withContext
             }
 
-//            updateOgImage:
-//            UPDATE Entry
-//            SET ext_og_image_url = ?, ext_og_image_width = ?, ext_og_image_height = ?, ext_og_image_checked = 1
-//            WHERE id = ?;
             db.entryQueries.updateOgImage(
-                ext_og_image_url = imageUrl,
-                ext_og_image_width = bitmap.width.toLong(),
-                ext_og_image_height = bitmap.height.toLong(),
+                extOgImageUrl = imageUrl,
+                extOgImageWidth = bitmap.width.toLong(),
+                extOgImageHeight = bitmap.height.toLong(),
                 id = entry.id,
             )
         }

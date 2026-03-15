@@ -67,9 +67,9 @@ class FeedSettingsFragment : Fragment() {
                 progress.isVisible = false
                 settings.isVisible = true
 
-                syncOpenEntriesInBrowser(state.feed.ext_open_entries_in_browser ?: false)
-                syncBlockedWords(state.feed.ext_blocked_words)
-                syncShowPreviewImages(state.feed.ext_show_preview_images)
+                syncOpenEntriesInBrowser(state.feed.extOpenEntriesInBrowser ?: false)
+                syncBlockedWords(state.feed.extBlockedWords)
+                syncShowPreviewImages(state.feed.extShowPreviewImages)
             }
         }
     }

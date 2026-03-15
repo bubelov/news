@@ -20,7 +20,7 @@ class BackgroundSyncScheduler(
         val workManager = WorkManager.getInstance(context)
         val conf = confRepo.conf.value
 
-        if (!conf.sync_in_background) {
+        if (!conf.syncInBackground) {
             workManager.cancelUniqueWork(WORK_NAME)
             return
         }
@@ -30,11 +30,11 @@ class BackgroundSyncScheduler(
             .build()
 
         val periodicSyncRequest = PeriodicWorkRequestBuilder<SyncWorker>(
-            repeatInterval = conf.background_sync_interval_millis,
+            repeatInterval = conf.backgroundSyncIntervalMillis,
             repeatIntervalTimeUnit = TimeUnit.MILLISECONDS,
         )
             .setConstraints(constraints)
-            .setInitialDelay(conf.background_sync_interval_millis, TimeUnit.MILLISECONDS)
+            .setInitialDelay(conf.backgroundSyncIntervalMillis, TimeUnit.MILLISECONDS)
             .build()
 
         workManager.enqueueUniquePeriodicWork(

@@ -51,8 +51,8 @@ class EntriesModel(
     fun hasBackend() = confRepo.conf.value.backend.isNotBlank()
 
     private suspend fun updateState(filter: EntriesFilter, conf: Conf, syncState: Sync.State) {
-        if (!conf.initial_sync_completed || (conf.sync_on_startup && !conf.synced_on_startup)) {
-            confRepo.update { it.copy(synced_on_startup = true) }
+        if (!conf.initialSyncCompleted || (conf.syncOnStartup && !conf.syncedOnStartup)) {
+            confRepo.update { it.copy(syncedOnStartup = true) }
             viewModelScope.launch { newsApiSync.run() }
         }
 
@@ -71,11 +71,11 @@ class EntriesModel(
                 val rows: List<EntriesAdapterRow> = if (filter is EntriesFilter.BelongToFeed) {
                     entriesRepo.selectByFeedIdAndReadAndBookmarked(
                         feedId = filter.feedId,
-                        read = if (conf.show_read_entries) listOf(true, false) else listOf(false),
+                        read = if (conf.showReadEntries) listOf(true, false) else listOf(false),
                         bookmarked = false,
                     ).first()
                 } else {
-                    val includeRead = (conf.show_read_entries || filter is EntriesFilter.Bookmarked)
+                    val includeRead = (conf.showReadEntries || filter is EntriesFilter.Bookmarked)
                     val includeBookmarked = filter is EntriesFilter.Bookmarked
 
                     entriesRepo.selectByReadAndBookmarked(
@@ -84,7 +84,7 @@ class EntriesModel(
                     ).first()
                 }
 
-                val sortedRows = when (conf.sort_order) {
+                val sortedRows = when (conf.sortOrder) {
                     SORT_ORDER_ASCENDING -> rows.sortedBy { it.published }
                     SORT_ORDER_DESCENDING -> rows.sortedByDescending { it.published }
                     else -> throw Exception()
@@ -124,13 +124,13 @@ class EntriesModel(
         scrollToTopNextTime = true
 
         confRepo.update {
-            val newSortOrder = when (it.sort_order) {
+            val newSortOrder = when (it.sortOrder) {
                 SORT_ORDER_ASCENDING -> SORT_ORDER_DESCENDING
                 SORT_ORDER_DESCENDING -> SORT_ORDER_ASCENDING
                 else -> throw Exception()
             }
 
-            it.copy(sort_order = newSortOrder)
+            it.copy(sortOrder = newSortOrder)
         }
     }
 
@@ -212,17 +212,17 @@ class EntriesModel(
     private fun EntriesAdapterRow.toItem(conf: Conf): EntriesAdapter.Item {
         return EntriesAdapter.Item(
             id = id,
-            showImage = ext_show_preview_images ?: conf.show_preview_images,
-            cropImage = conf.crop_preview_images,
-            imageUrl = ext_og_image_url,
-            imageWidth = ext_og_image_width.toInt(),
-            imageHeight = ext_og_image_height.toInt(),
+            showImage = extShowPreviewImages || conf.showPreviewImages,
+            cropImage = conf.cropPreviewImages,
+            imageUrl = extOpenGraphImageUrl,
+            imageWidth = extOpenGraphImageWidth,
+            imageHeight = extOpenGraphImageHeight,
             title = title,
             subtitle = "$feedTitle · ${DATE_TIME_FORMAT.format(published)}",
             summary = summary ?: "",
-            read = ext_read,
-            openInBrowser = ext_open_entries_in_browser ?: false,
-            useBuiltInBrowser = conf.use_built_in_browser,
+            read = extRead,
+            openInBrowser = extOpenEntriesInBrowser,
+            useBuiltInBrowser = conf.useBuiltInBrowser,
             links = links,
         )
     }
