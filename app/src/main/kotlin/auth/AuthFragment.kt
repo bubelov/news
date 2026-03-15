@@ -6,10 +6,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentAuthBinding
 import entries.EntriesFilter
+import navigation.NavDirections
+import navigation.findNavController
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class AuthFragment : Fragment() {
@@ -45,19 +46,21 @@ class AuthFragment : Fragment() {
 
     private fun FragmentAuthBinding.initButtons() {
         useStandaloneBackend.setOnClickListener {
-            // This animation hides layout shift caused by bottom nav visibility change
             binding.root.animate().alpha(0f).withEndAction {
                 model.setStandaloneBackend()
-                findNavController().navigate(AuthFragmentDirections.actionAuthFragmentToNewsFragment(EntriesFilter.NotBookmarked))
+                findNavController().navigate(
+                    R.id.newsFragment,
+                    NavDirections.AuthFragment.actionAuthFragmentToNewsFragment(EntriesFilter.NotBookmarked)
+                )
             }
         }
 
         useMinifluxBackend.setOnClickListener {
-            findNavController().navigate(R.id.action_authFragment_to_minifluxAuthFragment)
+            findNavController().navigate(R.id.minifluxAuthFragment)
         }
 
         useNextcloudBackend.setOnClickListener {
-            findNavController().navigate(R.id.action_authFragment_to_nextcloudAuthFragment)
+            findNavController().navigate(R.id.nextcloudAuthFragment)
         }
     }
 }

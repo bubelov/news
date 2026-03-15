@@ -21,8 +21,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.feedk.AtomLinkRel
@@ -35,6 +33,10 @@ import enclosures.EnclosuresAdapter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import navigation.EntryFragmentArgs
+import navigation.NavDirections
+import navigation.findNavController
+import navigation.navArgs
 import navigation.openUrl
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.time.format.DateTimeFormatter
@@ -202,11 +204,8 @@ class EntryFragment : Fragment() {
             }
 
             R.id.feedSettings -> {
-                findNavController().navigate(
-                    EntryFragmentDirections.actionEntryFragmentToFeedSettingsFragment(
-                        feedId = entry.feedId,
-                    )
-                )
+                val args = NavDirections.EntryFragment.actionEntryFragmentToFeedSettingsFragment(feedId = entry.feedId)
+                findNavController().navigate(R.id.feedSettingsFragment, args)
 
                 return true
             }

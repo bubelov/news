@@ -12,7 +12,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -24,6 +23,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import navigation.findNavController
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.concurrent.TimeUnit
 
@@ -185,7 +185,7 @@ class SettingsFragment : Fragment() {
         }
 
         manageEnclosures.setOnClickListener {
-            findNavController().navigate(R.id.action_settingsFragment_to_enclosuresFragment)
+            findNavController().navigate(R.id.enclosuresFragment)
         }
 
         exportDatabase.setOnClickListener { exportDbLauncher.launch("news.db") }

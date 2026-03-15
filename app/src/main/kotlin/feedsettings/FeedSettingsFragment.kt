@@ -9,8 +9,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentFeedSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -20,6 +18,9 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import navigation.FeedSettingsFragmentArgs
+import navigation.findNavController
+import navigation.navArgs
 import navigation.showKeyboard
 import org.koin.androidx.viewmodel.ext.android.viewModel
 

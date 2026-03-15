@@ -9,10 +9,11 @@ import android.view.inputmethod.EditorInfo
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentNextcloudAuthBinding
 import dialog.showErrorDialog
+import navigation.NavDirections
+import navigation.findNavController
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -80,7 +81,10 @@ class NextcloudAuthFragment : Fragment() {
                     trustSelfSignedCerts = trustSelfSignedCerts,
                 )
 
-                findNavController().navigate(R.id.action_nextcloudAuthFragment_to_newsFragment)
+                findNavController().navigate(
+                    R.id.newsFragment,
+                    NavDirections.NextcloudAuthFragment.actionNextcloudAuthFragmentToNewsFragment()
+                )
             }.onFailure {
                 binding.progress.isVisible = false
                 showErrorDialog(it.message ?: getString(R.string.direct_login_failed))

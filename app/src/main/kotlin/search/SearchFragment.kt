@@ -11,7 +11,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import anim.animateVisibilityChanges
@@ -20,6 +19,8 @@ import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentSearchBinding
 import entries.EntriesAdapter
 import kotlinx.coroutines.launch
+import navigation.NavDirections
+import navigation.findNavController
 import navigation.hideKeyboard
 import navigation.openUrl
 import navigation.showKeyboard
@@ -120,12 +121,12 @@ class SearchFragment : Fragment() {
                     useBuiltInBrowser = item.useBuiltInBrowser,
                 )
             } else {
-                val action = SearchFragmentDirections.actionSearchFragmentToEntryFragment(item.id)
-                findNavController().navigate(action)
+                val args = NavDirections.SearchFragment.actionSearchFragmentToEntryFragment(item.id)
+                findNavController().navigate(R.id.entryFragment, args)
             }
         } else {
-            val action = SearchFragmentDirections.actionSearchFragmentToEntryFragment(item.id)
-            findNavController().navigate(action)
+            val args = NavDirections.SearchFragment.actionSearchFragmentToEntryFragment(item.id)
+            findNavController().navigate(R.id.entryFragment, args)
         }
     }
 

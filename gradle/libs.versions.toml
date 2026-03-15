@@ -17,7 +17,6 @@ fragment = "1.8.9"
 
 
 # AndroidX
-androidx-navigation = "2.7.7"
 androidx-work = "2.9.0"
 androidx-browser = "1.8.0"
 androidx-lifecycle = "2.7.0"
@@ -59,7 +58,6 @@ androidx-test-monitor = "1.6.1"
 android-gradle-plugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
-navigation-safe-args = { group = "androidx.navigation", name = "navigation-safe-args-gradle-plugin", version.ref = "androidx-navigation" }
 
 # Coroutines
 kotlinx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
@@ -67,8 +65,6 @@ androidx-fragment = { group = "androidx.fragment", name = "fragment-ktx", versio
 
 # AndroidX
 androidx-fragment-testing = { group = "androidx.fragment", name = "fragment-testing", version.ref = "fragment" }
-androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "androidx-navigation" }
-androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "androidx-navigation" }
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "androidx-work" }
 androidx-work-testing = { group = "androidx.work", name = "work-testing", version.ref = "androidx-work" }
 androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "androidx-browser" }
@@ -118,4 +114,3 @@ androidx-test-monitor = { group = "androidx.test", name = "monitor", version.ref
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
-navigation-safeargs = { id = "androidx.navigation.safeargs.kotlin", version.ref = "androidx-navigation" }

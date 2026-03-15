@@ -17,7 +17,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import anim.animateVisibilityChanges
@@ -29,6 +28,10 @@ import com.google.android.material.textfield.TextInputEditText
 import dialog.showErrorDialog
 import entries.EntriesFilter
 import kotlinx.coroutines.launch
+import navigation.FeedsFragmentArgs
+import navigation.NavDirections
+import navigation.findNavController
+import navigation.navArgs
 import navigation.openUrl
 import navigation.showKeyboard
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -195,19 +198,17 @@ class FeedsFragment : Fragment() {
     private fun createFeedsAdapter(): FeedsAdapter {
         return FeedsAdapter(callback = object : FeedsAdapter.Callback {
             override fun onClick(item: FeedsAdapter.Item) {
-                findNavController().navigate(
-                    FeedsFragmentDirections.actionFeedsFragmentToFeedEntriesFragment(
-                        filter = EntriesFilter.BelongToFeed(feedId = item.id),
-                    )
+                val args = NavDirections.FeedsFragment.actionFeedsFragmentToFeedEntriesFragment(
+                    filter = EntriesFilter.BelongToFeed(feedId = item.id),
                 )
+                findNavController().navigate(R.id.feedEntriesFragment, args)
             }
 
             override fun onSettingsClick(item: FeedsAdapter.Item) {
-                findNavController().navigate(
-                    FeedsFragmentDirections.actionFeedsFragmentToFeedSettingsFragment(
-                        feedId = item.id,
-                    )
+                val args = NavDirections.FeedsFragment.actionFeedsFragmentToFeedSettingsFragment(
+                    url = item.id,
                 )
+                findNavController().navigate(R.id.feedSettingsFragment, args)
             }
 
             override fun onOpenSelfLinkClick(item: FeedsAdapter.Item) {

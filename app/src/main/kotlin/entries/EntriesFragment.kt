@@ -14,8 +14,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.NavOptions
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -31,12 +29,15 @@ import conf.ConfRepo
 import dialog.showErrorDialog
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import navigation.NavController
+import navigation.NavDirections
+import navigation.findNavController
 import navigation.openUrl
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class EntriesFragment : Fragment(), OnItemReselectedListener {
 
-    private val args by lazy { EntriesFragmentArgs.fromBundle(requireArguments()) }
+    private val args by lazy { navigation.EntriesFragmentArgs.fromBundle(requireArguments()) }
 
     private val model: EntriesModel by viewModel()
 
@@ -71,10 +72,13 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
             intent.removeExtra(Intent.EXTRA_TEXT)
 
             if (sharedFeedUrl.isNotBlank()) {
+                val navOptions = navigation.NavOptions.Builder()
+                    .setPopUpTo(R.id.authFragment, true)
+                    .build()
                 findNavController().navigate(
-                    resId = R.id.feedsFragment,
-                    args = bundleOf(Pair("url", sharedFeedUrl)),
-                    navOptions = NavOptions.Builder().setPopUpTo(R.id.nav_graph, true).build(),
+                    R.id.feedsFragment,
+                    bundleOf(Pair("url", sharedFeedUrl)),
+                    navOptions
                 )
             }
 
@@ -85,8 +89,10 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
             _binding = FragmentEntriesBinding.inflate(inflater, container, false)
             binding.root
         } else {
-            val builder = NavOptions.Builder().setPopUpTo(R.id.nav_graph, true)
-            findNavController().navigate(R.id.authFragment, null, builder.build())
+            val navOptions = navigation.NavOptions.Builder()
+                .setPopUpTo(R.id.authFragment, true)
+                .build()
+            findNavController().navigate(R.id.authFragment, null, navOptions)
             null
         }
     }
@@ -240,7 +246,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
 
     private fun updateSearchButton() {
         binding.toolbar.menu!!.findItem(R.id.search).setOnMenuItemClickListener {
-            findNavController().navigate(R.id.action_entriesFragment_to_searchFragment)
+            findNavController().navigate(R.id.searchFragment)
             true
         }
     }
@@ -308,7 +314,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
 
     private fun updateSettingsButton() {
         binding.toolbar.menu!!.findItem(R.id.settings).setOnMenuItemClickListener {
-            findNavController().navigate(EntriesFragmentDirections.actionEntriesFragmentToSettingsFragment())
+            findNavController().navigate(R.id.settingsFragment)
             true
         }
     }
@@ -371,8 +377,8 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
                 useBuiltInBrowser = item.useBuiltInBrowser,
             )
         } else {
-            val action = EntriesFragmentDirections.actionEntriesFragmentToEntryFragment(item.id)
-            findNavController().navigate(action)
+            val args = NavDirections.EntriesFragment.actionEntriesFragmentToEntryFragment(item.id)
+            findNavController().navigate(R.id.entryFragment, args)
         }
     }
 

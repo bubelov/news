@@ -5,7 +5,6 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.parcelize")
-    id("androidx.navigation.safeargs.kotlin")
     id("com.google.devtools.ksp")
 }
 
@@ -90,8 +89,6 @@ dependencies {
     // AndroidX
     implementation(libs.androidx.fragment)
     debugImplementation(libs.androidx.fragment.testing)
-    implementation(libs.androidx.navigation.fragment.ktx)
-    implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.work.runtime.ktx)
     androidTestImplementation(libs.androidx.work.testing)
     implementation(libs.androidx.browser)

@@ -11,7 +11,6 @@ import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
@@ -21,6 +20,7 @@ import dialog.showErrorDialog
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import navigation.findNavController
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class EnclosuresFragment : Fragment() {
