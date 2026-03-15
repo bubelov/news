@@ -27,8 +27,9 @@ constraintlayout = "2.2.1"
 # List widget
 # https://developer.android.com/jetpack/androidx/releases/recyclerview
 recyclerview = "1.4.0"
-
-androidx-swiperefreshlayout = "1.1.0"
+# Swipe to refresh on news screen
+# https://developer.android.com/jetpack/androidx/releases/swiperefreshlayout
+swiperefreshlayout = "1.2.0"
 
 # Networking
 retrofit = "2.11.0"
@@ -78,7 +79,7 @@ androidx-lifecycle-runtime = { group = "androidx.lifecycle", name = "lifecycle-r
 androidx-lifecycle-viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
-androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "androidx-swiperefreshlayout" }
+androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swiperefreshlayout" }
 
 # Networking
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
