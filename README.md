@@ -1,5 +1,5 @@
-<h2 align="center"><b>News</b></h2>
-<h4 align="center">Feed Reader 📰 and Podcast Player 🎧 for Android 🤖</h4>
+<h2 align="center"><b>Vesti</b></h2>
+<h4 align="center">Feed reader 📰 and podcast player 🎧 for Android 🤖</h4>
 
 <p align="center">
   <a href="https://f-droid.org/packages/co.appreactor.news/">
