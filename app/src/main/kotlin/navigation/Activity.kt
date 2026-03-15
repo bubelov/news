@@ -59,7 +59,15 @@ class Activity : AppCompatActivity() {
             currentDestinationId = destinationId
 
             val showBottomNav = when (destinationId) {
-                R.id.authFragment, R.id.minifluxAuthFragment, R.id.nextcloudAuthFragment -> false
+                R.id.authFragment,
+                R.id.minifluxAuthFragment,
+                R.id.nextcloudAuthFragment,
+                R.id.settingsFragment,
+                R.id.enclosuresFragment,
+                R.id.entryFragment,
+                R.id.searchFragment,
+                R.id.feedEntriesFragment,
+                R.id.feedSettingsFragment -> false
                 else -> true
             }
 
@@ -121,7 +129,15 @@ class Activity : AppCompatActivity() {
 
     private fun updateBottomNavVisibility(destinationId: Int) {
         val showBottomNav = when (destinationId) {
-            R.id.authFragment, R.id.minifluxAuthFragment, R.id.nextcloudAuthFragment -> false
+            R.id.authFragment,
+            R.id.minifluxAuthFragment,
+            R.id.nextcloudAuthFragment,
+            R.id.settingsFragment,
+            R.id.enclosuresFragment,
+            R.id.entryFragment,
+            R.id.searchFragment,
+            R.id.feedEntriesFragment,
+            R.id.feedSettingsFragment -> false
             else -> true
         }
         binding.bottomNav.isVisible = showBottomNav
