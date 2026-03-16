@@ -1,5 +1,6 @@
 package api
 
+import androidx.sqlite.SQLiteConnection
 import api.miniflux.MinifluxApiAdapter
 import api.miniflux.MinifluxApiBuilder
 import api.nextcloud.NextcloudApiAdapter

@@ -2,6 +2,7 @@ package api.standalone
 
 import android.util.Base64
 import android.util.Log
+import androidx.sqlite.SQLiteConnection
 import api.Api
 import co.appreactor.feedk.AtomEntry
 import co.appreactor.feedk.AtomFeed

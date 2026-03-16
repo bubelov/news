@@ -44,6 +44,8 @@ coil = "3.4.0"
 jsoup = "1.22.1"
 # Feed parser
 feedk = "0.2.6"
+# Database
+sqlite = "2.6.2"
 
 # Testing
 junit = "4.13.2"
@@ -53,6 +55,8 @@ androidx-test-espresso = "3.5.1"
 androidx-test-monitor = "1.6.1"
 
 [libraries]
+androidx-sqlite = { module = "androidx.sqlite:sqlite", version.ref = "sqlite" }
+androidx-sqlite-framework = { module = "androidx.sqlite:sqlite-framework", version.ref = "sqlite" }
 # Gradle
 android-gradle-plugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
