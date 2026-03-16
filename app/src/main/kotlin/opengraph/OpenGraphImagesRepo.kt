@@ -3,21 +3,18 @@ package opengraph
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.graphics.drawable.BitmapDrawable
 import android.util.Log
-import coil3.ImageLoader
 import coil3.request.ImageRequest
 import co.appreactor.feedk.AtomLinkRel
+import coil3.imageLoader
+import coil3.request.ErrorResult
+import coil3.request.SuccessResult
+import coil3.toBitmap
 import conf.ConfRepo
 import db.Db
 import http.await
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -31,13 +28,12 @@ class OpenGraphImagesRepo(
     private val db: Db,
 ) {
 
-    private val imageLoader = ImageLoader(context)
-
     private val httpClient = OkHttpClient.Builder()
         .callTimeout(10, TimeUnit.SECONDS)
         .build()
 
     suspend fun fetchEntryImages() {
+        Log.d("opengraph", "fetching entry images")
         withContext(Dispatchers.IO) {
             runCatching {
                 fetchPendingEntries()
@@ -46,13 +42,16 @@ class OpenGraphImagesRepo(
                 fetchEntryImages()
             }
         }
+        Log.d("opengraph", "done fetching entry images")
     }
 
     private suspend fun fetchPendingEntries() {
+        Log.d("opengraph", "fetching pending entries")
         val showPreviewImages = confRepo.conf.value.showPreviewImages
         if (!showPreviewImages) return
 
         val entries = db.entryQueries.selectByOgImageChecked(false, BATCH_SIZE * 2L)
+        Log.d("opengraph", "fetched ${entries.size} pending entries")
 
         for (entry in entries) {
             runCatching { fetchImage(entry) }
@@ -62,8 +61,9 @@ class OpenGraphImagesRepo(
 
     private suspend fun fetchImage(entry: db.EntryWithoutContent) {
         withContext(Dispatchers.IO) {
-            val link = entry.links.firstOrNull { it.rel is AtomLinkRel.Alternate && it.type == "text/html" }
-                ?: entry.links.firstOrNull { it.rel is AtomLinkRel.Alternate }
+            val link =
+                entry.links.firstOrNull { it.rel is AtomLinkRel.Alternate && it.type == "text/html" }
+                    ?: entry.links.firstOrNull { it.rel is AtomLinkRel.Alternate }
 
             if (link == null) {
                 db.entryQueries.updateOgImageChecked(true, entry.id)
@@ -102,22 +102,27 @@ class OpenGraphImagesRepo(
                 return@withContext
             }
 
-            val bitmap = runCatching {
-                val request = ImageRequest.Builder(context)
-                    .data(imageUrl)
-                    .size(MAX_WIDTH_PX, 0)
-                    .build()
-                (imageLoader.execute(request).image as? BitmapDrawable)?.bitmap
-                    ?: throw IllegalStateException("Failed to load bitmap")
-            }.getOrElse {
-                db.entryQueries.updateOgImageChecked(true, entry.id)
-                return@withContext
+            val imageRequest = ImageRequest.Builder(context)
+                .data(imageUrl)
+                .build()
+
+            val bitmap = when (val imageResult = context.imageLoader.execute(imageRequest)) {
+                is SuccessResult -> {
+                    Log.d("opengraph", "bitmap load success")
+                    imageResult.image.toBitmap()
+                }
+
+                is ErrorResult -> {
+                    Log.d("opengraph", "bitmap load error")
+                    db.entryQueries.updateOgImageChecked(true, entry.id)
+                    return@withContext
+                }
             }
 
-            if (bitmap.hasTransparentAngles() || bitmap.looksLikeSingleColor()) {
-                db.entryQueries.updateOgImageChecked(true, entry.id)
-                return@withContext
-            }
+//            if (bitmap.hasTransparentAngles() || bitmap.looksLikeSingleColor()) {
+//                db.entryQueries.updateOgImageChecked(true, entry.id)
+//                return@withContext
+//            }
 
             db.entryQueries.updateOgImage(
                 extOgImageUrl = imageUrl,
