@@ -102,7 +102,8 @@ dependencies {
 
     // UI
     implementation(libs.material)
-    implementation(libs.picasso)
+    implementation(libs.coil)
+    implementation(libs.coil.network)
 
     // Parsing
     implementation(libs.jsoup)

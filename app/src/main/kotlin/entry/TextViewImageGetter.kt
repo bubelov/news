@@ -4,7 +4,8 @@ import android.graphics.drawable.Drawable
 import android.text.Html
 import android.widget.TextView
 import androidx.lifecycle.LifecycleCoroutineScope
-import com.squareup.picasso.Picasso
+import coil3.ImageLoader
+import coil3.request.ImageRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl
@@ -41,11 +42,12 @@ class TextViewImageGetter(
         scope.launchWhenResumed {
             runCatching {
                 withContext(Dispatchers.Main) {
-                    Picasso.get()
-                        .load(url.toString())
-                        .resize(width, 0)
-                        .onlyScaleDown()
-                        .into(drawable)
+                    val request = ImageRequest.Builder(textView.context)
+                        .data(url.toString())
+                        .size(width, 0)
+                        .target(drawable)
+                        .build()
+                    ImageLoader(textView.context).enqueue(request)
                 }
             }
         }

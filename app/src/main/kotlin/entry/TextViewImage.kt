@@ -11,8 +11,8 @@ import android.os.Looper
 import android.text.SpannableStringBuilder
 import android.text.style.ImageSpan
 import android.widget.TextView
-import com.squareup.picasso.Picasso
-import com.squareup.picasso.Target
+import coil3.Image
+import coil3.target.Target
 
 class TextViewImage(
     private val textView: TextView,
@@ -34,7 +34,16 @@ class TextViewImage(
     )
     override fun getOpacity() = PixelFormat.OPAQUE
 
-    override fun onBitmapLoaded(unprocessedBitmap: Bitmap, from: Picasso.LoadedFrom) {
+    override fun onStart(result: Image?) {
+
+    }
+
+    override fun onError(result: Image?) {
+
+    }
+
+    override fun onSuccess(result: Image) {
+        val unprocessedBitmap = (result as BitmapDrawable).bitmap
         val scaleToFullWidth = unprocessedBitmap.width >= textView.width / 5
 
         val bitmap = if (scaleToFullWidth) {
@@ -91,13 +100,5 @@ class TextViewImage(
 
             textView.text = text
         }
-    }
-
-    override fun onBitmapFailed(e: Exception?, errorDrawable: Drawable?) {
-
-    }
-
-    override fun onPrepareLoad(placeHolderDrawable: Drawable?) {
-
     }
 }

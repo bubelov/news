@@ -5,8 +5,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
 import co.appreactor.news.databinding.ListItemEntryBinding
-import com.squareup.picasso.Callback
-import com.squareup.picasso.Picasso
+import coil3.load
 
 class EntriesAdapterViewHolder(
     private val binding: ListItemEntryBinding,
@@ -20,7 +19,7 @@ class EntriesAdapterViewHolder(
         val cardHeightMin = root.resources.getDimensionPixelSize(R.dimen.card_height_min)
         val cardHeightMax = root.resources.getDimensionPixelSize(R.dimen.card_height_max)
 
-        Picasso.get().load(null as String?).into(imageView)
+        imageView.load(null)
         imageView.isVisible = false
         imageProgress.isVisible = false
 
@@ -51,21 +50,18 @@ class EntriesAdapterViewHolder(
                 }
             }
 
-            Picasso.get()
-                .load(item.imageUrl)
-                .resize(item.imageWidth, 0)
-                .onlyScaleDown()
-                .into(imageView, object : Callback {
-                    override fun onSuccess() {
+            imageView.load(item.imageUrl) {
+                size(item.imageWidth, 0)
+                listener(
+                    onSuccess = { _, _ ->
                         imageProgress.isVisible = false
-                        imageProgress.isVisible = false
-                    }
-
-                    override fun onError(e: Exception) {
+                    },
+                    onError = { _, _ ->
                         imageView.isVisible = false
                         imageProgress.isVisible = false
                     }
-                })
+                )
+            }
         }
 
         primaryText.text = Html.fromHtml(item.title, Html.FROM_HTML_MODE_COMPACT).toString()

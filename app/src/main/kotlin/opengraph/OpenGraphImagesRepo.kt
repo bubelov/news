@@ -1,10 +1,13 @@
 package opengraph
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
 import android.util.Log
+import coil3.ImageLoader
+import coil3.request.ImageRequest
 import co.appreactor.feedk.AtomLinkRel
-import com.squareup.picasso.Picasso
 import conf.ConfRepo
 import db.Db
 import http.await
@@ -23,9 +26,12 @@ import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
 class OpenGraphImagesRepo(
+    private val context: Context,
     private val confRepo: ConfRepo,
     private val db: Db,
 ) {
+
+    private val imageLoader = ImageLoader(context)
 
     private val httpClient = OkHttpClient.Builder()
         .callTimeout(10, TimeUnit.SECONDS)
@@ -97,7 +103,12 @@ class OpenGraphImagesRepo(
             }
 
             val bitmap = runCatching {
-                Picasso.get().load(imageUrl).resize(MAX_WIDTH_PX, 0).onlyScaleDown().get()
+                val request = ImageRequest.Builder(context)
+                    .data(imageUrl)
+                    .size(MAX_WIDTH_PX, 0)
+                    .build()
+                (imageLoader.execute(request).image as? BitmapDrawable)?.bitmap
+                    ?: throw IllegalStateException("Failed to load bitmap")
             }.getOrElse {
                 db.entryQueries.updateOgImageChecked(true, entry.id)
                 return@withContext

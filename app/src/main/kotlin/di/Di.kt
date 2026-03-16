@@ -68,6 +68,7 @@ object Di {
                 get(Db::class.java)
             )
             OpenGraphImagesRepo::class.java -> OpenGraphImagesRepo(
+                context,
                 get(ConfRepo::class.java),
                 get(Db::class.java)
             )

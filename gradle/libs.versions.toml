@@ -36,8 +36,9 @@ retrofit = "3.0.0"
 # Networking
 # https://github.com/square/okhttp/blob/master/CHANGELOG.md
 okhttp = "5.3.2"
-
-picasso = "2.8"
+# Image manipulation
+# https://github.com/coil-kt/coil/blob/main/CHANGELOG.md
+coil = "3.4.0"
 
 # Parsing
 jsoup = "1.17.2"
@@ -85,7 +86,8 @@ okhttp-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver",
 
 # UI
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
-picasso = { group = "com.squareup.picasso", name = "picasso", version.ref = "picasso" }
+coil = { group = "io.coil-kt.coil3", name = "coil", version.ref = "coil" }
+coil-network = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 
 # Parsing
 jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
