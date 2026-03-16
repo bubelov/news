@@ -27,6 +27,15 @@ class NavController private constructor(private val fragmentManager: FragmentMan
 
     init {
         sharedNavController = this
+        syncBackStackWithFragmentManager()
+    }
+
+    private fun syncBackStackWithFragmentManager() {
+        backStack.clear()
+        for (i in 0 until fragmentManager.backStackEntryCount) {
+            val entry = fragmentManager.getBackStackEntryAt(i)
+            entry.name?.toIntOrNull()?.let { backStack.add(it) }
+        }
     }
 
     companion object {
@@ -41,7 +50,15 @@ class NavController private constructor(private val fragmentManager: FragmentMan
         onDestinationChangedListener = listener
     }
 
+    fun removeOnDestinationChangedListener(listener: (Int, Bundle?) -> Unit) {
+        if (onDestinationChangedListener == listener) {
+            onDestinationChangedListener = null
+        }
+    }
+
     fun navigate(destinationId: Int, args: Bundle? = null, navOptions: NavOptions? = null) {
+        android.util.Log.d("NavController", "navigate: destinationId=$destinationId, backStack before=$backStack")
+        
         val transaction = fragmentManager.beginTransaction()
 
         navOptions?.let { options ->
@@ -81,6 +98,7 @@ class NavController private constructor(private val fragmentManager: FragmentMan
 
         transaction.commit()
 
+        android.util.Log.d("NavController", "navigate: backStack after=$backStack, will notify $destinationId")
         handler.post {
             android.util.Log.d("NavController", "Notifying listener: destination=$destinationId")
             onDestinationChangedListener?.invoke(destinationId, args)
@@ -92,14 +110,18 @@ class NavController private constructor(private val fragmentManager: FragmentMan
     }
 
     fun popBackStack(): Boolean {
+        android.util.Log.d("NavController", "XXXX popBackStack called")
+        android.util.Log.d("NavController", "popBackStack: backStack before=$backStack, fragmentManager backStack count=${fragmentManager.backStackEntryCount}")
         if (fragmentManager.backStackEntryCount > 0) {
             fragmentManager.popBackStack()
             if (backStack.isNotEmpty()) {
                 backStack.removeAt(backStack.size - 1)
             }
 
-            val currentDestinationId = if (backStack.isNotEmpty()) backStack.last() else 0
+            val currentDestinationId = if (backStack.isNotEmpty()) backStack.last() else containerViewId
+            android.util.Log.d("NavController", "popBackStack: backStack after=$backStack, currentDestinationId=$currentDestinationId")
             handler.post {
+                android.util.Log.d("NavController", "popBackStack: notifying listener with destination=$currentDestinationId")
                 onDestinationChangedListener?.invoke(currentDestinationId, null)
             }
             return true

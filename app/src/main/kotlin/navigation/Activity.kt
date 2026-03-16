@@ -3,6 +3,7 @@ package navigation
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -15,11 +16,11 @@ import co.appreactor.news.R
 import co.appreactor.news.databinding.ActivityBinding
 import com.google.android.material.navigation.NavigationBarView.OnItemReselectedListener
 import conf.ConfRepo
+import di.Di
 import entries.EntriesFilter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import opengraph.OpenGraphImagesRepo
-import org.koin.android.ext.android.get
 
 class Activity : AppCompatActivity() {
 
@@ -29,8 +30,30 @@ class Activity : AppCompatActivity() {
 
     private var currentDestinationId: Int = R.id.newsFragment
 
+    private var destinationChangedListener: ((Int, Bundle?) -> Unit)? = null
+
+    private val backPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            android.util.Log.d("Activity", "Gesture back pressed")
+            if (!navController.popBackStack()) {
+                isEnabled = false
+                onBackPressedDispatcher.onBackPressed()
+            }
+        }
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        android.util.Log.d("Activity", "XXXX onBackPressed called")
+        if (!navController.popBackStack()) {
+            @Suppress("DEPRECATION")
+            super.onBackPressed()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        android.util.Log.d("Activity", "XXXX onCreate called - NEW INSTANCE")
         binding = ActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -43,39 +66,28 @@ class Activity : AppCompatActivity() {
             insets
         }
 
-        get<ConfRepo>().update { it.copy(syncedOnStartup = false) }
-        lifecycleScope.launch { get<OpenGraphImagesRepo>().fetchEntryImages() }
+        Di.get(ConfRepo::class.java).update { it.copy(syncedOnStartup = false) }
+        lifecycleScope.launch { Di.get(OpenGraphImagesRepo::class.java).fetchEntryImages() }
 
-        // Initialize shared NavController - this must be done before any fragment calls findNavController()
-        // The findNavController() in fragments will use this shared instance
         NavController.create(supportFragmentManager, R.id.navHost)
+        
+        onBackPressedDispatcher.addCallback(this, backPressedCallback)
     }
 
     override fun onStart() {
         super.onStart()
+        android.util.Log.d("Activity", "XXXX onStart called")
+        
+        destinationChangedListener?.let { navController.removeOnDestinationChangedListener(it) }
 
-        navController.addOnDestinationChangedListener { destinationId, args ->
+        destinationChangedListener = { destinationId, args ->
             android.util.Log.d("Activity", "Destination changed: $destinationId")
             currentDestinationId = destinationId
 
-            val showBottomNav = when (destinationId) {
-                R.id.authFragment,
-                R.id.minifluxAuthFragment,
-                R.id.nextcloudAuthFragment,
-                R.id.settingsFragment,
-                R.id.enclosuresFragment,
-                R.id.entryFragment,
-                R.id.searchFragment,
-                R.id.feedEntriesFragment,
-                R.id.feedSettingsFragment -> false
-                else -> true
-            }
+            // Use the visible fragment to determine bottom nav visibility
+            updateBottomNavForCurrentDestination()
 
-            android.util.Log.d("Activity", "showBottomNav: $showBottomNav, current visibility: ${binding.bottomNav.isVisible}")
-            binding.bottomNav.isVisible = showBottomNav
-            android.util.Log.d("Activity", "After set, visibility: ${binding.bottomNav.isVisible}")
-
-            if (showBottomNav) {
+            if (binding.bottomNav.isVisible) {
                 binding.bottomNav.menu.forEach { item ->
                     if (item.itemId == destinationId) {
                         item.isChecked = true
@@ -89,7 +101,13 @@ class Activity : AppCompatActivity() {
             }
         }
 
-        navigateToStartDestination()
+        navController.addOnDestinationChangedListener(destinationChangedListener!!)
+
+        if (navController.getCurrentDestinationId() == null) {
+            navigateToStartDestination()
+        }
+
+        updateBottomNavForCurrentDestination()
 
         binding.bottomNav.apply {
             setOnItemSelectedListener { item ->
@@ -113,9 +131,23 @@ class Activity : AppCompatActivity() {
         }
     }
 
+    private fun updateBottomNavForCurrentDestination() {
+        // Check the actual visible fragment to determine bottom nav visibility
+        val visibleFragment = supportFragmentManager.findFragmentById(R.id.navHost)
+        
+        val showBottomNav = when (visibleFragment) {
+            is entries.EntriesFragment -> true
+            is feeds.FeedsFragment -> true
+            else -> false
+        }
+        
+        binding.bottomNav.isVisible = showBottomNav
+        android.util.Log.d("Activity", "Bottom nav visibility: $showBottomNav for ${visibleFragment?.javaClass?.simpleName}")
+    }
+
     private fun navigateToStartDestination() {
         lifecycleScope.launch {
-            val confRepo = get<ConfRepo>()
+            val confRepo = Di.get(ConfRepo::class.java)
             val config = confRepo.conf.value
             
             // Only navigate to news if already configured, otherwise go to auth
@@ -151,5 +183,15 @@ class Activity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        android.util.Log.d("Activity", "XXXX onResume called - updating bottom nav")
+        
+        // Post the update to ensure the fragment transaction is complete
+        binding.bottomNav.postDelayed({
+            updateBottomNavForCurrentDestination()
+        }, 100)
     }
 }

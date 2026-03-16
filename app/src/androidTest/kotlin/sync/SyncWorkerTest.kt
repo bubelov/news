@@ -5,8 +5,8 @@ import androidx.work.ListenableWorker
 import androidx.work.testing.TestWorkerBuilder
 import app.App
 import conf.ConfRepo
+import di.Di
 import org.junit.Before
-import org.koin.android.ext.android.get
 import org.junit.Test
 
 class SyncWorkerTest {
@@ -21,7 +21,7 @@ class SyncWorkerTest {
 
     @Test
     fun retryIfInitialSyncIncomplete() {
-        val confRepo = app.get<ConfRepo>()
+        val confRepo = Di.get(ConfRepo::class.java)
         confRepo.update { it.copy(initial_sync_completed = false) }
         val workerBuilder = TestWorkerBuilder.from(app, SyncWorker::class.java)
         val worker = workerBuilder.build()

@@ -20,11 +20,9 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okio.buffer
 import okio.sink
-import org.koin.core.annotation.Single
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
-@Single
 class EnclosuresRepo(
     private val context: Context,
     private val db: Db,

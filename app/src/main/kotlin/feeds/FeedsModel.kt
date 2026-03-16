@@ -29,12 +29,10 @@ import opml.leafOutlines
 import opml.toOpml
 import opml.toPrettyString
 import opml.toXmlDocument
-import org.koin.android.annotation.KoinViewModel
 import java.io.InputStream
 import java.io.OutputStream
 import javax.xml.parsers.DocumentBuilderFactory
 
-@KoinViewModel
 class FeedsModel(
     private val confRepo: ConfRepo,
     private val feedsRepo: FeedsRepo,

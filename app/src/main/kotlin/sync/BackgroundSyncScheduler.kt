@@ -7,10 +7,8 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import conf.ConfRepo
-import org.koin.core.annotation.Single
 import java.util.concurrent.TimeUnit
 
-@Single
 class BackgroundSyncScheduler(
     private val confRepo: ConfRepo,
     private val context: Context,

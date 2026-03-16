@@ -12,10 +12,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
-import org.koin.android.annotation.KoinViewModel
 import sync.BackgroundSyncScheduler
 
-@KoinViewModel
 class SettingsModel(
     private val app: Application,
     private val confRepo: ConfRepo,

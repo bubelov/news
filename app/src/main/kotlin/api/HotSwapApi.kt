@@ -15,10 +15,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import okhttp3.HttpUrl
-import org.koin.core.annotation.Single
 import java.time.OffsetDateTime
 
-@Single(binds = [Api::class])
 class HotSwapApi(
     private val confRepo: ConfRepo,
     private val db: Db,

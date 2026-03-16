@@ -11,16 +11,16 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentMinifluxAuthBinding
+import di.Di
 import dialog.showErrorDialog
 import navigation.NavDirections
 import navigation.findNavController
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MinifluxAuthFragment : Fragment() {
 
-    private val model: MinifluxAuthModel by viewModel()
+    private val model: MinifluxAuthModel by lazy { Di.getViewModel(MinifluxAuthModel::class.java) }
 
     private var _binding: FragmentMinifluxAuthBinding? = null
     private val binding get() = _binding!!

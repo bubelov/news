@@ -7,10 +7,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
-import org.koin.core.annotation.Single
 import java.time.Instant
 
-@Single
 class Sync(
     private val confRepo: ConfRepo,
     private val feedsRepo: FeedsRepo,

@@ -16,16 +16,16 @@ import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentEnclosuresBinding
 import db.Link
+import di.Di
 import dialog.showErrorDialog
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import navigation.findNavController
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class EnclosuresFragment : Fragment() {
 
-    private val model: EnclosuresModel by viewModel()
+    private val model: EnclosuresModel by lazy { Di.getViewModel(EnclosuresModel::class.java) }
 
     private var _binding: FragmentEnclosuresBinding? = null
     private val binding get() = _binding!!

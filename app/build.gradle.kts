@@ -5,7 +5,6 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.parcelize")
-    id("com.google.devtools.ksp")
 }
 
 val signingPropertiesFile = rootProject.file("signing.properties")
@@ -75,10 +74,6 @@ android {
     buildFeatures {
         viewBinding = true
     }
-
-    sourceSets.all {
-        kotlin.srcDir("build/generated/ksp/$name/kotlin")
-    }
 }
 
 dependencies {
@@ -104,11 +99,6 @@ dependencies {
     implementation(platform(libs.okhttp.bom))
     implementation(libs.okhttp)
     testImplementation(libs.okhttp.mockwebserver)
-
-    // DI
-    implementation(libs.koin.android)
-    implementation(libs.koin.annotations)
-    ksp(libs.koin.ksp.compiler)
 
     // UI
     implementation(libs.material)

@@ -13,10 +13,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withContext
-import org.koin.core.annotation.Single
 import java.time.OffsetDateTime
 
-@Single
 class EntriesRepo(
     private val api: Api,
     private val db: Db,

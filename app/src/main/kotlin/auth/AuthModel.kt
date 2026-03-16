@@ -2,11 +2,9 @@ package auth
 
 import androidx.lifecycle.ViewModel
 import conf.ConfRepo
-import org.koin.android.annotation.KoinViewModel
 import sync.BackgroundSyncScheduler
 import java.util.concurrent.TimeUnit
 
-@KoinViewModel
 class AuthModel(
     private val confRepo: ConfRepo,
     private val syncScheduler: BackgroundSyncScheduler,

@@ -20,6 +20,7 @@ import co.appreactor.news.databinding.FragmentSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import conf.ConfRepo
 import db.databaseFile
+import di.Di
 import dialog.showErrorDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
@@ -27,12 +28,11 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import navigation.findNavController
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.concurrent.TimeUnit
 
 class SettingsFragment : Fragment() {
 
-    private val model: SettingsModel by viewModel()
+    private val model: SettingsModel by lazy { Di.getViewModel(SettingsModel::class.java) }
 
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!

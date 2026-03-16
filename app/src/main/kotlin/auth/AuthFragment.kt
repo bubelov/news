@@ -8,14 +8,14 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentAuthBinding
+import di.Di
 import entries.EntriesFilter
 import navigation.NavDirections
 import navigation.findNavController
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class AuthFragment : Fragment() {
 
-    private val model: AuthModel by viewModel()
+    private val model: AuthModel by lazy { Di.getViewModel(AuthModel::class.java) }
 
     private var _binding: FragmentAuthBinding? = null
     private val binding get() = _binding!!

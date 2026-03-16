@@ -17,17 +17,16 @@ import conf.ConfRepo
 import entries.EntriesRepo
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import org.koin.android.ext.android.get
+import di.Di
 
 class SyncWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
 
     override fun doWork() = runBlocking { doWorkAsync() }
 
     private suspend fun doWorkAsync(): Result {
-        val app = applicationContext as App
-        val conf = app.get<ConfRepo>().conf.value
-        val sync = app.get<Sync>()
-        val entriesRepository = app.get<EntriesRepo>()
+        val conf = Di.get(ConfRepo::class.java).conf.value
+        val sync = Di.get(Sync::class.java)
+        val entriesRepository = Di.get(EntriesRepo::class.java)
 
         if (!conf.initialSyncCompleted) {
             return Result.retry()
@@ -43,7 +42,7 @@ class SyncWorker(context: Context, workerParams: WorkerParameters) : Worker(cont
                         ).first().size
 
                         if (unreadEntries > 0) {
-                            showUnreadEntriesNotification(unreadEntries, app)
+                            showUnreadEntriesNotification(unreadEntries, applicationContext)
                         }
                     }
                 }

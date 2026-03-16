@@ -28,6 +28,7 @@ import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentFeedsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
+import di.Di
 import dialog.showErrorDialog
 import entries.EntriesFilter
 import kotlinx.coroutines.launch
@@ -37,11 +38,10 @@ import navigation.findNavController
 import navigation.navArgs
 import navigation.openUrl
 import navigation.showKeyboard
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class FeedsFragment : Fragment() {
 
-    private val model: FeedsModel by viewModel()
+    private val model: FeedsModel by lazy { Di.getViewModel(FeedsModel::class.java) }
 
     private var _binding: FragmentFeedsBinding? = null
     private val binding get() = _binding!!

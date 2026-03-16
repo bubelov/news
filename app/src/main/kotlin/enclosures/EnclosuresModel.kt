@@ -7,11 +7,9 @@ import db.Link
 import entries.EntriesRepo
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import org.koin.android.annotation.KoinViewModel
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-@KoinViewModel
 class EnclosuresModel(
     private val enclosuresRepo: EnclosuresRepo,
     private val entriesRepo: EntriesRepo,

@@ -32,6 +32,7 @@ import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentEntryBinding
 import db.Entry
 import db.Link
+import di.Di
 import dialog.showErrorDialog
 import enclosures.EnclosuresAdapter
 import kotlinx.coroutines.flow.launchIn
@@ -42,7 +43,6 @@ import navigation.NavDirections
 import navigation.findNavController
 import navigation.navArgs
 import navigation.openUrl
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
@@ -50,7 +50,7 @@ class EntryFragment : Fragment() {
 
     private val args: EntryFragmentArgs by navArgs()
 
-    private val model: EntryModel by viewModel()
+    private val model: EntryModel by lazy { Di.getViewModel(EntryModel::class.java) }
 
     private var _binding: FragmentEntryBinding? = null
     private val binding get() = _binding!!
@@ -69,7 +69,15 @@ class EntryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
+        binding.toolbar.setNavigationOnClickListener {
+            android.util.Log.d("EntryFragment", "Toolbar back button clicked!")
+            findNavController().popBackStack()
+        }
+        
+        // Also add click listener to toolbar navigation icon directly
+        binding.toolbar.navigationIcon?.let { icon ->
+            android.util.Log.d("EntryFragment", "Navigation icon is set: $icon")
+        }
 
         binding.enclosures.apply {
             layoutManager = LinearLayoutManager(requireContext())

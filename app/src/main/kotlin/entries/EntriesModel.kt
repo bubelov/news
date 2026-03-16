@@ -17,12 +17,10 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.koin.android.annotation.KoinViewModel
 import sync.Sync
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-@KoinViewModel
 class EntriesModel(
     private val confRepo: ConfRepo,
     private val entriesRepo: EntriesRepo,

@@ -22,10 +22,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.koin.android.annotation.KoinViewModel
 import sync.Sync
 
-@KoinViewModel
 class EntryModel(
     private val app: Application,
     private val enclosuresRepo: EnclosuresRepo,

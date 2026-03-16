@@ -17,6 +17,7 @@ import anim.animateVisibilityChanges
 import co.appreactor.feedk.AtomLinkRel
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentSearchBinding
+import di.Di
 import entries.EntriesAdapter
 import kotlinx.coroutines.launch
 import navigation.NavDirections
@@ -24,11 +25,10 @@ import navigation.findNavController
 import navigation.hideKeyboard
 import navigation.openUrl
 import navigation.showKeyboard
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SearchFragment : Fragment() {
 
-    private val model: SearchModel by viewModel()
+    private val model: SearchModel by lazy { Di.getViewModel(SearchModel::class.java) }
 
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!

@@ -14,9 +14,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import org.koin.core.annotation.Single
 
-@Single
 class ConfRepo(
     private val db: Db,
 ) {

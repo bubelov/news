@@ -29,6 +29,7 @@ import co.appreactor.news.databinding.FragmentEntriesBinding
 import com.google.android.material.navigation.NavigationBarView.OnItemReselectedListener
 import com.google.android.material.snackbar.Snackbar
 import conf.ConfRepo
+import di.Di
 import dialog.showErrorDialog
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -36,13 +37,12 @@ import navigation.NavController
 import navigation.NavDirections
 import navigation.findNavController
 import navigation.openUrl
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class EntriesFragment : Fragment(), OnItemReselectedListener {
 
     private val args by lazy { navigation.EntriesFragmentArgs.fromBundle(requireArguments()) }
 
-    private val model: EntriesModel by viewModel()
+    private val model: EntriesModel by lazy { Di.getViewModel(EntriesModel::class.java) }
 
     private var _binding: FragmentEntriesBinding? = null
     private val binding get() = _binding!!

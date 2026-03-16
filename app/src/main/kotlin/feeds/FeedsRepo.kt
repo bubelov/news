@@ -11,9 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl
-import org.koin.core.annotation.Single
 
-@Single
 class FeedsRepo(
     private val api: Api,
     private val db: Db,

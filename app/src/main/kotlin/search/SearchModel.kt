@@ -15,12 +15,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.koin.android.annotation.KoinViewModel
 import sync.Sync
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-@KoinViewModel
 class SearchModel(
     confRepo: ConfRepo,
     private val entriesRepo: EntriesRepo,

@@ -4,10 +4,8 @@ import androidx.lifecycle.ViewModel
 import api.miniflux.MinifluxApiBuilder
 import conf.ConfRepo
 import okhttp3.HttpUrl
-import org.koin.android.annotation.KoinViewModel
 import sync.BackgroundSyncScheduler
 
-@KoinViewModel
 class MinifluxAuthModel(
     private val confRepo: ConfRepo,
     private val syncScheduler: BackgroundSyncScheduler,

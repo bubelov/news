@@ -37,10 +37,6 @@ retrofit = "3.0.0"
 # https://github.com/square/okhttp/blob/master/CHANGELOG.md
 okhttp = "5.3.2"
 
-# DI
-koin = "3.5.0"
-koin-annotations = "1.0.0"
-
 picasso = "2.8"
 
 # Parsing
@@ -86,11 +82,6 @@ retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-
 okhttp-bom = { group = "com.squareup.okhttp3", name = "okhttp-bom", version.ref = "okhttp" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 okhttp-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
-
-# DI
-koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
-koin-annotations = { group = "io.insert-koin", name = "koin-annotations", version.ref = "koin-annotations" }
-koin-ksp-compiler = { group = "io.insert-koin", name = "koin-ksp-compiler", version.ref = "koin-annotations" }
 
 # UI
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }

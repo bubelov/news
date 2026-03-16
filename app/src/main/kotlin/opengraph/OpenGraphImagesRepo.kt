@@ -19,11 +19,9 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.jsoup.Jsoup
-import org.koin.core.annotation.Single
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
-@Single
 class OpenGraphImagesRepo(
     private val confRepo: ConfRepo,
     private val db: Db,

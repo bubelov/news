@@ -13,6 +13,7 @@ import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentFeedSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
+import di.Di
 import dialog.showErrorDialog
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -22,13 +23,12 @@ import navigation.FeedSettingsFragmentArgs
 import navigation.findNavController
 import navigation.navArgs
 import navigation.showKeyboard
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class FeedSettingsFragment : Fragment() {
 
     private val args: FeedSettingsFragmentArgs by navArgs()
 
-    private val model: FeedSettingsModel by viewModel()
+    private val model: FeedSettingsModel by lazy { Di.getViewModel(FeedSettingsModel::class.java) }
 
     private var _binding: FragmentFeedSettingsBinding? = null
     private val binding get() = _binding!!
