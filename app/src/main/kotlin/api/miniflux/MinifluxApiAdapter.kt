@@ -110,8 +110,9 @@ class MinifluxApiAdapter(
         lastSync: OffsetDateTime?,
     ): Result<List<Entry>> {
         return runCatching {
-            api.getEntriesAfterEntry(
-                afterEntryId = maxEntryId?.toLong() ?: 0,
+            val changedAfter = lastSync?.toEpochSecond() ?: 0L
+            api.getEntriesChangedAfter(
+                changedAfter = changedAfter,
                 limit = 0,
             ).entries.map { it.toEntry() }
         }

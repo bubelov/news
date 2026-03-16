@@ -44,6 +44,12 @@ interface MinifluxApi {
         @Query("limit") limit: Long = 0,
     ): EntriesPayload
 
+    @GET("entries?order=id")
+    suspend fun getEntriesChangedAfter(
+        @Query("changed_after") changedAfter: Long,
+        @Query("limit") limit: Long = 0,
+    ): EntriesPayload
+
     @GET("entries?order=id&direction=desc")
     suspend fun getEntriesBeforeEntry(
         @Query("status") status: String = "",
