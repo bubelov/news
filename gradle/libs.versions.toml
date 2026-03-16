@@ -39,15 +39,11 @@ okhttp = "5.3.2"
 # Image manipulation
 # https://github.com/coil-kt/coil/blob/main/CHANGELOG.md
 coil = "3.4.0"
-
-# Parsing
-jsoup = "1.17.2"
-
+# XML parser
+# https://github.com/jhy/jsoup/blob/master/CHANGES.md
+jsoup = "1.22.1"
 # Feed parser
 feedk = "0.2.6"
-
-# Crash reporting
-acra = "5.11.3"
 
 # Testing
 junit = "4.13.2"
@@ -94,10 +90,6 @@ jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
 
 # Feed parser
 feedk = { group = "co.appreactor", name = "feedk", version.ref = "feedk" }
-
-# Crash reporting
-acra-mail = { group = "ch.acra", name = "acra-mail", version.ref = "acra" }
-acra-dialog = { group = "ch.acra", name = "acra-dialog", version.ref = "acra" }
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }

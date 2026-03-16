@@ -111,10 +111,6 @@ dependencies {
     // Feed parser
     implementation(libs.feedk)
 
-    // Crash reporting
-    implementation(libs.acra.mail)
-    implementation(libs.acra.dialog)
-
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
