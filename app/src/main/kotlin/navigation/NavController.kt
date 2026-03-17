@@ -213,7 +213,7 @@ private var sharedNavController: NavController? = null
 
 fun Fragment.findNavController(): NavController {
     val activity = requireActivity()
-    val containerView = activity.findViewById<android.view.View>(R.id.navHost)
+    val containerView = activity.findViewById<android.view.View>(R.id.fragmentContainerView)
     val containerViewId = containerView?.id ?: throw IllegalStateException("navHost not found")
     val fragmentManager = activity.supportFragmentManager
     

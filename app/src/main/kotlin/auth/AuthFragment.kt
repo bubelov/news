@@ -5,11 +5,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
+import androidx.fragment.app.replace
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentAuthBinding
 import di.Di
 import entries.EntriesFilter
+import entries.EntriesFragment
+import navigation.Activity
 import navigation.NavDirections
 import navigation.findNavController
 
@@ -48,19 +54,31 @@ class AuthFragment : Fragment() {
         useStandaloneBackend.setOnClickListener {
             binding.root.animate().alpha(0f).withEndAction {
                 model.setStandaloneBackend()
-                findNavController().navigate(
-                    R.id.newsFragment,
-                    NavDirections.AuthFragment.actionAuthFragmentToNewsFragment(EntriesFilter.NotBookmarked)
-                )
+
+                parentFragmentManager.commit {
+                    setReorderingAllowed(true)
+                    replace(
+                        R.id.fragmentContainerView,
+                        EntriesFragment::class.java,
+                        bundleOf("filter" to EntriesFilter.NotBookmarked),
+                    )
+                    addToBackStack(null)
+                }
+
+                (activity as Activity).binding.bottomNav.isVisible = true
             }
         }
 
         useMinifluxBackend.setOnClickListener {
-            findNavController().navigate(R.id.minifluxAuthFragment)
+            parentFragmentManager.commit {
+                setReorderingAllowed(true)
+                replace<MinifluxAuthFragment>(R.id.fragmentContainerView)
+                addToBackStack(null)
+            }
         }
 
         useNextcloudBackend.setOnClickListener {
-            findNavController().navigate(R.id.nextcloudAuthFragment)
+            TODO()
         }
     }
 }

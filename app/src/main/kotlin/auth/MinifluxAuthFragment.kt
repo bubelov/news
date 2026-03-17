@@ -38,7 +38,7 @@ class MinifluxAuthFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.apply {
-            toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
+            toolbar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
 
             password.setOnEditorActionListener { _, actionId, keyEvent ->
                 if (actionId == EditorInfo.IME_ACTION_DONE || keyEvent?.keyCode == KeyEvent.KEYCODE_ENTER) {

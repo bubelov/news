@@ -1,16 +1,14 @@
 package navigation
 
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.forEach
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
-import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.commit
+import androidx.fragment.app.replace
 import androidx.lifecycle.lifecycleScope
 import co.appreactor.news.R
 import co.appreactor.news.databinding.ActivityBinding
@@ -18,7 +16,8 @@ import com.google.android.material.navigation.NavigationBarView.OnItemReselected
 import conf.ConfRepo
 import di.Di
 import entries.EntriesFilter
-import kotlinx.coroutines.flow.first
+import entries.EntriesFragment
+import feeds.FeedsFragment
 import kotlinx.coroutines.launch
 import opengraph.OpenGraphImagesRepo
 
@@ -26,34 +25,8 @@ class Activity : AppCompatActivity() {
 
     lateinit var binding: ActivityBinding
 
-    private val navController: NavController by lazy { getSharedNavController()!! }
-
-    private var currentDestinationId: Int = R.id.newsFragment
-
-    private var destinationChangedListener: ((Int, Bundle?) -> Unit)? = null
-
-    private val backPressedCallback = object : OnBackPressedCallback(true) {
-        override fun handleOnBackPressed() {
-            android.util.Log.d("Activity", "Gesture back pressed")
-            if (!navController.popBackStack()) {
-                isEnabled = false
-                onBackPressedDispatcher.onBackPressed()
-            }
-        }
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        android.util.Log.d("Activity", "XXXX onBackPressed called")
-        if (!navController.popBackStack()) {
-            @Suppress("DEPRECATION")
-            super.onBackPressed()
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        android.util.Log.d("Activity", "XXXX onCreate called - NEW INSTANCE")
         binding = ActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -68,111 +41,76 @@ class Activity : AppCompatActivity() {
 
         Di.get(ConfRepo::class.java).update { it.copy(syncedOnStartup = false) }
         lifecycleScope.launch { Di.get(OpenGraphImagesRepo::class.java).fetchEntryImages() }
-
-        NavController.create(supportFragmentManager, R.id.navHost)
-        
-        onBackPressedDispatcher.addCallback(this, backPressedCallback)
     }
 
     override fun onStart() {
         super.onStart()
-        android.util.Log.d("Activity", "XXXX onStart called")
-        
-        destinationChangedListener?.let { navController.removeOnDestinationChangedListener(it) }
 
-        destinationChangedListener = { destinationId, args ->
-            android.util.Log.d("Activity", "Destination changed: $destinationId")
-            currentDestinationId = destinationId
+        lifecycleScope.launch {
+            val confRepo = Di.get(ConfRepo::class.java)
+            val config = confRepo.conf.value
 
-            // Use the visible fragment to determine bottom nav visibility
-            updateBottomNavForCurrentDestination()
-
-            if (binding.bottomNav.isVisible) {
-                binding.bottomNav.menu.forEach { item ->
-                    if (item.itemId == destinationId) {
-                        item.isChecked = true
-                    }
+            if (config.backend.isNotBlank()) {
+                supportFragmentManager.commit {
+                    replace(
+                        R.id.fragmentContainerView,
+                        EntriesFragment::class.java,
+                        bundleOf("filter" to EntriesFilter.NotBookmarked),
+                    )
                 }
-            }
 
-            when (destinationId) {
-                R.id.newsFragment -> args?.putParcelable("filter", EntriesFilter.NotBookmarked)
-                R.id.bookmarksFragment -> args?.putParcelable("filter", EntriesFilter.Bookmarked)
+                binding.bottomNav.isVisible = true
+            } else {
+//                supportFragmentManager.commit {
+//                    setReorderingAllowed(true)
+//                    replace<AuthFragment>(R.id.fragmentContainerView)
+//                    addToBackStack(null)
+//                }
             }
         }
-
-        navController.addOnDestinationChangedListener(destinationChangedListener!!)
-
-        if (navController.getCurrentDestinationId() == null) {
-            navigateToStartDestination()
-        }
-
-        updateBottomNavForCurrentDestination()
 
         binding.bottomNav.apply {
             setOnItemSelectedListener { item ->
                 when (item.itemId) {
                     R.id.newsFragment -> {
-                        navController.navigate(R.id.newsFragment, NavDirections.AuthFragment.actionAuthFragmentToNewsFragment(EntriesFilter.NotBookmarked))
+                        supportFragmentManager.commit {
+                            replace(
+                                R.id.fragmentContainerView,
+                                EntriesFragment::class.java,
+                                bundleOf("filter" to EntriesFilter.NotBookmarked),
+                            )
+                        }
                         true
                     }
+
                     R.id.bookmarksFragment -> {
-                        navController.navigate(R.id.bookmarksFragment, NavDirections.AuthFragment.actionAuthFragmentToNewsFragment(EntriesFilter.Bookmarked))
+                        supportFragmentManager.commit {
+                            replace(
+                                R.id.fragmentContainerView,
+                                EntriesFragment::class.java,
+                                bundleOf("filter" to EntriesFilter.Bookmarked),
+                            )
+                        }
                         true
                     }
+
                     R.id.feedsFragment -> {
-                        navController.navigate(R.id.feedsFragment)
+                        supportFragmentManager.commit {
+                            replace(
+                                R.id.fragmentContainerView,
+                                FeedsFragment::class.java,
+                                bundleOf("url" to ""),
+                            )
+                        }
                         true
                     }
+
                     else -> false
                 }
             }
+
             setOnItemReselectedListener(createOnItemReselectedListener())
         }
-    }
-
-    private fun updateBottomNavForCurrentDestination() {
-        // Check the actual visible fragment to determine bottom nav visibility
-        val visibleFragment = supportFragmentManager.findFragmentById(R.id.navHost)
-        
-        val showBottomNav = when (visibleFragment) {
-            is entries.EntriesFragment -> true
-            is feeds.FeedsFragment -> true
-            else -> false
-        }
-        
-        binding.bottomNav.isVisible = showBottomNav
-        android.util.Log.d("Activity", "Bottom nav visibility: $showBottomNav for ${visibleFragment?.javaClass?.simpleName}")
-    }
-
-    private fun navigateToStartDestination() {
-        lifecycleScope.launch {
-            val confRepo = Di.get(ConfRepo::class.java)
-            val config = confRepo.conf.value
-            
-            // Only navigate to news if already configured, otherwise go to auth
-            if (config.minifluxServerUrl.isNotBlank() || config.nextcloudServerUrl.isNotBlank() || config.initialSyncCompleted) {
-                navController.navigate(R.id.newsFragment, NavDirections.AuthFragment.actionAuthFragmentToNewsFragment(EntriesFilter.NotBookmarked))
-            } else {
-                navController.navigate(R.id.authFragment)
-            }
-        }
-    }
-
-    private fun updateBottomNavVisibility(destinationId: Int) {
-        val showBottomNav = when (destinationId) {
-            R.id.authFragment,
-            R.id.minifluxAuthFragment,
-            R.id.nextcloudAuthFragment,
-            R.id.settingsFragment,
-            R.id.enclosuresFragment,
-            R.id.entryFragment,
-            R.id.searchFragment,
-            R.id.feedEntriesFragment,
-            R.id.feedSettingsFragment -> false
-            else -> true
-        }
-        binding.bottomNav.isVisible = showBottomNav
     }
 
     private fun createOnItemReselectedListener(): OnItemReselectedListener {
@@ -183,15 +121,5 @@ class Activity : AppCompatActivity() {
                 }
             }
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        android.util.Log.d("Activity", "XXXX onResume called - updating bottom nav")
-        
-        // Post the update to ensure the fragment transaction is complete
-        binding.bottomNav.postDelayed({
-            updateBottomNavForCurrentDestination()
-        }, 100)
     }
 }
