@@ -85,6 +85,7 @@ dependencies {
     implementation(libs.androidx.fragment)
     implementation(libs.androidx.sqlite)
     implementation(libs.androidx.sqlite.framework)
+    testImplementation(libs.androidx.sqlite.bundled)
     debugImplementation(libs.androidx.fragment.testing)
     implementation(libs.androidx.work)
     androidTestImplementation(libs.androidx.work.testing)

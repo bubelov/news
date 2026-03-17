@@ -11,28 +11,28 @@ class FeedQueriesTest {
     fun insertOrReplace() {
         val db = testDb()
         val feed = db.insertRandomFeed()
-        assertEquals(feed, db.feedQueries.selectAll().executeAsOne())
+        assertEquals(feed, db.feedQueries.selectAll().single())
         db.feedQueries.insertOrReplace(feed)
-        assertEquals(feed, db.feedQueries.selectAll().executeAsOne())
+        assertEquals(feed, db.feedQueries.selectAll().single())
     }
 
     @Test
     fun selectAll() {
         val db = testDb()
         val feeds = buildList { repeat(5) { add(db.insertRandomFeed()) } }
-        assertEquals(feeds.sortedBy { it.title }, db.feedQueries.selectAll().executeAsList())
+        assertEquals(feeds.sortedBy { it.title }, db.feedQueries.selectAll())
     }
 
     @Test
     fun selectAllWithUnreadEntryCount() {
         val db = testDb()
         val feed = db.insertRandomFeed()
-        assertEquals(0, db.feedQueries.selectAllWithUnreadEntryCount().executeAsList().first().unread_entries)
-        val readEntries = buildList { repeat(7) { add(entry().copy(feed_id = feed.id, ext_read = true)) } }
-        val unreadEntries = buildList { repeat(3) { add(entry().copy(feed_id = feed.id, ext_read = false)) } }
+        assertEquals(0, db.feedQueries.selectAllWithUnreadEntryCount().first().unreadEntries)
+        val readEntries = buildList { repeat(7) { add(entry().copy(feedId = feed.id, extRead = true)) } }
+        val unreadEntries = buildList { repeat(3) { add(entry().copy(feedId = feed.id, extRead = false)) } }
         (readEntries + unreadEntries).forEach { db.entryQueries.insertOrReplace(it) }
-        val row = db.feedQueries.selectAllWithUnreadEntryCount().executeAsOne()
-        assertEquals(3, row.unread_entries)
+        val row = db.feedQueries.selectAllWithUnreadEntryCount().single()
+        assertEquals(3, row.unreadEntries)
     }
 
     @Test
@@ -40,7 +40,7 @@ class FeedQueriesTest {
         val db = testDb()
         val feeds = buildList { repeat(5) { add(db.insertRandomFeed()) } }
         val randomFeed = feeds.random()
-        assertEquals(randomFeed, db.feedQueries.selectById(randomFeed.id).executeAsOne())
+        assertEquals(randomFeed, db.feedQueries.selectById(randomFeed.id))
     }
 
     @Test
@@ -48,7 +48,7 @@ class FeedQueriesTest {
         val db = testDb()
         repeat(5) { db.insertRandomFeed() }
         db.feedQueries.deleteAll()
-        assertTrue(db.feedQueries.selectAll().executeAsList().isEmpty())
+        assertTrue(db.feedQueries.selectAll().isEmpty())
     }
 
     @Test
@@ -57,7 +57,7 @@ class FeedQueriesTest {
         val feeds = buildList { repeat(5) { add(db.insertRandomFeed()) } }
         val randomFeed = feeds.random()
         db.feedQueries.deleteById(randomFeed.id)
-        assertTrue(db.feedQueries.selectById(randomFeed.id).executeAsOneOrNull() == null)
+        assertTrue(db.feedQueries.selectById(randomFeed.id) == null)
     }
 }
 
@@ -67,7 +67,7 @@ private fun feed() = Feed(
     id = UUID.randomUUID().toString(),
     links = emptyList(),
     title = "",
-    ext_open_entries_in_browser = null,
-    ext_blocked_words = "",
-    ext_show_preview_images = null,
+    extOpenEntriesInBrowser = null,
+    extBlockedWords = "",
+    extShowPreviewImages = null,
 )
