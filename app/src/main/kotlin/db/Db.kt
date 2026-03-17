@@ -416,11 +416,11 @@ class EntryQueries(private val conn: SQLiteConnection) {
 
     private fun statementToEntry(stmt: SQLiteStatement): Entry {
         return Entry(
-            contentType = stmt.getText(0),
-            contentSrc = stmt.getText(1),
-            contentText = stmt.getText(2),
-            links = jsonToLinks(stmt.getText(3)),
-            summary = stmt.getText(4),
+            contentType = stmt.getTextSafe(0),
+            contentSrc = stmt.getTextSafe(1),
+            contentText = stmt.getTextSafe(2),
+            links = jsonToLinks(stmt.getTextSafe(3)),
+            summary = stmt.getTextSafe(4),
             id = stmt.getText(5),
             feedId = stmt.getText(6),
             title = stmt.getText(7),

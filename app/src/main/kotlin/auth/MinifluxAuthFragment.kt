@@ -6,13 +6,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentMinifluxAuthBinding
 import di.Di
 import dialog.showErrorDialog
+import entries.EntriesFilter
+import entries.EntriesFragment
+import navigation.Activity
 import navigation.NavDirections
 import navigation.findNavController
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -81,10 +86,15 @@ class MinifluxAuthFragment : Fragment() {
                     trustSelfSignedCerts = trustSelfSignedCerts,
                 )
 
-                findNavController().navigate(
-                    R.id.newsFragment,
-                    NavDirections.MinifluxAuthFragment.actionMinifluxAuthFragmentToNewsFragment()
-                )
+                parentFragmentManager.commit {
+                    replace(
+                        R.id.fragmentContainerView,
+                        EntriesFragment::class.java,
+                        bundleOf("filter" to EntriesFilter.NotBookmarked),
+                    )
+                }
+
+                (activity as Activity).binding.bottomNav.isVisible = true
             }.onFailure {
                 binding.progress.isVisible = false
                 showErrorDialog(it.message ?: getString(R.string.direct_login_failed))
