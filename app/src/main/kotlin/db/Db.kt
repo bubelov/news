@@ -1,83 +1,30 @@
 package db
 
-import android.content.ContentValues
 import android.content.Context
-import android.database.Cursor
-import android.database.sqlite.SQLiteDatabase
-import android.database.sqlite.SQLiteOpenHelper
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.SQLiteStatement
 import androidx.sqlite.execSQL
 import androidx.sqlite.driver.AndroidSQLiteDriver
-import kotlinx.coroutines.flow.Flow
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import java.io.File
 import java.time.OffsetDateTime
 
-private const val FILE_NAME = "news-v6.db"
+private const val FILE_NAME = "vesti-2026-03-17.db"
 
-const val SCHEMA = """
-CREATE TABLE IF NOT EXISTS feed (
-    id TEXT PRIMARY KEY NOT NULL,
-    links TEXT,
-    title TEXT NOT NULL,
-    ext_open_entries_in_browser INTEGER,
-    ext_blocked_words TEXT NOT NULL,
-    ext_show_preview_images INTEGER
-);
+private fun loadSchema(): String {
+    return Db::class.java.classLoader.getResourceAsStream("schema.sql")?.bufferedReader()?.use { it.readText() }
+        ?: error("schema.sql not found in resources")
+}
 
-CREATE TABLE IF NOT EXISTS entry (
-    content_type TEXT,
-    content_src TEXT,
-    content_text TEXT,
-    links TEXT,
-    summary TEXT,
-    id TEXT PRIMARY KEY NOT NULL,
-    feed_id TEXT NOT NULL,
-    title TEXT NOT NULL,
-    published TEXT NOT NULL,
-    updated TEXT NOT NULL,
-    author_name TEXT NOT NULL,
-    ext_read INTEGER NOT NULL,
-    ext_read_synced INTEGER NOT NULL,
-    ext_bookmarked INTEGER NOT NULL,
-    ext_bookmarked_synced INTEGER NOT NULL,
-    ext_nc_guid_hash TEXT NOT NULL,
-    ext_comments_url TEXT NOT NULL,
-    ext_og_image_checked INTEGER NOT NULL,
-    ext_og_image_url TEXT NOT NULL,
-    ext_og_image_width INTEGER NOT NULL,
-    ext_og_image_height INTEGER NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS conf (
-    backend TEXT NOT NULL,
-    miniflux_server_url TEXT NOT NULL,
-    miniflux_server_trust_self_signed_certs INTEGER NOT NULL,
-    miniflux_server_username TEXT NOT NULL,
-    miniflux_server_password TEXT NOT NULL,
-    nextcloud_server_url TEXT NOT NULL,
-    nextcloud_server_trust_self_signed_certs INTEGER NOT NULL,
-    nextcloud_server_username TEXT NOT NULL,
-    nextcloud_server_password TEXT NOT NULL,
-    initial_sync_completed INTEGER NOT NULL,
-    last_entries_sync_datetime TEXT NOT NULL,
-    show_read_entries INTEGER NOT NULL,
-    sort_order TEXT NOT NULL,
-    show_preview_images INTEGER NOT NULL,
-    crop_preview_images INTEGER NOT NULL,
-    mark_scrolled_entries_as_read INTEGER NOT NULL,
-    sync_on_startup INTEGER NOT NULL,
-    sync_in_background INTEGER NOT NULL,
-    background_sync_interval_millis INTEGER NOT NULL,
-    use_built_in_browser INTEGER NOT NULL,
-    show_preview_text INTEGER NOT NULL,
-    synced_on_startup INTEGER NOT NULL
-);
-
-CREATE INDEX IF NOT EXISTS idx_entry_feed_id ON entry(feed_id);
-CREATE INDEX IF NOT EXISTS idx_entry_published ON entry(published);
-"""
+private fun executeSchema(conn: SQLiteConnection) {
+    val schema = loadSchema()
+    schema.split(";").forEach { statement ->
+        val trimmed = statement.trim()
+        if (trimmed.isNotEmpty()) {
+            conn.execSQL(trimmed)
+        }
+    }
+}
 
 fun Context.databaseFile(): File {
     return getDatabasePath(FILE_NAME)
@@ -86,84 +33,7 @@ fun Context.databaseFile(): File {
 fun Context.db(): Db {
     val path = getDatabasePath(FILE_NAME).absolutePath
     return Db(AndroidSQLiteDriver().open(path))
-    //val helper = DatabaseHelper(this)
-    //return Db.getInstance(helper.writableDatabase)
 }
-
-//private class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, FILE_NAME, null, 1) {
-//    override fun onCreate(db: SQLiteDatabase) {
-//        db.execSQL("""
-//            CREATE TABLE IF NOT EXISTS feed (
-//                id TEXT PRIMARY KEY NOT NULL,
-//                links TEXT,
-//                title TEXT NOT NULL,
-//                ext_open_entries_in_browser INTEGER,
-//                ext_blocked_words TEXT NOT NULL,
-//                ext_show_preview_images INTEGER
-//            )
-//        """.trimIndent())
-//
-//        db.execSQL("""
-//            CREATE TABLE IF NOT EXISTS entry (
-//                content_type TEXT,
-//                content_src TEXT,
-//                content_text TEXT,
-//                links TEXT,
-//                summary TEXT,
-//                id TEXT PRIMARY KEY NOT NULL,
-//                feed_id TEXT NOT NULL,
-//                title TEXT NOT NULL,
-//                published TEXT NOT NULL,
-//                updated TEXT NOT NULL,
-//                author_name TEXT NOT NULL,
-//                ext_read INTEGER NOT NULL,
-//                ext_read_synced INTEGER NOT NULL,
-//                ext_bookmarked INTEGER NOT NULL,
-//                ext_bookmarked_synced INTEGER NOT NULL,
-//                ext_nc_guid_hash TEXT NOT NULL,
-//                ext_comments_url TEXT NOT NULL,
-//                ext_og_image_checked INTEGER NOT NULL,
-//                ext_og_image_url TEXT NOT NULL,
-//                ext_og_image_width INTEGER NOT NULL,
-//                ext_og_image_height INTEGER NOT NULL
-//            )
-//        """.trimIndent())
-//
-//        db.execSQL("""
-//            CREATE TABLE IF NOT EXISTS conf (
-//                backend TEXT NOT NULL,
-//                miniflux_server_url TEXT NOT NULL,
-//                miniflux_server_trust_self_signed_certs INTEGER NOT NULL,
-//                miniflux_server_username TEXT NOT NULL,
-//                miniflux_server_password TEXT NOT NULL,
-//                nextcloud_server_url TEXT NOT NULL,
-//                nextcloud_server_trust_self_signed_certs INTEGER NOT NULL,
-//                nextcloud_server_username TEXT NOT NULL,
-//                nextcloud_server_password TEXT NOT NULL,
-//                initial_sync_completed INTEGER NOT NULL,
-//                last_entries_sync_datetime TEXT NOT NULL,
-//                show_read_entries INTEGER NOT NULL,
-//                sort_order TEXT NOT NULL,
-//                show_preview_images INTEGER NOT NULL,
-//                crop_preview_images INTEGER NOT NULL,
-//                mark_scrolled_entries_as_read INTEGER NOT NULL,
-//                sync_on_startup INTEGER NOT NULL,
-//                sync_in_background INTEGER NOT NULL,
-//                background_sync_interval_millis INTEGER NOT NULL,
-//                use_built_in_browser INTEGER NOT NULL,
-//                show_preview_text INTEGER NOT NULL,
-//                synced_on_startup INTEGER NOT NULL
-//            )
-//        """.trimIndent())
-//
-//        db.execSQL("CREATE INDEX IF NOT EXISTS idx_entry_feed_id ON entry(feed_id)")
-//        db.execSQL("CREATE INDEX IF NOT EXISTS idx_entry_published ON entry(published)")
-//    }
-//
-//    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-//        // Handle migrations if needed
-//    }
-//}
 
 class Db(private val conn: SQLiteConnection) {
 
@@ -172,72 +42,7 @@ class Db(private val conn: SQLiteConnection) {
     val entrySearchQueries = EntrySearchQueries(conn)
 
     init {
-        conn.execSQL("""
-            CREATE TABLE IF NOT EXISTS feed (
-                id TEXT PRIMARY KEY NOT NULL,
-                links TEXT,
-                title TEXT NOT NULL,
-                ext_open_entries_in_browser INTEGER,
-                ext_blocked_words TEXT NOT NULL,
-                ext_show_preview_images INTEGER
-            )
-        """.trimIndent())
-
-        conn.execSQL("""
-            CREATE TABLE IF NOT EXISTS entry (
-                content_type TEXT,
-                content_src TEXT,
-                content_text TEXT,
-                links TEXT,
-                summary TEXT,
-                id TEXT PRIMARY KEY NOT NULL,
-                feed_id TEXT NOT NULL,
-                title TEXT NOT NULL,
-                published TEXT NOT NULL,
-                updated TEXT NOT NULL,
-                author_name TEXT NOT NULL,
-                ext_read INTEGER NOT NULL,
-                ext_read_synced INTEGER NOT NULL,
-                ext_bookmarked INTEGER NOT NULL,
-                ext_bookmarked_synced INTEGER NOT NULL,
-                ext_nc_guid_hash TEXT NOT NULL,
-                ext_comments_url TEXT NOT NULL,
-                ext_og_image_checked INTEGER NOT NULL,
-                ext_og_image_url TEXT NOT NULL,
-                ext_og_image_width INTEGER NOT NULL,
-                ext_og_image_height INTEGER NOT NULL
-            )
-        """.trimIndent())
-
-        conn.execSQL("""
-            CREATE TABLE IF NOT EXISTS conf (
-                backend TEXT NOT NULL,
-                miniflux_server_url TEXT NOT NULL,
-                miniflux_server_trust_self_signed_certs INTEGER NOT NULL,
-                miniflux_server_username TEXT NOT NULL,
-                miniflux_server_password TEXT NOT NULL,
-                nextcloud_server_url TEXT NOT NULL,
-                nextcloud_server_trust_self_signed_certs INTEGER NOT NULL,
-                nextcloud_server_username TEXT NOT NULL,
-                nextcloud_server_password TEXT NOT NULL,
-                initial_sync_completed INTEGER NOT NULL,
-                last_entries_sync_datetime TEXT NOT NULL,
-                show_read_entries INTEGER NOT NULL,
-                sort_order TEXT NOT NULL,
-                show_preview_images INTEGER NOT NULL,
-                crop_preview_images INTEGER NOT NULL,
-                mark_scrolled_entries_as_read INTEGER NOT NULL,
-                sync_on_startup INTEGER NOT NULL,
-                sync_in_background INTEGER NOT NULL,
-                background_sync_interval_millis INTEGER NOT NULL,
-                use_built_in_browser INTEGER NOT NULL,
-                show_preview_text INTEGER NOT NULL,
-                synced_on_startup INTEGER NOT NULL
-            )
-        """.trimIndent())
-
-        conn.execSQL("CREATE INDEX IF NOT EXISTS idx_entry_feed_id ON entry(feed_id)")
-        conn.execSQL("CREATE INDEX IF NOT EXISTS idx_entry_published ON entry(published)")
+        executeSchema(conn)
     }
 
     fun getConnection(): SQLiteConnection = conn
