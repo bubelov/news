@@ -83,9 +83,9 @@ class OpmlTest {
                 id = UUID.randomUUID().toString(),
                 links = listOf(selfLink, alternateLink),
                 title = it.text,
-                ext_open_entries_in_browser = it.extOpenEntriesInBrowser!!,
-                ext_blocked_words = it.extBlockedWords!!,
-                ext_show_preview_images = it.extShowPreviewImages,
+                extOpenEntriesInBrowser = it.extOpenEntriesInBrowser!!,
+                extBlockedWords = it.extBlockedWords!!,
+                extShowPreviewImages = it.extShowPreviewImages,
             )
 
             feed
@@ -97,9 +97,9 @@ class OpmlTest {
                 outlines = emptyList(),
                 xmlUrl = feed.links.first { it.rel is AtomLinkRel.Self }.href.toString(),
                 htmlUrl = feed.links.first { it.rel is AtomLinkRel.Alternate }.href.toString(),
-                extOpenEntriesInBrowser = feed.ext_open_entries_in_browser,
-                extBlockedWords = feed.ext_blocked_words,
-                extShowPreviewImages = feed.ext_show_preview_images,
+                extOpenEntriesInBrowser = feed.extOpenEntriesInBrowser,
+                extBlockedWords = feed.extBlockedWords,
+                extShowPreviewImages = feed.extShowPreviewImages,
             )
         }
 

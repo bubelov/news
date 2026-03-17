@@ -79,7 +79,7 @@ android {
 dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines)
-    //testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.kotlinx.coroutines.test)
 
     // AndroidX
     implementation(libs.androidx.fragment)

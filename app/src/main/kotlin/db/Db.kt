@@ -11,12 +11,12 @@ import java.time.OffsetDateTime
 
 private const val FILE_NAME = "vesti-2026-03-17.db"
 
-private fun loadSchema(): String {
+internal fun loadSchema(): String {
     return Db::class.java.classLoader.getResourceAsStream("schema.sql")?.bufferedReader()?.use { it.readText() }
         ?: error("schema.sql not found in resources")
 }
 
-private fun executeSchema(conn: SQLiteConnection) {
+internal fun executeSchema(conn: SQLiteConnection) {
     val schema = loadSchema()
     schema.split(";").forEach { statement ->
         val trimmed = statement.trim()
@@ -35,14 +35,18 @@ fun Context.db(): Db {
     return Db(AndroidSQLiteDriver().open(path))
 }
 
-class Db(private val conn: SQLiteConnection) {
+class Db(val conn: SQLiteConnection, initSchema: Boolean) {
+
+    constructor(conn: SQLiteConnection) : this(conn, true)
 
     val entryQueries = EntryQueries(conn)
     val feedQueries = FeedQueries(conn)
     val entrySearchQueries = EntrySearchQueries(conn)
 
     init {
-        executeSchema(conn)
+        if (initSchema) {
+            executeSchema(conn)
+        }
     }
 
     fun getConnection(): SQLiteConnection = conn

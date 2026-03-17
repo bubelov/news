@@ -30,31 +30,31 @@ class EntriesRepositoryTest {
         val repo = EntriesRepo(db = db, api = mockk())
 
         val entries = listOf(
-            entryWithoutContent().copy(feed_id = feed.id, ext_read = true, ext_bookmarked = true),
-            entryWithoutContent().copy(feed_id = feed.id, ext_read = true, ext_bookmarked = false),
-            entryWithoutContent().copy(feed_id = feed.id, ext_read = false, ext_bookmarked = true),
-            entryWithoutContent().copy(feed_id = feed.id, ext_read = false, ext_bookmarked = false),
+            entryWithoutContent().copy(feedId = feed.id, extRead = true, extBookmarked = true),
+            entryWithoutContent().copy(feedId = feed.id, extRead = true, extBookmarked = false),
+            entryWithoutContent().copy(feedId = feed.id, extRead = false, extBookmarked = true),
+            entryWithoutContent().copy(feedId = feed.id, extRead = false, extBookmarked = false),
         )
 
         entries.forEach { db.entryQueries.insertOrReplace(it.toEntry()) }
 
         assertEquals(
-            entries.filter { it.ext_read && it.ext_bookmarked }.map { it.id },
+            entries.filter { it.extRead && it.extBookmarked }.map { it.id },
             repo.selectByReadAndBookmarked(read = listOf(true), bookmarked = true).first().map { it.id },
         )
 
         assertEquals(
-            entries.filter { it.ext_read && !it.ext_bookmarked }.map { it.id },
+            entries.filter { it.extRead && !it.extBookmarked }.map { it.id },
             repo.selectByReadAndBookmarked(read = listOf(true), bookmarked = false).first().map { it.id },
         )
 
         assertEquals(
-            entries.filter { !it.ext_read && it.ext_bookmarked }.map { it.id },
+            entries.filter { !it.extRead && it.extBookmarked }.map { it.id },
             repo.selectByReadAndBookmarked(read = listOf(false), bookmarked = true).first().map { it.id },
         )
 
         assertEquals(
-            entries.filter { !it.ext_read && !it.ext_bookmarked }.map { it.id },
+            entries.filter { !it.extRead && !it.extBookmarked }.map { it.id },
             repo.selectByReadAndBookmarked(read = listOf(false), bookmarked = false).first().map { it.id },
         )
     }

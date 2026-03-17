@@ -41,7 +41,7 @@ class SettingsModelTest {
         confRepo.update {
             it.copy(
                 backend = ConfRepo.BACKEND_MINIFLUX,
-                miniflux_server_url = "https://acme.com",
+                minifluxServerUrl = "https://acme.com",
             )
         }
 
@@ -59,7 +59,7 @@ class SettingsModelTest {
         confRepo.update {
             it.copy(
                 backend = ConfRepo.BACKEND_MINIFLUX,
-                miniflux_server_url = "http://acme.com",
+                minifluxServerUrl = "http://acme.com",
             )
         }
 

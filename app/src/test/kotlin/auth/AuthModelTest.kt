@@ -26,8 +26,8 @@ class AuthModelTest {
 
         val conf = confRepo.conf.value
         assertEquals(ConfRepo.BACKEND_STANDALONE, conf.backend)
-        assertEquals(false, conf.sync_on_startup)
-        assertEquals(TimeUnit.HOURS.toMillis(12), conf.background_sync_interval_millis)
+        assertEquals(false, conf.syncOnStartup)
+        assertEquals(TimeUnit.HOURS.toMillis(12), conf.backgroundSyncIntervalMillis)
 
         coVerify { syncScheduler.schedule() }
     }

@@ -29,14 +29,14 @@ class FeedsRepositoryTest {
             id = UUID.randomUUID().toString(),
             links = emptyList(),
             title = "",
-            ext_open_entries_in_browser = null,
-            ext_blocked_words = "",
-            ext_show_preview_images = null,
+            extOpenEntriesInBrowser = null,
+            extBlockedWords = "",
+            extShowPreviewImages = null,
         )
 
         repo.insertOrReplace(feed)
 
-        assertEquals(feed, db.feedQueries.selectAll().executeAsList().single())
+        assertEquals(feed, db.feedQueries.selectAll().single())
     }
 
     @Test
@@ -50,9 +50,9 @@ class FeedsRepositoryTest {
             id = UUID.randomUUID().toString(),
             links = emptyList(),
             title = "",
-            ext_open_entries_in_browser = null,
-            ext_blocked_words = "",
-            ext_show_preview_images = null,
+            extOpenEntriesInBrowser = null,
+            extBlockedWords = "",
+            extShowPreviewImages = null,
         )
 
         val entries = listOf<Entry>()
@@ -63,7 +63,7 @@ class FeedsRepositoryTest {
 
         repo.insertByUrl(feedUrl)
 
-        assertEquals(feed, db.feedQueries.selectAll().executeAsList().single())
+        assertEquals(feed, db.feedQueries.selectAll().single())
 
         coVerify { api.addFeed(feedUrl) }
         confirmVerified(api)
@@ -98,9 +98,9 @@ class FeedsRepositoryTest {
             id = UUID.randomUUID().toString(),
             links = emptyList(),
             title = "",
-            ext_open_entries_in_browser = null,
-            ext_blocked_words = "",
-            ext_show_preview_images = null,
+            extOpenEntriesInBrowser = null,
+            extBlockedWords = "",
+            extShowPreviewImages = null,
         )
 
         val newTitle = "  ${feed.title}_modified "
@@ -132,6 +132,6 @@ class FeedsRepositoryTest {
 
         repo.deleteById(randomFeed.id)
 
-        assertTrue(db.feedQueries.selectById(randomFeed.id).executeAsOneOrNull() == null)
+        assertTrue(db.feedQueries.selectById(randomFeed.id) == null)
     }
 }
