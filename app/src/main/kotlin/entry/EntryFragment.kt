@@ -1,9 +1,11 @@
 package entry
 
+import android.app.Application
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Rect
 import android.os.Bundle
+import android.text.Html
 import android.text.SpannableStringBuilder
 import android.text.method.LinkMovementMethod
 import android.text.style.BulletSpan
@@ -15,6 +17,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.net.toUri
+import androidx.core.text.HtmlCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
@@ -23,6 +26,7 @@ import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -30,19 +34,29 @@ import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.feedk.AtomLinkRel
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentEntryBinding
+import conf.ConfRepo
 import db.Entry
 import db.Link
 import di.Di
 import dialog.showErrorDialog
 import enclosures.EnclosuresAdapter
+import enclosures.EnclosuresRepo
+import entries.EntriesRepo
+import feeds.FeedsRepo
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import navigation.EntryFragmentArgs
 import navigation.NavDirections
 import navigation.findNavController
 import navigation.navArgs
 import navigation.openUrl
+import sync.Sync
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
@@ -50,12 +64,24 @@ class EntryFragment : Fragment() {
 
     private val args: EntryFragmentArgs by navArgs()
 
-    private val model: EntryModel by lazy { Di.getViewModel(EntryModel::class.java) }
+    private val app: Application by lazy { Di.get(Application::class.java) }
+    private val enclosuresRepo: EnclosuresRepo by lazy { Di.get(EnclosuresRepo::class.java) }
+    private val entriesRepository: EntriesRepo by lazy { Di.get(EntriesRepo::class.java) }
+    private val feedsRepository: FeedsRepo by lazy { Di.get(FeedsRepo::class.java) }
+    private val newsApiSync: Sync by lazy { Di.get(Sync::class.java) }
+    private val confRepo: ConfRepo by lazy { Di.get(ConfRepo::class.java) }
+
+    private val conf = confRepo.conf
 
     private var _binding: FragmentEntryBinding? = null
     private val binding get() = _binding!!
 
     private val enclosuresAdapter = createEnclosuresAdapter()
+
+    private val _state = MutableStateFlow<State>(State.Progress)
+    private val state = _state.asStateFlow()
+
+    private val entryArgs = MutableStateFlow<EntryArgs?>(null)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -85,15 +111,60 @@ class EntryFragment : Fragment() {
             addItemDecoration(CardListAdapterDecoration(resources.getDimensionPixelSize(R.dimen.dp_16)))
         }
 
-        model.setArgs(
-            EntryModel.Args(
+        entryArgs.update {
+            EntryArgs(
                 entryId = args.entryId,
                 summaryView = binding.summaryView,
                 lifecycleScope = lifecycleScope,
             )
-        )
+        }
 
-        model.state
+        lifecycleScope.launch { enclosuresRepo.deletePartialDownloads() }
+
+        combine(entryArgs, entriesRepository.selectCount()) { args, _ ->
+            if (args == null) {
+                _state.update { State.Progress }
+                return@combine
+            }
+
+            runCatching {
+                val entry = entriesRepository.selectById(args.entryId).first()
+
+                if (entry == null) {
+                    val message = getString(R.string.cannot_find_entry_with_id_s, args.entryId)
+                    _state.update { State.Error(message) }
+                    return@combine
+                }
+
+                val feed = feedsRepository.selectById(entry.feedId).first()
+
+                if (feed == null) {
+                    val message = getString(R.string.cannot_find_feed_with_id_s, entry.feedId)
+                    _state.update { State.Error(message) }
+                    return@combine
+                }
+
+                _state.update {
+                    State.Success(
+                        feedTitle = feed.title,
+                        entry = entry,
+                        entryLinks = entry.links,
+                        parsedContent = parseEntryContent(
+                            entry.contentText ?: "",
+                            TextViewImageGetter(
+                                textView = args.summaryView,
+                                scope = args.lifecycleScope,
+                                baseUrl = null,
+                            ),
+                        ),
+                    )
+                }
+            }.onFailure { throwable ->
+                _state.update { State.Error(throwable.message ?: "") }
+            }
+        }.launchIn(lifecycleScope)
+
+        state
             .onEach { setState(it) }
             .launchIn(viewLifecycleOwner.lifecycleScope)
 
@@ -136,26 +207,26 @@ class EntryFragment : Fragment() {
         _binding = null
     }
 
-    private fun setState(state: EntryModel.State) {
+    private fun setState(state: State) {
         binding.apply {
             val menu = binding.toolbar.menu!!
 
             when (state) {
-                EntryModel.State.Progress -> {
+                State.Progress -> {
                     menu.iterator().forEach { it.isVisible = false }
                     contentContainer.isVisible = false
                     progress.isVisible = true
                     fab.hide()
                 }
 
-                is EntryModel.State.Success -> {
+                is State.Success -> {
                     menu.findItem(R.id.toggleBookmarked)?.isVisible = true
                     menu.findItem(R.id.comments)?.apply {
                         isVisible = state.entry.extCommentsUrl.isNotBlank()
                         setOnMenuItemClickListener {
                             openUrl(
                                 state.entry.extCommentsUrl,
-                                model.conf.value.useBuiltInBrowser
+                                conf.value.useBuiltInBrowser
                             )
                             true
                         }
@@ -206,13 +277,13 @@ class EntryFragment : Fragment() {
                         fab.setOnClickListener {
                             openUrl(
                                 firstHtmlLink.href.toString(),
-                                model.conf.value.useBuiltInBrowser
+                                conf.value.useBuiltInBrowser
                             )
                         }
                     }
                 }
 
-                is EntryModel.State.Error -> {
+                is State.Error -> {
                     menu.iterator().forEach { it.isVisible = false }
                     contentContainer.isVisible = false
                     showErrorDialog(state.message) { findNavController().popBackStack() }
@@ -229,7 +300,7 @@ class EntryFragment : Fragment() {
         when (menuItem?.itemId) {
             R.id.toggleBookmarked -> {
                 lifecycleScope.launchWhenResumed {
-                    model.setBookmarked(
+                    setBookmarked(
                         entry.id,
                         !entry.extBookmarked,
                     )
@@ -279,7 +350,7 @@ class EntryFragment : Fragment() {
     fun downloadAudioEnclosure(enclosure: Link) {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                runCatching { model.downloadAudioEnclosure(enclosure) }
+                runCatching { enclosuresRepo.downloadAudioEnclosure(enclosure) }
                     .onFailure { showErrorDialog(it) }
             }
         }
@@ -302,7 +373,7 @@ class EntryFragment : Fragment() {
 
     private fun deleteEnclosure(enclosure: Link) {
         viewLifecycleOwner.lifecycleScope.launch {
-            runCatching { model.deleteEnclosure(enclosure) }
+            runCatching { enclosuresRepo.deleteFromCache(enclosure) }
                 .onFailure { showErrorDialog(it) }
         }
     }
@@ -350,6 +421,58 @@ class EntryFragment : Fragment() {
         }
     }
 
+    private fun setBookmarked(
+        entryId: String,
+        bookmarked: Boolean,
+    ) {
+        lifecycleScope.launch {
+            entriesRepository.updateBookmarkedAndBookmaredSynced(
+                id = entryId,
+                bookmarked = bookmarked,
+                bookmarkedSynced = false,
+            )
+
+            newsApiSync.run(
+                Sync.Args(
+                    syncFeeds = false,
+                    syncFlags = true,
+                    syncEntries = false,
+                )
+            )
+        }
+    }
+
+    private fun parseEntryContent(
+        content: String,
+        imageGetter: Html.ImageGetter,
+    ): SpannableStringBuilder {
+        val summary = HtmlCompat.fromHtml(
+            content,
+            HtmlCompat.FROM_HTML_MODE_LEGACY,
+            imageGetter,
+            null,
+        ) as SpannableStringBuilder
+
+        if (summary.isBlank()) {
+            return summary
+        }
+
+        while (summary.contains("\n\n\n")) {
+            val index = summary.indexOf("\n\n\n")
+            summary.delete(index, index + 1)
+        }
+
+        while (summary.startsWith("\n\n")) {
+            summary.delete(0, 1)
+        }
+
+        while (summary.endsWith("\n\n")) {
+            summary.delete(summary.length - 2, summary.length - 1)
+        }
+
+        return summary
+    }
+
     private fun createEnclosuresAdapter(): EnclosuresAdapter {
         return EnclosuresAdapter(object : EnclosuresAdapter.Callback {
             override fun onDownloadClick(item: EnclosuresAdapter.Item) {
@@ -384,6 +507,35 @@ class EntryFragment : Fragment() {
             }
 
             outRect.set(gapInPixels, gapInPixels, gapInPixels, bottomGap)
+        }
+    }
+
+    private data class EntryArgs(
+        val entryId: String,
+        val summaryView: TextView,
+        val lifecycleScope: LifecycleCoroutineScope,
+    )
+
+    private sealed class State {
+        object Progress : State()
+
+        data class Success(
+            val feedTitle: String,
+            val entry: Entry,
+            val entryLinks: List<Link>,
+            val parsedContent: SpannableStringBuilder,
+        ) : State()
+
+        data class Error(val message: String) : State()
+    }
+
+    private class TextViewImageGetter(
+        private val textView: TextView,
+        private val scope: LifecycleCoroutineScope,
+        private val baseUrl: String?,
+    ) : Html.ImageGetter {
+        override fun getDrawable(source: String): android.graphics.drawable.Drawable? {
+            return null
         }
     }
 }

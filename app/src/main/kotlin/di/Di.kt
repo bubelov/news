@@ -15,7 +15,6 @@ import entries.EntriesModel
 import entries.EntriesRepo
 import enclosures.EnclosuresModel
 import enclosures.EnclosuresRepo
-import entry.EntryModel
 import feeds.FeedsModel
 import feeds.FeedsRepo
 import feedsettings.FeedSettingsModel
@@ -98,14 +97,6 @@ object Di {
                 get(EntriesRepo::class.java),
                 get(FeedsRepo::class.java),
                 get(Sync::class.java)
-            )
-            EntryModel::class.java -> EntryModel(
-                context as Application,
-                get(EnclosuresRepo::class.java),
-                get(EntriesRepo::class.java),
-                get(FeedsRepo::class.java),
-                get(Sync::class.java),
-                get(ConfRepo::class.java)
             )
             SettingsModel::class.java -> SettingsModel(
                 context as Application,
