@@ -11,6 +11,7 @@ import androidx.core.view.updatePadding
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
+import auth.AuthFragment
 import co.appreactor.news.R
 import co.appreactor.news.databinding.ActivityBinding
 import com.google.android.material.navigation.NavigationBarView.OnItemReselectedListener
@@ -63,20 +64,22 @@ class Activity : AppCompatActivity(), FragmentManager.OnBackStackChangedListener
 
         supportFragmentManager.addOnBackStackChangedListener(this)
 
-        lifecycleScope.launch {
-            val confRepo = Di.get(ConfRepo::class.java)
-            val config = confRepo.conf.value
+        if (supportFragmentManager.findFragmentById(R.id.fragmentContainerView) is AuthFragment) {
+            lifecycleScope.launch {
+                val confRepo = Di.get(ConfRepo::class.java)
+                val config = confRepo.conf.value
 
-            if (config.backend.isNotBlank()) {
-                supportFragmentManager.commit {
-                    replace(
-                        R.id.fragmentContainerView,
-                        EntriesFragment::class.java,
-                        bundleOf("filter" to EntriesFilter.NotBookmarked),
-                    )
+                if (config.backend.isNotBlank()) {
+                    supportFragmentManager.commit {
+                        replace(
+                            R.id.fragmentContainerView,
+                            EntriesFragment::class.java,
+                            bundleOf("filter" to EntriesFilter.NotBookmarked),
+                        )
+                    }
+
+                    binding.bottomNav.isVisible = true
                 }
-
-                binding.bottomNav.isVisible = true
             }
         }
 
