@@ -2,6 +2,7 @@ package entry
 
 import android.app.Application
 import android.content.ActivityNotFoundException
+import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Rect
 import android.os.Bundle
@@ -25,10 +26,7 @@ import androidx.core.view.iterator
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.feedk.AtomLinkRel
@@ -43,13 +41,7 @@ import enclosures.EnclosuresAdapter
 import enclosures.EnclosuresRepo
 import entries.EntriesRepo
 import feeds.FeedsRepo
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import navigation.EntryFragmentArgs
 import navigation.NavDirections
@@ -71,17 +63,12 @@ class EntryFragment : Fragment() {
     private val newsApiSync: Sync by lazy { Di.get(Sync::class.java) }
     private val confRepo: ConfRepo by lazy { Di.get(ConfRepo::class.java) }
 
-    private val conf = confRepo.conf
+    private val conf get() = confRepo.conf
 
     private var _binding: FragmentEntryBinding? = null
     private val binding get() = _binding!!
 
     private val enclosuresAdapter = createEnclosuresAdapter()
-
-    private val _state = MutableStateFlow<State>(State.Progress)
-    private val state = _state.asStateFlow()
-
-    private val entryArgs = MutableStateFlow<EntryArgs?>(null)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -96,13 +83,7 @@ class EntryFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.toolbar.setNavigationOnClickListener {
-            android.util.Log.d("EntryFragment", "Toolbar back button clicked!")
             findNavController().popBackStack()
-        }
-        
-        // Also add click listener to toolbar navigation icon directly
-        binding.toolbar.navigationIcon?.let { icon ->
-            android.util.Log.d("EntryFragment", "Navigation icon is set: $icon")
         }
 
         binding.enclosures.apply {
@@ -111,62 +92,9 @@ class EntryFragment : Fragment() {
             addItemDecoration(CardListAdapterDecoration(resources.getDimensionPixelSize(R.dimen.dp_16)))
         }
 
-        entryArgs.update {
-            EntryArgs(
-                entryId = args.entryId,
-                summaryView = binding.summaryView,
-                lifecycleScope = lifecycleScope,
-            )
-        }
-
         lifecycleScope.launch { enclosuresRepo.deletePartialDownloads() }
 
-        combine(entryArgs, entriesRepository.selectCount()) { args, _ ->
-            if (args == null) {
-                _state.update { State.Progress }
-                return@combine
-            }
-
-            runCatching {
-                val entry = entriesRepository.selectById(args.entryId).first()
-
-                if (entry == null) {
-                    val message = getString(R.string.cannot_find_entry_with_id_s, args.entryId)
-                    _state.update { State.Error(message) }
-                    return@combine
-                }
-
-                val feed = feedsRepository.selectById(entry.feedId).first()
-
-                if (feed == null) {
-                    val message = getString(R.string.cannot_find_feed_with_id_s, entry.feedId)
-                    _state.update { State.Error(message) }
-                    return@combine
-                }
-
-                _state.update {
-                    State.Success(
-                        feedTitle = feed.title,
-                        entry = entry,
-                        entryLinks = entry.links,
-                        parsedContent = parseEntryContent(
-                            entry.contentText ?: "",
-                            TextViewImageGetter(
-                                textView = args.summaryView,
-                                scope = args.lifecycleScope,
-                                baseUrl = null,
-                            ),
-                        ),
-                    )
-                }
-            }.onFailure { throwable ->
-                _state.update { State.Error(throwable.message ?: "") }
-            }
-        }.launchIn(lifecycleScope)
-
-        state
-            .onEach { setState(it) }
-            .launchIn(viewLifecycleOwner.lifecycleScope)
+        loadEntry()
 
         binding.apply {
             scrollView.setOnScrollChangeListener { _, _, _, _, _ ->
@@ -207,131 +135,132 @@ class EntryFragment : Fragment() {
         _binding = null
     }
 
-    private fun setState(state: State) {
-        binding.apply {
-            val menu = binding.toolbar.menu!!
-
-            when (state) {
-                State.Progress -> {
-                    menu.iterator().forEach { it.isVisible = false }
-                    contentContainer.isVisible = false
-                    progress.isVisible = true
-                    fab.hide()
+    private fun loadEntry() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            runCatching {
+                val entry = entriesRepository.selectById(args.entryId).first()
+                if (entry == null) {
+                    showError(getString(R.string.cannot_find_entry_with_id_s, args.entryId)) { popBackStack() }
+                    return@launch
                 }
 
-                is State.Success -> {
-                    menu.findItem(R.id.toggleBookmarked)?.isVisible = true
-                    menu.findItem(R.id.comments)?.apply {
-                        isVisible = state.entry.extCommentsUrl.isNotBlank()
-                        setOnMenuItemClickListener {
-                            openUrl(
-                                state.entry.extCommentsUrl,
-                                conf.value.useBuiltInBrowser
-                            )
-                            true
-                        }
-                    }
-                    menu.findItem(R.id.feedSettings)?.isVisible = true
-                    menu.findItem(R.id.share)?.isVisible = true
-
-                    contentContainer.isVisible = true
-                    binding.toolbar.title = state.feedTitle
-
-                    binding.toolbar.setOnMenuItemClickListener {
-                        onMenuItemClick(
-                            menuItem = it,
-                            entry = state.entry,
-                            entryLinks = state.entryLinks,
-                        )
-                    }
-
-                    updateBookmarkedButton(state.entry.extBookmarked)
-                    title.text = state.entry.title
-                    val format =
-                        DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)
-                    date.text = format.format(state.entry.published)
-                    state.parsedContent.applyStyle(summaryView)
-                    summaryView.text = state.parsedContent
-                    summaryView.movementMethod = LinkMovementMethod.getInstance()
-                    progress.isVisible = false
-
-                    enclosuresAdapter.submitList(state.entryLinks
-                        .filter { it.rel is AtomLinkRel.Enclosure }
-                        .filter { it.type?.startsWith("audio") ?: false }
-                        .mapIndexed { index, enclosure ->
-                            EnclosuresAdapter.Item(
-                                entryId = state.entry.id,
-                                enclosure = enclosure,
-                                primaryText = getString(R.string.audio_n, index + 1),
-                                secondaryText = enclosure.href.toString()
-                            )
-                        })
-
-                    val firstHtmlLink =
-                        state.entryLinks.firstOrNull { it.rel is AtomLinkRel.Alternate && it.type == "text/html" }
-
-                    if (firstHtmlLink == null) {
-                        fab.hide()
-                    } else {
-                        fab.show()
-                        fab.setOnClickListener {
-                            openUrl(
-                                firstHtmlLink.href.toString(),
-                                conf.value.useBuiltInBrowser
-                            )
-                        }
-                    }
+                val feed = feedsRepository.selectById(entry.feedId).first()
+                if (feed == null) {
+                    showError(getString(R.string.cannot_find_feed_with_id_s, entry.feedId)) { popBackStack() }
+                    return@launch
                 }
 
-                is State.Error -> {
-                    menu.iterator().forEach { it.isVisible = false }
-                    contentContainer.isVisible = false
-                    showErrorDialog(state.message) { findNavController().popBackStack() }
-                }
+                showEntry(feed.title, entry, entry.links)
+            }.onFailure {
+                showError(it.message ?: "") { popBackStack() }
             }
         }
     }
 
-    private fun onMenuItemClick(
-        menuItem: MenuItem?,
-        entry: Entry,
-        entryLinks: List<Link>,
-    ): Boolean {
-        when (menuItem?.itemId) {
-            R.id.toggleBookmarked -> {
-                lifecycleScope.launchWhenResumed {
-                    setBookmarked(
-                        entry.id,
-                        !entry.extBookmarked,
+    private fun showEntry(feedTitle: String, entry: Entry, entryLinks: List<Link>) {
+        val menu = binding.toolbar.menu
+
+        menu.findItem(R.id.toggleBookmarked)?.isVisible = true
+        menu.findItem(R.id.comments)?.apply {
+            isVisible = entry.extCommentsUrl.isNotBlank()
+            setOnMenuItemClickListener {
+                openUrl(entry.extCommentsUrl, conf.value.useBuiltInBrowser)
+                true
+            }
+        }
+        menu.findItem(R.id.feedSettings)?.isVisible = true
+        menu.findItem(R.id.share)?.isVisible = true
+
+        binding.contentContainer.isVisible = true
+        binding.toolbar.title = feedTitle
+
+        binding.toolbar.setOnMenuItemClickListener { onMenuItemClick(it, entry, entryLinks) }
+
+        updateBookmarkedButton(entry.extBookmarked)
+        binding.title.text = entry.title
+        binding.date.text = DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).format(entry.published)
+
+        val parsedContent = parseEntryContent(
+            entry.contentText ?: "",
+            TextViewImageGetter(binding.summaryView),
+        )
+        parsedContent.applyStyle(binding.summaryView)
+        binding.summaryView.text = parsedContent
+        binding.summaryView.movementMethod = LinkMovementMethod.getInstance()
+        binding.progress.isVisible = false
+
+        enclosuresAdapter.submitList(
+            entryLinks
+                .filter { it.rel is AtomLinkRel.Enclosure }
+                .filter { it.type?.startsWith("audio") ?: false }
+                .mapIndexed { index, enclosure ->
+                    EnclosuresAdapter.Item(
+                        entryId = entry.id,
+                        enclosure = enclosure,
+                        primaryText = getString(R.string.audio_n, index + 1),
+                        secondaryText = enclosure.href.toString()
                     )
                 }
+        )
 
+        val firstHtmlLink = entryLinks.firstOrNull { it.rel is AtomLinkRel.Alternate && it.type == "text/html" }
+
+        if (firstHtmlLink != null) {
+            binding.fab.show()
+            binding.fab.setOnClickListener {
+                openUrl(firstHtmlLink.href.toString(), conf.value.useBuiltInBrowser)
+            }
+        }
+    }
+
+    private fun showError(message: String, action: () -> Unit) {
+        binding.toolbar.menu.iterator().forEach { it.isVisible = false }
+        binding.contentContainer.isVisible = false
+        showErrorDialog(message, DialogInterface.OnDismissListener { action() })
+    }
+
+    private fun popBackStack() {
+        findNavController().popBackStack()
+    }
+
+    private fun onMenuItemClick(menuItem: MenuItem?, entry: Entry, entryLinks: List<Link>): Boolean {
+        when (menuItem?.itemId) {
+            R.id.toggleBookmarked -> {
+                lifecycleScope.launch {
+                    entriesRepository.updateBookmarkedAndBookmaredSynced(
+                        id = entry.id,
+                        bookmarked = !entry.extBookmarked,
+                        bookmarkedSynced = false,
+                    )
+                    newsApiSync.run(
+                        Sync.Args(
+                            syncFeeds = false,
+                            syncFlags = true,
+                            syncEntries = false,
+                        )
+                    )
+                }
                 return true
             }
 
             R.id.feedSettings -> {
                 val args = NavDirections.EntryFragment.actionEntryFragmentToFeedSettingsFragment(feedId = entry.feedId)
                 findNavController().navigate(R.id.feedSettingsFragment, args)
-
                 return true
             }
 
             R.id.share -> {
-                val firstAlternateLink =
-                    entryLinks.firstOrNull { it.rel is AtomLinkRel.Alternate } ?: return true
-
+                val firstAlternateLink = entryLinks.firstOrNull { it.rel is AtomLinkRel.Alternate } ?: return true
                 val intent = Intent().apply {
                     action = Intent.ACTION_SEND
                     type = "text/plain"
                     putExtra(Intent.EXTRA_SUBJECT, entry.title)
                     putExtra(Intent.EXTRA_TEXT, firstAlternateLink.href.toString())
                 }
-
                 startActivity(Intent.createChooser(intent, ""))
                 return true
             }
         }
-
         return false
     }
 
@@ -349,10 +278,8 @@ class EntryFragment : Fragment() {
 
     fun downloadAudioEnclosure(enclosure: Link) {
         viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                runCatching { enclosuresRepo.downloadAudioEnclosure(enclosure) }
-                    .onFailure { showErrorDialog(it) }
-            }
+            runCatching { enclosuresRepo.downloadAudioEnclosure(enclosure) }
+                .onFailure { showErrorDialog(it) }
         }
     }
 
@@ -393,7 +320,6 @@ class EntryFragment : Fragment() {
                         getSpanEnd(it),
                         0
                     )
-
                     removeSpan(it)
                 }
 
@@ -408,7 +334,6 @@ class EntryFragment : Fragment() {
                         getSpanEnd(it),
                         0
                     )
-
                     removeSpan(it)
                 }
 
@@ -421,41 +346,10 @@ class EntryFragment : Fragment() {
         }
     }
 
-    private fun setBookmarked(
-        entryId: String,
-        bookmarked: Boolean,
-    ) {
-        lifecycleScope.launch {
-            entriesRepository.updateBookmarkedAndBookmaredSynced(
-                id = entryId,
-                bookmarked = bookmarked,
-                bookmarkedSynced = false,
-            )
+    private fun parseEntryContent(content: String, imageGetter: Html.ImageGetter): SpannableStringBuilder {
+        val summary = HtmlCompat.fromHtml(content, HtmlCompat.FROM_HTML_MODE_LEGACY, imageGetter, null) as SpannableStringBuilder
 
-            newsApiSync.run(
-                Sync.Args(
-                    syncFeeds = false,
-                    syncFlags = true,
-                    syncEntries = false,
-                )
-            )
-        }
-    }
-
-    private fun parseEntryContent(
-        content: String,
-        imageGetter: Html.ImageGetter,
-    ): SpannableStringBuilder {
-        val summary = HtmlCompat.fromHtml(
-            content,
-            HtmlCompat.FROM_HTML_MODE_LEGACY,
-            imageGetter,
-            null,
-        ) as SpannableStringBuilder
-
-        if (summary.isBlank()) {
-            return summary
-        }
+        if (summary.isBlank()) return summary
 
         while (summary.contains("\n\n\n")) {
             val index = summary.indexOf("\n\n\n")
@@ -473,69 +367,21 @@ class EntryFragment : Fragment() {
         return summary
     }
 
-    private fun createEnclosuresAdapter(): EnclosuresAdapter {
-        return EnclosuresAdapter(object : EnclosuresAdapter.Callback {
-            override fun onDownloadClick(item: EnclosuresAdapter.Item) {
-                downloadAudioEnclosure(item.enclosure)
-            }
+    private fun createEnclosuresAdapter() = EnclosuresAdapter(object : EnclosuresAdapter.Callback {
+        override fun onDownloadClick(item: EnclosuresAdapter.Item) = downloadAudioEnclosure(item.enclosure)
+        override fun onPlayClick(item: EnclosuresAdapter.Item) = playAudioEnclosure(item.enclosure)
+        override fun onDeleteClick(item: EnclosuresAdapter.Item) = deleteEnclosure(item.enclosure)
+    })
 
-            override fun onPlayClick(item: EnclosuresAdapter.Item) {
-                playAudioEnclosure(item.enclosure)
-            }
-
-            override fun onDeleteClick(item: EnclosuresAdapter.Item) {
-                deleteEnclosure(item.enclosure)
-            }
-        })
-    }
-
-    private class CardListAdapterDecoration(private val gapInPixels: Int) :
-        RecyclerView.ItemDecoration() {
-
-        override fun getItemOffsets(
-            outRect: Rect,
-            view: View,
-            parent: RecyclerView,
-            state: RecyclerView.State,
-        ) {
+    private class CardListAdapterDecoration(private val gapInPixels: Int) : RecyclerView.ItemDecoration() {
+        override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
             val position = parent.getChildAdapterPosition(view)
-
-            val bottomGap = if (position == (parent.adapter?.itemCount ?: 0) - 1) {
-                gapInPixels
-            } else {
-                0
-            }
-
+            val bottomGap = if (position == (parent.adapter?.itemCount ?: 0) - 1) gapInPixels else 0
             outRect.set(gapInPixels, gapInPixels, gapInPixels, bottomGap)
         }
     }
 
-    private data class EntryArgs(
-        val entryId: String,
-        val summaryView: TextView,
-        val lifecycleScope: LifecycleCoroutineScope,
-    )
-
-    private sealed class State {
-        object Progress : State()
-
-        data class Success(
-            val feedTitle: String,
-            val entry: Entry,
-            val entryLinks: List<Link>,
-            val parsedContent: SpannableStringBuilder,
-        ) : State()
-
-        data class Error(val message: String) : State()
-    }
-
-    private class TextViewImageGetter(
-        private val textView: TextView,
-        private val scope: LifecycleCoroutineScope,
-        private val baseUrl: String?,
-    ) : Html.ImageGetter {
-        override fun getDrawable(source: String): android.graphics.drawable.Drawable? {
-            return null
-        }
+    private class TextViewImageGetter(private val textView: TextView) : Html.ImageGetter {
+        override fun getDrawable(source: String): android.graphics.drawable.Drawable? = null
     }
 }
