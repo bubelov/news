@@ -14,6 +14,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -31,6 +32,7 @@ import com.google.android.material.snackbar.Snackbar
 import conf.ConfRepo
 import di.Di
 import dialog.showErrorDialog
+import entry.EntryFragment
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import navigation.NavController
@@ -387,8 +389,14 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
                 useBuiltInBrowser = item.useBuiltInBrowser,
             )
         } else {
-            val args = NavDirections.EntriesFragment.actionEntriesFragmentToEntryFragment(item.id)
-            findNavController().navigate(R.id.entryFragment, args)
+            parentFragmentManager.commit {
+                replace(
+                    R.id.fragmentContainerView,
+                    EntryFragment::class.java,
+                    bundleOf("entryId" to item.id),
+                )
+                addToBackStack(null)
+            }
         }
     }
 

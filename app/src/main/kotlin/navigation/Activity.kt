@@ -1,6 +1,7 @@
 package navigation
 
 import android.os.Bundle
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
@@ -25,6 +26,16 @@ class Activity : AppCompatActivity(), FragmentManager.OnBackStackChangedListener
 
     lateinit var binding: ActivityBinding
 
+    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            if (supportFragmentManager.backStackEntryCount > 0) {
+                supportFragmentManager.popBackStack()
+            } else {
+                finish()
+            }
+        }
+    }
+
     override fun onBackStackChanged() {
         updateBottomNavVisibility()
     }
@@ -47,6 +58,8 @@ class Activity : AppCompatActivity(), FragmentManager.OnBackStackChangedListener
 
     override fun onStart() {
         super.onStart()
+
+        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
         supportFragmentManager.addOnBackStackChangedListener(this)
 
