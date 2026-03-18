@@ -1,5 +1,5 @@
 <h2 align="center"><b>Vesti</b></h2>
-<h4 align="center">Feed reader 📰 and podcast player 🎧 for Android 🤖</h4>
+<h4 align="center">Web feed reader for Android</h4>
 
 <p align="center">
   <a href="https://f-droid.org/packages/co.appreactor.news/">
@@ -20,10 +20,15 @@
 <img alt="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width="204">
 </div>
 
-## 🔌 Integrations
+## 📱 Standalone mode
 
-- Miniflux (active)
-- Nextcloud (needs maintainers)
+- In standalone mode, you don't need a server
+- If you have a few devices you want to keep in sync, consider one of supported servers
+
+## 💻 Servers
+
+- Miniflux (supported)
+- Nextcloud (outdated, needs maintainers)
 
 ## ✨ Main Features:
 
