@@ -18,7 +18,7 @@ class ConfRepo(
     private val db: Db,
 ) {
 
-    private val conn = db.getConnection()
+    private val conn = db.conn
 
     private val _conf: MutableStateFlow<Conf> = MutableStateFlow(
         runBlocking { select() ?: DEFAULT_CONF })

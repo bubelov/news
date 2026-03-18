@@ -2,6 +2,7 @@ package db
 
 import android.content.Context
 import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.SQLiteStatement
 import androidx.sqlite.execSQL
 import androidx.sqlite.driver.AndroidSQLiteDriver
@@ -12,7 +13,8 @@ import java.time.OffsetDateTime
 private const val FILE_NAME = "vesti-2026-03-17.db"
 
 internal fun loadSchema(): String {
-    return Db::class.java.classLoader.getResourceAsStream("schema.sql")?.bufferedReader()?.use { it.readText() }
+    return Db::class.java.classLoader.getResourceAsStream("schema.sql")?.bufferedReader()
+        ?.use { it.readText() }
         ?: error("schema.sql not found in resources")
 }
 
@@ -31,25 +33,17 @@ fun Context.databaseFile(): File {
 }
 
 fun Context.db(): Db {
-    val path = getDatabasePath(FILE_NAME).absolutePath
-    return Db(AndroidSQLiteDriver().open(path))
+    val db = Db(AndroidSQLiteDriver(), getDatabasePath(FILE_NAME).absolutePath)
+    executeSchema(db.conn)
+    return db
 }
 
-class Db(val conn: SQLiteConnection, initSchema: Boolean) {
-
-    constructor(conn: SQLiteConnection) : this(conn, true)
+class Db(driver: SQLiteDriver, val path: String) {
+    val conn = driver.open(path)
 
     val entryQueries = EntryQueries(conn)
     val feedQueries = FeedQueries(conn)
     val entrySearchQueries = EntrySearchQueries(conn)
-
-    init {
-        if (initSchema) {
-            executeSchema(conn)
-        }
-    }
-
-    fun getConnection(): SQLiteConnection = conn
 
     fun transaction(block: () -> Unit) {
         conn.execSQL("BEGIN TRANSACTION")
@@ -61,30 +55,21 @@ class Db(val conn: SQLiteConnection, initSchema: Boolean) {
             throw e
         }
     }
-
-    companion object {
-        @Volatile
-        private var instance: Db? = null
-
-        fun getInstance(connection: SQLiteConnection): Db {
-            return instance ?: synchronized(this) {
-                instance ?: Db(connection).also { instance = it }
-            }
-        }
-    }
 }
 
 class EntryQueries(private val conn: SQLiteConnection) {
 
     fun insertOrReplace(entry: Entry) {
-        val stmt = conn.prepare("""
+        val stmt = conn.prepare(
+            """
             INSERT OR REPLACE INTO entry (
                 content_type, content_src, content_text, links, summary, id, feed_id, title,
                 published, updated, author_name, ext_read, ext_read_synced, ext_bookmarked,
                 ext_bookmarked_synced, ext_nc_guid_hash, ext_comments_url, ext_og_image_checked,
                 ext_og_image_url, ext_og_image_width, ext_og_image_height
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """)
+        """
+        )
         if (entry.contentType != null) stmt.bindText(1, entry.contentType) else stmt.bindNull(1)
         if (entry.contentSrc != null) stmt.bindText(2, entry.contentSrc) else stmt.bindNull(2)
         if (entry.contentText != null) stmt.bindText(3, entry.contentText) else stmt.bindNull(3)
@@ -254,7 +239,8 @@ class EntryQueries(private val conn: SQLiteConnection) {
 
     fun updateReadByFeedId(read: Boolean, feedId: String) {
         val readInt = if (read) 0 else 1
-        val stmt = conn.prepare("UPDATE entry SET ext_read = ?, ext_read_synced = 0 WHERE ext_read != ? AND feed_id = ?")
+        val stmt =
+            conn.prepare("UPDATE entry SET ext_read = ?, ext_read_synced = 0 WHERE ext_read != ? AND feed_id = ?")
         stmt.bindInt(1, if (read) 1 else 0)
         stmt.bindInt(2, readInt)
         stmt.bindText(3, feedId)
@@ -265,7 +251,8 @@ class EntryQueries(private val conn: SQLiteConnection) {
     fun updateReadByBookmarked(read: Boolean, bookmarked: Boolean) {
         val readInt = if (read) 0 else 1
         val bookmarkedInt = if (bookmarked) 1 else 0
-        val stmt = conn.prepare("UPDATE entry SET ext_read = ?, ext_read_synced = 0 WHERE ext_read != ? AND ext_bookmarked = ?")
+        val stmt =
+            conn.prepare("UPDATE entry SET ext_read = ?, ext_read_synced = 0 WHERE ext_read != ? AND ext_bookmarked = ?")
         stmt.bindInt(1, if (read) 1 else 0)
         stmt.bindInt(2, readInt)
         stmt.bindInt(3, bookmarkedInt)
@@ -282,8 +269,13 @@ class EntryQueries(private val conn: SQLiteConnection) {
         stmt.close()
     }
 
-    fun updateBookmarkedAndBookmaredSynced(id: String, extBookmarked: Boolean, extBookmarkedSynced: Boolean) {
-        val stmt = conn.prepare("UPDATE entry SET ext_bookmarked = ?, ext_bookmarked_synced = ? WHERE id = ?")
+    fun updateBookmarkedAndBookmaredSynced(
+        id: String,
+        extBookmarked: Boolean,
+        extBookmarkedSynced: Boolean
+    ) {
+        val stmt =
+            conn.prepare("UPDATE entry SET ext_bookmarked = ?, ext_bookmarked_synced = ? WHERE id = ?")
         stmt.bindInt(1, if (extBookmarked) 1 else 0)
         stmt.bindInt(2, if (extBookmarkedSynced) 1 else 0)
         stmt.bindText(3, id)
@@ -293,13 +285,15 @@ class EntryQueries(private val conn: SQLiteConnection) {
 
     fun selectByReadSynced(extReadSynced: Boolean): List<EntryWithoutContent> {
         val res = mutableListOf<EntryWithoutContent>()
-        val stmt = conn.prepare("""
+        val stmt = conn.prepare(
+            """
             SELECT links, summary, id, feed_id, title, published, updated, author_name,
                    ext_read, ext_read_synced, ext_bookmarked, ext_bookmarked_synced,
                    ext_nc_guid_hash, ext_comments_url, ext_og_image_checked, ext_og_image_url,
                    ext_og_image_width, ext_og_image_height
             FROM entry WHERE ext_read_synced = ? ORDER BY published DESC
-        """)
+        """
+        )
         stmt.bindInt(1, if (extReadSynced) 1 else 0)
         while (stmt.step()) {
             res.add(statementToEntryWithoutContent(stmt))
@@ -310,13 +304,15 @@ class EntryQueries(private val conn: SQLiteConnection) {
 
     fun selectByBookmarkedSynced(extBookmarkedSynced: Boolean): List<EntryWithoutContent> {
         val res = mutableListOf<EntryWithoutContent>()
-        val stmt = conn.prepare("""
+        val stmt = conn.prepare(
+            """
             SELECT links, summary, id, feed_id, title, published, updated, author_name,
                    ext_read, ext_read_synced, ext_bookmarked, ext_bookmarked_synced,
                    ext_nc_guid_hash, ext_comments_url, ext_og_image_checked, ext_og_image_url,
                    ext_og_image_width, ext_og_image_height
             FROM entry WHERE ext_bookmarked_synced = ? ORDER BY published DESC
-        """)
+        """
+        )
         stmt.bindInt(1, if (extBookmarkedSynced) 1 else 0)
         while (stmt.step()) {
             res.add(statementToEntryWithoutContent(stmt))
@@ -359,8 +355,14 @@ class EntryQueries(private val conn: SQLiteConnection) {
         stmt.close()
     }
 
-    fun updateOgImage(extOgImageUrl: String, extOgImageWidth: Long, extOgImageHeight: Long, id: String) {
-        val stmt = conn.prepare("UPDATE entry SET ext_og_image_url = ?, ext_og_image_width = ?, ext_og_image_height = ?, ext_og_image_checked = 1 WHERE id = ?")
+    fun updateOgImage(
+        extOgImageUrl: String,
+        extOgImageWidth: Long,
+        extOgImageHeight: Long,
+        id: String
+    ) {
+        val stmt =
+            conn.prepare("UPDATE entry SET ext_og_image_url = ?, ext_og_image_width = ?, ext_og_image_height = ?, ext_og_image_checked = 1 WHERE id = ?")
         stmt.bindText(1, extOgImageUrl)
         stmt.bindLong(2, extOgImageWidth)
         stmt.bindLong(3, extOgImageHeight)
@@ -398,13 +400,15 @@ class EntryQueries(private val conn: SQLiteConnection) {
 
     fun selectByOgImageChecked(extOgImageChecked: Boolean, limit: Long): List<EntryWithoutContent> {
         val res = mutableListOf<EntryWithoutContent>()
-        val stmt = conn.prepare("""
+        val stmt = conn.prepare(
+            """
             SELECT links, summary, id, feed_id, title, published, updated, author_name,
                    ext_read, ext_read_synced, ext_bookmarked, ext_bookmarked_synced,
                    ext_nc_guid_hash, ext_comments_url, ext_og_image_checked, ext_og_image_url,
                    ext_og_image_width, ext_og_image_height
             FROM entry WHERE ext_og_image_checked = ? ORDER BY published DESC LIMIT ?
-        """)
+        """
+        )
         stmt.bindInt(1, if (extOgImageChecked) 1 else 0)
         stmt.bindLong(2, limit)
         while (stmt.step()) {
@@ -457,16 +461,35 @@ class EntryQueries(private val conn: SQLiteConnection) {
             id = stmt.getTextSafe(getColumnIndex(stmt, "id")) ?: "",
             feedId = stmt.getTextSafe(getColumnIndex(stmt, "feed_id")) ?: "",
             extBookmarked = stmt.getInt(getColumnIndex(stmt, "ext_bookmarked")) == 1,
-            extShowPreviewImages = stmt.getInt(getColumnIndex(stmt, "ext_show_preview_images")) == 1,
+            extShowPreviewImages = stmt.getInt(
+                getColumnIndex(
+                    stmt,
+                    "ext_show_preview_images"
+                )
+            ) == 1,
             extOpenGraphImageUrl = stmt.getTextSafe(getColumnIndex(stmt, "ext_og_image_url")) ?: "",
             extOpenGraphImageWidth = stmt.getInt(getColumnIndex(stmt, "ext_og_image_width")),
             extOpenGraphImageHeight = stmt.getInt(getColumnIndex(stmt, "ext_og_image_height")),
             title = stmt.getTextSafe(getColumnIndex(stmt, "title")) ?: "",
             feedTitle = stmt.getTextSafe(getColumnIndex(stmt, "feed_title")) ?: "",
-            published = runCatching { OffsetDateTime.parse(stmt.getTextSafe(getColumnIndex(stmt, "published"))) }.getOrDefault(OffsetDateTime.now()),
+            published = runCatching {
+                OffsetDateTime.parse(
+                    stmt.getTextSafe(
+                        getColumnIndex(
+                            stmt,
+                            "published"
+                        )
+                    )
+                )
+            }.getOrDefault(OffsetDateTime.now()),
             summary = stmt.getTextSafe(getColumnIndex(stmt, "summary")) ?: "",
             extRead = stmt.getInt(getColumnIndex(stmt, "ext_read")) == 1,
-            extOpenEntriesInBrowser = stmt.getInt(getColumnIndex(stmt, "ext_open_entries_in_browser")) == 1,
+            extOpenEntriesInBrowser = stmt.getInt(
+                getColumnIndex(
+                    stmt,
+                    "ext_open_entries_in_browser"
+                )
+            ) == 1,
             links = jsonToLinks(stmt.getTextSafe(getColumnIndex(stmt, "links")))
         )
     }
@@ -480,7 +503,9 @@ class EntryQueries(private val conn: SQLiteConnection) {
             extOpenGraphImageHeight = stmt.getInt(4),
             title = stmt.getTextSafe(5) ?: "",
             feedTitle = stmt.getTextSafe(6) ?: "",
-            published = runCatching { OffsetDateTime.parse(stmt.getTextSafe(7)) }.getOrDefault(OffsetDateTime.now()),
+            published = runCatching { OffsetDateTime.parse(stmt.getTextSafe(7)) }.getOrDefault(
+                OffsetDateTime.now()
+            ),
             summary = stmt.getTextSafe(8) ?: "",
             extRead = stmt.getInt(9) == 1,
             extOpenEntriesInBrowser = stmt.getInt(10) == 1,
@@ -495,8 +520,12 @@ class EntryQueries(private val conn: SQLiteConnection) {
             id = stmt.getTextSafe(2) ?: "",
             feedId = stmt.getTextSafe(3) ?: "",
             title = stmt.getTextSafe(4) ?: "",
-            published = runCatching { OffsetDateTime.parse(stmt.getTextSafe(5)) }.getOrDefault(OffsetDateTime.now()),
-            updated = runCatching { OffsetDateTime.parse(stmt.getTextSafe(6)) }.getOrDefault(OffsetDateTime.now()),
+            published = runCatching { OffsetDateTime.parse(stmt.getTextSafe(5)) }.getOrDefault(
+                OffsetDateTime.now()
+            ),
+            updated = runCatching { OffsetDateTime.parse(stmt.getTextSafe(6)) }.getOrDefault(
+                OffsetDateTime.now()
+            ),
             authorName = stmt.getTextSafe(7) ?: "",
             extRead = stmt.getInt(8) == 1,
             extReadSynced = stmt.getInt(9) == 1,
@@ -515,11 +544,13 @@ class EntryQueries(private val conn: SQLiteConnection) {
 class FeedQueries(private val conn: SQLiteConnection) {
 
     fun insertOrReplace(feed: Feed) {
-        val stmt = conn.prepare("""
+        val stmt = conn.prepare(
+            """
             INSERT OR REPLACE INTO feed (
                 id, links, title, ext_open_entries_in_browser, ext_blocked_words, ext_show_preview_images
             ) VALUES (?, ?, ?, ?, ?, ?)
-        """)
+        """
+        )
         stmt.bindText(1, feed.id)
         stmt.bindText(2, linksToJson(feed.links))
         stmt.bindText(3, feed.title)
@@ -532,7 +563,8 @@ class FeedQueries(private val conn: SQLiteConnection) {
 
     fun selectAll(): List<Feed> {
         val res = mutableListOf<Feed>()
-        val stmt = conn.prepare("SELECT id, links, title, ext_open_entries_in_browser, ext_blocked_words, ext_show_preview_images FROM feed ORDER BY title")
+        val stmt =
+            conn.prepare("SELECT id, links, title, ext_open_entries_in_browser, ext_blocked_words, ext_show_preview_images FROM feed ORDER BY title")
         while (stmt.step()) {
             res.add(statementToFeed(stmt))
         }
@@ -569,7 +601,8 @@ class FeedQueries(private val conn: SQLiteConnection) {
     }
 
     fun selectById(id: String): Feed? {
-        val stmt = conn.prepare("SELECT id, links, title, ext_open_entries_in_browser, ext_blocked_words, ext_show_preview_images FROM feed WHERE id = ?")
+        val stmt =
+            conn.prepare("SELECT id, links, title, ext_open_entries_in_browser, ext_blocked_words, ext_show_preview_images FROM feed WHERE id = ?")
         stmt.bindText(1, id)
         val feed = if (stmt.step()) statementToFeed(stmt) else null
         stmt.close()
