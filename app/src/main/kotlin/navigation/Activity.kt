@@ -7,8 +7,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
-import androidx.fragment.app.replace
 import androidx.lifecycle.lifecycleScope
 import co.appreactor.news.R
 import co.appreactor.news.databinding.ActivityBinding
@@ -21,16 +21,18 @@ import feeds.FeedsFragment
 import kotlinx.coroutines.launch
 import opengraph.OpenGraphImagesRepo
 
-class Activity : AppCompatActivity() {
+class Activity : AppCompatActivity(), FragmentManager.OnBackStackChangedListener {
 
     lateinit var binding: ActivityBinding
+
+    override fun onBackStackChanged() {
+        updateBottomNavVisibility()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        binding.bottomNav.isVisible = false
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNav) { v, insets ->
             insets.getInsets(WindowInsetsCompat.Type.navigationBars()).let {
@@ -46,6 +48,8 @@ class Activity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
+        supportFragmentManager.addOnBackStackChangedListener(this)
+
         lifecycleScope.launch {
             val confRepo = Di.get(ConfRepo::class.java)
             val config = confRepo.conf.value
@@ -60,12 +64,6 @@ class Activity : AppCompatActivity() {
                 }
 
                 binding.bottomNav.isVisible = true
-            } else {
-//                supportFragmentManager.commit {
-//                    setReorderingAllowed(true)
-//                    replace<AuthFragment>(R.id.fragmentContainerView)
-//                    addToBackStack(null)
-//                }
             }
         }
 
@@ -111,6 +109,20 @@ class Activity : AppCompatActivity() {
 
             setOnItemReselectedListener(createOnItemReselectedListener())
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        supportFragmentManager.removeOnBackStackChangedListener(this)
+    }
+
+    private fun updateBottomNavVisibility() {
+        val hasNoBackStack = supportFragmentManager.backStackEntryCount == 0
+        val currentFragment = supportFragmentManager.fragments.firstOrNull()
+        val isEntriesOrFeedsFragment =
+            currentFragment is EntriesFragment || currentFragment is FeedsFragment
+
+        binding.bottomNav.isVisible = hasNoBackStack && isEntriesOrFeedsFragment
     }
 
     private fun createOnItemReselectedListener(): OnItemReselectedListener {

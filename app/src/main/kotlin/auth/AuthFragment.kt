@@ -16,8 +16,6 @@ import di.Di
 import entries.EntriesFilter
 import entries.EntriesFragment
 import navigation.Activity
-import navigation.NavDirections
-import navigation.findNavController
 
 class AuthFragment : Fragment() {
 
@@ -56,13 +54,11 @@ class AuthFragment : Fragment() {
                 model.setStandaloneBackend()
 
                 parentFragmentManager.commit {
-                    setReorderingAllowed(true)
                     replace(
                         R.id.fragmentContainerView,
                         EntriesFragment::class.java,
                         bundleOf("filter" to EntriesFilter.NotBookmarked),
                     )
-                    addToBackStack(null)
                 }
 
                 (activity as Activity).binding.bottomNav.isVisible = true
@@ -71,7 +67,6 @@ class AuthFragment : Fragment() {
 
         useMinifluxBackend.setOnClickListener {
             parentFragmentManager.commit {
-                setReorderingAllowed(true)
                 replace<MinifluxAuthFragment>(R.id.fragmentContainerView)
                 addToBackStack(null)
             }
