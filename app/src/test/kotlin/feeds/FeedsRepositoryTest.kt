@@ -75,6 +75,7 @@ class FeedsRepositoryTest {
         val api: Api = mockk()
         val repo = FeedsRepo(api, db)
         val feeds = buildList { repeat(5) { add(db.insertRandomFeed()) } }
+        repo.refresh()
         assertEquals(feeds.sortedBy { it.title }, repo.selectAll().first())
     }
 

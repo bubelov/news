@@ -43,6 +43,10 @@ class FeedsRepo(
 
     fun selectAll(): Flow<List<Feed>> = _feedsFlow.asStateFlow()
 
+    fun refresh() {
+        refreshFlows()
+    }
+
     fun selectAllWithUnreadEntryCount(): Flow<List<db.SelectAllWithUnreadEntryCount>> = _feedsWithUnreadFlow.asStateFlow()
 
     fun selectById(id: String): Flow<Feed?> {
