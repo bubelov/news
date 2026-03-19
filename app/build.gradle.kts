@@ -38,10 +38,10 @@ android {
             isShrinkResources = true
 
             // Includes the default ProGuard rules file
-            proguardFiles(
-                // Default file with automatically generated optimization rules.
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-            )
+            //proguardFiles(
+            //    // Default file with automatically generated optimization rules.
+            //    getDefaultProguardFile("proguard-android-optimize.txt"),
+            //)
 
             signingConfig = signingConfigs.getByName("debug")
         }
