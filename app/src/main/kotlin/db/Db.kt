@@ -680,19 +680,30 @@ data class SelectAllWithUnreadEntryCount(
     val unreadEntries: Long
 )
 
-private fun linksToJson(links: List<Link>): String {
+@PublishedApi
+internal fun linksToJson(links: List<Link>): String {
     return links.joinToString(",") { link ->
-        """{"href":"${link.href}","rel":"${link.rel}","type":"${link.type}"}"""
+        val length = link.length?.toString() ?: "null"
+        val extEnclosureDownloadProgress = link.extEnclosureDownloadProgress?.toString() ?: "null"
+        val relName = when (link.rel) {
+            is co.appreactor.feedk.AtomLinkRel.Alternate -> "Alternate"
+            is co.appreactor.feedk.AtomLinkRel.Enclosure -> "Enclosure"
+            is co.appreactor.feedk.AtomLinkRel.Self -> "Self"
+            is co.appreactor.feedk.AtomLinkRel.Related -> "Related"
+            else -> ""
+        }
+        """{"feedId":"${link.feedId ?: ""}","entryId":"${link.entryId ?: ""}","href":"${link.href}","rel":"$relName","type":"${link.type ?: ""}","hreflang":"${link.hreflang ?: ""}","title":"${link.title ?: ""}","length":$length,"extEnclosureDownloadProgress":$extEnclosureDownloadProgress,"extCacheUri":"${link.extCacheUri ?: ""}"}"""
     }
 }
 
-private fun jsonToLinks(json: String?): List<Link> {
+@PublishedApi
+internal fun jsonToLinks(json: String?): List<Link> {
     if (json.isNullOrBlank()) return emptyList()
     return try {
         val links = mutableListOf<Link>()
-        val regex = """\{"href":"([^"]*)","rel":"([^"]*)","type":"([^"]*)"\}""".toRegex()
+        val regex = """\{"feedId":"([^"]*)","entryId":"([^"]*)","href":"([^"]*)","rel":"([^"]*)","type":"([^"]*)","hreflang":"([^"]*)","title":"([^"]*)","length":([^,]*),"extEnclosureDownloadProgress":([^,]*),"extCacheUri":"([^"]*)"\}""".toRegex()
         regex.findAll(json).forEach { match ->
-            val (href, rel, type) = match.destructured
+            val (feedId, entryId, href, rel, type, hreflang, title, length, extEnclosureDownloadProgress, extCacheUri) = match.destructured
             val parsedRel: co.appreactor.feedk.AtomLinkRel = when (rel) {
                 "Alternate" -> co.appreactor.feedk.AtomLinkRel.Alternate
                 "Enclosure" -> co.appreactor.feedk.AtomLinkRel.Enclosure
@@ -707,16 +718,16 @@ private fun jsonToLinks(json: String?): List<Link> {
             }
             links.add(
                 Link(
-                    feedId = null,
-                    entryId = null,
+                    feedId = feedId.ifEmpty { null },
+                    entryId = entryId.ifEmpty { null },
                     href = parsedUrl,
                     rel = parsedRel,
-                    type = type,
-                    hreflang = null,
-                    title = null,
-                    length = null,
-                    extEnclosureDownloadProgress = null,
-                    extCacheUri = null
+                    type = type.ifEmpty { null },
+                    hreflang = hreflang.ifEmpty { null },
+                    title = title.ifEmpty { null },
+                    length = if (length == "null") null else length.toLongOrNull(),
+                    extEnclosureDownloadProgress = if (extEnclosureDownloadProgress == "null") null else extEnclosureDownloadProgress.toDoubleOrNull(),
+                    extCacheUri = extCacheUri.ifEmpty { null }
                 )
             )
         }
