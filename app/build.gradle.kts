@@ -1,17 +1,17 @@
-import java.io.FileInputStream
-import java.util.Properties
-
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("org.jetbrains.kotlin.plugin.parcelize")
+    alias(libs.plugins.android.application)
 }
 
-val signingPropertiesFile = rootProject.file("signing.properties")
+kotlin {
+    jvmToolchain(21)
+}
 
 android {
     namespace = "co.appreactor.news"
-    compileSdk = 36
+
+    compileSdk {
+        version = release(36)
+    }
 
     defaultConfig {
         applicationId = "co.appreactor.news"
@@ -19,38 +19,8 @@ android {
         targetSdk = 36
         versionCode = 24
         versionName = "0.4.3"
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        //setProperty("archivesBaseName", "news-$versionName")
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-
-    kotlinOptions {
-        jvmTarget = "11"
-        freeCompilerArgs += "-opt-in=kotlinx.coroutines.DelicateCoroutinesApi"
-    }
-
-    signingConfigs {
-        if (signingPropertiesFile.exists()) {
-            create("release") {
-                val signingProperties = Properties()
-                signingProperties.load(FileInputStream(signingPropertiesFile))
-                storeFile = File(signingProperties["releaseKeystoreFile"] as String)
-                storePassword = signingProperties["releaseKeystorePassword"] as String
-                keyAlias = signingProperties["releaseKeyAlias"] as String
-                keyPassword = signingProperties["releaseKeyPassword"] as String
-            }
-        }
-
-        create("selfSignedRelease") {
-            storeFile = File(rootDir, "release.jks")
-            storePassword = "news-android"
-            keyAlias = "news-android"
-            keyPassword = "news-android"
-        }
     }
 
     buildTypes {
@@ -58,20 +28,27 @@ android {
             applicationIdSuffix = ".debug"
         }
 
-        if (signingPropertiesFile.exists()) {
-            release {
-                val signingProperties = Properties()
-                signingProperties.load(FileInputStream(signingPropertiesFile))
-                signingConfig = signingConfigs.getByName("release")
-            }
-        }
+        release {
+            // https://developer.android.com/topic/performance/app-optimization/enable-app-optimization
 
-        create("selfSignedRelease") {
-            signingConfig = signingConfigs.getByName("selfSignedRelease")
+            // Enables code-related app optimization.
+            isMinifyEnabled = true
+
+            // Enables resource shrinking.
+            isShrinkResources = true
+
+            // Includes the default ProGuard rules file
+            proguardFiles(
+                // Default file with automatically generated optimization rules.
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+            )
+
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 
     buildFeatures {
+        buildConfig = true
         viewBinding = true
     }
 }
@@ -119,6 +96,6 @@ dependencies {
     testImplementation(libs.mockk)
     androidTestImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.runner)
-    androidTestImplementation(libs.androidx.test.espresso.core)
-    debugImplementation(libs.androidx.test.monitor)
+    //androidTestImplementation(libs.androidx.test.espresso.core)
+    //debugImplementation(libs.androidx.test.monitor)
 }

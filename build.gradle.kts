@@ -1,6 +1,5 @@
 plugins {
-    id("com.android.application") apply false
-    id("org.jetbrains.kotlin.android") apply false
-    id("org.jetbrains.kotlin.plugin.parcelize") apply false
-    id("com.google.devtools.ksp") apply false
+    // this is necessary to avoid the plugins to be loaded multiple times
+    // in each subproject's classloader
+    alias(libs.plugins.android.application) apply false
 }
