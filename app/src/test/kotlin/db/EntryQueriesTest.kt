@@ -12,7 +12,7 @@ class EntryQueriesTest {
 
     @Before
     fun before() {
-        db = testDb()
+        db = db()
     }
 
     @Test

@@ -2,7 +2,7 @@ package auth
 
 import android.util.Log
 import conf.ConfRepo
-import db.testDb
+import db.db
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -19,7 +19,7 @@ class MinifluxAuthModelTest {
         mockkStatic(Log::class)
         every { Log.d(any(), any()) } returns 0
 
-        val db = testDb()
+        val db = db()
         val confRepo = ConfRepo(db)
 
         val model = MinifluxAuthModel(

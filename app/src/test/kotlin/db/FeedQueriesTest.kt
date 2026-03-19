@@ -9,7 +9,7 @@ class FeedQueriesTest {
 
     @Test
     fun insertOrReplace() {
-        val db = testDb()
+        val db = db()
         val feed = db.insertRandomFeed()
         assertEquals(feed, db.feedQueries.selectAll().single())
         db.feedQueries.insertOrReplace(feed)
@@ -18,14 +18,14 @@ class FeedQueriesTest {
 
     @Test
     fun selectAll() {
-        val db = testDb()
+        val db = db()
         val feeds = buildList { repeat(5) { add(db.insertRandomFeed()) } }
         assertEquals(feeds.sortedBy { it.title }, db.feedQueries.selectAll())
     }
 
     @Test
     fun selectAllWithUnreadEntryCount() {
-        val db = testDb()
+        val db = db()
         val feed = db.insertRandomFeed()
         assertEquals(0, db.feedQueries.selectAllWithUnreadEntryCount().first().unreadEntries)
         val readEntries = buildList { repeat(7) { add(entry().copy(feedId = feed.id, extRead = true)) } }
@@ -37,7 +37,7 @@ class FeedQueriesTest {
 
     @Test
     fun selectById() {
-        val db = testDb()
+        val db = db()
         val feeds = buildList { repeat(5) { add(db.insertRandomFeed()) } }
         val randomFeed = feeds.random()
         assertEquals(randomFeed, db.feedQueries.selectById(randomFeed.id))
@@ -45,7 +45,7 @@ class FeedQueriesTest {
 
     @Test
     fun deleteAll() {
-        val db = testDb()
+        val db = db()
         repeat(5) { db.insertRandomFeed() }
         db.feedQueries.deleteAll()
         assertTrue(db.feedQueries.selectAll().isEmpty())
@@ -53,7 +53,7 @@ class FeedQueriesTest {
 
     @Test
     fun deleteById() {
-        val db = testDb()
+        val db = db()
         val feeds = buildList { repeat(5) { add(db.insertRandomFeed()) } }
         val randomFeed = feeds.random()
         db.feedQueries.deleteById(randomFeed.id)

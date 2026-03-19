@@ -1,7 +1,7 @@
 package feedsettings
 
+import db.db
 import db.insertRandomFeed
-import db.testDb
 import feeds.FeedsRepo
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -35,7 +35,7 @@ class FeedSettingsModelTest {
 
     @Test
     fun loadFeed(): Unit = runBlocking {
-        val db = testDb()
+        val db = db()
         val feed = db.insertRandomFeed()
 
         val model = FeedSettingsModel(

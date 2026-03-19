@@ -1,7 +1,7 @@
 package feeds
 
 import conf.ConfRepo
-import db.testDb
+import db.db
 import entries.EntriesRepo
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -32,7 +32,7 @@ class FeedsModelTest {
 
     @Test
     fun init(): Unit = runBlocking {
-        val db = testDb()
+        val db = db()
         val confRepo = ConfRepo(db)
         val feedsRepo = FeedsRepo(mockk(), db)
         val entriesRepo = EntriesRepo(mockk(), db)

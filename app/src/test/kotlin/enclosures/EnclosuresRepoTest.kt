@@ -2,8 +2,8 @@ package enclosures
 
 import co.appreactor.feedk.AtomLinkRel
 import db.Link
+import db.db
 import db.entryWithoutContent
-import db.testDb
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -14,7 +14,7 @@ class EnclosuresRepoTest {
 
     @Test
     fun downloadAudioEnclosure_withInvalidRel(): Unit = runBlocking {
-        val db = testDb()
+        val db = db()
 
         val repo = EnclosuresRepo(
             db = db,

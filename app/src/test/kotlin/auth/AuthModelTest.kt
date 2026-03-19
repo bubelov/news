@@ -1,7 +1,7 @@
 package auth
 
 import conf.ConfRepo
-import db.testDb
+import db.db
 import io.mockk.coVerify
 import io.mockk.mockk
 import sync.BackgroundSyncScheduler
@@ -13,7 +13,7 @@ class AuthModelTest {
 
     @Test
     fun setStandaloneBackend() {
-        val db = testDb()
+        val db = db()
         val confRepo = ConfRepo(db)
         val syncScheduler = mockk<BackgroundSyncScheduler>(relaxUnitFun = true)
 

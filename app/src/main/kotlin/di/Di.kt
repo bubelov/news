@@ -5,12 +5,12 @@ import android.app.Application
 import androidx.lifecycle.ViewModel
 import api.Api
 import api.HotSwapApi
+import app.App
 import auth.AuthModel
 import auth.MinifluxAuthModel
 import auth.NextcloudAuthModel
 import conf.ConfRepo
 import db.Db
-import db.db
 import entries.EntriesModel
 import entries.EntriesRepo
 import enclosures.EnclosuresModel
@@ -48,7 +48,7 @@ object Di {
     @Suppress("UNCHECKED_CAST")
     private fun createInstance(clazz: Class<*>): Any {
         return when (clazz) {
-            Db::class.java -> context.db()
+            Db::class.java -> (context.applicationContext as App).db
             ConfRepo::class.java -> ConfRepo(get(Db::class.java))
             Api::class.java, HotSwapApi::class.java -> HotSwapApi(
                 get(ConfRepo::class.java),

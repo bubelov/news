@@ -6,8 +6,8 @@ import android.net.Uri
 import android.util.Log
 import co.appreactor.feedk.AtomLinkRel
 import db.Link
+import db.db
 import db.entry
-import db.testDb
 import entries.EntriesRepo
 import io.mockk.every
 import io.mockk.mockk
@@ -55,7 +55,7 @@ class EnclosuresModelTest {
         every { context.contentResolver } returns contentResolver
         every { contentResolver.delete(any(), null, null) } returns 1
 
-        val db = testDb()
+        val db = db()
 
         val entryId = UUID.randomUUID().toString()
         val enclosureUri = "audio://1"

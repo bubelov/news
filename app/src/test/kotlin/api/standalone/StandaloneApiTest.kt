@@ -1,7 +1,7 @@
 package api.standalone
 
+import db.db
 import db.insertRandomFeed
-import db.testDb
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -17,7 +17,7 @@ class StandaloneApiTest {
         server.enqueue(MockResponse().setResponseCode(404))
         server.start()
 
-        val result = StandaloneNewsApi(testDb()).addFeed(server.url("/feed.atom"))
+        val result = StandaloneNewsApi(db()).addFeed(server.url("/feed.atom"))
         assertTrue(result.isFailure)
 
         server.shutdown()
@@ -25,7 +25,7 @@ class StandaloneApiTest {
 
     @Test
     fun getFeeds() = runBlocking {
-        val db = testDb()
+        val db = db()
         val feed = db.insertRandomFeed()
         val api = StandaloneNewsApi(db)
         assertEquals(feed, api.getFeeds().getOrThrow().single())

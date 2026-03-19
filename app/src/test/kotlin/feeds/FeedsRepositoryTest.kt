@@ -3,8 +3,8 @@ package feeds
 import api.Api
 import db.Entry
 import db.Feed
+import db.db
 import db.insertRandomFeed
-import db.testDb
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
@@ -21,7 +21,7 @@ class FeedsRepositoryTest {
 
     @Test
     fun insertOrReplace() = runBlocking {
-        val db = testDb()
+        val db = db()
         val api: Api = mockk()
         val repo = FeedsRepo(api, db)
 
@@ -41,7 +41,7 @@ class FeedsRepositoryTest {
 
     @Test
     fun insertByUrl() = runBlocking {
-        val db = testDb()
+        val db = db()
         val api: Api = mockk()
         val repo = FeedsRepo(api, db)
         val feedUrl = "https://example.com/".toHttpUrl()
@@ -71,7 +71,7 @@ class FeedsRepositoryTest {
 
     @Test
     fun selectAll() = runBlocking {
-        val db = testDb()
+        val db = db()
         val api: Api = mockk()
         val repo = FeedsRepo(api, db)
         val feeds = buildList { repeat(5) { add(db.insertRandomFeed()) } }
@@ -80,7 +80,7 @@ class FeedsRepositoryTest {
 
     @Test
     fun selectById() = runBlocking {
-        val db = testDb()
+        val db = db()
         val api: Api = mockk()
         val repo = FeedsRepo(api, db)
         val feeds = buildList { repeat(5) { add(db.insertRandomFeed()) } }
@@ -90,7 +90,7 @@ class FeedsRepositoryTest {
 
     @Test
     fun updateTitle() = runBlocking {
-        val db = testDb()
+        val db = db()
         val api: Api = mockk()
         val repo = FeedsRepo(api, db)
 
@@ -120,7 +120,7 @@ class FeedsRepositoryTest {
 
     @Test
     fun deleteById() = runBlocking {
-        val db = testDb()
+        val db = db()
         val api: Api = mockk()
         val repo = FeedsRepo(api, db)
         val feeds = buildList { repeat(5) { add(db.insertRandomFeed()) } }

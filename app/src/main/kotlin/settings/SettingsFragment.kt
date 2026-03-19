@@ -15,11 +15,11 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import app.App
 import co.appreactor.news.R
 import co.appreactor.news.databinding.FragmentSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import conf.ConfRepo
-import db.databaseFile
 import di.Di
 import dialog.showErrorDialog
 import kotlinx.coroutines.Dispatchers
@@ -81,7 +81,8 @@ class SettingsFragment : Fragment() {
                     runCatching {
                         withContext(Dispatchers.IO) {
                             requireContext().contentResolver.openOutputStream(uri)?.use {
-                                requireContext().databaseFile().inputStream().copyTo(it)
+                                (requireContext().applicationContext as App).databaseFile()
+                                    .inputStream().copyTo(it)
                             }
                         }
                     }.onFailure {

@@ -8,7 +8,7 @@ class EntrySearchQueriesTest {
 
     @Test
     fun selectByQuery() {
-        val db = testDb()
+        val db = db()
         val feed = db.insertRandomFeed()
 
         val entries = listOf(
@@ -29,7 +29,7 @@ class EntrySearchQueriesTest {
     @Test
     @Ignore("Won't work without icu, see https://github.com/requery/sqlite-android/issues/55")
     fun selectByQuery_inRussian() {
-        val db = testDb()
+        val db = db()
         val feed = db.insertRandomFeed()
 
         val entries = listOf(

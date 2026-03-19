@@ -2,7 +2,7 @@ package settings
 
 import android.app.Application
 import conf.ConfRepo
-import db.testDb
+import db.db
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterIsInstance
@@ -35,7 +35,7 @@ class SettingsModelTest {
     fun removeProtocolPrefixFromAccountName() = runBlocking {
         val app: Application = mockk(relaxed = true)
 
-        val db = testDb()
+        val db = db()
         val confRepo = ConfRepo(db)
 
         confRepo.update {

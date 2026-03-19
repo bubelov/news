@@ -1,9 +1,9 @@
 package entries
 
+import db.db
 import db.entry
 import db.entryWithoutContent
 import db.insertRandomFeed
-import db.testDb
 import db.toEntry
 import io.mockk.mockk
 import kotlinx.coroutines.flow.first
@@ -15,7 +15,7 @@ class EntriesRepositoryTest {
 
     @Test
     fun selectById(): Unit = runBlocking {
-        val db = testDb()
+        val db = db()
         val repo = EntriesRepo(db = db, api = mockk())
         val entries = listOf(entry(), entry(), entry())
         entries.forEach { db.entryQueries.insertOrReplace(it) }
@@ -25,7 +25,7 @@ class EntriesRepositoryTest {
 
     @Test
     fun selectByReadAndBookmarked(): Unit = runBlocking {
-        val db = testDb()
+        val db = db()
         val feed = db.insertRandomFeed()
         val repo = EntriesRepo(db = db, api = mockk())
 
@@ -40,22 +40,26 @@ class EntriesRepositoryTest {
 
         assertEquals(
             entries.filter { it.extRead && it.extBookmarked }.map { it.id },
-            repo.selectByReadAndBookmarked(read = listOf(true), bookmarked = true).first().map { it.id },
+            repo.selectByReadAndBookmarked(read = listOf(true), bookmarked = true).first()
+                .map { it.id },
         )
 
         assertEquals(
             entries.filter { it.extRead && !it.extBookmarked }.map { it.id },
-            repo.selectByReadAndBookmarked(read = listOf(true), bookmarked = false).first().map { it.id },
+            repo.selectByReadAndBookmarked(read = listOf(true), bookmarked = false).first()
+                .map { it.id },
         )
 
         assertEquals(
             entries.filter { !it.extRead && it.extBookmarked }.map { it.id },
-            repo.selectByReadAndBookmarked(read = listOf(false), bookmarked = true).first().map { it.id },
+            repo.selectByReadAndBookmarked(read = listOf(false), bookmarked = true).first()
+                .map { it.id },
         )
 
         assertEquals(
             entries.filter { !it.extRead && !it.extBookmarked }.map { it.id },
-            repo.selectByReadAndBookmarked(read = listOf(false), bookmarked = false).first().map { it.id },
+            repo.selectByReadAndBookmarked(read = listOf(false), bookmarked = false).first()
+                .map { it.id },
         )
     }
 }

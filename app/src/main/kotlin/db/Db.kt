@@ -39,11 +39,16 @@ fun Context.db(): Db {
 }
 
 class Db(driver: SQLiteDriver, val path: String) {
+
     val conn = driver.open(path)
 
     val entryQueries = EntryQueries(conn)
     val feedQueries = FeedQueries(conn)
     val entrySearchQueries = EntrySearchQueries(conn)
+
+    init {
+        executeSchema(conn)
+    }
 
     fun transaction(block: () -> Unit) {
         conn.execSQL("BEGIN TRANSACTION")
@@ -554,9 +559,17 @@ class FeedQueries(private val conn: SQLiteConnection) {
         stmt.bindText(1, feed.id)
         stmt.bindText(2, linksToJson(feed.links))
         stmt.bindText(3, feed.title)
-        stmt.bindInt(4, if (feed.extOpenEntriesInBrowser == true) 1 else 0)
+        if (feed.extOpenEntriesInBrowser != null) {
+            stmt.bindInt(4, if (feed.extOpenEntriesInBrowser) 1 else 0)
+        } else {
+            stmt.bindNull(4)
+        }
         stmt.bindText(5, feed.extBlockedWords)
-        stmt.bindInt(6, if (feed.extShowPreviewImages == true) 1 else 0)
+        if (feed.extShowPreviewImages != null) {
+            stmt.bindInt(6, if (feed.extShowPreviewImages) 1 else 0)
+        } else {
+            stmt.bindNull(6)
+        }
         stmt.step()
         stmt.close()
     }
@@ -635,9 +648,9 @@ class FeedQueries(private val conn: SQLiteConnection) {
             id = stmt.getText(0),
             links = jsonToLinks(stmt.getText(1)),
             title = stmt.getText(2),
-            extOpenEntriesInBrowser = stmt.getInt(3) == 1,
+            extOpenEntriesInBrowser = if (stmt.isNull(3)) null else stmt.getInt(3) == 1,
             extBlockedWords = stmt.getText(4),
-            extShowPreviewImages = stmt.getInt(5) == 1
+            extShowPreviewImages = if (stmt.isNull(5)) null else stmt.getInt(5) == 1
         )
     }
 }
