@@ -1,4 +1,4 @@
-package entry
+package org.vestifeed.entry
 
 import androidx.fragment.app.testing.launchFragmentInContainer
 import entries.EntriesFragmentDirections

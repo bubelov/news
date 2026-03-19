@@ -1,4 +1,4 @@
-package entries
+package org.vestifeed.entries
 
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.platform.app.InstrumentationRegistry

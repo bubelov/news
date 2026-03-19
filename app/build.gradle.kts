@@ -7,14 +7,14 @@ kotlin {
 }
 
 android {
-    namespace = "co.appreactor.news"
+    namespace = "org.vestifeed"
 
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "co.appreactor.news"
+        applicationId = "org.vestifeed"
         minSdk = 33
         targetSdk = 36
         versionCode = 24
@@ -31,7 +31,7 @@ android {
         release {
             // https://developer.android.com/topic/performance/app-optimization/enable-app-optimization
 
-            // Enables code-related app optimization.
+            // Enables code-related org.vestifeed.app optimization.
             // isMinifyEnabled = true
 
             // Enables resource shrinking.

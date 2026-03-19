@@ -1,4 +1,4 @@
-package settings
+package org.vestifeed.settings
 
 import androidx.fragment.app.testing.launchFragmentInContainer
 import org.junit.Test

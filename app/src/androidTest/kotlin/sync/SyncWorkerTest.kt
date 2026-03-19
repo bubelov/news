@@ -1,4 +1,4 @@
-package sync
+package org.vestifeed.sync
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.work.ListenableWorker

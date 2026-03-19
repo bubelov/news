@@ -23,7 +23,7 @@
 ## 📱 Standalone mode
 
 - In standalone mode, you don't need a server
-- If you have a few devices you want to keep in sync, consider one of supported servers
+- If you have a few devices you want to keep in org.vestifeed.sync, consider one of supported servers
 
 ## 💻 Servers
 
