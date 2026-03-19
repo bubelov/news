@@ -34,18 +34,21 @@ sealed class EntriesFilter : Parcelable {
         }
     }
 
-    companion object CREATOR : Parcelable.Creator<EntriesFilter> {
-        override fun createFromParcel(parcel: Parcel): EntriesFilter {
-            return when (parcel.readInt()) {
-                0 -> Bookmarked
-                1 -> NotBookmarked
-                2 -> BelongToFeed(parcel.readString()!!)
-                else -> throw IllegalArgumentException("Unknown type")
+    companion object {
+        @JvmField
+        val CREATOR: Parcelable.Creator<EntriesFilter> = object : Parcelable.Creator<EntriesFilter> {
+            override fun createFromParcel(parcel: Parcel): EntriesFilter {
+                return when (parcel.readInt()) {
+                    0 -> Bookmarked
+                    1 -> NotBookmarked
+                    2 -> BelongToFeed(parcel.readString()!!)
+                    else -> throw IllegalArgumentException("Unknown type")
+                }
             }
-        }
 
-        override fun newArray(size: Int): Array<EntriesFilter?> {
-            return arrayOfNulls(size)
+            override fun newArray(size: Int): Array<EntriesFilter?> {
+                return arrayOfNulls(size)
+            }
         }
     }
 }

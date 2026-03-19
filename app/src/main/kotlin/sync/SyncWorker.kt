@@ -79,8 +79,10 @@ class SyncWorker(context: Context, workerParams: WorkerParameters) : Worker(cont
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
 
-        with(NotificationManagerCompat.from(context)) {
-            notify(NOTIFICATION_ID, builder.build())
+        val notificationManager = NotificationManagerCompat.from(context)
+
+        if (notificationManager.areNotificationsEnabled()) {
+            notificationManager.notify(NOTIFICATION_ID, builder.build())
         }
     }
 
