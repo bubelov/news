@@ -32,10 +32,10 @@ android {
             // https://developer.android.com/topic/performance/app-optimization/enable-app-optimization
 
             // Enables code-related app optimization.
-            isMinifyEnabled = true
+            // isMinifyEnabled = true
 
             // Enables resource shrinking.
-            isShrinkResources = true
+            // isShrinkResources = true
 
             // Includes the default ProGuard rules file
             //proguardFiles(
