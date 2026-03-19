@@ -1,42 +1,11 @@
 package db
 
-import android.content.Context
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.SQLiteStatement
 import androidx.sqlite.execSQL
-import androidx.sqlite.driver.AndroidSQLiteDriver
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import java.io.File
 import java.time.OffsetDateTime
-
-private const val FILE_NAME = "vesti-2026-03-17.db"
-
-internal fun loadSchema(): String {
-    return Db::class.java.classLoader.getResourceAsStream("schema.sql")?.bufferedReader()
-        ?.use { it.readText() }
-        ?: error("schema.sql not found in resources")
-}
-
-internal fun executeSchema(conn: SQLiteConnection) {
-    val schema = loadSchema()
-    schema.split(";").forEach { statement ->
-        val trimmed = statement.trim()
-        if (trimmed.isNotEmpty()) {
-            conn.execSQL(trimmed)
-        }
-    }
-}
-
-fun Context.databaseFile(): File {
-    return getDatabasePath(FILE_NAME)
-}
-
-fun Context.db(): Db {
-    val db = Db(AndroidSQLiteDriver(), getDatabasePath(FILE_NAME).absolutePath)
-    executeSchema(db.conn)
-    return db
-}
 
 class Db(driver: SQLiteDriver, val path: String) {
 
@@ -47,7 +16,25 @@ class Db(driver: SQLiteDriver, val path: String) {
     val entrySearchQueries = EntrySearchQueries(conn)
 
     init {
-        executeSchema(conn)
+        migrate()
+    }
+
+    private fun migrate() {
+        val stmt = conn.prepare("SELECT user_version FROM pragma_user_version")
+        val version = if (stmt.step()) stmt.getInt(0) else 0
+
+        if (version == 0) {
+            val schema = Db::class.java.classLoader.getResourceAsStream("schema.sql")?.bufferedReader()
+                ?.use { it.readText() }
+                ?: error("schema.sql not found in resources")
+            schema.split(";").forEach { statement ->
+                val trimmed = statement.trim()
+                if (trimmed.isNotEmpty()) {
+                    conn.execSQL(trimmed)
+                }
+            }
+            conn.execSQL("PRAGMA user_version=1")
+        }
     }
 
     fun transaction(block: () -> Unit) {

@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import api.Api
 import api.HotSwapApi
 import app.App
+import app.db
 import auth.AuthModel
 import auth.MinifluxAuthModel
 import auth.NextcloudAuthModel
@@ -48,38 +49,44 @@ object Di {
     @Suppress("UNCHECKED_CAST")
     private fun createInstance(clazz: Class<*>): Any {
         return when (clazz) {
-            Db::class.java -> (context.applicationContext as App).db
-            ConfRepo::class.java -> ConfRepo(get(Db::class.java))
+            ConfRepo::class.java -> ConfRepo(context.db())
             Api::class.java, HotSwapApi::class.java -> HotSwapApi(
                 get(ConfRepo::class.java),
-                get(Db::class.java)
+                context.db(),
             )
+
             FeedsRepo::class.java -> FeedsRepo(
                 get(Api::class.java),
-                get(Db::class.java)
+                context.db(),
             )
+
             EntriesRepo::class.java -> EntriesRepo(
                 get(Api::class.java),
-                get(Db::class.java)
+                context.db(),
             )
+
             EnclosuresRepo::class.java -> EnclosuresRepo(
                 context,
-                get(Db::class.java)
+                context.db(),
             )
+
             OpenGraphImagesRepo::class.java -> OpenGraphImagesRepo(
                 context,
                 get(ConfRepo::class.java),
-                get(Db::class.java)
+                context.db(),
             )
+
             Sync::class.java -> Sync(
                 get(ConfRepo::class.java),
                 get(FeedsRepo::class.java),
                 get(EntriesRepo::class.java)
             )
+
             BackgroundSyncScheduler::class.java -> BackgroundSyncScheduler(
                 get(ConfRepo::class.java),
                 context
             )
+
             else -> throw IllegalArgumentException("Unknown class: $clazz")
         }
     }
@@ -92,42 +99,51 @@ object Di {
                 get(FeedsRepo::class.java),
                 get(EntriesRepo::class.java)
             )
+
             EntriesModel::class.java -> EntriesModel(
                 get(ConfRepo::class.java),
                 get(EntriesRepo::class.java),
                 get(FeedsRepo::class.java),
                 get(Sync::class.java)
             )
+
             SettingsModel::class.java -> SettingsModel(
                 context as Application,
                 get(ConfRepo::class.java),
-                get(Db::class.java),
+                context.db(),
                 get(BackgroundSyncScheduler::class.java)
             )
+
             SearchModel::class.java -> SearchModel(
                 get(ConfRepo::class.java),
                 get(EntriesRepo::class.java),
                 get(Sync::class.java)
             )
+
             FeedSettingsModel::class.java -> FeedSettingsModel(
                 get(FeedsRepo::class.java)
             )
+
             EnclosuresModel::class.java -> EnclosuresModel(
                 get(EnclosuresRepo::class.java),
                 get(EntriesRepo::class.java)
             )
+
             AuthModel::class.java -> AuthModel(
                 get(ConfRepo::class.java),
                 get(BackgroundSyncScheduler::class.java)
             )
+
             MinifluxAuthModel::class.java -> MinifluxAuthModel(
                 get(ConfRepo::class.java),
                 get(BackgroundSyncScheduler::class.java)
             )
+
             NextcloudAuthModel::class.java -> NextcloudAuthModel(
                 get(ConfRepo::class.java),
                 get(BackgroundSyncScheduler::class.java)
             )
+
             else -> throw IllegalArgumentException("Unknown ViewModel class: $clazz")
         }
     }

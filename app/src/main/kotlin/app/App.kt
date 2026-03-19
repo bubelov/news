@@ -1,6 +1,7 @@
 package app
 
 import android.app.Application
+import android.content.Context
 import androidx.sqlite.driver.AndroidSQLiteDriver
 import db.Db
 import di.Di
@@ -24,3 +25,5 @@ class App : Application() {
         return getDatabasePath("vesti-2026-03-17.db")
     }
 }
+
+fun Context.db(): Db = (applicationContext as App).db
