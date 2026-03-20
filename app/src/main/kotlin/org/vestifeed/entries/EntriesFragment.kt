@@ -40,7 +40,12 @@ import org.vestifeed.navigation.openUrl
 
 class EntriesFragment : Fragment(), OnItemReselectedListener {
 
-    private val args by lazy { org.vestifeed.navigation.EntriesFragmentArgs.fromBundle(requireArguments()) }
+    private val filter: EntriesFilter by lazy {
+        requireArguments().getParcelable(
+            "filter",
+            EntriesFilter::class.java,
+        )!!
+    }
 
     private val model: EntriesModel by lazy { Di.getViewModel(EntriesModel::class.java) }
 
@@ -71,7 +76,8 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
     ): View? {
         return if (model.hasBackend()) {
             val intent = requireActivity().intent
-            val sharedFeedUrl = (intent?.dataString ?: intent?.getStringExtra(Intent.EXTRA_TEXT))?.trim() ?: ""
+            val sharedFeedUrl =
+                (intent?.dataString ?: intent?.getStringExtra(Intent.EXTRA_TEXT))?.trim() ?: ""
             intent.removeExtra(Intent.EXTRA_TEXT)
 
             if (sharedFeedUrl.isNotBlank()) {
@@ -113,7 +119,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         initSwipeRefresh()
         initList()
 
-        model.args.update { args.filter!! }
+        model.args.update { filter }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -149,7 +155,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
 
     private fun initSwipeRefresh() {
         binding.swipeRefresh.apply {
-            when (args.filter) {
+            when (filter) {
                 is EntriesFilter.NotBookmarked, is EntriesFilter.BelongToFeed -> {
                     isEnabled = true
                     setOnRefreshListener { model.onPullRefresh() }
@@ -218,7 +224,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
 
                 if (
                     state.conf.markScrolledEntriesAsRead
-                    && (args.filter is EntriesFilter.NotBookmarked || args.filter is EntriesFilter.BelongToFeed)
+                    && (filter is EntriesFilter.NotBookmarked || filter is EntriesFilter.BelongToFeed)
                 ) {
                     binding.list.addOnScrollListener(trackingListener)
                 } else {
@@ -230,7 +236,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
 
     private fun updateToolbar(state: EntriesModel.State) {
         binding.toolbar.apply {
-            when (args.filter!!) {
+            when (filter) {
                 EntriesFilter.Bookmarked -> setTitle(R.string.bookmarks)
                 EntriesFilter.NotBookmarked -> setTitle(R.string.news)
 
@@ -334,7 +340,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
     }
 
     private fun getShowReadEntriesButtonVisibility(): Boolean {
-        return when (args.filter!!) {
+        return when (filter) {
             EntriesFilter.NotBookmarked -> true
             EntriesFilter.Bookmarked -> false
             is EntriesFilter.BelongToFeed -> true
@@ -342,7 +348,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
     }
 
     private fun getEmptyMessage(): String {
-        return when (args.filter) {
+        return when (filter) {
             is EntriesFilter.Bookmarked -> getString(R.string.you_have_no_bookmarks)
             else -> getString(R.string.news_list_is_empty)
         }
@@ -399,7 +405,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
     }
 
     private fun createTouchHelper(): ItemTouchHelper? {
-        return when (args.filter) {
+        return when (filter) {
             EntriesFilter.NotBookmarked, is EntriesFilter.BelongToFeed -> {
                 ItemTouchHelper(object : SwipeHelper(
                     requireContext(),
@@ -512,7 +518,8 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         })
     }
 
-    private class CardListAdapterDecoration(private val gapInPixels: Int) : RecyclerView.ItemDecoration() {
+    private class CardListAdapterDecoration(private val gapInPixels: Int) :
+        RecyclerView.ItemDecoration() {
 
         override fun getItemOffsets(
             outRect: Rect,

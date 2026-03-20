@@ -6,17 +6,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import org.vestifeed.di.Di
 import org.vestifeed.dialog.showErrorDialog
-import org.vestifeed.navigation.NavDirections
 import org.vestifeed.navigation.findNavController
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.vestifeed.R
 import org.vestifeed.databinding.FragmentNextcloudAuthBinding
+import org.vestifeed.entries.EntriesFilter
+import org.vestifeed.entries.EntriesFragment
+import org.vestifeed.navigation.Activity
 
 class NextcloudAuthFragment : Fragment() {
 
@@ -81,10 +85,15 @@ class NextcloudAuthFragment : Fragment() {
                     trustSelfSignedCerts = trustSelfSignedCerts,
                 )
 
-                findNavController().navigate(
-                    R.id.newsFragment,
-                    NavDirections.NextcloudAuthFragment.actionNextcloudAuthFragmentToNewsFragment()
-                )
+                parentFragmentManager.commit {
+                    replace(
+                        R.id.fragmentContainerView,
+                        EntriesFragment::class.java,
+                        bundleOf("filter" to EntriesFilter.NotBookmarked),
+                    )
+                }
+
+                (activity as Activity).binding.bottomNav.isVisible = true
             }.onFailure {
                 binding.progress.isVisible = false
                 showErrorDialog(it.message ?: getString(R.string.direct_login_failed))

@@ -18,6 +18,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.net.toUri
+import androidx.core.os.bundleOf
 import androidx.core.text.HtmlCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -26,6 +27,7 @@ import androidx.core.view.iterator
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -43,8 +45,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.vestifeed.R
 import org.vestifeed.databinding.FragmentEntryBinding
+import org.vestifeed.feedsettings.FeedSettingsFragment
 import org.vestifeed.navigation.EntryFragmentArgs
-import org.vestifeed.navigation.NavDirections
 import org.vestifeed.navigation.findNavController
 import org.vestifeed.navigation.navArgs
 import org.vestifeed.navigation.openUrl
@@ -260,9 +262,14 @@ class EntryFragment : Fragment() {
             }
 
             R.id.feedSettings -> {
-                val args =
-                    NavDirections.EntryFragment.actionEntryFragmentToFeedSettingsFragment(feedId = entry.feedId)
-                findNavController().navigate(R.id.feedSettingsFragment, args)
+                parentFragmentManager.commit {
+                    replace(
+                        R.id.fragmentContainerView,
+                        FeedSettingsFragment::class.java,
+                        bundleOf("feedId" to entry.feedId),
+                    )
+                    addToBackStack(null)
+                }
                 return true
             }
 

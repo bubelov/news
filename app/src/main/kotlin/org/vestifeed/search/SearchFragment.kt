@@ -5,9 +5,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -20,7 +22,7 @@ import org.vestifeed.entries.EntriesAdapter
 import kotlinx.coroutines.launch
 import org.vestifeed.R
 import org.vestifeed.databinding.FragmentSearchBinding
-import org.vestifeed.navigation.NavDirections
+import org.vestifeed.entry.EntryFragment
 import org.vestifeed.navigation.findNavController
 import org.vestifeed.navigation.hideKeyboard
 import org.vestifeed.navigation.openUrl
@@ -123,12 +125,24 @@ class SearchFragment : Fragment() {
                     useBuiltInBrowser = item.useBuiltInBrowser,
                 )
             } else {
-                val args = NavDirections.SearchFragment.actionSearchFragmentToEntryFragment(item.id)
-                findNavController().navigate(R.id.entryFragment, args)
+                parentFragmentManager.commit {
+                    replace(
+                        R.id.fragmentContainerView,
+                        EntryFragment::class.java,
+                        bundleOf("entryId" to item.id),
+                    )
+                    addToBackStack(null)
+                }
             }
         } else {
-            val args = NavDirections.SearchFragment.actionSearchFragmentToEntryFragment(item.id)
-            findNavController().navigate(R.id.entryFragment, args)
+            parentFragmentManager.commit {
+                replace(
+                    R.id.fragmentContainerView,
+                    EntryFragment::class.java,
+                    bundleOf("entryId" to item.id),
+                )
+                addToBackStack(null)
+            }
         }
     }
 

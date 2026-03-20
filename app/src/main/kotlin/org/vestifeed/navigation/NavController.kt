@@ -48,16 +48,6 @@ class NavController private constructor(
         }
     }
 
-    fun addOnDestinationChangedListener(listener: (Int, Bundle?) -> Unit) {
-        onDestinationChangedListener = listener
-    }
-
-    fun removeOnDestinationChangedListener(listener: (Int, Bundle?) -> Unit) {
-        if (onDestinationChangedListener == listener) {
-            onDestinationChangedListener = null
-        }
-    }
-
     fun navigate(destinationId: Int, args: Bundle? = null, navOptions: NavOptions? = null) {
         android.util.Log.d(
             "NavController",
@@ -116,10 +106,6 @@ class NavController private constructor(
         }
     }
 
-    fun navigate(resId: Int, args: Bundle?) {
-        navigate(resId, args, null)
-    }
-
     fun popBackStack(): Boolean {
         android.util.Log.d("NavController", "XXXX popBackStack called")
         android.util.Log.d(
@@ -158,10 +144,6 @@ class NavController private constructor(
         )
     }
 
-    fun getCurrentDestinationId(): Int? {
-        return if (backStack.isNotEmpty()) backStack.last() else null
-    }
-
     private fun createFragment(destinationId: Int): Fragment {
         return when (destinationId) {
             R.id.authFragment -> AuthFragment()
@@ -197,26 +179,6 @@ class NavOptions {
     class Builder {
         private val navOptions = NavOptions()
 
-        fun setEnterAnim(anim: Int): Builder {
-            navOptions.enterAnim = anim
-            return this
-        }
-
-        fun setExitAnim(anim: Int): Builder {
-            navOptions.exitAnim = anim
-            return this
-        }
-
-        fun setPopEnterAnim(anim: Int): Builder {
-            navOptions.popEnterAnim = anim
-            return this
-        }
-
-        fun setPopExitAnim(anim: Int): Builder {
-            navOptions.popExitAnim = anim
-            return this
-        }
-
         fun setPopUpTo(destinationId: Int, inclusive: Boolean): Builder {
             navOptions.popUpTo = destinationId
             navOptions.popUpToInclusive = inclusive
@@ -225,12 +187,6 @@ class NavOptions {
 
         fun build(): NavOptions = navOptions
     }
-}
-
-fun Fragment.findNavController(containerViewId: Int): NavController {
-    val activity = requireActivity()
-    val fragmentManager = activity.supportFragmentManager
-    return NavController.create(fragmentManager, containerViewId)
 }
 
 private var sharedNavController: NavController? = null
@@ -247,16 +203,10 @@ fun Fragment.findNavController(): NavController {
     return sharedNavController!!
 }
 
-fun getSharedNavController(): NavController? = sharedNavController
-
 inline fun <reified T : Any> Fragment.navArgs(): Lazy<T> {
     return lazy {
         val args = requireArguments()
         when (T::class.java) {
-            AuthFragmentArgs::class.java -> AuthFragmentArgs.fromBundle(args) as T
-            MinifluxAuthFragmentArgs::class.java -> MinifluxAuthFragmentArgs.fromBundle(args) as T
-            NextcloudAuthFragmentArgs::class.java -> NextcloudAuthFragmentArgs.fromBundle(args) as T
-            EntriesFragmentArgs::class.java -> EntriesFragmentArgs.fromBundle(args) as T
             FeedsFragmentArgs::class.java -> FeedsFragmentArgs.fromBundle(args) as T
             EntryFragmentArgs::class.java -> EntryFragmentArgs.fromBundle(args) as T
             SearchFragmentArgs::class.java -> SearchFragmentArgs.fromBundle(args) as T

@@ -13,10 +13,12 @@ import android.widget.EditText
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -32,9 +34,9 @@ import org.vestifeed.entries.EntriesFilter
 import kotlinx.coroutines.launch
 import org.vestifeed.R
 import org.vestifeed.databinding.FragmentFeedsBinding
+import org.vestifeed.entries.EntriesFragment
+import org.vestifeed.feedsettings.FeedSettingsFragment
 import org.vestifeed.navigation.FeedsFragmentArgs
-import org.vestifeed.navigation.NavDirections
-import org.vestifeed.navigation.findNavController
 import org.vestifeed.navigation.openUrl
 import org.vestifeed.navigation.showKeyboard
 
@@ -213,17 +215,25 @@ class FeedsFragment : Fragment() {
     private fun createFeedsAdapter(): FeedsAdapter {
         return FeedsAdapter(callback = object : FeedsAdapter.Callback {
             override fun onClick(item: FeedsAdapter.Item) {
-                val args = NavDirections.FeedsFragment.actionFeedsFragmentToFeedEntriesFragment(
-                    filter = EntriesFilter.BelongToFeed(feedId = item.id),
-                )
-                findNavController().navigate(R.id.feedEntriesFragment, args)
+                parentFragmentManager.commit {
+                    replace(
+                        R.id.fragmentContainerView,
+                        EntriesFragment::class.java,
+                        bundleOf("filter" to EntriesFilter.BelongToFeed(feedId = item.id)),
+                    )
+                    addToBackStack(null)
+                }
             }
 
             override fun onSettingsClick(item: FeedsAdapter.Item) {
-                val args = NavDirections.FeedsFragment.actionFeedsFragmentToFeedSettingsFragment(
-                    url = item.id,
-                )
-                findNavController().navigate(R.id.feedSettingsFragment, args)
+                parentFragmentManager.commit {
+                    replace(
+                        R.id.fragmentContainerView,
+                        FeedSettingsFragment::class.java,
+                        bundleOf("feedId" to item.id),
+                    )
+                    addToBackStack(null)
+                }
             }
 
             override fun onOpenSelfLinkClick(item: FeedsAdapter.Item) {
