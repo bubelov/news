@@ -17,6 +17,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import androidx.core.text.HtmlCompat
@@ -303,9 +304,32 @@ class EntryFragment : Fragment() {
 
     fun downloadAudioEnclosure(enclosure: Link) {
         viewLifecycleOwner.lifecycleScope.launch {
-            runCatching { enclosuresRepo.downloadAudioEnclosure(enclosure) }
-                .onFailure { showErrorDialog(it) }
+            try {
+                enclosuresRepo.downloadAudioEnclosure(enclosure)
+                Toast.makeText(requireContext(), "Downloaded", Toast.LENGTH_LONG).show()
+                refreshEnclosures()
+            } catch (e: Exception) {
+                showErrorDialog(e)
+            }
         }
+    }
+
+    private suspend fun refreshEnclosures() {
+        val entry = entriesRepository.selectById(args.entryId).first() ?: return
+
+        enclosuresAdapter.submitList(
+            entry.links
+                .filter { it.rel is AtomLinkRel.Enclosure }
+                .filter { it.type?.startsWith("audio") ?: false }
+                .mapIndexed { index, enclosure ->
+                    EnclosuresAdapter.Item(
+                        entryId = entry.id,
+                        enclosure = enclosure,
+                        primaryText = getString(R.string.audio_n, index + 1),
+                        secondaryText = enclosure.href.toString()
+                    )
+                }
+        )
     }
 
     fun playAudioEnclosure(enclosure: Link) {
@@ -325,8 +349,12 @@ class EntryFragment : Fragment() {
 
     private fun deleteEnclosure(enclosure: Link) {
         viewLifecycleOwner.lifecycleScope.launch {
-            runCatching { enclosuresRepo.deleteFromCache(enclosure) }
-                .onFailure { showErrorDialog(it) }
+            try {
+                enclosuresRepo.deleteFromCache(enclosure)
+                refreshEnclosures()
+            } catch (e: Exception) {
+                showErrorDialog(e)
+            }
         }
     }
 
