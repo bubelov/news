@@ -4,7 +4,7 @@
     <string name="app_name">News</string>
     <string name="post_image">Photo de l’article</string>
     <string name="settings">Paramètres</string>
-    <string name="news">Articles</string>
+    <string name="feed">Flux</string>
     <string name="show_read_news">Afficher les articles lus</string>
     <string name="hide_read_news">Masquer les articles lus</string>
     <string name="bookmark">Épinglés</string>
@@ -26,7 +26,7 @@
     <string name="downloading">Téléchargement</string>
     <string name="listen">Écouter</string>
     <string name="crop_feed_images">Recadrer les images d’aperçu</string>
-    <string name="feeds">Flux</string>
+    <string name="subscriptions">Abonnements</string>
     <string name="bookmarks">Épingles</string>
     <string name="open_feed">Ouvrir le flux</string>
     <string name="open_html_link">Ouvrir le site</string>

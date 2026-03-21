@@ -243,7 +243,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         binding.toolbar.apply {
             when (filter) {
                 EntriesFilter.Bookmarked -> setTitle(R.string.bookmarks)
-                EntriesFilter.NotBookmarked -> setTitle(R.string.news)
+                EntriesFilter.NotBookmarked -> setTitle(R.string.feed)
 
                 is EntriesFilter.BelongToFeed -> {
                     binding.toolbar.apply {

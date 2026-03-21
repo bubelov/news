@@ -4,7 +4,7 @@
     <string name="app_name">أخبار</string>
     <string name="post_image">صورة المنشور</string>
     <string name="settings">إعدادات</string>
-    <string name="news">أخبار</string>
+    <string name="feed">خلاصة</string>
     <string name="show_read_news">إظهار الأخبار المقروءة</string>
     <string name="hide_read_news">إخفاء الأخبار المقروءة</string>
     <string name="bookmark">إضف إلى العلامات المرجعية</string>
@@ -26,7 +26,7 @@
     <string name="downloading">جارى التحميل</string>
     <string name="listen">استماع</string>
     <string name="crop_feed_images">تصغير صور المعاينة</string>
-    <string name="feeds">مواجز</string>
+    <string name="subscriptions">الاشتراكات</string>
     <string name="bookmarks">العلامات المرجعية</string>
     <string name="open_feed">افتح الموجز</string>
     <string name="open_html_link">افتح الموقع</string>

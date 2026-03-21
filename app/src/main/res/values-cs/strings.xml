@@ -4,7 +4,7 @@
     <string name="app_name">Novinky</string>
     <string name="post_image">Zveřejnit obrázek</string>
     <string name="settings">Nastavení</string>
-    <string name="news">Novinky</string>
+    <string name="feed">Feed</string>
     <string name="show_read_news">Zobrazit přečtené novinky</string>
     <string name="hide_read_news">Skrýt přečtené novinky</string>
     <string name="bookmark">Záložka</string>
@@ -26,7 +26,7 @@
     <string name="downloading">Stahování</string>
     <string name="listen">Poslouchat</string>
     <string name="crop_feed_images">Oříznout náhled obrázků</string>
-    <string name="feeds">Kanály</string>
+    <string name="subscriptions">Odběry</string>
     <string name="bookmarks">Záložky</string>
     <string name="open_feed">Otevřít kanál</string>
     <string name="open_html_link">Otevřít web</string>

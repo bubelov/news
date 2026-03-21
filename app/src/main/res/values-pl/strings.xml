@@ -4,7 +4,7 @@
     <string name="app_name">News</string>
     <string name="post_image">Publikuj obraz</string>
     <string name="settings">Ustawienia</string>
-    <string name="news">News</string>
+    <string name="feed">Feed</string>
     <string name="show_read_news">Pokaż przeczytane</string>
     <string name="hide_read_news">Ukryj przeczytane</string>
     <string name="bookmark">Zakładki</string>
@@ -26,7 +26,7 @@
     <string name="downloading">Pobieranie</string>
     <string name="listen">Słuchaj</string>
     <string name="crop_feed_images">Przytnij grafiki</string>
-    <string name="feeds">Kanały</string>
+    <string name="subscriptions">Subskrypcje</string>
     <string name="bookmarks">Zakładki</string>
     <string name="open_feed">Otwórz kanał</string>
     <string name="open_html_link">Otwórz stronę</string>
