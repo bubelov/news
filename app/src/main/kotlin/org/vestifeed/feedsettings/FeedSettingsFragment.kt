@@ -19,14 +19,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.vestifeed.R
 import org.vestifeed.databinding.FragmentFeedSettingsBinding
-import org.vestifeed.navigation.FeedSettingsFragmentArgs
-import org.vestifeed.navigation.findNavController
-import org.vestifeed.navigation.navArgs
 import org.vestifeed.navigation.showKeyboard
 
 class FeedSettingsFragment : Fragment() {
 
-    private val args: FeedSettingsFragmentArgs by navArgs()
+    private val feedId by lazy { requireArguments().getString("feedId", "") }
 
     private val model: FeedSettingsModel by lazy { Di.getViewModel(FeedSettingsModel::class.java) }
 
@@ -45,9 +42,9 @@ class FeedSettingsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
+        binding.toolbar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
 
-        model.feedId.update { args.feedId }
+        model.feedId.update { feedId }
         model.state.onEach { binding.setState(it) }.launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
@@ -81,7 +78,7 @@ class FeedSettingsFragment : Fragment() {
 
             setOnCheckedChangeListener { _, isChecked ->
                 viewLifecycleOwner.lifecycleScope.launch {
-                    runCatching { model.setOpenEntriesInBrowser(args.feedId, isChecked) }
+                    runCatching { model.setOpenEntriesInBrowser(feedId, isChecked) }
                         .onFailure { showErrorDialog(it) }
                 }
             }
@@ -103,7 +100,7 @@ class FeedSettingsFragment : Fragment() {
                                 dialog.findViewById<TextInputEditText>(R.id.blockedWords)!!
                             val formattedBlockedWords =
                                 model.formatBlockedWords(blockedWordsView.text.toString())
-                            model.setBlockedWords(args.feedId, formattedBlockedWords)
+                            model.setBlockedWords(feedId, formattedBlockedWords)
                             binding.blockedWords.text = formattedBlockedWords.replace(",", ", ")
                         }.onFailure {
                             showErrorDialog(it)
@@ -148,7 +145,7 @@ class FeedSettingsFragment : Fragment() {
 
                 val saveValue = fun(value: Boolean?) {
                     viewLifecycleOwner.lifecycleScope.launch {
-                        runCatching { model.setShowPreviewImages(args.feedId, value) }
+                        runCatching { model.setShowPreviewImages(feedId, value) }
                             .onSuccess { syncShowPreviewImages(value) }
                             .onFailure { showErrorDialog(it) }
                     }

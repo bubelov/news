@@ -7,11 +7,13 @@ import android.view.ViewGroup
 import android.widget.RadioButton
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -26,8 +28,10 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.vestifeed.R
+import org.vestifeed.auth.AuthFragment
 import org.vestifeed.databinding.FragmentSettingsBinding
-import org.vestifeed.navigation.findNavController
+import org.vestifeed.enclosures.EnclosuresFragment
+import org.vestifeed.feeds.FeedsFragment
 import java.util.concurrent.TimeUnit
 
 class SettingsFragment : Fragment() {
@@ -58,7 +62,7 @@ class SettingsFragment : Fragment() {
             insets
         }
 
-        binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
+        binding.toolbar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
 
         model.state
             .onEach { binding.setState(it) }
@@ -196,7 +200,10 @@ class SettingsFragment : Fragment() {
         }
 
         manageEnclosures.setOnClickListener {
-            findNavController().navigate(R.id.enclosuresFragment)
+            parentFragmentManager.commit {
+                replace(R.id.fragmentContainerView, EnclosuresFragment::class.java, null)
+                addToBackStack(null)
+            }
         }
 
         exportDatabase.setOnClickListener { exportDbLauncher.launch("news.org.vestifeed.db") }
@@ -230,12 +237,10 @@ class SettingsFragment : Fragment() {
         lifecycleScope.launch {
             model.logOut()
 
-            findNavController().apply {
-                while (popBackStack()) {
-                    popBackStack()
-                }
-
-                navigate(R.id.authFragment)
+            parentFragmentManager.commit {
+                replace(
+                    R.id.fragmentContainerView, AuthFragment::class.java, null
+                )
             }
         }
     }

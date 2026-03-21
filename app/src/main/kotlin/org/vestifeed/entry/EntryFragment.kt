@@ -47,7 +47,6 @@ import kotlinx.coroutines.launch
 import org.vestifeed.R
 import org.vestifeed.databinding.FragmentEntryBinding
 import org.vestifeed.feedsettings.FeedSettingsFragment
-import org.vestifeed.navigation.findNavController
 import org.vestifeed.navigation.openUrl
 import org.vestifeed.sync.Sync
 import java.time.format.DateTimeFormatter
@@ -233,7 +232,7 @@ class EntryFragment : Fragment() {
     }
 
     private fun popBackStack() {
-        findNavController().popBackStack()
+        parentFragmentManager.popBackStack()
     }
 
     private fun onMenuItemClick(

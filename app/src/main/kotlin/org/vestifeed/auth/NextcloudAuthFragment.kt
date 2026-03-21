@@ -13,7 +13,6 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import org.vestifeed.di.Di
 import org.vestifeed.dialog.showErrorDialog
-import org.vestifeed.navigation.findNavController
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.vestifeed.R
@@ -42,7 +41,7 @@ class NextcloudAuthFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.apply {
-            toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
+            toolbar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
 
             password.setOnEditorActionListener { _, actionId, keyEvent ->
                 if (actionId == EditorInfo.IME_ACTION_DONE || keyEvent?.keyCode == KeyEvent.KEYCODE_ENTER) {

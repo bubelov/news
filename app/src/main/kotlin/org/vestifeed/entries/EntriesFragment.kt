@@ -34,9 +34,12 @@ import org.vestifeed.entry.EntryFragment
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.vestifeed.R
+import org.vestifeed.auth.AuthFragment
 import org.vestifeed.databinding.FragmentEntriesBinding
-import org.vestifeed.navigation.findNavController
+import org.vestifeed.feeds.FeedsFragment
 import org.vestifeed.navigation.openUrl
+import org.vestifeed.search.SearchFragment
+import org.vestifeed.settings.SettingsFragment
 
 class EntriesFragment : Fragment(), OnItemReselectedListener {
 
@@ -81,14 +84,13 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
             intent.removeExtra(Intent.EXTRA_TEXT)
 
             if (sharedFeedUrl.isNotBlank()) {
-                val navOptions = org.vestifeed.navigation.NavOptions.Builder()
-                    .setPopUpTo(R.id.authFragment, true)
-                    .build()
-                findNavController().navigate(
-                    R.id.feedsFragment,
-                    bundleOf(Pair("url", sharedFeedUrl)),
-                    navOptions
-                )
+                parentFragmentManager.commit {
+                    replace(
+                        R.id.fragmentContainerView,
+                        FeedsFragment::class.java,
+                        bundleOf("url" to sharedFeedUrl),
+                    )
+                }
             }
 
             if (!requireArguments().containsKey("filter")) {
@@ -98,10 +100,13 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
             _binding = FragmentEntriesBinding.inflate(inflater, container, false)
             binding.root
         } else {
-            val navOptions = org.vestifeed.navigation.NavOptions.Builder()
-                .setPopUpTo(R.id.authFragment, true)
-                .build()
-            findNavController().navigate(R.id.authFragment, null, navOptions)
+            parentFragmentManager.commit {
+                replace(
+                    R.id.fragmentContainerView,
+                    AuthFragment::class.java,
+                    null,
+                )
+            }
             null
         }
     }
@@ -243,7 +248,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
                 is EntriesFilter.BelongToFeed -> {
                     binding.toolbar.apply {
                         navigationIcon = DrawerArrowDrawable(context).also { it.progress = 1f }
-                        setNavigationOnClickListener { findNavController().popBackStack() }
+                        setNavigationOnClickListener { parentFragmentManager.popBackStack() }
                     }
 
                     if (state is EntriesModel.State.ShowingCachedEntries) {
@@ -262,7 +267,14 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
 
     private fun updateSearchButton() {
         binding.toolbar.menu!!.findItem(R.id.search).setOnMenuItemClickListener {
-            findNavController().navigate(R.id.searchFragment)
+            parentFragmentManager.commit {
+                replace(
+                    R.id.fragmentContainerView,
+                    SearchFragment::class.java,
+                    null,
+                )
+                addToBackStack(null)
+            }
             true
         }
     }
@@ -330,7 +342,11 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
 
     private fun updateSettingsButton() {
         binding.toolbar.menu!!.findItem(R.id.settings).setOnMenuItemClickListener {
-            findNavController().navigate(R.id.settingsFragment)
+            parentFragmentManager.commit {
+                replace(R.id.fragmentContainerView, SettingsFragment::class.java, null)
+                addToBackStack(null)
+            }
+            
             true
         }
     }

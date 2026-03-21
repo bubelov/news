@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.vestifeed.R
 import org.vestifeed.databinding.FragmentEnclosuresBinding
-import org.vestifeed.navigation.findNavController
 
 class EnclosuresFragment : Fragment() {
 
@@ -56,7 +55,7 @@ class EnclosuresFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
+        binding.toolbar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
 
         binding.list.apply {
             layoutManager = LinearLayoutManager(requireContext())

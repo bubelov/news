@@ -9,6 +9,7 @@ import android.view.inputmethod.EditorInfo
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import org.vestifeed.di.Di
@@ -80,6 +81,8 @@ class MinifluxAuthFragment : Fragment() {
                     token = token,
                     trustSelfSignedCerts = trustSelfSignedCerts,
                 )
+
+                parentFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
 
                 parentFragmentManager.commit {
                     replace(

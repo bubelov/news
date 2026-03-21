@@ -23,7 +23,6 @@ import kotlinx.coroutines.launch
 import org.vestifeed.R
 import org.vestifeed.databinding.FragmentSearchBinding
 import org.vestifeed.entry.EntryFragment
-import org.vestifeed.navigation.findNavController
 import org.vestifeed.navigation.hideKeyboard
 import org.vestifeed.navigation.openUrl
 import org.vestifeed.navigation.showKeyboard
@@ -69,7 +68,7 @@ class SearchFragment : Fragment() {
     private fun initToolbar() {
         binding.toolbar.setNavigationOnClickListener {
             hideKeyboard(binding.query)
-            findNavController().popBackStack()
+            parentFragmentManager.popBackStack()
         }
 
         binding.query.addTextChangedListener(
