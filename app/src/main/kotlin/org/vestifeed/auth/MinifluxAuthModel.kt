@@ -13,14 +13,12 @@ class MinifluxAuthModel(
 
     suspend fun testBackend(
         url: HttpUrl,
-        username: String,
-        password: String,
+        token: String,
         trustSelfSignedCerts: Boolean,
     ) {
         val api = MinifluxApiBuilder().build(
             url = url.toString().trim('/'),
-            username = username,
-            password = password,
+            token = token,
             trustSelfSignedCerts = trustSelfSignedCerts,
         )
 
@@ -29,8 +27,7 @@ class MinifluxAuthModel(
 
     fun setBackend(
         url: HttpUrl,
-        username: String,
-        password: String,
+        token: String,
         trustSelfSignedCerts: Boolean,
     ) {
         confRepo.update {
@@ -38,8 +35,7 @@ class MinifluxAuthModel(
                 backend = ConfRepo.BACKEND_MINIFLUX,
                 minifluxServerUrl = url.toString().trim('/'),
                 minifluxServerTrustSelfSignedCerts = trustSelfSignedCerts,
-                minifluxServerUsername = username,
-                minifluxServerPassword = password,
+                minifluxServerToken = token,
             )
         }
 

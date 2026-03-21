@@ -43,7 +43,7 @@ class MinifluxAuthFragment : Fragment() {
         binding.apply {
             toolbar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
 
-            password.setOnEditorActionListener { _, actionId, keyEvent ->
+            token.setOnEditorActionListener { _, actionId, keyEvent ->
                 if (actionId == EditorInfo.IME_ACTION_DONE || keyEvent?.keyCode == KeyEvent.KEYCODE_ENTER) {
                     connect()
                     return@setOnEditorActionListener true
@@ -64,23 +64,20 @@ class MinifluxAuthFragment : Fragment() {
         binding.progress.isVisible = true
 
         val url = binding.url.text.toString().toHttpUrl()
-        val username = binding.username.text.toString()
-        val password = binding.password.text.toString()
+        val token = binding.token.text.toString()
         val trustSelfSignedCerts = binding.trustSelfSignedCerts.isChecked
 
         viewLifecycleOwner.lifecycleScope.launchWhenResumed {
             runCatching {
                 model.testBackend(
                     url = url,
-                    username = username,
-                    password = password,
+                    token = token,
                     trustSelfSignedCerts = trustSelfSignedCerts,
                 )
             }.onSuccess {
                 model.setBackend(
                     url = url,
-                    username = username,
-                    password = password,
+                    token = token,
                     trustSelfSignedCerts = trustSelfSignedCerts,
                 )
 
@@ -111,18 +108,13 @@ class MinifluxAuthFragment : Fragment() {
             else -> null
         }
 
-        usernameLayout.error = when (username.text.toString().length) {
-            0 -> getString(R.string.field_is_empty)
-            else -> null
-        }
-
-        if (binding.password.text.isNullOrEmpty()) {
-            binding.passwordLayout.error = getString(R.string.field_is_empty)
+        if (binding.token.text.isNullOrEmpty()) {
+            binding.tokenLayout.error = getString(R.string.field_is_empty)
         } else {
-            binding.passwordLayout.error = null
+            binding.tokenLayout.error = null
         }
 
-        return urlLayout.error == null && usernameLayout.error == null && passwordLayout.error == null
+        return urlLayout.error == null && tokenLayout.error == null
     }
 
     override fun onDestroyView() {

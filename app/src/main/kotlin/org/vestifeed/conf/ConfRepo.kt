@@ -44,37 +44,36 @@ class ConfRepo(
         val stmt = conn.prepare("""
             INSERT OR REPLACE INTO conf (
                 backend, miniflux_server_url, miniflux_server_trust_self_signed_certs,
-                miniflux_server_username, miniflux_server_password, nextcloud_server_url,
+                miniflux_server_token, nextcloud_server_url,
                 nextcloud_server_trust_self_signed_certs, nextcloud_server_username,
                 nextcloud_server_password, initial_sync_completed, last_entries_sync_datetime,
                 show_read_entries, sort_order, show_preview_images, crop_preview_images,
                 mark_scrolled_entries_as_read, sync_on_startup, sync_in_background,
                 background_sync_interval_millis, use_built_in_browser, show_preview_text,
                 synced_on_startup
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """)
         stmt.bindText(1, conf.backend)
         stmt.bindText(2, conf.minifluxServerUrl)
         stmt.bindInt(3, if (conf.minifluxServerTrustSelfSignedCerts) 1 else 0)
-        stmt.bindText(4, conf.minifluxServerUsername)
-        stmt.bindText(5, conf.minifluxServerPassword)
-        stmt.bindText(6, conf.nextcloudServerUrl)
-        stmt.bindInt(7, if (conf.nextcloudServerTrustSelfSignedCerts) 1 else 0)
-        stmt.bindText(8, conf.nextcloudServerUsername)
-        stmt.bindText(9, conf.nextcloudServerPassword)
-        stmt.bindInt(10, if (conf.initialSyncCompleted) 1 else 0)
-        stmt.bindText(11, conf.lastEntriesSyncDatetime)
-        stmt.bindInt(12, if (conf.showReadEntries) 1 else 0)
-        stmt.bindText(13, conf.sortOrder)
-        stmt.bindInt(14, if (conf.showPreviewImages) 1 else 0)
-        stmt.bindInt(15, if (conf.cropPreviewImages) 1 else 0)
-        stmt.bindInt(16, if (conf.markScrolledEntriesAsRead) 1 else 0)
-        stmt.bindInt(17, if (conf.syncOnStartup) 1 else 0)
-        stmt.bindInt(18, if (conf.syncInBackground) 1 else 0)
-        stmt.bindLong(19, conf.backgroundSyncIntervalMillis)
-        stmt.bindInt(20, if (conf.useBuiltInBrowser) 1 else 0)
-        stmt.bindInt(21, if (conf.showPreviewText) 1 else 0)
-        stmt.bindInt(22, if (conf.syncedOnStartup) 1 else 0)
+        stmt.bindText(4, conf.minifluxServerToken)
+        stmt.bindText(5, conf.nextcloudServerUrl)
+        stmt.bindInt(6, if (conf.nextcloudServerTrustSelfSignedCerts) 1 else 0)
+        stmt.bindText(7, conf.nextcloudServerUsername)
+        stmt.bindText(8, conf.nextcloudServerPassword)
+        stmt.bindInt(9, if (conf.initialSyncCompleted) 1 else 0)
+        stmt.bindText(10, conf.lastEntriesSyncDatetime)
+        stmt.bindInt(11, if (conf.showReadEntries) 1 else 0)
+        stmt.bindText(12, conf.sortOrder)
+        stmt.bindInt(13, if (conf.showPreviewImages) 1 else 0)
+        stmt.bindInt(14, if (conf.cropPreviewImages) 1 else 0)
+        stmt.bindInt(15, if (conf.markScrolledEntriesAsRead) 1 else 0)
+        stmt.bindInt(16, if (conf.syncOnStartup) 1 else 0)
+        stmt.bindInt(17, if (conf.syncInBackground) 1 else 0)
+        stmt.bindLong(18, conf.backgroundSyncIntervalMillis)
+        stmt.bindInt(19, if (conf.useBuiltInBrowser) 1 else 0)
+        stmt.bindInt(20, if (conf.showPreviewText) 1 else 0)
+        stmt.bindInt(21, if (conf.syncedOnStartup) 1 else 0)
         stmt.step()
         stmt.close()
     }
@@ -85,8 +84,7 @@ class ConfRepo(
                 backend,
                 miniflux_server_url,
                 miniflux_server_trust_self_signed_certs,
-                miniflux_server_username,
-                miniflux_server_password,
+                miniflux_server_token,
                 nextcloud_server_url,
                 nextcloud_server_trust_self_signed_certs,
                 nextcloud_server_username,
@@ -114,25 +112,24 @@ class ConfRepo(
             backend = stmt.getText(0),
             minifluxServerUrl = stmt.getText(1),
             minifluxServerTrustSelfSignedCerts = stmt.getInt(2) == 1,
-            minifluxServerUsername = stmt.getText(3),
-            minifluxServerPassword = stmt.getText(4),
-            nextcloudServerUrl = stmt.getText(5),
-            nextcloudServerTrustSelfSignedCerts = stmt.getInt(6) == 1,
-            nextcloudServerUsername = stmt.getText(7),
-            nextcloudServerPassword = stmt.getText(8),
-            initialSyncCompleted = stmt.getInt(9) == 1,
-            lastEntriesSyncDatetime = stmt.getText(10),
-            showReadEntries = stmt.getInt(11) == 1,
-            sortOrder = stmt.getText(12),
-            showPreviewImages = stmt.getInt(13) == 1,
-            cropPreviewImages = stmt.getInt(14) == 1,
-            markScrolledEntriesAsRead = stmt.getInt(15) == 1,
-            syncOnStartup = stmt.getInt(16) == 1,
-            syncInBackground = stmt.getInt(17) == 1,
-            backgroundSyncIntervalMillis = stmt.getLong(18),
-            useBuiltInBrowser = stmt.getInt(19) == 1,
-            showPreviewText = stmt.getInt(20) == 1,
-            syncedOnStartup = stmt.getInt(21) == 1,
+            minifluxServerToken = stmt.getText(3),
+            nextcloudServerUrl = stmt.getText(4),
+            nextcloudServerTrustSelfSignedCerts = stmt.getInt(5) == 1,
+            nextcloudServerUsername = stmt.getText(6),
+            nextcloudServerPassword = stmt.getText(7),
+            initialSyncCompleted = stmt.getInt(8) == 1,
+            lastEntriesSyncDatetime = stmt.getText(9),
+            showReadEntries = stmt.getInt(10) == 1,
+            sortOrder = stmt.getText(11),
+            showPreviewImages = stmt.getInt(12) == 1,
+            cropPreviewImages = stmt.getInt(13) == 1,
+            markScrolledEntriesAsRead = stmt.getInt(14) == 1,
+            syncOnStartup = stmt.getInt(15) == 1,
+            syncInBackground = stmt.getInt(16) == 1,
+            backgroundSyncIntervalMillis = stmt.getLong(17),
+            useBuiltInBrowser = stmt.getInt(18) == 1,
+            showPreviewText = stmt.getInt(19) == 1,
+            syncedOnStartup = stmt.getInt(20) == 1,
         )
     }
 
@@ -152,8 +149,7 @@ class ConfRepo(
             backend = "",
             minifluxServerUrl = "",
             minifluxServerTrustSelfSignedCerts = false,
-            minifluxServerUsername = "",
-            minifluxServerPassword = "",
+            minifluxServerToken = "",
             nextcloudServerUrl = "",
             nextcloudServerTrustSelfSignedCerts = false,
             nextcloudServerUsername = "",

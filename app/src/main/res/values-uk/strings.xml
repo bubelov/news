@@ -17,6 +17,7 @@
     <string name="server_url_hint">https://example.com</string>
     <string name="username">Имя пользователя</string>
     <string name="password">Пароль</string>
+    <string name="api_token">API токен</string>
     <string name="news_list_is_empty">Список новостей пуст</string>
     <string name="you_have_no_bookmarks">У вас нет закладок</string>
     <string name="field_is_empty">Поле не заполнено</string>

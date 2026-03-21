@@ -34,8 +34,7 @@ class MinifluxAuthModelTest {
         val res = runCatching {
             model.testBackend(
                 url = server.url(""),
-                username = "test",
-                password = "test",
+                token = "test-token",
                 trustSelfSignedCerts = false,
             )
         }

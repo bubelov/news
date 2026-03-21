@@ -102,8 +102,7 @@ class SettingsModel(
         return when (backend) {
             ConfRepo.BACKEND_STANDALONE -> ""
             ConfRepo.BACKEND_MINIFLUX -> {
-                val username = minifluxServerUsername
-                "$username@${minifluxServerUrl.extractDomain()}"
+                minifluxServerUrl.extractDomain()
             }
 
             ConfRepo.BACKEND_NEXTCLOUD -> {

@@ -43,39 +43,19 @@
         app:layout_constraintTop_toBottomOf="@id/urlLayout" />
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/usernameLayout"
+        android:id="@+id/tokenLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        android:hint="@string/username"
-        app:errorEnabled="true"
-        app:layout_constraintTop_toBottomOf="@id/trustSelfSignedCerts"
-        app:startIconDrawable="@drawable/ic_baseline_person_24">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/username"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textPersonName" />
-
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/passwordLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:hint="@string/password"
+        android:hint="@string/api_token"
         app:endIconMode="password_toggle"
         app:errorEnabled="true"
-        app:layout_constraintTop_toBottomOf="@id/usernameLayout"
+        app:layout_constraintTop_toBottomOf="@id/trustSelfSignedCerts"
         app:startIconDrawable="@drawable/ic_baseline_vpn_key_24">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/password"
+            android:id="@+id/token"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPassword" />

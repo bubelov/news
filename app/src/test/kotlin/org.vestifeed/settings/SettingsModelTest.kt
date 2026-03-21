@@ -54,7 +54,7 @@ class SettingsModelTest {
 
         var state = model.state.filterIsInstance<SettingsModel.State.ShowingSettings>().first()
 
-        assertEquals("@acme.com", state.logOutSubtitle)
+        assertEquals("acme.com", state.logOutSubtitle)
 
         confRepo.update {
             it.copy(
@@ -72,6 +72,6 @@ class SettingsModelTest {
 
         state = model.state.filterIsInstance<SettingsModel.State.ShowingSettings>().first()
 
-        assertEquals("@acme.com", state.logOutSubtitle)
+        assertEquals("acme.com", state.logOutSubtitle)
     }
 }

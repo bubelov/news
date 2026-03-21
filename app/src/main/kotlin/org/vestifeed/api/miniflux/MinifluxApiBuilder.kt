@@ -2,7 +2,7 @@ package org.vestifeed.api.miniflux
 
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import org.vestifeed.http.authInterceptor
+import org.vestifeed.http.tokenAuthInterceptor
 import org.vestifeed.http.trustSelfSignedCerts
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -15,12 +15,11 @@ class MinifluxApiBuilder {
 
     fun build(
         url: String,
-        username: String,
-        password: String,
+        token: String,
         trustSelfSignedCerts: Boolean,
     ): MinifluxApi {
         val builder = OkHttpClient.Builder()
-            .addInterceptor(authInterceptor(username, password))
+            .addInterceptor(tokenAuthInterceptor(token))
             .addInterceptor(errorInterceptor())
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(20, TimeUnit.SECONDS)

@@ -17,6 +17,7 @@
     <string name="server_url_hint">https://example.com</string>
     <string name="username">Gebruikersnaam</string>
     <string name="password">Wachtwoord</string>
+    <string name="api_token">API Token</string>
     <string name="news_list_is_empty">Nieuws lijst is leeg</string>
     <string name="you_have_no_bookmarks">U hebt geen bladwijzers</string>
     <string name="field_is_empty">Veld is leeg</string>

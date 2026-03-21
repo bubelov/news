@@ -17,6 +17,7 @@
     <string name="server_url_hint">https://example.com</string>
     <string name="username">نام کاربری</string>
     <string name="password">گذرواژه</string>
+    <string name="api_token">توکن API</string>
     <string name="news_list_is_empty">فهرست اخبار خالی‌ست</string>
     <string name="you_have_no_bookmarks">نشانکی ندارید</string>
     <string name="field_is_empty">مکان خالی‌ست</string>

@@ -14,6 +14,16 @@ fun authInterceptor(username: String, password: String): Interceptor {
     }
 }
 
+fun tokenAuthInterceptor(token: String): Interceptor {
+    return Interceptor { chain ->
+        chain.proceed(
+            chain.request().newBuilder()
+                .header("X-Auth-Token", token)
+                .build()
+        )
+    }
+}
+
 fun loggingInterceptor(tag: String): Interceptor {
     return Interceptor { chain ->
         val req = chain.request()

@@ -36,8 +36,7 @@ class HotSwapApi(
                         api = MinifluxApiAdapter(
                             MinifluxApiBuilder().build(
                                 url = conf.minifluxServerUrl,
-                                username = conf.minifluxServerUsername,
-                                password = conf.minifluxServerPassword,
+                                token = conf.minifluxServerToken,
                                 trustSelfSignedCerts = conf.minifluxServerTrustSelfSignedCerts,
                             )
                         )

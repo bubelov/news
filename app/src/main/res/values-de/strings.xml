@@ -17,6 +17,7 @@
     <string name="server_url_hint">https://example.com</string>
     <string name="username">Benutzername</string>
     <string name="password">Passwort</string>
+    <string name="api_token">API-Token</string>
     <string name="news_list_is_empty">Artikel-Liste ist leer</string>
     <string name="you_have_no_bookmarks">Du hast keine Lesezeichen</string>
     <string name="field_is_empty">Feld ist leer</string>
