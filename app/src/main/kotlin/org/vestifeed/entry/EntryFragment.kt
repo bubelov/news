@@ -47,9 +47,7 @@ import kotlinx.coroutines.launch
 import org.vestifeed.R
 import org.vestifeed.databinding.FragmentEntryBinding
 import org.vestifeed.feedsettings.FeedSettingsFragment
-import org.vestifeed.navigation.EntryFragmentArgs
 import org.vestifeed.navigation.findNavController
-import org.vestifeed.navigation.navArgs
 import org.vestifeed.navigation.openUrl
 import org.vestifeed.sync.Sync
 import java.time.format.DateTimeFormatter
@@ -57,7 +55,7 @@ import java.time.format.FormatStyle
 
 class EntryFragment : Fragment() {
 
-    private val args: EntryFragmentArgs by navArgs()
+    private val entryId by lazy { requireArguments().getString("entryId", "") }
 
     private val app: Application by lazy { Di.get(Application::class.java) }
     private val enclosuresRepo: EnclosuresRepo by lazy { Di.get(EnclosuresRepo::class.java) }
@@ -141,12 +139,12 @@ class EntryFragment : Fragment() {
     private fun loadEntry() {
         viewLifecycleOwner.lifecycleScope.launch {
             runCatching {
-                val entry = entriesRepository.selectById(args.entryId).first()
+                val entry = entriesRepository.selectById(entryId).first()
                 if (entry == null) {
                     showError(
                         getString(
                             R.string.cannot_find_entry_with_id_s,
-                            args.entryId
+                            entryId
                         )
                     ) { popBackStack() }
                     return@launch
@@ -317,7 +315,7 @@ class EntryFragment : Fragment() {
     }
 
     private suspend fun refreshEnclosures() {
-        val entry = entriesRepository.selectById(args.entryId).first() ?: return
+        val entry = entriesRepository.selectById(entryId).first() ?: return
 
         enclosuresAdapter.submitList(
             entry.links

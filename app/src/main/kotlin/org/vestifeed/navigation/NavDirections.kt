@@ -2,16 +2,6 @@ package org.vestifeed.navigation
 
 import android.os.Bundle
 
-class EntryFragmentArgs(args: Bundle) {
-    val entryId: String by lazy { args.getString("entryId", "") }
-
-    companion object {
-        fun fromBundle(bundle: Bundle): EntryFragmentArgs {
-            return EntryFragmentArgs(bundle)
-        }
-    }
-}
-
 class SearchFragmentArgs(args: Bundle) {
     companion object {
         fun fromBundle(bundle: Bundle): SearchFragmentArgs {
@@ -44,8 +34,4 @@ class EnclosuresFragmentArgs(args: Bundle) {
             return EnclosuresFragmentArgs(bundle)
         }
     }
-}
-
-fun Bundle.putParcelable(key: String, value: android.os.Parcelable?) {
-    putParcelable(key, value)
 }

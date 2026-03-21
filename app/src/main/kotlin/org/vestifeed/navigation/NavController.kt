@@ -207,7 +207,6 @@ inline fun <reified T : Any> Fragment.navArgs(): Lazy<T> {
     return lazy {
         val args = requireArguments()
         when (T::class.java) {
-            EntryFragmentArgs::class.java -> EntryFragmentArgs.fromBundle(args) as T
             SearchFragmentArgs::class.java -> SearchFragmentArgs.fromBundle(args) as T
             FeedSettingsFragmentArgs::class.java -> FeedSettingsFragmentArgs.fromBundle(args) as T
             SettingsFragmentArgs::class.java -> SettingsFragmentArgs.fromBundle(args) as T
