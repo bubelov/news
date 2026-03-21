@@ -246,11 +246,13 @@ class EntryFragment : Fragment() {
         when (menuItem?.itemId) {
             R.id.toggleBookmarked -> {
                 lifecycleScope.launch {
+                    val newBookmarkedState = !entry.extBookmarked
                     entriesRepository.updateBookmarkedAndBookmaredSynced(
                         id = entry.id,
-                        bookmarked = !entry.extBookmarked,
+                        bookmarked = newBookmarkedState,
                         bookmarkedSynced = false,
                     )
+                    updateBookmarkedButton(newBookmarkedState)
                     newsApiSync.run(
                         Sync.Args(
                             syncFeeds = false,
