@@ -2,16 +2,6 @@ package org.vestifeed.navigation
 
 import android.os.Bundle
 
-class FeedsFragmentArgs(args: Bundle) {
-    val url: String by lazy { args.getString("url", "") }
-
-    companion object {
-        fun fromBundle(bundle: Bundle): FeedsFragmentArgs {
-            return FeedsFragmentArgs(bundle)
-        }
-    }
-}
-
 class EntryFragmentArgs(args: Bundle) {
     val entryId: String by lazy { args.getString("entryId", "") }
 

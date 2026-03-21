@@ -36,7 +36,6 @@ import org.vestifeed.R
 import org.vestifeed.databinding.FragmentFeedsBinding
 import org.vestifeed.entries.EntriesFragment
 import org.vestifeed.feedsettings.FeedSettingsFragment
-import org.vestifeed.navigation.FeedsFragmentArgs
 import org.vestifeed.navigation.openUrl
 import org.vestifeed.navigation.showKeyboard
 
@@ -193,10 +192,10 @@ class FeedsFragment : Fragment() {
     }
 
     private fun handleAddFeedIntent() {
-        val args = FeedsFragmentArgs.fromBundle(requireArguments())
+        val url = requireArguments().getString("url", "")
 
-        if (args.url.isNotBlank()) {
-            model.addFeed(args.url)
+        if (url.isNotBlank()) {
+            model.addFeed(url)
             requireArguments().clear()
         }
     }
