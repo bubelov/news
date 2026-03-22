@@ -14,6 +14,7 @@ import org.junit.Test
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.vestifeed.conf.ConfRepo
+import org.vestifeed.db.ConfQueries
 import org.vestifeed.db.db
 
 class SettingsModelTest {
@@ -40,7 +41,7 @@ class SettingsModelTest {
 
         confRepo.update {
             it.copy(
-                backend = ConfRepo.BACKEND_MINIFLUX,
+                backend = ConfQueries.BACKEND_MINIFLUX,
                 minifluxServerUrl = "https://acme.com",
             )
         }
@@ -58,7 +59,7 @@ class SettingsModelTest {
 
         confRepo.update {
             it.copy(
-                backend = ConfRepo.BACKEND_MINIFLUX,
+                backend = ConfQueries.BACKEND_MINIFLUX,
                 minifluxServerUrl = "http://acme.com",
             )
         }

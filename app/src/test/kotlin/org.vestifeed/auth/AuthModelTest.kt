@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit
 import org.junit.Test
 import org.junit.Assert.assertEquals
 import org.vestifeed.conf.ConfRepo
+import org.vestifeed.db.ConfQueries
 import org.vestifeed.db.db
 import org.vestifeed.sync.BackgroundSyncScheduler
 
@@ -25,7 +26,7 @@ class AuthModelTest {
         model.setStandaloneBackend()
 
         val conf = confRepo.conf.value
-        assertEquals(ConfRepo.BACKEND_STANDALONE, conf.backend)
+        assertEquals(ConfQueries.BACKEND_STANDALONE, conf.backend)
         assertEquals(false, conf.syncOnStartup)
         assertEquals(TimeUnit.HOURS.toMillis(12), conf.backgroundSyncIntervalMillis)
 

@@ -5,6 +5,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.Assert.assertEquals
 import org.vestifeed.conf.ConfRepo
+import org.vestifeed.db.ConfQueries
 import org.vestifeed.db.db
 
 class HotSwapApiTest {
@@ -15,7 +16,7 @@ class HotSwapApiTest {
         val confRepo = ConfRepo(db)
         val api = HotSwapApi(confRepo, db)
 
-        confRepo.update { it.copy(backend = ConfRepo.BACKEND_STANDALONE) }
+        confRepo.update { it.copy(backend = ConfQueries.BACKEND_STANDALONE) }
 
         var attempts = 0L
 
