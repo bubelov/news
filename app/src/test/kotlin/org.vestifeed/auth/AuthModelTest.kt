@@ -18,7 +18,7 @@ class AuthModelTest {
         val syncScheduler = mockk<BackgroundSyncScheduler>(relaxUnitFun = true)
 
         val model = AuthModel(
-            confRepo = confRepo,
+            db = db,
             syncScheduler = syncScheduler,
         )
 

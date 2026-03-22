@@ -129,7 +129,7 @@ object Di {
             )
 
             AuthModel::class.java -> AuthModel(
-                context.applicationContext as App,
+                (context.applicationContext as App).db,
                 get(BackgroundSyncScheduler::class.java)
             )
 
