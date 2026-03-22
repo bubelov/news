@@ -51,19 +51,17 @@ class AuthFragment : Fragment() {
 
     private fun FragmentAuthBinding.initButtons() {
         useStandaloneBackend.setOnClickListener {
-            binding.root.animate().alpha(0f).withEndAction {
-                model.setStandaloneBackend()
+            model.setStandaloneBackend()
 
-                parentFragmentManager.commit {
-                    replace(
-                        R.id.fragmentContainerView,
-                        EntriesFragment::class.java,
-                        bundleOf("filter" to EntriesFilter.NotBookmarked),
-                    )
-                }
-
-                (activity as Activity).binding.bottomNav.isVisible = true
+            parentFragmentManager.commit {
+                replace(
+                    R.id.fragmentContainerView,
+                    EntriesFragment::class.java,
+                    bundleOf("filter" to EntriesFilter.NotBookmarked),
+                )
             }
+
+            (activity as Activity).binding.bottomNav.isVisible = true
         }
 
         useMinifluxBackend.setOnClickListener {

@@ -5,6 +5,7 @@ import android.app.Application
 import androidx.lifecycle.ViewModel
 import org.vestifeed.api.Api
 import org.vestifeed.api.HotSwapApi
+import org.vestifeed.app.App
 import org.vestifeed.app.db
 import org.vestifeed.auth.AuthModel
 import org.vestifeed.auth.MinifluxAuthModel
@@ -128,7 +129,7 @@ object Di {
             )
 
             AuthModel::class.java -> AuthModel(
-                get(ConfRepo::class.java),
+                context.applicationContext as App,
                 get(BackgroundSyncScheduler::class.java)
             )
 
