@@ -36,6 +36,7 @@ import kotlinx.coroutines.launch
 import org.vestifeed.R
 import org.vestifeed.auth.AuthFragment
 import org.vestifeed.databinding.FragmentEntriesBinding
+import org.vestifeed.db.ConfQueries
 import org.vestifeed.feeds.FeedsFragment
 import org.vestifeed.navigation.openUrl
 import org.vestifeed.search.SearchFragment
@@ -315,12 +316,12 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         }
 
         when (state.conf.sortOrder) {
-            ConfRepo.SORT_ORDER_ASCENDING -> {
+            ConfQueries.SORT_ORDER_ASCENDING -> {
                 button.setIcon(R.drawable.ic_clock_forward)
                 button.title = getString(R.string.show_newest_first)
             }
 
-            ConfRepo.SORT_ORDER_DESCENDING -> {
+            ConfQueries.SORT_ORDER_DESCENDING -> {
                 button.setIcon(R.drawable.ic_clock_back)
                 button.title = getString(R.string.show_oldest_first)
             }

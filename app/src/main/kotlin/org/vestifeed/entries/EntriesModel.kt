@@ -3,8 +3,6 @@ package org.vestifeed.entries
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import org.vestifeed.conf.ConfRepo
-import org.vestifeed.conf.ConfRepo.Companion.SORT_ORDER_ASCENDING
-import org.vestifeed.conf.ConfRepo.Companion.SORT_ORDER_DESCENDING
 import org.vestifeed.db.Conf
 import org.vestifeed.db.EntriesAdapterRow
 import org.vestifeed.db.Feed
@@ -17,6 +15,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.vestifeed.db.ConfQueries
 import org.vestifeed.sync.Sync
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -83,8 +82,8 @@ class EntriesModel(
                 }
 
                 val sortedRows = when (conf.sortOrder) {
-                    SORT_ORDER_ASCENDING -> rows.sortedBy { it.published }
-                    SORT_ORDER_DESCENDING -> rows.sortedByDescending { it.published }
+                    ConfQueries.SORT_ORDER_ASCENDING -> rows.sortedBy { it.published }
+                    ConfQueries.SORT_ORDER_DESCENDING -> rows.sortedByDescending { it.published }
                     else -> throw Exception()
                 }
 
@@ -123,8 +122,8 @@ class EntriesModel(
 
         confRepo.update {
             val newSortOrder = when (it.sortOrder) {
-                SORT_ORDER_ASCENDING -> SORT_ORDER_DESCENDING
-                SORT_ORDER_DESCENDING -> SORT_ORDER_ASCENDING
+                ConfQueries.SORT_ORDER_ASCENDING -> ConfQueries.SORT_ORDER_DESCENDING
+                ConfQueries.SORT_ORDER_DESCENDING -> ConfQueries.SORT_ORDER_ASCENDING
                 else -> throw Exception()
             }
 

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import org.vestifeed.api.nextcloud.NextcloudApiBuilder
 import org.vestifeed.conf.ConfRepo
 import okhttp3.HttpUrl
+import org.vestifeed.db.ConfQueries
 import org.vestifeed.sync.BackgroundSyncScheduler
 
 class NextcloudAuthModel(
@@ -35,7 +36,7 @@ class NextcloudAuthModel(
     ) {
         confRepo.update {
             it.copy(
-                backend = ConfRepo.BACKEND_NEXTCLOUD,
+                backend = ConfQueries.BACKEND_NEXTCLOUD,
                 nextcloudServerUrl = url.toString().trim('/'),
                 nextcloudServerTrustSelfSignedCerts = trustSelfSignedCerts,
                 nextcloudServerUsername = username,

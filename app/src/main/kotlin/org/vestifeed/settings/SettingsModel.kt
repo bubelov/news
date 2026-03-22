@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import org.vestifeed.R
+import org.vestifeed.db.ConfQueries
 import org.vestifeed.sync.BackgroundSyncScheduler
 
 class SettingsModel(
@@ -31,7 +32,7 @@ class SettingsModel(
                 val logOutSubtitle: String
 
                 when (conf.backend) {
-                    ConfRepo.BACKEND_STANDALONE -> {
+                    ConfQueries.BACKEND_STANDALONE -> {
                         logOutTitle = app.getString(R.string.delete_all_data)
                         logOutSubtitle = ""
                     }
@@ -90,7 +91,7 @@ class SettingsModel(
     }
 
     fun logOut() {
-        confRepo.update { ConfRepo.DEFAULT_CONF }
+        db.confQueries.delete()
 
         db.transaction {
             db.feedQueries.deleteAll()
@@ -100,12 +101,12 @@ class SettingsModel(
 
     private fun Conf.accountName(): String {
         return when (backend) {
-            ConfRepo.BACKEND_STANDALONE -> ""
-            ConfRepo.BACKEND_MINIFLUX -> {
+            ConfQueries.BACKEND_STANDALONE -> ""
+            ConfQueries.BACKEND_MINIFLUX -> {
                 minifluxServerUrl.extractDomain()
             }
 
-            ConfRepo.BACKEND_NEXTCLOUD -> {
+            ConfQueries.BACKEND_NEXTCLOUD -> {
                 val username = nextcloudServerUsername
                 "$username@${nextcloudServerUrl.extractDomain()}"
             }

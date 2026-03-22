@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import okhttp3.HttpUrl
+import org.vestifeed.db.ConfQueries
 import java.time.OffsetDateTime
 
 class HotSwapApi(
@@ -28,11 +29,11 @@ class HotSwapApi(
         GlobalScope.launch {
             confRepo.conf.collectLatest { conf ->
                 when (conf.backend) {
-                    ConfRepo.BACKEND_STANDALONE -> {
+                    ConfQueries.BACKEND_STANDALONE -> {
                         api = StandaloneNewsApi(db)
                     }
 
-                    ConfRepo.BACKEND_MINIFLUX -> {
+                    ConfQueries.BACKEND_MINIFLUX -> {
                         api = MinifluxApiAdapter(
                             MinifluxApiBuilder().build(
                                 url = conf.minifluxServerUrl,
@@ -42,7 +43,7 @@ class HotSwapApi(
                         )
                     }
 
-                    ConfRepo.BACKEND_NEXTCLOUD -> {
+                    ConfQueries.BACKEND_NEXTCLOUD -> {
                         api = NextcloudApiAdapter(
                             NextcloudApiBuilder().build(
                                 url = conf.nextcloudServerUrl,

@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import android.widget.RadioButton
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
@@ -19,7 +18,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import org.vestifeed.app.App
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import org.vestifeed.conf.ConfRepo
 import org.vestifeed.di.Di
 import org.vestifeed.dialog.showErrorDialog
 import kotlinx.coroutines.Dispatchers
@@ -30,8 +28,8 @@ import kotlinx.coroutines.withContext
 import org.vestifeed.R
 import org.vestifeed.auth.AuthFragment
 import org.vestifeed.databinding.FragmentSettingsBinding
+import org.vestifeed.db.ConfQueries
 import org.vestifeed.enclosures.EnclosuresFragment
-import org.vestifeed.feeds.FeedsFragment
 import java.util.concurrent.TimeUnit
 
 class SettingsFragment : Fragment() {
@@ -214,7 +212,7 @@ class SettingsFragment : Fragment() {
 
         logOut.setOnClickListener {
             when (state.conf.backend) {
-                ConfRepo.BACKEND_STANDALONE -> {
+                ConfQueries.BACKEND_STANDALONE -> {
                     MaterialAlertDialogBuilder(requireContext())
                         .setMessage(R.string.delete_all_data_warning)
                         .setPositiveButton(R.string.delete) { _, _ -> logOut() }

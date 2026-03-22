@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import org.vestifeed.conf.ConfRepo.Companion.SORT_ORDER_DESCENDING
 import java.time.OffsetDateTime
 
 class Db(driver: SQLiteDriver, val path: String) {
@@ -911,5 +910,14 @@ class ConfQueries(private val conn: SQLiteConnection) {
 
     fun delete() {
         conn.execSQL("DELETE FROM conf")
+    }
+
+    companion object {
+        const val BACKEND_STANDALONE = "standalone"
+        const val BACKEND_MINIFLUX = "miniflux"
+        const val BACKEND_NEXTCLOUD = "nextcloud"
+
+        const val SORT_ORDER_ASCENDING = "ascending"
+        const val SORT_ORDER_DESCENDING = "descending"
     }
 }
