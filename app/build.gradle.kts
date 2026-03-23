@@ -29,21 +29,15 @@ android {
         }
 
         release {
-            // https://developer.android.com/topic/performance/app-optimization/enable-app-optimization
-
-            // Enables code-related org.vestifeed.app optimization.
-            // isMinifyEnabled = true
-
-            // Enables resource shrinking.
-            // isShrinkResources = true
-
-            // Includes the default ProGuard rules file
-            //proguardFiles(
-            //    // Default file with automatically generated optimization rules.
-            //    getDefaultProguardFile("proguard-android-optimize.txt"),
-            //)
-
             signingConfig = signingConfigs.getByName("debug")
+
+            isMinifyEnabled = true
+            isShrinkResources = true
+
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 

@@ -1,0 +1,2 @@
+-keep class org.vestifeed.api.miniflux.** { *; }
+-keep class org.vestifeed.api.nextcloud.** { *; }
