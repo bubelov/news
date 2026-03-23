@@ -419,11 +419,11 @@ class EntryQueries(private val conn: SQLiteConnection) {
 
     private fun statementToEntry(stmt: SQLiteStatement): Entry {
         return Entry(
-            contentType = stmt.getTextSafe(0),
-            contentSrc = stmt.getTextSafe(1),
-            contentText = stmt.getTextSafe(2),
-            links = jsonToLinks(stmt.getTextSafe(3)),
-            summary = stmt.getTextSafe(4),
+            contentType = stmt.getTextOrNull(0),
+            contentSrc = stmt.getTextOrNull(1),
+            contentText = stmt.getTextOrNull(2),
+            links = jsonToLinks(stmt.getTextOrNull(3)),
+            summary = stmt.getTextOrNull(4),
             id = stmt.getText(5),
             feedId = stmt.getText(6),
             title = stmt.getText(7),
@@ -447,18 +447,14 @@ class EntryQueries(private val conn: SQLiteConnection) {
         return stmt.getColumnNames().indexOf(name)
     }
 
-    private fun SQLiteStatement.getTextSafe(index: Int): String? {
-        return try {
-            if (index < 0) null else getText(index)
-        } catch (e: NullPointerException) {
-            null
-        }
+    private fun SQLiteStatement.getTextOrNull(index: Int): String? {
+        return if (isNull(index)) null else getText(index)
     }
 
     private fun statementToEntriesAdapterRow(stmt: SQLiteStatement): EntriesAdapterRow {
         return EntriesAdapterRow(
-            id = stmt.getTextSafe(getColumnIndex(stmt, "id")) ?: "",
-            feedId = stmt.getTextSafe(getColumnIndex(stmt, "feed_id")) ?: "",
+            id = stmt.getTextOrNull(getColumnIndex(stmt, "id")) ?: "",
+            feedId = stmt.getTextOrNull(getColumnIndex(stmt, "feed_id")) ?: "",
             extBookmarked = stmt.getInt(getColumnIndex(stmt, "ext_bookmarked")) == 1,
             extShowPreviewImages = stmt.getInt(
                 getColumnIndex(
@@ -466,14 +462,14 @@ class EntryQueries(private val conn: SQLiteConnection) {
                     "ext_show_preview_images"
                 )
             ) == 1,
-            extOpenGraphImageUrl = stmt.getTextSafe(getColumnIndex(stmt, "ext_og_image_url")) ?: "",
+            extOpenGraphImageUrl = stmt.getTextOrNull(getColumnIndex(stmt, "ext_og_image_url")) ?: "",
             extOpenGraphImageWidth = stmt.getInt(getColumnIndex(stmt, "ext_og_image_width")),
             extOpenGraphImageHeight = stmt.getInt(getColumnIndex(stmt, "ext_og_image_height")),
-            title = stmt.getTextSafe(getColumnIndex(stmt, "title")) ?: "",
-            feedTitle = stmt.getTextSafe(getColumnIndex(stmt, "feed_title")) ?: "",
+            title = stmt.getTextOrNull(getColumnIndex(stmt, "title")) ?: "",
+            feedTitle = stmt.getTextOrNull(getColumnIndex(stmt, "feed_title")) ?: "",
             published = runCatching {
                 OffsetDateTime.parse(
-                    stmt.getTextSafe(
+                    stmt.getTextOrNull(
                         getColumnIndex(
                             stmt,
                             "published"
@@ -481,7 +477,7 @@ class EntryQueries(private val conn: SQLiteConnection) {
                     )
                 )
             }.getOrDefault(OffsetDateTime.now()),
-            summary = stmt.getTextSafe(getColumnIndex(stmt, "summary")) ?: "",
+            summary = stmt.getTextOrNull(getColumnIndex(stmt, "summary")) ?: "",
             extRead = stmt.getInt(getColumnIndex(stmt, "ext_read")) == 1,
             extOpenEntriesInBrowser = stmt.getInt(
                 getColumnIndex(
@@ -489,51 +485,51 @@ class EntryQueries(private val conn: SQLiteConnection) {
                     "ext_open_entries_in_browser"
                 )
             ) == 1,
-            links = jsonToLinks(stmt.getTextSafe(getColumnIndex(stmt, "links")))
+            links = jsonToLinks(stmt.getTextOrNull(getColumnIndex(stmt, "links")))
         )
     }
 
     private fun statementToSelectByQuery(stmt: SQLiteStatement): SelectByQuery {
         return SelectByQuery(
-            id = stmt.getTextSafe(0) ?: "",
+            id = stmt.getTextOrNull(0) ?: "",
             extShowPreviewImages = stmt.getInt(1) == 1,
-            extOpenGraphImageUrl = stmt.getTextSafe(2) ?: "",
+            extOpenGraphImageUrl = stmt.getTextOrNull(2) ?: "",
             extOpenGraphImageWidth = stmt.getInt(3),
             extOpenGraphImageHeight = stmt.getInt(4),
-            title = stmt.getTextSafe(5) ?: "",
-            feedTitle = stmt.getTextSafe(6) ?: "",
-            published = runCatching { OffsetDateTime.parse(stmt.getTextSafe(7)) }.getOrDefault(
+            title = stmt.getTextOrNull(5) ?: "",
+            feedTitle = stmt.getTextOrNull(6) ?: "",
+            published = runCatching { OffsetDateTime.parse(stmt.getTextOrNull(7)) }.getOrDefault(
                 OffsetDateTime.now()
             ),
-            summary = stmt.getTextSafe(8) ?: "",
+            summary = stmt.getTextOrNull(8) ?: "",
             extRead = stmt.getInt(9) == 1,
             extOpenEntriesInBrowser = stmt.getInt(10) == 1,
-            links = jsonToLinks(stmt.getTextSafe(11))
+            links = jsonToLinks(stmt.getTextOrNull(11))
         )
     }
 
     private fun statementToEntryWithoutContent(stmt: SQLiteStatement): EntryWithoutContent {
         return EntryWithoutContent(
-            links = jsonToLinks(stmt.getTextSafe(0)),
-            summary = stmt.getTextSafe(1),
-            id = stmt.getTextSafe(2) ?: "",
-            feedId = stmt.getTextSafe(3) ?: "",
-            title = stmt.getTextSafe(4) ?: "",
-            published = runCatching { OffsetDateTime.parse(stmt.getTextSafe(5)) }.getOrDefault(
+            links = jsonToLinks(stmt.getTextOrNull(0)),
+            summary = stmt.getTextOrNull(1),
+            id = stmt.getTextOrNull(2) ?: "",
+            feedId = stmt.getTextOrNull(3) ?: "",
+            title = stmt.getTextOrNull(4) ?: "",
+            published = runCatching { OffsetDateTime.parse(stmt.getTextOrNull(5)) }.getOrDefault(
                 OffsetDateTime.now()
             ),
-            updated = runCatching { OffsetDateTime.parse(stmt.getTextSafe(6)) }.getOrDefault(
+            updated = runCatching { OffsetDateTime.parse(stmt.getTextOrNull(6)) }.getOrDefault(
                 OffsetDateTime.now()
             ),
-            authorName = stmt.getTextSafe(7) ?: "",
+            authorName = stmt.getTextOrNull(7) ?: "",
             extRead = stmt.getInt(8) == 1,
             extReadSynced = stmt.getInt(9) == 1,
             extBookmarked = stmt.getInt(10) == 1,
             extBookmarkedSynced = stmt.getInt(11) == 1,
-            extNextcloudGuidHash = stmt.getTextSafe(12) ?: "",
-            extCommentsUrl = stmt.getTextSafe(13) ?: "",
+            extNextcloudGuidHash = stmt.getTextOrNull(12) ?: "",
+            extCommentsUrl = stmt.getTextOrNull(13) ?: "",
             extOpenGraphImageChecked = stmt.getInt(14) == 1,
-            extOpenGraphImageUrl = stmt.getTextSafe(15) ?: "",
+            extOpenGraphImageUrl = stmt.getTextOrNull(15) ?: "",
             extOpenGraphImageWidth = stmt.getInt(16),
             extOpenGraphImageHeight = stmt.getInt(17)
         )
