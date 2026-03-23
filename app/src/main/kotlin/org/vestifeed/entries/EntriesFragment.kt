@@ -27,7 +27,6 @@ import org.vestifeed.anim.showSmooth
 import co.appreactor.feedk.AtomLinkRel
 import com.google.android.material.navigation.NavigationBarView.OnItemReselectedListener
 import com.google.android.material.snackbar.Snackbar
-import org.vestifeed.conf.ConfRepo
 import org.vestifeed.di.Di
 import org.vestifeed.dialog.showErrorDialog
 import org.vestifeed.entry.EntryFragment

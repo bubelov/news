@@ -13,7 +13,6 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import org.vestifeed.auth.AuthFragment
 import com.google.android.material.navigation.NavigationBarView.OnItemReselectedListener
-import org.vestifeed.conf.ConfRepo
 import org.vestifeed.di.Di
 import org.vestifeed.entries.EntriesFilter
 import org.vestifeed.entries.EntriesFragment
@@ -54,7 +53,7 @@ class Activity : AppCompatActivity(), FragmentManager.OnBackStackChangedListener
             insets
         }
 
-        Di.get(ConfRepo::class.java).update { it.copy(syncedOnStartup = false) }
+        db().confQueries.update { it.copy(syncedOnStartup = false) }
         lifecycleScope.launch { Di.get(OpenGraphImagesRepo::class.java).fetchEntryImages() }
     }
 

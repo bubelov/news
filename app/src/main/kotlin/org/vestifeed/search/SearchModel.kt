@@ -2,7 +2,6 @@ package org.vestifeed.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import org.vestifeed.conf.ConfRepo
 import org.vestifeed.db.Conf
 import org.vestifeed.db.SelectByQuery
 import org.vestifeed.entries.EntriesAdapter
@@ -13,13 +12,13 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import androidx.lifecycle.viewModelScope
+import org.vestifeed.db.Db
 import org.vestifeed.sync.Sync
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 class SearchModel(
-    confRepo: ConfRepo,
+    db: Db,
     private val entriesRepo: EntriesRepo,
     private val sync: Sync,
 ) : ViewModel() {
@@ -32,7 +31,7 @@ class SearchModel(
     init {
         viewModelScope.launch {
             args.filterNotNull().collect { args ->
-                val conf = confRepo.select()
+                val conf = db.confQueries.select()
                 if (args.query.length < 3) {
                     _state.update { State.QueryIsTooShort }
                     return@collect

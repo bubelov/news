@@ -13,7 +13,6 @@ import org.junit.After
 import org.junit.Test
 import org.junit.Assert.assertEquals
 import org.junit.Before
-import org.vestifeed.conf.ConfRepo
 import org.vestifeed.db.ConfQueries
 import org.vestifeed.db.db
 
@@ -37,9 +36,8 @@ class SettingsModelTest {
         val app: Application = mockk(relaxed = true)
 
         val db = db()
-        val confRepo = ConfRepo(db)
 
-        confRepo.update {
+        db.confQueries.update {
             it.copy(
                 backend = ConfQueries.BACKEND_MINIFLUX,
                 minifluxServerUrl = "https://acme.com",
@@ -48,7 +46,6 @@ class SettingsModelTest {
 
         var model = SettingsModel(
             app = app,
-            confRepo = confRepo,
             db = db,
             syncScheduler = mockk(),
         )
@@ -57,7 +54,7 @@ class SettingsModelTest {
 
         assertEquals("acme.com", state.logOutSubtitle)
 
-        confRepo.update {
+        db.confQueries.update {
             it.copy(
                 backend = ConfQueries.BACKEND_MINIFLUX,
                 minifluxServerUrl = "http://acme.com",
@@ -66,7 +63,6 @@ class SettingsModelTest {
 
         model = SettingsModel(
             app = app,
-            confRepo = confRepo,
             db = db,
             syncScheduler = mockk(),
         )

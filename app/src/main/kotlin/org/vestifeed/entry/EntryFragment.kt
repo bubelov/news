@@ -33,7 +33,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.feedk.AtomLinkRel
-import org.vestifeed.conf.ConfRepo
 import org.vestifeed.db.Entry
 import org.vestifeed.db.Link
 import org.vestifeed.di.Di
@@ -45,6 +44,7 @@ import org.vestifeed.feeds.FeedsRepo
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.vestifeed.R
+import org.vestifeed.app.db
 import org.vestifeed.databinding.FragmentEntryBinding
 import org.vestifeed.feedsettings.FeedSettingsFragment
 import org.vestifeed.navigation.openUrl
@@ -61,9 +61,8 @@ class EntryFragment : Fragment() {
     private val entriesRepository: EntriesRepo by lazy { Di.get(EntriesRepo::class.java) }
     private val feedsRepository: FeedsRepo by lazy { Di.get(FeedsRepo::class.java) }
     private val newsApiSync: Sync by lazy { Di.get(Sync::class.java) }
-    private val confRepo: ConfRepo by lazy { Di.get(ConfRepo::class.java) }
 
-    private val conf get() = confRepo.select()
+    private val conf by lazy { requireContext().db().confQueries.select() }
 
     private var _binding: FragmentEntryBinding? = null
     private val binding get() = _binding!!

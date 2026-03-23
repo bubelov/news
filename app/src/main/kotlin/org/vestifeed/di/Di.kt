@@ -10,7 +10,6 @@ import org.vestifeed.app.db
 import org.vestifeed.auth.AuthModel
 import org.vestifeed.auth.MinifluxAuthModel
 import org.vestifeed.auth.NextcloudAuthModel
-import org.vestifeed.conf.ConfRepo
 import org.vestifeed.entries.EntriesModel
 import org.vestifeed.entries.EntriesRepo
 import org.vestifeed.enclosures.EnclosuresModel
@@ -48,11 +47,7 @@ object Di {
     @Suppress("UNCHECKED_CAST")
     private fun createInstance(clazz: Class<*>): Any {
         return when (clazz) {
-            ConfRepo::class.java -> ConfRepo(context.db())
-            Api::class.java, HotSwapApi::class.java -> HotSwapApi(
-                get(ConfRepo::class.java),
-                context.db(),
-            )
+            Api::class.java, HotSwapApi::class.java -> HotSwapApi(context.db())
 
             FeedsRepo::class.java -> FeedsRepo(
                 get(Api::class.java),
@@ -71,20 +66,16 @@ object Di {
 
             OpenGraphImagesRepo::class.java -> OpenGraphImagesRepo(
                 context,
-                get(ConfRepo::class.java),
                 context.db(),
             )
 
             Sync::class.java -> Sync(
-                get(ConfRepo::class.java),
+                context.db(),
                 get(FeedsRepo::class.java),
                 get(EntriesRepo::class.java)
             )
 
-            BackgroundSyncScheduler::class.java -> BackgroundSyncScheduler(
-                get(ConfRepo::class.java),
-                context
-            )
+            BackgroundSyncScheduler::class.java -> BackgroundSyncScheduler(context)
 
             else -> throw IllegalArgumentException("Unknown class: $clazz")
         }
@@ -94,13 +85,13 @@ object Di {
     private fun createViewModel(clazz: Class<out ViewModel>): ViewModel {
         return when (clazz) {
             FeedsModel::class.java -> FeedsModel(
-                get(ConfRepo::class.java),
+                context.db(),
                 get(FeedsRepo::class.java),
                 get(EntriesRepo::class.java)
             )
 
             EntriesModel::class.java -> EntriesModel(
-                get(ConfRepo::class.java),
+                context.db(),
                 get(EntriesRepo::class.java),
                 get(FeedsRepo::class.java),
                 get(Sync::class.java)
@@ -108,13 +99,12 @@ object Di {
 
             SettingsModel::class.java -> SettingsModel(
                 context as Application,
-                get(ConfRepo::class.java),
                 context.db(),
                 get(BackgroundSyncScheduler::class.java)
             )
 
             SearchModel::class.java -> SearchModel(
-                get(ConfRepo::class.java),
+                context.db(),
                 get(EntriesRepo::class.java),
                 get(Sync::class.java)
             )
@@ -134,12 +124,12 @@ object Di {
             )
 
             MinifluxAuthModel::class.java -> MinifluxAuthModel(
-                get(ConfRepo::class.java),
+                context.db(),
                 get(BackgroundSyncScheduler::class.java)
             )
 
             NextcloudAuthModel::class.java -> NextcloudAuthModel(
-                get(ConfRepo::class.java),
+                context.db(),
                 get(BackgroundSyncScheduler::class.java)
             )
 

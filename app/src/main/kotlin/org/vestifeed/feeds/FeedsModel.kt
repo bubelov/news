@@ -3,7 +3,6 @@ package org.vestifeed.feeds
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.appreactor.feedk.AtomLinkRel
-import org.vestifeed.conf.ConfRepo
 import org.vestifeed.db.SelectAllWithUnreadEntryCount
 import org.vestifeed.entries.EntriesRepo
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +21,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import org.vestifeed.db.Db
 import org.vestifeed.opml.OpmlDocument
 import org.vestifeed.opml.OpmlOutline
 import org.vestifeed.opml.OpmlVersion
@@ -34,7 +34,7 @@ import java.io.OutputStream
 import javax.xml.parsers.DocumentBuilderFactory
 
 class FeedsModel(
-    private val confRepo: ConfRepo,
+    private val db: Db,
     private val feedsRepo: FeedsRepo,
     private val entriesRepo: EntriesRepo,
 ) : ViewModel() {
@@ -256,7 +256,7 @@ class FeedsModel(
             selfLink = selfLink,
             alternateLink = links.firstOrNull { it.rel is AtomLinkRel.Alternate }?.href,
             unreadCount = unreadEntries,
-            confUseBuiltInBrowser = confRepo.select().useBuiltInBrowser,
+            confUseBuiltInBrowser = db.confQueries.select().useBuiltInBrowser,
         )
     }
 

@@ -11,11 +11,11 @@ import androidx.core.content.getSystemService
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import org.vestifeed.navigation.Activity
-import org.vestifeed.conf.ConfRepo
 import org.vestifeed.entries.EntriesRepo
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.vestifeed.R
+import org.vestifeed.app.db
 import org.vestifeed.di.Di
 
 class SyncWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
@@ -23,7 +23,7 @@ class SyncWorker(context: Context, workerParams: WorkerParameters) : Worker(cont
     override fun doWork() = runBlocking { doWorkAsync() }
 
     private suspend fun doWorkAsync(): Result {
-        val conf = Di.get(ConfRepo::class.java).select()
+        val conf = applicationContext.db().confQueries.select()
         val sync = Di.get(Sync::class.java)
         val entriesRepository = Di.get(EntriesRepo::class.java)
 

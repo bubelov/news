@@ -4,7 +4,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.Assert.assertEquals
-import org.vestifeed.conf.ConfRepo
 import org.vestifeed.db.ConfQueries
 import org.vestifeed.db.db
 
@@ -13,10 +12,9 @@ class HotSwapApiTest {
     @Test
     fun standaloneBackend() = runBlocking {
         val db = db()
-        val confRepo = ConfRepo(db)
-        val api = HotSwapApi(confRepo, db)
+        val api = HotSwapApi(db)
 
-        confRepo.update { it.copy(backend = ConfQueries.BACKEND_STANDALONE) }
+        db.confQueries.update { it.copy(backend = ConfQueries.BACKEND_STANDALONE) }
 
         var attempts = 0L
 

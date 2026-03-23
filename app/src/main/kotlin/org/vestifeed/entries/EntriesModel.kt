@@ -2,7 +2,6 @@ package org.vestifeed.entries
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import org.vestifeed.conf.ConfRepo
 import org.vestifeed.db.Conf
 import org.vestifeed.db.EntriesAdapterRow
 import org.vestifeed.db.Feed
@@ -16,12 +15,13 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.vestifeed.db.ConfQueries
+import org.vestifeed.db.Db
 import org.vestifeed.sync.Sync
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 class EntriesModel(
-    private val confRepo: ConfRepo,
+    private val db: Db,
     private val entriesRepo: EntriesRepo,
     private val feedsRepo: FeedsRepo,
     private val newsApiSync: Sync,
@@ -40,18 +40,23 @@ class EntriesModel(
                 args.filterNotNull(),
                 newsApiSync.state,
                 entriesRepo.selectCount(),
-            ) { filter, syncState, _ -> Pair(filter, syncState) }.collectLatest { (filter, syncState) ->
-                val conf = confRepo.select()
+            ) { filter, syncState, _ ->
+                Pair(
+                    filter,
+                    syncState
+                )
+            }.collectLatest { (filter, syncState) ->
+                val conf = db.confQueries.select()
                 updateState(filter, conf, syncState)
             }
         }
     }
 
-    fun hasBackend() = confRepo.select().backend.isNotBlank()
+    fun hasBackend() = db.confQueries.select().backend.isNotBlank()
 
     private suspend fun updateState(filter: EntriesFilter, conf: Conf, syncState: Sync.State) {
         if (!conf.initialSyncCompleted || (conf.syncOnStartup && !conf.syncedOnStartup)) {
-            confRepo.update { it.copy(syncedOnStartup = true) }
+            db.confQueries.update { it.copy(syncedOnStartup = true) }
             viewModelScope.launch { newsApiSync.run() }
         }
 
@@ -116,13 +121,13 @@ class EntriesModel(
     }
 
     fun saveConf(newConf: (Conf) -> Conf) {
-        this.confRepo.update(newConf)
+        db.confQueries.update(newConf)
     }
 
     fun changeSortOrder() {
         scrollToTopNextTime = true
 
-        confRepo.update {
+        db.confQueries.update {
             val newSortOrder = when (it.sortOrder) {
                 ConfQueries.SORT_ORDER_ASCENDING -> ConfQueries.SORT_ORDER_DESCENDING
                 ConfQueries.SORT_ORDER_DESCENDING -> ConfQueries.SORT_ORDER_ASCENDING

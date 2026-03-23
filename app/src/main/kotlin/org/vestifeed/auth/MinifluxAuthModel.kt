@@ -2,13 +2,13 @@ package org.vestifeed.auth
 
 import androidx.lifecycle.ViewModel
 import org.vestifeed.api.miniflux.MinifluxApiBuilder
-import org.vestifeed.conf.ConfRepo
 import okhttp3.HttpUrl
 import org.vestifeed.db.ConfQueries
+import org.vestifeed.db.Db
 import org.vestifeed.sync.BackgroundSyncScheduler
 
 class MinifluxAuthModel(
-    private val confRepo: ConfRepo,
+    private val db: Db,
     private val syncScheduler: BackgroundSyncScheduler,
 ) : ViewModel() {
 
@@ -31,7 +31,7 @@ class MinifluxAuthModel(
         token: String,
         trustSelfSignedCerts: Boolean,
     ) {
-        confRepo.update {
+        db.confQueries.update {
             it.copy(
                 backend = ConfQueries.BACKEND_MINIFLUX,
                 minifluxServerUrl = url.toString().trim('/'),

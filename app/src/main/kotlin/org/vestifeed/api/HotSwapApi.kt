@@ -5,7 +5,6 @@ import org.vestifeed.api.miniflux.MinifluxApiBuilder
 import org.vestifeed.api.nextcloud.NextcloudApiAdapter
 import org.vestifeed.api.nextcloud.NextcloudApiBuilder
 import org.vestifeed.api.standalone.StandaloneNewsApi
-import org.vestifeed.conf.ConfRepo
 import org.vestifeed.db.Db
 import org.vestifeed.db.Entry
 import org.vestifeed.db.EntryWithoutContent
@@ -15,10 +14,7 @@ import okhttp3.HttpUrl
 import org.vestifeed.db.ConfQueries
 import java.time.OffsetDateTime
 
-class HotSwapApi(
-    private val confRepo: ConfRepo,
-    private val db: Db,
-) : Api {
+class HotSwapApi(private val db: Db) : Api {
 
     private lateinit var api: Api
 
@@ -27,7 +23,7 @@ class HotSwapApi(
     }
 
     private fun updateApi() {
-        val conf = confRepo.select()
+        val conf = db.confQueries.select()
         api = when (conf.backend) {
             ConfQueries.BACKEND_STANDALONE -> {
                 StandaloneNewsApi(db)

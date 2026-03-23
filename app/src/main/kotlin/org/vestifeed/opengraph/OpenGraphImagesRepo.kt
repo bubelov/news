@@ -10,7 +10,6 @@ import coil3.imageLoader
 import coil3.request.ErrorResult
 import coil3.request.SuccessResult
 import coil3.toBitmap
-import org.vestifeed.conf.ConfRepo
 import org.vestifeed.db.Db
 import org.vestifeed.http.await
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +23,6 @@ import kotlin.random.Random
 
 class OpenGraphImagesRepo(
     private val context: Context,
-    private val confRepo: ConfRepo,
     private val db: Db,
 ) {
 
@@ -47,7 +45,7 @@ class OpenGraphImagesRepo(
 
     private suspend fun fetchPendingEntries() {
         Log.d("opengraph", "fetching pending org.vestifeed.entries")
-        val showPreviewImages = confRepo.select().showPreviewImages
+        val showPreviewImages = db.confQueries.select().showPreviewImages
         if (!showPreviewImages) return
 
         val entries = db.entryQueries.selectByOgImageChecked(false, BATCH_SIZE * 2L)
