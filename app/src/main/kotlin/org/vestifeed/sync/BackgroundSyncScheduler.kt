@@ -6,17 +6,16 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import org.vestifeed.conf.ConfRepo
+import org.vestifeed.app.db
 import java.util.concurrent.TimeUnit
 
 class BackgroundSyncScheduler(
-    private val confRepo: ConfRepo,
     private val context: Context,
 ) {
 
     fun schedule() {
         val workManager = WorkManager.getInstance(context)
-        val conf = confRepo.conf.value
+        val conf = context.db().confQueries.select()
 
         if (!conf.syncInBackground) {
             workManager.cancelUniqueWork(WORK_NAME)

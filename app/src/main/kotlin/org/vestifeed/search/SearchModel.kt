@@ -9,12 +9,11 @@ import org.vestifeed.entries.EntriesAdapter
 import org.vestifeed.entries.EntriesRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import androidx.lifecycle.viewModelScope
 import org.vestifeed.sync.Sync
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -31,23 +30,22 @@ class SearchModel(
     val state = _state.asStateFlow()
 
     init {
-        combine(
-            args.filterNotNull(),
-            confRepo.conf,
-            entriesRepo.selectCount(),
-        ) { args, conf, _ ->
-            if (args.query.length < 3) {
-                _state.update { State.QueryIsTooShort }
-                return@combine
+        viewModelScope.launch {
+            args.filterNotNull().collect { args ->
+                val conf = confRepo.select()
+                if (args.query.length < 3) {
+                    _state.update { State.QueryIsTooShort }
+                    return@collect
+                }
+
+                _state.update { State.RunningQuery }
+
+                val rows = entriesRepo.selectByFtsQuery(args.query).first()
+                val items = rows.map { it.toItem(conf) }
+
+                _state.update { State.ShowingQueryResults(items) }
             }
-
-            _state.update { State.RunningQuery }
-
-            val rows = entriesRepo.selectByFtsQuery(args.query).first()
-            val items = rows.map { it.toItem(conf) }
-
-            _state.update { State.ShowingQueryResults(items) }
-        }.launchIn(viewModelScope)
+        }
     }
 
     fun setArgs(args: Args) {

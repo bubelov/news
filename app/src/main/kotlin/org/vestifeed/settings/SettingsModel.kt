@@ -26,68 +26,80 @@ class SettingsModel(
     val state = _state.asStateFlow()
 
     init {
-        confRepo.conf.onEach { conf ->
-            _state.update {
-                val logOutTitle: String
-                val logOutSubtitle: String
+        refresh()
+    }
 
-                when (conf.backend) {
-                    ConfQueries.BACKEND_STANDALONE -> {
-                        logOutTitle = app.getString(R.string.delete_all_data)
-                        logOutSubtitle = ""
-                    }
+    private fun refresh() {
+        val conf = confRepo.select()
+        _state.update {
+            val logOutTitle: String
+            val logOutSubtitle: String
 
-                    else -> {
-                        logOutTitle = app.getString(R.string.log_out)
-                        logOutSubtitle = conf.accountName()
-                    }
+            when (conf.backend) {
+                ConfQueries.BACKEND_STANDALONE -> {
+                    logOutTitle = app.getString(R.string.delete_all_data)
+                    logOutSubtitle = ""
                 }
 
-                State.ShowingSettings(
-                    conf = conf,
-                    logOutTitle = logOutTitle,
-                    logOutSubtitle = logOutSubtitle,
-                )
+                else -> {
+                    logOutTitle = app.getString(R.string.log_out)
+                    logOutSubtitle = conf.accountName()
+                }
             }
-        }.launchIn(viewModelScope)
+
+            State.ShowingSettings(
+                conf = conf,
+                logOutTitle = logOutTitle,
+                logOutSubtitle = logOutSubtitle,
+            )
+        }
     }
 
     fun setSyncInBackground(value: Boolean) {
         confRepo.update { it.copy(syncInBackground = value) }
         syncScheduler.schedule()
+        refresh()
     }
 
     fun setBackgroundSyncIntervalMillis(value: Long) {
         confRepo.update { it.copy(backgroundSyncIntervalMillis = value) }
         syncScheduler.schedule()
+        refresh()
     }
 
     fun setSyncOnStartup(value: Boolean) {
         confRepo.update { it.copy(syncOnStartup = value) }
+        refresh()
     }
 
     fun setShowReadEntries(value: Boolean) {
         confRepo.update { it.copy(showReadEntries = value) }
+        refresh()
     }
 
     fun setShowPreviewImages(value: Boolean) {
         confRepo.update { it.copy(showPreviewImages = value) }
+        refresh()
     }
 
     fun setCropPreviewImages(value: Boolean) {
         confRepo.update { it.copy(cropPreviewImages = value) }
+        refresh()
     }
 
     fun setShowPreviewText(value: Boolean) {
         confRepo.update { it.copy(showPreviewText = value) }
+        refresh()
     }
 
     fun setMarkScrolledEntriesAsRead(value: Boolean) {
         confRepo.update { it.copy(markScrolledEntriesAsRead = value) }
+        refresh()
     }
 
     fun setUseBuiltInBrowser(value: Boolean) {
         confRepo.update { it.copy(useBuiltInBrowser = value) }
+        refresh()
     }
 
     fun logOut() {

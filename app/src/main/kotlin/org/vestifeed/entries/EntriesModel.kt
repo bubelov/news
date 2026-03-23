@@ -38,14 +38,16 @@ class EntriesModel(
         viewModelScope.launch {
             combine(
                 args.filterNotNull(),
-                confRepo.conf,
                 newsApiSync.state,
                 entriesRepo.selectCount(),
-            ) { filter, conf, syncState, _ -> updateState(filter, conf, syncState) }.collectLatest { }
+            ) { filter, syncState, _ -> Pair(filter, syncState) }.collectLatest { (filter, syncState) ->
+                val conf = confRepo.select()
+                updateState(filter, conf, syncState)
+            }
         }
     }
 
-    fun hasBackend() = confRepo.conf.value.backend.isNotBlank()
+    fun hasBackend() = confRepo.select().backend.isNotBlank()
 
     private suspend fun updateState(filter: EntriesFilter, conf: Conf, syncState: Sync.State) {
         if (!conf.initialSyncCompleted || (conf.syncOnStartup && !conf.syncedOnStartup)) {

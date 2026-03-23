@@ -20,6 +20,7 @@ import org.vestifeed.entries.EntriesFragment
 import org.vestifeed.feeds.FeedsFragment
 import kotlinx.coroutines.launch
 import org.vestifeed.R
+import org.vestifeed.app.db
 import org.vestifeed.databinding.ActivityBinding
 import org.vestifeed.opengraph.OpenGraphImagesRepo
 
@@ -66,10 +67,9 @@ class Activity : AppCompatActivity(), FragmentManager.OnBackStackChangedListener
 
         if (supportFragmentManager.findFragmentById(R.id.fragmentContainerView) is AuthFragment) {
             lifecycleScope.launch {
-                val confRepo = Di.get(ConfRepo::class.java)
-                val config = confRepo.conf.value
+                val conf = db().confQueries.select()
 
-                if (config.backend.isNotBlank()) {
+                if (conf.backend.isNotBlank()) {
                     supportFragmentManager.commit {
                         replace(
                             R.id.fragmentContainerView,

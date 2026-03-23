@@ -4,11 +4,6 @@ import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.SQLiteStatement
 import androidx.sqlite.execSQL
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.runBlocking
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import java.time.OffsetDateTime
 
@@ -770,12 +765,6 @@ class EntrySearchQueries(private val conn: SQLiteConnection) {
 }
 
 class ConfQueries(private val conn: SQLiteConnection) {
-    private val _conf: MutableStateFlow<Conf> by lazy {
-        MutableStateFlow(
-            runBlocking { select() })
-    }
-
-    val conf: StateFlow<Conf> by lazy { _conf.asStateFlow() }
 
     fun insert(conf: Conf) {
         val stmt = conn.prepare(
@@ -901,7 +890,6 @@ class ConfQueries(private val conn: SQLiteConnection) {
         val newConf = newConf(oldConf)
         delete()
         insert(newConf)
-        _conf.update { newConf }
     }
 
     fun delete() {

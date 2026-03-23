@@ -47,7 +47,7 @@ class OpenGraphImagesRepo(
 
     private suspend fun fetchPendingEntries() {
         Log.d("opengraph", "fetching pending org.vestifeed.entries")
-        val showPreviewImages = confRepo.conf.value.showPreviewImages
+        val showPreviewImages = confRepo.select().showPreviewImages
         if (!showPreviewImages) return
 
         val entries = db.entryQueries.selectByOgImageChecked(false, BATCH_SIZE * 2L)

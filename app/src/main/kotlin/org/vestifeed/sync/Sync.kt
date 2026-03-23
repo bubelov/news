@@ -35,7 +35,7 @@ class Sync(
             return SyncResult.Failure(Exception("Already syncing"))
         }
 
-        val conf = confRepo.conf.value
+        val conf = confRepo.select()
 
         if (!conf.initialSyncCompleted) {
             _state.update { State.InitialSync() }
@@ -102,7 +102,7 @@ class Sync(
             return if (args.syncEntries) {
                 runCatching {
                     val newAndUpdatedEntries = entriesRepo.syncNewAndUpdated(
-                        lastEntriesSyncDateTime = confRepo.conf.value.lastEntriesSyncDatetime,
+                        lastEntriesSyncDateTime = confRepo.select().lastEntriesSyncDatetime,
                         feeds = feedsRepo.selectAll().first(),
                     )
 

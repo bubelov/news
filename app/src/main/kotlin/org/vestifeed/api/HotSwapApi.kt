@@ -10,10 +10,7 @@ import org.vestifeed.db.Db
 import org.vestifeed.db.Entry
 import org.vestifeed.db.EntryWithoutContent
 import org.vestifeed.db.Feed
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import okhttp3.HttpUrl
 import org.vestifeed.db.ConfQueries
 import java.time.OffsetDateTime
@@ -26,55 +23,65 @@ class HotSwapApi(
     private lateinit var api: Api
 
     init {
-        GlobalScope.launch {
-            confRepo.conf.collectLatest { conf ->
-                when (conf.backend) {
-                    ConfQueries.BACKEND_STANDALONE -> {
-                        api = StandaloneNewsApi(db)
-                    }
+        updateApi()
+    }
 
-                    ConfQueries.BACKEND_MINIFLUX -> {
-                        api = MinifluxApiAdapter(
-                            MinifluxApiBuilder().build(
-                                url = conf.minifluxServerUrl,
-                                token = conf.minifluxServerToken,
-                                trustSelfSignedCerts = conf.minifluxServerTrustSelfSignedCerts,
-                            )
-                        )
-                    }
+    private fun updateApi() {
+        val conf = confRepo.select()
+        api = when (conf.backend) {
+            ConfQueries.BACKEND_STANDALONE -> {
+                StandaloneNewsApi(db)
+            }
 
-                    ConfQueries.BACKEND_NEXTCLOUD -> {
-                        api = NextcloudApiAdapter(
-                            NextcloudApiBuilder().build(
-                                url = conf.nextcloudServerUrl,
-                                username = conf.nextcloudServerUsername,
-                                password = conf.nextcloudServerPassword,
-                                trustSelfSignedCerts = conf.nextcloudServerTrustSelfSignedCerts,
-                            )
-                        )
-                    }
-                }
+            ConfQueries.BACKEND_MINIFLUX -> {
+                MinifluxApiAdapter(
+                    MinifluxApiBuilder().build(
+                        url = conf.minifluxServerUrl,
+                        token = conf.minifluxServerToken,
+                        trustSelfSignedCerts = conf.minifluxServerTrustSelfSignedCerts,
+                    )
+                )
+            }
+
+            ConfQueries.BACKEND_NEXTCLOUD -> {
+                NextcloudApiAdapter(
+                    NextcloudApiBuilder().build(
+                        url = conf.nextcloudServerUrl,
+                        username = conf.nextcloudServerUsername,
+                        password = conf.nextcloudServerPassword,
+                        trustSelfSignedCerts = conf.nextcloudServerTrustSelfSignedCerts,
+                    )
+                )
+            }
+
+            else -> {
+                StandaloneNewsApi(db)
             }
         }
     }
 
     override suspend fun addFeed(url: HttpUrl): Result<Pair<Feed, List<Entry>>> {
+        updateApi()
         return api.addFeed(url)
     }
 
     override suspend fun getFeeds(): Result<List<Feed>> {
+        updateApi()
         return api.getFeeds()
     }
 
     override suspend fun updateFeedTitle(feedId: String, newTitle: String): Result<Unit> {
+        updateApi()
         return api.updateFeedTitle(feedId, newTitle)
     }
 
     override suspend fun deleteFeed(feedId: String): Result<Unit> {
+        updateApi()
         return api.deleteFeed(feedId)
     }
 
     override suspend fun getEntries(includeReadEntries: Boolean): Flow<Result<List<Entry>>> {
+        updateApi()
         return api.getEntries(includeReadEntries)
     }
 
@@ -83,10 +90,12 @@ class HotSwapApi(
         maxEntryUpdated: OffsetDateTime?,
         lastSync: OffsetDateTime?,
     ): Result<List<Entry>> {
+        updateApi()
         return api.getNewAndUpdatedEntries(maxEntryId, maxEntryUpdated, lastSync)
     }
 
     override suspend fun markEntriesAsRead(entriesIds: List<String>, read: Boolean): Result<Unit> {
+        updateApi()
         return api.markEntriesAsRead(entriesIds, read)
     }
 
@@ -94,6 +103,7 @@ class HotSwapApi(
         entries: List<EntryWithoutContent>,
         bookmarked: Boolean,
     ): Result<Unit> {
+        updateApi()
         return api.markEntriesAsBookmarked(entries, bookmarked)
     }
 }

@@ -23,7 +23,7 @@ class SyncWorker(context: Context, workerParams: WorkerParameters) : Worker(cont
     override fun doWork() = runBlocking { doWorkAsync() }
 
     private suspend fun doWorkAsync(): Result {
-        val conf = Di.get(ConfRepo::class.java).conf.value
+        val conf = Di.get(ConfRepo::class.java).select()
         val sync = Di.get(Sync::class.java)
         val entriesRepository = Di.get(EntriesRepo::class.java)
 

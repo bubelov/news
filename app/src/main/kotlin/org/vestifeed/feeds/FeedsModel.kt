@@ -256,7 +256,7 @@ class FeedsModel(
             selfLink = selfLink,
             alternateLink = links.firstOrNull { it.rel is AtomLinkRel.Alternate }?.href,
             unreadCount = unreadEntries,
-            confUseBuiltInBrowser = confRepo.conf.value.useBuiltInBrowser,
+            confUseBuiltInBrowser = confRepo.select().useBuiltInBrowser,
         )
     }
 

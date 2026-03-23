@@ -63,7 +63,7 @@ class EntryFragment : Fragment() {
     private val newsApiSync: Sync by lazy { Di.get(Sync::class.java) }
     private val confRepo: ConfRepo by lazy { Di.get(ConfRepo::class.java) }
 
-    private val conf get() = confRepo.conf
+    private val conf get() = confRepo.select()
 
     private var _binding: FragmentEntryBinding? = null
     private val binding get() = _binding!!
@@ -174,7 +174,7 @@ class EntryFragment : Fragment() {
         menu.findItem(R.id.comments)?.apply {
             isVisible = entry.extCommentsUrl.isNotBlank()
             setOnMenuItemClickListener {
-                openUrl(entry.extCommentsUrl, conf.value.useBuiltInBrowser)
+                openUrl(entry.extCommentsUrl, conf.useBuiltInBrowser)
                 true
             }
         }
@@ -220,7 +220,7 @@ class EntryFragment : Fragment() {
         if (firstHtmlLink != null) {
             binding.fab.show()
             binding.fab.setOnClickListener {
-                openUrl(firstHtmlLink.href.toString(), conf.value.useBuiltInBrowser)
+                openUrl(firstHtmlLink.href.toString(), conf.useBuiltInBrowser)
             }
         }
     }
