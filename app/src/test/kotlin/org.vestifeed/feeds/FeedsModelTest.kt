@@ -11,7 +11,6 @@ import kotlinx.coroutines.withTimeout
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.vestifeed.conf.ConfRepo
 import org.vestifeed.db.db
 import org.vestifeed.entries.EntriesRepo
 
@@ -33,12 +32,11 @@ class FeedsModelTest {
     @Test
     fun init(): Unit = runBlocking {
         val db = db()
-        val confRepo = ConfRepo(db)
         val feedsRepo = FeedsRepo(mockk(), db)
         val entriesRepo = EntriesRepo(mockk(), db)
 
         val model = FeedsModel(
-            confRepo = confRepo,
+            db = db,
             feedsRepo = feedsRepo,
             entriesRepo = entriesRepo,
         )

@@ -9,7 +9,6 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Test
 import org.junit.Assert.assertTrue
-import org.vestifeed.conf.ConfRepo
 import org.vestifeed.db.db
 
 class MinifluxAuthModelTest {
@@ -20,10 +19,9 @@ class MinifluxAuthModelTest {
         every { Log.d(any(), any()) } returns 0
 
         val db = db()
-        val confRepo = ConfRepo(db)
 
         val model = MinifluxAuthModel(
-            confRepo = confRepo,
+            db = db,
             syncScheduler = mockk(),
         )
 
