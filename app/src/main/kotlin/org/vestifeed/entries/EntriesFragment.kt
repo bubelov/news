@@ -4,7 +4,6 @@ import android.content.Intent
 import android.graphics.Rect
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
@@ -22,7 +21,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 import co.appreactor.feedk.AtomLinkRel
-import com.google.android.material.navigation.NavigationBarView.OnItemReselectedListener
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -53,7 +51,7 @@ import org.vestifeed.sync.Sync
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-class EntriesFragment : AppFragment(), OnItemReselectedListener {
+class EntriesFragment : AppFragment() {
 
     private val filter: EntriesFilter by lazy {
         requireArguments().getParcelable(
@@ -181,10 +179,6 @@ class EntriesFragment : AppFragment(), OnItemReselectedListener {
         super.onDestroyView()
 
         _binding = null
-    }
-
-    override fun onNavigationItemReselected(item: MenuItem) {
-        scrollToTop()
     }
 
     private fun hasBackend() = db().confQueries.select().backend.isNotBlank()
