@@ -8,19 +8,20 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import org.vestifeed.R
+import org.vestifeed.app.App
+import org.vestifeed.db.ConfQueries
 import org.vestifeed.databinding.FragmentAuthBinding
 import org.vestifeed.di.Di
 import org.vestifeed.entries.EntriesFilter
 import org.vestifeed.entries.EntriesFragment
 import org.vestifeed.navigation.Activity
+import org.vestifeed.sync.BackgroundSyncScheduler
+import java.util.concurrent.TimeUnit
 
 class AuthFragment : Fragment() {
-
-    private val model: AuthModel by lazy { Di.getViewModel(AuthModel::class.java) }
 
     private var _binding: FragmentAuthBinding? = null
     private val binding get() = _binding!!
@@ -51,7 +52,18 @@ class AuthFragment : Fragment() {
 
     private fun FragmentAuthBinding.initButtons() {
         useStandaloneBackend.setOnClickListener {
-            model.setStandaloneBackend()
+            val db = (requireContext().applicationContext as App).db
+            val syncScheduler = Di.get(BackgroundSyncScheduler::class.java)
+
+            db.confQueries.update {
+                it.copy(
+                    backend = ConfQueries.BACKEND_STANDALONE,
+                    syncOnStartup = false,
+                    backgroundSyncIntervalMillis = TimeUnit.HOURS.toMillis(12),
+                )
+            }
+
+            syncScheduler.schedule()
 
             parentFragmentManager.commit {
                 replace(
