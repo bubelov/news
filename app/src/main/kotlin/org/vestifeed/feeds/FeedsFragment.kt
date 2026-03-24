@@ -24,24 +24,64 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import org.vestifeed.anim.animateVisibilityChanges
-import org.vestifeed.anim.showSmooth
+import co.appreactor.feedk.AtomLinkRel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
-import org.vestifeed.di.Di
-import org.vestifeed.dialog.showErrorDialog
-import org.vestifeed.entries.EntriesFilter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.channels.produce
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.vestifeed.R
+import org.vestifeed.anim.animateVisibilityChanges
+import org.vestifeed.anim.showSmooth
+import org.vestifeed.api.Api
+import org.vestifeed.app.App
+import org.vestifeed.db.SelectAllWithUnreadEntryCount
 import org.vestifeed.databinding.FragmentFeedsBinding
+import org.vestifeed.dialog.showErrorDialog
+import org.vestifeed.di.Di
+import org.vestifeed.entries.EntriesFilter
 import org.vestifeed.entries.EntriesFragment
+import org.vestifeed.entries.EntriesRepo
 import org.vestifeed.feedsettings.FeedSettingsFragment
 import org.vestifeed.navigation.openUrl
 import org.vestifeed.navigation.showKeyboard
+import org.vestifeed.opml.OpmlDocument
+import org.vestifeed.opml.OpmlOutline
+import org.vestifeed.opml.OpmlVersion
+import org.vestifeed.opml.leafOutlines
+import org.vestifeed.opml.toOpml
+import org.vestifeed.opml.toPrettyString
+import org.vestifeed.opml.toXmlDocument
+import java.io.InputStream
+import java.io.OutputStream
+import javax.xml.parsers.DocumentBuilderFactory
 
 class FeedsFragment : Fragment() {
 
-    private val model: FeedsModel by lazy { Di.getViewModel(FeedsModel::class.java) }
+    private val db by lazy { (requireContext().applicationContext as App).db }
+    private val api by lazy { Di.get(Api::class.java) }
+    private val feedsRepo by lazy { FeedsRepo(api, db) }
+    private val entriesRepo by lazy { EntriesRepo(api, db) }
+
+    private val _state = MutableStateFlow<State>(State.Loading)
+    private val state = _state.asStateFlow()
+
+    private val hasActionInProgress = MutableStateFlow(false)
+    private val importState = MutableStateFlow<ImportState?>(null)
+    private val error = MutableStateFlow<Throwable?>(null)
 
     private var _binding: FragmentFeedsBinding? = null
     private val binding get() = _binding!!
@@ -76,9 +116,33 @@ class FeedsFragment : Fragment() {
         initImportButton()
         initFab()
 
+        combine(
+            feedsRepo.selectAllWithUnreadEntryCount(),
+            hasActionInProgress,
+            importState,
+            error,
+        ) { feeds, hasActionInProgress, importState, error ->
+            if (error != null) {
+                _state.update { State.ShowingError(error) }
+                return@combine
+            }
+
+            if (importState != null) {
+                _state.update { State.ImportingFeeds(importState) }
+                return@combine
+            }
+
+            if (hasActionInProgress) {
+                _state.update { State.Loading }
+                return@combine
+            }
+
+            _state.update { State.ShowingFeeds(feeds.map { it.toItem() }) }
+        }.launchIn(viewLifecycleOwner.lifecycleScope)
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                model.state.collect { binding.setState(it) }
+                state.collect { binding.setState(it) }
             }
         }
 
@@ -141,7 +205,7 @@ class FeedsFragment : Fragment() {
             urlView.setOnEditorActionListener { _, actionId, keyEvent ->
                 if (actionId == EditorInfo.IME_ACTION_DONE || keyEvent?.keyCode == KeyEvent.KEYCODE_ENTER) {
                     dialog.dismiss()
-                    model.addFeed(urlView.text.toString())
+                    addFeed(urlView.text.toString())
                     return@setOnEditorActionListener true
                 }
 
@@ -153,21 +217,211 @@ class FeedsFragment : Fragment() {
         }
     }
 
-    private fun FragmentFeedsBinding.setState(state: FeedsModel.State) {
+    private fun importOpml(document: InputStream) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val outlines = runCatching {
+                withContext(Dispatchers.IO) {
+                    DocumentBuilderFactory
+                        .newInstance()
+                        .newDocumentBuilder()
+                        .parse(document)
+                        .toOpml()
+                        .leafOutlines()
+                }
+            }.getOrElse { e ->
+                error.update { e }
+                return@launch
+            }
+
+            importState.update { ImportState(0, outlines.size) }
+
+            var feedsImported = 0
+            var feedsExisted = 0
+            var feedsFailed = 0
+            val errors = mutableListOf<String>()
+
+            val mutex = Mutex()
+
+            val outlinesChannel = produce { outlines.forEach { send(it) } }
+            val existingLinks = feedsRepo.selectLinks().first().flatten()
+
+            val workers = buildList {
+                repeat(15) {
+                    add(
+                        async {
+                            for (outline in outlinesChannel) {
+                                val outlineUrl = (outline.xmlUrl ?: "").toHttpUrlOrNull()
+
+                                if (outlineUrl == null) {
+                                    mutex.withLock {
+                                        errors += "Invalid URL: ${outline.xmlUrl}"
+                                        feedsFailed++
+                                    }
+
+                                    continue
+                                }
+
+                                val feedAlreadyExists = existingLinks.any {
+                                    it.href.toUri().normalize() == outlineUrl.toUri().normalize()
+                                }
+
+                                if (feedAlreadyExists) {
+                                    mutex.withLock { feedsExisted++ }
+                                } else {
+                                    runCatching {
+                                        feedsRepo.insertByUrl(outlineUrl)
+                                    }.onSuccess {
+                                        mutex.withLock { feedsImported++ }
+                                    }.onFailure {
+                                        mutex.withLock {
+                                            errors += "Failed to import feed ${outline.xmlUrl}\nReason: ${it.message}"
+                                            feedsFailed++
+                                        }
+                                    }
+
+                                    importState.update {
+                                        ImportState(
+                                            imported = feedsImported + feedsExisted + feedsFailed,
+                                            total = outlines.size,
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                    )
+                }
+            }
+
+            workers.awaitAll()
+
+            if (errors.isNotEmpty()) {
+                val message = buildString {
+                    errors.forEach {
+                        append(it)
+
+                        if (errors.last() != it) {
+                            append("\n\n")
+                        }
+                    }
+                }
+
+                error.update { Exception(message) }
+            }
+
+            importState.update { null }
+        }
+    }
+
+    private fun exportOpml(out: OutputStream) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val feeds = feedsRepo.selectAll().first()
+
+            val outlines = feeds.map { feed ->
+                val selfLink = feed.links.firstOrNull { it.rel is AtomLinkRel.Self }
+                    ?: feed.links.firstOrNull()
+                OpmlOutline(
+                    text = feed.title,
+                    outlines = emptyList(),
+                    xmlUrl = selfLink?.href?.toString() ?: "",
+                    htmlUrl = feed.links.firstOrNull { it.rel is AtomLinkRel.Alternate }?.href?.toString(),
+                    extOpenEntriesInBrowser = feed.extOpenEntriesInBrowser,
+                    extShowPreviewImages = feed.extShowPreviewImages,
+                    extBlockedWords = feed.extBlockedWords,
+                )
+            }
+
+            val opmlDocument = OpmlDocument(
+                version = OpmlVersion.V_2_0,
+                outlines = outlines,
+            )
+
+            withContext(Dispatchers.IO) {
+                out.write(opmlDocument.toXmlDocument().toPrettyString().toByteArray())
+            }
+        }
+    }
+
+    private fun onErrorAcknowledged() {
+        error.update { null }
+    }
+
+    private fun addFeed(unvalidatedUrl: String) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            runCatching {
+                hasActionInProgress.update { true }
+
+                val hasHttpPrefix =
+                    unvalidatedUrl.startsWith("http") or unvalidatedUrl.startsWith("https")
+
+                val entries = if (hasHttpPrefix) {
+                    feedsRepo.insertByUrl(unvalidatedUrl.toHttpUrl()).second
+                } else {
+                    feedsRepo.insertByUrl("https://$unvalidatedUrl".toHttpUrl()).second
+                }
+
+                entriesRepo.insertOrReplace(entries)
+            }.onSuccess {
+                hasActionInProgress.update { false }
+            }.onFailure { e ->
+                hasActionInProgress.update { false }
+                error.update { e }
+            }
+        }
+    }
+
+    private fun renameFeed(feedId: String, newTitle: String) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            runCatching {
+                hasActionInProgress.update { true }
+                feedsRepo.updateTitle(feedId, newTitle)
+            }.onFailure { e -> error.update { e } }
+
+            hasActionInProgress.update { false }
+        }
+    }
+
+    private fun deleteFeed(feedId: String) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            runCatching {
+                hasActionInProgress.update { true }
+                feedsRepo.deleteById(feedId)
+            }.onFailure { e -> error.update { e } }
+
+            hasActionInProgress.update { false }
+        }
+    }
+
+    private fun SelectAllWithUnreadEntryCount.toItem(): FeedsAdapter.Item {
+        val selfLink = links.firstOrNull { it.rel is AtomLinkRel.Self }?.href
+            ?: links.firstOrNull()?.href
+            ?: "https://example.com".toHttpUrl()
+
+        return FeedsAdapter.Item(
+            id = id,
+            title = title,
+            selfLink = selfLink,
+            alternateLink = links.firstOrNull { it.rel is AtomLinkRel.Alternate }?.href,
+            unreadCount = unreadEntries,
+            confUseBuiltInBrowser = db.confQueries.select().useBuiltInBrowser,
+        )
+    }
+
+    private fun FragmentFeedsBinding.setState(state: State) {
         animateVisibilityChanges(
             views = listOf(toolbar, list, progress, message, importOpml, fab),
             visibleViews = when (state) {
-                is FeedsModel.State.Loading -> listOf(toolbar, progress)
-                is FeedsModel.State.ShowingFeeds -> listOf(toolbar, list, fab)
-                is FeedsModel.State.ImportingFeeds -> listOf(toolbar, message)
-                is FeedsModel.State.ShowingError -> listOf(toolbar)
+                is State.Loading -> listOf(toolbar, progress)
+                is State.ShowingFeeds -> listOf(toolbar, list, fab)
+                is State.ImportingFeeds -> listOf(toolbar, message)
+                is State.ShowingError -> listOf(toolbar)
             },
         )
 
         when (state) {
-            is FeedsModel.State.Loading -> {}
+            is State.Loading -> {}
 
-            is FeedsModel.State.ShowingFeeds -> {
+            is State.ShowingFeeds -> {
                 listAdapter.submitList(state.feeds)
 
                 if (state.feeds.isEmpty()) {
@@ -177,7 +431,7 @@ class FeedsFragment : Fragment() {
                 }
             }
 
-            is FeedsModel.State.ImportingFeeds -> {
+            is State.ImportingFeeds -> {
                 message.text = getString(
                     R.string.importing_feeds_n_of_n,
                     state.progress.imported,
@@ -185,8 +439,8 @@ class FeedsFragment : Fragment() {
                 )
             }
 
-            is FeedsModel.State.ShowingError -> {
-                showErrorDialog(state.error) { model.onErrorAcknowledged() }
+            is State.ShowingError -> {
+                showErrorDialog(state.error) { onErrorAcknowledged() }
             }
         }
     }
@@ -195,7 +449,7 @@ class FeedsFragment : Fragment() {
         val url = requireArguments().getString("url", "")
 
         if (url.isNotBlank()) {
-            model.addFeed(url)
+            addFeed(url)
             requireArguments().clear()
         }
     }
@@ -203,12 +457,12 @@ class FeedsFragment : Fragment() {
     private fun onAddClick(dialogInterface: DialogInterface) {
         val url =
             (dialogInterface as AlertDialog).findViewById<TextInputEditText>(R.id.url)?.text.toString()
-        model.addFeed(url)
+        addFeed(url)
     }
 
     private fun onRenameClick(feedId: String, dialogInterface: DialogInterface) {
         val title = (dialogInterface as AlertDialog).findViewById<TextInputEditText>(R.id.title)!!
-        model.renameFeed(feedId, title.text.toString())
+        renameFeed(feedId, title.text.toString())
     }
 
     private fun createFeedsAdapter(): FeedsAdapter {
@@ -268,7 +522,7 @@ class FeedsFragment : Fragment() {
             }
 
             override fun onDeleteClick(item: FeedsAdapter.Item) {
-                model.deleteFeed(item.id)
+                deleteFeed(item.id)
             }
         })
     }
@@ -279,14 +533,14 @@ class FeedsFragment : Fragment() {
                 return@registerForActivityResult
             }
 
-            model.importOpml(requireContext().contentResolver.openInputStream(uri)!!)
+            importOpml(requireContext().contentResolver.openInputStream(uri)!!)
         }
     }
 
     private fun createExportFeedsLauncher(): ActivityResultLauncher<String> {
         return registerForActivityResult(ActivityResultContracts.CreateDocument()) { uri ->
             if (uri != null) {
-                model.exportOpml(requireContext().contentResolver.openOutputStream(uri)!!)
+                exportOpml(requireContext().contentResolver.openOutputStream(uri)!!)
             }
         }
     }
@@ -318,4 +572,16 @@ class FeedsFragment : Fragment() {
             outRect.set(left, top, right, bottom)
         }
     }
+
+    sealed class State {
+        object Loading : State()
+        data class ShowingFeeds(val feeds: List<FeedsAdapter.Item>) : State()
+        data class ImportingFeeds(val progress: ImportState) : State()
+        data class ShowingError(val error: Throwable) : State()
+    }
+
+    data class ImportState(
+        val imported: Int,
+        val total: Int,
+    )
 }

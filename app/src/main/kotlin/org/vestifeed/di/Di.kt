@@ -1,14 +1,11 @@
 package org.vestifeed.di
 
 import android.content.Context
-import android.app.Application
-import androidx.lifecycle.ViewModel
 import org.vestifeed.api.Api
 import org.vestifeed.api.HotSwapApi
 import org.vestifeed.app.db
 import org.vestifeed.entries.EntriesRepo
 import org.vestifeed.enclosures.EnclosuresRepo
-import org.vestifeed.feeds.FeedsModel
 import org.vestifeed.feeds.FeedsRepo
 import org.vestifeed.opengraph.OpenGraphImagesRepo
 import org.vestifeed.sync.BackgroundSyncScheduler
@@ -28,11 +25,6 @@ object Di {
         return singletons.getOrPut(clazz) {
             createInstance(clazz)
         } as T
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    fun <T : ViewModel> getViewModel(clazz: Class<T>): T {
-        return createViewModel(clazz) as T
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -69,19 +61,6 @@ object Di {
             BackgroundSyncScheduler::class.java -> BackgroundSyncScheduler(context)
 
             else -> throw IllegalArgumentException("Unknown class: $clazz")
-        }
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    private fun createViewModel(clazz: Class<out ViewModel>): ViewModel {
-        return when (clazz) {
-            FeedsModel::class.java -> FeedsModel(
-                context.db(),
-                get(FeedsRepo::class.java),
-                get(EntriesRepo::class.java)
-            )
-
-            else -> throw IllegalArgumentException("Unknown ViewModel class: $clazz")
         }
     }
 }
