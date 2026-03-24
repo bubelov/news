@@ -15,21 +15,44 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import org.vestifeed.anim.animateVisibilityChanges
 import co.appreactor.feedk.AtomLinkRel
-import org.vestifeed.di.Di
-import org.vestifeed.entries.EntriesAdapter
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.vestifeed.R
+import org.vestifeed.anim.animateVisibilityChanges
+import org.vestifeed.api.Api
+import org.vestifeed.app.App
+import org.vestifeed.db.Conf
+import org.vestifeed.db.SelectByQuery
+import org.vestifeed.entries.EntriesRepo
+import org.vestifeed.feeds.FeedsRepo
 import org.vestifeed.databinding.FragmentSearchBinding
+import org.vestifeed.dialog.showErrorDialog
+import org.vestifeed.di.Di
+import org.vestifeed.entries.EntriesAdapter
 import org.vestifeed.entry.EntryFragment
 import org.vestifeed.navigation.hideKeyboard
 import org.vestifeed.navigation.openUrl
 import org.vestifeed.navigation.showKeyboard
+import org.vestifeed.sync.Sync
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 class SearchFragment : Fragment() {
 
-    private val model: SearchModel by lazy { Di.getViewModel(SearchModel::class.java) }
+    private val db by lazy { (requireContext().applicationContext as App).db }
+    private val api by lazy { Di.get(Api::class.java) }
+    private val entriesRepo by lazy { EntriesRepo(api, db) }
+    private val sync by lazy { Sync(db, FeedsRepo(api, db), entriesRepo) }
+
+    private val args = MutableStateFlow<Args?>(null)
+
+    private val _state = MutableStateFlow<State>(State.QueryIsEmpty)
+    private val state = _state.asStateFlow()
 
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
@@ -54,8 +77,25 @@ class SearchFragment : Fragment() {
         initList()
 
         viewLifecycleOwner.lifecycleScope.launch {
+            args.filterNotNull().collect { args ->
+                val conf = db.confQueries.select()
+                if (args.query.length < 3) {
+                    _state.update { State.QueryIsTooShort }
+                    return@collect
+                }
+
+                _state.update { State.RunningQuery }
+
+                val rows = entriesRepo.selectByFtsQuery(args.query).first()
+                val items = rows.map { it.toItem(conf) }
+
+                _state.update { State.ShowingQueryResults(items) }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                model.state.collect { binding.setState(it) }
+                state.collect { binding.setState(it) }
             }
         }
     }
@@ -63,6 +103,30 @@ class SearchFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun setArgs(args: Args) {
+        this.args.update { args }
+    }
+
+    private fun markAsRead(entryId: String) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            runCatching {
+                entriesRepo.updateReadAndReadSynced(
+                    id = entryId,
+                    read = true,
+                    readSynced = false,
+                )
+
+                sync.run(
+                    Sync.Args(
+                        syncFeeds = false,
+                        syncFlags = true,
+                        syncEntries = false,
+                    )
+                )
+            }.onFailure { showErrorDialog(it) }
+        }
     }
 
     private fun initToolbar() {
@@ -74,7 +138,7 @@ class SearchFragment : Fragment() {
         binding.query.addTextChangedListener(
             afterTextChanged = {
                 binding.clear.isVisible = it!!.isNotEmpty()
-                model.setArgs(SearchModel.Args(query = it.toString()))
+                setArgs(Args(query = it.toString()))
             }
         )
 
@@ -94,25 +158,25 @@ class SearchFragment : Fragment() {
         }
     }
 
-    private fun FragmentSearchBinding.setState(state: SearchModel.State) {
+    private fun FragmentSearchBinding.setState(state: State) {
         animateVisibilityChanges(
             views = listOf(toolbar, list, progress, message),
             visibleViews = when (state) {
-                is SearchModel.State.QueryIsEmpty,
-                is SearchModel.State.QueryIsTooShort -> listOf(toolbar)
+                is State.QueryIsEmpty,
+                is State.QueryIsTooShort -> listOf(toolbar)
 
-                is SearchModel.State.RunningQuery -> listOf(toolbar, progress)
-                is SearchModel.State.ShowingQueryResults -> listOf(toolbar, list)
+                is State.RunningQuery -> listOf(toolbar, progress)
+                is State.ShowingQueryResults -> listOf(toolbar, list)
             },
         )
 
-        if (state is SearchModel.State.ShowingQueryResults) {
+        if (state is State.ShowingQueryResults) {
             adapter.submitList(state.items)
         }
     }
 
     private fun onListItemClick(item: EntriesAdapter.Item) {
-        model.markAsRead(item.id)
+        markAsRead(item.id)
 
         if (item.openInBrowser) {
             val htmlLink =
@@ -164,5 +228,41 @@ class SearchFragment : Fragment() {
 
             outRect.set(gapInPixels, gapInPixels, gapInPixels, bottomGap)
         }
+    }
+
+    data class Args(
+        val query: String,
+    )
+
+    sealed class State {
+        object QueryIsEmpty : State()
+        object QueryIsTooShort : State()
+        object RunningQuery : State()
+        data class ShowingQueryResults(val items: List<EntriesAdapter.Item>) : State()
+    }
+
+    private fun SelectByQuery.toItem(conf: Conf): EntriesAdapter.Item {
+        return EntriesAdapter.Item(
+            id = id,
+            showImage = extShowPreviewImages || conf.showPreviewImages,
+            cropImage = conf.cropPreviewImages,
+            imageUrl = extOpenGraphImageUrl,
+            imageWidth = extOpenGraphImageWidth,
+            imageHeight = extOpenGraphImageHeight,
+            title = title,
+            subtitle = "$feedTitle · ${DATE_TIME_FORMAT.format(published)}",
+            summary = summary ?: "",
+            read = extRead,
+            openInBrowser = extOpenEntriesInBrowser,
+            useBuiltInBrowser = conf.useBuiltInBrowser,
+            links = links,
+        )
+    }
+
+    companion object {
+        private val DATE_TIME_FORMAT = DateTimeFormatter.ofLocalizedDateTime(
+            FormatStyle.MEDIUM,
+            FormatStyle.SHORT,
+        )
     }
 }

@@ -12,7 +12,6 @@ import org.vestifeed.enclosures.EnclosuresRepo
 import org.vestifeed.feeds.FeedsModel
 import org.vestifeed.feeds.FeedsRepo
 import org.vestifeed.opengraph.OpenGraphImagesRepo
-import org.vestifeed.search.SearchModel
 import org.vestifeed.settings.SettingsModel
 import org.vestifeed.sync.BackgroundSyncScheduler
 import org.vestifeed.sync.Sync
@@ -95,12 +94,6 @@ object Di {
                 context as Application,
                 context.db(),
                 get(BackgroundSyncScheduler::class.java)
-            )
-
-            SearchModel::class.java -> SearchModel(
-                context.db(),
-                get(EntriesRepo::class.java),
-                get(Sync::class.java)
             )
 
             else -> throw IllegalArgumentException("Unknown ViewModel class: $clazz")
