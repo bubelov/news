@@ -8,7 +8,6 @@ import org.vestifeed.api.HotSwapApi
 import org.vestifeed.app.db
 import org.vestifeed.entries.EntriesModel
 import org.vestifeed.entries.EntriesRepo
-import org.vestifeed.enclosures.EnclosuresModel
 import org.vestifeed.enclosures.EnclosuresRepo
 import org.vestifeed.feeds.FeedsModel
 import org.vestifeed.feeds.FeedsRepo
@@ -107,11 +106,6 @@ object Di {
 
             FeedSettingsModel::class.java -> FeedSettingsModel(
                 get(FeedsRepo::class.java)
-            )
-
-            EnclosuresModel::class.java -> EnclosuresModel(
-                get(EnclosuresRepo::class.java),
-                get(EntriesRepo::class.java)
             )
 
             else -> throw IllegalArgumentException("Unknown ViewModel class: $clazz")

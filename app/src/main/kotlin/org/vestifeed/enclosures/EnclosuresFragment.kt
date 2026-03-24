@@ -13,21 +13,37 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import org.vestifeed.db.Link
-import org.vestifeed.di.Di
-import org.vestifeed.dialog.showErrorDialog
+import co.appreactor.feedk.AtomLinkRel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.vestifeed.R
+import org.vestifeed.api.Api
+import org.vestifeed.app.App
+import org.vestifeed.db.Link
+import org.vestifeed.di.Di
 import org.vestifeed.databinding.FragmentEnclosuresBinding
+import org.vestifeed.dialog.showErrorDialog
+import org.vestifeed.entries.EntriesRepo
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 class EnclosuresFragment : Fragment() {
 
-    private val model: EnclosuresModel by lazy { Di.getViewModel(EnclosuresModel::class.java) }
-
     private var _binding: FragmentEnclosuresBinding? = null
     private val binding get() = _binding!!
+
+    private val db by lazy { (requireContext().applicationContext as App).db }
+    private val api by lazy { Di.get(Api::class.java) }
+    private val enclosuresRepo by lazy { EnclosuresRepo(requireContext(), db) }
+    private val entriesRepo by lazy { EntriesRepo(api, db) }
+
+    private val _state = MutableStateFlow<State>(State.LoadingEnclosures)
+    private val state = _state.asStateFlow()
 
     val adapter = EnclosuresAdapter(object : EnclosuresAdapter.Callback {
         override fun onDownloadClick(item: EnclosuresAdapter.Item) {
@@ -63,14 +79,38 @@ class EnclosuresFragment : Fragment() {
             addItemDecoration(CardListAdapterDecoration(resources.getDimensionPixelSize(R.dimen.dp_8)))
         }
 
-        model.state.onEach {
+        viewLifecycleOwner.lifecycleScope.launch {
+            enclosuresRepo.deletePartialDownloads()
+
+            entriesRepo.selectCount().collect {
+                val entries = entriesRepo.selectAllLinksPublishedAndTitle().first()
+                val enclosures = mutableListOf<EnclosuresAdapter.Item>()
+
+                entries.forEach { entry ->
+                    val entryEnclosures = entry.links.filter { it.rel is AtomLinkRel.Enclosure }
+
+                    enclosures += entryEnclosures.map {
+                        EnclosuresAdapter.Item(
+                            entryId = it.entryId!!,
+                            enclosure = it,
+                            primaryText = entry.title,
+                            secondaryText = DATE_TIME_FORMAT.format(entry.published),
+                        )
+                    }
+                }
+
+                _state.update { State.ShowingEnclosures(enclosures) }
+            }
+        }
+
+        state.onEach {
             when (it) {
-                is EnclosuresModel.State.LoadingEnclosures -> {
+                is State.LoadingEnclosures -> {
                     binding.progress.isVisible = true
                     binding.list.isVisible = false
                 }
 
-                is EnclosuresModel.State.ShowingEnclosures -> {
+                is State.ShowingEnclosures -> {
                     binding.progress.isVisible = false
                     binding.list.isVisible = true
                     adapter.submitList(it.items)
@@ -86,7 +126,7 @@ class EnclosuresFragment : Fragment() {
 
     fun downloadAudioEnclosure(enclosure: Link) {
         viewLifecycleOwner.lifecycleScope.launch {
-            runCatching { model.downloadAudioEnclosure(enclosure) }
+            runCatching { enclosuresRepo.downloadAudioEnclosure(enclosure) }
                 .onFailure { showErrorDialog(it) }
         }
     }
@@ -108,7 +148,7 @@ class EnclosuresFragment : Fragment() {
 
     private fun deleteEnclosure(enclosure: Link) {
         viewLifecycleOwner.lifecycleScope.launch {
-            runCatching { model.deleteEnclosure(enclosure) }
+            runCatching { enclosuresRepo.deleteFromCache(enclosure) }
                 .onFailure { showErrorDialog(it) }
         }
     }
@@ -133,5 +173,17 @@ class EnclosuresFragment : Fragment() {
 
             outRect.set(gapPx, gapPx, gapPx, bottomGap)
         }
+    }
+
+    sealed class State {
+        object LoadingEnclosures : State()
+        data class ShowingEnclosures(val items: List<EnclosuresAdapter.Item>) : State()
+    }
+
+    companion object {
+        private val DATE_TIME_FORMAT = DateTimeFormatter.ofLocalizedDateTime(
+            FormatStyle.MEDIUM,
+            FormatStyle.SHORT,
+        )
     }
 }
