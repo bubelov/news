@@ -11,7 +11,6 @@ import org.vestifeed.entries.EntriesRepo
 import org.vestifeed.enclosures.EnclosuresRepo
 import org.vestifeed.feeds.FeedsModel
 import org.vestifeed.feeds.FeedsRepo
-import org.vestifeed.feedsettings.FeedSettingsModel
 import org.vestifeed.opengraph.OpenGraphImagesRepo
 import org.vestifeed.search.SearchModel
 import org.vestifeed.settings.SettingsModel
@@ -102,10 +101,6 @@ object Di {
                 context.db(),
                 get(EntriesRepo::class.java),
                 get(Sync::class.java)
-            )
-
-            FeedSettingsModel::class.java -> FeedSettingsModel(
-                get(FeedsRepo::class.java)
             )
 
             else -> throw IllegalArgumentException("Unknown ViewModel class: $clazz")

@@ -11,21 +11,33 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
-import org.vestifeed.di.Di
-import org.vestifeed.dialog.showErrorDialog
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.vestifeed.R
+import org.vestifeed.api.Api
+import org.vestifeed.app.App
 import org.vestifeed.databinding.FragmentFeedSettingsBinding
+import org.vestifeed.dialog.showErrorDialog
+import org.vestifeed.di.Di
+import org.vestifeed.feeds.FeedsRepo
 import org.vestifeed.navigation.showKeyboard
 
 class FeedSettingsFragment : Fragment() {
 
     private val feedId by lazy { requireArguments().getString("feedId", "") }
 
-    private val model: FeedSettingsModel by lazy { Di.getViewModel(FeedSettingsModel::class.java) }
+    private val db by lazy { (requireContext().applicationContext as App).db }
+    private val api by lazy { Di.get(Api::class.java) }
+    private val feedsRepo by lazy { FeedsRepo(api, db) }
+
+    private val _feedId = MutableStateFlow("")
+    private val _state = MutableStateFlow<State>(State.LoadingFeed)
+    private val state = _state.asStateFlow()
 
     private var _binding: FragmentFeedSettingsBinding? = null
     private val binding get() = _binding!!
@@ -44,8 +56,19 @@ class FeedSettingsFragment : Fragment() {
 
         binding.toolbar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
 
-        model.feedId.update { feedId }
-        model.state.onEach { binding.setState(it) }.launchIn(viewLifecycleOwner.lifecycleScope)
+        _feedId.update { feedId }
+
+        _feedId.onEach {
+            if (it.isBlank()) {
+                _state.update { State.LoadingFeed }
+                return@onEach
+            }
+
+            val feed = feedsRepo.selectById(it).first()!!
+            _state.update { State.ShowingFeedSettings(feed) }
+        }.launchIn(viewLifecycleOwner.lifecycleScope)
+
+        state.onEach { binding.setState(it) }.launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
     override fun onDestroyView() {
@@ -53,14 +76,50 @@ class FeedSettingsFragment : Fragment() {
         _binding = null
     }
 
-    private fun FragmentFeedSettingsBinding.setState(state: FeedSettingsModel.State) {
+    private fun setOpenEntriesInBrowser(feedId: String, openEntriesInBrowser: Boolean) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val feed = feedsRepo.selectById(feedId).first()!!
+            feedsRepo.insertOrReplace(feed.copy(extOpenEntriesInBrowser = openEntriesInBrowser))
+        }
+    }
+
+    private fun setShowPreviewImages(feedId: String, value: Boolean?) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val feed = feedsRepo.selectById(feedId).first()!!
+            feedsRepo.insertOrReplace(feed.copy(extShowPreviewImages = value))
+        }
+    }
+
+    private fun setBlockedWords(feedId: String, blockedWords: String) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val feed = feedsRepo.selectById(feedId).first()!!
+            feedsRepo.insertOrReplace(feed.copy(extBlockedWords = blockedWords))
+        }
+    }
+
+    private fun formatBlockedWords(blockedWords: String): String {
+        val separatedWords = blockedWords.split(",")
+
+        return if (separatedWords.isEmpty()) {
+            ""
+        } else {
+            buildString {
+                separatedWords.forEach {
+                    append(it.trim())
+                    append(",")
+                }
+            }.dropLast(1)
+        }
+    }
+
+    private fun FragmentFeedSettingsBinding.setState(state: State) {
         when (state) {
-            is FeedSettingsModel.State.LoadingFeed -> {
+            is State.LoadingFeed -> {
                 progress.isVisible = true
                 settings.isVisible = false
             }
 
-            is FeedSettingsModel.State.ShowingFeedSettings -> {
+            is State.ShowingFeedSettings -> {
                 toolbar.title = state.feed.title
                 progress.isVisible = false
                 settings.isVisible = true
@@ -77,16 +136,14 @@ class FeedSettingsFragment : Fragment() {
             isChecked = openEntriesInBrowser
 
             setOnCheckedChangeListener { _, isChecked ->
-                viewLifecycleOwner.lifecycleScope.launch {
-                    runCatching { model.setOpenEntriesInBrowser(feedId, isChecked) }
-                        .onFailure { showErrorDialog(it) }
-                }
+                runCatching { setOpenEntriesInBrowser(feedId, isChecked) }
+                    .onFailure { showErrorDialog(it) }
             }
         }
     }
 
     private fun syncBlockedWords(blockedWords: String) {
-        binding.blockedWords.text = model.formatBlockedWords(blockedWords)
+        binding.blockedWords.text = formatBlockedWords(blockedWords)
 
         binding.blockedWordsPanel.setOnClickListener {
             val dialog = MaterialAlertDialogBuilder(requireContext())
@@ -99,8 +156,8 @@ class FeedSettingsFragment : Fragment() {
                             val blockedWordsView =
                                 dialog.findViewById<TextInputEditText>(R.id.blockedWords)!!
                             val formattedBlockedWords =
-                                model.formatBlockedWords(blockedWordsView.text.toString())
-                            model.setBlockedWords(feedId, formattedBlockedWords)
+                                formatBlockedWords(blockedWordsView.text.toString())
+                            setBlockedWords(feedId, formattedBlockedWords)
                             binding.blockedWords.text = formattedBlockedWords.replace(",", ", ")
                         }.onFailure {
                             showErrorDialog(it)
@@ -145,7 +202,7 @@ class FeedSettingsFragment : Fragment() {
 
                 val saveValue = fun(value: Boolean?) {
                     viewLifecycleOwner.lifecycleScope.launch {
-                        runCatching { model.setShowPreviewImages(feedId, value) }
+                        runCatching { setShowPreviewImages(feedId, value) }
                             .onSuccess { syncShowPreviewImages(value) }
                             .onFailure { showErrorDialog(it) }
                     }
@@ -158,5 +215,10 @@ class FeedSettingsFragment : Fragment() {
                 btnFollowSettings.setOnClickListener { saveValue.invoke(null) }
             }
         }
+    }
+
+    sealed class State {
+        object LoadingFeed : State()
+        data class ShowingFeedSettings(val feed: org.vestifeed.db.Feed) : State()
     }
 }
