@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import org.vestifeed.api.Api
 import org.vestifeed.api.HotSwapApi
 import org.vestifeed.app.db
-import org.vestifeed.entries.EntriesModel
 import org.vestifeed.entries.EntriesRepo
 import org.vestifeed.enclosures.EnclosuresRepo
 import org.vestifeed.feeds.FeedsModel
@@ -80,13 +79,6 @@ object Di {
                 context.db(),
                 get(FeedsRepo::class.java),
                 get(EntriesRepo::class.java)
-            )
-
-            EntriesModel::class.java -> EntriesModel(
-                context.db(),
-                get(EntriesRepo::class.java),
-                get(FeedsRepo::class.java),
-                get(Sync::class.java)
             )
 
             else -> throw IllegalArgumentException("Unknown ViewModel class: $clazz")

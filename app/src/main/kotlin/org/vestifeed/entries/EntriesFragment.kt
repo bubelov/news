@@ -22,24 +22,39 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.OnScrollListener
-import org.vestifeed.anim.animateVisibilityChanges
-import org.vestifeed.anim.showSmooth
 import co.appreactor.feedk.AtomLinkRel
 import com.google.android.material.navigation.NavigationBarView.OnItemReselectedListener
 import com.google.android.material.snackbar.Snackbar
-import org.vestifeed.di.Di
-import org.vestifeed.dialog.showErrorDialog
-import org.vestifeed.entry.EntryFragment
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.vestifeed.R
+import org.vestifeed.anim.animateVisibilityChanges
+import org.vestifeed.anim.showSmooth
+import org.vestifeed.api.Api
+import org.vestifeed.app.App
 import org.vestifeed.auth.AuthFragment
-import org.vestifeed.databinding.FragmentEntriesBinding
+import org.vestifeed.db.Conf
 import org.vestifeed.db.ConfQueries
+import org.vestifeed.db.EntriesAdapterRow
+import org.vestifeed.db.Feed
+import org.vestifeed.databinding.FragmentEntriesBinding
+import org.vestifeed.dialog.showErrorDialog
+import org.vestifeed.di.Di
+import org.vestifeed.entry.EntryFragment
 import org.vestifeed.feeds.FeedsFragment
+import org.vestifeed.feeds.FeedsRepo
 import org.vestifeed.navigation.openUrl
 import org.vestifeed.search.SearchFragment
 import org.vestifeed.settings.SettingsFragment
+import org.vestifeed.sync.Sync
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 class EntriesFragment : Fragment(), OnItemReselectedListener {
 
@@ -50,7 +65,18 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         )!!
     }
 
-    private val model: EntriesModel by lazy { Di.getViewModel(EntriesModel::class.java) }
+    private val db by lazy { (requireContext().applicationContext as App).db }
+    private val api by lazy { Di.get(Api::class.java) }
+    private val entriesRepo by lazy { EntriesRepo(api, db) }
+    private val feedsRepo by lazy { FeedsRepo(api, db) }
+    private val sync by lazy { Sync(db, feedsRepo, entriesRepo) }
+
+    private val args = MutableStateFlow<EntriesFilter?>(null)
+
+    private val _state = MutableStateFlow<State>(State.LoadingCachedEntries)
+    private val state = _state.asStateFlow()
+
+    private var scrollToTopNextTime = false
 
     private var _binding: FragmentEntriesBinding? = null
     private val binding get() = _binding!!
@@ -77,7 +103,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
-        return if (model.hasBackend()) {
+        return if (hasBackend()) {
             val intent = requireActivity().intent
             val sharedFeedUrl =
                 (intent?.dataString ?: intent?.getStringExtra(Intent.EXTRA_TEXT))?.trim() ?: ""
@@ -124,11 +150,27 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         initSwipeRefresh()
         initList()
 
-        model.args.update { filter }
+        args.update { filter }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            combine(
+                args.filterNotNull(),
+                sync.state,
+                entriesRepo.selectCount(),
+            ) { filter, syncState, _ ->
+                Pair(
+                    filter,
+                    syncState
+                )
+            }.collectLatest { (filter, syncState) ->
+                val conf = db.confQueries.select()
+                updateState(filter, conf, syncState)
+            }
+        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                model.state.collect { binding.setState(it) }
+                state.collect { binding.setState(it) }
             }
         }
     }
@@ -136,10 +178,10 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
     override fun onStop() {
         super.onStop()
 
-        val state = model.state.value
+        val currentState = state.value
 
-        if (state is EntriesModel.State.ShowingCachedEntries && state.conf.markScrolledEntriesAsRead) {
-            model.setRead(
+        if (currentState is State.ShowingCachedEntries && currentState.conf.markScrolledEntriesAsRead) {
+            setRead(
                 entryIds = seenEntries.map { it.id },
                 read = true,
             )
@@ -158,12 +200,191 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         scrollToTop()
     }
 
+    private fun hasBackend() = db.confQueries.select().backend.isNotBlank()
+
+    private suspend fun updateState(filter: EntriesFilter, conf: Conf, syncState: Sync.State) {
+        if (!conf.initialSyncCompleted || (conf.syncOnStartup && !conf.syncedOnStartup)) {
+            db.confQueries.update { it.copy(syncedOnStartup = true) }
+            viewLifecycleOwner.lifecycleScope.launch { sync.run() }
+        }
+
+        when (syncState) {
+            is Sync.State.InitialSync -> _state.update { State.InitialSync(syncState.message) }
+
+            else -> {
+                val showBgProgress = when (syncState) {
+                    is Sync.State.FollowUpSync -> syncState.args.syncEntries
+                    else -> false
+                }
+
+                val scrollToTop = scrollToTopNextTime
+                scrollToTopNextTime = false
+
+                val rows: List<EntriesAdapterRow> = if (filter is EntriesFilter.BelongToFeed) {
+                    entriesRepo.selectByFeedIdAndReadAndBookmarked(
+                        feedId = filter.feedId,
+                        read = if (conf.showReadEntries) listOf(true, false) else listOf(false),
+                        bookmarked = false,
+                    ).first()
+                } else {
+                    val includeRead = (conf.showReadEntries || filter is EntriesFilter.Bookmarked)
+                    val includeBookmarked = filter is EntriesFilter.Bookmarked
+
+                    entriesRepo.selectByReadAndBookmarked(
+                        read = if (includeRead) listOf(true, false) else listOf(false),
+                        bookmarked = includeBookmarked,
+                    ).first()
+                }
+
+                val sortedRows = when (conf.sortOrder) {
+                    ConfQueries.SORT_ORDER_ASCENDING -> rows.sortedBy { it.published }
+                    ConfQueries.SORT_ORDER_DESCENDING -> rows.sortedByDescending { it.published }
+                    else -> throw Exception()
+                }
+
+                _state.update {
+                    State.ShowingCachedEntries(
+                        feed = if (filter is EntriesFilter.BelongToFeed) {
+                            feedsRepo.selectById(filter.feedId)
+                                .first()
+                        } else {
+                            null
+                        },
+                        entries = sortedRows.map { it.toItem(conf) },
+                        showBackgroundProgress = showBgProgress,
+                        scrollToTop = scrollToTop,
+                        conf = conf,
+                    )
+                }
+            }
+        }
+    }
+
+    private fun onRetry() {
+        viewLifecycleOwner.lifecycleScope.launch { sync.run() }
+    }
+
+    private fun onPullRefresh() {
+        viewLifecycleOwner.lifecycleScope.launch { sync.run() }
+    }
+
+    private fun saveConf(newConf: (Conf) -> Conf) {
+        db.confQueries.update(newConf)
+    }
+
+    private fun changeSortOrder() {
+        scrollToTopNextTime = true
+
+        db.confQueries.update {
+            val newSortOrder = when (it.sortOrder) {
+                ConfQueries.SORT_ORDER_ASCENDING -> ConfQueries.SORT_ORDER_DESCENDING
+                ConfQueries.SORT_ORDER_DESCENDING -> ConfQueries.SORT_ORDER_ASCENDING
+                else -> throw Exception()
+            }
+
+            it.copy(sortOrder = newSortOrder)
+        }
+    }
+
+    private fun setRead(entryIds: Collection<String>, read: Boolean) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            entryIds.forEach {
+                entriesRepo.updateReadAndReadSynced(
+                    id = it,
+                    read = read,
+                    readSynced = false,
+                )
+            }
+
+            sync.run(
+                Sync.Args(
+                    syncFeeds = false,
+                    syncFlags = true,
+                    syncEntries = false,
+                )
+            )
+        }
+    }
+
+    private fun setBookmarked(entryId: String, bookmarked: Boolean) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            entriesRepo.updateBookmarkedAndBookmaredSynced(
+                id = entryId,
+                bookmarked = bookmarked,
+                bookmarkedSynced = false
+            )
+
+            sync.run(
+                Sync.Args(
+                    syncFeeds = false,
+                    syncFlags = true,
+                    syncEntries = false,
+                )
+            )
+        }
+    }
+
+    private fun markAllAsRead() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            when (val currentFilter = args.value) {
+                null -> {}
+
+                is EntriesFilter.NotBookmarked -> {
+                    entriesRepo.updateReadByBookmarked(
+                        read = true,
+                        bookmarked = false,
+                    )
+                }
+
+                is EntriesFilter.Bookmarked -> {
+                    entriesRepo.updateReadByBookmarked(
+                        read = true,
+                        bookmarked = true,
+                    )
+                }
+
+                is EntriesFilter.BelongToFeed -> {
+                    entriesRepo.updateReadByFeedId(
+                        read = true,
+                        feedId = currentFilter.feedId,
+                    )
+                }
+            }
+
+            sync.run(
+                Sync.Args(
+                    syncFeeds = false,
+                    syncFlags = true,
+                    syncEntries = false,
+                )
+            )
+        }
+    }
+
+    private fun EntriesAdapterRow.toItem(conf: Conf): EntriesAdapter.Item {
+        return EntriesAdapter.Item(
+            id = id,
+            showImage = extShowPreviewImages || conf.showPreviewImages,
+            cropImage = conf.cropPreviewImages,
+            imageUrl = extOpenGraphImageUrl,
+            imageWidth = extOpenGraphImageWidth,
+            imageHeight = extOpenGraphImageHeight,
+            title = title,
+            subtitle = "$feedTitle · ${DATE_TIME_FORMAT.format(published)}",
+            summary = summary ?: "",
+            read = extRead,
+            openInBrowser = extOpenEntriesInBrowser,
+            useBuiltInBrowser = conf.useBuiltInBrowser,
+            links = links,
+        )
+    }
+
     private fun initSwipeRefresh() {
         binding.swipeRefresh.apply {
             when (filter) {
                 is EntriesFilter.NotBookmarked, is EntriesFilter.BelongToFeed -> {
                     isEnabled = true
-                    setOnRefreshListener { model.onPullRefresh() }
+                    setOnRefreshListener { onPullRefresh() }
                 }
 
                 else -> isEnabled = false
@@ -188,35 +409,35 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         }
     }
 
-    private fun FragmentEntriesBinding.setState(state: EntriesModel.State) {
+    private fun FragmentEntriesBinding.setState(state: State) {
         animateVisibilityChanges(
             views = listOf(toolbar, progress, message, retry, swipeRefresh),
             visibleViews = when (state) {
-                is EntriesModel.State.InitialSync -> listOf(toolbar, progress)
-                is EntriesModel.State.FailedToSync -> listOf(toolbar, retry)
-                is EntriesModel.State.LoadingCachedEntries -> listOf(toolbar, progress)
-                is EntriesModel.State.ShowingCachedEntries -> listOf(toolbar, swipeRefresh)
+                is State.InitialSync -> listOf(toolbar, progress)
+                is State.FailedToSync -> listOf(toolbar, retry)
+                is State.LoadingCachedEntries -> listOf(toolbar, progress)
+                is State.ShowingCachedEntries -> listOf(toolbar, swipeRefresh)
             },
         )
 
         updateToolbar(state)
 
         when (state) {
-            is EntriesModel.State.InitialSync -> {
+            is State.InitialSync -> {
                 if (state.message.isNotEmpty()) {
                     message.showSmooth()
                     message.text = state.message
                 }
             }
 
-            is EntriesModel.State.FailedToSync -> {
-                retry.setOnClickListener { model.onRetry() }
+            is State.FailedToSync -> {
+                retry.setOnClickListener { onRetry() }
                 showErrorDialog(state.cause)
             }
 
-            EntriesModel.State.LoadingCachedEntries -> {}
+            State.LoadingCachedEntries -> {}
 
-            is EntriesModel.State.ShowingCachedEntries -> {
+            is State.ShowingCachedEntries -> {
                 swipeRefresh.isRefreshing = state.showBackgroundProgress
 
                 if (state.entries.isEmpty()) {
@@ -239,7 +460,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         }
     }
 
-    private fun updateToolbar(state: EntriesModel.State) {
+    private fun updateToolbar(state: State) {
         binding.toolbar.apply {
             when (filter) {
                 EntriesFilter.Bookmarked -> setTitle(R.string.bookmarks)
@@ -251,7 +472,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
                         setNavigationOnClickListener { parentFragmentManager.popBackStack() }
                     }
 
-                    if (state is EntriesModel.State.ShowingCachedEntries) {
+                    if (state is State.ShowingCachedEntries) {
                         title = state.feed?.title
                     }
                 }
@@ -279,11 +500,11 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         }
     }
 
-    private fun updateShowReadEntriesButton(state: EntriesModel.State) {
+    private fun updateShowReadEntriesButton(state: State) {
         val button = binding.toolbar.menu!!.findItem(R.id.showOpenedEntries)
         button.isVisible = getShowReadEntriesButtonVisibility()
 
-        if (state !is EntriesModel.State.ShowingCachedEntries) {
+        if (state !is State.ShowingCachedEntries) {
             button.isVisible = false
             return
         }
@@ -299,15 +520,15 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         }
 
         button.setOnMenuItemClickListener {
-            model.saveConf { it.copy(showReadEntries = !it.showReadEntries) }
+            saveConf { it.copy(showReadEntries = !it.showReadEntries) }
             true
         }
     }
 
-    private fun updateSortOrderButton(state: EntriesModel.State) {
+    private fun updateSortOrderButton(state: State) {
         val button = binding.toolbar.menu.findItem(R.id.sort)
 
-        if (state !is EntriesModel.State.ShowingCachedEntries) {
+        if (state !is State.ShowingCachedEntries) {
             button.isVisible = false
             return
         } else {
@@ -327,7 +548,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
         }
 
         button.setOnMenuItemClickListener {
-            model.changeSortOrder()
+            changeSortOrder()
             scrollToTop()
             true
         }
@@ -335,7 +556,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
 
     private fun updateMarkAllAsReadButton() {
         binding.toolbar.menu!!.findItem(R.id.markAllAsRead).setOnMenuItemClickListener {
-            model.markAllAsRead()
+            markAllAsRead()
             true
         }
     }
@@ -346,7 +567,7 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
                 replace(R.id.fragmentContainerView, SettingsFragment::class.java, null)
                 addToBackStack(null)
             }
-            
+
             true
         }
     }
@@ -381,14 +602,14 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
                 setAction(R.string.undo) { undoAction.invoke() }
             }.show()
 
-            model.apply { action.invoke() }
+            action.invoke()
         }.onFailure {
             showErrorDialog(it)
         }
     }
 
     private fun onListItemClick(item: EntriesAdapter.Item) {
-        model.setRead(
+        setRead(
             entryIds = listOf(item.id),
             read = true,
         )
@@ -435,16 +656,16 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
                             ItemTouchHelper.LEFT -> {
                                 showSnackbar(
                                     actionText = R.string.marked_as_read,
-                                    action = { model.setRead(listOf(entry.id), true) },
-                                    undoAction = { model.setRead(listOf(entry.id), false) },
+                                    action = { setRead(listOf(entry.id), true) },
+                                    undoAction = { setRead(listOf(entry.id), false) },
                                 )
                             }
 
                             ItemTouchHelper.RIGHT -> {
                                 showSnackbar(
                                     actionText = R.string.bookmarked,
-                                    action = { model.setBookmarked(entry.id, true) },
-                                    undoAction = { model.setBookmarked(entry.id, false) },
+                                    action = { setBookmarked(entry.id, true) },
+                                    undoAction = { setBookmarked(entry.id, false) },
                                 )
                             }
                         }
@@ -465,16 +686,16 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
                             ItemTouchHelper.LEFT -> {
                                 showSnackbar(
                                     actionText = R.string.removed_from_bookmarks,
-                                    action = { model.setBookmarked(entry.id, false) },
-                                    undoAction = { model.setBookmarked(entry.id, true) },
+                                    action = { setBookmarked(entry.id, false) },
+                                    undoAction = { setBookmarked(entry.id, true) },
                                 )
                             }
 
                             ItemTouchHelper.RIGHT -> {
                                 showSnackbar(
                                     actionText = R.string.removed_from_bookmarks,
-                                    action = { model.setBookmarked(entry.id, false) },
-                                    undoAction = { model.setBookmarked(entry.id, true) },
+                                    action = { setBookmarked(entry.id, false) },
+                                    undoAction = { setBookmarked(entry.id, true) },
                                 )
                             }
                         }
@@ -553,5 +774,29 @@ class EntriesFragment : Fragment(), OnItemReselectedListener {
 
             outRect.set(gapInPixels, gapInPixels, gapInPixels, bottomGap)
         }
+    }
+
+    sealed class State {
+
+        data class InitialSync(val message: String) : State()
+
+        object LoadingCachedEntries : State()
+
+        data class ShowingCachedEntries(
+            val feed: Feed?,
+            val entries: List<EntriesAdapter.Item>,
+            val showBackgroundProgress: Boolean,
+            val scrollToTop: Boolean = false,
+            val conf: Conf,
+        ) : State()
+
+        data class FailedToSync(val cause: Throwable) : State()
+    }
+
+    companion object {
+        private val DATE_TIME_FORMAT = DateTimeFormatter.ofLocalizedDateTime(
+            FormatStyle.MEDIUM,
+            FormatStyle.SHORT,
+        )
     }
 }
