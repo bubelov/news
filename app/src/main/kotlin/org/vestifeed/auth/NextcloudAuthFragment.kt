@@ -11,19 +11,20 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
-import org.vestifeed.di.Di
-import org.vestifeed.dialog.showErrorDialog
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.vestifeed.R
+import org.vestifeed.api.nextcloud.NextcloudApiBuilder
+import org.vestifeed.app.App
+import org.vestifeed.db.ConfQueries
 import org.vestifeed.databinding.FragmentNextcloudAuthBinding
+import org.vestifeed.dialog.showErrorDialog
 import org.vestifeed.entries.EntriesFilter
 import org.vestifeed.entries.EntriesFragment
 import org.vestifeed.navigation.Activity
+import org.vestifeed.sync.BackgroundSyncScheduler
 
 class NextcloudAuthFragment : Fragment() {
-
-    private val model: NextcloudAuthModel by lazy { Di.getViewModel(NextcloudAuthModel::class.java) }
 
     private var _binding: FragmentNextcloudAuthBinding? = null
     private val binding get() = _binding!!
@@ -70,19 +71,28 @@ class NextcloudAuthFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launchWhenResumed {
             runCatching {
-                model.testBackend(
-                    url = url,
+                val api = NextcloudApiBuilder().build(
+                    url = url.toString().trim('/'),
                     username = username,
                     password = password,
                     trustSelfSignedCerts = trustSelfSignedCerts,
                 )
+                api.getFeeds()
             }.onSuccess {
-                model.setBackend(
-                    url = url,
-                    username = username,
-                    password = password,
-                    trustSelfSignedCerts = trustSelfSignedCerts,
-                )
+                val db = (requireContext().applicationContext as App).db
+                val syncScheduler = BackgroundSyncScheduler(requireContext())
+
+                db.confQueries.update {
+                    it.copy(
+                        backend = ConfQueries.BACKEND_NEXTCLOUD,
+                        nextcloudServerUrl = url.toString().trim('/'),
+                        nextcloudServerTrustSelfSignedCerts = trustSelfSignedCerts,
+                        nextcloudServerUsername = username,
+                        nextcloudServerPassword = password,
+                    )
+                }
+
+                syncScheduler.schedule()
 
                 parentFragmentManager.commit {
                     replace(

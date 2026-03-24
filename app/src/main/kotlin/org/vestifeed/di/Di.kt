@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import org.vestifeed.api.Api
 import org.vestifeed.api.HotSwapApi
 import org.vestifeed.app.db
-import org.vestifeed.auth.NextcloudAuthModel
 import org.vestifeed.entries.EntriesModel
 import org.vestifeed.entries.EntriesRepo
 import org.vestifeed.enclosures.EnclosuresModel
@@ -113,11 +112,6 @@ object Di {
             EnclosuresModel::class.java -> EnclosuresModel(
                 get(EnclosuresRepo::class.java),
                 get(EntriesRepo::class.java)
-            )
-
-            NextcloudAuthModel::class.java -> NextcloudAuthModel(
-                context.db(),
-                get(BackgroundSyncScheduler::class.java)
             )
 
             else -> throw IllegalArgumentException("Unknown ViewModel class: $clazz")
