@@ -12,7 +12,6 @@ import org.vestifeed.enclosures.EnclosuresRepo
 import org.vestifeed.feeds.FeedsModel
 import org.vestifeed.feeds.FeedsRepo
 import org.vestifeed.opengraph.OpenGraphImagesRepo
-import org.vestifeed.settings.SettingsModel
 import org.vestifeed.sync.BackgroundSyncScheduler
 import org.vestifeed.sync.Sync
 
@@ -88,12 +87,6 @@ object Di {
                 get(EntriesRepo::class.java),
                 get(FeedsRepo::class.java),
                 get(Sync::class.java)
-            )
-
-            SettingsModel::class.java -> SettingsModel(
-                context as Application,
-                context.db(),
-                get(BackgroundSyncScheduler::class.java)
             )
 
             else -> throw IllegalArgumentException("Unknown ViewModel class: $clazz")

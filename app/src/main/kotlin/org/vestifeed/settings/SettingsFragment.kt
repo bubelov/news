@@ -16,25 +16,33 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import org.vestifeed.app.App
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import org.vestifeed.di.Di
-import org.vestifeed.dialog.showErrorDialog
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.vestifeed.R
+import org.vestifeed.app.App
 import org.vestifeed.auth.AuthFragment
 import org.vestifeed.databinding.FragmentSettingsBinding
+import org.vestifeed.db.Conf
 import org.vestifeed.db.ConfQueries
+import org.vestifeed.dialog.showErrorDialog
 import org.vestifeed.enclosures.EnclosuresFragment
+import org.vestifeed.sync.BackgroundSyncScheduler
 import java.util.concurrent.TimeUnit
 
 class SettingsFragment : Fragment() {
 
-    private val model: SettingsModel by lazy { Di.getViewModel(SettingsModel::class.java) }
+    private val db by lazy { (requireContext().applicationContext as App).db }
+    private val syncScheduler by lazy { BackgroundSyncScheduler(requireContext()) }
+
+    private val _state = MutableStateFlow<State>(State.Loading)
+    private val state = _state.asStateFlow()
 
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
@@ -62,7 +70,9 @@ class SettingsFragment : Fragment() {
 
         binding.toolbar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
 
-        model.state
+        refresh()
+
+        state
             .onEach { binding.setState(it) }
             .launchIn(viewLifecycleOwner.lifecycleScope)
     }
@@ -70,6 +80,108 @@ class SettingsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun refresh() {
+        val conf = db.confQueries.select()
+        _state.update {
+            val logOutTitle: String
+            val logOutSubtitle: String
+
+            when (conf.backend) {
+                ConfQueries.BACKEND_STANDALONE -> {
+                    logOutTitle = getString(R.string.delete_all_data)
+                    logOutSubtitle = ""
+                }
+
+                else -> {
+                    logOutTitle = getString(R.string.log_out)
+                    logOutSubtitle = conf.accountName()
+                }
+            }
+
+            State.ShowingSettings(
+                conf = conf,
+                logOutTitle = logOutTitle,
+                logOutSubtitle = logOutSubtitle,
+            )
+        }
+    }
+
+    private fun setSyncInBackground(value: Boolean) {
+        db.confQueries.update { it.copy(syncInBackground = value) }
+        syncScheduler.schedule()
+        refresh()
+    }
+
+    private fun setBackgroundSyncIntervalMillis(value: Long) {
+        db.confQueries.update { it.copy(backgroundSyncIntervalMillis = value) }
+        syncScheduler.schedule()
+        refresh()
+    }
+
+    private fun setSyncOnStartup(value: Boolean) {
+        db.confQueries.update { it.copy(syncOnStartup = value) }
+        refresh()
+    }
+
+    private fun setShowReadEntries(value: Boolean) {
+        db.confQueries.update { it.copy(showReadEntries = value) }
+        refresh()
+    }
+
+    private fun setShowPreviewImages(value: Boolean) {
+        db.confQueries.update { it.copy(showPreviewImages = value) }
+        refresh()
+    }
+
+    private fun setCropPreviewImages(value: Boolean) {
+        db.confQueries.update { it.copy(cropPreviewImages = value) }
+        refresh()
+    }
+
+    private fun setShowPreviewText(value: Boolean) {
+        db.confQueries.update { it.copy(showPreviewText = value) }
+        refresh()
+    }
+
+    private fun setMarkScrolledEntriesAsRead(value: Boolean) {
+        db.confQueries.update { it.copy(markScrolledEntriesAsRead = value) }
+        refresh()
+    }
+
+    private fun setUseBuiltInBrowser(value: Boolean) {
+        db.confQueries.update { it.copy(useBuiltInBrowser = value) }
+        refresh()
+    }
+
+    private fun logOut() {
+        db.confQueries.delete()
+
+        db.transaction {
+            db.feedQueries.deleteAll()
+            db.entryQueries.deleteAll()
+        }
+    }
+
+    private fun Conf.accountName(): String {
+        return when (backend) {
+            ConfQueries.BACKEND_STANDALONE -> ""
+            ConfQueries.BACKEND_MINIFLUX -> {
+                minifluxServerUrl.extractDomain()
+            }
+
+            ConfQueries.BACKEND_NEXTCLOUD -> {
+                val username = nextcloudServerUsername
+                "$username@${nextcloudServerUrl.extractDomain()}"
+            }
+
+            else -> ""
+        }
+    }
+
+    private fun String.extractDomain(): String {
+        return replace("https://", "").replace("http://", "")
     }
 
     private fun createExportDbLauncher(): ActivityResultLauncher<String> {
@@ -95,10 +207,10 @@ class SettingsFragment : Fragment() {
         }
     }
 
-    private fun FragmentSettingsBinding.setState(state: SettingsModel.State) {
+    private fun FragmentSettingsBinding.setState(state: State) {
         when (state) {
-            SettingsModel.State.Loading -> showProgress()
-            is SettingsModel.State.ShowingSettings -> showSettings(state)
+            State.Loading -> showProgress()
+            is State.ShowingSettings -> showSettings(state)
         }
     }
 
@@ -107,7 +219,7 @@ class SettingsFragment : Fragment() {
         settings.isVisible = false
     }
 
-    private fun FragmentSettingsBinding.showSettings(state: SettingsModel.State.ShowingSettings) {
+    private fun FragmentSettingsBinding.showSettings(state: State.ShowingSettings) {
         progress.isVisible = false
         settings.isVisible = true
 
@@ -116,7 +228,7 @@ class SettingsFragment : Fragment() {
             backgroundSyncIntervalButton.isVisible = state.conf.syncInBackground
 
             setOnCheckedChangeListener { _, isChecked ->
-                model.setSyncInBackground(isChecked)
+                setSyncInBackground(isChecked)
                 backgroundSyncIntervalButton.isVisible = isChecked
             }
         }
@@ -136,7 +248,7 @@ class SettingsFragment : Fragment() {
 
                 setOnCheckedChangeListener { _, isChecked ->
                     if (isChecked) {
-                        model.setBackgroundSyncIntervalMillis(millis)
+                        setBackgroundSyncIntervalMillis(millis)
                         backgroundSyncInterval.text = text
                         dialog.dismiss()
                     }
@@ -160,41 +272,39 @@ class SettingsFragment : Fragment() {
 
         syncOnStartup.apply {
             isChecked = state.conf.syncOnStartup
-            setOnCheckedChangeListener { _, isChecked -> model.setSyncOnStartup(isChecked) }
+            setOnCheckedChangeListener { _, isChecked -> setSyncOnStartup(isChecked) }
         }
 
         showOpenedEntries.apply {
             isChecked = state.conf.showReadEntries
-            setOnCheckedChangeListener { _, isChecked -> model.setShowReadEntries(isChecked) }
+            setOnCheckedChangeListener { _, isChecked -> setShowReadEntries(isChecked) }
         }
 
         showPreviewImages.apply {
             isChecked = state.conf.showPreviewImages
-            setOnCheckedChangeListener { _, isChecked -> model.setShowPreviewImages(isChecked) }
+            setOnCheckedChangeListener { _, isChecked -> setShowPreviewImages(isChecked) }
         }
 
         cropPreviewImages.apply {
             isChecked = state.conf.cropPreviewImages
-            setOnCheckedChangeListener { _, isChecked -> model.setCropPreviewImages(isChecked) }
+            setOnCheckedChangeListener { _, isChecked -> setCropPreviewImages(isChecked) }
         }
 
         showPreviewText.apply {
             isChecked = state.conf.showPreviewText
-            setOnCheckedChangeListener { _, isChecked -> model.setShowPreviewText(isChecked) }
+            setOnCheckedChangeListener { _, isChecked -> setShowPreviewText(isChecked) }
         }
 
         markScrolledEntriesAsRead.apply {
             isChecked = state.conf.markScrolledEntriesAsRead
             setOnCheckedChangeListener { _, isChecked ->
-                model.setMarkScrolledEntriesAsRead(
-                    isChecked
-                )
+                setMarkScrolledEntriesAsRead(isChecked)
             }
         }
 
         useBuiltInBrowser.apply {
             isChecked = state.conf.useBuiltInBrowser
-            setOnCheckedChangeListener { _, isChecked -> model.setUseBuiltInBrowser(isChecked) }
+            setOnCheckedChangeListener { _, isChecked -> setUseBuiltInBrowser(isChecked) }
         }
 
         manageEnclosures.setOnClickListener {
@@ -215,7 +325,7 @@ class SettingsFragment : Fragment() {
                 ConfQueries.BACKEND_STANDALONE -> {
                     MaterialAlertDialogBuilder(requireContext())
                         .setMessage(R.string.delete_all_data_warning)
-                        .setPositiveButton(R.string.delete) { _, _ -> logOut() }
+                        .setPositiveButton(R.string.delete) { _, _ -> doLogOut() }
                         .setNegativeButton(R.string.cancel, null)
                         .show()
                 }
@@ -223,7 +333,7 @@ class SettingsFragment : Fragment() {
                 else -> {
                     MaterialAlertDialogBuilder(requireContext())
                         .setMessage(R.string.log_out_warning)
-                        .setPositiveButton(R.string.log_out) { _, _ -> logOut() }
+                        .setPositiveButton(R.string.log_out) { _, _ -> doLogOut() }
                         .setNegativeButton(R.string.cancel, null)
                         .show()
                 }
@@ -231,9 +341,9 @@ class SettingsFragment : Fragment() {
         }
     }
 
-    private fun logOut() {
+    private fun doLogOut() {
         lifecycleScope.launch {
-            model.logOut()
+            logOut()
 
             parentFragmentManager.commit {
                 replace(
@@ -241,5 +351,14 @@ class SettingsFragment : Fragment() {
                 )
             }
         }
+    }
+
+    sealed class State {
+        object Loading : State()
+        data class ShowingSettings(
+            val conf: Conf,
+            val logOutTitle: String,
+            val logOutSubtitle: String,
+        ) : State()
     }
 }
