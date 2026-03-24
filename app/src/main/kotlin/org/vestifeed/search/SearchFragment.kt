@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
-import androidx.fragment.app.Fragment
+import org.vestifeed.navigation.AppFragment
 import androidx.fragment.app.commit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -42,7 +42,7 @@ import org.vestifeed.sync.Sync
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-class SearchFragment : Fragment() {
+class SearchFragment : AppFragment() {
 
     private val db by lazy { (requireContext().applicationContext as App).db }
     private val api by lazy { Di.get(Api::class.java) }

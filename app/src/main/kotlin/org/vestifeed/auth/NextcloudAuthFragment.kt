@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
+import org.vestifeed.navigation.AppFragment
 import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -21,10 +21,9 @@ import org.vestifeed.databinding.FragmentNextcloudAuthBinding
 import org.vestifeed.dialog.showErrorDialog
 import org.vestifeed.entries.EntriesFilter
 import org.vestifeed.entries.EntriesFragment
-import org.vestifeed.navigation.Activity
 import org.vestifeed.sync.BackgroundSyncScheduler
 
-class NextcloudAuthFragment : Fragment() {
+class NextcloudAuthFragment : AppFragment() {
 
     private var _binding: FragmentNextcloudAuthBinding? = null
     private val binding get() = _binding!!
@@ -101,8 +100,6 @@ class NextcloudAuthFragment : Fragment() {
                         bundleOf("filter" to EntriesFilter.NotBookmarked),
                     )
                 }
-
-                (activity as Activity).binding.bottomNav.isVisible = true
             }.onFailure {
                 binding.progress.isVisible = false
                 showErrorDialog(it.message ?: getString(R.string.direct_login_failed))

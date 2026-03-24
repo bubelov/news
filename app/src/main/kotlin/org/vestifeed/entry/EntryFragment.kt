@@ -27,7 +27,6 @@ import androidx.core.view.isVisible
 import androidx.core.view.iterator
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -47,12 +46,13 @@ import org.vestifeed.R
 import org.vestifeed.app.db
 import org.vestifeed.databinding.FragmentEntryBinding
 import org.vestifeed.feedsettings.FeedSettingsFragment
+import org.vestifeed.navigation.AppFragment
 import org.vestifeed.navigation.openUrl
 import org.vestifeed.sync.Sync
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-class EntryFragment : Fragment() {
+class EntryFragment : AppFragment() {
 
     private val entryId by lazy { requireArguments().getString("entryId", "") }
 

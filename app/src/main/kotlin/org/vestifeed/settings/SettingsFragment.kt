@@ -11,7 +11,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
-import androidx.fragment.app.Fragment
+import org.vestifeed.navigation.AppFragment
 import androidx.fragment.app.commit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -36,7 +36,7 @@ import org.vestifeed.enclosures.EnclosuresFragment
 import org.vestifeed.sync.BackgroundSyncScheduler
 import java.util.concurrent.TimeUnit
 
-class SettingsFragment : Fragment() {
+class SettingsFragment : AppFragment() {
 
     private val db by lazy { (requireContext().applicationContext as App).db }
     private val syncScheduler by lazy { BackgroundSyncScheduler(requireContext()) }

@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
+import org.vestifeed.navigation.AppFragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
@@ -22,10 +22,9 @@ import org.vestifeed.databinding.FragmentMinifluxAuthBinding
 import org.vestifeed.dialog.showErrorDialog
 import org.vestifeed.entries.EntriesFilter
 import org.vestifeed.entries.EntriesFragment
-import org.vestifeed.navigation.Activity
 import org.vestifeed.sync.BackgroundSyncScheduler
 
-class MinifluxAuthFragment : Fragment() {
+class MinifluxAuthFragment : AppFragment() {
 
     private var _binding: FragmentMinifluxAuthBinding? = null
     private val binding get() = _binding!!
@@ -101,8 +100,6 @@ class MinifluxAuthFragment : Fragment() {
                         bundleOf("filter" to EntriesFilter.NotBookmarked),
                     )
                 }
-
-                (activity as Activity).binding.bottomNav.isVisible = true
             }.onFailure {
                 binding.progress.isVisible = false
                 showErrorDialog(it.message ?: getString(R.string.direct_login_failed))

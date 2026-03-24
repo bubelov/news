@@ -13,7 +13,6 @@ import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -49,6 +48,7 @@ import org.vestifeed.di.Di
 import org.vestifeed.entry.EntryFragment
 import org.vestifeed.feeds.FeedsFragment
 import org.vestifeed.feeds.FeedsRepo
+import org.vestifeed.navigation.AppFragment
 import org.vestifeed.navigation.openUrl
 import org.vestifeed.search.SearchFragment
 import org.vestifeed.settings.SettingsFragment
@@ -56,7 +56,7 @@ import org.vestifeed.sync.Sync
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-class EntriesFragment : Fragment(), OnItemReselectedListener {
+class EntriesFragment : AppFragment(), OnItemReselectedListener {
 
     private val filter: EntriesFilter by lazy {
         requireArguments().getParcelable(

@@ -6,14 +6,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
-import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
-import org.vestifeed.auth.AuthFragment
 import com.google.android.material.navigation.NavigationBarView.OnItemReselectedListener
-import org.vestifeed.di.Di
 import org.vestifeed.entries.EntriesFilter
 import org.vestifeed.entries.EntriesFragment
 import org.vestifeed.feeds.FeedsFragment
@@ -21,9 +17,8 @@ import kotlinx.coroutines.launch
 import org.vestifeed.R
 import org.vestifeed.app.db
 import org.vestifeed.databinding.ActivityBinding
-import org.vestifeed.opengraph.OpenGraphImagesRepo
 
-class Activity : AppCompatActivity(), FragmentManager.OnBackStackChangedListener {
+class Activity : AppCompatActivity() {
 
     lateinit var binding: ActivityBinding
 
@@ -35,10 +30,6 @@ class Activity : AppCompatActivity(), FragmentManager.OnBackStackChangedListener
                 finish()
             }
         }
-    }
-
-    override fun onBackStackChanged() {
-        updateBottomNavVisibility()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,33 +45,29 @@ class Activity : AppCompatActivity(), FragmentManager.OnBackStackChangedListener
         }
 
         db().confQueries.update { it.copy(syncedOnStartup = false) }
-        lifecycleScope.launch { Di.get(OpenGraphImagesRepo::class.java).fetchEntryImages() }
+        //lifecycleScope.launch { Di.get(OpenGraphImagesRepo::class.java).fetchEntryImages() }
+
+        lifecycleScope.launch {
+            val conf = db().confQueries.select()
+
+            if (conf.backend.isNotBlank()) {
+                supportFragmentManager.commit {
+                    replace(
+                        R.id.fragmentContainerView,
+                        EntriesFragment::class.java,
+                        bundleOf("filter" to EntriesFilter.NotBookmarked),
+                    )
+                }
+            }
+        }
     }
 
     override fun onStart() {
         super.onStart()
 
+
+
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
-
-        supportFragmentManager.addOnBackStackChangedListener(this)
-
-        if (supportFragmentManager.findFragmentById(R.id.fragmentContainerView) is AuthFragment) {
-            lifecycleScope.launch {
-                val conf = db().confQueries.select()
-
-                if (conf.backend.isNotBlank()) {
-                    supportFragmentManager.commit {
-                        replace(
-                            R.id.fragmentContainerView,
-                            EntriesFragment::class.java,
-                            bundleOf("filter" to EntriesFilter.NotBookmarked),
-                        )
-                    }
-
-                    binding.bottomNav.isVisible = true
-                }
-            }
-        }
 
         binding.bottomNav.apply {
             setOnItemSelectedListener { item ->
@@ -124,20 +111,6 @@ class Activity : AppCompatActivity(), FragmentManager.OnBackStackChangedListener
 
             setOnItemReselectedListener(createOnItemReselectedListener())
         }
-    }
-
-    override fun onStop() {
-        super.onStop()
-        supportFragmentManager.removeOnBackStackChangedListener(this)
-    }
-
-    private fun updateBottomNavVisibility() {
-        val hasNoBackStack = supportFragmentManager.backStackEntryCount == 0
-        val currentFragment = supportFragmentManager.fragments.firstOrNull()
-        val isEntriesOrFeedsFragment =
-            currentFragment is EntriesFragment || currentFragment is FeedsFragment
-
-        binding.bottomNav.isVisible = hasNoBackStack && isEntriesOrFeedsFragment
     }
 
     private fun createOnItemReselectedListener(): OnItemReselectedListener {

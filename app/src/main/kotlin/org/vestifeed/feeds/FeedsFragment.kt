@@ -17,7 +17,6 @@ import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -56,6 +55,7 @@ import org.vestifeed.entries.EntriesFilter
 import org.vestifeed.entries.EntriesFragment
 import org.vestifeed.entries.EntriesRepo
 import org.vestifeed.feedsettings.FeedSettingsFragment
+import org.vestifeed.navigation.AppFragment
 import org.vestifeed.navigation.openUrl
 import org.vestifeed.navigation.showKeyboard
 import org.vestifeed.opml.OpmlDocument
@@ -69,7 +69,7 @@ import java.io.InputStream
 import java.io.OutputStream
 import javax.xml.parsers.DocumentBuilderFactory
 
-class FeedsFragment : Fragment() {
+class FeedsFragment : AppFragment() {
 
     private val db by lazy { (requireContext().applicationContext as App).db }
     private val api by lazy { Di.get(Api::class.java) }

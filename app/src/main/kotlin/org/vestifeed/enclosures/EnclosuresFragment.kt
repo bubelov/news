@@ -9,7 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
+import org.vestifeed.navigation.AppFragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -32,7 +32,7 @@ import org.vestifeed.entries.EntriesRepo
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-class EnclosuresFragment : Fragment() {
+class EnclosuresFragment : AppFragment() {
 
     private var _binding: FragmentEnclosuresBinding? = null
     private val binding get() = _binding!!
