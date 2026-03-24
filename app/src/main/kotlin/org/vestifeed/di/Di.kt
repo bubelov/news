@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import org.vestifeed.api.Api
 import org.vestifeed.api.HotSwapApi
 import org.vestifeed.app.db
-import org.vestifeed.auth.MinifluxAuthModel
 import org.vestifeed.auth.NextcloudAuthModel
 import org.vestifeed.entries.EntriesModel
 import org.vestifeed.entries.EntriesRepo
@@ -114,11 +113,6 @@ object Di {
             EnclosuresModel::class.java -> EnclosuresModel(
                 get(EnclosuresRepo::class.java),
                 get(EntriesRepo::class.java)
-            )
-
-            MinifluxAuthModel::class.java -> MinifluxAuthModel(
-                context.db(),
-                get(BackgroundSyncScheduler::class.java)
             )
 
             NextcloudAuthModel::class.java -> NextcloudAuthModel(

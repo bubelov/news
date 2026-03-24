@@ -12,19 +12,20 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
-import org.vestifeed.di.Di
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import org.vestifeed.R
+import org.vestifeed.api.miniflux.MinifluxApiBuilder
+import org.vestifeed.app.App
+import org.vestifeed.db.ConfQueries
+import org.vestifeed.databinding.FragmentMinifluxAuthBinding
 import org.vestifeed.dialog.showErrorDialog
 import org.vestifeed.entries.EntriesFilter
 import org.vestifeed.entries.EntriesFragment
 import org.vestifeed.navigation.Activity
-import okhttp3.HttpUrl.Companion.toHttpUrl
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import org.vestifeed.R
-import org.vestifeed.databinding.FragmentMinifluxAuthBinding
+import org.vestifeed.sync.BackgroundSyncScheduler
 
 class MinifluxAuthFragment : Fragment() {
-
-    private val model: MinifluxAuthModel by lazy { Di.getViewModel(MinifluxAuthModel::class.java) }
 
     private var _binding: FragmentMinifluxAuthBinding? = null
     private val binding get() = _binding!!
@@ -70,17 +71,26 @@ class MinifluxAuthFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launchWhenResumed {
             runCatching {
-                model.testBackend(
-                    url = url,
+                val api = MinifluxApiBuilder().build(
+                    url = url.toString().trim('/'),
                     token = token,
                     trustSelfSignedCerts = trustSelfSignedCerts,
                 )
+                api.getFeeds()
             }.onSuccess {
-                model.setBackend(
-                    url = url,
-                    token = token,
-                    trustSelfSignedCerts = trustSelfSignedCerts,
-                )
+                val db = (requireContext().applicationContext as App).db
+                val syncScheduler = BackgroundSyncScheduler(requireContext())
+
+                db.confQueries.update {
+                    it.copy(
+                        backend = ConfQueries.BACKEND_MINIFLUX,
+                        minifluxServerUrl = url.toString().trim('/'),
+                        minifluxServerTrustSelfSignedCerts = trustSelfSignedCerts,
+                        minifluxServerToken = token,
+                    )
+                }
+
+                syncScheduler.schedule()
 
                 parentFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
 
