@@ -26,9 +26,6 @@ import com.google.android.material.navigation.NavigationBarView.OnItemReselected
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -70,8 +67,6 @@ class EntriesFragment : AppFragment(), OnItemReselectedListener {
     private val entriesRepo by lazy { EntriesRepo(api, db) }
     private val feedsRepo by lazy { FeedsRepo(api, db) }
     private val sync by lazy { Sync(db, feedsRepo, entriesRepo) }
-
-    private val args = MutableStateFlow<EntriesFilter?>(null)
 
     private val _state = MutableStateFlow<State>(State.LoadingCachedEntries)
     private val state = _state.asStateFlow()
@@ -150,28 +145,21 @@ class EntriesFragment : AppFragment(), OnItemReselectedListener {
         initSwipeRefresh()
         initList()
 
-        args.update { filter }
-
         viewLifecycleOwner.lifecycleScope.launch {
-            combine(
-                args.filterNotNull(),
-                sync.state,
-                entriesRepo.selectCount(),
-            ) { filter, syncState, _ ->
-                Pair(
-                    filter,
-                    syncState
-                )
-            }.collectLatest { (filter, syncState) ->
-                val conf = db.confQueries.select()
-                updateState(filter, conf, syncState)
-            }
+            refresh()
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 state.collect { binding.setState(it) }
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewLifecycleOwner.lifecycleScope.launch {
+            refresh()
         }
     }
 
@@ -202,10 +190,20 @@ class EntriesFragment : AppFragment(), OnItemReselectedListener {
 
     private fun hasBackend() = db.confQueries.select().backend.isNotBlank()
 
+private suspend fun refresh() {
+    val conf = db.confQueries.select()
+    val syncState = sync.state.value
+    updateState(filter, conf, syncState)
+}
+
     private suspend fun updateState(filter: EntriesFilter, conf: Conf, syncState: Sync.State) {
         if (!conf.initialSyncCompleted || (conf.syncOnStartup && !conf.syncedOnStartup)) {
             db.confQueries.update { it.copy(syncedOnStartup = true) }
-            viewLifecycleOwner.lifecycleScope.launch { sync.run() }
+
+            viewLifecycleOwner.lifecycleScope.launch {
+                sync.run()
+                refresh()
+            }
         }
 
         when (syncState) {
@@ -261,11 +259,17 @@ class EntriesFragment : AppFragment(), OnItemReselectedListener {
     }
 
     private fun onRetry() {
-        viewLifecycleOwner.lifecycleScope.launch { sync.run() }
+        viewLifecycleOwner.lifecycleScope.launch {
+            sync.run()
+            refresh()
+        }
     }
 
     private fun onPullRefresh() {
-        viewLifecycleOwner.lifecycleScope.launch { sync.run() }
+        viewLifecycleOwner.lifecycleScope.launch {
+            sync.run()
+            refresh()
+        }
     }
 
     private fun saveConf(newConf: (Conf) -> Conf) {
@@ -283,6 +287,10 @@ class EntriesFragment : AppFragment(), OnItemReselectedListener {
             }
 
             it.copy(sortOrder = newSortOrder)
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            refresh()
         }
     }
 
@@ -303,6 +311,8 @@ class EntriesFragment : AppFragment(), OnItemReselectedListener {
                     syncEntries = false,
                 )
             )
+
+            refresh()
         }
     }
 
@@ -321,14 +331,14 @@ class EntriesFragment : AppFragment(), OnItemReselectedListener {
                     syncEntries = false,
                 )
             )
+
+            refresh()
         }
     }
 
     private fun markAllAsRead() {
         viewLifecycleOwner.lifecycleScope.launch {
-            when (val currentFilter = args.value) {
-                null -> {}
-
+            when (val currentFilter = filter) {
                 is EntriesFilter.NotBookmarked -> {
                     entriesRepo.updateReadByBookmarked(
                         read = true,
@@ -358,6 +368,8 @@ class EntriesFragment : AppFragment(), OnItemReselectedListener {
                     syncEntries = false,
                 )
             )
+
+            refresh()
         }
     }
 
@@ -521,6 +533,9 @@ class EntriesFragment : AppFragment(), OnItemReselectedListener {
 
         button.setOnMenuItemClickListener {
             saveConf { it.copy(showReadEntries = !it.showReadEntries) }
+            viewLifecycleOwner.lifecycleScope.launch {
+                refresh()
+            }
             true
         }
     }
@@ -549,7 +564,6 @@ class EntriesFragment : AppFragment(), OnItemReselectedListener {
 
         button.setOnMenuItemClickListener {
             changeSortOrder()
-            scrollToTop()
             true
         }
     }
