@@ -4,7 +4,7 @@
     <string name="app_name">新闻</string>
     <string name="post_image">发布图像</string>
     <string name="settings">设置</string>
-    <string name="feed">订阅源</string>
+    <string name="unread">未读</string>
     <string name="show_read_news">显示已读新闻</string>
     <string name="hide_read_news">隐藏已读新闻</string>
     <string name="bookmark">书签</string>
@@ -26,7 +26,7 @@
     <string name="downloading">下载中</string>
     <string name="listen">收听</string>
     <string name="crop_feed_images">裁剪预览图像</string>
-    <string name="subscriptions">订阅</string>
+    <string name="feeds">订阅源</string>
     <string name="bookmarks">书签</string>
     <string name="open_feed">打开订阅源</string>
     <string name="open_html_link">打开网站</string>

@@ -112,7 +112,7 @@ class EntriesFragment : AppFragment() {
             }
 
             if (!requireArguments().containsKey("filter")) {
-                requireArguments().putParcelable("filter", EntriesFilter.NotBookmarked)
+                requireArguments().putParcelable("filter", EntriesFilter.Unread)
             }
 
             _binding = FragmentEntriesBinding.inflate(inflater, container, false)
@@ -332,7 +332,7 @@ class EntriesFragment : AppFragment() {
     private fun markAllAsRead() {
         viewLifecycleOwner.lifecycleScope.launch {
             when (val currentFilter = filter) {
-                is EntriesFilter.NotBookmarked -> {
+                is EntriesFilter.Unread -> {
                     entriesRepo.updateReadByBookmarked(
                         read = true,
                         bookmarked = false,
@@ -387,7 +387,7 @@ class EntriesFragment : AppFragment() {
     private fun initSwipeRefresh() {
         binding.swipeRefresh.apply {
             when (filter) {
-                is EntriesFilter.NotBookmarked, is EntriesFilter.BelongToFeed -> {
+                is EntriesFilter.Unread, is EntriesFilter.BelongToFeed -> {
                     isEnabled = true
                     setOnRefreshListener { onPullRefresh() }
                 }
@@ -455,7 +455,7 @@ class EntriesFragment : AppFragment() {
 
                 if (
                     state.conf.markScrolledEntriesAsRead
-                    && (filter is EntriesFilter.NotBookmarked || filter is EntriesFilter.BelongToFeed)
+                    && (filter is EntriesFilter.Unread || filter is EntriesFilter.BelongToFeed)
                 ) {
                     binding.list.addOnScrollListener(trackingListener)
                 } else {
@@ -469,7 +469,7 @@ class EntriesFragment : AppFragment() {
         binding.toolbar.apply {
             when (filter) {
                 EntriesFilter.Bookmarked -> setTitle(R.string.bookmarks)
-                EntriesFilter.NotBookmarked -> setTitle(R.string.feed)
+                EntriesFilter.Unread -> setTitle(R.string.unread)
 
                 is EntriesFilter.BelongToFeed -> {
                     binding.toolbar.apply {
@@ -585,7 +585,7 @@ class EntriesFragment : AppFragment() {
 
     private fun getShowReadEntriesButtonVisibility(): Boolean {
         return when (filter) {
-            EntriesFilter.NotBookmarked -> true
+            EntriesFilter.Unread -> true
             EntriesFilter.Bookmarked -> false
             is EntriesFilter.BelongToFeed -> true
         }
@@ -650,7 +650,7 @@ class EntriesFragment : AppFragment() {
 
     private fun createTouchHelper(): ItemTouchHelper? {
         return when (filter) {
-            EntriesFilter.NotBookmarked, is EntriesFilter.BelongToFeed -> {
+            EntriesFilter.Unread, is EntriesFilter.BelongToFeed -> {
                 ItemTouchHelper(object : SwipeHelper(
                     requireContext(),
                     R.drawable.ic_baseline_visibility_24,

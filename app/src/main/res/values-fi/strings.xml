@@ -4,7 +4,7 @@
     <string name="app_name">Uutiset</string>
     <string name="post_image">Lähetä kuva</string>
     <string name="settings">Asetukset</string>
-    <string name="feed">Syöte</string>
+    <string name="unread">Lukematta</string>
     <string name="show_read_news">Näytä luetut uutiset</string>
     <string name="hide_read_news">Piilota luetut uutiset</string>
     <string name="bookmark">Kirjainmerkki</string>
@@ -26,7 +26,7 @@
     <string name="downloading">Ladataan</string>
     <string name="listen">Kuuntele</string>
     <string name="crop_feed_images">Leikkaa esikatselukuvat</string>
-    <string name="subscriptions">Tilaukset</string>
+    <string name="feeds">Syötteet</string>
     <string name="bookmarks">Kirjainmerkit</string>
     <string name="open_feed">Avaa syöte</string>
     <string name="open_html_link">Avaa verkkosivusto</string>

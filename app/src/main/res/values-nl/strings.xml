@@ -4,7 +4,7 @@
     <string name="app_name">Nieuws</string>
     <string name="post_image">Plaats afbeelding</string>
     <string name="settings">Instellingen</string>
-    <string name="feed">Feed</string>
+    <string name="unread">Ongelezen</string>
     <string name="show_read_news">Toon gelezen nieuws</string>
     <string name="hide_read_news">Verberg gelezen nieuws</string>
     <string name="bookmark">Bladwijzer</string>
@@ -26,7 +26,7 @@
     <string name="downloading">Downloaden</string>
     <string name="listen">Luisteren</string>
     <string name="crop_feed_images">Preview afbeeldingen bijsnijden</string>
-    <string name="subscriptions">Abonnementen</string>
+    <string name="feeds">Feeds</string>
     <string name="bookmarks">Bladwijzer</string>
     <string name="open_feed">Open feed</string>
     <string name="open_html_link">Open website</string>

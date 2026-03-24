@@ -4,7 +4,7 @@
     <string name="app_name">Hírek</string>
     <string name="post_image">Bejegyzés képe</string>
     <string name="settings">Beállítások</string>
-    <string name="feed">Hírfolyam</string>
+    <string name="unread">Olvasatlan</string>
     <string name="show_read_news">Olvasott hírek megjelenítése</string>
     <string name="hide_read_news">Olvasott hírek elrejtése</string>
     <string name="bookmark">Könyvjelző</string>
@@ -26,7 +26,7 @@
     <string name="downloading">Letöltés folyamatban</string>
     <string name="listen">Meghallgatás</string>
     <string name="crop_feed_images">Előnézeti képek levágása arányosan</string>
-    <string name="subscriptions">Feliratkozások</string>
+    <string name="feeds">Hírfolyamok</string>
     <string name="bookmarks">Könyvjelzők</string>
     <string name="open_feed">Hírfolyam megnyitása</string>
     <string name="open_html_link">Weboldal megnyitása</string>

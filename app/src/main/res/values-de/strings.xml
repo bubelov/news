@@ -4,7 +4,7 @@
     <string name="app_name">Nachrichten</string>
     <string name="post_image">Beitragsbild</string>
     <string name="settings">Einstellungen</string>
-    <string name="feed">Feed</string>
+    <string name="unread">Ungelesen</string>
     <string name="show_read_news">Gelesene Artikel anzeigen</string>
     <string name="hide_read_news">Gelesene Artikel ausblenden</string>
     <string name="bookmark">Lesezeichen</string>
@@ -26,7 +26,7 @@
     <string name="downloading">Wird heruntergeladen</string>
     <string name="listen">Anhören</string>
     <string name="crop_feed_images">Vorschaubilder zuschneiden</string>
-    <string name="subscriptions">Abonnements</string>
+    <string name="feeds">Feeds</string>
     <string name="bookmarks">Lesezeichen</string>
     <string name="open_feed">Feed öffnen</string>
     <string name="open_html_link">Webseite öffnen</string>

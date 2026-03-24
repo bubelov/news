@@ -4,7 +4,7 @@
     <string name="app_name">Știri</string>
     <string name="post_image">Postează imaginea</string>
     <string name="settings">Setări</string>
-    <string name="feed">Flux</string>
+    <string name="unread">Necitit</string>
     <string name="show_read_news">Arată articole citite</string>
     <string name="hide_read_news">Ascunde articole citite</string>
     <string name="bookmark">Marcaj</string>
@@ -26,7 +26,7 @@
     <string name="downloading">Se descarcă</string>
     <string name="listen">Ascultă</string>
     <string name="crop_feed_images">Decupează imaginile de previzualizare</string>
-    <string name="subscriptions">Abonamente</string>
+    <string name="feeds">Fluxuri</string>
     <string name="bookmarks">Marcaje</string>
     <string name="open_feed">Deschide feed-ul</string>
     <string name="open_html_link">Deschide link-ul</string>

@@ -4,7 +4,7 @@
     <string name="app_name">Nyheter</string>
     <string name="post_image">Artikelbild</string>
     <string name="settings">Inställningar</string>
-    <string name="feed">Flöde</string>
+    <string name="unread">Oläst</string>
     <string name="show_read_news">Visa lästa nyheter</string>
     <string name="hide_read_news">Göm lästa nyheter</string>
     <string name="bookmark">Bokmärken</string>
@@ -26,7 +26,7 @@
     <string name="downloading">Laddar ner</string>
     <string name="listen">Lyssna</string>
     <string name="crop_feed_images">Beskär artikelbilden</string>
-    <string name="subscriptions">Prenumerationer</string>
+    <string name="feeds">Flöden</string>
     <string name="bookmarks">Bokmärken</string>
     <string name="open_feed">Öppna flöde</string>
     <string name="open_html_link">Öppna webbplats</string>

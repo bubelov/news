@@ -4,7 +4,7 @@
     <string name="app_name">Вести</string>
     <string name="post_image">Изображение публикации</string>
     <string name="settings">Настройки</string>
-    <string name="feed">Лента</string>
+    <string name="unread">Лента</string>
     <string name="show_read_news">Показать прочитанные новости</string>
     <string name="hide_read_news">Скрыть прочитанные новости</string>
     <string name="bookmark">Закладка</string>
@@ -26,7 +26,7 @@
     <string name="downloading">Скачивание</string>
     <string name="listen">Слушать</string>
     <string name="crop_feed_images">Обрезать изображения предпросмотра</string>
-    <string name="subscriptions">Подписки</string>
+    <string name="feeds">Подписки</string>
     <string name="bookmarks">Закладки</string>
     <string name="open_feed">Открыть ленту</string>
     <string name="open_html_link">Открыть сайт</string>

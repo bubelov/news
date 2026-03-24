@@ -9,7 +9,7 @@ sealed class EntriesFilter : Parcelable {
 
     abstract override fun writeToParcel(parcel: Parcel, flags: Int)
 
-    object Bookmarked : EntriesFilter() {
+    object Unread : EntriesFilter() {
         override fun describeContents(): Int = 0
 
         override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -17,7 +17,7 @@ sealed class EntriesFilter : Parcelable {
         }
     }
 
-    object NotBookmarked : EntriesFilter() {
+    object Bookmarked : EntriesFilter() {
         override fun describeContents(): Int = 0
 
         override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -39,8 +39,8 @@ sealed class EntriesFilter : Parcelable {
         val CREATOR: Parcelable.Creator<EntriesFilter> = object : Parcelable.Creator<EntriesFilter> {
             override fun createFromParcel(parcel: Parcel): EntriesFilter {
                 return when (parcel.readInt()) {
-                    0 -> Bookmarked
-                    1 -> NotBookmarked
+                    0 -> Unread
+                    1 -> Bookmarked
                     2 -> BelongToFeed(parcel.readString()!!)
                     else -> throw IllegalArgumentException("Unknown type")
                 }

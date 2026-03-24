@@ -67,7 +67,7 @@ class AuthFragment : AppFragment() {
                 replace(
                     R.id.fragmentContainerView,
                     EntriesFragment::class.java,
-                    bundleOf("filter" to EntriesFilter.NotBookmarked),
+                    bundleOf("filter" to EntriesFilter.Unread),
                 )
             }
         }

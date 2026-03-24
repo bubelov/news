@@ -55,7 +55,7 @@ class Activity : AppCompatActivity() {
                     replace(
                         R.id.fragmentContainerView,
                         EntriesFragment::class.java,
-                        bundleOf("filter" to EntriesFilter.NotBookmarked),
+                        bundleOf("filter" to EntriesFilter.Unread),
                     )
                 }
             }
@@ -77,7 +77,7 @@ class Activity : AppCompatActivity() {
                             replace(
                                 R.id.fragmentContainerView,
                                 EntriesFragment::class.java,
-                                bundleOf("filter" to EntriesFilter.NotBookmarked),
+                                bundleOf("filter" to EntriesFilter.Unread),
                             )
                         }
                         true

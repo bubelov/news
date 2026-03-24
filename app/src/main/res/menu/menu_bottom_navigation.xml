@@ -6,7 +6,7 @@
     <item
         android:id="@+id/newsFragment"
         android:icon="@drawable/ic_baseline_list_alt_24"
-        android:title="@string/feed"
+        android:title="@string/unread"
         app:showAsAction="ifRoom" />
 
     <item
@@ -18,7 +18,7 @@
     <item
         android:id="@+id/feedsFragment"
         android:icon="@drawable/ic_baseline_rss_feed_24"
-        android:title="@string/subscriptions"
+        android:title="@string/feeds"
         app:showAsAction="ifRoom" />
 
 </menu>

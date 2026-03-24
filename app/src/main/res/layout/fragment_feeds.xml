@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
         app:menu="@menu/menu_feeds"
-        app:title="@string/subscriptions" />
+        app:title="@string/feeds" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list"

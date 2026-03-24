@@ -4,7 +4,7 @@
     <string name="app_name">Notizie</string>
     <string name="post_image">Immagine dell\'articolo</string>
     <string name="settings">Impostazioni</string>
-    <string name="feed">Feed</string>
+    <string name="unread">Non lette</string>
     <string name="show_read_news">Mostra gli articoli già letti</string>
     <string name="hide_read_news">Nascondi gli articoli già letti</string>
     <string name="bookmark">Segnalibro</string>
@@ -26,7 +26,7 @@
     <string name="downloading">Scaricamento</string>
     <string name="listen">Ascolta</string>
     <string name="crop_feed_images">Ritaglia le immagini di anteprima</string>
-    <string name="subscriptions">Iscrizioni</string>
+    <string name="feeds">Feeds</string>
     <string name="bookmarks">Segnalibri</string>
     <string name="open_feed">Apri il feed</string>
     <string name="open_html_link">Apri il sito web</string>

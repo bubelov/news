@@ -4,7 +4,7 @@
     <string name="app_name">News</string>
     <string name="post_image">ارسال تصویر</string>
     <string name="settings">تنظیمات</string>
-    <string name="feed">خوراک</string>
+    <string name="unread">خوانده نشده</string>
     <string name="show_read_news">نمایش اخبار خوانده شده</string>
     <string name="hide_read_news">مخفی‌سازی اخبار خوانده شده</string>
     <string name="bookmark">نشانک</string>
@@ -26,7 +26,7 @@
     <string name="downloading">در حال بارگیری</string>
     <string name="listen">شنیدن</string>
     <string name="crop_feed_images">برش تصویر پیش‌نمایش</string>
-    <string name="subscriptions">اشتراک‌ها</string>
+    <string name="feeds">خوراک‌ها</string>
     <string name="bookmarks">نشانک‌ها</string>
     <string name="open_feed">باز کردن خوراک</string>
     <string name="open_html_link">باز کردن تارنما</string>

@@ -4,7 +4,7 @@
     <string name="app_name">News</string>
     <string name="post_image">Post image</string>
     <string name="settings">Settings</string>
-    <string name="feed">Feed</string>
+    <string name="unread">Ongelezen</string>
     <string name="show_read_news">Show read news</string>
     <string name="hide_read_news">Hide read news</string>
     <string name="bookmark">Bookmark</string>
@@ -26,7 +26,7 @@
     <string name="downloading">Downloading</string>
     <string name="listen">Listen</string>
     <string name="crop_feed_images">Crop preview images</string>
-    <string name="subscriptions">Intekoppings</string>
+    <string name="feeds">Feeds</string>
     <string name="bookmarks">Bookmarks</string>
     <string name="open_feed">Open feed</string>
     <string name="open_html_link">Open website</string>
