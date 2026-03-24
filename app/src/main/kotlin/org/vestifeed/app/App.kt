@@ -2,6 +2,7 @@ package org.vestifeed.app
 
 import android.app.Application
 import android.content.Context
+import androidx.fragment.app.Fragment
 import androidx.sqlite.driver.AndroidSQLiteDriver
 import org.vestifeed.db.Db
 import org.vestifeed.di.Di
@@ -25,5 +26,7 @@ class App : Application() {
         return getDatabasePath("vesti-2026-03-17.org.vestifeed.db")
     }
 }
+
+fun Fragment.db() = requireContext().db()
 
 fun Context.db(): Db = (applicationContext as App).db

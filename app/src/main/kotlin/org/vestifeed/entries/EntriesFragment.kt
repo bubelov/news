@@ -33,7 +33,7 @@ import org.vestifeed.R
 import org.vestifeed.anim.animateVisibilityChanges
 import org.vestifeed.anim.showSmooth
 import org.vestifeed.api.Api
-import org.vestifeed.app.App
+import org.vestifeed.app.db
 import org.vestifeed.auth.AuthFragment
 import org.vestifeed.db.Conf
 import org.vestifeed.db.ConfQueries
@@ -62,11 +62,10 @@ class EntriesFragment : AppFragment(), OnItemReselectedListener {
         )!!
     }
 
-    private val db by lazy { (requireContext().applicationContext as App).db }
     private val api by lazy { Di.get(Api::class.java) }
-    private val entriesRepo by lazy { EntriesRepo(api, db) }
-    private val feedsRepo by lazy { FeedsRepo(api, db) }
-    private val sync by lazy { Sync(db, feedsRepo, entriesRepo) }
+    private val entriesRepo by lazy { EntriesRepo(api, db()) }
+    private val feedsRepo by lazy { FeedsRepo(api, db()) }
+    private val sync by lazy { Sync(db(), feedsRepo, entriesRepo) }
 
     private val _state = MutableStateFlow<State>(State.LoadingCachedEntries)
     private val state = _state.asStateFlow()
@@ -188,17 +187,17 @@ class EntriesFragment : AppFragment(), OnItemReselectedListener {
         scrollToTop()
     }
 
-    private fun hasBackend() = db.confQueries.select().backend.isNotBlank()
+    private fun hasBackend() = db().confQueries.select().backend.isNotBlank()
 
-private suspend fun refresh() {
-    val conf = db.confQueries.select()
-    val syncState = sync.state.value
-    updateState(filter, conf, syncState)
-}
+    private suspend fun refresh() {
+        val conf = db().confQueries.select()
+        val syncState = sync.state.value
+        updateState(filter, conf, syncState)
+    }
 
     private suspend fun updateState(filter: EntriesFilter, conf: Conf, syncState: Sync.State) {
         if (!conf.initialSyncCompleted || (conf.syncOnStartup && !conf.syncedOnStartup)) {
-            db.confQueries.update { it.copy(syncedOnStartup = true) }
+            db().confQueries.update { it.copy(syncedOnStartup = true) }
 
             viewLifecycleOwner.lifecycleScope.launch {
                 sync.run()
@@ -273,13 +272,13 @@ private suspend fun refresh() {
     }
 
     private fun saveConf(newConf: (Conf) -> Conf) {
-        db.confQueries.update(newConf)
+        db().confQueries.update(newConf)
     }
 
     private fun changeSortOrder() {
         scrollToTopNextTime = true
 
-        db.confQueries.update {
+        db().confQueries.update {
             val newSortOrder = when (it.sortOrder) {
                 ConfQueries.SORT_ORDER_ASCENDING -> ConfQueries.SORT_ORDER_DESCENDING
                 ConfQueries.SORT_ORDER_DESCENDING -> ConfQueries.SORT_ORDER_ASCENDING
