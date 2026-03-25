@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
 import org.vestifeed.R
 import org.vestifeed.anim.animateVisibilityChanges
 import org.vestifeed.anim.showSmooth
-import org.vestifeed.api.Api
+import org.vestifeed.app.api
 import org.vestifeed.app.db
 import org.vestifeed.auth.AuthFragment
 import org.vestifeed.db.Conf
@@ -39,7 +39,6 @@ import org.vestifeed.db.EntriesAdapterRow
 import org.vestifeed.db.Feed
 import org.vestifeed.databinding.FragmentEntriesBinding
 import org.vestifeed.dialog.showErrorDialog
-import org.vestifeed.di.Di
 import org.vestifeed.entry.EntryFragment
 import org.vestifeed.feeds.FeedsFragment
 import org.vestifeed.feeds.FeedsRepo
@@ -60,9 +59,8 @@ class EntriesFragment : AppFragment() {
         )
     }
 
-    private val api by lazy { Di.get(Api::class.java) }
-    private val entriesRepo by lazy { EntriesRepo(api, db()) }
-    private val feedsRepo by lazy { FeedsRepo(api, db()) }
+    private val entriesRepo by lazy { EntriesRepo(api(), db()) }
+    private val feedsRepo by lazy { FeedsRepo(api(), db()) }
     private val sync by lazy { Sync(db(), feedsRepo, entriesRepo) }
 
     private val _state = MutableStateFlow<State>(State.LoadingCachedEntries)

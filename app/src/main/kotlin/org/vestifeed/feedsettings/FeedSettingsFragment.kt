@@ -19,11 +19,10 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.vestifeed.R
-import org.vestifeed.api.Api
 import org.vestifeed.app.App
+import org.vestifeed.app.api
 import org.vestifeed.databinding.FragmentFeedSettingsBinding
 import org.vestifeed.dialog.showErrorDialog
-import org.vestifeed.di.Di
 import org.vestifeed.feeds.FeedsRepo
 import org.vestifeed.navigation.showKeyboard
 
@@ -32,7 +31,7 @@ class FeedSettingsFragment : AppFragment() {
     private val feedId by lazy { requireArguments().getString("feedId", "") }
 
     private val db by lazy { (requireContext().applicationContext as App).db }
-    private val api by lazy { Di.get(Api::class.java) }
+    private val api by lazy { api() }
     private val feedsRepo by lazy { FeedsRepo(api, db) }
 
     private val _feedId = MutableStateFlow("")

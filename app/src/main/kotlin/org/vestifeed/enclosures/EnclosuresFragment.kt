@@ -22,10 +22,9 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.vestifeed.R
-import org.vestifeed.api.Api
 import org.vestifeed.app.App
+import org.vestifeed.app.api
 import org.vestifeed.db.Link
-import org.vestifeed.di.Di
 import org.vestifeed.databinding.FragmentEnclosuresBinding
 import org.vestifeed.dialog.showErrorDialog
 import org.vestifeed.entries.EntriesRepo
@@ -38,7 +37,7 @@ class EnclosuresFragment : AppFragment() {
     private val binding get() = _binding!!
 
     private val db by lazy { (requireContext().applicationContext as App).db }
-    private val api by lazy { Di.get(Api::class.java) }
+    private val api by lazy { api() }
     private val enclosuresRepo by lazy { EnclosuresRepo(requireContext(), db) }
     private val entriesRepo by lazy { EntriesRepo(api, db) }
 

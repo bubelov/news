@@ -24,15 +24,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.vestifeed.R
 import org.vestifeed.anim.animateVisibilityChanges
-import org.vestifeed.api.Api
 import org.vestifeed.app.App
+import org.vestifeed.app.api
 import org.vestifeed.db.Conf
 import org.vestifeed.db.SelectByQuery
 import org.vestifeed.entries.EntriesRepo
 import org.vestifeed.feeds.FeedsRepo
 import org.vestifeed.databinding.FragmentSearchBinding
 import org.vestifeed.dialog.showErrorDialog
-import org.vestifeed.di.Di
 import org.vestifeed.entries.EntriesAdapter
 import org.vestifeed.entry.EntryFragment
 import org.vestifeed.navigation.hideKeyboard
@@ -45,7 +44,7 @@ import java.time.format.FormatStyle
 class SearchFragment : AppFragment() {
 
     private val db by lazy { (requireContext().applicationContext as App).db }
-    private val api by lazy { Di.get(Api::class.java) }
+    private val api by lazy { api() }
     private val entriesRepo by lazy { EntriesRepo(api, db) }
     private val sync by lazy { Sync(db, FeedsRepo(api, db), entriesRepo) }
 
