@@ -597,6 +597,11 @@ class EntriesFragment : AppFragment() {
         binding.list.layoutManager?.scrollToPosition(0)
     }
 
+    override fun onOpenGraphImageDownloaded() {
+        super.onOpenGraphImageDownloaded()
+        refresh()
+    }
+
     private fun getShowReadEntriesButtonVisibility(): Boolean {
         return when (filter) {
             EntriesFilter.Unread -> true
