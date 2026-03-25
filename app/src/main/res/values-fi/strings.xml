@@ -90,6 +90,7 @@
     <string name="crash_title">Sovellus kaatui</string>
     <string name="crash_summary">Voit ilmoittaa meille tapahtumasta jakamalla kaatumisraportin</string>
     <string name="this_entry_doesnt_have_any_external_links">Tällä tietueella ei ole ulkoisia linkkejä</string>
+    <string name="required_argument_is_missing">Vaadittu argumentti puuttuu: %1$s</string>
     <plurals name="d_hours">
         <item quantity="one">%d tunti</item>
         <item quantity="other">%d tuntia</item>

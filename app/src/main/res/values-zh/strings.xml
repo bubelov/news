@@ -90,6 +90,7 @@
     <string name="crash_title">APP已崩溃</string>
     <string name="crash_summary">你可以告诉我们通过分享崩溃报告</string>
     <string name="this_entry_doesnt_have_any_external_links">此条目不包含任何外部链接</string>
+    <string name="required_argument_is_missing">缺少必需的参数：%1$s</string>
     <plurals name="d_hours">
         <item quantity="other">%d 小时</item>
     </plurals>

@@ -53,11 +53,11 @@ import java.time.format.FormatStyle
 
 class EntriesFragment : AppFragment() {
 
-    private val filter: EntriesFilter by lazy {
-        requireArguments().getParcelable(
+    private val filter: EntriesFilter? by lazy {
+        arguments?.getParcelable(
             "filter",
             EntriesFilter::class.java,
-        )!!
+        )
     }
 
     private val api by lazy { Di.get(Api::class.java) }
@@ -111,10 +111,6 @@ class EntriesFragment : AppFragment() {
                 }
             }
 
-            if (!requireArguments().containsKey("filter")) {
-                requireArguments().putParcelable("filter", EntriesFilter.Unread)
-            }
-
             _binding = FragmentEntriesBinding.inflate(inflater, container, false)
             binding.root
         } else {
@@ -131,6 +127,12 @@ class EntriesFragment : AppFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        if (filter == null) {
+            showErrorDialog(getString(R.string.required_argument_is_missing, "filter")) {
+                requireActivity().finish()
+            }
+        }
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { v, insets ->
             insets.getInsets(WindowInsetsCompat.Type.statusBars()).let {
@@ -177,7 +179,6 @@ class EntriesFragment : AppFragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-
         _binding = null
     }
 
@@ -186,19 +187,22 @@ class EntriesFragment : AppFragment() {
     private suspend fun refresh() {
         val conf = db().confQueries.select()
         val syncState = sync.state.value
-        updateState(filter, conf, syncState)
+        maybeStartupSync()
+        updateState(conf, syncState)
     }
 
-    private suspend fun updateState(filter: EntriesFilter, conf: Conf, syncState: Sync.State) {
+    private fun maybeStartupSync() {
+        val conf = db().confQueries.select()
         if (!conf.initialSyncCompleted || (conf.syncOnStartup && !conf.syncedOnStartup)) {
             db().confQueries.update { it.copy(syncedOnStartup = true) }
-
             viewLifecycleOwner.lifecycleScope.launch {
                 sync.run()
                 refresh()
             }
         }
+    }
 
+    private suspend fun updateState(conf: Conf, syncState: Sync.State) {
         when (syncState) {
             is Sync.State.InitialSync -> _state.update { State.InitialSync(syncState.message) }
 
@@ -213,7 +217,7 @@ class EntriesFragment : AppFragment() {
 
                 val rows: List<EntriesAdapterRow> = if (filter is EntriesFilter.BelongToFeed) {
                     entriesRepo.selectByFeedIdAndReadAndBookmarked(
-                        feedId = filter.feedId,
+                        feedId = (filter as EntriesFilter.BelongToFeed).feedId,
                         read = if (conf.showReadEntries) listOf(true, false) else listOf(false),
                         bookmarked = false,
                     ).first()
@@ -236,7 +240,7 @@ class EntriesFragment : AppFragment() {
                 _state.update {
                     State.ShowingCachedEntries(
                         feed = if (filter is EntriesFilter.BelongToFeed) {
-                            feedsRepo.selectById(filter.feedId)
+                            feedsRepo.selectById((filter as EntriesFilter.BelongToFeed).feedId)
                                 .first()
                         } else {
                             null
@@ -351,6 +355,10 @@ class EntriesFragment : AppFragment() {
                         read = true,
                         feedId = currentFilter.feedId,
                     )
+                }
+
+                null -> {
+
                 }
             }
 
@@ -481,6 +489,8 @@ class EntriesFragment : AppFragment() {
                         title = state.feed?.title
                     }
                 }
+
+                null -> {}
             }
 
             updateSearchButton()
@@ -588,6 +598,7 @@ class EntriesFragment : AppFragment() {
             EntriesFilter.Unread -> true
             EntriesFilter.Bookmarked -> false
             is EntriesFilter.BelongToFeed -> true
+            null -> false
         }
     }
 

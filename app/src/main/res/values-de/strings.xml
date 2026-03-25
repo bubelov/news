@@ -90,6 +90,7 @@
     <string name="crash_title">Die App ist abgestürzt</string>
     <string name="crash_summary">Du kannst uns darüber informieren, indem du uns den Absturzbericht zukommen lässt</string>
     <string name="this_entry_doesnt_have_any_external_links">Dieser Eintrag hat keine externen Links</string>
+    <string name="required_argument_is_missing">Erforderliches Argument fehlt: %1$s</string>
     <plurals name="d_hours">
         <item quantity="zero">%d Stunden</item>
         <item quantity="one">%d Stunde</item>

@@ -90,6 +90,7 @@
     <string name="crash_title">لقد تعطل التطبيق</string>
     <string name="crash_summary">يمكنك إخبارنا بذلك من خلال مشاركة تقرير الأعطال</string>
     <string name="this_entry_doesnt_have_any_external_links">لا يحتوي هذا الإدخال على أي روابط خارجية</string>
+    <string name="required_argument_is_missing">مفقود الوسيط المطلوب: %1$s</string>
     <plurals name="d_hours">
         <item quantity="zero">%d ساعات</item>
         <item quantity="one">%d ساعة</item>
