@@ -11,12 +11,10 @@ import androidx.core.content.getSystemService
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import org.vestifeed.navigation.Activity
-import org.vestifeed.entries.EntriesRepo
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.vestifeed.R
 import org.vestifeed.app.db
-import org.vestifeed.di.Di
+import org.vestifeed.app.sync
 
 class SyncWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
 
@@ -24,8 +22,7 @@ class SyncWorker(context: Context, workerParams: WorkerParameters) : Worker(cont
 
     private suspend fun doWorkAsync(): Result {
         val conf = applicationContext.db().confQueries.select()
-        val sync = Di.get(Sync::class.java)
-        val entriesRepository = Di.get(EntriesRepo::class.java)
+        val sync = applicationContext.sync()
 
         if (!conf.initialSyncCompleted) {
             return Result.retry()
@@ -35,10 +32,11 @@ class SyncWorker(context: Context, workerParams: WorkerParameters) : Worker(cont
             is SyncResult.Success -> {
                 if (syncResult.newAndUpdatedEntries > 0) {
                     runCatching {
-                        val unreadEntries = entriesRepository.selectByReadAndBookmarked(
-                            read = listOf(false),
-                            bookmarked = false,
-                        ).first().size
+                        val unreadEntries =
+                            applicationContext.db().entryQueries.selectByReadAndBookmarked(
+                                extRead = listOf(false),
+                                extBookmarked = false,
+                            ).size
 
                         if (unreadEntries > 0) {
                             showUnreadEntriesNotification(unreadEntries, applicationContext)

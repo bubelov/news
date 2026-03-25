@@ -1,6 +1,5 @@
 package org.vestifeed.entry
 
-import android.app.Application
 import android.content.ActivityNotFoundException
 import android.content.DialogInterface
 import android.content.Intent
@@ -34,17 +33,15 @@ import androidx.recyclerview.widget.RecyclerView
 import co.appreactor.feedk.AtomLinkRel
 import org.vestifeed.db.Entry
 import org.vestifeed.db.Link
-import org.vestifeed.di.Di
 import org.vestifeed.dialog.showErrorDialog
 import org.vestifeed.enclosures.EnclosuresAdapter
-import org.vestifeed.enclosures.EnclosuresRepo
-import org.vestifeed.entries.EntriesRepo
-import org.vestifeed.feeds.FeedsRepo
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.vestifeed.R
 import org.vestifeed.app.db
+import org.vestifeed.app.sync
 import org.vestifeed.databinding.FragmentEntryBinding
+import org.vestifeed.enclosures.EnclosuresRepo
 import org.vestifeed.feedsettings.FeedSettingsFragment
 import org.vestifeed.navigation.AppFragment
 import org.vestifeed.navigation.openUrl
@@ -55,12 +52,6 @@ import java.time.format.FormatStyle
 class EntryFragment : AppFragment() {
 
     private val entryId by lazy { requireArguments().getString("entryId", "") }
-
-    private val app: Application by lazy { Di.get(Application::class.java) }
-    private val enclosuresRepo: EnclosuresRepo by lazy { Di.get(EnclosuresRepo::class.java) }
-    private val entriesRepository: EntriesRepo by lazy { Di.get(EntriesRepo::class.java) }
-    private val feedsRepository: FeedsRepo by lazy { Di.get(FeedsRepo::class.java) }
-    private val newsApiSync: Sync by lazy { Di.get(Sync::class.java) }
 
     private val conf by lazy { requireContext().db().confQueries.select() }
 
@@ -91,7 +82,9 @@ class EntryFragment : AppFragment() {
             addItemDecoration(CardListAdapterDecoration(resources.getDimensionPixelSize(R.dimen.dp_16)))
         }
 
-        lifecycleScope.launch { enclosuresRepo.deletePartialDownloads() }
+        lifecycleScope.launch {
+            EnclosuresRepo(requireContext(), db()).deletePartialDownloads()
+        }
 
         loadEntry()
 
@@ -137,7 +130,7 @@ class EntryFragment : AppFragment() {
     private fun loadEntry() {
         viewLifecycleOwner.lifecycleScope.launch {
             runCatching {
-                val entry = entriesRepository.selectById(entryId).first()
+                val entry = db().entryQueries.selectById(entryId)
                 if (entry == null) {
                     showError(
                         getString(
@@ -148,7 +141,7 @@ class EntryFragment : AppFragment() {
                     return@launch
                 }
 
-                val feed = feedsRepository.selectById(entry.feedId).first()
+                val feed = db().feedQueries.selectById(entry.feedId)
                 if (feed == null) {
                     showError(
                         getString(
@@ -243,13 +236,13 @@ class EntryFragment : AppFragment() {
             R.id.toggleBookmarked -> {
                 lifecycleScope.launch {
                     val newBookmarkedState = !entry.extBookmarked
-                    entriesRepository.updateBookmarkedAndBookmaredSynced(
+                    db().entryQueries.updateBookmarkedAndBookmaredSynced(
                         id = entry.id,
-                        bookmarked = newBookmarkedState,
-                        bookmarkedSynced = false,
+                        extBookmarked = newBookmarkedState,
+                        extBookmarkedSynced = false,
                     )
                     updateBookmarkedButton(newBookmarkedState)
-                    newsApiSync.run(
+                    sync().run(
                         Sync.Args(
                             syncFeeds = false,
                             syncFlags = true,
@@ -303,7 +296,7 @@ class EntryFragment : AppFragment() {
     fun downloadAudioEnclosure(enclosure: Link) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                enclosuresRepo.downloadAudioEnclosure(enclosure)
+                EnclosuresRepo(requireContext(), db()).downloadAudioEnclosure(enclosure)
                 Toast.makeText(requireContext(), "Downloaded", Toast.LENGTH_LONG).show()
                 refreshEnclosures()
             } catch (e: Exception) {
@@ -312,8 +305,8 @@ class EntryFragment : AppFragment() {
         }
     }
 
-    private suspend fun refreshEnclosures() {
-        val entry = entriesRepository.selectById(entryId).first() ?: return
+    private fun refreshEnclosures() {
+        val entry = db().entryQueries.selectById(entryId) ?: return
 
         enclosuresAdapter.submitList(
             entry.links
@@ -348,7 +341,7 @@ class EntryFragment : AppFragment() {
     private fun deleteEnclosure(enclosure: Link) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                enclosuresRepo.deleteFromCache(enclosure)
+                EnclosuresRepo(requireContext(), db()).deleteFromCache(enclosure)
                 refreshEnclosures()
             } catch (e: Exception) {
                 showErrorDialog(e)

@@ -7,10 +7,14 @@ import androidx.sqlite.driver.AndroidSQLiteDriver
 import org.vestifeed.api.Api
 import org.vestifeed.api.HotSwapApi
 import org.vestifeed.db.Db
-import org.vestifeed.di.Di
+import org.vestifeed.entries.EntriesRepo
+import org.vestifeed.feeds.FeedsRepo
+import org.vestifeed.sync.Sync
 import java.io.File
 
 class App : Application() {
+
+    val sync by lazy { Sync(db, FeedsRepo(api, db), EntriesRepo(api, db)) }
 
     val api by lazy { HotSwapApi(db) }
 
@@ -21,15 +25,14 @@ class App : Application() {
         )
     }
 
-    override fun onCreate() {
-        super.onCreate()
-        Di.init(this)
-    }
-
     fun databaseFile(): File {
         return getDatabasePath("vesti-2026-03-17.org.vestifeed.db")
     }
 }
+
+fun Fragment.sync() = requireContext().sync()
+
+fun Context.sync(): Sync = (applicationContext as App).sync
 
 fun Fragment.api() = requireContext().api()
 

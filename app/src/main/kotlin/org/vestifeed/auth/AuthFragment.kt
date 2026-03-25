@@ -13,7 +13,6 @@ import org.vestifeed.R
 import org.vestifeed.app.App
 import org.vestifeed.db.ConfQueries
 import org.vestifeed.databinding.FragmentAuthBinding
-import org.vestifeed.di.Di
 import org.vestifeed.entries.EntriesFilter
 import org.vestifeed.entries.EntriesFragment
 import org.vestifeed.sync.BackgroundSyncScheduler
@@ -51,7 +50,7 @@ class AuthFragment : AppFragment() {
     private fun FragmentAuthBinding.initButtons() {
         useStandaloneBackend.setOnClickListener {
             val db = (requireContext().applicationContext as App).db
-            val syncScheduler = Di.get(BackgroundSyncScheduler::class.java)
+            val syncScheduler = BackgroundSyncScheduler(requireContext())
 
             db.confQueries.update {
                 it.copy(

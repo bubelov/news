@@ -23,15 +23,13 @@ import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 import co.appreactor.feedk.AtomLinkRel
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.vestifeed.R
 import org.vestifeed.anim.animateVisibilityChanges
 import org.vestifeed.anim.showSmooth
-import org.vestifeed.app.api
 import org.vestifeed.app.db
+import org.vestifeed.app.sync
 import org.vestifeed.auth.AuthFragment
 import org.vestifeed.db.Conf
 import org.vestifeed.db.ConfQueries
@@ -41,7 +39,6 @@ import org.vestifeed.databinding.FragmentEntriesBinding
 import org.vestifeed.dialog.showErrorDialog
 import org.vestifeed.entry.EntryFragment
 import org.vestifeed.feeds.FeedsFragment
-import org.vestifeed.feeds.FeedsRepo
 import org.vestifeed.navigation.AppFragment
 import org.vestifeed.navigation.openUrl
 import org.vestifeed.search.SearchFragment
@@ -59,12 +56,24 @@ class EntriesFragment : AppFragment() {
         )
     }
 
-    private val entriesRepo by lazy { EntriesRepo(api(), db()) }
-    private val feedsRepo by lazy { FeedsRepo(api(), db()) }
-    private val sync by lazy { Sync(db(), feedsRepo, entriesRepo) }
+    private val state = MutableStateFlow<State>(State.LoadingCachedEntries)
 
-    private val _state = MutableStateFlow<State>(State.LoadingCachedEntries)
-    private val state = _state.asStateFlow()
+    sealed class State {
+
+        data class InitialSync(val message: String) : State()
+
+        object LoadingCachedEntries : State()
+
+        data class ShowingCachedEntries(
+            val feed: Feed?,
+            val entries: List<EntriesAdapter.Item>,
+            val showBackgroundProgress: Boolean,
+            val scrollToTop: Boolean = false,
+            val conf: Conf,
+        ) : State()
+
+        data class FailedToSync(val cause: Throwable) : State()
+    }
 
     private var scrollToTopNextTime = false
 
@@ -182,9 +191,9 @@ class EntriesFragment : AppFragment() {
 
     private fun hasBackend() = db().confQueries.select().backend.isNotBlank()
 
-    private suspend fun refresh() {
+    private fun refresh() {
         val conf = db().confQueries.select()
-        val syncState = sync.state.value
+        val syncState = sync().state.value
         maybeStartupSync()
         updateState(conf, syncState)
     }
@@ -194,15 +203,15 @@ class EntriesFragment : AppFragment() {
         if (!conf.initialSyncCompleted || (conf.syncOnStartup && !conf.syncedOnStartup)) {
             db().confQueries.update { it.copy(syncedOnStartup = true) }
             viewLifecycleOwner.lifecycleScope.launch {
-                sync.run()
+                sync().run()
                 refresh()
             }
         }
     }
 
-    private suspend fun updateState(conf: Conf, syncState: Sync.State) {
+    private fun updateState(conf: Conf, syncState: Sync.State) {
         when (syncState) {
-            is Sync.State.InitialSync -> _state.update { State.InitialSync(syncState.message) }
+            is Sync.State.InitialSync -> state.update { State.InitialSync(syncState.message) }
 
             else -> {
                 val showBgProgress = when (syncState) {
@@ -214,19 +223,19 @@ class EntriesFragment : AppFragment() {
                 scrollToTopNextTime = false
 
                 val rows: List<EntriesAdapterRow> = if (filter is EntriesFilter.BelongToFeed) {
-                    entriesRepo.selectByFeedIdAndReadAndBookmarked(
+                    db().entryQueries.selectByFeedIdAndReadAndBookmarked(
                         feedId = (filter as EntriesFilter.BelongToFeed).feedId,
-                        read = if (conf.showReadEntries) listOf(true, false) else listOf(false),
-                        bookmarked = false,
-                    ).first()
+                        extRead = if (conf.showReadEntries) listOf(true, false) else listOf(false),
+                        extBookmarked = false,
+                    )
                 } else {
                     val includeRead = (conf.showReadEntries || filter is EntriesFilter.Bookmarked)
                     val includeBookmarked = filter is EntriesFilter.Bookmarked
 
-                    entriesRepo.selectByReadAndBookmarked(
-                        read = if (includeRead) listOf(true, false) else listOf(false),
-                        bookmarked = includeBookmarked,
-                    ).first()
+                    db().entryQueries.selectByReadAndBookmarked(
+                        extRead = if (includeRead) listOf(true, false) else listOf(false),
+                        extBookmarked = includeBookmarked,
+                    )
                 }
 
                 val sortedRows = when (conf.sortOrder) {
@@ -235,11 +244,10 @@ class EntriesFragment : AppFragment() {
                     else -> throw Exception()
                 }
 
-                _state.update {
+                state.update {
                     State.ShowingCachedEntries(
                         feed = if (filter is EntriesFilter.BelongToFeed) {
-                            feedsRepo.selectById((filter as EntriesFilter.BelongToFeed).feedId)
-                                .first()
+                            db().feedQueries.selectById((filter as EntriesFilter.BelongToFeed).feedId)
                         } else {
                             null
                         },
@@ -255,14 +263,14 @@ class EntriesFragment : AppFragment() {
 
     private fun onRetry() {
         viewLifecycleOwner.lifecycleScope.launch {
-            sync.run()
+            sync().run()
             refresh()
         }
     }
 
     private fun onPullRefresh() {
         viewLifecycleOwner.lifecycleScope.launch {
-            sync.run()
+            sync().run()
             refresh()
         }
     }
@@ -284,22 +292,20 @@ class EntriesFragment : AppFragment() {
             it.copy(sortOrder = newSortOrder)
         }
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            refresh()
-        }
+        refresh()
     }
 
     private fun setRead(entryIds: Collection<String>, read: Boolean) {
         viewLifecycleOwner.lifecycleScope.launch {
             entryIds.forEach {
-                entriesRepo.updateReadAndReadSynced(
+                db().entryQueries.updateReadAndReadSynced(
                     id = it,
-                    read = read,
-                    readSynced = false,
+                    extRead = read,
+                    extReadSynced = false,
                 )
             }
 
-            sync.run(
+            sync().run(
                 Sync.Args(
                     syncFeeds = false,
                     syncFlags = true,
@@ -313,13 +319,13 @@ class EntriesFragment : AppFragment() {
 
     private fun setBookmarked(entryId: String, bookmarked: Boolean) {
         viewLifecycleOwner.lifecycleScope.launch {
-            entriesRepo.updateBookmarkedAndBookmaredSynced(
+            db().entryQueries.updateBookmarkedAndBookmaredSynced(
                 id = entryId,
-                bookmarked = bookmarked,
-                bookmarkedSynced = false
+                extBookmarked = bookmarked,
+                extBookmarkedSynced = false
             )
 
-            sync.run(
+            sync().run(
                 Sync.Args(
                     syncFeeds = false,
                     syncFlags = true,
@@ -335,21 +341,21 @@ class EntriesFragment : AppFragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             when (val currentFilter = filter) {
                 is EntriesFilter.Unread -> {
-                    entriesRepo.updateReadByBookmarked(
+                    db().entryQueries.updateReadByBookmarked(
                         read = true,
                         bookmarked = false,
                     )
                 }
 
                 is EntriesFilter.Bookmarked -> {
-                    entriesRepo.updateReadByBookmarked(
+                    db().entryQueries.updateReadByBookmarked(
                         read = true,
                         bookmarked = true,
                     )
                 }
 
                 is EntriesFilter.BelongToFeed -> {
-                    entriesRepo.updateReadByFeedId(
+                    db().entryQueries.updateReadByFeedId(
                         read = true,
                         feedId = currentFilter.feedId,
                     )
@@ -360,7 +366,7 @@ class EntriesFragment : AppFragment() {
                 }
             }
 
-            sync.run(
+            sync().run(
                 Sync.Args(
                     syncFeeds = false,
                     syncFlags = true,
@@ -790,23 +796,6 @@ class EntriesFragment : AppFragment() {
 
             outRect.set(gapInPixels, gapInPixels, gapInPixels, bottomGap)
         }
-    }
-
-    sealed class State {
-
-        data class InitialSync(val message: String) : State()
-
-        object LoadingCachedEntries : State()
-
-        data class ShowingCachedEntries(
-            val feed: Feed?,
-            val entries: List<EntriesAdapter.Item>,
-            val showBackgroundProgress: Boolean,
-            val scrollToTop: Boolean = false,
-            val conf: Conf,
-        ) : State()
-
-        data class FailedToSync(val cause: Throwable) : State()
     }
 
     companion object {
