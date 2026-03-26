@@ -1,5 +1,6 @@
 package org.vestifeed.sync
 
+import android.util.Log
 import org.vestifeed.entries.EntriesRepo
 import org.vestifeed.feeds.FeedsRepo
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,19 +39,25 @@ class Sync(
         val conf = db.confQueries.select()
 
         if (!conf.initialSyncCompleted) {
+            Log.d("sync", "launching initial sync")
             _state.update { State.InitialSync() }
 
-            runCatching {
+            try {
+                Log.d("sync", "syncing feeds")
                 feedsRepo.sync()
-            }.onFailure {
+                Log.d("sync", "done syncing feeds")
+            } catch (e: Throwable) {
+                Log.d("sync", "error syncing feeds")
                 _state.update { State.Idle }
                 return SyncResult.Failure(
                     Exception(
-                        "Failed to org.vestifeed.sync org.vestifeed.feeds",
-                        it
+                        "failed to sync feeds",
+                        e,
                     )
                 )
             }
+
+            Log.d("sync", "syncing entries")
 
             runCatching {
                 entriesRepo.syncAll().collect { progress ->

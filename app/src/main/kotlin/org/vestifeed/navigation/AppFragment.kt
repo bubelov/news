@@ -144,6 +144,7 @@ abstract class AppFragment : Fragment() {
 
         val imageRequest = ImageRequest.Builder(requireContext())
             .data(imageUrl)
+            .size(800)
             .build()
 
         val bitmap = when (val imageResult = requireContext().imageLoader.execute(imageRequest)) {

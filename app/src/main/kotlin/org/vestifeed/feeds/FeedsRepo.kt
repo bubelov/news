@@ -1,5 +1,6 @@
 package org.vestifeed.feeds
 
+import android.util.Log
 import org.vestifeed.api.Api
 import org.vestifeed.db.Db
 import org.vestifeed.db.Entry
@@ -81,9 +82,13 @@ class FeedsRepo(
 
     suspend fun sync() {
         withContext(Dispatchers.IO) {
+            Log.d("sync", "requesting feeds from api")
             val newFeeds = api.getFeeds().getOrThrow().sortedBy { it.id }
+            Log.d("sync", "got ${newFeeds.size} feeds")
+            Log.d("sync", "getting cached feeds")
             val cachedFeeds = _feedsFlow.value.sortedBy { it.id }
-
+            Log.d("sync", "got ${cachedFeeds.size} cached feeds")
+            Log.d("sync", "preparing write transaction")
             db.transaction {
                 db.feedQueries.deleteAll()
 
@@ -99,11 +104,15 @@ class FeedsRepo(
                     )
                 }
             }
+            Log.d("sync", "finished write transaction")
+            Log.d("sync", "preparing to refresh flows")
             refreshFlows()
+            Log.d("sync", "done refreshing flows")
         }
+        Log.d("sync", "returning")
     }
 
-    init {
-        refreshFlows()
-    }
+//    init {
+//        refreshFlows()
+//    }
 }

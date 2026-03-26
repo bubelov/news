@@ -45,7 +45,6 @@ class Activity : AppCompatActivity() {
         }
 
         db().confQueries.update { it.copy(syncedOnStartup = false) }
-        //lifecycleScope.launch { Di.get(OpenGraphImagesRepo::class.java).fetchEntryImages() }
 
         lifecycleScope.launch {
             val conf = db().confQueries.select()

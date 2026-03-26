@@ -1,8 +1,8 @@
 package org.vestifeed.entries
 
-import android.content.Intent
 import android.graphics.Rect
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -30,7 +30,6 @@ import org.vestifeed.anim.animateVisibilityChanges
 import org.vestifeed.anim.showSmooth
 import org.vestifeed.app.db
 import org.vestifeed.app.sync
-import org.vestifeed.auth.AuthFragment
 import org.vestifeed.db.Conf
 import org.vestifeed.db.ConfQueries
 import org.vestifeed.db.EntriesAdapterRow
@@ -38,7 +37,6 @@ import org.vestifeed.db.Feed
 import org.vestifeed.databinding.FragmentEntriesBinding
 import org.vestifeed.dialog.showErrorDialog
 import org.vestifeed.entry.EntryFragment
-import org.vestifeed.feeds.FeedsFragment
 import org.vestifeed.navigation.AppFragment
 import org.vestifeed.navigation.openUrl
 import org.vestifeed.search.SearchFragment
@@ -101,39 +99,14 @@ class EntriesFragment : AppFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View? {
-        return if (hasBackend()) {
-            val intent = requireActivity().intent
-            val sharedFeedUrl =
-                (intent?.dataString ?: intent?.getStringExtra(Intent.EXTRA_TEXT))?.trim() ?: ""
-            intent.removeExtra(Intent.EXTRA_TEXT)
-
-            if (sharedFeedUrl.isNotBlank()) {
-                parentFragmentManager.commit {
-                    replace(
-                        R.id.fragmentContainerView,
-                        FeedsFragment::class.java,
-                        bundleOf("url" to sharedFeedUrl),
-                    )
-                }
-            }
-
-            _binding = FragmentEntriesBinding.inflate(inflater, container, false)
-            binding.root
-        } else {
-            parentFragmentManager.commit {
-                replace(
-                    R.id.fragmentContainerView,
-                    AuthFragment::class.java,
-                    null,
-                )
-            }
-            null
-        }
+    ): View {
+        _binding = FragmentEntriesBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.d("entries_fragment", "view created")
 
         if (filter == null) {
             showErrorDialog(getString(R.string.required_argument_is_missing, "filter")) {
@@ -148,12 +121,10 @@ class EntriesFragment : AppFragment() {
             insets
         }
 
+        Log.d("entries_fragment", "before init swipe refresh")
+
         initSwipeRefresh()
         initList()
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            refresh()
-        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -199,13 +170,17 @@ class EntriesFragment : AppFragment() {
     }
 
     private fun maybeStartupSync() {
+        Log.d("entries_fragment", "maybe startup sync")
         val conf = db().confQueries.select()
         if (!conf.initialSyncCompleted || (conf.syncOnStartup && !conf.syncedOnStartup)) {
+            Log.d("entries_fragment", "YES")
             db().confQueries.update { it.copy(syncedOnStartup = true) }
             viewLifecycleOwner.lifecycleScope.launch {
                 sync().run()
                 refresh()
             }
+        } else {
+            Log.d("entries_fragment", "NO")
         }
     }
 

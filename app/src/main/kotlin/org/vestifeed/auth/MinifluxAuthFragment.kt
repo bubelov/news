@@ -16,13 +16,12 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.vestifeed.R
 import org.vestifeed.api.miniflux.MinifluxApiBuilder
-import org.vestifeed.app.App
+import org.vestifeed.app.db
 import org.vestifeed.db.ConfQueries
 import org.vestifeed.databinding.FragmentMinifluxAuthBinding
 import org.vestifeed.dialog.showErrorDialog
 import org.vestifeed.entries.EntriesFilter
 import org.vestifeed.entries.EntriesFragment
-import org.vestifeed.sync.BackgroundSyncScheduler
 
 class MinifluxAuthFragment : AppFragment() {
 
@@ -77,10 +76,9 @@ class MinifluxAuthFragment : AppFragment() {
                 )
                 api.getFeeds()
             }.onSuccess {
-                val db = (requireContext().applicationContext as App).db
-                val syncScheduler = BackgroundSyncScheduler(requireContext())
+                //val syncScheduler = BackgroundSyncScheduler(requireContext())
 
-                db.confQueries.update {
+                db().confQueries.update {
                     it.copy(
                         backend = ConfQueries.BACKEND_MINIFLUX,
                         minifluxServerUrl = url.toString().trim('/'),
@@ -89,7 +87,7 @@ class MinifluxAuthFragment : AppFragment() {
                     )
                 }
 
-                syncScheduler.schedule()
+                //syncScheduler.schedule()
 
                 parentFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
 

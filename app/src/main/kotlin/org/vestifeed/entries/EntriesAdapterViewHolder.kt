@@ -51,6 +51,7 @@ class EntriesAdapterViewHolder(
             }
 
             imageView.load(item.imageUrl) {
+                size(800)
                 listener(
                     onSuccess = { _, _ ->
                         imageProgress.isVisible = false

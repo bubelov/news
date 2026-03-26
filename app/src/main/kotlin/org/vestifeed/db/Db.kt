@@ -888,8 +888,16 @@ class ConfQueries(private val conn: SQLiteConnection) {
     fun update(newConf: (Conf) -> Conf) {
         val oldConf = select()
         val newConf = newConf(oldConf)
-        delete()
-        insert(newConf)
+
+        conn.execSQL("BEGIN TRANSACTION")
+        try {
+            delete()
+            insert(newConf)
+            conn.execSQL("COMMIT")
+        } catch (e: Exception) {
+            conn.execSQL("ROLLBACK")
+            throw e
+        }
     }
 
     fun delete() {
