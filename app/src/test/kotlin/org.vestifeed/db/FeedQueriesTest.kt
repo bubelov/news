@@ -61,7 +61,7 @@ class FeedQueriesTest {
     }
 }
 
-fun Db.insertRandomFeed(): Feed = feed().apply { feedQueries.insertOrReplace(this) }
+fun Database.insertRandomFeed(): Feed = feed().apply { feedQueries.insertOrReplace(this) }
 
 private fun feed() = Feed(
     id = UUID.randomUUID().toString(),

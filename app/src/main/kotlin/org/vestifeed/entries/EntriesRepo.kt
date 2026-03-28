@@ -1,7 +1,7 @@
 package org.vestifeed.entries
 
 import org.vestifeed.api.Api
-import org.vestifeed.db.Db
+import org.vestifeed.db.Database
 import org.vestifeed.db.EntriesAdapterRow
 import org.vestifeed.db.Entry
 import org.vestifeed.db.Feed
@@ -15,7 +15,7 @@ import java.time.OffsetDateTime
 
 class EntriesRepo(
     private val api: Api,
-    private val db: Db,
+    private val db: Database,
 ) {
 
     fun insertOrReplace(entry: Entry) {

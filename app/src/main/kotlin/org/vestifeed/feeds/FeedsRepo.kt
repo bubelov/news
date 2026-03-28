@@ -2,7 +2,7 @@ package org.vestifeed.feeds
 
 import android.util.Log
 import org.vestifeed.api.Api
-import org.vestifeed.db.Db
+import org.vestifeed.db.Database
 import org.vestifeed.db.Entry
 import org.vestifeed.db.Feed
 import kotlinx.coroutines.Dispatchers
@@ -14,7 +14,7 @@ import okhttp3.HttpUrl
 
 class FeedsRepo(
     private val api: Api,
-    private val db: Db,
+    private val db: Database,
 ) {
     private val _feedsFlow = MutableStateFlow<List<Feed>>(emptyList())
     private val _feedsWithUnreadFlow = MutableStateFlow<List<org.vestifeed.db.SelectAllWithUnreadEntryCount>>(emptyList())

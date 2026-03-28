@@ -12,7 +12,7 @@ import co.appreactor.feedk.RssFeed
 import co.appreactor.feedk.RssItem
 import co.appreactor.feedk.RssItemGuid
 import co.appreactor.feedk.feed
-import org.vestifeed.db.Db
+import org.vestifeed.db.Database
 import org.vestifeed.db.Entry
 import org.vestifeed.db.EntryWithoutContent
 import org.vestifeed.db.Feed
@@ -38,7 +38,7 @@ import java.util.Locale
 typealias ParsedFeed = co.appreactor.feedk.Feed
 
 class StandaloneNewsApi(
-    private val db: Db,
+    private val db: Database,
 ) : Api {
 
     private val httpClient = OkHttpClient()

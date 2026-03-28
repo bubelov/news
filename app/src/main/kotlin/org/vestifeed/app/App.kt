@@ -6,7 +6,7 @@ import androidx.fragment.app.Fragment
 import androidx.sqlite.driver.AndroidSQLiteDriver
 import org.vestifeed.api.Api
 import org.vestifeed.api.HotSwapApi
-import org.vestifeed.db.Db
+import org.vestifeed.db.Database
 import org.vestifeed.entries.EntriesRepo
 import org.vestifeed.feeds.FeedsRepo
 import org.vestifeed.sync.Sync
@@ -19,7 +19,7 @@ class App : Application() {
     val api by lazy { HotSwapApi(db) }
 
     val db by lazy {
-        Db(
+        Database(
             driver = AndroidSQLiteDriver(),
             path = databaseFile().absolutePath,
         )
@@ -40,4 +40,4 @@ fun Context.api(): Api = (applicationContext as App).api
 
 fun Fragment.db() = requireContext().db()
 
-fun Context.db(): Db = (applicationContext as App).db
+fun Context.db(): Database = (applicationContext as App).db

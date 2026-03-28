@@ -32,9 +32,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -45,8 +43,8 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.vestifeed.R
 import org.vestifeed.anim.animateVisibilityChanges
 import org.vestifeed.anim.showSmooth
-import org.vestifeed.app.App
 import org.vestifeed.app.api
+import org.vestifeed.app.db
 import org.vestifeed.db.SelectAllWithUnreadEntryCount
 import org.vestifeed.databinding.FragmentFeedsBinding
 import org.vestifeed.dialog.showErrorDialog
@@ -70,10 +68,9 @@ import javax.xml.parsers.DocumentBuilderFactory
 
 class FeedsFragment : AppFragment() {
 
-    private val db by lazy { (requireContext().applicationContext as App).db }
     private val api by lazy { api() }
-    private val feedsRepo by lazy { FeedsRepo(api, db) }
-    private val entriesRepo by lazy { EntriesRepo(api, db) }
+    private val feedsRepo by lazy { FeedsRepo(api, db()) }
+    private val entriesRepo by lazy { EntriesRepo(api, db()) }
 
     private val _state = MutableStateFlow<State>(State.Loading)
     private val state = _state.asStateFlow()
@@ -115,29 +112,8 @@ class FeedsFragment : AppFragment() {
         initImportButton()
         initFab()
 
-        combine(
-            feedsRepo.selectAllWithUnreadEntryCount(),
-            hasActionInProgress,
-            importState,
-            error,
-        ) { feeds, hasActionInProgress, importState, error ->
-            if (error != null) {
-                _state.update { State.ShowingError(error) }
-                return@combine
-            }
-
-            if (importState != null) {
-                _state.update { State.ImportingFeeds(importState) }
-                return@combine
-            }
-
-            if (hasActionInProgress) {
-                _state.update { State.Loading }
-                return@combine
-            }
-
-            _state.update { State.ShowingFeeds(feeds.map { it.toItem() }) }
-        }.launchIn(viewLifecycleOwner.lifecycleScope)
+        val feeds = db().feedQueries.selectAllWithUnreadEntryCount()
+        _state.update { State.ShowingFeeds(feeds.map { it.toItem() }) }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -402,7 +378,7 @@ class FeedsFragment : AppFragment() {
             selfLink = selfLink,
             alternateLink = links.firstOrNull { it.rel is AtomLinkRel.Alternate }?.href,
             unreadCount = unreadEntries,
-            confUseBuiltInBrowser = db.confQueries.select().useBuiltInBrowser,
+            confUseBuiltInBrowser = db().confQueries.select().useBuiltInBrowser,
         )
     }
 

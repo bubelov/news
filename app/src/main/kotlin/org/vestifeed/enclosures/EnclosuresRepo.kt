@@ -7,7 +7,7 @@ import android.provider.MediaStore
 import android.util.Log
 import androidx.core.net.toUri
 import co.appreactor.feedk.AtomLinkRel
-import org.vestifeed.db.Db
+import org.vestifeed.db.Database
 import org.vestifeed.db.Entry
 import org.vestifeed.db.Link
 import org.vestifeed.http.await
@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit
 
 class EnclosuresRepo(
     private val context: Context,
-    private val db: Db,
+    private val db: Database,
 ) {
 
     private val httpClient = OkHttpClient()

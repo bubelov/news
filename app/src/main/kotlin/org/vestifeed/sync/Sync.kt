@@ -7,11 +7,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
-import org.vestifeed.db.Db
+import org.vestifeed.db.Database
 import java.time.Instant
 
 class Sync(
-    private val db: Db,
+    private val db: Database,
     private val feedsRepo: FeedsRepo,
     private val entriesRepo: EntriesRepo,
 ) {

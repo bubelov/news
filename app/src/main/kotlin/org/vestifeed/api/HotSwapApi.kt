@@ -5,7 +5,7 @@ import org.vestifeed.api.miniflux.MinifluxApiBuilder
 import org.vestifeed.api.nextcloud.NextcloudApiAdapter
 import org.vestifeed.api.nextcloud.NextcloudApiBuilder
 import org.vestifeed.api.standalone.StandaloneNewsApi
-import org.vestifeed.db.Db
+import org.vestifeed.db.Database
 import org.vestifeed.db.Entry
 import org.vestifeed.db.EntryWithoutContent
 import org.vestifeed.db.Feed
@@ -14,7 +14,7 @@ import okhttp3.HttpUrl
 import org.vestifeed.db.ConfQueries
 import java.time.OffsetDateTime
 
-class HotSwapApi(private val db: Db) : Api {
+class HotSwapApi(private val db: Database) : Api {
 
     private lateinit var api: Api
 

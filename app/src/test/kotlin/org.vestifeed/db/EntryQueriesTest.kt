@@ -8,7 +8,7 @@ import org.junit.Before
 
 class EntryQueriesTest {
 
-    private lateinit var db: Db
+    private lateinit var db: Database
 
     @Before
     fun before() {
