@@ -5,6 +5,7 @@ import java.util.UUID
 import org.junit.Test
 import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Ignore
 
 class EntryQueriesTest {
 
@@ -18,21 +19,21 @@ class EntryQueriesTest {
     @Test
     fun insertOrReplace() {
         val item = entry()
-        db.entryQueries.insertOrReplace(item)
-        assertEquals(item, db.entryQueries.selectById(item.id))
+        db.entry.insertOrReplace(listOf(item))
+        assertEquals(item, db.entry.selectById(item.id))
     }
 
     @Test
     fun selectById() {
         val items = listOf(
-            db.entryQueries.insertOrReplace(),
-            db.entryQueries.insertOrReplace(),
-            db.entryQueries.insertOrReplace(),
+            db.entry.insertOrReplace(),
+            db.entry.insertOrReplace(),
+            db.entry.insertOrReplace(),
         )
 
         assertEquals(
             items[1],
-            db.entryQueries.selectById(items[1].id),
+            db.entry.selectById(items[1].id),
         )
     }
 
@@ -46,11 +47,11 @@ class EntryQueriesTest {
             entry().copy(feedId = feed.id, extRead = false, extBookmarked = false),
         )
 
-        all.forEach { db.entryQueries.insertOrReplace(it) }
+        db.entry.insertOrReplace(all)
 
         assertEquals(
             all.filter { !it.extRead && !it.extBookmarked }.map { it.id },
-            db.entryQueries.selectByReadAndBookmarked(
+            db.entry.selectByReadAndBookmarked(
                 extRead = listOf(false),
                 extBookmarked = false
             ).map { it.id },
@@ -65,25 +66,64 @@ class EntryQueriesTest {
             entry().copy(extReadSynced = true),
         )
 
-        all.forEach { db.entryQueries.insertOrReplace(it) }
+        db.entry.insertOrReplace(all)
 
         assertEquals(
             all.filter { it.extReadSynced }.map { it.withoutContent() }
                 .sortedByDescending { it.published },
-            db.entryQueries.selectByReadSynced(true),
+            db.entry.selectByReadSynced(true),
         )
 
         assertEquals(
             all.filter { !it.extReadSynced }.map { it.withoutContent() }
                 .sortedByDescending { it.published },
-            db.entryQueries.selectByReadSynced(false),
+            db.entry.selectByReadSynced(false),
         )
+    }
+
+    @Test
+    fun selectByQuery() {
+        val db = db()
+        val feed = db.insertRandomFeed()
+
+        val entries = listOf(
+            entry().copy(feedId = feed.id, contentText = "Linux 5.19 introduces RSS API"),
+            entry().copy(feedId = feed.id, contentText = "LinuX 5.19 introduces RSS API"),
+            entry().copy(feedId = feed.id, contentText = "linux 5.19 introduces RSS API"),
+            entry().copy(feedId = feed.id, contentText = "Injured Irons Destroy Specifically")
+        )
+
+        db.entry.insertOrReplace(entries)
+
+        assertEquals(3, db.entry.selectByQuery("Linux").size)
+        assertEquals(3, db.entry.selectByQuery("LinuX").size)
+        assertEquals(3, db.entry.selectByQuery("linux").size)
+        assertEquals(1, db.entry.selectByQuery("call").size)
+    }
+
+    @Test
+    @Ignore("Won't work without icu, see https://github.com/requery/sqlite-android/issues/55")
+    fun selectByQuery_inRussian() {
+        val db = db()
+        val feed = db.insertRandomFeed()
+
+        val entries = listOf(
+            entry().copy(feedId = feed.id, contentText = "Роулинг рулет гуляш"),
+            entry().copy(feedId = feed.id, contentText = "РоулинГ рулет гуляш"),
+            entry().copy(feedId = feed.id, contentText = "роулинг рулет гуляш"),
+        )
+
+        db.entry.insertOrReplace(entries)
+
+        assertEquals(3, db.entry.selectByQuery("Роулинг").size)
+        assertEquals(3, db.entry.selectByQuery("РоулинГ").size)
+        assertEquals(3, db.entry.selectByQuery("роулинг").size)
     }
 }
 
 fun EntryQueries.insertOrReplace(): Entry {
     val entry = entry()
-    insertOrReplace(entry)
+    insertOrReplace(listOf(entry))
     return entry
 }
 

@@ -296,7 +296,7 @@ class FeedsFragment : AppFragment() {
                 }
 
                 db().transaction {
-                    entries.forEach { db().entry.insertOrReplace(it) }
+                    db().entry.insertOrReplace(entries)
                 }
             }.onSuccess {
                 state.update { State.Loading }

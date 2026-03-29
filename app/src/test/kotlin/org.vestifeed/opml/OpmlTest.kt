@@ -1,6 +1,6 @@
 package org.vestifeed.opml
 
-import co.appreactor.feedk.AtomLinkRel
+import org.vestifeed.parser.AtomLinkRel
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.junit.Assert.*
 import java.io.InputStream

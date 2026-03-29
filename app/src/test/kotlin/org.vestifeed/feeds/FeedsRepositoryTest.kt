@@ -36,7 +36,7 @@ class FeedsRepositoryTest {
 
         repo.insertOrReplace(feed)
 
-        assertEquals(feed, db.feedQueries.selectAll().single())
+        assertEquals(feed, db.feed.selectAll().single())
     }
 
     @Test
@@ -63,7 +63,7 @@ class FeedsRepositoryTest {
 
         repo.insertByUrl(feedUrl)
 
-        assertEquals(feed, db.feedQueries.selectAll().single())
+        assertEquals(feed, db.feed.selectAll().single())
 
         coVerify { api.addFeed(feedUrl) }
         confirmVerified(api)
@@ -109,7 +109,7 @@ class FeedsRepositoryTest {
 
         coEvery { api.updateFeedTitle(feed.id, trimmedNewTitle) } returns Result.success(Unit)
 
-        db.feedQueries.insertOrReplace(feed)
+        db.feed.insertOrReplace(feed)
 
         repo.updateTitle(
             feedId = feed.id,
@@ -129,10 +129,10 @@ class FeedsRepositoryTest {
 
         coEvery { api.deleteFeed(randomFeed.id) } returns Result.success(Unit)
 
-        feeds.forEach { db.feedQueries.insertOrReplace(it) }
+        feeds.forEach { db.feed.insertOrReplace(it) }
 
         repo.deleteById(randomFeed.id)
 
-        assertTrue(db.feedQueries.selectById(randomFeed.id) == null)
+        assertTrue(db.feed.selectById(randomFeed.id) == null)
     }
 }

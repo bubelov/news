@@ -72,8 +72,8 @@ class EntryQueries(private val conn: SQLiteConnection) {
         """
     }
 
-    fun insertOrReplace(entry: Entry) {
-        val stmt = conn.prepare(
+    fun insertOrReplace(entries: List<Entry>) {
+        conn.prepare(
             """
             INSERT OR REPLACE INTO entry (
                 content_type, content_src, content_text, links, summary, id, feed_id, title,
@@ -82,30 +82,33 @@ class EntryQueries(private val conn: SQLiteConnection) {
                 ext_og_image_url, ext_og_image_width, ext_og_image_height
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
-        )
-        if (entry.contentType != null) stmt.bindText(1, entry.contentType) else stmt.bindNull(1)
-        if (entry.contentSrc != null) stmt.bindText(2, entry.contentSrc) else stmt.bindNull(2)
-        if (entry.contentText != null) stmt.bindText(3, entry.contentText) else stmt.bindNull(3)
-        stmt.bindText(4, linksToJson(entry.links))
-        if (entry.summary != null) stmt.bindText(5, entry.summary) else stmt.bindNull(5)
-        stmt.bindText(6, entry.id)
-        stmt.bindText(7, entry.feedId)
-        stmt.bindText(8, entry.title)
-        stmt.bindText(9, entry.published.toString())
-        stmt.bindText(10, entry.updated.toString())
-        stmt.bindText(11, entry.authorName)
-        stmt.bindInt(12, if (entry.extRead) 1 else 0)
-        stmt.bindInt(13, if (entry.extReadSynced) 1 else 0)
-        stmt.bindInt(14, if (entry.extBookmarked) 1 else 0)
-        stmt.bindInt(15, if (entry.extBookmarkedSynced) 1 else 0)
-        stmt.bindText(16, entry.extNextcloudGuidHash)
-        stmt.bindText(17, entry.extCommentsUrl)
-        stmt.bindInt(18, if (entry.extOpenGraphImageChecked) 1 else 0)
-        stmt.bindText(19, entry.extOpenGraphImageUrl)
-        stmt.bindInt(20, entry.extOpenGraphImageWidth)
-        stmt.bindInt(21, entry.extOpenGraphImageHeight)
-        stmt.step()
-        stmt.close()
+        ).use { stmt ->
+            entries.forEach { entry ->
+                stmt.bindTextOrNull(1, entry.contentType)
+                stmt.bindTextOrNull(2, entry.contentSrc)
+                stmt.bindTextOrNull(3, entry.contentText)
+                stmt.bindText(4, linksToJson(entry.links))
+                stmt.bindTextOrNull(5, entry.summary)
+                stmt.bindText(6, entry.id)
+                stmt.bindText(7, entry.feedId)
+                stmt.bindText(8, entry.title)
+                stmt.bindText(9, entry.published.toString())
+                stmt.bindText(10, entry.updated.toString())
+                stmt.bindText(11, entry.authorName)
+                stmt.bindInt(12, if (entry.extRead) 1 else 0)
+                stmt.bindInt(13, if (entry.extReadSynced) 1 else 0)
+                stmt.bindInt(14, if (entry.extBookmarked) 1 else 0)
+                stmt.bindInt(15, if (entry.extBookmarkedSynced) 1 else 0)
+                stmt.bindText(16, entry.extNextcloudGuidHash)
+                stmt.bindText(17, entry.extCommentsUrl)
+                stmt.bindInt(18, if (entry.extOpenGraphImageChecked) 1 else 0)
+                stmt.bindText(19, entry.extOpenGraphImageUrl)
+                stmt.bindInt(20, entry.extOpenGraphImageWidth)
+                stmt.bindInt(21, entry.extOpenGraphImageHeight)
+                stmt.step()
+                stmt.reset()
+            }
+        }
     }
 
     fun selectAllLinksPublishedAndTitle(): List<ShortEntry> {

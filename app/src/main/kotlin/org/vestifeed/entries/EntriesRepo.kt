@@ -18,23 +18,8 @@ class EntriesRepo(
     private val db: Database,
 ) {
 
-    fun insertOrReplace(entry: Entry) {
-        db.entry.insertOrReplace(entry)
-    }
-
     fun selectAll(): List<Entry> {
         return emptyList()
-    }
-
-    suspend fun insertOrReplace(entries: List<Entry>) {
-        withContext(Dispatchers.IO) {
-            db.transaction {
-                entries.forEach { entry ->
-                    val postProcessedEntry = entry.postProcess()
-                    insertOrReplace(postProcessedEntry)
-                }
-            }
-        }
     }
 
     fun selectAllLinksPublishedAndTitle(): Flow<List<ShortEntry>> {
@@ -50,7 +35,13 @@ class EntriesRepo(
         read: Collection<Boolean>,
         bookmarked: Boolean,
     ): Flow<List<EntriesAdapterRow>> {
-        return flowOf(db.entry.selectByFeedIdAndReadAndBookmarked(feedId, read.toList(), bookmarked))
+        return flowOf(
+            db.entry.selectByFeedIdAndReadAndBookmarked(
+                feedId,
+                read.toList(),
+                bookmarked
+            )
+        )
     }
 
     fun selectByReadAndBookmarked(
@@ -107,7 +98,9 @@ class EntriesRepo(
         api.getEntries(false).collect { batch ->
             entriesLoaded += batch.getOrThrow().size
             emit(SyncProgress(entriesLoaded))
-            insertOrReplace(batch.getOrThrow())
+            db.transaction {
+                db.entry.insertOrReplace(batch.getOrThrow())
+            }
         }
     }
 
@@ -187,7 +180,6 @@ class EntriesRepo(
 
     suspend fun syncNewAndUpdated(
         lastEntriesSyncDateTime: String,
-        feeds: List<Feed>,
     ): Int {
         return withContext(Dispatchers.IO) {
             val lastSyncInstant = if (lastEntriesSyncDateTime.isNotBlank()) {
@@ -211,37 +203,11 @@ class EntriesRepo(
             ).getOrThrow()
 
             db.transaction {
-                entries.forEach { newEntry ->
-                    val feed = feeds.firstOrNull { it.id == newEntry.feedId }
-                    val postProcessedEntry = newEntry.postProcess(feed)
-
-                    val oldLinks = db.entry.selectLinksById(newEntry.id)
-                        ?: emptyList()
-
-                    db.entry.insertOrReplace(
-                        postProcessedEntry.copy(links = oldLinks.ifEmpty { newEntry.links })
-                    )
-                }
+                db.entry.insertOrReplace(entries)
             }
 
             entries.size
         }
-    }
-
-    private fun Entry.postProcess(feed: Feed? = null): Entry {
-        var processedEntry = this
-
-        if (contentText != null && contentText.toByteArray().size / 1024 > 250) {
-            processedEntry = processedEntry.copy(contentText = "Content is too large")
-        }
-
-        feed?.extBlockedWords?.split(",")?.filter { it.isNotBlank() }?.forEach { word ->
-            if (processedEntry.title.contains(word, ignoreCase = true)) {
-                processedEntry = processedEntry.copy(extRead = true)
-            }
-        }
-
-        return processedEntry
     }
 
     data class SyncProgress(val itemsSynced: Long)

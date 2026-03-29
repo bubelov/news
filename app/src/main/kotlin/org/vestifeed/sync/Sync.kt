@@ -135,7 +135,6 @@ class Sync(
                 runCatching {
                     val newAndUpdatedEntries = entriesRepo.syncNewAndUpdated(
                         lastEntriesSyncDateTime = db.conf.select().lastEntriesSyncDatetime,
-                        feeds = feedsRepo.selectAll().first(),
                     )
 
                     db.conf.update {

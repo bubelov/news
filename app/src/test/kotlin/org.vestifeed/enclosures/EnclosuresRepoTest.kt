@@ -1,6 +1,6 @@
 package org.vestifeed.enclosures
 
-import co.appreactor.feedk.AtomLinkRel
+import org.vestifeed.parser.AtomLinkRel
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import okhttp3.HttpUrl.Companion.toHttpUrl

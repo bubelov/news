@@ -18,7 +18,7 @@ class EntriesRepositoryTest {
         val db = db()
         val repo = EntriesRepo(db = db, api = mockk())
         val entries = listOf(entry(), entry(), entry())
-        entries.forEach { db.entryQueries.insertOrReplace(it) }
+        db.entry.insertOrReplace(entries)
         val randomEntry = entries.random()
         assertEquals(randomEntry, repo.selectById(randomEntry.id).first())
     }
@@ -36,7 +36,7 @@ class EntriesRepositoryTest {
             entryWithoutContent().copy(feedId = feed.id, extRead = false, extBookmarked = false),
         )
 
-        entries.forEach { db.entryQueries.insertOrReplace(it.toEntry()) }
+        db.entry.insertOrReplace(entries.map { it.toEntry() })
 
         assertEquals(
             entries.filter { it.extRead && it.extBookmarked }.map { it.id },
