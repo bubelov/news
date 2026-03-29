@@ -50,7 +50,6 @@ import org.vestifeed.databinding.FragmentFeedsBinding
 import org.vestifeed.dialog.showErrorDialog
 import org.vestifeed.entries.EntriesFilter
 import org.vestifeed.entries.EntriesFragment
-import org.vestifeed.entries.EntriesRepo
 import org.vestifeed.feedsettings.FeedSettingsFragment
 import org.vestifeed.navigation.AppFragment
 import org.vestifeed.navigation.openUrl
@@ -68,9 +67,7 @@ import javax.xml.parsers.DocumentBuilderFactory
 
 class FeedsFragment : AppFragment() {
 
-    private val api by lazy { api() }
-    private val feedsRepo by lazy { FeedsRepo(api, db()) }
-    private val entriesRepo by lazy { EntriesRepo(api, db()) }
+    private val feedsRepo by lazy { FeedsRepo(api(), db()) }
 
     private val _state = MutableStateFlow<State>(State.Loading)
     private val state = _state.asStateFlow()
@@ -335,7 +332,9 @@ class FeedsFragment : AppFragment() {
                     feedsRepo.insertByUrl("https://$unvalidatedUrl".toHttpUrl()).second
                 }
 
-                entriesRepo.insertOrReplace(entries)
+                db().transaction {
+                    entries.forEach { db().entry.insertOrReplace(it) }
+                }
             }.onSuccess {
                 hasActionInProgress.update { false }
             }.onFailure { e ->
