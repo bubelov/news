@@ -83,9 +83,6 @@ dependencies {
     implementation(libs.jsoup)
     implementation(libs.re2j)
 
-    // Feed parser
-    implementation(libs.feedk)
-
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.mockk)

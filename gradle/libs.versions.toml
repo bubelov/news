@@ -43,8 +43,6 @@ coil = "3.4.0"
 # https://github.com/jhy/jsoup/blob/master/CHANGES.md
 jsoup = "1.22.1"
 re2j = "1.7"
-# Feed parser
-feedk = "0.2.6"
 # Database
 sqlite = "2.6.2"
 # Testing
@@ -81,7 +79,6 @@ coil = { group = "io.coil-kt.coil3", name = "coil", version.ref = "coil" }
 coil-network = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
 re2j = { group = "com.google.re2j", name = "re2j", version.ref = "re2j" }
-feedk = { group = "co.appreactor", name = "feedk", version.ref = "feedk" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "testrunner" }

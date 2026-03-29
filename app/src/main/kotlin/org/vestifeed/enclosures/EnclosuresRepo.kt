@@ -6,7 +6,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import androidx.core.net.toUri
-import co.appreactor.feedk.AtomLinkRel
+import org.vestifeed.parser.AtomLinkRel
 import org.vestifeed.db.Database
 import org.vestifeed.db.Entry
 import org.vestifeed.db.Link

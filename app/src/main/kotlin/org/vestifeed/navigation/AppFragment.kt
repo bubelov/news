@@ -6,7 +6,7 @@ import android.view.View
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import co.appreactor.feedk.AtomLinkRel
+import org.vestifeed.parser.AtomLinkRel
 import coil3.imageLoader
 import coil3.request.ErrorResult
 import coil3.request.ImageRequest

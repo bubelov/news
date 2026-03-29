@@ -3,15 +3,15 @@ package org.vestifeed.api.standalone
 import android.util.Base64
 import android.util.Log
 import org.vestifeed.api.Api
-import co.appreactor.feedk.AtomEntry
-import co.appreactor.feedk.AtomFeed
-import co.appreactor.feedk.AtomLink
-import co.appreactor.feedk.AtomLinkRel
-import co.appreactor.feedk.FeedResult
-import co.appreactor.feedk.RssFeed
-import co.appreactor.feedk.RssItem
-import co.appreactor.feedk.RssItemGuid
-import co.appreactor.feedk.feed
+import org.vestifeed.parser.AtomEntry
+import org.vestifeed.parser.AtomFeed
+import org.vestifeed.parser.AtomLink
+import org.vestifeed.parser.AtomLinkRel
+import org.vestifeed.parser.FeedResult
+import org.vestifeed.parser.RssFeed
+import org.vestifeed.parser.RssItem
+import org.vestifeed.parser.RssItemGuid
+import org.vestifeed.parser.feed
 import org.vestifeed.db.Database
 import org.vestifeed.db.Entry
 import org.vestifeed.db.EntryWithoutContent
@@ -35,7 +35,7 @@ import java.util.Collections
 import java.util.Date
 import java.util.Locale
 
-typealias ParsedFeed = co.appreactor.feedk.Feed
+typealias ParsedFeed = org.vestifeed.parser.Feed
 
 class StandaloneNewsApi(
     private val db: Database,
@@ -86,7 +86,7 @@ class StandaloneNewsApi(
             } else {
                 val result = runCatching {
                     withContext(Dispatchers.IO) {
-                        feed(response.body!!.byteStream(), contentType)
+                        feed(response.body.byteStream(), contentType)
                     }
                 }.getOrElse {
                     return Result.failure(Exception("Failed to read response", it))
@@ -191,7 +191,11 @@ class StandaloneNewsApi(
                                     runCatching {
                                         atomEntry.toEntry(feed.id)
                                     }.onFailure {
-                                        Log.e(TAG, "Failed to parse Atom org.vestifeed.entry: $atomEntry", it)
+                                        Log.e(
+                                            TAG,
+                                            "Failed to parse Atom org.vestifeed.entry: $atomEntry",
+                                            it
+                                        )
                                     }.getOrNull()
                                 }
                         }

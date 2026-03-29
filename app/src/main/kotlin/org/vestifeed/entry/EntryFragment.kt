@@ -30,7 +30,7 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import co.appreactor.feedk.AtomLinkRel
+import org.vestifeed.parser.AtomLinkRel
 import org.vestifeed.db.Entry
 import org.vestifeed.db.Link
 import org.vestifeed.dialog.showErrorDialog

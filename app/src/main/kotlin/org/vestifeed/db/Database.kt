@@ -742,10 +742,10 @@ internal fun linksToJson(links: List<Link>): String {
         val length = link.length?.toString() ?: "null"
         val extEnclosureDownloadProgress = link.extEnclosureDownloadProgress?.toString() ?: "null"
         val relName = when (link.rel) {
-            is co.appreactor.feedk.AtomLinkRel.Alternate -> "Alternate"
-            is co.appreactor.feedk.AtomLinkRel.Enclosure -> "Enclosure"
-            is co.appreactor.feedk.AtomLinkRel.Self -> "Self"
-            is co.appreactor.feedk.AtomLinkRel.Related -> "Related"
+            is org.vestifeed.parser.AtomLinkRel.Alternate -> "Alternate"
+            is org.vestifeed.parser.AtomLinkRel.Enclosure -> "Enclosure"
+            is org.vestifeed.parser.AtomLinkRel.Self -> "Self"
+            is org.vestifeed.parser.AtomLinkRel.Related -> "Related"
             else -> ""
         }
         """{"feedId":"${link.feedId ?: ""}","entryId":"${link.entryId ?: ""}","href":"${link.href}","rel":"$relName","type":"${link.type ?: ""}","hreflang":"${link.hreflang ?: ""}","title":"${link.title ?: ""}","length":$length,"extEnclosureDownloadProgress":$extEnclosureDownloadProgress,"extCacheUri":"${link.extCacheUri ?: ""}"}"""
@@ -761,12 +761,12 @@ internal fun jsonToLinks(json: String?): List<Link> {
             """\{"feedId":"([^"]*)","entryId":"([^"]*)","href":"([^"]*)","rel":"([^"]*)","type":"([^"]*)","hreflang":"([^"]*)","title":"([^"]*)","length":([^,]*),"extEnclosureDownloadProgress":([^,]*),"extCacheUri":"([^"]*)"\}""".toRegex()
         regex.findAll(json).forEach { match ->
             val (feedId, entryId, href, rel, type, hreflang, title, length, extEnclosureDownloadProgress, extCacheUri) = match.destructured
-            val parsedRel: co.appreactor.feedk.AtomLinkRel = when (rel) {
-                "Alternate" -> co.appreactor.feedk.AtomLinkRel.Alternate
-                "Enclosure" -> co.appreactor.feedk.AtomLinkRel.Enclosure
-                "Self" -> co.appreactor.feedk.AtomLinkRel.Self
-                "Related" -> co.appreactor.feedk.AtomLinkRel.Related
-                else -> co.appreactor.feedk.AtomLinkRel.Alternate
+            val parsedRel: org.vestifeed.parser.AtomLinkRel = when (rel) {
+                "Alternate" -> org.vestifeed.parser.AtomLinkRel.Alternate
+                "Enclosure" -> org.vestifeed.parser.AtomLinkRel.Enclosure
+                "Self" -> org.vestifeed.parser.AtomLinkRel.Self
+                "Related" -> org.vestifeed.parser.AtomLinkRel.Related
+                else -> org.vestifeed.parser.AtomLinkRel.Alternate
             }
             val parsedUrl = if (href.startsWith("http")) {
                 href.toHttpUrlOrNull() ?: return@forEach

@@ -19,7 +19,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import co.appreactor.feedk.AtomLinkRel
+import org.vestifeed.parser.AtomLinkRel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.Dispatchers
@@ -66,7 +66,7 @@ class FeedsFragment : AppFragment() {
     private var _binding: FragmentFeedsBinding? = null
     private val binding get() = _binding!!
 
-    private val importFeedsLauncher by lazy {
+    private val importFeedsLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             if (uri == null) {
                 return@registerForActivityResult
@@ -76,15 +76,13 @@ class FeedsFragment : AppFragment() {
                 importOpml(requireContext().contentResolver.openInputStream(uri)!!)
             }
         }
-    }
 
-    private val exportFeedsLauncher by lazy {
+    private val exportFeedsLauncher =
         registerForActivityResult(ActivityResultContracts.CreateDocument()) { uri ->
             if (uri != null) {
                 exportOpml(requireContext().contentResolver.openOutputStream(uri)!!)
             }
         }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,

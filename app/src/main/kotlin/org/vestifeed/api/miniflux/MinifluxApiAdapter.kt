@@ -2,7 +2,6 @@ package org.vestifeed.api.miniflux
 
 import android.util.Log
 import org.vestifeed.api.Api
-import co.appreactor.feedk.AtomLinkRel
 import org.vestifeed.db.Entry
 import org.vestifeed.db.EntryWithoutContent
 import org.vestifeed.db.Feed
@@ -11,6 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import org.vestifeed.parser.AtomLinkRel
 import java.time.OffsetDateTime
 
 class MinifluxApiAdapter(

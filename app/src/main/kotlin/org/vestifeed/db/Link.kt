@@ -1,6 +1,6 @@
 package org.vestifeed.db
 
-import co.appreactor.feedk.AtomLinkRel
+import org.vestifeed.parser.AtomLinkRel
 import okhttp3.HttpUrl
 
 data class Link(
