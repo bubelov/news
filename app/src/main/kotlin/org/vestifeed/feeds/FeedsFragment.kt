@@ -60,13 +60,9 @@ class FeedsFragment : AppFragment() {
         object Loading : State()
         data class ShowingFeeds(val feeds: List<FeedsAdapter.Item>) : State()
         data class ImportingFeeds(val imported: Int, val total: Int) : State()
-        data class ShowingError(val error: Throwable) : State()
     }
 
     private val state = MutableStateFlow<State>(State.Loading)
-
-    private val hasActionInProgress = MutableStateFlow(false)
-    private val error = MutableStateFlow<Throwable?>(null)
 
     private var _binding: FragmentFeedsBinding? = null
     private val binding get() = _binding!!
@@ -279,15 +275,9 @@ class FeedsFragment : AppFragment() {
         }
     }
 
-    private fun onErrorAcknowledged() {
-        error.update { null }
-    }
-
     private fun addFeed(unvalidatedUrl: String) {
         viewLifecycleOwner.lifecycleScope.launch {
             runCatching {
-                hasActionInProgress.update { true }
-
                 val hasHttpPrefix =
                     unvalidatedUrl.startsWith("http") or unvalidatedUrl.startsWith("https")
 
@@ -308,10 +298,8 @@ class FeedsFragment : AppFragment() {
             }.onSuccess {
                 val feeds = db().feed.selectAllWithUnreadEntryCount()
                 state.update { State.ShowingFeeds(feeds.map { it.toItem() }) }
-                hasActionInProgress.update { false }
             }.onFailure { e ->
-                hasActionInProgress.update { false }
-                error.update { e }
+                showErrorDialog(e)
             }
         }
     }
@@ -319,31 +307,25 @@ class FeedsFragment : AppFragment() {
     private fun renameFeed(feedId: String, newTitle: String) {
         viewLifecycleOwner.lifecycleScope.launch {
             runCatching {
-                hasActionInProgress.update { true }
                 val feed = db().feed.selectById(feedId)
                     ?: throw Exception("Cannot find feed $feedId in cache")
                 val trimmedNewTitle = newTitle.trim()
                 api().updateFeedTitle(feedId, trimmedNewTitle)
                 db().feed.insertOrReplace(feed.copy(title = trimmedNewTitle))
-            }.onFailure { e -> error.update { e } }
-
-            hasActionInProgress.update { false }
+            }.onFailure { e -> showErrorDialog(e) }
         }
     }
 
     private fun deleteFeed(feedId: String) {
         viewLifecycleOwner.lifecycleScope.launch {
             runCatching {
-                hasActionInProgress.update { true }
                 api().deleteFeed(feedId)
 
                 db().transaction {
                     db().feed.deleteById(feedId)
                     db().entry.deleteByFeedId(feedId)
                 }
-            }.onFailure { e -> error.update { e } }
-
-            hasActionInProgress.update { false }
+            }.onFailure { e -> showErrorDialog(e) }
         }
     }
 
@@ -369,7 +351,6 @@ class FeedsFragment : AppFragment() {
                 is State.Loading -> listOf(toolbar, progress)
                 is State.ShowingFeeds -> listOf(toolbar, list, fab)
                 is State.ImportingFeeds -> listOf(toolbar, message)
-                is State.ShowingError -> listOf(toolbar)
             },
         )
 
@@ -392,10 +373,6 @@ class FeedsFragment : AppFragment() {
                     state.imported,
                     state.total,
                 )
-            }
-
-            is State.ShowingError -> {
-                showErrorDialog(state.error) { onErrorAcknowledged() }
             }
         }
     }
