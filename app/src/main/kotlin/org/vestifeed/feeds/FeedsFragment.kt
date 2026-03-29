@@ -14,9 +14,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updatePadding
 import androidx.fragment.app.commit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -27,14 +24,9 @@ import co.appreactor.feedk.AtomLinkRel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
@@ -64,10 +56,16 @@ import java.io.OutputStream
 import javax.xml.parsers.DocumentBuilderFactory
 
 class FeedsFragment : AppFragment() {
+    sealed class State {
+        object Loading : State()
+        data class ShowingFeeds(val feeds: List<FeedsAdapter.Item>) : State()
+        data class ImportingFeeds(val imported: Int, val total: Int) : State()
+        data class ShowingError(val error: Throwable) : State()
+    }
+
     private val state = MutableStateFlow<State>(State.Loading)
 
     private val hasActionInProgress = MutableStateFlow(false)
-    private val importState = MutableStateFlow<ImportState?>(null)
     private val error = MutableStateFlow<Throwable?>(null)
 
     private var _binding: FragmentFeedsBinding? = null
@@ -90,13 +88,6 @@ class FeedsFragment : AppFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { v, insets ->
-            insets.getInsets(WindowInsetsCompat.Type.statusBars()).let {
-                v.updatePadding(top = it.top)
-            }
-            insets
-        }
 
         initToolbar()
         initList()
@@ -124,7 +115,7 @@ class FeedsFragment : AppFragment() {
         binding.toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.importFeeds -> importFeedsLauncher.launch("*/*")
-                R.id.exportFeeds -> exportFeedsLauncher.launch("org.vestifeed.feeds.org.vestifeed.opml")
+                R.id.exportFeeds -> exportFeedsLauncher.launch("feeds.opml")
             }
 
             true
@@ -183,100 +174,79 @@ class FeedsFragment : AppFragment() {
         }
     }
 
-    private fun importOpml(document: InputStream) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            val outlines = runCatching {
-                withContext(Dispatchers.IO) {
-                    DocumentBuilderFactory
-                        .newInstance()
-                        .newDocumentBuilder()
-                        .parse(document)
-                        .toOpml()
-                        .leafOutlines()
-                }
-            }.getOrElse { e ->
-                error.update { e }
-                return@launch
+    private suspend fun importOpml(document: InputStream) {
+        val outlines = try {
+            withContext(Dispatchers.IO) {
+                DocumentBuilderFactory
+                    .newInstance()
+                    .newDocumentBuilder()
+                    .parse(document)
+                    .toOpml()
+                    .leafOutlines()
+            }
+        } catch (e: Throwable) {
+            showErrorDialog(e)
+            return
+        }
+
+        state.update { State.ImportingFeeds(0, outlines.size) }
+
+        var feedsImported = 0
+        var feedsExisted = 0
+        var feedsFailed = 0
+        val errors = mutableListOf<String>()
+
+        val existingLinks = db().feed.selectLinks().flatten()
+
+        for (outline in outlines) {
+            val outlineUrl = (outline.xmlUrl ?: "").toHttpUrlOrNull()
+
+            if (outlineUrl == null) {
+                errors += "Invalid URL: ${outline.xmlUrl}"
+                feedsFailed++
+                continue
             }
 
-            importState.update { ImportState(0, outlines.size) }
+            val feedAlreadyExists = existingLinks.any {
+                it.href.toUri().normalize() == outlineUrl.toUri().normalize()
+            }
 
-            var feedsImported = 0
-            var feedsExisted = 0
-            var feedsFailed = 0
-            val errors = mutableListOf<String>()
+            if (feedAlreadyExists) {
+                feedsExisted++
+            } else {
+                try {
+                    val feedWithEntries = api().addFeed(outlineUrl).getOrThrow()
+                    db().feed.insertOrReplace(feedWithEntries.first)
+                    feedsImported++
+                } catch (e: Throwable) {
+                    errors += "Failed to import feed ${outline.xmlUrl}\nReason: ${e.message}"
+                    feedsFailed++
+                }
 
-            val mutex = Mutex()
-
-            val outlinesChannel = produce { outlines.forEach { send(it) } }
-            val existingLinks = db().feed.selectLinks().flatten()
-
-            val workers = buildList {
-                repeat(15) {
-                    add(
-                        async {
-                            for (outline in outlinesChannel) {
-                                val outlineUrl = (outline.xmlUrl ?: "").toHttpUrlOrNull()
-
-                                if (outlineUrl == null) {
-                                    mutex.withLock {
-                                        errors += "Invalid URL: ${outline.xmlUrl}"
-                                        feedsFailed++
-                                    }
-
-                                    continue
-                                }
-
-                                val feedAlreadyExists = existingLinks.any {
-                                    it.href.toUri().normalize() == outlineUrl.toUri().normalize()
-                                }
-
-                                if (feedAlreadyExists) {
-                                    mutex.withLock { feedsExisted++ }
-                                } else {
-                                    runCatching {
-                                        val feedWithEntries = api().addFeed(outlineUrl).getOrThrow()
-                                        db().feed.insertOrReplace(feedWithEntries.first)
-                                    }.onSuccess {
-                                        mutex.withLock { feedsImported++ }
-                                    }.onFailure {
-                                        mutex.withLock {
-                                            errors += "Failed to import feed ${outline.xmlUrl}\nReason: ${it.message}"
-                                            feedsFailed++
-                                        }
-                                    }
-
-                                    importState.update {
-                                        ImportState(
-                                            imported = feedsImported + feedsExisted + feedsFailed,
-                                            total = outlines.size,
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
+                state.update {
+                    State.ImportingFeeds(
+                        imported = feedsImported + feedsExisted + feedsFailed,
+                        total = outlines.size,
                     )
                 }
             }
+        }
 
-            workers.awaitAll()
+        if (errors.isNotEmpty()) {
+            val message = buildString {
+                errors.forEach {
+                    append(it)
 
-            if (errors.isNotEmpty()) {
-                val message = buildString {
-                    errors.forEach {
-                        append(it)
-
-                        if (errors.last() != it) {
-                            append("\n\n")
-                        }
+                    if (errors.last() != it) {
+                        append("\n\n")
                     }
                 }
-
-                error.update { Exception(message) }
             }
 
-            importState.update { null }
+            showErrorDialog(message)
+        } else {
+            val feeds = db().feed.selectAllWithUnreadEntryCount()
+            state.update { State.ShowingFeeds(feeds.map { it.toItem() }) }
         }
     }
 
@@ -419,8 +389,8 @@ class FeedsFragment : AppFragment() {
             is State.ImportingFeeds -> {
                 message.text = getString(
                     R.string.importing_feeds_n_of_n,
-                    state.progress.imported,
-                    state.progress.total,
+                    state.imported,
+                    state.total,
                 )
             }
 
@@ -518,7 +488,9 @@ class FeedsFragment : AppFragment() {
                 return@registerForActivityResult
             }
 
-            importOpml(requireContext().contentResolver.openInputStream(uri)!!)
+            viewLifecycleOwner.lifecycleScope.launch {
+                importOpml(requireContext().contentResolver.openInputStream(uri)!!)
+            }
         }
     }
 
@@ -557,16 +529,4 @@ class FeedsFragment : AppFragment() {
             outRect.set(left, top, right, bottom)
         }
     }
-
-    sealed class State {
-        object Loading : State()
-        data class ShowingFeeds(val feeds: List<FeedsAdapter.Item>) : State()
-        data class ImportingFeeds(val progress: ImportState) : State()
-        data class ShowingError(val error: Throwable) : State()
-    }
-
-    data class ImportState(
-        val imported: Int,
-        val total: Int,
-    )
 }
