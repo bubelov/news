@@ -31,8 +31,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -66,11 +64,7 @@ import java.io.OutputStream
 import javax.xml.parsers.DocumentBuilderFactory
 
 class FeedsFragment : AppFragment() {
-
-    private val feedsRepo by lazy { FeedsRepo(api(), db()) }
-
-    private val _state = MutableStateFlow<State>(State.Loading)
-    private val state = _state.asStateFlow()
+    private val state = MutableStateFlow<State>(State.Loading)
 
     private val hasActionInProgress = MutableStateFlow(false)
     private val importState = MutableStateFlow<ImportState?>(null)
@@ -110,7 +104,7 @@ class FeedsFragment : AppFragment() {
         initFab()
 
         val feeds = db().feed.selectAllWithUnreadEntryCount()
-        _state.update { State.ShowingFeeds(feeds.map { it.toItem() }) }
+        state.update { State.ShowingFeeds(feeds.map { it.toItem() }) }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -215,7 +209,7 @@ class FeedsFragment : AppFragment() {
             val mutex = Mutex()
 
             val outlinesChannel = produce { outlines.forEach { send(it) } }
-            val existingLinks = feedsRepo.selectLinks().first().flatten()
+            val existingLinks = db().feed.selectLinks().flatten()
 
             val workers = buildList {
                 repeat(15) {
@@ -241,7 +235,8 @@ class FeedsFragment : AppFragment() {
                                     mutex.withLock { feedsExisted++ }
                                 } else {
                                     runCatching {
-                                        feedsRepo.insertByUrl(outlineUrl)
+                                        val feedWithEntries = api().addFeed(outlineUrl).getOrThrow()
+                                        db().feed.insertOrReplace(feedWithEntries.first)
                                     }.onSuccess {
                                         mutex.withLock { feedsImported++ }
                                     }.onFailure {
@@ -287,7 +282,7 @@ class FeedsFragment : AppFragment() {
 
     private fun exportOpml(out: OutputStream) {
         viewLifecycleOwner.lifecycleScope.launch {
-            val feeds = feedsRepo.selectAll().first()
+            val feeds = db().feed.selectAll()
 
             val outlines = feeds.map { feed ->
                 val selfLink = feed.links.firstOrNull { it.rel is AtomLinkRel.Self }
@@ -327,15 +322,22 @@ class FeedsFragment : AppFragment() {
                     unvalidatedUrl.startsWith("http") or unvalidatedUrl.startsWith("https")
 
                 val entries = if (hasHttpPrefix) {
-                    feedsRepo.insertByUrl(unvalidatedUrl.toHttpUrl()).second
+                    val feedWithEntries = api().addFeed(unvalidatedUrl.toHttpUrl()).getOrThrow()
+                    db().feed.insertOrReplace(feedWithEntries.first)
+                    feedWithEntries.second
                 } else {
-                    feedsRepo.insertByUrl("https://$unvalidatedUrl".toHttpUrl()).second
+                    val feedWithEntries =
+                        api().addFeed("https://$unvalidatedUrl".toHttpUrl()).getOrThrow()
+                    db().feed.insertOrReplace(feedWithEntries.first)
+                    feedWithEntries.second
                 }
 
                 db().transaction {
                     entries.forEach { db().entry.insertOrReplace(it) }
                 }
             }.onSuccess {
+                val feeds = db().feed.selectAllWithUnreadEntryCount()
+                state.update { State.ShowingFeeds(feeds.map { it.toItem() }) }
                 hasActionInProgress.update { false }
             }.onFailure { e ->
                 hasActionInProgress.update { false }
@@ -348,7 +350,11 @@ class FeedsFragment : AppFragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             runCatching {
                 hasActionInProgress.update { true }
-                feedsRepo.updateTitle(feedId, newTitle)
+                val feed = db().feed.selectById(feedId)
+                    ?: throw Exception("Cannot find feed $feedId in cache")
+                val trimmedNewTitle = newTitle.trim()
+                api().updateFeedTitle(feedId, trimmedNewTitle)
+                db().feed.insertOrReplace(feed.copy(title = trimmedNewTitle))
             }.onFailure { e -> error.update { e } }
 
             hasActionInProgress.update { false }
@@ -359,7 +365,12 @@ class FeedsFragment : AppFragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             runCatching {
                 hasActionInProgress.update { true }
-                feedsRepo.deleteById(feedId)
+                api().deleteFeed(feedId)
+
+                db().transaction {
+                    db().feed.deleteById(feedId)
+                    db().entry.deleteByFeedId(feedId)
+                }
             }.onFailure { e -> error.update { e } }
 
             hasActionInProgress.update { false }
