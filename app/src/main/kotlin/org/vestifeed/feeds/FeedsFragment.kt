@@ -10,7 +10,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
@@ -67,11 +66,25 @@ class FeedsFragment : AppFragment() {
     private var _binding: FragmentFeedsBinding? = null
     private val binding get() = _binding!!
 
-    private val listAdapter = createFeedsAdapter()
-    private val listItemDecoration by lazy { ListItemDecoration(requireContext()) }
+    private val importFeedsLauncher by lazy {
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            if (uri == null) {
+                return@registerForActivityResult
+            }
 
-    private val importFeedsLauncher = createImportFeedsLauncher()
-    private val exportFeedsLauncher = createExportFeedsLauncher()
+            viewLifecycleOwner.lifecycleScope.launch {
+                importOpml(requireContext().contentResolver.openInputStream(uri)!!)
+            }
+        }
+    }
+
+    private val exportFeedsLauncher by lazy {
+        registerForActivityResult(ActivityResultContracts.CreateDocument()) { uri ->
+            if (uri != null) {
+                exportOpml(requireContext().contentResolver.openOutputStream(uri)!!)
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -85,29 +98,6 @@ class FeedsFragment : AppFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initToolbar()
-        initList()
-        initImportButton()
-        initFab()
-
-        val feeds = db().feed.selectAllWithUnreadEntryCount()
-        state.update { State.ShowingFeeds(feeds.map { it.toItem() }) }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                state.collect { binding.setState(it) }
-            }
-        }
-
-        handleAddFeedIntent()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
-    private fun initToolbar() {
         binding.toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.importFeeds -> importFeedsLauncher.launch("*/*")
@@ -116,14 +106,12 @@ class FeedsFragment : AppFragment() {
 
             true
         }
-    }
 
-    private fun initList() {
         binding.list.apply {
             setHasFixedSize(true)
-            adapter = listAdapter
+            adapter = createFeedsAdapter()
             layoutManager = LinearLayoutManager(requireContext())
-            addItemDecoration(listItemDecoration)
+            addItemDecoration(ListItemDecoration(requireContext()))
 
             addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
@@ -135,13 +123,9 @@ class FeedsFragment : AppFragment() {
                 }
             })
         }
-    }
 
-    private fun initImportButton() {
         binding.importOpml.setOnClickListener { importFeedsLauncher.launch("*/*") }
-    }
 
-    private fun initFab() {
         binding.fab.setOnClickListener {
             val dialog =
                 MaterialAlertDialogBuilder(requireContext()).setTitle(getString(R.string.add_feed))
@@ -168,6 +152,27 @@ class FeedsFragment : AppFragment() {
             urlView.requestFocus()
             urlView.postDelayed({ showKeyboard(urlView) }, 300)
         }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            state.update { State.Loading }
+            val feeds = withContext(Dispatchers.IO) {
+                db().feed.selectAllWithUnreadEntryCount()
+            }
+            state.update { State.ShowingFeeds(feeds.map { it.toItem() }) }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                state.collect { binding.setState(it) }
+            }
+        }
+
+        handleAddFeedIntent()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     private suspend fun importOpml(document: InputStream) {
@@ -296,7 +301,10 @@ class FeedsFragment : AppFragment() {
                     entries.forEach { db().entry.insertOrReplace(it) }
                 }
             }.onSuccess {
-                val feeds = db().feed.selectAllWithUnreadEntryCount()
+                state.update { State.Loading }
+                val feeds = withContext(Dispatchers.IO) {
+                    db().feed.selectAllWithUnreadEntryCount()
+                }
                 state.update { State.ShowingFeeds(feeds.map { it.toItem() }) }
             }.onFailure { e ->
                 showErrorDialog(e)
@@ -358,7 +366,7 @@ class FeedsFragment : AppFragment() {
             is State.Loading -> {}
 
             is State.ShowingFeeds -> {
-                listAdapter.submitList(state.feeds)
+                (binding.list.adapter as? FeedsAdapter)?.submitList(state.feeds)
 
                 if (state.feeds.isEmpty()) {
                     message.showSmooth()
@@ -459,28 +467,7 @@ class FeedsFragment : AppFragment() {
         })
     }
 
-    private fun createImportFeedsLauncher(): ActivityResultLauncher<String> {
-        return registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            if (uri == null) {
-                return@registerForActivityResult
-            }
-
-            viewLifecycleOwner.lifecycleScope.launch {
-                importOpml(requireContext().contentResolver.openInputStream(uri)!!)
-            }
-        }
-    }
-
-    private fun createExportFeedsLauncher(): ActivityResultLauncher<String> {
-        return registerForActivityResult(ActivityResultContracts.CreateDocument()) { uri ->
-            if (uri != null) {
-                exportOpml(requireContext().contentResolver.openOutputStream(uri)!!)
-            }
-        }
-    }
-
     class ListItemDecoration(context: Context) : RecyclerView.ItemDecoration() {
-
         private val gapInPixels = context.resources.getDimensionPixelSize(R.dimen.dp_8)
 
         override fun getItemOffsets(
