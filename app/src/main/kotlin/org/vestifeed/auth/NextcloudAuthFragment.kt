@@ -81,7 +81,7 @@ class NextcloudAuthFragment : AppFragment() {
                 val db = (requireContext().applicationContext as App).db
                 val syncScheduler = BackgroundSyncScheduler(requireContext())
 
-                db.confQueries.update {
+                db.conf.update {
                     it.copy(
                         backend = ConfQueries.BACKEND_NEXTCLOUD,
                         nextcloudServerUrl = url.toString().trim('/'),

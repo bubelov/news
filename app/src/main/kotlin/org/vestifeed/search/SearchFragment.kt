@@ -77,7 +77,7 @@ class SearchFragment : AppFragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             args.filterNotNull().collect { args ->
-                val conf = db.confQueries.select()
+                val conf = db.conf.select()
                 if (args.query.length < 3) {
                     _state.update { State.QueryIsTooShort }
                     return@collect

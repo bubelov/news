@@ -9,12 +9,11 @@ import java.time.OffsetDateTime
 
 class Database(driver: SQLiteDriver, val path: String) {
 
-    val conn = driver.open(path)
+    private val conn = driver.open(path)
 
-    val entryQueries = EntryQueries(conn)
-    val feedQueries = FeedQueries(conn)
-    val entrySearchQueries = EntrySearchQueries(conn)
-    val confQueries = ConfQueries(conn)
+    val feed = FeedQueries(conn)
+    val entry = EntryQueries(conn)
+    val conf = ConfQueries(conn)
 
     init {
         migrate()
@@ -550,6 +549,45 @@ class EntryQueries(private val conn: SQLiteConnection) {
             extOpenGraphImageHeight = stmt.getInt(17)
         )
     }
+
+    fun selectByQuery(query: String): List<SelectByQuery> {
+        val searchQuery = "%$query%"
+        val sql = """
+            SELECT e.id, f.ext_show_preview_images, e.ext_og_image_url, e.ext_og_image_width,
+                   e.ext_og_image_height, e.title, f.title as feed_title, e.published,
+                   e.summary, e.ext_read, f.ext_open_entries_in_browser, e.links
+            FROM entry e
+            JOIN feed f ON f.id = e.feed_id
+            WHERE e.title LIKE ? OR e.summary LIKE ? OR e.content_text LIKE ?
+            LIMIT 500
+        """.trimIndent()
+
+        val res = mutableListOf<SelectByQuery>()
+        val stmt = conn.prepare(sql)
+        stmt.bindText(1, searchQuery)
+        stmt.bindText(2, searchQuery)
+        stmt.bindText(3, searchQuery)
+        while (stmt.step()) {
+            res.add(
+                SelectByQuery(
+                    id = stmt.getText(0),
+                    extShowPreviewImages = stmt.getInt(1) == 1,
+                    extOpenGraphImageUrl = stmt.getText(2),
+                    extOpenGraphImageWidth = stmt.getInt(3),
+                    extOpenGraphImageHeight = stmt.getInt(4),
+                    title = stmt.getText(5),
+                    feedTitle = stmt.getText(6),
+                    published = OffsetDateTime.parse(stmt.getText(7)),
+                    summary = stmt.getText(8),
+                    extRead = stmt.getInt(9) == 1,
+                    extOpenEntriesInBrowser = stmt.getInt(10) == 1,
+                    links = jsonToLinks(stmt.getText(11))
+                )
+            )
+        }
+        stmt.close()
+        return res
+    }
 }
 
 class FeedQueries(private val conn: SQLiteConnection) {
@@ -754,47 +792,8 @@ internal fun jsonToLinks(json: String?): List<Link> {
     } catch (e: Exception) {
         emptyList()
     }
-}
 
-class EntrySearchQueries(private val conn: SQLiteConnection) {
-    fun selectByQuery(query: String): List<SelectByQuery> {
-        val searchQuery = "%$query%"
-        val sql = """
-            SELECT e.id, f.ext_show_preview_images, e.ext_og_image_url, e.ext_og_image_width,
-                   e.ext_og_image_height, e.title, f.title as feed_title, e.published,
-                   e.summary, e.ext_read, f.ext_open_entries_in_browser, e.links
-            FROM entry e
-            JOIN feed f ON f.id = e.feed_id
-            WHERE e.title LIKE ? OR e.summary LIKE ? OR e.content_text LIKE ?
-            LIMIT 500
-        """.trimIndent()
 
-        val res = mutableListOf<SelectByQuery>()
-        val stmt = conn.prepare(sql)
-        stmt.bindText(1, searchQuery)
-        stmt.bindText(2, searchQuery)
-        stmt.bindText(3, searchQuery)
-        while (stmt.step()) {
-            res.add(
-                SelectByQuery(
-                    id = stmt.getText(0),
-                    extShowPreviewImages = stmt.getInt(1) == 1,
-                    extOpenGraphImageUrl = stmt.getText(2),
-                    extOpenGraphImageWidth = stmt.getInt(3),
-                    extOpenGraphImageHeight = stmt.getInt(4),
-                    title = stmt.getText(5),
-                    feedTitle = stmt.getText(6),
-                    published = OffsetDateTime.parse(stmt.getText(7)),
-                    summary = stmt.getText(8),
-                    extRead = stmt.getInt(9) == 1,
-                    extOpenEntriesInBrowser = stmt.getInt(10) == 1,
-                    links = jsonToLinks(stmt.getText(11))
-                )
-            )
-        }
-        stmt.close()
-        return res
-    }
 }
 
 class ConfQueries(private val conn: SQLiteConnection) {

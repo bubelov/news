@@ -38,7 +38,7 @@ class EnclosuresRepo(
             throw Exception("Invalid link type: ${enclosure.type}")
         }
 
-        val entry = db.entryQueries.selectById(enclosure.entryId!!)
+        val entry = db.entry.selectById(enclosure.entryId!!)
             ?: throw Exception("Entry ${enclosure.entryId} does not exist")
 
         updateLink(
@@ -169,7 +169,7 @@ class EnclosuresRepo(
 
     suspend fun deletePartialDownloads() {
         Log.d(TAG, "Deleting partial downloads")
-        val links = db.entryQueries.selectAllLinks().flatten()
+        val links = db.entry.selectAllLinks().flatten()
         Log.d(TAG, "Got ${links.size} links")
         val enclosures = links.filter { it.rel is AtomLinkRel.Enclosure }
         Log.d(TAG, "Of them, ${enclosures.size} are org.vestifeed.enclosures")
@@ -216,14 +216,14 @@ class EnclosuresRepo(
         }
 
         if (link.entryId != null) {
-            val entry = db.entryQueries.selectById(link.entryId) ?: throw Exception("Entry not found")
+            val entry = db.entry.selectById(link.entryId) ?: throw Exception("Entry not found")
             updateLink(link, entry)
         }
     }
 
     private suspend fun updateLink(link: Link, entry: Entry): Link {
         withContext(Dispatchers.IO) {
-            db.entryQueries.updateLinks(
+            db.entry.updateLinks(
                 id = entry.id,
                 links = entry.links.map {
                     if (it.href == link.href) {

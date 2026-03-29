@@ -83,7 +83,7 @@ class SettingsFragment : AppFragment() {
     }
 
     private fun refresh() {
-        val conf = db.confQueries.select()
+        val conf = db.conf.select()
         _state.update {
             val logOutTitle: String
             val logOutSubtitle: String
@@ -109,58 +109,58 @@ class SettingsFragment : AppFragment() {
     }
 
     private fun setSyncInBackground(value: Boolean) {
-        db.confQueries.update { it.copy(syncInBackground = value) }
+        db.conf.update { it.copy(syncInBackground = value) }
         syncScheduler.schedule()
         refresh()
     }
 
     private fun setBackgroundSyncIntervalMillis(value: Long) {
-        db.confQueries.update { it.copy(backgroundSyncIntervalMillis = value) }
+        db.conf.update { it.copy(backgroundSyncIntervalMillis = value) }
         syncScheduler.schedule()
         refresh()
     }
 
     private fun setSyncOnStartup(value: Boolean) {
-        db.confQueries.update { it.copy(syncOnStartup = value) }
+        db.conf.update { it.copy(syncOnStartup = value) }
         refresh()
     }
 
     private fun setShowReadEntries(value: Boolean) {
-        db.confQueries.update { it.copy(showReadEntries = value) }
+        db.conf.update { it.copy(showReadEntries = value) }
         refresh()
     }
 
     private fun setShowPreviewImages(value: Boolean) {
-        db.confQueries.update { it.copy(showPreviewImages = value) }
+        db.conf.update { it.copy(showPreviewImages = value) }
         refresh()
     }
 
     private fun setCropPreviewImages(value: Boolean) {
-        db.confQueries.update { it.copy(cropPreviewImages = value) }
+        db.conf.update { it.copy(cropPreviewImages = value) }
         refresh()
     }
 
     private fun setShowPreviewText(value: Boolean) {
-        db.confQueries.update { it.copy(showPreviewText = value) }
+        db.conf.update { it.copy(showPreviewText = value) }
         refresh()
     }
 
     private fun setMarkScrolledEntriesAsRead(value: Boolean) {
-        db.confQueries.update { it.copy(markScrolledEntriesAsRead = value) }
+        db.conf.update { it.copy(markScrolledEntriesAsRead = value) }
         refresh()
     }
 
     private fun setUseBuiltInBrowser(value: Boolean) {
-        db.confQueries.update { it.copy(useBuiltInBrowser = value) }
+        db.conf.update { it.copy(useBuiltInBrowser = value) }
         refresh()
     }
 
     private fun logOut() {
-        db.confQueries.delete()
+        db.conf.delete()
 
         db.transaction {
-            db.feedQueries.deleteAll()
-            db.entryQueries.deleteAll()
+            db.feed.deleteAll()
+            db.entry.deleteAll()
         }
     }
 

@@ -119,7 +119,7 @@ class StandaloneNewsApi(
     }
 
     override suspend fun getFeeds(): Result<List<Feed>> {
-        return runCatching { db.feedQueries.selectAll() }
+        return runCatching { db.feed.selectAll() }
     }
 
     override suspend fun updateFeedTitle(feedId: String, newTitle: String): Result<Unit> {
@@ -143,7 +143,7 @@ class StandaloneNewsApi(
             val entries = Collections.synchronizedList(mutableListOf<Entry>())
 
             withContext(Dispatchers.IO) {
-                val feeds = db.feedQueries.selectAll()
+                val feeds = db.feed.selectAll()
 
                 feeds.forEach { feed ->
                     runCatching {
@@ -153,7 +153,7 @@ class StandaloneNewsApi(
                     }
                 }
 
-                val prevCachedEntryIds = db.entryQueries.selectByIds(entries.map { it.id }).map { it.id }
+                val prevCachedEntryIds = db.entry.selectByIds(entries.map { it.id }).map { it.id }
                 entries.removeAll { prevCachedEntryIds.contains(it.id) }
             }
 

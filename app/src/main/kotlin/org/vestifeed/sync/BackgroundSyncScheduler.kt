@@ -15,7 +15,7 @@ class BackgroundSyncScheduler(
 
     fun schedule() {
         val workManager = WorkManager.getInstance(context)
-        val conf = context.db().confQueries.select()
+        val conf = context.db().conf.select()
 
         if (!conf.syncInBackground) {
             workManager.cancelUniqueWork(WORK_NAME)

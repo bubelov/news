@@ -58,7 +58,7 @@ abstract class AppFragment : Fragment() {
         maxEntries: Long,
     ): List<EntryWithoutContent> {
         val entries = withContext(Dispatchers.IO) {
-            db().entryQueries.selectByOgImageChecked(
+            db().entry.selectByOgImageChecked(
                 false,
                 maxEntries,
             )
@@ -93,7 +93,7 @@ abstract class AppFragment : Fragment() {
         if (htmlLink == null) {
             Log.e("opengraph", "html link not found")
             withContext(Dispatchers.IO) {
-                db().entryQueries.updateOgImageChecked(true, entry.id)
+                db().entry.updateOgImageChecked(true, entry.id)
             }
             return false
         }
@@ -105,7 +105,7 @@ abstract class AppFragment : Fragment() {
         } catch (e: Throwable) {
             Log.e("opengraph", "failed to fetch html page", e)
             withContext(Dispatchers.IO) {
-                db().entryQueries.updateOgImageChecked(true, entry.id)
+                db().entry.updateOgImageChecked(true, entry.id)
             }
             return false
         }
@@ -113,7 +113,7 @@ abstract class AppFragment : Fragment() {
         if (!htmlLinkResponse.isSuccessful) {
             Log.e("opengraph", "http request failed with code ${htmlLinkResponse.code}")
             withContext(Dispatchers.IO) {
-                db().entryQueries.updateOgImageChecked(true, entry.id)
+                db().entry.updateOgImageChecked(true, entry.id)
             }
             return false
         }
@@ -123,7 +123,7 @@ abstract class AppFragment : Fragment() {
         } catch (e: Throwable) {
             Log.e("opengraph", "failed to read response body", e)
             withContext(Dispatchers.IO) {
-                db().entryQueries.updateOgImageChecked(true, entry.id)
+                db().entry.updateOgImageChecked(true, entry.id)
             }
             return false
         }
@@ -135,7 +135,7 @@ abstract class AppFragment : Fragment() {
         if (imageUrl.isBlank()) {
             Log.e("opengraph", "cannot find opengraph image url")
             withContext(Dispatchers.IO) {
-                db().entryQueries.updateOgImageChecked(true, entry.id)
+                db().entry.updateOgImageChecked(true, entry.id)
             }
             return false
         }
@@ -156,13 +156,13 @@ abstract class AppFragment : Fragment() {
             is ErrorResult -> {
                 Log.d("opengraph", "bitmap load error")
                 withContext(Dispatchers.IO) {
-                    db().entryQueries.updateOgImageChecked(true, entry.id)
+                    db().entry.updateOgImageChecked(true, entry.id)
                 }
                 return false
             }
         }
 
-        db().entryQueries.updateOgImage(
+        db().entry.updateOgImage(
             extOgImageUrl = imageUrl,
             extOgImageWidth = bitmap.width.toLong(),
             extOgImageHeight = bitmap.height.toLong(),

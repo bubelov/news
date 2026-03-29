@@ -20,13 +20,13 @@ class FeedsRepo(
     private val _feedsWithUnreadFlow = MutableStateFlow<List<org.vestifeed.db.SelectAllWithUnreadEntryCount>>(emptyList())
 
     private fun refreshFlows() {
-        _feedsFlow.value = db.feedQueries.selectAll()
-        _feedsWithUnreadFlow.value = db.feedQueries.selectAllWithUnreadEntryCount()
+        _feedsFlow.value = db.feed.selectAll()
+        _feedsWithUnreadFlow.value = db.feed.selectAllWithUnreadEntryCount()
     }
 
     suspend fun insertOrReplace(feed: Feed) {
         withContext(Dispatchers.IO) {
-            db.feedQueries.insertOrReplace(feed)
+            db.feed.insertOrReplace(feed)
             refreshFlows()
         }
     }
@@ -35,7 +35,7 @@ class FeedsRepo(
         val feedWithEntries = api.addFeed(url).getOrThrow()
 
         return withContext(Dispatchers.IO) {
-            db.feedQueries.insertOrReplace(feedWithEntries.first)
+            db.feed.insertOrReplace(feedWithEntries.first)
             refreshFlows()
             feedWithEntries
         }
@@ -50,20 +50,20 @@ class FeedsRepo(
     fun selectAllWithUnreadEntryCount(): Flow<List<org.vestifeed.db.SelectAllWithUnreadEntryCount>> = _feedsWithUnreadFlow.asStateFlow()
 
     fun selectById(id: String): Flow<Feed?> {
-        return kotlinx.coroutines.flow.flowOf(db.feedQueries.selectById(id))
+        return kotlinx.coroutines.flow.flowOf(db.feed.selectById(id))
     }
 
     fun selectLinks(): Flow<List<List<org.vestifeed.db.Link>>> {
-        return kotlinx.coroutines.flow.flowOf(db.feedQueries.selectLinks())
+        return kotlinx.coroutines.flow.flowOf(db.feed.selectLinks())
     }
 
     suspend fun updateTitle(feedId: String, newTitle: String) {
         withContext(Dispatchers.IO) {
-            val feed = db.feedQueries.selectById(feedId)
+            val feed = db.feed.selectById(feedId)
                 ?: throw Exception("Cannot find feed $feedId in cache")
             val trimmedNewTitle = newTitle.trim()
             api.updateFeedTitle(feedId, trimmedNewTitle)
-            db.feedQueries.insertOrReplace(feed.copy(title = trimmedNewTitle))
+            db.feed.insertOrReplace(feed.copy(title = trimmedNewTitle))
             refreshFlows()
         }
     }
@@ -73,8 +73,8 @@ class FeedsRepo(
 
         withContext(Dispatchers.IO) {
             db.transaction {
-                db.feedQueries.deleteById(id)
-                db.entryQueries.deleteByFeedId(id)
+                db.feed.deleteById(id)
+                db.entry.deleteByFeedId(id)
             }
             refreshFlows()
         }
@@ -90,12 +90,12 @@ class FeedsRepo(
             Log.d("sync", "got ${cachedFeeds.size} cached feeds")
             Log.d("sync", "preparing write transaction")
             db.transaction {
-                db.feedQueries.deleteAll()
+                db.feed.deleteAll()
 
                 newFeeds.forEach { feed ->
                     val cachedFeed = cachedFeeds.find { it.id == feed.id }
 
-                    db.feedQueries.insertOrReplace(
+                    db.feed.insertOrReplace(
                         feed.copy(
                             extOpenEntriesInBrowser = cachedFeed?.extOpenEntriesInBrowser ?: false,
                             extBlockedWords = cachedFeed?.extBlockedWords ?: "",

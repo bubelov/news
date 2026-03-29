@@ -23,7 +23,7 @@ class HotSwapApi(private val db: Database) : Api {
     }
 
     private fun updateApi() {
-        val conf = db.confQueries.select()
+        val conf = db.conf.select()
         api = when (conf.backend) {
             ConfQueries.BACKEND_STANDALONE -> {
                 StandaloneNewsApi(db)

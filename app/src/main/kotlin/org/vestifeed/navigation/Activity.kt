@@ -44,10 +44,10 @@ class Activity : AppCompatActivity() {
             insets
         }
 
-        db().confQueries.update { it.copy(syncedOnStartup = false) }
+        db().conf.update { it.copy(syncedOnStartup = false) }
 
         lifecycleScope.launch {
-            val conf = db().confQueries.select()
+            val conf = db().conf.select()
 
             if (conf.backend.isNotBlank()) {
                 supportFragmentManager.commit {

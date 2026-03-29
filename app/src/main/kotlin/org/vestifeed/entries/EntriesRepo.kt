@@ -19,7 +19,7 @@ class EntriesRepo(
 ) {
 
     fun insertOrReplace(entry: Entry) {
-        db.entryQueries.insertOrReplace(entry)
+        db.entry.insertOrReplace(entry)
     }
 
     fun selectAll(): List<Entry> {
@@ -38,11 +38,11 @@ class EntriesRepo(
     }
 
     fun selectAllLinksPublishedAndTitle(): Flow<List<ShortEntry>> {
-        return flowOf(db.entryQueries.selectAllLinksPublishedAndTitle())
+        return flowOf(db.entry.selectAllLinksPublishedAndTitle())
     }
 
     fun selectById(entryId: String): Flow<Entry?> {
-        return flowOf(db.entryQueries.selectById(entryId))
+        return flowOf(db.entry.selectById(entryId))
     }
 
     fun selectByFeedIdAndReadAndBookmarked(
@@ -50,41 +50,41 @@ class EntriesRepo(
         read: Collection<Boolean>,
         bookmarked: Boolean,
     ): Flow<List<EntriesAdapterRow>> {
-        return flowOf(db.entryQueries.selectByFeedIdAndReadAndBookmarked(feedId, read.toList(), bookmarked))
+        return flowOf(db.entry.selectByFeedIdAndReadAndBookmarked(feedId, read.toList(), bookmarked))
     }
 
     fun selectByReadAndBookmarked(
         read: Collection<Boolean>,
         bookmarked: Boolean,
     ): Flow<List<EntriesAdapterRow>> {
-        return flowOf(db.entryQueries.selectByReadAndBookmarked(read.toList(), bookmarked))
+        return flowOf(db.entry.selectByReadAndBookmarked(read.toList(), bookmarked))
     }
 
-    fun selectCount(): Flow<Long> = flowOf(db.entryQueries.selectCount())
+    fun selectCount(): Flow<Long> = flowOf(db.entry.selectCount())
 
-    private fun selectMaxId(): Flow<String?> = flowOf(db.entryQueries.selectMaxId())
+    private fun selectMaxId(): Flow<String?> = flowOf(db.entry.selectMaxId())
 
-    private fun selectMaxUpdated(): Flow<String?> = flowOf(db.entryQueries.selectMaxUpdated())
+    private fun selectMaxUpdated(): Flow<String?> = flowOf(db.entry.selectMaxUpdated())
 
     fun selectByFtsQuery(query: String): Flow<List<SelectByQuery>> {
-        return flowOf(db.entrySearchQueries.selectByQuery(query))
+        return flowOf(db.entry.selectByQuery(query))
     }
 
     suspend fun updateReadByFeedId(read: Boolean, feedId: String) {
         withContext(Dispatchers.IO) {
-            db.entryQueries.updateReadByFeedId(read, feedId)
+            db.entry.updateReadByFeedId(read, feedId)
         }
     }
 
     suspend fun updateReadByBookmarked(read: Boolean, bookmarked: Boolean) {
         withContext(Dispatchers.IO) {
-            db.entryQueries.updateReadByBookmarked(read, bookmarked)
+            db.entry.updateReadByBookmarked(read, bookmarked)
         }
     }
 
     suspend fun updateReadAndReadSynced(id: String, read: Boolean, readSynced: Boolean) {
         withContext(Dispatchers.IO) {
-            db.entryQueries.updateReadAndReadSynced(id, read, readSynced)
+            db.entry.updateReadAndReadSynced(id, read, readSynced)
         }
     }
 
@@ -94,7 +94,7 @@ class EntriesRepo(
         bookmarkedSynced: Boolean,
     ) {
         withContext(Dispatchers.IO) {
-            db.entryQueries.updateBookmarkedAndBookmaredSynced(id, bookmarked, bookmarkedSynced)
+            db.entry.updateBookmarkedAndBookmaredSynced(id, bookmarked, bookmarkedSynced)
         }
     }
 
@@ -113,7 +113,7 @@ class EntriesRepo(
 
     suspend fun syncReadEntries() {
         withContext(Dispatchers.IO) {
-            val unsyncedEntries = db.entryQueries.selectByReadSynced(false)
+            val unsyncedEntries = db.entry.selectByReadSynced(false)
 
             if (unsyncedEntries.isEmpty()) {
                 return@withContext
@@ -129,7 +129,7 @@ class EntriesRepo(
 
                 db.transaction {
                     unsyncedReadEntries.forEach {
-                        db.entryQueries.updateReadSynced(true, it.id)
+                        db.entry.updateReadSynced(true, it.id)
                     }
                 }
             }
@@ -144,7 +144,7 @@ class EntriesRepo(
 
                 db.transaction {
                     unsyncedUnreadEntries.forEach {
-                        db.entryQueries.updateReadSynced(true, it.id)
+                        db.entry.updateReadSynced(true, it.id)
                     }
                 }
             }
@@ -153,7 +153,7 @@ class EntriesRepo(
 
     suspend fun syncBookmarkedEntries() {
         withContext(Dispatchers.IO) {
-            val notSyncedEntries = db.entryQueries.selectByBookmarkedSynced(false)
+            val notSyncedEntries = db.entry.selectByBookmarkedSynced(false)
 
             if (notSyncedEntries.isEmpty()) {
                 return@withContext
@@ -166,7 +166,7 @@ class EntriesRepo(
 
                 db.transaction {
                     notSyncedBookmarkedEntries.forEach {
-                        db.entryQueries.updateBookmarkedSynced(true, it.id)
+                        db.entry.updateBookmarkedSynced(true, it.id)
                     }
                 }
             }
@@ -178,7 +178,7 @@ class EntriesRepo(
 
                 db.transaction {
                     notSyncedNotBookmarkedEntries.forEach {
-                        db.entryQueries.updateBookmarkedSynced(true, it.id)
+                        db.entry.updateBookmarkedSynced(true, it.id)
                     }
                 }
             }
@@ -196,7 +196,7 @@ class EntriesRepo(
                 null
             }
 
-            val maxUpdated = db.entryQueries.selectMaxUpdated()
+            val maxUpdated = db.entry.selectMaxUpdated()
 
             val maxUpdatedInstant = if (maxUpdated != null) {
                 OffsetDateTime.parse(maxUpdated)
@@ -206,7 +206,7 @@ class EntriesRepo(
 
             val entries = api.getNewAndUpdatedEntries(
                 lastSync = lastSyncInstant,
-                maxEntryId = db.entryQueries.selectMaxId(),
+                maxEntryId = db.entry.selectMaxId(),
                 maxEntryUpdated = maxUpdatedInstant,
             ).getOrThrow()
 
@@ -215,10 +215,10 @@ class EntriesRepo(
                     val feed = feeds.firstOrNull { it.id == newEntry.feedId }
                     val postProcessedEntry = newEntry.postProcess(feed)
 
-                    val oldLinks = db.entryQueries.selectLinksById(newEntry.id)
+                    val oldLinks = db.entry.selectLinksById(newEntry.id)
                         ?: emptyList()
 
-                    db.entryQueries.insertOrReplace(
+                    db.entry.insertOrReplace(
                         postProcessedEntry.copy(links = oldLinks.ifEmpty { newEntry.links })
                     )
                 }

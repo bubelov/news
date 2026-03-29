@@ -36,7 +36,7 @@ class Sync(
             return SyncResult.Failure(Exception("Already syncing"))
         }
 
-        val conf = db.confQueries.select()
+        val conf = db.conf.select()
 
         if (!conf.initialSyncCompleted) {
             Log.d("sync", "launching initial sync")
@@ -79,7 +79,7 @@ class Sync(
                 )
             }
 
-            db.confQueries.update {
+            db.conf.update {
                 it.copy(
                     initialSyncCompleted = true,
                     lastEntriesSyncDatetime = Instant.now().toString(),
@@ -134,11 +134,11 @@ class Sync(
             return if (args.syncEntries) {
                 runCatching {
                     val newAndUpdatedEntries = entriesRepo.syncNewAndUpdated(
-                        lastEntriesSyncDateTime = db.confQueries.select().lastEntriesSyncDatetime,
+                        lastEntriesSyncDateTime = db.conf.select().lastEntriesSyncDatetime,
                         feeds = feedsRepo.selectAll().first(),
                     )
 
-                    db.confQueries.update {
+                    db.conf.update {
                         it.copy(
                             lastEntriesSyncDatetime = Instant.now().toString()
                         )

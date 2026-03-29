@@ -35,7 +35,6 @@ import org.vestifeed.db.Entry
 import org.vestifeed.db.Link
 import org.vestifeed.dialog.showErrorDialog
 import org.vestifeed.enclosures.EnclosuresAdapter
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.vestifeed.R
 import org.vestifeed.app.db
@@ -53,7 +52,7 @@ class EntryFragment : AppFragment() {
 
     private val entryId by lazy { requireArguments().getString("entryId", "") }
 
-    private val conf by lazy { requireContext().db().confQueries.select() }
+    private val conf by lazy { requireContext().db().conf.select() }
 
     private var _binding: FragmentEntryBinding? = null
     private val binding get() = _binding!!
@@ -130,7 +129,7 @@ class EntryFragment : AppFragment() {
     private fun loadEntry() {
         viewLifecycleOwner.lifecycleScope.launch {
             runCatching {
-                val entry = db().entryQueries.selectById(entryId)
+                val entry = db().entry.selectById(entryId)
                 if (entry == null) {
                     showError(
                         getString(
@@ -141,7 +140,7 @@ class EntryFragment : AppFragment() {
                     return@launch
                 }
 
-                val feed = db().feedQueries.selectById(entry.feedId)
+                val feed = db().feed.selectById(entry.feedId)
                 if (feed == null) {
                     showError(
                         getString(
@@ -236,7 +235,7 @@ class EntryFragment : AppFragment() {
             R.id.toggleBookmarked -> {
                 lifecycleScope.launch {
                     val newBookmarkedState = !entry.extBookmarked
-                    db().entryQueries.updateBookmarkedAndBookmaredSynced(
+                    db().entry.updateBookmarkedAndBookmaredSynced(
                         id = entry.id,
                         extBookmarked = newBookmarkedState,
                         extBookmarkedSynced = false,
@@ -306,7 +305,7 @@ class EntryFragment : AppFragment() {
     }
 
     private fun refreshEnclosures() {
-        val entry = db().entryQueries.selectById(entryId) ?: return
+        val entry = db().entry.selectById(entryId) ?: return
 
         enclosuresAdapter.submitList(
             entry.links

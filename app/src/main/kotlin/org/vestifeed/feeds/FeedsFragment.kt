@@ -112,7 +112,7 @@ class FeedsFragment : AppFragment() {
         initImportButton()
         initFab()
 
-        val feeds = db().feedQueries.selectAllWithUnreadEntryCount()
+        val feeds = db().feed.selectAllWithUnreadEntryCount()
         _state.update { State.ShowingFeeds(feeds.map { it.toItem() }) }
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -378,7 +378,7 @@ class FeedsFragment : AppFragment() {
             selfLink = selfLink,
             alternateLink = links.firstOrNull { it.rel is AtomLinkRel.Alternate }?.href,
             unreadCount = unreadEntries,
-            confUseBuiltInBrowser = db().confQueries.select().useBuiltInBrowser,
+            confUseBuiltInBrowser = db().conf.select().useBuiltInBrowser,
         )
     }
 

@@ -160,10 +160,10 @@ class EntriesFragment : AppFragment() {
         _binding = null
     }
 
-    private fun hasBackend() = db().confQueries.select().backend.isNotBlank()
+    private fun hasBackend() = db().conf.select().backend.isNotBlank()
 
     private fun refresh() {
-        val conf = db().confQueries.select()
+        val conf = db().conf.select()
         val syncState = sync().state.value
         maybeStartupSync()
         updateState(conf, syncState)
@@ -171,10 +171,10 @@ class EntriesFragment : AppFragment() {
 
     private fun maybeStartupSync() {
         Log.d("entries_fragment", "maybe startup sync")
-        val conf = db().confQueries.select()
+        val conf = db().conf.select()
         if (!conf.initialSyncCompleted || (conf.syncOnStartup && !conf.syncedOnStartup)) {
             Log.d("entries_fragment", "YES")
-            db().confQueries.update { it.copy(syncedOnStartup = true) }
+            db().conf.update { it.copy(syncedOnStartup = true) }
             viewLifecycleOwner.lifecycleScope.launch {
                 sync().run()
                 refresh()
@@ -198,7 +198,7 @@ class EntriesFragment : AppFragment() {
                 scrollToTopNextTime = false
 
                 val rows: List<EntriesAdapterRow> = if (filter is EntriesFilter.BelongToFeed) {
-                    db().entryQueries.selectByFeedIdAndReadAndBookmarked(
+                    db().entry.selectByFeedIdAndReadAndBookmarked(
                         feedId = (filter as EntriesFilter.BelongToFeed).feedId,
                         extRead = if (conf.showReadEntries) listOf(true, false) else listOf(false),
                         extBookmarked = false,
@@ -207,7 +207,7 @@ class EntriesFragment : AppFragment() {
                     val includeRead = (conf.showReadEntries || filter is EntriesFilter.Bookmarked)
                     val includeBookmarked = filter is EntriesFilter.Bookmarked
 
-                    db().entryQueries.selectByReadAndBookmarked(
+                    db().entry.selectByReadAndBookmarked(
                         extRead = if (includeRead) listOf(true, false) else listOf(false),
                         extBookmarked = includeBookmarked,
                     )
@@ -222,7 +222,7 @@ class EntriesFragment : AppFragment() {
                 state.update {
                     State.ShowingCachedEntries(
                         feed = if (filter is EntriesFilter.BelongToFeed) {
-                            db().feedQueries.selectById((filter as EntriesFilter.BelongToFeed).feedId)
+                            db().feed.selectById((filter as EntriesFilter.BelongToFeed).feedId)
                         } else {
                             null
                         },
@@ -251,13 +251,13 @@ class EntriesFragment : AppFragment() {
     }
 
     private fun saveConf(newConf: (Conf) -> Conf) {
-        db().confQueries.update(newConf)
+        db().conf.update(newConf)
     }
 
     private fun changeSortOrder() {
         scrollToTopNextTime = true
 
-        db().confQueries.update {
+        db().conf.update {
             val newSortOrder = when (it.sortOrder) {
                 ConfQueries.SORT_ORDER_ASCENDING -> ConfQueries.SORT_ORDER_DESCENDING
                 ConfQueries.SORT_ORDER_DESCENDING -> ConfQueries.SORT_ORDER_ASCENDING
@@ -273,7 +273,7 @@ class EntriesFragment : AppFragment() {
     private fun setRead(entryIds: Collection<String>, read: Boolean) {
         viewLifecycleOwner.lifecycleScope.launch {
             entryIds.forEach {
-                db().entryQueries.updateReadAndReadSynced(
+                db().entry.updateReadAndReadSynced(
                     id = it,
                     extRead = read,
                     extReadSynced = false,
@@ -294,7 +294,7 @@ class EntriesFragment : AppFragment() {
 
     private fun setBookmarked(entryId: String, bookmarked: Boolean) {
         viewLifecycleOwner.lifecycleScope.launch {
-            db().entryQueries.updateBookmarkedAndBookmaredSynced(
+            db().entry.updateBookmarkedAndBookmaredSynced(
                 id = entryId,
                 extBookmarked = bookmarked,
                 extBookmarkedSynced = false
@@ -316,21 +316,21 @@ class EntriesFragment : AppFragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             when (val currentFilter = filter) {
                 is EntriesFilter.Unread -> {
-                    db().entryQueries.updateReadByBookmarked(
+                    db().entry.updateReadByBookmarked(
                         read = true,
                         bookmarked = false,
                     )
                 }
 
                 is EntriesFilter.Bookmarked -> {
-                    db().entryQueries.updateReadByBookmarked(
+                    db().entry.updateReadByBookmarked(
                         read = true,
                         bookmarked = true,
                     )
                 }
 
                 is EntriesFilter.BelongToFeed -> {
-                    db().entryQueries.updateReadByFeedId(
+                    db().entry.updateReadByFeedId(
                         read = true,
                         feedId = currentFilter.feedId,
                     )

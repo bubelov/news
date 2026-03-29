@@ -52,7 +52,7 @@ class AuthFragment : AppFragment() {
             val db = (requireContext().applicationContext as App).db
             val syncScheduler = BackgroundSyncScheduler(requireContext())
 
-            db.confQueries.update {
+            db.conf.update {
                 it.copy(
                     backend = ConfQueries.BACKEND_STANDALONE,
                     syncOnStartup = false,

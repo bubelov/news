@@ -21,7 +21,7 @@ class SyncWorker(context: Context, workerParams: WorkerParameters) : Worker(cont
     override fun doWork() = runBlocking { doWorkAsync() }
 
     private suspend fun doWorkAsync(): Result {
-        val conf = applicationContext.db().confQueries.select()
+        val conf = applicationContext.db().conf.select()
         val sync = applicationContext.sync()
 
         if (!conf.initialSyncCompleted) {
@@ -33,7 +33,7 @@ class SyncWorker(context: Context, workerParams: WorkerParameters) : Worker(cont
                 if (syncResult.newAndUpdatedEntries > 0) {
                     runCatching {
                         val unreadEntries =
-                            applicationContext.db().entryQueries.selectByReadAndBookmarked(
+                            applicationContext.db().entry.selectByReadAndBookmarked(
                                 extRead = listOf(false),
                                 extBookmarked = false,
                             ).size
