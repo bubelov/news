@@ -2,14 +2,8 @@ package org.vestifeed.entries
 
 import org.vestifeed.api.Api
 import org.vestifeed.db.Database
-import org.vestifeed.db.EntriesAdapterRow
-import org.vestifeed.db.Entry
-import org.vestifeed.db.Feed
-import org.vestifeed.db.SelectByQuery
-import org.vestifeed.db.ShortEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withContext
 import java.time.OffsetDateTime
 
@@ -17,79 +11,7 @@ class EntriesRepo(
     private val api: Api,
     private val db: Database,
 ) {
-
-    fun selectAll(): List<Entry> {
-        return emptyList()
-    }
-
-    fun selectAllLinksPublishedAndTitle(): Flow<List<ShortEntry>> {
-        return flowOf(db.entry.selectAllLinksPublishedAndTitle())
-    }
-
-    fun selectById(entryId: String): Flow<Entry?> {
-        return flowOf(db.entry.selectById(entryId))
-    }
-
-    fun selectByFeedIdAndReadAndBookmarked(
-        feedId: String,
-        read: Collection<Boolean>,
-        bookmarked: Boolean,
-    ): Flow<List<EntriesAdapterRow>> {
-        return flowOf(
-            db.entry.selectByFeedIdAndReadAndBookmarked(
-                feedId,
-                read.toList(),
-                bookmarked
-            )
-        )
-    }
-
-    fun selectByReadAndBookmarked(
-        read: Collection<Boolean>,
-        bookmarked: Boolean,
-    ): Flow<List<EntriesAdapterRow>> {
-        return flowOf(db.entry.selectByReadAndBookmarked(read.toList(), bookmarked))
-    }
-
-    fun selectCount(): Flow<Long> = flowOf(db.entry.selectCount())
-
-    private fun selectMaxId(): Flow<String?> = flowOf(db.entry.selectMaxId())
-
-    private fun selectMaxUpdated(): Flow<String?> = flowOf(db.entry.selectMaxUpdated())
-
-    fun selectByFtsQuery(query: String): Flow<List<SelectByQuery>> {
-        return flowOf(db.entry.selectByQuery(query))
-    }
-
-    suspend fun updateReadByFeedId(read: Boolean, feedId: String) {
-        withContext(Dispatchers.IO) {
-            db.entry.updateReadByFeedId(read, feedId)
-        }
-    }
-
-    suspend fun updateReadByBookmarked(read: Boolean, bookmarked: Boolean) {
-        withContext(Dispatchers.IO) {
-            db.entry.updateReadByBookmarked(read, bookmarked)
-        }
-    }
-
-    suspend fun updateReadAndReadSynced(id: String, read: Boolean, readSynced: Boolean) {
-        withContext(Dispatchers.IO) {
-            db.entry.updateReadAndReadSynced(id, read, readSynced)
-        }
-    }
-
-    suspend fun updateBookmarkedAndBookmaredSynced(
-        id: String,
-        bookmarked: Boolean,
-        bookmarkedSynced: Boolean,
-    ) {
-        withContext(Dispatchers.IO) {
-            db.entry.updateBookmarkedAndBookmaredSynced(id, bookmarked, bookmarkedSynced)
-        }
-    }
-
-    suspend fun syncAll(): Flow<SyncProgress> = kotlinx.coroutines.flow.flow {
+    fun syncAll(): Flow<SyncProgress> = kotlinx.coroutines.flow.flow {
         emit(SyncProgress(0L))
 
         var entriesLoaded = 0L

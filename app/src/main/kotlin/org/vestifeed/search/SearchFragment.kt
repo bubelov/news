@@ -19,13 +19,13 @@ import org.vestifeed.parser.AtomLinkRel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.vestifeed.R
 import org.vestifeed.anim.animateVisibilityChanges
 import org.vestifeed.app.App
 import org.vestifeed.app.api
+import org.vestifeed.app.db
 import org.vestifeed.db.Conf
 import org.vestifeed.db.SelectByQuery
 import org.vestifeed.entries.EntriesRepo
@@ -85,7 +85,7 @@ class SearchFragment : AppFragment() {
 
                 _state.update { State.RunningQuery }
 
-                val rows = entriesRepo.selectByFtsQuery(args.query).first()
+                val rows = db().entry.selectByFtsQuery(args.query)
                 val items = rows.map { it.toItem(conf) }
 
                 _state.update { State.ShowingQueryResults(items) }
@@ -111,10 +111,10 @@ class SearchFragment : AppFragment() {
     private fun markAsRead(entryId: String) {
         viewLifecycleOwner.lifecycleScope.launch {
             runCatching {
-                entriesRepo.updateReadAndReadSynced(
+                db().entry.updateReadAndReadSynced(
                     id = entryId,
-                    read = true,
-                    readSynced = false,
+                    extRead = true,
+                    extReadSynced = false,
                 )
 
                 sync.run(

@@ -16,18 +16,17 @@ import androidx.recyclerview.widget.RecyclerView
 import org.vestifeed.parser.AtomLinkRel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.vestifeed.R
 import org.vestifeed.app.App
-import org.vestifeed.app.api
+import org.vestifeed.app.db
 import org.vestifeed.db.Link
 import org.vestifeed.databinding.FragmentEnclosuresBinding
 import org.vestifeed.dialog.showErrorDialog
-import org.vestifeed.entries.EntriesRepo
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
@@ -37,9 +36,7 @@ class EnclosuresFragment : AppFragment() {
     private val binding get() = _binding!!
 
     private val db by lazy { (requireContext().applicationContext as App).db }
-    private val api by lazy { api() }
     private val enclosuresRepo by lazy { EnclosuresRepo(requireContext(), db) }
-    private val entriesRepo by lazy { EntriesRepo(api, db) }
 
     private val _state = MutableStateFlow<State>(State.LoadingEnclosures)
     private val state = _state.asStateFlow()
@@ -81,8 +78,8 @@ class EnclosuresFragment : AppFragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             enclosuresRepo.deletePartialDownloads()
 
-            entriesRepo.selectCount().collect {
-                val entries = entriesRepo.selectAllLinksPublishedAndTitle().first()
+            flowOf(db().entry.selectCount()).collect {
+                val entries = db().entry.selectAllLinksPublishedAndTitle()
                 val enclosures = mutableListOf<EnclosuresAdapter.Item>()
 
                 entries.forEach { entry ->
