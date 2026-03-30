@@ -13,17 +13,14 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.vestifeed.R
 import org.vestifeed.app.App
-import org.vestifeed.app.api
 import org.vestifeed.databinding.FragmentFeedSettingsBinding
 import org.vestifeed.dialog.showErrorDialog
-import org.vestifeed.feeds.FeedsRepo
 import org.vestifeed.navigation.showKeyboard
 
 class FeedSettingsFragment : AppFragment() {
@@ -31,8 +28,6 @@ class FeedSettingsFragment : AppFragment() {
     private val feedId by lazy { requireArguments().getString("feedId", "") }
 
     private val db by lazy { (requireContext().applicationContext as App).db }
-    private val api by lazy { api() }
-    private val feedsRepo by lazy { FeedsRepo(api, db) }
 
     private val _feedId = MutableStateFlow("")
     private val _state = MutableStateFlow<State>(State.LoadingFeed)
@@ -63,7 +58,7 @@ class FeedSettingsFragment : AppFragment() {
                 return@onEach
             }
 
-            val feed = feedsRepo.selectById(it).first()!!
+            val feed = db.feed.selectById(it)!!
             _state.update { State.ShowingFeedSettings(feed) }
         }.launchIn(viewLifecycleOwner.lifecycleScope)
 
@@ -77,22 +72,22 @@ class FeedSettingsFragment : AppFragment() {
 
     private fun setOpenEntriesInBrowser(feedId: String, openEntriesInBrowser: Boolean) {
         viewLifecycleOwner.lifecycleScope.launch {
-            val feed = feedsRepo.selectById(feedId).first()!!
-            feedsRepo.insertOrReplace(feed.copy(extOpenEntriesInBrowser = openEntriesInBrowser))
+            val feed = db.feed.selectById(feedId)!!
+            db.feed.insertOrReplace(feed.copy(extOpenEntriesInBrowser = openEntriesInBrowser))
         }
     }
 
     private fun setShowPreviewImages(feedId: String, value: Boolean?) {
         viewLifecycleOwner.lifecycleScope.launch {
-            val feed = feedsRepo.selectById(feedId).first()!!
-            feedsRepo.insertOrReplace(feed.copy(extShowPreviewImages = value))
+            val feed = db.feed.selectById(feedId)!!
+            db.feed.insertOrReplace(feed.copy(extShowPreviewImages = value))
         }
     }
 
     private fun setBlockedWords(feedId: String, blockedWords: String) {
         viewLifecycleOwner.lifecycleScope.launch {
-            val feed = feedsRepo.selectById(feedId).first()!!
-            feedsRepo.insertOrReplace(feed.copy(extBlockedWords = blockedWords))
+            val feed = db.feed.selectById(feedId)!!
+            db.feed.insertOrReplace(feed.copy(extBlockedWords = blockedWords))
         }
     }
 

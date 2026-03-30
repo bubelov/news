@@ -8,13 +8,12 @@ import org.vestifeed.api.Api
 import org.vestifeed.api.HotSwapApi
 import org.vestifeed.db.Database
 import org.vestifeed.entries.EntriesRepo
-import org.vestifeed.feeds.FeedsRepo
 import org.vestifeed.sync.Sync
 import java.io.File
 
 class App : Application() {
 
-    val sync by lazy { Sync(db, FeedsRepo(api, db), EntriesRepo(api, db)) }
+    val sync by lazy { Sync(api, db, EntriesRepo(api, db)) }
 
     val api by lazy { HotSwapApi(db) }
 

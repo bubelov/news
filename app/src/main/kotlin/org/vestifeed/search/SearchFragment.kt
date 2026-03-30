@@ -24,12 +24,10 @@ import kotlinx.coroutines.launch
 import org.vestifeed.R
 import org.vestifeed.anim.animateVisibilityChanges
 import org.vestifeed.app.App
-import org.vestifeed.app.api
 import org.vestifeed.app.db
+import org.vestifeed.app.sync
 import org.vestifeed.db.Conf
 import org.vestifeed.db.SelectByQuery
-import org.vestifeed.entries.EntriesRepo
-import org.vestifeed.feeds.FeedsRepo
 import org.vestifeed.databinding.FragmentSearchBinding
 import org.vestifeed.dialog.showErrorDialog
 import org.vestifeed.entries.EntriesAdapter
@@ -44,9 +42,6 @@ import java.time.format.FormatStyle
 class SearchFragment : AppFragment() {
 
     private val db by lazy { (requireContext().applicationContext as App).db }
-    private val api by lazy { api() }
-    private val entriesRepo by lazy { EntriesRepo(api, db) }
-    private val sync by lazy { Sync(db, FeedsRepo(api, db), entriesRepo) }
 
     private val args = MutableStateFlow<Args?>(null)
 
@@ -117,7 +112,7 @@ class SearchFragment : AppFragment() {
                     extReadSynced = false,
                 )
 
-                sync.run(
+                sync().run(
                     Sync.Args(
                         syncFeeds = false,
                         syncFlags = true,

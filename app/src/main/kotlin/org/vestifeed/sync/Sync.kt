@@ -1,35 +1,35 @@
 package org.vestifeed.sync
 
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
 import org.vestifeed.entries.EntriesRepo
-import org.vestifeed.feeds.FeedsRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.withContext
+import org.vestifeed.api.Api
 import org.vestifeed.db.Database
 import java.time.Instant
 
 class Sync(
+    private val api: Api,
     private val db: Database,
-    private val feedsRepo: FeedsRepo,
     private val entriesRepo: EntriesRepo,
 ) {
-
     sealed class State {
         object Idle : State()
         data class InitialSync(val message: String = "") : State()
         data class FollowUpSync(val args: Args) : State()
     }
 
+    private val _state = MutableStateFlow<State>(State.Idle)
+    val state = _state.asStateFlow()
+
     data class Args(
         val syncFeeds: Boolean = true,
         val syncFlags: Boolean = true,
         val syncEntries: Boolean = true,
     )
-
-    private val _state = MutableStateFlow<State>(State.Idle)
-    val state = _state.asStateFlow()
 
     suspend fun run(args: Args = Args()): SyncResult {
         if (_state.value != State.Idle) {
@@ -44,7 +44,7 @@ class Sync(
 
             try {
                 Log.d("sync", "syncing feeds")
-                feedsRepo.sync()
+                syncFeeds()
                 Log.d("sync", "done syncing feeds")
             } catch (e: Throwable) {
                 Log.d("sync", "error syncing feeds")
@@ -118,14 +118,17 @@ class Sync(
             }
 
             if (args.syncFeeds) {
+                Log.d("sync", "syncing feeds")
                 runCatching {
-                    feedsRepo.sync()
+                    syncFeeds()
+                    Log.d("sync", "syncing feeds success")
                 }.onFailure {
+                    Log.d("sync", "syncing feeds failure")
                     _state.update { State.Idle }
                     return SyncResult.Failure(
                         Exception(
-                            "Failed to org.vestifeed.sync org.vestifeed.feeds",
-                            it
+                            "Failed to sync feeds",
+                            it,
                         )
                     )
                 }
@@ -158,5 +161,34 @@ class Sync(
                 SyncResult.Success(0)
             }
         }
+    }
+
+    private suspend fun syncFeeds() {
+        withContext(Dispatchers.IO) {
+            Log.d("sync", "requesting feeds from api")
+            val newFeeds = api.getFeeds().getOrThrow().sortedBy { it.id }
+            Log.d("sync", "got ${newFeeds.size} feeds")
+            Log.d("sync", "getting cached feeds")
+            val cachedFeeds = db.feed.selectAll()
+            Log.d("sync", "got ${cachedFeeds.size} cached feeds")
+            Log.d("sync", "preparing write transaction")
+            db.transaction {
+                db.feed.deleteAll()
+
+                newFeeds.forEach { feed ->
+                    val cachedFeed = cachedFeeds.find { it.id == feed.id }
+
+                    db.feed.insertOrReplace(
+                        feed.copy(
+                            extOpenEntriesInBrowser = cachedFeed?.extOpenEntriesInBrowser ?: false,
+                            extBlockedWords = cachedFeed?.extBlockedWords ?: "",
+                            extShowPreviewImages = cachedFeed?.extShowPreviewImages,
+                        )
+                    )
+                }
+            }
+            Log.d("sync", "finished write transaction")
+        }
+        Log.d("sync", "returning")
     }
 }

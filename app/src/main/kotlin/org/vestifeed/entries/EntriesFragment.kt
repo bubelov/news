@@ -247,6 +247,7 @@ class EntriesFragment : AppFragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             sync().run()
             refresh()
+            binding.swipeRefresh.isRefreshing = false
         }
     }
 
