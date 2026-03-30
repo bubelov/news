@@ -67,7 +67,7 @@ class MinifluxApiAdapter(
             runCatching {
                 var totalFetched = 0L
                 val currentBatch = mutableSetOf<EntryJson>()
-                val batchSize = 250L
+                val batchSize = 5L
                 var oldestEntryId = Long.MAX_VALUE
 
                 while (true) {

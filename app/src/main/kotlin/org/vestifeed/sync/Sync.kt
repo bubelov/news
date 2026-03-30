@@ -2,6 +2,7 @@ package org.vestifeed.sync
 
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,135 +32,127 @@ class Sync(
         val syncEntries: Boolean = true,
     )
 
-    suspend fun run(args: Args = Args()): SyncResult {
+    suspend fun maybeInitialSync() {
+        Log.d("sync", "maybeInitialSync")
+
         if (_state.value != State.Idle) {
-            return SyncResult.Failure(Exception("Already syncing"))
+            Log.d("sync", "already syncing, maybe no")
+            return
         }
 
-        val conf = db.conf.select()
+        val conf = withContext(Dispatchers.IO) {
+            db.conf.select()
+        }
 
-        if (!conf.initialSyncCompleted) {
-            Log.d("sync", "launching initial sync")
-            _state.update { State.InitialSync() }
+        if (conf.initialSyncCompleted) {
+            Log.d("sync", "initial sync was previously completed, maybe no")
+            return
+        }
 
-            try {
-                Log.d("sync", "syncing feeds")
-                syncFeeds()
-                Log.d("sync", "done syncing feeds")
-            } catch (e: Throwable) {
-                Log.d("sync", "error syncing feeds")
-                _state.update { State.Idle }
-                return SyncResult.Failure(
-                    Exception(
-                        "failed to sync feeds",
-                        e,
-                    )
-                )
-            }
+        Log.d("sync", "launching initial sync")
+        _state.update { State.InitialSync() }
 
-            Log.d("sync", "syncing entries")
+        try {
+            Log.d("sync", "syncing feeds")
+            _state.update { State.InitialSync("syncing feeds") }
+            delay(1_000)
+            syncFeeds()
+            Log.d("sync", "done syncing feeds")
+        } catch (e: Throwable) {
+            Log.e("sync", "error syncing feeds", e)
+            _state.update { State.Idle }
+            return
+        }
 
-            runCatching {
-                syncAllEntries().collect { progress ->
-                    var message = "Fetching news"
+        Log.d("sync", "syncing entries")
+        _state.update { State.InitialSync("syncing entries") }
 
-                    if (progress.itemsSynced > 0) {
-                        message += "\n Got ${progress.itemsSynced} items so far"
-                    }
+        try {
+            syncAllEntries().collect { progress ->
+                delay(500)
+                var message = "syncing entries"
 
-                    _state.update { State.InitialSync(message) }
+                if (progress.itemsSynced > 0) {
+                    message += " (${progress.itemsSynced})"
                 }
+
+                Log.d("sync", message)
+                _state.update { State.InitialSync(message) }
+            }
+        } catch (_: Throwable) {
+            _state.update { State.Idle }
+            return
+        }
+
+        db.conf.update {
+            it.copy(
+                initialSyncCompleted = true,
+                lastEntriesSyncDatetime = Instant.now().toString(),
+            )
+        }
+
+        _state.update { State.Idle }
+    }
+
+    suspend fun run(args: Args = Args()) {
+        if (_state.value != State.Idle) {
+            return
+        }
+
+        maybeInitialSync()
+
+        _state.update { State.FollowUpSync(args) }
+
+        if (args.syncFlags) {
+            runCatching {
+                syncReadEntries()
             }.onFailure {
                 _state.update { State.Idle }
-                return SyncResult.Failure(
-                    Exception(
-                        "Failed to org.vestifeed.sync org.vestifeed.entries",
-                        it
-                    )
-                )
+                return
             }
 
-            db.conf.update {
-                it.copy(
-                    initialSyncCompleted = true,
-                    lastEntriesSyncDatetime = Instant.now().toString(),
-                )
-            }
-
-            _state.update { State.Idle }
-            return SyncResult.Success(0)
-        } else {
-            _state.update { State.FollowUpSync(args) }
-
-            if (args.syncFlags) {
-                runCatching {
-                    syncReadEntries()
-                }.onFailure {
-                    _state.update { State.Idle }
-                    return SyncResult.Failure(
-                        Exception(
-                            "Failed to org.vestifeed.sync read news",
-                            it
-                        )
-                    )
-                }
-
-                runCatching {
-                    syncBookmarkedEntries()
-                }.onFailure {
-                    _state.update { State.Idle }
-                    return SyncResult.Failure(
-                        Exception(
-                            "Failed to org.vestifeed.sync bookmarks",
-                            it
-                        )
-                    )
-                }
-            }
-
-            if (args.syncFeeds) {
-                Log.d("sync", "syncing feeds")
-                runCatching {
-                    syncFeeds()
-                    Log.d("sync", "syncing feeds success")
-                }.onFailure {
-                    Log.d("sync", "syncing feeds failure")
-                    _state.update { State.Idle }
-                    return SyncResult.Failure(
-                        Exception(
-                            "Failed to sync feeds",
-                            it,
-                        )
-                    )
-                }
-            }
-
-            return if (args.syncEntries) {
-                runCatching {
-                    val newAndUpdatedEntries = syncNewAndUpdatedEntries(
-                        lastEntriesSyncDateTime = db.conf.select().lastEntriesSyncDatetime,
-                    )
-
-                    db.conf.update {
-                        it.copy(
-                            lastEntriesSyncDatetime = Instant.now().toString()
-                        )
-                    }
-                    _state.update { State.Idle }
-                    SyncResult.Success(newAndUpdatedEntries)
-                }.getOrElse {
-                    _state.update { State.Idle }
-                    return SyncResult.Failure(
-                        Exception(
-                            "Failed to org.vestifeed.sync new and updated org.vestifeed.entries",
-                            it
-                        )
-                    )
-                }
-            } else {
+            runCatching {
+                syncBookmarkedEntries()
+            }.onFailure {
                 _state.update { State.Idle }
-                SyncResult.Success(0)
+                return
             }
+        }
+
+        if (args.syncFeeds) {
+            Log.d("sync", "syncing feeds")
+            runCatching {
+                syncFeeds()
+                Log.d("sync", "syncing feeds success")
+            }.onFailure {
+                Log.d("sync", "syncing feeds failure")
+                _state.update { State.Idle }
+                return
+            }
+        }
+
+        return if (args.syncEntries) {
+            Log.d("sync", "syncing entries")
+            runCatching {
+                syncNewAndUpdatedEntries(
+                    lastEntriesSyncDateTime = db.conf.select().lastEntriesSyncDatetime,
+                )
+
+                db.conf.update {
+                    it.copy(
+                        lastEntriesSyncDatetime = Instant.now().toString()
+                    )
+                }
+                Log.d("sync", "syncing entries success")
+                _state.update { State.Idle }
+                Log.d("sync", "syncing entries success returning result")
+                return
+            }.getOrElse {
+                _state.update { State.Idle }
+                return
+            }
+        } else {
+            _state.update { State.Idle }
         }
     }
 

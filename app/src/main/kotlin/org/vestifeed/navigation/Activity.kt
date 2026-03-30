@@ -1,6 +1,7 @@
 package org.vestifeed.navigation
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
@@ -16,6 +17,7 @@ import org.vestifeed.feeds.FeedsFragment
 import kotlinx.coroutines.launch
 import org.vestifeed.R
 import org.vestifeed.app.db
+import org.vestifeed.app.sync
 import org.vestifeed.databinding.ActivityBinding
 
 class Activity : AppCompatActivity() {
@@ -49,6 +51,16 @@ class Activity : AppCompatActivity() {
         lifecycleScope.launch {
             val conf = db().conf.select()
 
+            if (conf.backend.isNotBlank() && conf.syncOnStartup) {
+                Log.d("activity", "sync on startup start")
+                sync().run()
+                Log.d("activity", "sync on startup end")
+            }
+        }
+
+        lifecycleScope.launch {
+            val conf = db().conf.select()
+
             if (conf.backend.isNotBlank()) {
                 supportFragmentManager.commit {
                     replace(
@@ -63,8 +75,6 @@ class Activity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-
-
 
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 

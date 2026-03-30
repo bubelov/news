@@ -11,6 +11,7 @@ import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.fragment.app.commit
 import androidx.lifecycle.Lifecycle
@@ -53,8 +54,6 @@ class EntriesFragment : AppFragment() {
         )
     }
 
-    private val state = MutableStateFlow<State>(State.LoadingCachedEntries)
-
     sealed class State {
         data class InitialSync(val message: String) : State()
 
@@ -66,6 +65,8 @@ class EntriesFragment : AppFragment() {
             val showBackgroundProgress: Boolean,
         ) : State()
     }
+
+    private val state = MutableStateFlow<State>(State.LoadingCachedEntries)
 
     private var _binding: FragmentEntriesBinding? = null
     private val binding get() = _binding!!
@@ -94,7 +95,6 @@ class EntriesFragment : AppFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.d("entries_fragment", "view created")
 
         if (filter == null) {
             showErrorDialog(getString(R.string.required_argument_is_missing, "filter")) {
@@ -109,8 +109,6 @@ class EntriesFragment : AppFragment() {
             insets
         }
 
-        Log.d("entries_fragment", "before init swipe refresh")
-
         initSwipeRefresh()
         initList()
 
@@ -119,12 +117,16 @@ class EntriesFragment : AppFragment() {
                 state.collect { binding.setState(it) }
             }
         }
-    }
 
-    override fun onResume() {
-        super.onResume()
         viewLifecycleOwner.lifecycleScope.launch {
-            refresh()
+            sync().maybeInitialSync()
+//            refresh()
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            sync().state.collect {
+                updateState(db().conf.select(), it)
+            }
         }
     }
 
@@ -133,29 +135,11 @@ class EntriesFragment : AppFragment() {
         _binding = null
     }
 
-    private fun hasBackend() = db().conf.select().backend.isNotBlank()
-
-    private fun refresh() {
-        val conf = db().conf.select()
-        val syncState = sync().state.value
-        maybeStartupSync()
-        updateState(conf, syncState)
-    }
-
-    private fun maybeStartupSync() {
-        Log.d("entries_fragment", "maybe startup sync")
-        val conf = db().conf.select()
-        if (!conf.initialSyncCompleted || (conf.syncOnStartup && !conf.syncedOnStartup)) {
-            Log.d("entries_fragment", "YES")
-            db().conf.update { it.copy(syncedOnStartup = true) }
-            viewLifecycleOwner.lifecycleScope.launch {
-                sync().run()
-                refresh()
-            }
-        } else {
-            Log.d("entries_fragment", "NO")
-        }
-    }
+//    private fun refresh() {
+//        val conf = db().conf.select()
+//        val syncState = sync().state.value
+//        updateState(conf, syncState)
+//    }
 
     private fun updateState(conf: Conf, syncState: Sync.State) {
         when (syncState) {
@@ -204,18 +188,9 @@ class EntriesFragment : AppFragment() {
         }
     }
 
-    private fun onRetry() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            sync().run()
-            refresh()
-        }
-    }
-
     private fun onPullRefresh() {
         viewLifecycleOwner.lifecycleScope.launch {
             sync().run()
-            refresh()
-            binding.swipeRefresh.isRefreshing = false
         }
     }
 
@@ -234,7 +209,7 @@ class EntriesFragment : AppFragment() {
             it.copy(sortOrder = newSortOrder)
         }
 
-        refresh()
+//        refresh()
     }
 
     private fun setRead(entryIds: Collection<String>, read: Boolean) {
@@ -255,7 +230,7 @@ class EntriesFragment : AppFragment() {
                 )
             )
 
-            refresh()
+//            refresh()
         }
     }
 
@@ -275,7 +250,7 @@ class EntriesFragment : AppFragment() {
                 )
             )
 
-            refresh()
+//            refresh()
         }
     }
 
@@ -315,8 +290,6 @@ class EntriesFragment : AppFragment() {
                     syncEntries = false,
                 )
             )
-
-            refresh()
         }
     }
 
@@ -369,6 +342,8 @@ class EntriesFragment : AppFragment() {
     }
 
     private fun FragmentEntriesBinding.setState(state: State) {
+        Log.d("entries_fragment", state.toString())
+
         animateVisibilityChanges(
             views = listOf(toolbar, progress, message, retry, swipeRefresh),
             visibleViews = when (state) {
@@ -383,7 +358,6 @@ class EntriesFragment : AppFragment() {
         when (state) {
             is State.InitialSync -> {
                 if (state.message.isNotEmpty()) {
-                    message.showSmooth()
                     message.text = state.message
                 }
             }
@@ -394,7 +368,6 @@ class EntriesFragment : AppFragment() {
                 swipeRefresh.isRefreshing = state.showBackgroundProgress
 
                 if (state.entries.isEmpty()) {
-                    message.showSmooth()
                     message.text = getEmptyMessage()
                 }
 
@@ -468,9 +441,6 @@ class EntriesFragment : AppFragment() {
 
         button.setOnMenuItemClickListener {
             saveConf { it.copy(showReadEntries = !it.showReadEntries) }
-            viewLifecycleOwner.lifecycleScope.launch {
-                refresh()
-            }
             true
         }
     }
@@ -529,7 +499,7 @@ class EntriesFragment : AppFragment() {
 
     override fun onOpenGraphImageDownloaded() {
         super.onOpenGraphImageDownloaded()
-        refresh()
+//        refresh()
     }
 
     private fun getShowReadEntriesButtonVisibility(): Boolean {

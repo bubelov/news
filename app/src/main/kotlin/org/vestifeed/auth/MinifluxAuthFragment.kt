@@ -12,6 +12,8 @@ import org.vestifeed.navigation.AppFragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.withResumed
+import kotlinx.coroutines.launch
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.vestifeed.R
@@ -68,16 +70,15 @@ class MinifluxAuthFragment : AppFragment() {
         val token = binding.token.text.toString()
         val trustSelfSignedCerts = binding.trustSelfSignedCerts.isChecked
 
-        viewLifecycleOwner.lifecycleScope.launchWhenResumed {
-            runCatching {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
                 val api = MinifluxApiBuilder().build(
                     url = url.toString().trim('/'),
                     token = token,
                     trustSelfSignedCerts = trustSelfSignedCerts,
                 )
+
                 api.getFeeds()
-            }.onSuccess {
-                val syncScheduler = BackgroundSyncScheduler(requireContext())
 
                 db().conf.update {
                     it.copy(
@@ -88,20 +89,23 @@ class MinifluxAuthFragment : AppFragment() {
                     )
                 }
 
+                val syncScheduler = BackgroundSyncScheduler(requireContext())
                 syncScheduler.schedule()
 
-                parentFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                withResumed {
+                    parentFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
 
-                parentFragmentManager.commit {
-                    replace(
-                        R.id.fragmentContainerView,
-                        EntriesFragment::class.java,
-                        bundleOf("filter" to EntriesFilter.Unread),
-                    )
+                    parentFragmentManager.commit {
+                        replace(
+                            R.id.fragmentContainerView,
+                            EntriesFragment::class.java,
+                            bundleOf("filter" to EntriesFilter.Unread),
+                        )
+                    }
                 }
-            }.onFailure {
+            } catch (e: Throwable) {
                 binding.progress.isVisible = false
-                showErrorDialog(it.message ?: getString(R.string.direct_login_failed))
+                showErrorDialog(e.message ?: getString(R.string.direct_login_failed))
             }
         }
     }
