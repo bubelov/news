@@ -19,7 +19,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 import org.vestifeed.parser.AtomLinkRel
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -57,7 +56,6 @@ class EntriesFragment : AppFragment() {
     private val state = MutableStateFlow<State>(State.LoadingCachedEntries)
 
     sealed class State {
-
         data class InitialSync(val message: String) : State()
 
         object LoadingCachedEntries : State()
@@ -66,19 +64,11 @@ class EntriesFragment : AppFragment() {
             val feed: Feed?,
             val entries: List<EntriesAdapter.Item>,
             val showBackgroundProgress: Boolean,
-            val scrollToTop: Boolean = false,
-            val conf: Conf,
         ) : State()
-
-        data class FailedToSync(val cause: Throwable) : State()
     }
-
-    private var scrollToTopNextTime = false
 
     private var _binding: FragmentEntriesBinding? = null
     private val binding get() = _binding!!
-
-    private val seenEntries = mutableSetOf<EntriesAdapter.Item>()
 
     private val snackbar by lazy {
         Snackbar.make(binding.root, "", Snackbar.LENGTH_SHORT).apply {
@@ -92,8 +82,6 @@ class EntriesFragment : AppFragment() {
     }
 
     private val touchHelper: ItemTouchHelper? by lazy { createTouchHelper() }
-
-    private val trackingListener = createTrackingListener()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -140,21 +128,6 @@ class EntriesFragment : AppFragment() {
         }
     }
 
-    override fun onStop() {
-        super.onStop()
-
-        val currentState = state.value
-
-        if (currentState is State.ShowingCachedEntries && currentState.conf.markScrolledEntriesAsRead) {
-            setRead(
-                entryIds = seenEntries.map { it.id },
-                read = true,
-            )
-
-            seenEntries.clear()
-        }
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
@@ -194,9 +167,6 @@ class EntriesFragment : AppFragment() {
                     else -> false
                 }
 
-                val scrollToTop = scrollToTopNextTime
-                scrollToTopNextTime = false
-
                 val rows: List<EntriesAdapterRow> = if (filter is EntriesFilter.BelongToFeed) {
                     db().entry.selectByFeedIdAndReadAndBookmarked(
                         feedId = (filter as EntriesFilter.BelongToFeed).feedId,
@@ -228,8 +198,6 @@ class EntriesFragment : AppFragment() {
                         },
                         entries = sortedRows.map { it.toItem(conf) },
                         showBackgroundProgress = showBgProgress,
-                        scrollToTop = scrollToTop,
-                        conf = conf,
                     )
                 }
             }
@@ -256,8 +224,6 @@ class EntriesFragment : AppFragment() {
     }
 
     private fun changeSortOrder() {
-        scrollToTopNextTime = true
-
         db().conf.update {
             val newSortOrder = when (it.sortOrder) {
                 ConfQueries.SORT_ORDER_ASCENDING -> ConfQueries.SORT_ORDER_DESCENDING
@@ -407,7 +373,6 @@ class EntriesFragment : AppFragment() {
             views = listOf(toolbar, progress, message, retry, swipeRefresh),
             visibleViews = when (state) {
                 is State.InitialSync -> listOf(toolbar, progress)
-                is State.FailedToSync -> listOf(toolbar, retry)
                 is State.LoadingCachedEntries -> listOf(toolbar, progress)
                 is State.ShowingCachedEntries -> listOf(toolbar, swipeRefresh)
             },
@@ -423,11 +388,6 @@ class EntriesFragment : AppFragment() {
                 }
             }
 
-            is State.FailedToSync -> {
-                retry.setOnClickListener { onRetry() }
-                showErrorDialog(state.cause)
-            }
-
             State.LoadingCachedEntries -> {}
 
             is State.ShowingCachedEntries -> {
@@ -438,17 +398,7 @@ class EntriesFragment : AppFragment() {
                     message.text = getEmptyMessage()
                 }
 
-                seenEntries.clear()
-                adapter.submitList(state.entries) { if (state.scrollToTop) scrollToTop() }
-
-                if (
-                    state.conf.markScrolledEntriesAsRead
-                    && (filter is EntriesFilter.Unread || filter is EntriesFilter.BelongToFeed)
-                ) {
-                    binding.list.addOnScrollListener(trackingListener)
-                } else {
-                    binding.list.removeOnScrollListener(trackingListener)
-                }
+                adapter.submitList(state.entries)
             }
         }
     }
@@ -504,7 +454,9 @@ class EntriesFragment : AppFragment() {
             return
         }
 
-        if (state.conf.showReadEntries) {
+        val conf = db().conf.select()
+
+        if (conf.showReadEntries) {
             button.setIcon(R.drawable.ic_baseline_visibility_24)
             button.title = getString(R.string.hide_read_news)
             touchHelper?.attachToRecyclerView(null)
@@ -533,7 +485,9 @@ class EntriesFragment : AppFragment() {
             button.isVisible = true
         }
 
-        when (state.conf.sortOrder) {
+        val conf = db().conf.select()
+
+        when (conf.sortOrder) {
             ConfQueries.SORT_ORDER_ASCENDING -> {
                 button.setIcon(R.drawable.ic_clock_forward)
                 button.title = getString(R.string.show_newest_first)
@@ -707,37 +661,6 @@ class EntriesFragment : AppFragment() {
             }
 
             else -> null
-        }
-    }
-
-    private fun createTrackingListener(): OnScrollListener {
-        return object : OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-
-            }
-
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                if (recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE) {
-                    return
-                }
-
-                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
-
-                if (layoutManager.findFirstVisibleItemPosition() == RecyclerView.NO_POSITION) {
-                    return
-                }
-
-                if (layoutManager.findLastVisibleItemPosition() == RecyclerView.NO_POSITION) {
-                    return
-                }
-
-                val visibleEntries =
-                    (layoutManager.findFirstVisibleItemPosition()..layoutManager.findLastVisibleItemPosition()).map {
-                        adapter.currentList[it]
-                    }
-
-                seenEntries.addAll(visibleEntries)
-            }
         }
     }
 
