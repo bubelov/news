@@ -34,7 +34,7 @@ class SyncWorker(context: Context, workerParams: WorkerParameters) : Worker(cont
                     runCatching {
                         val unreadEntries =
                             applicationContext.db().entry.selectByReadAndBookmarked(
-                                extRead = listOf(false),
+                                extRead = false,
                                 extBookmarked = false,
                             ).size
 

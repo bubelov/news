@@ -26,8 +26,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.vestifeed.R
-import org.vestifeed.anim.animateVisibilityChanges
-import org.vestifeed.anim.showSmooth
 import org.vestifeed.app.db
 import org.vestifeed.app.sync
 import org.vestifeed.db.Conf
@@ -62,7 +60,6 @@ class EntriesFragment : AppFragment() {
         data class ShowingCachedEntries(
             val feed: Feed?,
             val entries: List<EntriesAdapter.Item>,
-            val showBackgroundProgress: Boolean,
         ) : State()
     }
 
@@ -142,15 +139,16 @@ class EntriesFragment : AppFragment() {
 //    }
 
     private fun updateState(conf: Conf, syncState: Sync.State) {
+        binding.swipeRefresh.isRefreshing = false
+
         when (syncState) {
             is Sync.State.InitialSync -> state.update { State.InitialSync(syncState.message) }
 
-            else -> {
-                val showBgProgress = when (syncState) {
-                    is Sync.State.FollowUpSync -> syncState.args.syncEntries
-                    else -> false
-                }
+            is Sync.State.FollowUpSync -> {
+                binding.swipeRefresh.isRefreshing = true
+            }
 
+            else -> {
                 val rows: List<EntriesAdapterRow> = if (filter is EntriesFilter.BelongToFeed) {
                     db().entry.selectByFeedIdAndReadAndBookmarked(
                         feedId = (filter as EntriesFilter.BelongToFeed).feedId,
@@ -158,13 +156,18 @@ class EntriesFragment : AppFragment() {
                         extBookmarked = false,
                     )
                 } else {
-                    val includeRead = (conf.showReadEntries || filter is EntriesFilter.Bookmarked)
-                    val includeBookmarked = filter is EntriesFilter.Bookmarked
+                    if (filter is EntriesFilter.Bookmarked) {
+                        db().entry.selectBookmarked()
+                    } else {
+                        val includeRead =
+                            (conf.showReadEntries || filter is EntriesFilter.Bookmarked)
+                        val includeBookmarked = filter is EntriesFilter.Bookmarked
 
-                    db().entry.selectByReadAndBookmarked(
-                        extRead = if (includeRead) listOf(true, false) else listOf(false),
-                        extBookmarked = includeBookmarked,
-                    )
+                        db().entry.selectByReadAndBookmarked(
+                            extRead = includeRead,
+                            extBookmarked = includeBookmarked,
+                        )
+                    }
                 }
 
                 val sortedRows = when (conf.sortOrder) {
@@ -181,7 +184,6 @@ class EntriesFragment : AppFragment() {
                             null
                         },
                         entries = sortedRows.map { it.toItem(conf) },
-                        showBackgroundProgress = showBgProgress,
                     )
                 }
             }
@@ -229,8 +231,6 @@ class EntriesFragment : AppFragment() {
                     syncEntries = false,
                 )
             )
-
-//            refresh()
         }
     }
 
@@ -249,8 +249,6 @@ class EntriesFragment : AppFragment() {
                     syncEntries = false,
                 )
             )
-
-//            refresh()
         }
     }
 
@@ -344,34 +342,33 @@ class EntriesFragment : AppFragment() {
     private fun FragmentEntriesBinding.setState(state: State) {
         Log.d("entries_fragment", state.toString())
 
-        animateVisibilityChanges(
-            views = listOf(toolbar, progress, message, retry, swipeRefresh),
-            visibleViews = when (state) {
-                is State.InitialSync -> listOf(toolbar, progress)
-                is State.LoadingCachedEntries -> listOf(toolbar, progress)
-                is State.ShowingCachedEntries -> listOf(toolbar, swipeRefresh)
-            },
-        )
-
         updateToolbar(state)
+
+        progress.isVisible = false
+        message.isVisible = false
+        swipeRefresh.isVisible = false
 
         when (state) {
             is State.InitialSync -> {
-                if (state.message.isNotEmpty()) {
-                    message.text = state.message
-                }
+                progress.isVisible = true
+                message.isVisible = state.message.isNotBlank()
+                message.text = state.message
             }
 
-            State.LoadingCachedEntries -> {}
+            State.LoadingCachedEntries -> {
+                progress.isVisible = true
+            }
 
             is State.ShowingCachedEntries -> {
-                swipeRefresh.isRefreshing = state.showBackgroundProgress
+                Log.d("entries_fragment", "cached entries: ${state.entries.size}")
 
                 if (state.entries.isEmpty()) {
+                    message.isVisible = true
                     message.text = getEmptyMessage()
+                } else {
+                    swipeRefresh.isVisible = true
+                    adapter.submitList(state.entries)
                 }
-
-                adapter.submitList(state.entries)
             }
         }
     }
@@ -379,8 +376,29 @@ class EntriesFragment : AppFragment() {
     private fun updateToolbar(state: State) {
         binding.toolbar.apply {
             when (filter) {
-                EntriesFilter.Bookmarked -> setTitle(R.string.bookmarks)
-                EntriesFilter.Unread -> setTitle(R.string.unread)
+                EntriesFilter.Bookmarked -> {
+                    when (state) {
+                        is State.ShowingCachedEntries -> {
+                            setTitle(getString(R.string.bookmarks) + " (${state.entries.size})")
+                        }
+
+                        else -> {
+                            setTitle(R.string.bookmarks)
+                        }
+                    }
+                }
+
+                EntriesFilter.Unread -> {
+                    when (state) {
+                        is State.ShowingCachedEntries -> {
+                            setTitle(getString(R.string.unread) + " (${state.entries.size})")
+                        }
+
+                        else -> {
+                            setTitle(R.string.unread)
+                        }
+                    }
+                }
 
                 is EntriesFilter.BelongToFeed -> {
                     binding.toolbar.apply {
@@ -499,7 +517,7 @@ class EntriesFragment : AppFragment() {
 
     override fun onOpenGraphImageDownloaded() {
         super.onOpenGraphImageDownloaded()
-//        refresh()
+        updateState(db().conf.select(), sync().state.value)
     }
 
     private fun getShowReadEntriesButtonVisibility(): Boolean {
@@ -536,9 +554,10 @@ class EntriesFragment : AppFragment() {
     }
 
     private fun onListItemClick(item: EntriesAdapter.Item) {
-        setRead(
-            entryIds = listOf(item.id),
-            read = true,
+        db().entry.updateReadAndReadSynced(
+            id = item.id,
+            extRead = true,
+            extReadSynced = false,
         )
 
         if (item.openInBrowser) {

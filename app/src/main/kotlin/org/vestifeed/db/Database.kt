@@ -181,26 +181,39 @@ class EntryQueries(private val conn: SQLiteConnection) {
     }
 
     fun selectByReadAndBookmarked(
-        extRead: List<Boolean>,
+        extRead: Boolean,
         extBookmarked: Boolean
     ): List<EntriesAdapterRow> {
-        val readValues = extRead.map { if (it) 1 else 0 }
-        val placeholders = readValues.joinToString(",") { "?" }
         val query = """
             SELECT e.*, f.title as feed_title, f.ext_show_preview_images, f.ext_open_entries_in_browser
             FROM entry e
             JOIN feed f ON f.id = e.feed_id
-            WHERE e.ext_read IN ($placeholders) AND e.ext_bookmarked = ?
+            WHERE e.ext_read = ? AND e.ext_bookmarked = ?
             ORDER BY e.published DESC
-            LIMIT 500
         """.trimIndent()
 
         val res = mutableListOf<EntriesAdapterRow>()
         val stmt = conn.prepare(query)
-        readValues.forEachIndexed { index, value ->
-            stmt.bindInt(index + 1, value)
+        stmt.bindInt(1, if (extRead) 1 else 0)
+        stmt.bindInt(2, if (extBookmarked) 1 else 0)
+        while (stmt.step()) {
+            res.add(statementToEntriesAdapterRow(stmt))
         }
-        stmt.bindInt(1 + readValues.size, if (extBookmarked) 1 else 0)
+        stmt.close()
+        return res
+    }
+
+    fun selectBookmarked(): List<EntriesAdapterRow> {
+        val query = """
+            SELECT e.*, f.title as feed_title, f.ext_show_preview_images, f.ext_open_entries_in_browser
+            FROM entry e
+            JOIN feed f ON f.id = e.feed_id
+            WHERE e.ext_bookmarked = 1
+            ORDER BY e.published DESC
+        """.trimIndent()
+
+        val res = mutableListOf<EntriesAdapterRow>()
+        val stmt = conn.prepare(query)
         while (stmt.step()) {
             res.add(statementToEntriesAdapterRow(stmt))
         }

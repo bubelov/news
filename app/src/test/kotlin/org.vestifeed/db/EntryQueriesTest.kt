@@ -52,7 +52,7 @@ class EntryQueriesTest {
         assertEquals(
             all.filter { !it.extRead && !it.extBookmarked }.map { it.id },
             db.entry.selectByReadAndBookmarked(
-                extRead = listOf(false),
+                extRead = false,
                 extBookmarked = false
             ).map { it.id },
         )

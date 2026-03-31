@@ -40,7 +40,7 @@ abstract class AppFragment : Fragment() {
                 .build()
 
             while (true) {
-                val imagesFetched = fetchEntryImages(httpClient, 5)
+                val imagesFetched = fetchEntryImages(httpClient, 1)
 
                 if (imagesFetched.isNotEmpty()) {
                     onOpenGraphImageDownloaded()
