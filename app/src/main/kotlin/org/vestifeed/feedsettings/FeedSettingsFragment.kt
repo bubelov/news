@@ -73,21 +73,21 @@ class FeedSettingsFragment : AppFragment() {
     private fun setOpenEntriesInBrowser(feedId: String, openEntriesInBrowser: Boolean) {
         viewLifecycleOwner.lifecycleScope.launch {
             val feed = db.feed.selectById(feedId)!!
-            db.feed.insertOrReplace(feed.copy(extOpenEntriesInBrowser = openEntriesInBrowser))
+            db.feed.insertOrReplace(listOf(feed.copy(extOpenEntriesInBrowser = openEntriesInBrowser)))
         }
     }
 
     private fun setShowPreviewImages(feedId: String, value: Boolean?) {
         viewLifecycleOwner.lifecycleScope.launch {
             val feed = db.feed.selectById(feedId)!!
-            db.feed.insertOrReplace(feed.copy(extShowPreviewImages = value))
+            db.feed.insertOrReplace(listOf(feed.copy(extShowPreviewImages = value)))
         }
     }
 
     private fun setBlockedWords(feedId: String, blockedWords: String) {
         viewLifecycleOwner.lifecycleScope.launch {
             val feed = db.feed.selectById(feedId)!!
-            db.feed.insertOrReplace(feed.copy(extBlockedWords = blockedWords))
+            db.feed.insertOrReplace(listOf(feed.copy(extBlockedWords = blockedWords)))
         }
     }
 

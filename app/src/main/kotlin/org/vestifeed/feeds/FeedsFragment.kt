@@ -215,7 +215,7 @@ class FeedsFragment : AppFragment() {
             } else {
                 try {
                     val feedWithEntries = api().addFeed(outlineUrl).getOrThrow()
-                    db().feed.insertOrReplace(feedWithEntries.first)
+                    db().feed.insertOrReplace(listOf(feedWithEntries.first))
                     feedsImported++
                 } catch (e: Throwable) {
                     errors += "Failed to import feed ${outline.xmlUrl}\nReason: ${e.message}"
@@ -286,12 +286,12 @@ class FeedsFragment : AppFragment() {
 
                 val entries = if (hasHttpPrefix) {
                     val feedWithEntries = api().addFeed(unvalidatedUrl.toHttpUrl()).getOrThrow()
-                    db().feed.insertOrReplace(feedWithEntries.first)
+                    db().feed.insertOrReplace(listOf(feedWithEntries.first))
                     feedWithEntries.second
                 } else {
                     val feedWithEntries =
                         api().addFeed("https://$unvalidatedUrl".toHttpUrl()).getOrThrow()
-                    db().feed.insertOrReplace(feedWithEntries.first)
+                    db().feed.insertOrReplace(listOf(feedWithEntries.first))
                     feedWithEntries.second
                 }
 
@@ -317,7 +317,7 @@ class FeedsFragment : AppFragment() {
                     ?: throw Exception("Cannot find feed $feedId in cache")
                 val trimmedNewTitle = newTitle.trim()
                 api().updateFeedTitle(feedId, trimmedNewTitle)
-                db().feed.insertOrReplace(feed.copy(title = trimmedNewTitle))
+                db().feed.insertOrReplace(listOf(feed.copy(title = trimmedNewTitle)))
             }.onFailure { e -> showErrorDialog(e) }
         }
     }

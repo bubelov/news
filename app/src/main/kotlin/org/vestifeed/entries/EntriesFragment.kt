@@ -22,9 +22,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import org.vestifeed.parser.AtomLinkRel
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.vestifeed.R
 import org.vestifeed.app.db
 import org.vestifeed.app.sync
@@ -116,11 +118,6 @@ class EntriesFragment : AppFragment() {
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
-            sync().maybeInitialSync()
-//            refresh()
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
             sync().state.collect {
                 updateState(db().conf.select(), it)
             }
@@ -142,7 +139,7 @@ class EntriesFragment : AppFragment() {
         binding.swipeRefresh.isRefreshing = false
 
         when (syncState) {
-            is Sync.State.InitialSync -> state.update { State.InitialSync(syncState.message) }
+            is Sync.State.InitialSync -> state.update { State.InitialSync(syncState.toString()) }
 
             is Sync.State.FollowUpSync -> {
                 binding.swipeRefresh.isRefreshing = true
@@ -191,9 +188,7 @@ class EntriesFragment : AppFragment() {
     }
 
     private fun onPullRefresh() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            sync().run()
-        }
+        sync().runInBackground()
     }
 
     private fun saveConf(newConf: (Conf) -> Conf) {
@@ -216,15 +211,17 @@ class EntriesFragment : AppFragment() {
 
     private fun setRead(entryIds: Collection<String>, read: Boolean) {
         viewLifecycleOwner.lifecycleScope.launch {
-            entryIds.forEach {
-                db().entry.updateReadAndReadSynced(
-                    id = it,
-                    extRead = read,
-                    extReadSynced = false,
-                )
+            withContext(Dispatchers.IO) {
+                entryIds.forEach {
+                    db().entry.updateReadAndReadSynced(
+                        id = it,
+                        extRead = read,
+                        extReadSynced = false,
+                    )
+                }
             }
 
-            sync().run(
+            sync().runInBackground(
                 Sync.Args(
                     syncFeeds = false,
                     syncFlags = true,
@@ -236,13 +233,15 @@ class EntriesFragment : AppFragment() {
 
     private fun setBookmarked(entryId: String, bookmarked: Boolean) {
         viewLifecycleOwner.lifecycleScope.launch {
-            db().entry.updateBookmarkedAndBookmaredSynced(
-                id = entryId,
-                extBookmarked = bookmarked,
-                extBookmarkedSynced = false
-            )
+            withContext(Dispatchers.IO) {
+                db().entry.updateBookmarkedAndBookmaredSynced(
+                    id = entryId,
+                    extBookmarked = bookmarked,
+                    extBookmarkedSynced = false
+                )
+            }
 
-            sync().run(
+            sync().runInBackground(
                 Sync.Args(
                     syncFeeds = false,
                     syncFlags = true,
@@ -281,7 +280,7 @@ class EntriesFragment : AppFragment() {
                 }
             }
 
-            sync().run(
+            sync().runInBackground(
                 Sync.Args(
                     syncFeeds = false,
                     syncFlags = true,

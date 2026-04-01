@@ -112,7 +112,7 @@ class SearchFragment : AppFragment() {
                     extReadSynced = false,
                 )
 
-                sync().run(
+                sync().runInBackground(
                     Sync.Args(
                         syncFeeds = false,
                         syncFlags = true,

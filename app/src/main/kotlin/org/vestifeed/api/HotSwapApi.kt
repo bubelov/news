@@ -61,7 +61,7 @@ class HotSwapApi(private val db: Database) : Api {
         return api.addFeed(url)
     }
 
-    override suspend fun getFeeds(): Result<List<Feed>> {
+    override suspend fun getFeeds(): List<Feed> {
         updateApi()
         return api.getFeeds()
     }
@@ -76,7 +76,7 @@ class HotSwapApi(private val db: Database) : Api {
         return api.deleteFeed(feedId)
     }
 
-    override suspend fun getEntries(includeReadEntries: Boolean): Flow<Result<List<Entry>>> {
+    override suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Entry>> {
         updateApi()
         return api.getEntries(includeReadEntries)
     }
@@ -85,12 +85,12 @@ class HotSwapApi(private val db: Database) : Api {
         maxEntryId: String?,
         maxEntryUpdated: OffsetDateTime?,
         lastSync: OffsetDateTime?,
-    ): Result<List<Entry>> {
+    ): List<Entry> {
         updateApi()
         return api.getNewAndUpdatedEntries(maxEntryId, maxEntryUpdated, lastSync)
     }
 
-    override suspend fun markEntriesAsRead(entriesIds: List<String>, read: Boolean): Result<Unit> {
+    override suspend fun markEntriesAsRead(entriesIds: List<String>, read: Boolean) {
         updateApi()
         return api.markEntriesAsRead(entriesIds, read)
     }
@@ -98,7 +98,7 @@ class HotSwapApi(private val db: Database) : Api {
     override suspend fun markEntriesAsBookmarked(
         entries: List<EntryWithoutContent>,
         bookmarked: Boolean,
-    ): Result<Unit> {
+    ) {
         updateApi()
         return api.markEntriesAsBookmarked(entries, bookmarked)
     }

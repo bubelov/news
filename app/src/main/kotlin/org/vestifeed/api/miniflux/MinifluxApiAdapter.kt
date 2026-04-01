@@ -1,6 +1,7 @@
 package org.vestifeed.api.miniflux
 
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
 import org.vestifeed.api.Api
 import org.vestifeed.db.Entry
 import org.vestifeed.db.EntryWithoutContent
@@ -8,6 +9,7 @@ import org.vestifeed.db.Feed
 import org.vestifeed.db.Link
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.vestifeed.parser.AtomLinkRel
@@ -39,16 +41,9 @@ class MinifluxApiAdapter(
         }
     }
 
-    override suspend fun getFeeds(): Result<List<Feed>> {
-        return runCatching {
-            api.getFeeds().mapNotNull {
-                try {
-                    it.toFeed()
-                } catch (e: Exception) {
-                    Log.w("MinifluxApiAdapter", "Failed to parse feed ${it.feed_url}", e)
-                    null
-                }
-            }
+    override suspend fun getFeeds(): List<Feed> {
+        return withContext(Dispatchers.IO) {
+            api.getFeeds().map { it.toFeed()!! }
         }
     }
 
@@ -62,44 +57,44 @@ class MinifluxApiAdapter(
 
     override suspend fun getEntries(
         includeReadEntries: Boolean,
-    ): Flow<Result<List<Entry>>> {
+    ): Flow<List<Entry>> {
         return flow {
-            runCatching {
-                var totalFetched = 0L
-                val currentBatch = mutableSetOf<EntryJson>()
-                val batchSize = 10L
-                var oldestEntryId = Long.MAX_VALUE
+            var totalFetched = 0L
+            val currentBatch = mutableSetOf<EntryJson>()
+            val batchSize = 10L
+            var oldestEntryId = Long.MAX_VALUE
 
-                while (true) {
-                    val entries = api.getEntriesBeforeEntry(
+            while (true) {
+                val entries = withContext(Dispatchers.IO) {
+                    api.getEntriesBeforeEntry(
                         status = if (includeReadEntries) "" else "unread",
                         entryId = oldestEntryId,
                         limit = batchSize,
                     )
-
-                    currentBatch += entries.entries
-                    totalFetched += currentBatch.size
-                    emit(Result.success(currentBatch.map { it.toEntry() }))
-
-                    if (currentBatch.size < batchSize) {
-                        break
-                    } else {
-                        oldestEntryId = currentBatch.minOfOrNull { it.id }?.toLong() ?: 0L
-                        currentBatch.clear()
-                    }
                 }
 
-                val starredEntries = api.getStarredEntries()
+                currentBatch += entries.entries
+                totalFetched += currentBatch.size
+                val mappedCurrentBatch =
+                    withContext(Dispatchers.IO) { currentBatch.map { it.toEntry() } }
+                emit(mappedCurrentBatch)
 
-                if (starredEntries.entries.isNotEmpty()) {
-                    currentBatch += starredEntries.entries
-                    totalFetched += currentBatch.size
-                    emit(Result.success(currentBatch.map { it.toEntry() }))
+                if (currentBatch.size < batchSize) {
+                    break
+                } else {
+                    oldestEntryId = currentBatch.minOfOrNull { it.id } ?: 0L
                     currentBatch.clear()
                 }
-            }.getOrElse {
-                emit(Result.failure(it))
-                return@flow
+            }
+
+            val starredEntries = withContext(Dispatchers.IO) { api.getStarredEntries() }
+
+            if (starredEntries.entries.isNotEmpty()) {
+                currentBatch += starredEntries.entries
+                val mappedCurrentBatch =
+                    withContext(Dispatchers.IO) { currentBatch.map { it.toEntry() } }
+                emit(mappedCurrentBatch)
+                currentBatch.clear()
             }
         }
     }
@@ -108,18 +103,21 @@ class MinifluxApiAdapter(
         maxEntryId: String?,
         maxEntryUpdated: OffsetDateTime?,
         lastSync: OffsetDateTime?,
-    ): Result<List<Entry>> {
-        return runCatching {
-            val changedAfter = lastSync?.toEpochSecond() ?: 0L
+    ): List<Entry> {
+        val changedAfter = lastSync?.toEpochSecond() ?: 0L
+        val res = withContext(Dispatchers.IO) {
             api.getEntriesChangedAfter(
                 changedAfter = changedAfter,
                 limit = 0,
-            ).entries.map { it.toEntry() }
+            )
+        }
+        return withContext(Dispatchers.IO) {
+            res.entries.map { it.toEntry() }
         }
     }
 
-    override suspend fun markEntriesAsRead(entriesIds: List<String>, read: Boolean): Result<Unit> {
-        return runCatching {
+    override suspend fun markEntriesAsRead(entriesIds: List<String>, read: Boolean) {
+        withContext(Dispatchers.IO) {
             api.putEntryStatus(
                 PutStatusArgs(
                     entry_ids = entriesIds.map { it.toLong() },
@@ -132,8 +130,8 @@ class MinifluxApiAdapter(
     override suspend fun markEntriesAsBookmarked(
         entries: List<EntryWithoutContent>,
         bookmarked: Boolean,
-    ): Result<Unit> {
-        return runCatching {
+    ) {
+        withContext(Dispatchers.IO) {
             entries.forEach { api.putEntryBookmark(it.id.toLong()) }
         }
     }

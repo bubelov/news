@@ -241,7 +241,7 @@ class EntryFragment : AppFragment() {
                         extBookmarkedSynced = false,
                     )
                     updateBookmarkedButton(newBookmarkedState)
-                    sync().run(
+                    sync().runInBackground(
                         Sync.Args(
                             syncFeeds = false,
                             syncFlags = true,

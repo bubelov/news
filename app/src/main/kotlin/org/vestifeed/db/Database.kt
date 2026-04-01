@@ -620,30 +620,33 @@ class FeedQueries(private val conn: SQLiteConnection) {
         """
     }
 
-    fun insertOrReplace(feed: Feed) {
-        val stmt = conn.prepare(
+    fun insertOrReplace(feeds: List<Feed>) {
+        conn.prepare(
             """
             INSERT OR REPLACE INTO feed (
                 id, links, title, ext_open_entries_in_browser, ext_blocked_words, ext_show_preview_images
             ) VALUES (?, ?, ?, ?, ?, ?)
         """
-        )
-        stmt.bindText(1, feed.id)
-        stmt.bindText(2, linksToJson(feed.links))
-        stmt.bindText(3, feed.title)
-        if (feed.extOpenEntriesInBrowser != null) {
-            stmt.bindInt(4, if (feed.extOpenEntriesInBrowser) 1 else 0)
-        } else {
-            stmt.bindNull(4)
+        ).use { stmt ->
+            feeds.forEach { feed ->
+                stmt.bindText(1, feed.id)
+                stmt.bindText(2, linksToJson(feed.links))
+                stmt.bindText(3, feed.title)
+                if (feed.extOpenEntriesInBrowser != null) {
+                    stmt.bindInt(4, if (feed.extOpenEntriesInBrowser) 1 else 0)
+                } else {
+                    stmt.bindNull(4)
+                }
+                stmt.bindText(5, feed.extBlockedWords)
+                if (feed.extShowPreviewImages != null) {
+                    stmt.bindInt(6, if (feed.extShowPreviewImages) 1 else 0)
+                } else {
+                    stmt.bindNull(6)
+                }
+                stmt.step()
+                stmt.reset()
+            }
         }
-        stmt.bindText(5, feed.extBlockedWords)
-        if (feed.extShowPreviewImages != null) {
-            stmt.bindInt(6, if (feed.extShowPreviewImages) 1 else 0)
-        } else {
-            stmt.bindNull(6)
-        }
-        stmt.step()
-        stmt.close()
     }
 
     fun selectAll(): List<Feed> {

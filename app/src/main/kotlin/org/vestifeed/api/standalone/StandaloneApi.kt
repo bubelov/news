@@ -118,8 +118,8 @@ class StandaloneNewsApi(
         }
     }
 
-    override suspend fun getFeeds(): Result<List<Feed>> {
-        return runCatching { db.feed.selectAll() }
+    override suspend fun getFeeds(): List<Feed> {
+        return db.feed.selectAll()
     }
 
     override suspend fun updateFeedTitle(feedId: String, newTitle: String): Result<Unit> {
@@ -130,35 +130,33 @@ class StandaloneNewsApi(
         return Result.success(Unit)
     }
 
-    override suspend fun getEntries(includeReadEntries: Boolean): Flow<Result<List<Entry>>> {
-        return flowOf(Result.success(emptyList()))
+    override suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Entry>> {
+        return flowOf(emptyList())
     }
 
     override suspend fun getNewAndUpdatedEntries(
         maxEntryId: String?,
         maxEntryUpdated: OffsetDateTime?,
         lastSync: OffsetDateTime?,
-    ): Result<List<Entry>> {
-        return runCatching {
-            val entries = Collections.synchronizedList(mutableListOf<Entry>())
+    ): List<Entry> {
+        val entries = Collections.synchronizedList(mutableListOf<Entry>())
 
-            withContext(Dispatchers.IO) {
-                val feeds = db.feed.selectAll()
+        withContext(Dispatchers.IO) {
+            val feeds = db.feed.selectAll()
 
-                feeds.forEach { feed ->
-                    runCatching {
-                        entries += fetchEntries(feed)
-                    }.onFailure {
-                        Log.e(TAG, "Failed to fetch org.vestifeed.entries for feed: $feed", it)
-                    }
+            feeds.forEach { feed ->
+                runCatching {
+                    entries += fetchEntries(feed)
+                }.onFailure {
+                    Log.e(TAG, "Failed to fetch org.vestifeed.entries for feed: $feed", it)
                 }
-
-                val prevCachedEntryIds = db.entry.selectByIds(entries.map { it.id }).map { it.id }
-                entries.removeAll { prevCachedEntryIds.contains(it.id) }
             }
 
-            entries
+            val prevCachedEntryIds = db.entry.selectByIds(entries.map { it.id }).map { it.id }
+            entries.removeAll { prevCachedEntryIds.contains(it.id) }
         }
+
+        return entries
     }
 
     private suspend fun fetchEntries(feed: Feed): List<Entry> {
@@ -234,15 +232,15 @@ class StandaloneNewsApi(
         }
     }
 
-    override suspend fun markEntriesAsRead(entriesIds: List<String>, read: Boolean): Result<Unit> {
-        return Result.success(Unit)
+    override suspend fun markEntriesAsRead(entriesIds: List<String>, read: Boolean) {
+
     }
 
     override suspend fun markEntriesAsBookmarked(
         entries: List<EntryWithoutContent>,
         bookmarked: Boolean
-    ): Result<Unit> {
-        return Result.success(Unit)
+    ) {
+
     }
 
     private fun ParsedFeed.toFeed(feedUrl: HttpUrl): Feed {

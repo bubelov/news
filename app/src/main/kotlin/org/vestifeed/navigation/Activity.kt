@@ -53,7 +53,7 @@ class Activity : AppCompatActivity() {
 
             if (conf.backend.isNotBlank() && conf.syncOnStartup) {
                 Log.d("activity", "sync on startup start")
-                sync().run()
+                sync().runInBackground()
                 Log.d("activity", "sync on startup end")
             }
         }

@@ -30,8 +30,8 @@ class NextcloudApiAdapter(
         }
     }
 
-    override suspend fun getFeeds(): Result<List<Feed>> {
-        return runCatching { api.getFeeds().feeds.mapNotNull { it.toFeed() } }
+    override suspend fun getFeeds(): List<Feed> {
+        return api.getFeeds().feeds.mapNotNull { it.toFeed() }
     }
 
     override suspend fun updateFeedTitle(feedId: String, newTitle: String): Result<Unit> {
@@ -49,7 +49,7 @@ class NextcloudApiAdapter(
 
     override suspend fun getEntries(
         includeReadEntries: Boolean,
-    ): Flow<Result<List<Entry>>> {
+    ): Flow<List<Entry>> {
         return flow {
             var totalFetched = 0L
             val currentBatch = mutableSetOf<ItemJson>()
@@ -57,27 +57,22 @@ class NextcloudApiAdapter(
             var oldestEntryId = 0L
 
             while (true) {
-                val response = runCatching {
-                    api.getAllItems(
-                        getRead = includeReadEntries,
-                        batchSize = batchSize,
-                        offset = oldestEntryId,
-                    )
-                }.getOrElse {
-                    emit(Result.failure(it))
-                    return@flow
-                }
+                val response = api.getAllItems(
+                    getRead = includeReadEntries,
+                    batchSize = batchSize,
+                    offset = oldestEntryId,
+                )
 
                 val entries = response.items
                 currentBatch += entries
                 totalFetched += currentBatch.size
-                emit(Result.success(currentBatch.mapNotNull { it.toEntry() }))
+                emit(currentBatch.mapNotNull { it.toEntry() })
 
                 if (currentBatch.size < batchSize) {
                     break
                 } else {
                     oldestEntryId =
-                        currentBatch.minOfOrNull { it.id ?: Long.MAX_VALUE }?.toLong() ?: 0L
+                        currentBatch.minOfOrNull { it.id ?: Long.MAX_VALUE } ?: 0L
                     currentBatch.clear()
                 }
             }
@@ -88,42 +83,36 @@ class NextcloudApiAdapter(
         maxEntryId: String?,
         maxEntryUpdated: OffsetDateTime?,
         lastSync: OffsetDateTime?,
-    ): Result<List<Entry>> {
-        return runCatching {
-            val lastModified = maxEntryUpdated ?: lastSync!!
-            api.getNewAndUpdatedItems(lastModified.toEpochSecond() + 1).items.mapNotNull { it.toEntry() }
-        }
+    ): List<Entry> {
+        val lastModified = maxEntryUpdated ?: lastSync!!
+        return api.getNewAndUpdatedItems(lastModified.toEpochSecond() + 1).items.mapNotNull { it.toEntry() }
     }
 
-    override suspend fun markEntriesAsRead(entriesIds: List<String>, read: Boolean): Result<Unit> {
-        return runCatching {
-            val ids = entriesIds.map { it.toLong() }
+    override suspend fun markEntriesAsRead(entriesIds: List<String>, read: Boolean) {
+        val ids = entriesIds.map { it.toLong() }
 
-            if (read) {
-                api.putRead(PutReadArgs(ids))
-            } else {
-                api.putUnread(PutReadArgs(ids))
-            }
+        if (read) {
+            api.putRead(PutReadArgs(ids))
+        } else {
+            api.putUnread(PutReadArgs(ids))
         }
     }
 
     override suspend fun markEntriesAsBookmarked(
         entries: List<EntryWithoutContent>,
         bookmarked: Boolean,
-    ): Result<Unit> {
-        return runCatching {
-            val args = PutStarredArgs(entries.map {
-                PutStarredArgsItem(
-                    it.feedId.toLong(),
-                    it.extNextcloudGuidHash
-                )
-            })
+    ) {
+        val args = PutStarredArgs(entries.map {
+            PutStarredArgsItem(
+                it.feedId.toLong(),
+                it.extNextcloudGuidHash
+            )
+        })
 
-            if (bookmarked) {
-                api.putStarred(args)
-            } else {
-                api.putUnstarred(args)
-            }
+        if (bookmarked) {
+            api.putStarred(args)
+        } else {
+            api.putUnstarred(args)
         }
     }
 

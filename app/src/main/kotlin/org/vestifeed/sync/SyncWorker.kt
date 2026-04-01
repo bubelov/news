@@ -28,7 +28,7 @@ class SyncWorker(context: Context, workerParams: WorkerParameters) : Worker(cont
             return Result.retry()
         }
 
-        when (val syncResult = sync.run()) {
+        when (val syncResult = sync.runInForeground()) {
             is SyncResult.Success -> {
                 if (syncResult.newAndUpdatedEntries > 0) {
                     runCatching {
