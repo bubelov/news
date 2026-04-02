@@ -111,15 +111,109 @@ class EntriesFragment : AppFragment() {
         initSwipeRefresh()
         initList()
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                state.collect { binding.setState(it) }
-            }
-        }
+//        viewLifecycleOwner.lifecycleScope.launch {
+//            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+//                state.collect { binding.setState(it) }
+//            }
+//        }
 
         viewLifecycleOwner.lifecycleScope.launch {
-            sync().state.collect {
-                updateState(db().conf.select(), it)
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                sync().state.collect { onNewSyncState(it) }
+            }
+        }
+    }
+
+    private suspend fun onNewSyncState(syncState: Sync.State) {
+        Log.d("entries_fragment", "new sync state: $syncState")
+
+        when (filter) {
+            EntriesFilter.Unread -> {
+                binding.toolbar.setTitle(R.string.unread)
+            }
+
+            EntriesFilter.Bookmarked -> {
+                binding.toolbar.setTitle(R.string.bookmarks)
+            }
+
+            is EntriesFilter.BelongToFeed -> {
+                val feedId = (filter as EntriesFilter.BelongToFeed).feedId
+                val feed = withContext(Dispatchers.IO) {
+                    db().feed.selectById(feedId)
+                }
+                binding.toolbar.setTitle(feed?.title ?: feedId)
+            }
+
+            null -> {}
+        }
+
+        binding.swipeRefresh.isRefreshing = syncState is Sync.State.FollowUpSync
+
+        when (syncState) {
+            is Sync.State.InitialSync -> {
+                when (syncState.stage) {
+                    Sync.InitialSyncStage.SyncingFeeds -> {
+                        binding.swipeRefresh.isVisible = false
+                        binding.progress.isVisible = true
+                        binding.message.isVisible = true
+                        binding.message.setText("Fetching feeds")
+                    }
+
+                    is Sync.InitialSyncStage.SyncingEntries -> {
+                        binding.swipeRefresh.isVisible = false
+                        binding.progress.isVisible = true
+                        binding.message.isVisible = true
+                        binding.message.setText("Fetching entries (${syncState.stage.entriesSynced})")
+                    }
+                }
+            }
+
+            is Sync.State.Idle -> {
+                if (syncState.error != null) {
+                    showErrorDialog(syncState.error)
+                }
+
+                binding.progress.isVisible = true
+
+                val entries = when (filter) {
+                    EntriesFilter.Unread -> {
+                        withContext(Dispatchers.IO) { db().entry.selectUnread() }
+                    }
+
+                    EntriesFilter.Bookmarked -> {
+                        withContext(Dispatchers.IO) { db().entry.selectBookmarked() }
+                    }
+
+                    is EntriesFilter.BelongToFeed -> {
+                        withContext(Dispatchers.IO) { db().entry.selectUnreadByFeedId((filter as EntriesFilter.BelongToFeed).feedId) }
+                    }
+
+                    null -> emptyList()
+                }
+
+                val conf = withContext(Dispatchers.IO) {
+                    db().conf.select()
+                }
+
+                val listItems = withContext(Dispatchers.IO) {
+                    entries.map { it.toItem(conf) }
+                }
+
+                adapter.submitList(listItems)
+
+                binding.progress.isVisible = false
+
+                if (listItems.isEmpty()) {
+                    binding.message.isVisible = true
+                    binding.message.text = getEmptyMessage()
+                } else {
+                    binding.message.isVisible = false
+                    binding.swipeRefresh.isVisible = true
+                }
+            }
+
+            else -> {
+
             }
         }
     }
@@ -516,7 +610,14 @@ class EntriesFragment : AppFragment() {
 
     override fun onOpenGraphImageDownloaded() {
         super.onOpenGraphImageDownloaded()
-        updateState(db().conf.select(), sync().state.value)
+        // todo optimize
+        viewLifecycleOwner.lifecycleScope.launch {
+            val syncState = sync().state.value
+
+            if (syncState is Sync.State.Idle) {
+                onNewSyncState(sync().state.value)
+            }
+        }
     }
 
     private fun getShowReadEntriesButtonVisibility(): Boolean {

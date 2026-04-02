@@ -243,8 +243,10 @@ class Sync(
             }
 
             try {
-                val lastSyncInstant = if (conf.lastEntriesSyncDatetime.isNotBlank()) {
-                    OffsetDateTime.parse(conf.lastEntriesSyncDatetime)
+                val freshConf = withContext(Dispatchers.IO) { db.conf.select() }
+
+                val lastSyncInstant = if (freshConf.lastEntriesSyncDatetime.isNotBlank()) {
+                    OffsetDateTime.parse(freshConf.lastEntriesSyncDatetime)
                 } else {
                     null
                 }

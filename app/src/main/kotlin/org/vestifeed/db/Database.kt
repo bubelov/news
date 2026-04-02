@@ -151,6 +151,25 @@ class EntryQueries(private val conn: SQLiteConnection) {
         return res
     }
 
+    fun selectUnreadByFeedId(feedId: String): List<EntriesAdapterRow> {
+        conn.prepare(
+            """
+            SELECT e.*, f.title as feed_title, f.ext_show_preview_images, f.ext_open_entries_in_browser
+            FROM entry e
+            JOIN feed f ON f.id = e.feed_id
+            WHERE e.feed_id = ? AND e.ext_read = 0
+            ORDER BY e.published DESC;   
+        """.trimIndent()
+        ).use { stmt ->
+            val res = mutableListOf<EntriesAdapterRow>()
+            stmt.bindText(1, feedId)
+            while (stmt.step()) {
+                res.add(statementToEntriesAdapterRow(stmt))
+            }
+            return res
+        }
+    }
+
     fun selectByFeedIdAndReadAndBookmarked(
         feedId: String,
         extRead: List<Boolean>,
@@ -173,6 +192,24 @@ class EntryQueries(private val conn: SQLiteConnection) {
             stmt.bindInt(index + 2, value)
         }
         stmt.bindInt(2 + readValues.size, if (extBookmarked) 1 else 0)
+        while (stmt.step()) {
+            res.add(statementToEntriesAdapterRow(stmt))
+        }
+        stmt.close()
+        return res
+    }
+
+    fun selectUnread(): List<EntriesAdapterRow> {
+        val query = """
+            SELECT e.*, f.title as feed_title, f.ext_show_preview_images, f.ext_open_entries_in_browser
+            FROM entry e
+            JOIN feed f ON f.id = e.feed_id
+            WHERE e.ext_read = 0 AND e.ext_bookmarked = 0
+            ORDER BY e.published DESC
+        """.trimIndent()
+
+        val res = mutableListOf<EntriesAdapterRow>()
+        val stmt = conn.prepare(query)
         while (stmt.step()) {
             res.add(statementToEntriesAdapterRow(stmt))
         }
@@ -229,17 +266,17 @@ class EntryQueries(private val conn: SQLiteConnection) {
     }
 
     fun selectMaxId(): String? {
-        val stmt = conn.prepare("SELECT MAX(CAST(id AS INTEGER)) FROM entry")
-        val maxId = if (stmt.step()) stmt.getText(0) else null
-        stmt.close()
-        return maxId
+        conn.prepare("SELECT MAX(CAST(id AS INTEGER)) FROM entry").use { stmt ->
+            stmt.step()
+            return stmt.getTextOrNull(0)
+        }
     }
 
     fun selectMaxUpdated(): String? {
-        val stmt = conn.prepare("SELECT MAX(updated) FROM entry")
-        val maxUpdated = if (stmt.step()) stmt.getText(0) else null
-        stmt.close()
-        return maxUpdated
+        conn.prepare("SELECT MAX(updated) FROM entry").use { stmt ->
+            stmt.step()
+            return stmt.getTextOrNull(0)
+        }
     }
 
     fun selectByFtsQuery(query: String): List<SelectByQuery> {
@@ -621,6 +658,10 @@ class FeedQueries(private val conn: SQLiteConnection) {
     }
 
     fun insertOrReplace(feeds: List<Feed>) {
+        if (feeds.isEmpty()) {
+            return
+        }
+
         conn.prepare(
             """
             INSERT OR REPLACE INTO feed (
