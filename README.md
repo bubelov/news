@@ -13,6 +13,10 @@
 <a href="https://github.com/bubelov/news/actions" alt="Build Status"><img src="https://github.com/bubelov/news/workflows/CI/badge.svg?branch=master&event=push"></a>
 </p>
 
+<p align="center">
+  Join our <a href="https://matrix.to/#/#vesti:matrix.org">Matrix community</a>
+</p>
+
 <div>
 <img alt="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="204">
 <img alt="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.jpg" width="204">
