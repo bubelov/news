@@ -20,20 +20,15 @@
 <img alt="" src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width="204">
 </div>
 
-## 📱 Standalone mode
+## 💻 Supported Backends
 
-- In standalone mode, you don't need a server
-- If you have a few devices you want to keep in org.vestifeed.sync, consider one of supported servers
-
-## 💻 Servers
-
-- Miniflux (supported)
-- Nextcloud (outdated, needs maintainers)
+- [Miniflux](https://miniflux.app/)
+- Embedded
 
 ## ✨ Main Features:
 
 - Subscribe to your favorite RSS and Atom feeds
-- Sync with your personal Miniflux or Nextcloud server
+- Sync with your personal Miniflux server
 - Smooth and snappy user experience even on the older and cheaper devices
 - Built-in podcast fetcher which can be used with external players
 - Enhance your news feed with high-resolution preview images
