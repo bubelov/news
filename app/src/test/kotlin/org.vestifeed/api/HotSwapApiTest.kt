@@ -23,6 +23,6 @@ class HotSwapApiTest {
             delay(10 * attempts)
         }
 
-        assertEquals(0, api.getFeeds().getOrThrow().size)
+        assertEquals(0, api.getFeeds().size)
     }
 }

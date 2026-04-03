@@ -33,8 +33,8 @@ import org.vestifeed.app.sync
 import org.vestifeed.db.Conf
 import org.vestifeed.db.ConfQueries
 import org.vestifeed.db.EntriesAdapterRow
-import org.vestifeed.db.Feed
 import org.vestifeed.databinding.FragmentEntriesBinding
+import org.vestifeed.db.table.Feed
 import org.vestifeed.dialog.showErrorDialog
 import org.vestifeed.entry.EntryFragment
 import org.vestifeed.navigation.AppFragment

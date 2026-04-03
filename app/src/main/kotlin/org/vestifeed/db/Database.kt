@@ -5,6 +5,8 @@ import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.SQLiteStatement
 import androidx.sqlite.execSQL
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import org.vestifeed.db.table.FeedQueries
+import org.vestifeed.db.table.FeedSchema
 import java.time.OffsetDateTime
 
 class Database(driver: SQLiteDriver, val path: String) {
@@ -20,24 +22,24 @@ class Database(driver: SQLiteDriver, val path: String) {
     }
 
     private fun migrate() {
-        val stmt = conn.prepare("SELECT user_version FROM pragma_user_version")
+        val stmt = conn.prepare("SELECT user_version FROM pragma_user_version;")
         val version = if (stmt.step()) stmt.getInt(0) else 0
 
         if (version == 0) {
-            conn.execSQL(FeedQueries.SCHEMA)
+            conn.execSQL(FeedSchema.toString())
             conn.execSQL(EntryQueries.SCHEMA)
             conn.execSQL(ConfQueries.SCHEMA)
-            conn.execSQL("PRAGMA user_version=1")
+            conn.execSQL("PRAGMA user_version=1;")
         }
     }
 
     fun transaction(block: () -> Unit) {
-        conn.execSQL("BEGIN TRANSACTION")
+        conn.execSQL("BEGIN TRANSACTION;")
         try {
             block()
-            conn.execSQL("COMMIT")
+            conn.execSQL("COMMIT;")
         } catch (e: Exception) {
-            conn.execSQL("ROLLBACK")
+            conn.execSQL("ROLLBACK;")
             throw e
         }
     }
@@ -641,133 +643,63 @@ class EntryQueries(private val conn: SQLiteConnection) {
         stmt.close()
         return res
     }
-}
 
-class FeedQueries(private val conn: SQLiteConnection) {
-    companion object {
-        const val SCHEMA = """
-            CREATE TABLE IF NOT EXISTS feed (
-            id TEXT PRIMARY KEY NOT NULL,
-            links TEXT,
-            title TEXT NOT NULL,
-            ext_open_entries_in_browser INTEGER,
-            ext_blocked_words TEXT NOT NULL,
-            ext_show_preview_images INTEGER
-        );
-        """
-    }
-
-    fun insertOrReplace(feeds: List<Feed>) {
-        if (feeds.isEmpty()) {
-            return
-        }
-
-        conn.prepare(
-            """
-            INSERT OR REPLACE INTO feed (
-                id, links, title, ext_open_entries_in_browser, ext_blocked_words, ext_show_preview_images
-            ) VALUES (?, ?, ?, ?, ?, ?)
-        """
-        ).use { stmt ->
-            feeds.forEach { feed ->
-                stmt.bindText(1, feed.id)
-                stmt.bindText(2, linksToJson(feed.links))
-                stmt.bindText(3, feed.title)
-                if (feed.extOpenEntriesInBrowser != null) {
-                    stmt.bindInt(4, if (feed.extOpenEntriesInBrowser) 1 else 0)
-                } else {
-                    stmt.bindNull(4)
-                }
-                stmt.bindText(5, feed.extBlockedWords)
-                if (feed.extShowPreviewImages != null) {
-                    stmt.bindInt(6, if (feed.extShowPreviewImages) 1 else 0)
-                } else {
-                    stmt.bindNull(6)
-                }
-                stmt.step()
-                stmt.reset()
+    // todo refactor
+    private fun linksToJson(links: List<Link>): String {
+        return links.joinToString(",") { link ->
+            val length = link.length?.toString() ?: "null"
+            val extEnclosureDownloadProgress = link.extEnclosureDownloadProgress?.toString() ?: "null"
+            val relName = when (link.rel) {
+                is org.vestifeed.parser.AtomLinkRel.Alternate -> "Alternate"
+                is org.vestifeed.parser.AtomLinkRel.Enclosure -> "Enclosure"
+                is org.vestifeed.parser.AtomLinkRel.Self -> "Self"
+                is org.vestifeed.parser.AtomLinkRel.Related -> "Related"
+                else -> ""
             }
+            """{"feedId":"${link.feedId ?: ""}","entryId":"${link.entryId ?: ""}","href":"${link.href}","rel":"$relName","type":"${link.type ?: ""}","hreflang":"${link.hreflang ?: ""}","title":"${link.title ?: ""}","length":$length,"extEnclosureDownloadProgress":$extEnclosureDownloadProgress,"extCacheUri":"${link.extCacheUri ?: ""}"}"""
         }
     }
 
-    fun selectAll(): List<Feed> {
-        val res = mutableListOf<Feed>()
-        val stmt =
-            conn.prepare("SELECT id, links, title, ext_open_entries_in_browser, ext_blocked_words, ext_show_preview_images FROM feed ORDER BY title")
-        while (stmt.step()) {
-            res.add(statementToFeed(stmt))
-        }
-        stmt.close()
-        return res
-    }
-
-    fun selectAllWithUnreadEntryCount(): List<SelectAllWithUnreadEntryCount> {
-        val res = mutableListOf<SelectAllWithUnreadEntryCount>()
-        val sql = """
-            SELECT f.id, f.links, f.title, f.ext_open_entries_in_browser, f.ext_blocked_words, f.ext_show_preview_images, COUNT(e.id) as unread_entries
-            FROM feed f
-            LEFT JOIN entry e ON e.feed_id = f.id AND e.ext_read = 0 AND e.ext_bookmarked = 0
-            GROUP BY f.id
-            ORDER BY f.title
-        """.trimIndent()
-
-        val stmt = conn.prepare(sql)
-        while (stmt.step()) {
-            res.add(
-                SelectAllWithUnreadEntryCount(
-                    id = stmt.getText(0),
-                    links = jsonToLinks(stmt.getText(1)),
-                    title = stmt.getText(2),
-                    extOpenEntriesInBrowser = stmt.getInt(3) == 1,
-                    extBlockedWords = stmt.getText(4),
-                    extShowPreviewImages = stmt.getInt(5) == 1,
-                    unreadEntries = stmt.getLong(6)
+    // todo refactor
+    private fun jsonToLinks(json: String?): List<Link> {
+        if (json.isNullOrBlank()) return emptyList()
+        return try {
+            val links = mutableListOf<Link>()
+            val regex =
+                """\{"feedId":"([^"]*)","entryId":"([^"]*)","href":"([^"]*)","rel":"([^"]*)","type":"([^"]*)","hreflang":"([^"]*)","title":"([^"]*)","length":([^,]*),"extEnclosureDownloadProgress":([^,]*),"extCacheUri":"([^"]*)"\}""".toRegex()
+            regex.findAll(json).forEach { match ->
+                val (feedId, entryId, href, rel, type, hreflang, title, length, extEnclosureDownloadProgress, extCacheUri) = match.destructured
+                val parsedRel: org.vestifeed.parser.AtomLinkRel = when (rel) {
+                    "Alternate" -> org.vestifeed.parser.AtomLinkRel.Alternate
+                    "Enclosure" -> org.vestifeed.parser.AtomLinkRel.Enclosure
+                    "Self" -> org.vestifeed.parser.AtomLinkRel.Self
+                    "Related" -> org.vestifeed.parser.AtomLinkRel.Related
+                    else -> org.vestifeed.parser.AtomLinkRel.Alternate
+                }
+                val parsedUrl = if (href.startsWith("http")) {
+                    href.toHttpUrlOrNull() ?: return@forEach
+                } else {
+                    return@forEach
+                }
+                links.add(
+                    Link(
+                        feedId = feedId.ifEmpty { null },
+                        entryId = entryId.ifEmpty { null },
+                        href = parsedUrl,
+                        rel = parsedRel,
+                        type = type.ifEmpty { null },
+                        hreflang = hreflang.ifEmpty { null },
+                        title = title.ifEmpty { null },
+                        length = if (length == "null") null else length.toLongOrNull(),
+                        extEnclosureDownloadProgress = if (extEnclosureDownloadProgress == "null") null else extEnclosureDownloadProgress.toDoubleOrNull(),
+                        extCacheUri = extCacheUri.ifEmpty { null }
+                    )
                 )
-            )
+            }
+            links
+        } catch (e: Exception) {
+            emptyList()
         }
-        stmt.close()
-        return res
-    }
-
-    fun selectById(id: String): Feed? {
-        val stmt =
-            conn.prepare("SELECT id, links, title, ext_open_entries_in_browser, ext_blocked_words, ext_show_preview_images FROM feed WHERE id = ?")
-        stmt.bindText(1, id)
-        val feed = if (stmt.step()) statementToFeed(stmt) else null
-        stmt.close()
-        return feed
-    }
-
-    fun selectLinks(): List<List<Link>> {
-        val res = mutableListOf<List<Link>>()
-        val stmt = conn.prepare("SELECT links FROM entry")
-        while (stmt.step()) {
-            res.add(jsonToLinks(stmt.getText(0)))
-        }
-        stmt.close()
-        return res
-    }
-
-    fun deleteById(id: String) {
-        val stmt = conn.prepare("DELETE FROM feed WHERE id = ?")
-        stmt.bindText(1, id)
-        stmt.step()
-        stmt.close()
-    }
-
-    fun deleteAll() {
-        conn.execSQL("DELETE FROM feed")
-    }
-
-    private fun statementToFeed(stmt: SQLiteStatement): Feed {
-        return Feed(
-            id = stmt.getText(0),
-            links = jsonToLinks(stmt.getText(1)),
-            title = stmt.getText(2),
-            extOpenEntriesInBrowser = if (stmt.isNull(3)) null else stmt.getInt(3) == 1,
-            extBlockedWords = stmt.getText(4),
-            extShowPreviewImages = if (stmt.isNull(5)) null else stmt.getInt(5) == 1
-        )
     }
 }
 
@@ -785,76 +717,6 @@ data class SelectByQuery(
     val extOpenEntriesInBrowser: Boolean,
     val links: List<Link>
 )
-
-data class SelectAllWithUnreadEntryCount(
-    val id: String,
-    val links: List<Link>,
-    val title: String,
-    val extOpenEntriesInBrowser: Boolean,
-    val extBlockedWords: String,
-    val extShowPreviewImages: Boolean,
-    val unreadEntries: Long
-)
-
-@PublishedApi
-internal fun linksToJson(links: List<Link>): String {
-    return links.joinToString(",") { link ->
-        val length = link.length?.toString() ?: "null"
-        val extEnclosureDownloadProgress = link.extEnclosureDownloadProgress?.toString() ?: "null"
-        val relName = when (link.rel) {
-            is org.vestifeed.parser.AtomLinkRel.Alternate -> "Alternate"
-            is org.vestifeed.parser.AtomLinkRel.Enclosure -> "Enclosure"
-            is org.vestifeed.parser.AtomLinkRel.Self -> "Self"
-            is org.vestifeed.parser.AtomLinkRel.Related -> "Related"
-            else -> ""
-        }
-        """{"feedId":"${link.feedId ?: ""}","entryId":"${link.entryId ?: ""}","href":"${link.href}","rel":"$relName","type":"${link.type ?: ""}","hreflang":"${link.hreflang ?: ""}","title":"${link.title ?: ""}","length":$length,"extEnclosureDownloadProgress":$extEnclosureDownloadProgress,"extCacheUri":"${link.extCacheUri ?: ""}"}"""
-    }
-}
-
-@PublishedApi
-internal fun jsonToLinks(json: String?): List<Link> {
-    if (json.isNullOrBlank()) return emptyList()
-    return try {
-        val links = mutableListOf<Link>()
-        val regex =
-            """\{"feedId":"([^"]*)","entryId":"([^"]*)","href":"([^"]*)","rel":"([^"]*)","type":"([^"]*)","hreflang":"([^"]*)","title":"([^"]*)","length":([^,]*),"extEnclosureDownloadProgress":([^,]*),"extCacheUri":"([^"]*)"\}""".toRegex()
-        regex.findAll(json).forEach { match ->
-            val (feedId, entryId, href, rel, type, hreflang, title, length, extEnclosureDownloadProgress, extCacheUri) = match.destructured
-            val parsedRel: org.vestifeed.parser.AtomLinkRel = when (rel) {
-                "Alternate" -> org.vestifeed.parser.AtomLinkRel.Alternate
-                "Enclosure" -> org.vestifeed.parser.AtomLinkRel.Enclosure
-                "Self" -> org.vestifeed.parser.AtomLinkRel.Self
-                "Related" -> org.vestifeed.parser.AtomLinkRel.Related
-                else -> org.vestifeed.parser.AtomLinkRel.Alternate
-            }
-            val parsedUrl = if (href.startsWith("http")) {
-                href.toHttpUrlOrNull() ?: return@forEach
-            } else {
-                return@forEach
-            }
-            links.add(
-                Link(
-                    feedId = feedId.ifEmpty { null },
-                    entryId = entryId.ifEmpty { null },
-                    href = parsedUrl,
-                    rel = parsedRel,
-                    type = type.ifEmpty { null },
-                    hreflang = hreflang.ifEmpty { null },
-                    title = title.ifEmpty { null },
-                    length = if (length == "null") null else length.toLongOrNull(),
-                    extEnclosureDownloadProgress = if (extEnclosureDownloadProgress == "null") null else extEnclosureDownloadProgress.toDoubleOrNull(),
-                    extCacheUri = extCacheUri.ifEmpty { null }
-                )
-            )
-        }
-        links
-    } catch (e: Exception) {
-        emptyList()
-    }
-
-
-}
 
 class ConfQueries(private val conn: SQLiteConnection) {
     companion object {

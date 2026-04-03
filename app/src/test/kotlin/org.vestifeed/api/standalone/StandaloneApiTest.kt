@@ -28,6 +28,6 @@ class StandaloneApiTest {
         val db = db()
         val feed = db.insertRandomFeed()
         val api = StandaloneNewsApi(db)
-        assertEquals(feed, api.getFeeds().getOrThrow().single())
+        assertEquals(feed, api.getFeeds().single())
     }
 }

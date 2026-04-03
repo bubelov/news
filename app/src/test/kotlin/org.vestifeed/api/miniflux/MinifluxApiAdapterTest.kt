@@ -70,8 +70,7 @@ class MinifluxApiAdapterTest {
         coEvery { api.getFeeds() } returns listOf(feedJson)
 
         val adapter = MinifluxApiAdapter(api)
-        val result = adapter.getFeeds()
-        assert(result.isSuccess)
+        adapter.getFeeds()
 
         coVerify { api.getFeeds() }
     }

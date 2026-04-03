@@ -34,8 +34,8 @@ import org.vestifeed.anim.animateVisibilityChanges
 import org.vestifeed.anim.showSmooth
 import org.vestifeed.app.api
 import org.vestifeed.app.db
-import org.vestifeed.db.SelectAllWithUnreadEntryCount
 import org.vestifeed.databinding.FragmentFeedsBinding
+import org.vestifeed.db.table.FeedQueries
 import org.vestifeed.dialog.showErrorDialog
 import org.vestifeed.entries.EntriesFilter
 import org.vestifeed.entries.EntriesFragment
@@ -195,7 +195,7 @@ class FeedsFragment : AppFragment() {
         var feedsFailed = 0
         val errors = mutableListOf<String>()
 
-        val existingLinks = db().feed.selectLinks().flatten()
+        val existingLinks = db().feed.selectAllLinks().flatten()
 
         for (outline in outlines) {
             val outlineUrl = (outline.xmlUrl ?: "").toHttpUrlOrNull()
@@ -335,7 +335,7 @@ class FeedsFragment : AppFragment() {
         }
     }
 
-    private fun SelectAllWithUnreadEntryCount.toItem(): FeedsAdapter.Item {
+    private fun FeedQueries.SelectAllWithUnreadEntryCount.toItem(): FeedsAdapter.Item {
         val selfLink = links.firstOrNull { it.rel is AtomLinkRel.Self }?.href
             ?: links.firstOrNull()?.href
             ?: "https://example.com".toHttpUrl()

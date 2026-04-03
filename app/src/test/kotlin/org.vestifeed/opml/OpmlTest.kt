@@ -7,8 +7,8 @@ import java.io.InputStream
 import java.nio.charset.Charset
 import java.util.UUID
 import org.junit.Test
-import org.vestifeed.db.Feed
 import org.vestifeed.db.Link
+import org.vestifeed.db.table.Feed
 
 class OpmlTest {
 
@@ -127,7 +127,8 @@ class OpmlTest {
         assertEquals(2, document.outlines.size)
     }
 
-    private fun readFile(path: String) = javaClass.getResourceAsStream("/opml/$path")!!.readTextAndClose()
+    private fun readFile(path: String) =
+        javaClass.getResourceAsStream("/opml/$path")!!.readTextAndClose()
 
     private fun InputStream.readTextAndClose(charset: Charset = Charsets.UTF_8): String {
         return this.bufferedReader(charset).use { it.readText() }

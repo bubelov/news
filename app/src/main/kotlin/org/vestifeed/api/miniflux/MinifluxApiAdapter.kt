@@ -5,13 +5,13 @@ import kotlinx.coroutines.Dispatchers
 import org.vestifeed.api.Api
 import org.vestifeed.db.Entry
 import org.vestifeed.db.EntryWithoutContent
-import org.vestifeed.db.Feed
 import org.vestifeed.db.Link
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import org.vestifeed.db.table.Feed
 import org.vestifeed.parser.AtomLinkRel
 import java.time.OffsetDateTime
 

@@ -4,6 +4,7 @@ import java.util.UUID
 import org.junit.Test
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.vestifeed.db.table.Feed
 
 class FeedQueriesTest {
 
@@ -12,7 +13,7 @@ class FeedQueriesTest {
         val db = db()
         val feed = db.insertRandomFeed()
         assertEquals(feed, db.feed.selectAll().single())
-        db.feed.insertOrReplace(feed)
+        db.feed.insertOrReplace(listOf(feed))
         assertEquals(feed, db.feed.selectAll().single())
     }
 
@@ -28,8 +29,10 @@ class FeedQueriesTest {
         val db = db()
         val feed = db.insertRandomFeed()
         assertEquals(0, db.feed.selectAllWithUnreadEntryCount().first().unreadEntries)
-        val readEntries = buildList { repeat(7) { add(entry().copy(feedId = feed.id, extRead = true)) } }
-        val unreadEntries = buildList { repeat(3) { add(entry().copy(feedId = feed.id, extRead = false)) } }
+        val readEntries =
+            buildList { repeat(7) { add(entry().copy(feedId = feed.id, extRead = true)) } }
+        val unreadEntries =
+            buildList { repeat(3) { add(entry().copy(feedId = feed.id, extRead = false)) } }
         (readEntries + unreadEntries).forEach { db.entry.insertOrReplace(listOf(it)) }
         val row = db.feed.selectAllWithUnreadEntryCount().single()
         assertEquals(3, row.unreadEntries)
@@ -61,7 +64,7 @@ class FeedQueriesTest {
     }
 }
 
-fun Database.insertRandomFeed(): Feed = feed().apply { feed.insertOrReplace(this) }
+fun Database.insertRandomFeed(): Feed = feed().apply { feed.insertOrReplace(listOf(this)) }
 
 private fun feed() = Feed(
     id = UUID.randomUUID().toString(),

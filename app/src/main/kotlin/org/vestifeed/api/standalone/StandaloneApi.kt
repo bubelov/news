@@ -15,7 +15,6 @@ import org.vestifeed.parser.feed
 import org.vestifeed.db.Database
 import org.vestifeed.db.Entry
 import org.vestifeed.db.EntryWithoutContent
-import org.vestifeed.db.Feed
 import org.vestifeed.db.Link
 import org.vestifeed.http.await
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +27,7 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.jsoup.Jsoup
+import org.vestifeed.db.table.Feed
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.time.OffsetDateTime

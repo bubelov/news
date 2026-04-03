@@ -2,9 +2,9 @@ package org.vestifeed.api
 
 import org.vestifeed.db.Entry
 import org.vestifeed.db.EntryWithoutContent
-import org.vestifeed.db.Feed
 import kotlinx.coroutines.flow.Flow
 import okhttp3.HttpUrl
+import org.vestifeed.db.table.Feed
 import java.time.OffsetDateTime
 
 interface Api {
