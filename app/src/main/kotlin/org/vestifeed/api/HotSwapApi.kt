@@ -2,8 +2,6 @@ package org.vestifeed.api
 
 import org.vestifeed.api.miniflux.MinifluxApiAdapter
 import org.vestifeed.api.miniflux.MinifluxApiBuilder
-import org.vestifeed.api.nextcloud.NextcloudApiAdapter
-import org.vestifeed.api.nextcloud.NextcloudApiBuilder
 import org.vestifeed.api.standalone.StandaloneNewsApi
 import org.vestifeed.db.Database
 import org.vestifeed.db.Entry
@@ -35,17 +33,6 @@ class HotSwapApi(private val db: Database) : Api {
                         url = conf.minifluxServerUrl,
                         token = conf.minifluxServerToken,
                         trustSelfSignedCerts = conf.minifluxServerTrustSelfSignedCerts,
-                    )
-                )
-            }
-
-            ConfSchema.BACKEND_NEXTCLOUD -> {
-                NextcloudApiAdapter(
-                    NextcloudApiBuilder().build(
-                        url = conf.nextcloudServerUrl,
-                        username = conf.nextcloudServerUsername,
-                        password = conf.nextcloudServerPassword,
-                        trustSelfSignedCerts = conf.nextcloudServerTrustSelfSignedCerts,
                     )
                 )
             }

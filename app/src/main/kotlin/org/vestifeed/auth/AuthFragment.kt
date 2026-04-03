@@ -48,7 +48,14 @@ class AuthFragment : AppFragment() {
     }
 
     private fun FragmentAuthBinding.initButtons() {
-        useStandaloneBackend.setOnClickListener {
+        useMinifluxBackend.setOnClickListener {
+            parentFragmentManager.commit {
+                replace<MinifluxAuthFragment>(R.id.fragmentContainerView)
+                addToBackStack(null)
+            }
+        }
+
+        useEmbeddedBackend.setOnClickListener {
             val db = (requireContext().applicationContext as App).db
             val syncScheduler = BackgroundSyncScheduler(requireContext())
 
@@ -69,17 +76,6 @@ class AuthFragment : AppFragment() {
                     bundleOf("filter" to EntriesFilter.Unread),
                 )
             }
-        }
-
-        useMinifluxBackend.setOnClickListener {
-            parentFragmentManager.commit {
-                replace<MinifluxAuthFragment>(R.id.fragmentContainerView)
-                addToBackStack(null)
-            }
-        }
-
-        useNextcloudBackend.setOnClickListener {
-            TODO()
         }
     }
 }

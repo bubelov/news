@@ -48,14 +48,6 @@
         app:layout_constraintTop_toBottomOf="@id/logo">
 
         <Button
-            android:id="@+id/useStandaloneBackend"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="40dp"
-            android:layout_marginEnd="40dp"
-            android:text="@string/standalone_mode" />
-
-        <Button
             android:id="@+id/useMinifluxBackend"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -64,13 +56,13 @@
             android:text="@string/connect_to_miniflux" />
 
         <Button
-            android:id="@+id/useNextcloudBackend"
+            android:id="@+id/useEmbeddedBackend"
             style="?attr/materialButtonOutlinedStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="40dp"
             android:layout_marginEnd="40dp"
-            android:text="@string/connect_to_nextcloud" />
+            android:text="@string/standalone_mode" />
 
     </LinearLayout>
 

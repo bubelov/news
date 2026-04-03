@@ -171,11 +171,6 @@ class SettingsFragment : AppFragment() {
                 minifluxServerUrl.extractDomain()
             }
 
-            ConfSchema.BACKEND_NEXTCLOUD -> {
-                val username = nextcloudServerUsername
-                "$username@${nextcloudServerUrl.extractDomain()}"
-            }
-
             else -> ""
         }
     }

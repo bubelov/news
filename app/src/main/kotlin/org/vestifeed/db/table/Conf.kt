@@ -14,10 +14,6 @@ object ConfSchema {
                 ${Columns.MinifluxServerUrl} TEXT NOT NULL,
                 ${Columns.MinifluxServerTrustSelfSignedCerts} INTEGER NOT NULL,
                 ${Columns.MinifluxServerToken} TEXT NOT NULL,
-                ${Columns.NextcloudServerUrl} TEXT NOT NULL,
-                ${Columns.NextcloudServerTrustSelfSignedCerts} INTEGER NOT NULL,
-                ${Columns.NextcloudServerUsername} TEXT NOT NULL,
-                ${Columns.NextcloudServerPassword} TEXT NOT NULL,
                 ${Columns.InitialSyncCompleted} INTEGER NOT NULL,
                 ${Columns.LastEntriesSyncDatetime} TEXT NOT NULL,
                 ${Columns.ShowReadEntries} INTEGER NOT NULL,
@@ -40,10 +36,6 @@ object ConfSchema {
         MinifluxServerUrl("miniflux_server_url"),
         MinifluxServerTrustSelfSignedCerts("miniflux_server_trust_self_signed_certs"),
         MinifluxServerToken("miniflux_server_token"),
-        NextcloudServerUrl("nextcloud_server_url"),
-        NextcloudServerTrustSelfSignedCerts("nextcloud_server_trust_self_signed_certs"),
-        NextcloudServerUsername("nextcloud_server_username"),
-        NextcloudServerPassword("nextcloud_server_password"),
         InitialSyncCompleted("initial_sync_completed"),
         LastEntriesSyncDatetime("last_entries_sync_datetime"),
         ShowReadEntries("show_read_entries"),
@@ -63,7 +55,6 @@ object ConfSchema {
 
     const val BACKEND_STANDALONE = "standalone"
     const val BACKEND_MINIFLUX = "miniflux"
-    const val BACKEND_NEXTCLOUD = "nextcloud"
 
     const val SORT_ORDER_ASCENDING = "ascending"
     const val SORT_ORDER_DESCENDING = "descending"
@@ -79,10 +70,6 @@ data class ConfProjection(
     val minifluxServerUrl: String,
     val minifluxServerTrustSelfSignedCerts: Boolean,
     val minifluxServerToken: String,
-    val nextcloudServerUrl: String,
-    val nextcloudServerTrustSelfSignedCerts: Boolean,
-    val nextcloudServerUsername: String,
-    val nextcloudServerPassword: String,
     val initialSyncCompleted: Boolean,
     val lastEntriesSyncDatetime: String,
     val showReadEntries: Boolean,
@@ -103,10 +90,6 @@ object ConfDefaults {
     val minifluxServerUrl = ""
     val minifluxServerTrustSelfSignedCerts = false
     val minifluxServerToken = ""
-    val nextcloudServerUrl = ""
-    val nextcloudServerTrustSelfSignedCerts = false
-    val nextcloudServerUsername = ""
-    val nextcloudServerPassword = ""
     val initialSyncCompleted = false
     val lastEntriesSyncDatetime = ""
     val showReadEntries = false
@@ -127,10 +110,6 @@ fun confDefault(): Conf = Conf(
     minifluxServerUrl = ConfDefaults.minifluxServerUrl,
     minifluxServerTrustSelfSignedCerts = ConfDefaults.minifluxServerTrustSelfSignedCerts,
     minifluxServerToken = ConfDefaults.minifluxServerToken,
-    nextcloudServerUrl = ConfDefaults.nextcloudServerUrl,
-    nextcloudServerTrustSelfSignedCerts = ConfDefaults.nextcloudServerTrustSelfSignedCerts,
-    nextcloudServerUsername = ConfDefaults.nextcloudServerUsername,
-    nextcloudServerPassword = ConfDefaults.nextcloudServerPassword,
     initialSyncCompleted = ConfDefaults.initialSyncCompleted,
     lastEntriesSyncDatetime = ConfDefaults.lastEntriesSyncDatetime,
     showReadEntries = ConfDefaults.showReadEntries,
@@ -151,23 +130,19 @@ fun SQLiteStatement.toConf(): Conf = Conf(
     minifluxServerUrl = getText(1),
     minifluxServerTrustSelfSignedCerts = getInt(2) == 1,
     minifluxServerToken = getText(3),
-    nextcloudServerUrl = getText(4),
-    nextcloudServerTrustSelfSignedCerts = getInt(5) == 1,
-    nextcloudServerUsername = getText(6),
-    nextcloudServerPassword = getText(7),
-    initialSyncCompleted = getInt(8) == 1,
-    lastEntriesSyncDatetime = getText(9),
-    showReadEntries = getInt(10) == 1,
-    sortOrder = getText(11),
-    showPreviewImages = getInt(12) == 1,
-    cropPreviewImages = getInt(13) == 1,
-    markScrolledEntriesAsRead = getInt(14) == 1,
-    syncOnStartup = getInt(15) == 1,
-    syncInBackground = getInt(16) == 1,
-    backgroundSyncIntervalMillis = getLong(17),
-    useBuiltInBrowser = getInt(18) == 1,
-    showPreviewText = getInt(19) == 1,
-    syncedOnStartup = getInt(20) == 1,
+    initialSyncCompleted = getInt(4) == 1,
+    lastEntriesSyncDatetime = getText(5),
+    showReadEntries = getInt(6) == 1,
+    sortOrder = getText(7),
+    showPreviewImages = getInt(8) == 1,
+    cropPreviewImages = getInt(9) == 1,
+    markScrolledEntriesAsRead = getInt(10) == 1,
+    syncOnStartup = getInt(11) == 1,
+    syncInBackground = getInt(12) == 1,
+    backgroundSyncIntervalMillis = getLong(13),
+    useBuiltInBrowser = getInt(14) == 1,
+    showPreviewText = getInt(15) == 1,
+    syncedOnStartup = getInt(16) == 1,
 )
 
 class ConfQueries(private val conn: SQLiteConnection) {
@@ -175,30 +150,26 @@ class ConfQueries(private val conn: SQLiteConnection) {
         conn.prepare(
             """
             INSERT OR REPLACE INTO ${ConfSchema.TABLE_NAME} (${ConfSchema.columns})
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """
         ).use { stmt ->
             stmt.bindText(1, conf.backend)
             stmt.bindText(2, conf.minifluxServerUrl)
             stmt.bindInt(3, if (conf.minifluxServerTrustSelfSignedCerts) 1 else 0)
             stmt.bindText(4, conf.minifluxServerToken)
-            stmt.bindText(5, conf.nextcloudServerUrl)
-            stmt.bindInt(6, if (conf.nextcloudServerTrustSelfSignedCerts) 1 else 0)
-            stmt.bindText(7, conf.nextcloudServerUsername)
-            stmt.bindText(8, conf.nextcloudServerPassword)
-            stmt.bindInt(9, if (conf.initialSyncCompleted) 1 else 0)
-            stmt.bindText(10, conf.lastEntriesSyncDatetime)
-            stmt.bindInt(11, if (conf.showReadEntries) 1 else 0)
-            stmt.bindText(12, conf.sortOrder)
-            stmt.bindInt(13, if (conf.showPreviewImages) 1 else 0)
-            stmt.bindInt(14, if (conf.cropPreviewImages) 1 else 0)
-            stmt.bindInt(15, if (conf.markScrolledEntriesAsRead) 1 else 0)
-            stmt.bindInt(16, if (conf.syncOnStartup) 1 else 0)
-            stmt.bindInt(17, if (conf.syncInBackground) 1 else 0)
-            stmt.bindLong(18, conf.backgroundSyncIntervalMillis)
-            stmt.bindInt(19, if (conf.useBuiltInBrowser) 1 else 0)
-            stmt.bindInt(20, if (conf.showPreviewText) 1 else 0)
-            stmt.bindInt(21, if (conf.syncedOnStartup) 1 else 0)
+            stmt.bindInt(5, if (conf.initialSyncCompleted) 1 else 0)
+            stmt.bindText(6, conf.lastEntriesSyncDatetime)
+            stmt.bindInt(7, if (conf.showReadEntries) 1 else 0)
+            stmt.bindText(8, conf.sortOrder)
+            stmt.bindInt(9, if (conf.showPreviewImages) 1 else 0)
+            stmt.bindInt(10, if (conf.cropPreviewImages) 1 else 0)
+            stmt.bindInt(11, if (conf.markScrolledEntriesAsRead) 1 else 0)
+            stmt.bindInt(12, if (conf.syncOnStartup) 1 else 0)
+            stmt.bindInt(13, if (conf.syncInBackground) 1 else 0)
+            stmt.bindLong(14, conf.backgroundSyncIntervalMillis)
+            stmt.bindInt(15, if (conf.useBuiltInBrowser) 1 else 0)
+            stmt.bindInt(16, if (conf.showPreviewText) 1 else 0)
+            stmt.bindInt(17, if (conf.syncedOnStartup) 1 else 0)
             stmt.step()
         }
     }

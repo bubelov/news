@@ -25,35 +25,30 @@ class ConfTest {
     @Test
     fun confSchema_columns() {
         val columns = ConfSchema.Columns.entries
-        assertEquals(21, columns.size)
+        assertEquals(17, columns.size)
         assertEquals("backend", columns[0].sqlName)
         assertEquals("miniflux_server_url", columns[1].sqlName)
         assertEquals("miniflux_server_trust_self_signed_certs", columns[2].sqlName)
         assertEquals("miniflux_server_token", columns[3].sqlName)
-        assertEquals("nextcloud_server_url", columns[4].sqlName)
-        assertEquals("nextcloud_server_trust_self_signed_certs", columns[5].sqlName)
-        assertEquals("nextcloud_server_username", columns[6].sqlName)
-        assertEquals("nextcloud_server_password", columns[7].sqlName)
-        assertEquals("initial_sync_completed", columns[8].sqlName)
-        assertEquals("last_entries_sync_datetime", columns[9].sqlName)
-        assertEquals("show_read_entries", columns[10].sqlName)
-        assertEquals("sort_order", columns[11].sqlName)
-        assertEquals("show_preview_images", columns[12].sqlName)
-        assertEquals("crop_preview_images", columns[13].sqlName)
-        assertEquals("mark_scrolled_entries_as_read", columns[14].sqlName)
-        assertEquals("sync_on_startup", columns[15].sqlName)
-        assertEquals("sync_in_background", columns[16].sqlName)
-        assertEquals("background_sync_interval_millis", columns[17].sqlName)
-        assertEquals("use_built_in_browser", columns[18].sqlName)
-        assertEquals("show_preview_text", columns[19].sqlName)
-        assertEquals("synced_on_startup", columns[20].sqlName)
+        assertEquals("initial_sync_completed", columns[4].sqlName)
+        assertEquals("last_entries_sync_datetime", columns[5].sqlName)
+        assertEquals("show_read_entries", columns[6].sqlName)
+        assertEquals("sort_order", columns[7].sqlName)
+        assertEquals("show_preview_images", columns[8].sqlName)
+        assertEquals("crop_preview_images", columns[9].sqlName)
+        assertEquals("mark_scrolled_entries_as_read", columns[10].sqlName)
+        assertEquals("sync_on_startup", columns[11].sqlName)
+        assertEquals("sync_in_background", columns[12].sqlName)
+        assertEquals("background_sync_interval_millis", columns[13].sqlName)
+        assertEquals("use_built_in_browser", columns[14].sqlName)
+        assertEquals("show_preview_text", columns[15].sqlName)
+        assertEquals("synced_on_startup", columns[16].sqlName)
     }
 
     @Test
     fun confSchema_constants() {
         assertEquals("standalone", ConfSchema.BACKEND_STANDALONE)
         assertEquals("miniflux", ConfSchema.BACKEND_MINIFLUX)
-        assertEquals("nextcloud", ConfSchema.BACKEND_NEXTCLOUD)
         assertEquals("ascending", ConfSchema.SORT_ORDER_ASCENDING)
         assertEquals("descending", ConfSchema.SORT_ORDER_DESCENDING)
     }
@@ -72,7 +67,7 @@ class ConfTest {
     fun confSchema_columnsString() {
         val columns = ConfSchema.columns
         assertEquals(
-            "backend,miniflux_server_url,miniflux_server_trust_self_signed_certs,miniflux_server_token,nextcloud_server_url,nextcloud_server_trust_self_signed_certs,nextcloud_server_username,nextcloud_server_password,initial_sync_completed,last_entries_sync_datetime,show_read_entries,sort_order,show_preview_images,crop_preview_images,mark_scrolled_entries_as_read,sync_on_startup,sync_in_background,background_sync_interval_millis,use_built_in_browser,show_preview_text,synced_on_startup",
+            "backend,miniflux_server_url,miniflux_server_trust_self_signed_certs,miniflux_server_token,initial_sync_completed,last_entries_sync_datetime,show_read_entries,sort_order,show_preview_images,crop_preview_images,mark_scrolled_entries_as_read,sync_on_startup,sync_in_background,background_sync_interval_millis,use_built_in_browser,show_preview_text,synced_on_startup",
             columns
         )
     }
@@ -84,10 +79,6 @@ class ConfTest {
         assertEquals("", defaultConf.minifluxServerUrl)
         assertFalse(defaultConf.minifluxServerTrustSelfSignedCerts)
         assertEquals("", defaultConf.minifluxServerToken)
-        assertEquals("", defaultConf.nextcloudServerUrl)
-        assertFalse(defaultConf.nextcloudServerTrustSelfSignedCerts)
-        assertEquals("", defaultConf.nextcloudServerUsername)
-        assertEquals("", defaultConf.nextcloudServerPassword)
         assertFalse(defaultConf.initialSyncCompleted)
         assertEquals("", defaultConf.lastEntriesSyncDatetime)
         assertFalse(defaultConf.showReadEntries)
@@ -122,10 +113,6 @@ class ConfTest {
         assertEquals(conf.minifluxServerUrl, result.minifluxServerUrl)
         assertEquals(conf.minifluxServerTrustSelfSignedCerts, result.minifluxServerTrustSelfSignedCerts)
         assertEquals(conf.minifluxServerToken, result.minifluxServerToken)
-        assertEquals(conf.nextcloudServerUrl, result.nextcloudServerUrl)
-        assertEquals(conf.nextcloudServerTrustSelfSignedCerts, result.nextcloudServerTrustSelfSignedCerts)
-        assertEquals(conf.nextcloudServerUsername, result.nextcloudServerUsername)
-        assertEquals(conf.nextcloudServerPassword, result.nextcloudServerPassword)
         assertEquals(conf.initialSyncCompleted, result.initialSyncCompleted)
         assertEquals(conf.lastEntriesSyncDatetime, result.lastEntriesSyncDatetime)
         assertEquals(conf.showReadEntries, result.showReadEntries)
@@ -197,10 +184,6 @@ class ConfTest {
         minifluxServerUrl: String = "https://miniflux.example.com",
         minifluxServerTrustSelfSignedCerts: Boolean = false,
         minifluxServerToken: String = "miniflux-token",
-        nextcloudServerUrl: String = "https://nextcloud.example.com",
-        nextcloudServerTrustSelfSignedCerts: Boolean = true,
-        nextcloudServerUsername: String = "admin",
-        nextcloudServerPassword: String = "password",
         initialSyncCompleted: Boolean = true,
         lastEntriesSyncDatetime: String = "2024-01-01T00:00:00Z",
         showReadEntries: Boolean = true,
@@ -219,10 +202,6 @@ class ConfTest {
         minifluxServerUrl = minifluxServerUrl,
         minifluxServerTrustSelfSignedCerts = minifluxServerTrustSelfSignedCerts,
         minifluxServerToken = minifluxServerToken,
-        nextcloudServerUrl = nextcloudServerUrl,
-        nextcloudServerTrustSelfSignedCerts = nextcloudServerTrustSelfSignedCerts,
-        nextcloudServerUsername = nextcloudServerUsername,
-        nextcloudServerPassword = nextcloudServerPassword,
         initialSyncCompleted = initialSyncCompleted,
         lastEntriesSyncDatetime = lastEntriesSyncDatetime,
         showReadEntries = showReadEntries,
