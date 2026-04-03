@@ -6,6 +6,7 @@ import org.junit.Test
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Ignore
+import org.vestifeed.db.table.Feed
 
 class EntryQueriesTest {
 
@@ -39,7 +40,8 @@ class EntryQueriesTest {
 
     @Test
     fun selectByReadAndBookmarked() {
-        val feed = db.insertRandomFeed()
+        val feed = createFeed()
+        db.feed.insertOrReplace(listOf(feed))
 
         val all = listOf(
             entry().copy(feedId = feed.id, extRead = true, extBookmarked = true),
@@ -84,7 +86,8 @@ class EntryQueriesTest {
     @Test
     fun selectByQuery() {
         val db = db()
-        val feed = db.insertRandomFeed()
+        val feed = createFeed()
+        db.feed.insertOrReplace(listOf(feed))
 
         val entries = listOf(
             entry().copy(feedId = feed.id, contentText = "Linux 5.19 introduces RSS API"),
@@ -99,25 +102,6 @@ class EntryQueriesTest {
         assertEquals(3, db.entry.selectByQuery("LinuX").size)
         assertEquals(3, db.entry.selectByQuery("linux").size)
         assertEquals(1, db.entry.selectByQuery("call").size)
-    }
-
-    @Test
-    @Ignore("Won't work without icu, see https://github.com/requery/sqlite-android/issues/55")
-    fun selectByQuery_inRussian() {
-        val db = db()
-        val feed = db.insertRandomFeed()
-
-        val entries = listOf(
-            entry().copy(feedId = feed.id, contentText = "Роулинг рулет гуляш"),
-            entry().copy(feedId = feed.id, contentText = "РоулинГ рулет гуляш"),
-            entry().copy(feedId = feed.id, contentText = "роулинг рулет гуляш"),
-        )
-
-        db.entry.insertOrReplace(entries)
-
-        assertEquals(3, db.entry.selectByQuery("Роулинг").size)
-        assertEquals(3, db.entry.selectByQuery("РоулинГ").size)
-        assertEquals(3, db.entry.selectByQuery("роулинг").size)
     }
 }
 
@@ -218,3 +202,19 @@ fun EntryWithoutContent.toEntry(): Entry {
         extOpenGraphImageHeight = extOpenGraphImageHeight,
     )
 }
+
+private fun createFeed(
+    id: String = UUID.randomUUID().toString(),
+    links: List<Link> = emptyList(),
+    title: String = "Test Feed",
+    extOpenEntriesInBrowser: Boolean? = null,
+    extBlockedWords: String = "",
+    extShowPreviewImages: Boolean? = null,
+) = Feed(
+    id = id,
+    links = links,
+    title = title,
+    extOpenEntriesInBrowser = extOpenEntriesInBrowser,
+    extBlockedWords = extBlockedWords,
+    extShowPreviewImages = extShowPreviewImages,
+)

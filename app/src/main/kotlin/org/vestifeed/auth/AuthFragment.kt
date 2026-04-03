@@ -11,8 +11,8 @@ import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import org.vestifeed.R
 import org.vestifeed.app.App
-import org.vestifeed.db.ConfQueries
 import org.vestifeed.databinding.FragmentAuthBinding
+import org.vestifeed.db.table.ConfSchema
 import org.vestifeed.entries.EntriesFilter
 import org.vestifeed.entries.EntriesFragment
 import org.vestifeed.sync.BackgroundSyncScheduler
@@ -54,7 +54,7 @@ class AuthFragment : AppFragment() {
 
             db.conf.update {
                 it.copy(
-                    backend = ConfQueries.BACKEND_STANDALONE,
+                    backend = ConfSchema.BACKEND_STANDALONE,
                     syncOnStartup = false,
                     backgroundSyncIntervalMillis = TimeUnit.HOURS.toMillis(12),
                 )

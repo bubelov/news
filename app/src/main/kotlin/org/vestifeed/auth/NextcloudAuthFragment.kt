@@ -16,8 +16,8 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.vestifeed.R
 import org.vestifeed.api.nextcloud.NextcloudApiBuilder
 import org.vestifeed.app.App
-import org.vestifeed.db.ConfQueries
 import org.vestifeed.databinding.FragmentNextcloudAuthBinding
+import org.vestifeed.db.table.ConfSchema
 import org.vestifeed.dialog.showErrorDialog
 import org.vestifeed.entries.EntriesFilter
 import org.vestifeed.entries.EntriesFragment
@@ -83,7 +83,7 @@ class NextcloudAuthFragment : AppFragment() {
 
                 db.conf.update {
                     it.copy(
-                        backend = ConfQueries.BACKEND_NEXTCLOUD,
+                        backend = ConfSchema.BACKEND_NEXTCLOUD,
                         nextcloudServerUrl = url.toString().trim('/'),
                         nextcloudServerTrustSelfSignedCerts = trustSelfSignedCerts,
                         nextcloudServerUsername = username,

@@ -29,8 +29,8 @@ import org.vestifeed.R
 import org.vestifeed.app.App
 import org.vestifeed.auth.AuthFragment
 import org.vestifeed.databinding.FragmentSettingsBinding
-import org.vestifeed.db.Conf
-import org.vestifeed.db.ConfQueries
+import org.vestifeed.db.table.Conf
+import org.vestifeed.db.table.ConfSchema
 import org.vestifeed.dialog.showErrorDialog
 import org.vestifeed.enclosures.EnclosuresFragment
 import org.vestifeed.sync.BackgroundSyncScheduler
@@ -89,7 +89,7 @@ class SettingsFragment : AppFragment() {
             val logOutSubtitle: String
 
             when (conf.backend) {
-                ConfQueries.BACKEND_STANDALONE -> {
+                ConfSchema.BACKEND_STANDALONE -> {
                     logOutTitle = getString(R.string.delete_all_data)
                     logOutSubtitle = ""
                 }
@@ -166,12 +166,12 @@ class SettingsFragment : AppFragment() {
 
     private fun Conf.accountName(): String {
         return when (backend) {
-            ConfQueries.BACKEND_STANDALONE -> ""
-            ConfQueries.BACKEND_MINIFLUX -> {
+            ConfSchema.BACKEND_STANDALONE -> ""
+            ConfSchema.BACKEND_MINIFLUX -> {
                 minifluxServerUrl.extractDomain()
             }
 
-            ConfQueries.BACKEND_NEXTCLOUD -> {
+            ConfSchema.BACKEND_NEXTCLOUD -> {
                 val username = nextcloudServerUsername
                 "$username@${nextcloudServerUrl.extractDomain()}"
             }
@@ -322,7 +322,7 @@ class SettingsFragment : AppFragment() {
 
         logOut.setOnClickListener {
             when (state.conf.backend) {
-                ConfQueries.BACKEND_STANDALONE -> {
+                ConfSchema.BACKEND_STANDALONE -> {
                     MaterialAlertDialogBuilder(requireContext())
                         .setMessage(R.string.delete_all_data_warning)
                         .setPositiveButton(R.string.delete) { _, _ -> doLogOut() }

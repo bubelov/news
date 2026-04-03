@@ -30,10 +30,10 @@ import kotlinx.coroutines.withContext
 import org.vestifeed.R
 import org.vestifeed.app.db
 import org.vestifeed.app.sync
-import org.vestifeed.db.Conf
-import org.vestifeed.db.ConfQueries
 import org.vestifeed.db.EntriesAdapterRow
 import org.vestifeed.databinding.FragmentEntriesBinding
+import org.vestifeed.db.table.Conf
+import org.vestifeed.db.table.ConfSchema
 import org.vestifeed.db.table.Feed
 import org.vestifeed.dialog.showErrorDialog
 import org.vestifeed.entry.EntryFragment
@@ -262,8 +262,8 @@ class EntriesFragment : AppFragment() {
                 }
 
                 val sortedRows = when (conf.sortOrder) {
-                    ConfQueries.SORT_ORDER_ASCENDING -> rows.sortedBy { it.published }
-                    ConfQueries.SORT_ORDER_DESCENDING -> rows.sortedByDescending { it.published }
+                    ConfSchema.SORT_ORDER_ASCENDING -> rows.sortedBy { it.published }
+                    ConfSchema.SORT_ORDER_DESCENDING -> rows.sortedByDescending { it.published }
                     else -> throw Exception()
                 }
 
@@ -292,8 +292,8 @@ class EntriesFragment : AppFragment() {
     private fun changeSortOrder() {
         db().conf.update {
             val newSortOrder = when (it.sortOrder) {
-                ConfQueries.SORT_ORDER_ASCENDING -> ConfQueries.SORT_ORDER_DESCENDING
-                ConfQueries.SORT_ORDER_DESCENDING -> ConfQueries.SORT_ORDER_ASCENDING
+                ConfSchema.SORT_ORDER_ASCENDING -> ConfSchema.SORT_ORDER_DESCENDING
+                ConfSchema.SORT_ORDER_DESCENDING -> ConfSchema.SORT_ORDER_ASCENDING
                 else -> throw Exception()
             }
 
@@ -569,12 +569,12 @@ class EntriesFragment : AppFragment() {
         val conf = db().conf.select()
 
         when (conf.sortOrder) {
-            ConfQueries.SORT_ORDER_ASCENDING -> {
+            ConfSchema.SORT_ORDER_ASCENDING -> {
                 button.setIcon(R.drawable.ic_clock_forward)
                 button.title = getString(R.string.show_newest_first)
             }
 
-            ConfQueries.SORT_ORDER_DESCENDING -> {
+            ConfSchema.SORT_ORDER_DESCENDING -> {
                 button.setIcon(R.drawable.ic_clock_back)
                 button.title = getString(R.string.show_oldest_first)
             }

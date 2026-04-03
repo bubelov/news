@@ -26,9 +26,9 @@ import org.vestifeed.anim.animateVisibilityChanges
 import org.vestifeed.app.App
 import org.vestifeed.app.db
 import org.vestifeed.app.sync
-import org.vestifeed.db.Conf
 import org.vestifeed.db.SelectByQuery
 import org.vestifeed.databinding.FragmentSearchBinding
+import org.vestifeed.db.table.Conf
 import org.vestifeed.dialog.showErrorDialog
 import org.vestifeed.entries.EntriesAdapter
 import org.vestifeed.entry.EntryFragment

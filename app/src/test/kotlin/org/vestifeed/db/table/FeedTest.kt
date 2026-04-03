@@ -8,8 +8,10 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.vestifeed.db.Database
+import org.vestifeed.db.Entry
 import org.vestifeed.db.Link
 import org.vestifeed.parser.AtomLinkRel
+import java.time.OffsetDateTime
 import java.util.UUID
 
 class FeedTest {
@@ -370,7 +372,7 @@ class FeedTest {
         feedId: String,
         extRead: Boolean = false,
         extBookmarked: Boolean = false,
-    ) = org.vestifeed.db.Entry(
+    ) = Entry(
         contentType = "",
         contentSrc = "",
         contentText = "",
@@ -379,8 +381,8 @@ class FeedTest {
         id = UUID.randomUUID().toString(),
         feedId = feedId,
         title = "",
-        published = java.time.OffsetDateTime.now(),
-        updated = java.time.OffsetDateTime.now(),
+        published = OffsetDateTime.now(),
+        updated = OffsetDateTime.now(),
         authorName = "",
         extRead = extRead,
         extReadSynced = true,
