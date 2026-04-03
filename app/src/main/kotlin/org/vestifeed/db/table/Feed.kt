@@ -5,6 +5,7 @@ import androidx.sqlite.SQLiteStatement
 import androidx.sqlite.execSQL
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.vestifeed.db.Link
+import org.vestifeed.parser.AtomLinkRel
 import kotlin.collections.forEach
 
 object FeedSchema {
@@ -160,7 +161,9 @@ class FeedQueries(private val conn: SQLiteConnection) {
             """
         ).use { stmt ->
             return buildList {
-                add(jsonToLinks(stmt.getText(0)))
+                while (stmt.step()) {
+                    add(jsonToLinks(stmt.getText(0)))
+                }
             }
         }
     }
@@ -195,60 +198,48 @@ class FeedQueries(private val conn: SQLiteConnection) {
     }
 }
 
-// todo refactor
 private fun linksToJson(links: List<Link>): String {
-    return links.joinToString(",") { link ->
+    val array = links.map { link ->
         val length = link.length?.toString() ?: "null"
         val extEnclosureDownloadProgress = link.extEnclosureDownloadProgress?.toString() ?: "null"
         val relName = when (link.rel) {
-            is org.vestifeed.parser.AtomLinkRel.Alternate -> "Alternate"
-            is org.vestifeed.parser.AtomLinkRel.Enclosure -> "Enclosure"
-            is org.vestifeed.parser.AtomLinkRel.Self -> "Self"
-            is org.vestifeed.parser.AtomLinkRel.Related -> "Related"
+            is AtomLinkRel.Alternate -> "Alternate"
+            is AtomLinkRel.Enclosure -> "Enclosure"
+            is AtomLinkRel.Self -> "Self"
+            is AtomLinkRel.Related -> "Related"
             else -> ""
         }
         """{"feedId":"${link.feedId ?: ""}","entryId":"${link.entryId ?: ""}","href":"${link.href}","rel":"$relName","type":"${link.type ?: ""}","hreflang":"${link.hreflang ?: ""}","title":"${link.title ?: ""}","length":$length,"extEnclosureDownloadProgress":$extEnclosureDownloadProgress,"extCacheUri":"${link.extCacheUri ?: ""}"}"""
     }
+    return "[${array.joinToString(",")}]"
 }
 
-// todo refactor
 private fun jsonToLinks(json: String?): List<Link> {
     if (json.isNullOrBlank()) return emptyList()
-    return try {
-        val links = mutableListOf<Link>()
-        val regex =
-            """\{"feedId":"([^"]*)","entryId":"([^"]*)","href":"([^"]*)","rel":"([^"]*)","type":"([^"]*)","hreflang":"([^"]*)","title":"([^"]*)","length":([^,]*),"extEnclosureDownloadProgress":([^,]*),"extCacheUri":"([^"]*)"\}""".toRegex()
-        regex.findAll(json).forEach { match ->
-            val (feedId, entryId, href, rel, type, hreflang, title, length, extEnclosureDownloadProgress, extCacheUri) = match.destructured
-            val parsedRel: org.vestifeed.parser.AtomLinkRel = when (rel) {
-                "Alternate" -> org.vestifeed.parser.AtomLinkRel.Alternate
-                "Enclosure" -> org.vestifeed.parser.AtomLinkRel.Enclosure
-                "Self" -> org.vestifeed.parser.AtomLinkRel.Self
-                "Related" -> org.vestifeed.parser.AtomLinkRel.Related
-                else -> org.vestifeed.parser.AtomLinkRel.Alternate
-            }
-            val parsedUrl = if (href.startsWith("http")) {
-                href.toHttpUrlOrNull() ?: return@forEach
-            } else {
-                return@forEach
-            }
-            links.add(
-                Link(
-                    feedId = feedId.ifEmpty { null },
-                    entryId = entryId.ifEmpty { null },
-                    href = parsedUrl,
-                    rel = parsedRel,
-                    type = type.ifEmpty { null },
-                    hreflang = hreflang.ifEmpty { null },
-                    title = title.ifEmpty { null },
-                    length = if (length == "null") null else length.toLongOrNull(),
-                    extEnclosureDownloadProgress = if (extEnclosureDownloadProgress == "null") null else extEnclosureDownloadProgress.toDoubleOrNull(),
-                    extCacheUri = extCacheUri.ifEmpty { null }
-                )
-            )
+    val array = com.google.gson.JsonParser.parseString(json).asJsonArray
+    return array.mapNotNull { element ->
+        val obj = element.asJsonObject
+        val relStr = obj.get("rel")?.asString ?: return@mapNotNull null
+        val href = obj.get("href")?.asString ?: return@mapNotNull null
+        val parsedRel: AtomLinkRel = when (relStr) {
+            "Alternate" -> AtomLinkRel.Alternate
+            "Enclosure" -> AtomLinkRel.Enclosure
+            "Self" -> AtomLinkRel.Self
+            "Related" -> AtomLinkRel.Related
+            else -> AtomLinkRel.Alternate
         }
-        links
-    } catch (e: Exception) {
-        emptyList()
+        val parsedUrl = href.toHttpUrlOrNull() ?: return@mapNotNull null
+        Link(
+            feedId = obj.get("feedId")?.asString?.ifEmpty { null },
+            entryId = obj.get("entryId")?.asString?.ifEmpty { null },
+            href = parsedUrl,
+            rel = parsedRel,
+            type = obj.get("type")?.asString?.ifEmpty { null },
+            hreflang = obj.get("hreflang")?.asString?.ifEmpty { null },
+            title = obj.get("title")?.asString?.ifEmpty { null },
+            length = obj.get("length")?.let { if (it.isJsonNull) null else it.asLong },
+            extEnclosureDownloadProgress = obj.get("extEnclosureDownloadProgress")?.let { if (it.isJsonNull) null else it.asDouble },
+            extCacheUri = obj.get("extCacheUri")?.asString?.ifEmpty { null }
+        )
     }
 }
