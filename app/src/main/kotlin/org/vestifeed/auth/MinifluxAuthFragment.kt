@@ -69,14 +69,13 @@ class MinifluxAuthFragment : AppFragment() {
 
         val url = binding.url.text.toString().toHttpUrl()
         val token = binding.token.text.toString()
-        val trustSelfSignedCerts = binding.trustSelfSignedCerts.isChecked
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val api = MinifluxApiBuilder().build(
                     url = url.toString().trim('/'),
                     token = token,
-                    trustSelfSignedCerts = trustSelfSignedCerts,
+                    trustSelfSignedCerts = false,
                 )
 
                 api.getFeeds()
@@ -85,7 +84,7 @@ class MinifluxAuthFragment : AppFragment() {
                     it.copy(
                         backend = ConfSchema.BACKEND_MINIFLUX,
                         minifluxServerUrl = url.toString().trim('/'),
-                        minifluxServerTrustSelfSignedCerts = trustSelfSignedCerts,
+                        minifluxServerTrustSelfSignedCerts = false,
                         minifluxServerToken = token,
                     )
                 }
