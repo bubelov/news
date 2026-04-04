@@ -81,44 +81,6 @@ class FeedQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    data class SelectAllWithUnreadEntryCount(
-        val id: String,
-        val links: List<Link>,
-        val title: String,
-        val extOpenEntriesInBrowser: Boolean,
-        val extBlockedWords: String,
-        val extShowPreviewImages: Boolean,
-        val unreadEntries: Long,
-    )
-
-    fun selectAllWithUnreadEntryCount(): List<SelectAllWithUnreadEntryCount> {
-        conn.prepare(
-            """
-            SELECT f.*, COUNT(e.id) as unread_entries
-            FROM feed f
-            LEFT JOIN entry e ON e.feed_id = f.id AND e.ext_read = 0 AND e.ext_bookmarked = 0
-            GROUP BY f.id
-            ORDER BY f.title;   
-            """
-        ).use { stmt ->
-            return buildList {
-                while (stmt.step()) {
-                    add(
-                        SelectAllWithUnreadEntryCount(
-                            id = stmt.getText(0),
-                            links = jsonToLinks(stmt.getText(1)),
-                            title = stmt.getText(2),
-                            extOpenEntriesInBrowser = stmt.getInt(3) == 1,
-                            extBlockedWords = stmt.getText(4),
-                            extShowPreviewImages = stmt.getInt(5) == 1,
-                            unreadEntries = stmt.getLong(6),
-                        )
-                    )
-                }
-            }
-        }
-    }
-
     fun selectAllLinks(): List<List<Link>> {
         conn.prepare(
             """

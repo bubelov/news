@@ -35,6 +35,7 @@ import org.vestifeed.anim.showSmooth
 import org.vestifeed.app.api
 import org.vestifeed.app.db
 import org.vestifeed.databinding.FragmentFeedsBinding
+import org.vestifeed.db.table.Feed
 import org.vestifeed.db.table.FeedQueries
 import org.vestifeed.dialog.showErrorDialog
 import org.vestifeed.entries.EntriesFilter
@@ -154,7 +155,7 @@ class FeedsFragment : AppFragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             state.update { State.Loading }
             val feeds = withContext(Dispatchers.IO) {
-                db().feed.selectAllWithUnreadEntryCount()
+                db().feed.selectAll()
             }
             state.update { State.ShowingFeeds(feeds.map { it.toItem() }) }
         }
@@ -244,7 +245,7 @@ class FeedsFragment : AppFragment() {
 
             showErrorDialog(message)
         } else {
-            val feeds = db().feed.selectAllWithUnreadEntryCount()
+            val feeds = db().feed.selectAll()
             state.update { State.ShowingFeeds(feeds.map { it.toItem() }) }
         }
     }
@@ -301,7 +302,7 @@ class FeedsFragment : AppFragment() {
             }.onSuccess {
                 state.update { State.Loading }
                 val feeds = withContext(Dispatchers.IO) {
-                    db().feed.selectAllWithUnreadEntryCount()
+                    db().feed.selectAll()
                 }
                 state.update { State.ShowingFeeds(feeds.map { it.toItem() }) }
             }.onFailure { e ->
@@ -335,7 +336,7 @@ class FeedsFragment : AppFragment() {
         }
     }
 
-    private fun FeedQueries.SelectAllWithUnreadEntryCount.toItem(): FeedsAdapter.Item {
+    private fun Feed.toItem(): FeedsAdapter.Item {
         val selfLink = links.firstOrNull { it.rel is AtomLinkRel.Self }?.href
             ?: links.firstOrNull()?.href
             ?: "https://example.com".toHttpUrl()
@@ -345,7 +346,7 @@ class FeedsFragment : AppFragment() {
             title = title,
             selfLink = selfLink,
             alternateLink = links.firstOrNull { it.rel is AtomLinkRel.Alternate }?.href,
-            unreadCount = unreadEntries,
+            unreadCount = db().entry.selectByFeedId(id).filterNot { it.extRead }.size.toLong(),
             confUseBuiltInBrowser = db().conf.select().useBuiltInBrowser,
         )
     }
