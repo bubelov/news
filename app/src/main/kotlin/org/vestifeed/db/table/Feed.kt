@@ -1,39 +1,23 @@
 package org.vestifeed.db.table
 
 import androidx.sqlite.SQLiteConnection
-import androidx.sqlite.SQLiteStatement
 import androidx.sqlite.execSQL
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import org.vestifeed.db.bindBooleanOrNull
+import org.vestifeed.db.getBoolOrNull
 import org.vestifeed.parser.AtomLinkRel
 import kotlin.collections.forEach
 
-object FeedSchema {
-    const val TABLE_NAME = "feed"
-
-    override fun toString(): String {
-        return """
-            CREATE TABLE $TABLE_NAME (
-                ${Columns.Id} TEXT PRIMARY KEY NOT NULL,
-                ${Columns.Links} TEXT,
-                ${Columns.Title} TEXT NOT NULL,
-                ${Columns.ExtOpenEntriesInBrowser} INTEGER,
-                ${Columns.ExtBlockedWords} TEXT,
-                ${Columns.ExtShowPreviewImages} INTEGER
-            );
-        """.trimIndent()
-    }
-
-    enum class Columns(val sqlName: String) {
-        Id("id"),
-        Links("links"),
-        Title("title"),
-        ExtOpenEntriesInBrowser("ext_open_entries_in_browser"),
-        ExtBlockedWords("ext_blocked_words"),
-        ExtShowPreviewImages("ext_show_preview_images");
-
-        override fun toString() = sqlName
-    }
-}
+const val FEED_SCHEMA = """
+    CREATE TABLE feed (
+        id TEXT PRIMARY KEY NOT NULL,
+        links TEXT,
+        title TEXT NOT NULL,
+        ext_open_entries_in_browser INTEGER,
+        ext_blocked_words TEXT,
+        ext_show_preview_images INTEGER
+    );
+ """
 
 typealias Feed = FeedProjection
 
@@ -44,25 +28,7 @@ data class FeedProjection(
     val extOpenEntriesInBrowser: Boolean?,
     val extBlockedWords: String,
     val extShowPreviewImages: Boolean?,
-) {
-    companion object {
-        val columns: String
-            get() {
-                return FeedSchema.Columns.entries.joinToString(",") { it.sqlName }
-            }
-
-        fun fromStatement(stmt: SQLiteStatement): FeedProjection {
-            return FeedProjection(
-                id = stmt.getText(0),
-                links = jsonToLinks(stmt.getText(1)),
-                title = stmt.getText(2),
-                extOpenEntriesInBrowser = if (stmt.isNull(3)) null else stmt.getInt(3) == 1,
-                extBlockedWords = stmt.getText(4),
-                extShowPreviewImages = if (stmt.isNull(5)) null else stmt.getInt(5) == 1
-            )
-        }
-    }
-}
+)
 
 class FeedQueries(private val conn: SQLiteConnection) {
     fun insertOrReplace(feeds: List<Feed>) {
@@ -73,7 +39,7 @@ class FeedQueries(private val conn: SQLiteConnection) {
         conn.prepare(
             """
             INSERT OR REPLACE
-            INTO ${FeedSchema.TABLE_NAME} (${FeedProjection.columns})
+            INTO feed (id, links, title, ext_open_entries_in_browser, ext_blocked_words, ext_show_preview_images)
             VALUES (?, ?, ?, ?, ?, ?);
             """
         ).use { stmt ->
@@ -81,17 +47,9 @@ class FeedQueries(private val conn: SQLiteConnection) {
                 stmt.bindText(1, feed.id)
                 stmt.bindText(2, linksToJson(feed.links))
                 stmt.bindText(3, feed.title)
-                if (feed.extOpenEntriesInBrowser != null) {
-                    stmt.bindInt(4, if (feed.extOpenEntriesInBrowser) 1 else 0)
-                } else {
-                    stmt.bindNull(4)
-                }
+                stmt.bindBooleanOrNull(4, feed.extOpenEntriesInBrowser)
                 stmt.bindText(5, feed.extBlockedWords)
-                if (feed.extShowPreviewImages != null) {
-                    stmt.bindInt(6, if (feed.extShowPreviewImages) 1 else 0)
-                } else {
-                    stmt.bindNull(6)
-                }
+                stmt.bindBooleanOrNull(6, feed.extShowPreviewImages)
                 stmt.step()
                 stmt.reset()
             }
@@ -101,14 +59,23 @@ class FeedQueries(private val conn: SQLiteConnection) {
     fun selectAll(): List<FeedProjection> {
         conn.prepare(
             """
-            SELECT ${FeedProjection.columns}
-            FROM ${FeedSchema.TABLE_NAME}
-            ORDER BY ${FeedSchema.Columns.Title};
+            SELECT id, links, title, ext_open_entries_in_browser, ext_blocked_words, ext_show_preview_images
+            FROM feed
+            ORDER BY title;
             """
         ).use { stmt ->
             return buildList {
                 while (stmt.step()) {
-                    add(FeedProjection.fromStatement(stmt))
+                    add(
+                        FeedProjection(
+                            id = stmt.getText(0),
+                            links = jsonToLinks(stmt.getText(1)),
+                            title = stmt.getText(2),
+                            extOpenEntriesInBrowser = stmt.getBoolOrNull(3),
+                            extBlockedWords = stmt.getText(4),
+                            extShowPreviewImages = stmt.getBoolOrNull(5),
+                        )
+                    )
                 }
             }
         }
@@ -128,10 +95,10 @@ class FeedQueries(private val conn: SQLiteConnection) {
         conn.prepare(
             """
             SELECT f.*, COUNT(e.id) as unread_entries
-            FROM ${FeedSchema.TABLE_NAME} f
-            LEFT JOIN entry e ON e.feed_id = f.${FeedSchema.Columns.Id} AND e.ext_read = 0 AND e.ext_bookmarked = 0
-            GROUP BY f.${FeedSchema.Columns.Id}
-            ORDER BY f.${FeedSchema.Columns.Title};   
+            FROM feed f
+            LEFT JOIN entry e ON e.feed_id = f.id AND e.ext_read = 0 AND e.ext_bookmarked = 0
+            GROUP BY f.id
+            ORDER BY f.title;   
             """
         ).use { stmt ->
             return buildList {
@@ -155,8 +122,8 @@ class FeedQueries(private val conn: SQLiteConnection) {
     fun selectAllLinks(): List<List<Link>> {
         conn.prepare(
             """
-            SELECT ${FeedSchema.Columns.Links}
-            FROM ${FeedSchema.TABLE_NAME};
+            SELECT links
+            FROM feed;
             """
         ).use { stmt ->
             return buildList {
@@ -170,21 +137,28 @@ class FeedQueries(private val conn: SQLiteConnection) {
     fun selectById(id: String): FeedProjection? {
         conn.prepare(
             """
-            SELECT ${FeedProjection.columns}
-            FROM ${FeedSchema.TABLE_NAME}
+            SELECT id, links, title, ext_open_entries_in_browser, ext_blocked_words, ext_show_preview_images
+            FROM feed
             WHERE id = ?;
             """
         ).use { stmt ->
             stmt.bindText(1, id)
-            return if (stmt.step()) FeedProjection.fromStatement(stmt) else null
+            return if (stmt.step()) FeedProjection(
+                id = stmt.getText(0),
+                links = jsonToLinks(stmt.getText(1)),
+                title = stmt.getText(2),
+                extOpenEntriesInBrowser = stmt.getBoolOrNull(3),
+                extBlockedWords = stmt.getText(4),
+                extShowPreviewImages = stmt.getBoolOrNull(5),
+            ) else null
         }
     }
 
     fun deleteById(id: String) {
         conn.prepare(
             """
-            DELETE FROM ${FeedSchema.TABLE_NAME}
-            WHERE ${FeedSchema.Columns.Id} = ?;
+            DELETE FROM feed
+            WHERE id = ?;
             """
         ).use { stmt ->
             stmt.bindText(1, id)
@@ -193,7 +167,7 @@ class FeedQueries(private val conn: SQLiteConnection) {
     }
 
     fun deleteAll() {
-        conn.execSQL("DELETE FROM ${FeedSchema.TABLE_NAME};")
+        conn.execSQL("DELETE FROM feed;")
     }
 }
 
@@ -237,7 +211,8 @@ private fun jsonToLinks(json: String?): List<Link> {
             hreflang = obj.get("hreflang")?.asString?.ifEmpty { null },
             title = obj.get("title")?.asString?.ifEmpty { null },
             length = obj.get("length")?.let { if (it.isJsonNull) null else it.asLong },
-            extEnclosureDownloadProgress = obj.get("extEnclosureDownloadProgress")?.let { if (it.isJsonNull) null else it.asDouble },
+            extEnclosureDownloadProgress = obj.get("extEnclosureDownloadProgress")
+                ?.let { if (it.isJsonNull) null else it.asDouble },
             extCacheUri = obj.get("extCacheUri")?.asString?.ifEmpty { null }
         )
     }

@@ -6,8 +6,8 @@ import org.vestifeed.db.table.ConfQueries
 import org.vestifeed.db.table.ConfSchema
 import org.vestifeed.db.table.EntryQueries
 import org.vestifeed.db.table.EntrySchema
+import org.vestifeed.db.table.FEED_SCHEMA
 import org.vestifeed.db.table.FeedQueries
-import org.vestifeed.db.table.FeedSchema
 
 class Database(driver: SQLiteDriver, val path: String) {
 
@@ -26,7 +26,7 @@ class Database(driver: SQLiteDriver, val path: String) {
         val version = if (stmt.step()) stmt.getInt(0) else 0
 
         if (version == 0) {
-            conn.execSQL(FeedSchema.toString())
+            conn.execSQL(FEED_SCHEMA)
             conn.execSQL(EntrySchema.toString())
             conn.execSQL(ConfSchema.toString())
             conn.execSQL("PRAGMA user_version=1;")

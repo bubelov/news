@@ -10,6 +10,10 @@ fun SQLiteStatement.bindTextOrNull(index: Int, value: String?) {
     if (value == null) bindNull(index) else bindText(index, value)
 }
 
+fun SQLiteStatement.bindBooleanOrNull(index: Int, value: Boolean?) {
+    if (value == null) bindNull(index) else bindInt(index, if (value) 1 else 0)
+}
+
 fun SQLiteStatement.bindLongOrNull(index: Int, value: Long?) {
     if (value == null) bindNull(index) else bindLong(index, value)
 }
@@ -28,6 +32,9 @@ fun SQLiteStatement.bindJsonObjectOrNull(index: Int, value: JsonObject?) {
 
 fun SQLiteStatement.getTextOrNull(index: Int): String? =
     if (isNull(index)) null else getText(index)
+
+fun SQLiteStatement.getBoolOrNull(index: Int): Boolean? =
+    if (isNull(index)) null else getInt(index) != 0
 
 fun SQLiteStatement.getLongOrNull(index: Int): Long? =
     if (isNull(index)) null else getLong(index)

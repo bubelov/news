@@ -22,25 +22,8 @@ class FeedTest {
     }
 
     @Test
-    fun feedSchema_tableName() {
-        assertEquals("feed", FeedSchema.TABLE_NAME)
-    }
-
-    @Test
-    fun feedSchema_columns() {
-        val columns = FeedSchema.Columns.entries
-        assertEquals(6, columns.size)
-        assertEquals("id", columns[0].sqlName)
-        assertEquals("links", columns[1].sqlName)
-        assertEquals("title", columns[2].sqlName)
-        assertEquals("ext_open_entries_in_browser", columns[3].sqlName)
-        assertEquals("ext_blocked_words", columns[4].sqlName)
-        assertEquals("ext_show_preview_images", columns[5].sqlName)
-    }
-
-    @Test
     fun feedSchema_createTableStatement() {
-        val statement = FeedSchema.toString()
+        val statement = FEED_SCHEMA
         assertTrue(statement.contains("CREATE TABLE feed"))
         assertTrue(statement.contains("id TEXT PRIMARY KEY NOT NULL"))
         assertTrue(statement.contains("links TEXT"))
@@ -48,12 +31,6 @@ class FeedTest {
         assertTrue(statement.contains("ext_open_entries_in_browser INTEGER"))
         assertTrue(statement.contains("ext_blocked_words TEXT"))
         assertTrue(statement.contains("ext_show_preview_images INTEGER"))
-    }
-
-    @Test
-    fun feedProjection_columns() {
-        val columns = FeedProjection.columns
-        assertEquals("id,links,title,ext_open_entries_in_browser,ext_blocked_words,ext_show_preview_images", columns)
     }
 
     @Test
