@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import org.vestifeed.databinding.ListItemEnclosureBinding
-import org.vestifeed.db.Link
+import org.vestifeed.db.table.Link
 
 class EnclosuresAdapter(
     private val callback: Callback,

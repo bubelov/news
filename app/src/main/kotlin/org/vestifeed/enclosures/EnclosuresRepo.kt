@@ -8,8 +8,6 @@ import android.util.Log
 import androidx.core.net.toUri
 import org.vestifeed.parser.AtomLinkRel
 import org.vestifeed.db.Database
-import org.vestifeed.db.Entry
-import org.vestifeed.db.Link
 import org.vestifeed.http.await
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -19,6 +17,8 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okio.buffer
 import okio.sink
+import org.vestifeed.db.table.Entry
+import org.vestifeed.db.table.Link
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
@@ -74,7 +74,8 @@ class EnclosuresRepo(
 
         val cacheUri = kotlin.runCatching {
             withContext(Dispatchers.IO) {
-                context.contentResolver.insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                context.contentResolver.insert(
+                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     ContentValues().apply {
                         put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
                         put(MediaStore.MediaColumns.MIME_TYPE, enclosure.type)

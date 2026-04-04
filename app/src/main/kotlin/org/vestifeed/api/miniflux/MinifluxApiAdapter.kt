@@ -3,15 +3,15 @@ package org.vestifeed.api.miniflux
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import org.vestifeed.api.Api
-import org.vestifeed.db.Entry
-import org.vestifeed.db.EntryWithoutContent
-import org.vestifeed.db.Link
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import org.vestifeed.db.table.Entry
+import org.vestifeed.db.table.EntryQueries
 import org.vestifeed.db.table.Feed
+import org.vestifeed.db.table.Link
 import org.vestifeed.parser.AtomLinkRel
 import java.time.OffsetDateTime
 
@@ -128,7 +128,7 @@ class MinifluxApiAdapter(
     }
 
     override suspend fun markEntriesAsBookmarked(
-        entries: List<EntryWithoutContent>,
+        entries: List<EntryQueries.EntryWithoutContent>,
         bookmarked: Boolean,
     ) {
         withContext(Dispatchers.IO) {
@@ -227,7 +227,6 @@ class MinifluxApiAdapter(
             extReadSynced = true,
             extBookmarked = starred,
             extBookmarkedSynced = true,
-            extNextcloudGuidHash = "",
             extCommentsUrl = comments_url,
             extOpenGraphImageChecked = false,
             extOpenGraphImageUrl = "",

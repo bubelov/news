@@ -9,7 +9,7 @@ import androidx.core.content.getSystemService
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.ListAdapter
 import org.vestifeed.databinding.ListItemEntryBinding
-import org.vestifeed.db.Link
+import org.vestifeed.db.table.Link
 
 class EntriesAdapter(
     private val activity: FragmentActivity,

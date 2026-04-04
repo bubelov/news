@@ -13,9 +13,6 @@ import org.vestifeed.parser.RssItem
 import org.vestifeed.parser.RssItemGuid
 import org.vestifeed.parser.feed
 import org.vestifeed.db.Database
-import org.vestifeed.db.Entry
-import org.vestifeed.db.EntryWithoutContent
-import org.vestifeed.db.Link
 import org.vestifeed.http.await
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -27,7 +24,10 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.jsoup.Jsoup
+import org.vestifeed.db.table.Entry
+import org.vestifeed.db.table.EntryQueries
 import org.vestifeed.db.table.Feed
+import org.vestifeed.db.table.Link
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.time.OffsetDateTime
@@ -237,7 +237,7 @@ class StandaloneNewsApi(
     }
 
     override suspend fun markEntriesAsBookmarked(
-        entries: List<EntryWithoutContent>,
+        entries: List<EntryQueries.EntryWithoutContent>,
         bookmarked: Boolean
     ) {
 
@@ -337,7 +337,6 @@ class StandaloneNewsApi(
             extReadSynced = true,
             extBookmarked = false,
             extBookmarkedSynced = true,
-            extNextcloudGuidHash = "",
             extCommentsUrl = "",
             extOpenGraphImageChecked = false,
             extOpenGraphImageUrl = "",
@@ -410,7 +409,6 @@ class StandaloneNewsApi(
             extReadSynced = true,
             extBookmarked = false,
             extBookmarkedSynced = true,
-            extNextcloudGuidHash = "",
             extCommentsUrl = "",
             extOpenGraphImageChecked = false,
             extOpenGraphImageUrl = "",

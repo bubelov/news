@@ -24,8 +24,8 @@ import kotlinx.coroutines.launch
 import org.vestifeed.R
 import org.vestifeed.app.App
 import org.vestifeed.app.db
-import org.vestifeed.db.Link
 import org.vestifeed.databinding.FragmentEnclosuresBinding
+import org.vestifeed.db.table.Link
 import org.vestifeed.dialog.showErrorDialog
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle

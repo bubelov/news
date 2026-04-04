@@ -6,9 +6,9 @@ import kotlinx.coroutines.runBlocking
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.junit.Test
 import org.junit.Assert.assertTrue
-import org.vestifeed.db.Link
 import org.vestifeed.db.db
 import org.vestifeed.db.entryWithoutContent
+import org.vestifeed.db.table.Link
 
 class EnclosuresRepoTest {
 

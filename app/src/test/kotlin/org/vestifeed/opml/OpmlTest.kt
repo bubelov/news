@@ -7,8 +7,8 @@ import java.io.InputStream
 import java.nio.charset.Charset
 import java.util.UUID
 import org.junit.Test
-import org.vestifeed.db.Link
 import org.vestifeed.db.table.Feed
+import org.vestifeed.db.table.Link
 
 class OpmlTest {
 

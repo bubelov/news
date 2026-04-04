@@ -33,10 +33,7 @@ class SyncWorker(context: Context, workerParams: WorkerParameters) : Worker(cont
                 if (syncResult.newAndUpdatedEntries > 0) {
                     runCatching {
                         val unreadEntries =
-                            applicationContext.db().entry.selectByReadAndBookmarked(
-                                extRead = false,
-                                extBookmarked = false,
-                            ).size
+                            applicationContext.db().entry.selectUnread().size
 
                         if (unreadEntries > 0) {
                             showUnreadEntriesNotification(unreadEntries, applicationContext)

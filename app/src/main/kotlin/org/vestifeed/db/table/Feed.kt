@@ -4,7 +4,6 @@ import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.SQLiteStatement
 import androidx.sqlite.execSQL
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import org.vestifeed.db.Link
 import org.vestifeed.parser.AtomLinkRel
 import kotlin.collections.forEach
 

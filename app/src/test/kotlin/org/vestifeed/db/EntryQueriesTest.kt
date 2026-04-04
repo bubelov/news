@@ -5,8 +5,11 @@ import java.util.UUID
 import org.junit.Test
 import org.junit.Assert.assertEquals
 import org.junit.Before
-import org.junit.Ignore
+import org.vestifeed.db.table.Entry
+import org.vestifeed.db.table.EntryQueries
 import org.vestifeed.db.table.Feed
+import org.vestifeed.db.table.Link
+import kotlin.collections.sortedByDescending
 
 class EntryQueriesTest {
 
@@ -53,10 +56,7 @@ class EntryQueriesTest {
 
         assertEquals(
             all.filter { !it.extRead && !it.extBookmarked }.map { it.id },
-            db.entry.selectByReadAndBookmarked(
-                extRead = false,
-                extBookmarked = false
-            ).map { it.id },
+            db.entry.selectUnread().map { it.id },
         )
     }
 
@@ -127,7 +127,6 @@ fun entry() = Entry(
     extReadSynced = true,
     extBookmarked = false,
     extBookmarkedSynced = true,
-    extNextcloudGuidHash = "",
     extCommentsUrl = "",
     extOpenGraphImageChecked = true,
     extOpenGraphImageUrl = "",
@@ -135,7 +134,7 @@ fun entry() = Entry(
     extOpenGraphImageHeight = 0,
 )
 
-fun entryWithoutContent() = EntryWithoutContent(
+fun entryWithoutContent() = EntryQueries.EntryWithoutContent(
     links = emptyList(),
     summary = "",
     id = UUID.randomUUID().toString(),
@@ -148,7 +147,6 @@ fun entryWithoutContent() = EntryWithoutContent(
     extReadSynced = true,
     extBookmarked = false,
     extBookmarkedSynced = true,
-    extNextcloudGuidHash = "",
     extCommentsUrl = "",
     extOpenGraphImageChecked = true,
     extOpenGraphImageUrl = "",
@@ -156,7 +154,7 @@ fun entryWithoutContent() = EntryWithoutContent(
     extOpenGraphImageHeight = 0,
 )
 
-fun Entry.withoutContent() = EntryWithoutContent(
+fun Entry.withoutContent() = EntryQueries.EntryWithoutContent(
     links = links,
     summary = "",
     id = id,
@@ -169,7 +167,6 @@ fun Entry.withoutContent() = EntryWithoutContent(
     extReadSynced = extReadSynced,
     extBookmarked = extBookmarked,
     extBookmarkedSynced = extBookmarkedSynced,
-    extNextcloudGuidHash = extNextcloudGuidHash,
     extCommentsUrl = extCommentsUrl,
     extOpenGraphImageChecked = true,
     extOpenGraphImageUrl = "",
@@ -177,7 +174,7 @@ fun Entry.withoutContent() = EntryWithoutContent(
     extOpenGraphImageHeight = 0,
 )
 
-fun EntryWithoutContent.toEntry(): Entry {
+fun EntryQueries.EntryWithoutContent.toEntry(): Entry {
     return Entry(
         contentType = "",
         contentSrc = "",
@@ -194,7 +191,6 @@ fun EntryWithoutContent.toEntry(): Entry {
         extReadSynced = extReadSynced,
         extBookmarked = extBookmarked,
         extBookmarkedSynced = extBookmarkedSynced,
-        extNextcloudGuidHash = extNextcloudGuidHash,
         extCommentsUrl = extCommentsUrl,
         extOpenGraphImageChecked = extOpenGraphImageChecked,
         extOpenGraphImageUrl = extOpenGraphImageUrl,

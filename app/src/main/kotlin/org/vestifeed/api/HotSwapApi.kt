@@ -4,11 +4,11 @@ import org.vestifeed.api.miniflux.MinifluxApiAdapter
 import org.vestifeed.api.miniflux.MinifluxApiBuilder
 import org.vestifeed.api.standalone.StandaloneNewsApi
 import org.vestifeed.db.Database
-import org.vestifeed.db.Entry
-import org.vestifeed.db.EntryWithoutContent
 import kotlinx.coroutines.flow.Flow
 import okhttp3.HttpUrl
 import org.vestifeed.db.table.ConfSchema
+import org.vestifeed.db.table.Entry
+import org.vestifeed.db.table.EntryQueries
 import org.vestifeed.db.table.Feed
 import java.time.OffsetDateTime
 
@@ -83,7 +83,7 @@ class HotSwapApi(private val db: Database) : Api {
     }
 
     override suspend fun markEntriesAsBookmarked(
-        entries: List<EntryWithoutContent>,
+        entries: List<EntryQueries.EntryWithoutContent>,
         bookmarked: Boolean,
     ) {
         updateApi()

@@ -20,7 +20,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.jsoup.Jsoup
 import org.vestifeed.app.db
-import org.vestifeed.db.EntryWithoutContent
+import org.vestifeed.db.table.EntryQueries
 import org.vestifeed.entries.EntriesFragment
 import org.vestifeed.feeds.FeedsFragment
 import org.vestifeed.http.await
@@ -56,7 +56,7 @@ abstract class AppFragment : Fragment() {
     private suspend fun fetchEntryImages(
         httpClient: OkHttpClient,
         maxEntries: Long,
-    ): List<EntryWithoutContent> {
+    ): List<EntryQueries.EntryWithoutContent> {
         val entries = withContext(Dispatchers.IO) {
             db().entry.selectByOgImageChecked(
                 false,
@@ -66,7 +66,7 @@ abstract class AppFragment : Fragment() {
 
         Log.d("opengraph", "fetched ${entries.size} entries with unchecked opengraph images")
 
-        val successfulEntries = mutableListOf<EntryWithoutContent>()
+        val successfulEntries = mutableListOf<EntryQueries.EntryWithoutContent>()
 
         for (entry in entries) {
             if (fetchEntryImage(httpClient, entry)) {
@@ -81,7 +81,7 @@ abstract class AppFragment : Fragment() {
 
     private suspend fun fetchEntryImage(
         httpClient: OkHttpClient,
-        entry: EntryWithoutContent,
+        entry: EntryQueries.EntryWithoutContent,
     ): Boolean {
         Log.d("opengraph", "trying to fetch opengraph image for post ${entry.title}")
         Log.d("opengraph", "links: ${entry.links}")

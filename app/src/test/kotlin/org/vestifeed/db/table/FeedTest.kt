@@ -8,8 +8,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.vestifeed.db.Database
-import org.vestifeed.db.Entry
-import org.vestifeed.db.Link
 import org.vestifeed.parser.AtomLinkRel
 import java.time.OffsetDateTime
 import java.util.UUID
@@ -388,7 +386,6 @@ class FeedTest {
         extReadSynced = true,
         extBookmarked = extBookmarked,
         extBookmarkedSynced = true,
-        extNextcloudGuidHash = "",
         extCommentsUrl = "",
         extOpenGraphImageChecked = true,
         extOpenGraphImageUrl = "",

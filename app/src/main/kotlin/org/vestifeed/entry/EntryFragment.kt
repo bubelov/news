@@ -31,8 +31,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import org.vestifeed.parser.AtomLinkRel
-import org.vestifeed.db.Entry
-import org.vestifeed.db.Link
 import org.vestifeed.dialog.showErrorDialog
 import org.vestifeed.enclosures.EnclosuresAdapter
 import kotlinx.coroutines.launch
@@ -40,6 +38,8 @@ import org.vestifeed.R
 import org.vestifeed.app.db
 import org.vestifeed.app.sync
 import org.vestifeed.databinding.FragmentEntryBinding
+import org.vestifeed.db.table.Entry
+import org.vestifeed.db.table.Link
 import org.vestifeed.enclosures.EnclosuresRepo
 import org.vestifeed.feedsettings.FeedSettingsFragment
 import org.vestifeed.navigation.AppFragment
@@ -235,7 +235,7 @@ class EntryFragment : AppFragment() {
             R.id.toggleBookmarked -> {
                 lifecycleScope.launch {
                     val newBookmarkedState = !entry.extBookmarked
-                    db().entry.updateBookmarkedAndBookmaredSynced(
+                    db().entry.updateBookmarkedAndBookmarkedSynced(
                         id = entry.id,
                         extBookmarked = newBookmarkedState,
                         extBookmarkedSynced = false,

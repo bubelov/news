@@ -30,10 +30,10 @@ import kotlinx.coroutines.withContext
 import org.vestifeed.R
 import org.vestifeed.app.db
 import org.vestifeed.app.sync
-import org.vestifeed.db.EntriesAdapterRow
 import org.vestifeed.databinding.FragmentEntriesBinding
 import org.vestifeed.db.table.Conf
 import org.vestifeed.db.table.ConfSchema
+import org.vestifeed.db.table.EntryQueries
 import org.vestifeed.db.table.Feed
 import org.vestifeed.dialog.showErrorDialog
 import org.vestifeed.entry.EntryFragment
@@ -185,7 +185,10 @@ class EntriesFragment : AppFragment() {
                     }
 
                     is EntriesFilter.BelongToFeed -> {
-                        withContext(Dispatchers.IO) { db().entry.selectUnreadByFeedId((filter as EntriesFilter.BelongToFeed).feedId) }
+                        withContext(Dispatchers.IO) {
+                            db().entry.selectByFeedId((filter as EntriesFilter.BelongToFeed).feedId)
+                                .filterNot { it.extRead }
+                        }
                     }
 
                     null -> emptyList()
@@ -228,58 +231,6 @@ class EntriesFragment : AppFragment() {
 //        val syncState = sync().state.value
 //        updateState(conf, syncState)
 //    }
-
-    private fun updateState(conf: Conf, syncState: Sync.State) {
-        binding.swipeRefresh.isRefreshing = false
-
-        when (syncState) {
-            is Sync.State.InitialSync -> state.update { State.InitialSync(syncState.toString()) }
-
-            is Sync.State.FollowUpSync -> {
-                binding.swipeRefresh.isRefreshing = true
-            }
-
-            else -> {
-                val rows: List<EntriesAdapterRow> = if (filter is EntriesFilter.BelongToFeed) {
-                    db().entry.selectByFeedIdAndReadAndBookmarked(
-                        feedId = (filter as EntriesFilter.BelongToFeed).feedId,
-                        extRead = if (conf.showReadEntries) listOf(true, false) else listOf(false),
-                        extBookmarked = false,
-                    )
-                } else {
-                    if (filter is EntriesFilter.Bookmarked) {
-                        db().entry.selectBookmarked()
-                    } else {
-                        val includeRead =
-                            (conf.showReadEntries || filter is EntriesFilter.Bookmarked)
-                        val includeBookmarked = filter is EntriesFilter.Bookmarked
-
-                        db().entry.selectByReadAndBookmarked(
-                            extRead = includeRead,
-                            extBookmarked = includeBookmarked,
-                        )
-                    }
-                }
-
-                val sortedRows = when (conf.sortOrder) {
-                    ConfSchema.SORT_ORDER_ASCENDING -> rows.sortedBy { it.published }
-                    ConfSchema.SORT_ORDER_DESCENDING -> rows.sortedByDescending { it.published }
-                    else -> throw Exception()
-                }
-
-                state.update {
-                    State.ShowingCachedEntries(
-                        feed = if (filter is EntriesFilter.BelongToFeed) {
-                            db().feed.selectById((filter as EntriesFilter.BelongToFeed).feedId)
-                        } else {
-                            null
-                        },
-                        entries = sortedRows.map { it.toItem(conf) },
-                    )
-                }
-            }
-        }
-    }
 
     private fun onPullRefresh() {
         sync().runInBackground()
@@ -328,7 +279,7 @@ class EntriesFragment : AppFragment() {
     private fun setBookmarked(entryId: String, bookmarked: Boolean) {
         viewLifecycleOwner.lifecycleScope.launch {
             withContext(Dispatchers.IO) {
-                db().entry.updateBookmarkedAndBookmaredSynced(
+                db().entry.updateBookmarkedAndBookmarkedSynced(
                     id = entryId,
                     extBookmarked = bookmarked,
                     extBookmarkedSynced = false
@@ -346,45 +297,10 @@ class EntriesFragment : AppFragment() {
     }
 
     private fun markAllAsRead() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            when (val currentFilter = filter) {
-                is EntriesFilter.Unread -> {
-                    db().entry.updateReadByBookmarked(
-                        read = true,
-                        bookmarked = false,
-                    )
-                }
-
-                is EntriesFilter.Bookmarked -> {
-                    db().entry.updateReadByBookmarked(
-                        read = true,
-                        bookmarked = true,
-                    )
-                }
-
-                is EntriesFilter.BelongToFeed -> {
-                    db().entry.updateReadByFeedId(
-                        read = true,
-                        feedId = currentFilter.feedId,
-                    )
-                }
-
-                null -> {
-
-                }
-            }
-
-            sync().runInBackground(
-                Sync.Args(
-                    syncFeeds = false,
-                    syncFlags = true,
-                    syncEntries = false,
-                )
-            )
-        }
+        // todo
     }
 
-    private fun EntriesAdapterRow.toItem(conf: Conf): EntriesAdapter.Item {
+    private fun EntryQueries.EntriesAdapterRow.toItem(conf: Conf): EntriesAdapter.Item {
         return EntriesAdapter.Item(
             id = id,
             showImage = extShowPreviewImages || conf.showPreviewImages,
