@@ -16,8 +16,8 @@ const val FEED_SCHEMA = """
         ext_open_entries_in_browser INTEGER,
         ext_blocked_words TEXT,
         ext_show_preview_images INTEGER
-    );
- """
+    ) STRICT;
+  """
 
 typealias Feed = FeedProjection
 
@@ -29,13 +29,12 @@ data class FeedProjection(
     val extBlockedWords: String,
     val extShowPreviewImages: Boolean?,
 )
-
+    
 class FeedQueries(private val conn: SQLiteConnection) {
     fun insertOrReplace(feeds: List<Feed>) {
         if (feeds.isEmpty()) {
             return
         }
-
         conn.prepare(
             """
             INSERT OR REPLACE

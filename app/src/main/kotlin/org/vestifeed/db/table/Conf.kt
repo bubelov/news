@@ -27,7 +27,7 @@ object ConfSchema {
                 ${Columns.UseBuiltInBrowser} INTEGER NOT NULL,
                 ${Columns.ShowPreviewText} INTEGER NOT NULL,
                 ${Columns.SyncedOnStartup} INTEGER NOT NULL
-            );
+            ) STRICT;
         """
     }
 

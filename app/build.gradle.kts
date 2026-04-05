@@ -15,7 +15,7 @@ android {
 
     defaultConfig {
         applicationId = "org.vestifeed"
-        minSdk = 33
+        minSdk = 34
         targetSdk = 36
         versionCode = 24
         versionName = "0.4.3"

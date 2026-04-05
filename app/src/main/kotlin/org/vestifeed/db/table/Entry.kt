@@ -36,7 +36,7 @@ object EntrySchema {
                 ${Columns.ExtOgImageUrl} TEXT NOT NULL,
                 ${Columns.ExtOgImageWidth} INTEGER NOT NULL,
                 ${Columns.ExtOgImageHeight} INTEGER NOT NULL
-            );
+            ) STRICT;
         """
     }
 
