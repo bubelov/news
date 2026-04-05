@@ -18,27 +18,24 @@ import java.time.OffsetDateTime
 class MinifluxApiAdapter(
     private val api: MinifluxApi,
 ) : Api {
+    override suspend fun addFeed(url: HttpUrl): Pair<Feed, List<Entry>> {
+        val categories = api.getCategories()
 
-    override suspend fun addFeed(url: HttpUrl): Result<Pair<Feed, List<Entry>>> {
-        return runCatching {
-            val categories = api.getCategories()
-
-            if (categories.isEmpty()) {
-                return Result.failure(Exception("You have no categories"))
-            }
-
-            // Catch-all category always has the lowest id
-            val category = categories.minByOrNull { it.id }!!
-
-            val response = api.postFeed(
-                PostFeedArgs(
-                    feed_url = url.toString(),
-                    category_id = category.id,
-                )
-            )
-
-            Pair(api.getFeed(response.feed_id).toFeed()!!, emptyList())
+        if (categories.isEmpty()) {
+            throw IllegalStateException("You have no categories")
         }
+
+        // Catch-all category always has the lowest id
+        val category = categories.minByOrNull { it.id }!!
+
+        val response = api.postFeed(
+            PostFeedArgs(
+                feed_url = url.toString(),
+                category_id = category.id,
+            )
+        )
+
+        return Pair(api.getFeed(response.feed_id).toFeed()!!, emptyList())
     }
 
     override suspend fun getFeeds(): List<Feed> {

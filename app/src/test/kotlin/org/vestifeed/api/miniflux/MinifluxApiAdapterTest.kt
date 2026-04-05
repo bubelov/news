@@ -17,7 +17,7 @@ class MinifluxApiAdapterTest {
         val adapter = MinifluxApiAdapter(api)
         val feedUrl = "https://test.com/feeds/atom".toHttpUrl()
         coEvery { api.getCategories() } returns emptyList()
-        val result = adapter.addFeed(feedUrl)
+        val result = runCatching { adapter.addFeed(feedUrl) }
         assert(result.isFailure)
         coVerify { api.getCategories() }
     }
@@ -47,7 +47,7 @@ class MinifluxApiAdapterTest {
         coEvery { api.getFeed(feedJson.id!!) } returns feedJson
 
         val adapter = MinifluxApiAdapter(api)
-        val result = adapter.addFeed(feedUrl.toHttpUrl())
+        val result = runCatching { adapter.addFeed(feedUrl.toHttpUrl()) }
         assert(result.isSuccess)
 
         coVerifySequence {

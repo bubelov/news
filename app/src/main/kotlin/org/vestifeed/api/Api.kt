@@ -8,8 +8,7 @@ import org.vestifeed.db.table.Feed
 import java.time.OffsetDateTime
 
 interface Api {
-
-    suspend fun addFeed(url: HttpUrl): Result<Pair<Feed, List<Entry>>>
+    suspend fun addFeed(url: HttpUrl): Pair<Feed, List<Entry>>
 
     suspend fun getFeeds(): List<Feed>
 

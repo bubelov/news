@@ -43,16 +43,16 @@ class StandaloneNewsApi(
 
     private val httpClient = OkHttpClient()
 
-    override suspend fun addFeed(url: HttpUrl): Result<Pair<Feed, List<Entry>>> {
+    override suspend fun addFeed(url: HttpUrl): Pair<Feed, List<Entry>> {
         val request = Request.Builder().url(url).build()
 
         runCatching {
             httpClient.newCall(request).await()
         }.getOrElse {
-            return Result.failure(it)
+            throw it
         }.use { response ->
             if (!response.isSuccessful) {
-                return Result.failure(Exception("Cannot fetch feed (url = $url, code = ${response.code})"))
+                throw Exception("Cannot fetch feed (url = $url, code = ${response.code})")
             }
 
             val contentType = response.header("content-type") ?: ""
@@ -63,7 +63,7 @@ class StandaloneNewsApi(
                         Jsoup.parse(response.body!!.string())
                     }
                 }.getOrElse {
-                    return Result.failure(Exception("Failed to read response", it))
+                    throw Exception("Failed to read response", it)
                 }
 
                 val feedElements = buildList {
@@ -72,7 +72,7 @@ class StandaloneNewsApi(
                 }
 
                 if (feedElements.isEmpty()) {
-                    return Result.failure(Exception("Cannot find feed links in HTML page (url = $url)"))
+                    throw Exception("Cannot find feed links in HTML page (url = $url)")
                 }
 
                 val href = feedElements.first().attr("href")
@@ -89,29 +89,29 @@ class StandaloneNewsApi(
                         feed(response.body.byteStream(), contentType)
                     }
                 }.getOrElse {
-                    return Result.failure(Exception("Failed to read response", it))
+                    throw Exception("Failed to read response", it)
                 }
 
                 return when (result) {
                     is FeedResult.Success -> {
                         val feed = result.feed.toFeed(url)
-                        Result.success(Pair(feed, result.feed.getEntries(feed.id)))
+                        Pair(feed, result.feed.getEntries(feed.id))
                     }
 
                     is FeedResult.UnsupportedMediaType -> {
-                        Result.failure(Exception("Unsupported media type: ${result.mediaType}"))
+                        throw Exception("Unsupported media type: ${result.mediaType}")
                     }
 
                     is FeedResult.UnsupportedFeedType -> {
-                        Result.failure(Exception("Unsupported feed type"))
+                        throw Exception("Unsupported feed type")
                     }
 
                     is FeedResult.IOError -> {
-                        Result.failure(result.cause)
+                        throw result.cause
                     }
 
                     is FeedResult.ParserError -> {
-                        Result.failure(result.cause)
+                        throw result.cause
                     }
                 }
             }

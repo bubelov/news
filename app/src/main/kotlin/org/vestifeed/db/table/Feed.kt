@@ -29,8 +29,12 @@ data class FeedProjection(
     val extBlockedWords: String,
     val extShowPreviewImages: Boolean?,
 )
-    
+
 class FeedQueries(private val conn: SQLiteConnection) {
+    fun insertOrReplace(feed: Feed) {
+        insertOrReplace(listOf(feed))
+    }
+    
     fun insertOrReplace(feeds: List<Feed>) {
         if (feeds.isEmpty()) {
             return
@@ -75,21 +79,6 @@ class FeedQueries(private val conn: SQLiteConnection) {
                             extShowPreviewImages = stmt.getBoolOrNull(5),
                         )
                     )
-                }
-            }
-        }
-    }
-
-    fun selectAllLinks(): List<List<Link>> {
-        conn.prepare(
-            """
-            SELECT links
-            FROM feed;
-            """
-        ).use { stmt ->
-            return buildList {
-                while (stmt.step()) {
-                    add(jsonToLinks(stmt.getText(0)))
                 }
             }
         }

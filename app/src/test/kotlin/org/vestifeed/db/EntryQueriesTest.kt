@@ -44,7 +44,7 @@ class EntryQueriesTest {
     @Test
     fun selectByReadAndBookmarked() {
         val feed = createFeed()
-        db.feed.insertOrReplace(listOf(feed))
+        db.feed.insertOrReplace(feed)
 
         val all = listOf(
             entry().copy(feedId = feed.id, extRead = true, extBookmarked = true),
@@ -87,7 +87,7 @@ class EntryQueriesTest {
     fun selectByQuery() {
         val db = db()
         val feed = createFeed()
-        db.feed.insertOrReplace(listOf(feed))
+        db.feed.insertOrReplace(feed)
 
         val entries = listOf(
             entry().copy(feedId = feed.id, contentText = "Linux 5.19 introduces RSS API"),

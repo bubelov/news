@@ -86,7 +86,9 @@ class Sync(
             try {
                 _state.update { State.InitialSync(InitialSyncStage.SyncingFeeds) }
                 val feeds = api.getFeeds()
-                db.transaction { db.feed.insertOrReplace(feeds) }
+                withContext(Dispatchers.IO) {
+                    db.transaction { db.feed.insertOrReplace(feeds) }
+                }
             } catch (e: Throwable) {
                 _state.update { State.Idle(e) }
                 return

@@ -36,7 +36,6 @@ import org.vestifeed.app.api
 import org.vestifeed.app.db
 import org.vestifeed.databinding.FragmentFeedsBinding
 import org.vestifeed.db.table.Feed
-import org.vestifeed.db.table.FeedQueries
 import org.vestifeed.dialog.showErrorDialog
 import org.vestifeed.entries.EntriesFilter
 import org.vestifeed.entries.EntriesFragment
@@ -196,7 +195,9 @@ class FeedsFragment : AppFragment() {
         var feedsFailed = 0
         val errors = mutableListOf<String>()
 
-        val existingLinks = db().feed.selectAllLinks().flatten()
+        val existingLinks = withContext(Dispatchers.IO) {
+            db().feed.selectAll().flatMap { it.links }
+        }
 
         for (outline in outlines) {
             val outlineUrl = (outline.xmlUrl ?: "").toHttpUrlOrNull()
@@ -215,8 +216,13 @@ class FeedsFragment : AppFragment() {
                 feedsExisted++
             } else {
                 try {
-                    val feedWithEntries = api().addFeed(outlineUrl).getOrThrow()
-                    db().feed.insertOrReplace(listOf(feedWithEntries.first))
+                    val (feed, entries) = api().addFeed(outlineUrl)
+                    withContext(Dispatchers.IO) {
+                        db().transaction {
+                            db().feed.insertOrReplace(feed)
+                            db().entry.insertOrReplace(entries)
+                        }
+                    }
                     feedsImported++
                 } catch (e: Throwable) {
                     errors += "Failed to import feed ${outline.xmlUrl}\nReason: ${e.message}"
@@ -280,33 +286,41 @@ class FeedsFragment : AppFragment() {
     }
 
     private fun addFeed(unvalidatedUrl: String) {
+        val trimmedUrl = unvalidatedUrl.trim()
+        if (trimmedUrl.startsWith("http://")) {
+            showErrorDialog(Exception("HTTP URLs are not supported. Please use HTTPS or enter a domain name."))
+            return
+        }
+        val hasExplicitHttps = trimmedUrl.startsWith("https://")
+        val domain = if (hasExplicitHttps) {
+            trimmedUrl
+        } else {
+            "https://$trimmedUrl"
+        }
+        val parsedUrl = domain.toHttpUrlOrNull()
+        if (parsedUrl == null) {
+            showErrorDialog(Exception("Invalid URL: $unvalidatedUrl"))
+            return
+        }
         viewLifecycleOwner.lifecycleScope.launch {
-            runCatching {
-                val hasHttpPrefix =
-                    unvalidatedUrl.startsWith("http") or unvalidatedUrl.startsWith("https")
-
-                val entries = if (hasHttpPrefix) {
-                    val feedWithEntries = api().addFeed(unvalidatedUrl.toHttpUrl()).getOrThrow()
-                    db().feed.insertOrReplace(listOf(feedWithEntries.first))
-                    feedWithEntries.second
-                } else {
-                    val feedWithEntries =
-                        api().addFeed("https://$unvalidatedUrl".toHttpUrl()).getOrThrow()
-                    db().feed.insertOrReplace(listOf(feedWithEntries.first))
-                    feedWithEntries.second
+            val prevState = state.value
+            state.update { State.Loading }
+            try {
+                val (feed, entries) = api().addFeed(parsedUrl)
+                withContext(Dispatchers.IO) {
+                    db().transaction {
+                        db().feed.insertOrReplace(feed)
+                        db().entry.insertOrReplace(entries)
+                    }
                 }
-
-                db().transaction {
-                    db().entry.insertOrReplace(entries)
-                }
-            }.onSuccess {
-                state.update { State.Loading }
                 val feeds = withContext(Dispatchers.IO) {
                     db().feed.selectAll()
                 }
                 state.update { State.ShowingFeeds(feeds.map { it.toItem() }) }
-            }.onFailure { e ->
+            } catch (e: Throwable) {
+                state.update { prevState }
                 showErrorDialog(e)
+                return@launch
             }
         }
     }
@@ -318,7 +332,9 @@ class FeedsFragment : AppFragment() {
                     ?: throw Exception("Cannot find feed $feedId in cache")
                 val trimmedNewTitle = newTitle.trim()
                 api().updateFeedTitle(feedId, trimmedNewTitle)
-                db().feed.insertOrReplace(listOf(feed.copy(title = trimmedNewTitle)))
+                withContext(Dispatchers.IO) {
+                    db().feed.insertOrReplace(feed.copy(title = trimmedNewTitle))
+                }
             }.onFailure { e -> showErrorDialog(e) }
         }
     }

@@ -11,12 +11,14 @@ import org.vestifeed.navigation.AppFragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.vestifeed.R
 import org.vestifeed.app.App
 import org.vestifeed.databinding.FragmentFeedSettingsBinding
@@ -73,22 +75,28 @@ class FeedSettingsFragment : AppFragment() {
 
     private fun setOpenEntriesInBrowser(feedId: String, openEntriesInBrowser: Boolean) {
         viewLifecycleOwner.lifecycleScope.launch {
-            val feed = db.feed.selectById(feedId)!!
-            db.feed.insertOrReplace(listOf(feed.copy(extOpenEntriesInBrowser = openEntriesInBrowser)))
+            withContext(Dispatchers.IO) {
+                val feed = db.feed.selectById(feedId)!!
+                db.feed.insertOrReplace(feed.copy(extOpenEntriesInBrowser = openEntriesInBrowser))
+            }
         }
     }
 
     private fun setShowPreviewImages(feedId: String, value: Boolean?) {
         viewLifecycleOwner.lifecycleScope.launch {
-            val feed = db.feed.selectById(feedId)!!
-            db.feed.insertOrReplace(listOf(feed.copy(extShowPreviewImages = value)))
+            withContext(Dispatchers.IO) {
+                val feed = db.feed.selectById(feedId)!!
+                db.feed.insertOrReplace(feed.copy(extShowPreviewImages = value))
+            }
         }
     }
 
     private fun setBlockedWords(feedId: String, blockedWords: String) {
         viewLifecycleOwner.lifecycleScope.launch {
-            val feed = db.feed.selectById(feedId)!!
-            db.feed.insertOrReplace(listOf(feed.copy(extBlockedWords = blockedWords)))
+            withContext(Dispatchers.IO) {
+                val feed = db.feed.selectById(feedId)!!
+                db.feed.insertOrReplace(feed.copy(extBlockedWords = blockedWords))
+            }
         }
     }
 

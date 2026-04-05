@@ -36,7 +36,7 @@ class FeedTest {
     @Test
     fun feedQueries_insertOrReplace() {
         val feed = createFeed()
-        db.feed.insertOrReplace(listOf(feed))
+        db.feed.insertOrReplace(feed)
         assertEquals(feed, db.feed.selectAll().single())
     }
 
@@ -57,10 +57,10 @@ class FeedTest {
     @Test
     fun feedQueries_insertOrReplace_updatesExisting() {
         val feed = createFeed()
-        db.feed.insertOrReplace(listOf(feed))
+        db.feed.insertOrReplace(feed)
 
         val updated = feed.copy(title = "Updated Title")
-        db.feed.insertOrReplace(listOf(updated))
+        db.feed.insertOrReplace(updated)
 
         assertEquals(1, db.feed.selectAll().size)
         assertEquals("Updated Title", db.feed.selectAll().single().title)
@@ -123,40 +123,6 @@ class FeedTest {
     }
 
     @Test
-    fun feedQueries_selectAllLinks_emptyLinks() {
-        val feed = createFeed(links = emptyList())
-        db.feed.insertOrReplace(listOf(feed))
-
-        val result = db.feed.selectAllLinks()
-        assertEquals(1, result.size)
-        assertTrue(result[0].isEmpty())
-    }
-
-    @Test
-    fun feedQueries_selectAllLinks_withLinks() {
-        val link = Link(
-            feedId = "feed1",
-            entryId = null,
-            href = "https://example.com/feed".toHttpUrl(),
-            rel = AtomLinkRel.Self,
-            type = "application/rss+xml",
-            hreflang = "en",
-            title = "Example Feed",
-            length = 1234L,
-            extEnclosureDownloadProgress = null,
-            extCacheUri = null,
-        )
-        val feed = createFeed(links = listOf(link))
-        db.feed.insertOrReplace(listOf(feed))
-
-        val result = db.feed.selectAllLinks()
-        assertEquals(1, result.size)
-        assertEquals(1, result[0].size)
-        assertEquals("https://example.com/feed", result[0][0].href.toString())
-        assertEquals(AtomLinkRel.Self, result[0][0].rel)
-    }
-
-    @Test
     fun feedQueries_linksSerialization_roundTrip() {
         val link1 = Link(
             feedId = "feed1",
@@ -183,7 +149,7 @@ class FeedTest {
             extCacheUri = null,
         )
         val feed = createFeed(links = listOf(link1, link2))
-        db.feed.insertOrReplace(listOf(feed))
+        db.feed.insertOrReplace(feed)
 
         val result = db.feed.selectById(feed.id)
         assertEquals(2, result!!.links.size)
@@ -220,7 +186,7 @@ class FeedTest {
             extBlockedWords = "",
             extShowPreviewImages = null,
         )
-        db.feed.insertOrReplace(listOf(feed))
+        db.feed.insertOrReplace(feed)
 
         val result = db.feed.selectById(feed.id)
         assertNull(result!!.extOpenEntriesInBrowser)
@@ -237,7 +203,7 @@ class FeedTest {
             extBlockedWords = "",
             extShowPreviewImages = true,
         )
-        db.feed.insertOrReplace(listOf(feed))
+        db.feed.insertOrReplace(feed)
 
         val result = db.feed.selectById(feed.id)
         assertEquals(true, result!!.extOpenEntriesInBrowser)
@@ -254,7 +220,7 @@ class FeedTest {
             extBlockedWords = "",
             extShowPreviewImages = false,
         )
-        db.feed.insertOrReplace(listOf(feed))
+        db.feed.insertOrReplace(feed)
 
         val result = db.feed.selectById(feed.id)
         assertEquals(false, result!!.extOpenEntriesInBrowser)
