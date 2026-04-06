@@ -29,6 +29,7 @@ import org.vestifeed.app.sync
 import org.vestifeed.databinding.FragmentSearchBinding
 import org.vestifeed.db.table.Conf
 import org.vestifeed.db.table.EntryQueries
+import org.vestifeed.db.Database
 import org.vestifeed.dialog.showErrorDialog
 import org.vestifeed.entries.EntriesAdapter
 import org.vestifeed.entry.EntryFragment
@@ -81,7 +82,7 @@ class SearchFragment : AppFragment() {
                 _state.update { State.RunningQuery }
 
                 val rows = db().entry.selectByQuery(args.query)
-                val items = rows.map { it.toItem(conf) }
+                val items = rows.map { it.toItem(conf, db()) }
 
                 _state.update { State.ShowingQueryResults(items) }
             }
@@ -235,7 +236,7 @@ class SearchFragment : AppFragment() {
         data class ShowingQueryResults(val items: List<EntriesAdapter.Item>) : State()
     }
 
-    private fun EntryQueries.SelectByQuery.toItem(conf: Conf): EntriesAdapter.Item {
+    private fun EntryQueries.SelectByQuery.toItem(conf: Conf, database: Database): EntriesAdapter.Item {
         return EntriesAdapter.Item(
             id = id,
             showImage = extShowPreviewImages || conf.showPreviewImages,
@@ -249,7 +250,7 @@ class SearchFragment : AppFragment() {
             read = extRead,
             openInBrowser = extOpenEntriesInBrowser,
             useBuiltInBrowser = conf.useBuiltInBrowser,
-            links = links,
+            links = database.link.selectByEntryId(id),
         )
     }
 

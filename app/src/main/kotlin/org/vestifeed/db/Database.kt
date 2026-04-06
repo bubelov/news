@@ -8,6 +8,8 @@ import org.vestifeed.db.table.EntryQueries
 import org.vestifeed.db.table.EntrySchema
 import org.vestifeed.db.table.FEED_SCHEMA
 import org.vestifeed.db.table.FeedQueries
+import org.vestifeed.db.table.LINK_SCHEMA
+import org.vestifeed.db.table.LinkQueries
 
 class Database(driver: SQLiteDriver, val path: String) {
 
@@ -16,6 +18,7 @@ class Database(driver: SQLiteDriver, val path: String) {
     val feed = FeedQueries(conn)
     val entry = EntryQueries(conn)
     val conf = ConfQueries(conn)
+    val link = LinkQueries(conn)
 
     init {
         migrate()
@@ -28,6 +31,7 @@ class Database(driver: SQLiteDriver, val path: String) {
         if (version == 0) {
             conn.execSQL(FEED_SCHEMA)
             conn.execSQL(EntrySchema.toString())
+            conn.execSQL(LINK_SCHEMA)
             conn.execSQL(ConfSchema.toString())
             conn.execSQL("PRAGMA user_version=1;")
         }

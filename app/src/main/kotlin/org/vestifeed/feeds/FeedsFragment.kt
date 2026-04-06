@@ -27,7 +27,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.vestifeed.R
 import org.vestifeed.anim.animateVisibilityChanges
@@ -36,6 +35,7 @@ import org.vestifeed.app.api
 import org.vestifeed.app.db
 import org.vestifeed.databinding.FragmentFeedsBinding
 import org.vestifeed.db.table.Feed
+import org.vestifeed.db.Database
 import org.vestifeed.dialog.showErrorDialog
 import org.vestifeed.entries.EntriesFilter
 import org.vestifeed.entries.EntriesFragment
@@ -156,7 +156,7 @@ class FeedsFragment : AppFragment() {
             val feeds = withContext(Dispatchers.IO) {
                 db().feed.selectAll()
             }
-            state.update { State.ShowingFeeds(feeds.map { it.toItem() }) }
+            state.update { State.ShowingFeeds(feeds.map { it.toItem(db()) }) }
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -195,8 +195,12 @@ class FeedsFragment : AppFragment() {
         var feedsFailed = 0
         val errors = mutableListOf<String>()
 
+        val existingFeedIds = withContext(Dispatchers.IO) {
+            db().feed.selectAll().map { it.id }
+        }
+
         val existingLinks = withContext(Dispatchers.IO) {
-            db().feed.selectAll().flatMap { it.links }
+            existingFeedIds.flatMap { db().link.selectByFeedId(it) }
         }
 
         for (outline in outlines) {
@@ -209,18 +213,19 @@ class FeedsFragment : AppFragment() {
             }
 
             val feedAlreadyExists = existingLinks.any {
-                it.href.toUri().normalize() == outlineUrl.toUri().normalize()
+                it.href.toHttpUrlOrNull()?.toUri()?.normalize() == outlineUrl.toUri().normalize()
             }
 
             if (feedAlreadyExists) {
                 feedsExisted++
             } else {
                 try {
-                    val (feed, entries) = api().addFeed(outlineUrl)
+                    val res = api().addFeed(outlineUrl)
                     withContext(Dispatchers.IO) {
                         db().transaction {
-                            db().feed.insertOrReplace(feed)
-                            db().entry.insertOrReplace(entries)
+                            db().feed.insertOrReplace(res.feed)
+                            db().link.insertForFeed(res.feed.id, res.feedLinks)
+                            db().entry.insertOrReplace(res.entries)
                         }
                     }
                     feedsImported++
@@ -252,22 +257,28 @@ class FeedsFragment : AppFragment() {
             showErrorDialog(message)
         } else {
             val feeds = db().feed.selectAll()
-            state.update { State.ShowingFeeds(feeds.map { it.toItem() }) }
+            state.update { State.ShowingFeeds(feeds.map { it.toItem(db()) }) }
         }
     }
 
     private fun exportOpml(out: OutputStream) {
         viewLifecycleOwner.lifecycleScope.launch {
             val feeds = db().feed.selectAll()
+            val feedIds = feeds.map { it.id }
+            val allLinks = withContext(Dispatchers.IO) {
+                feedIds.flatMap { db().link.selectByFeedId(it) }
+            }
+            val linksByFeedId = allLinks.groupBy { it.feedId }
 
             val outlines = feeds.map { feed ->
-                val selfLink = feed.links.firstOrNull { it.rel is AtomLinkRel.Self }
-                    ?: feed.links.firstOrNull()
+                val feedLinks = linksByFeedId[feed.id] ?: emptyList()
+                val selfLink = feedLinks.firstOrNull { it.rel is AtomLinkRel.Self }
+                    ?: feedLinks.firstOrNull()
                 OpmlOutline(
                     text = feed.title,
                     outlines = emptyList(),
-                    xmlUrl = selfLink?.href?.toString() ?: "",
-                    htmlUrl = feed.links.firstOrNull { it.rel is AtomLinkRel.Alternate }?.href?.toString(),
+                    xmlUrl = selfLink?.href,
+                    htmlUrl = feedLinks.firstOrNull { it.rel is AtomLinkRel.Alternate }?.href,
                     extOpenEntriesInBrowser = feed.extOpenEntriesInBrowser,
                     extShowPreviewImages = feed.extShowPreviewImages,
                     extBlockedWords = feed.extBlockedWords,
@@ -306,17 +317,18 @@ class FeedsFragment : AppFragment() {
             val prevState = state.value
             state.update { State.Loading }
             try {
-                val (feed, entries) = api().addFeed(parsedUrl)
+                val res = api().addFeed(parsedUrl)
                 withContext(Dispatchers.IO) {
                     db().transaction {
-                        db().feed.insertOrReplace(feed)
-                        db().entry.insertOrReplace(entries)
+                        db().feed.insertOrReplace(res.feed)
+                        db().link.insertForFeed(res.feed.id, res.feedLinks)
+                        db().entry.insertOrReplace(res.entries)
                     }
                 }
                 val feeds = withContext(Dispatchers.IO) {
                     db().feed.selectAll()
                 }
-                state.update { State.ShowingFeeds(feeds.map { it.toItem() }) }
+                state.update { State.ShowingFeeds(feeds.map { it.toItem(db()) }) }
             } catch (e: Throwable) {
                 state.update { prevState }
                 showErrorDialog(e)
@@ -345,25 +357,27 @@ class FeedsFragment : AppFragment() {
                 api().deleteFeed(feedId)
 
                 db().transaction {
-                    db().feed.deleteById(feedId)
+                    db().link.deleteByFeedId(feedId)
                     db().entry.deleteByFeedId(feedId)
+                    db().feed.deleteById(feedId)
                 }
             }.onFailure { e -> showErrorDialog(e) }
         }
     }
 
-    private fun Feed.toItem(): FeedsAdapter.Item {
+    private fun Feed.toItem(database: Database): FeedsAdapter.Item {
+        val links = database.link.selectByFeedId(id)
         val selfLink = links.firstOrNull { it.rel is AtomLinkRel.Self }?.href
             ?: links.firstOrNull()?.href
-            ?: "https://example.com".toHttpUrl()
+            ?: "https://example.com"
 
         return FeedsAdapter.Item(
             id = id,
             title = title,
             selfLink = selfLink,
             alternateLink = links.firstOrNull { it.rel is AtomLinkRel.Alternate }?.href,
-            unreadCount = db().entry.selectByFeedId(id).filterNot { it.extRead }.size.toLong(),
-            confUseBuiltInBrowser = db().conf.select().useBuiltInBrowser,
+            unreadCount = database.entry.selectByFeedId(id).filterNot { it.extRead }.size.toLong(),
+            confUseBuiltInBrowser = database.conf.select().useBuiltInBrowser,
         )
     }
 

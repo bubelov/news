@@ -17,7 +17,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okio.buffer
 import okio.sink
-import org.vestifeed.db.table.Entry
 import org.vestifeed.db.table.Link
 import java.util.UUID
 import java.util.concurrent.TimeUnit
@@ -38,12 +37,8 @@ class EnclosuresRepo(
             throw Exception("Invalid link type: ${enclosure.type}")
         }
 
-        val entry = db.entry.selectById(enclosure.entryId!!)
-            ?: throw Exception("Entry ${enclosure.entryId} does not exist")
-
-        updateLink(
+        updateEnclosureProgress(
             link = enclosure.copy(extEnclosureDownloadProgress = 0.0),
-            entry = entry,
         )
 
         val request = Request.Builder().url(enclosure.href).build()
@@ -51,18 +46,16 @@ class EnclosuresRepo(
         val response = runCatching {
             httpClient.newCall(request).await()
         }.getOrElse {
-            updateLink(
+            updateEnclosureProgress(
                 link = enclosure.copy(extEnclosureDownloadProgress = null),
-                entry = entry,
             )
 
             throw it
         }
 
         if (!response.isSuccessful) {
-            updateLink(
+            updateEnclosureProgress(
                 link = enclosure.copy(extEnclosureDownloadProgress = null),
-                entry = entry,
             )
 
             throw Exception("Unexpected response code: ${response.code}")
@@ -93,12 +86,11 @@ class EnclosuresRepo(
                     ?: throw Exception("Failed to open an output stream for URI $cacheUri")
             }
 
-            updateLink(
+            updateEnclosureProgress(
                 link = enclosure.copy(
                     extEnclosureDownloadProgress = 0.0,
                     extCacheUri = cacheUri.toString(),
                 ),
-                entry = entry,
             )
 
             val responseBody = response.body!!
@@ -125,12 +117,11 @@ class EnclosuresRepo(
                                 100
                             )
                         ) {
-                            updateLink(
+                            updateEnclosureProgress(
                                 link = enclosure.copy(
                                     extEnclosureDownloadProgress = progress,
                                     extCacheUri = cacheUri.toString(),
                                 ),
-                                entry = entry,
                             )
 
                             lastNotificationNanos = System.nanoTime()
@@ -139,12 +130,11 @@ class EnclosuresRepo(
                 }
             }
         }.onSuccess {
-            updateLink(
+            updateEnclosureProgress(
                 link = enclosure.copy(
                     extEnclosureDownloadProgress = 1.0,
                     extCacheUri = cacheUri.toString(),
                 ),
-                entry = entry,
             )
 
             context.contentResolver.update(
@@ -154,12 +144,11 @@ class EnclosuresRepo(
                 null,
             )
         }.onFailure { throwable ->
-            updateLink(
+            updateEnclosureProgress(
                 link = enclosure.copy(
                     extEnclosureDownloadProgress = null,
                     extCacheUri = null,
                 ),
-                entry = entry,
             )
 
             context.contentResolver.delete(cacheUri, null, null)
@@ -170,7 +159,7 @@ class EnclosuresRepo(
 
     suspend fun deletePartialDownloads() {
         Log.d(TAG, "Deleting partial downloads")
-        val links = db.entry.selectAllLinks().flatten()
+        val links = db.link.selectAll()
         Log.d(TAG, "Got ${links.size} links")
         val enclosures = links.filter { it.rel is AtomLinkRel.Enclosure }
         Log.d(TAG, "Of them, ${enclosures.size} are org.vestifeed.enclosures")
@@ -185,7 +174,7 @@ class EnclosuresRepo(
 
     suspend fun deleteFromCache(enclosure: Link) {
         if (enclosure.extCacheUri == null) {
-            updateLink(enclosure.copy(extEnclosureDownloadProgress = null))
+            updateEnclosureProgress(enclosure.copy(extEnclosureDownloadProgress = null))
             return
         }
 
@@ -203,7 +192,7 @@ class EnclosuresRepo(
             throw Exception("Failed to delete cache org.vestifeed.entry")
         }
 
-        updateLink(
+        updateEnclosureProgress(
             enclosure.copy(
                 extCacheUri = null,
                 extEnclosureDownloadProgress = null,
@@ -211,32 +200,17 @@ class EnclosuresRepo(
         )
     }
 
-    private suspend fun updateLink(link: Link) {
-        if (link.feedId != null) {
-            throw Exception("Cannot update link with feedId")
-        }
-
-        if (link.entryId != null) {
-            val entry = db.entry.selectById(link.entryId) ?: throw Exception("Entry not found")
-            updateLink(link, entry)
-        }
-    }
-
-    private suspend fun updateLink(link: Link, entry: Entry): Link {
+    private suspend fun updateEnclosureProgress(link: Link) {
         withContext(Dispatchers.IO) {
-            db.entry.updateLinks(
-                id = entry.id,
-                links = entry.links.map {
-                    if (it.href == link.href) {
-                        link
-                    } else {
-                        it
-                    }
-                },
-            )
+            val existingLink = db.link.selectByEntryIdAndHref(link.entryId!!, link.href)
+            if (existingLink != null && existingLink.id != null) {
+                db.link.updateEnclosureProgress(
+                    linkId = existingLink.id,
+                    progress = link.extEnclosureDownloadProgress,
+                    cacheUri = link.extCacheUri,
+                )
+            }
         }
-
-        return link
     }
 
     private fun MediaType.fileExtension(): String {

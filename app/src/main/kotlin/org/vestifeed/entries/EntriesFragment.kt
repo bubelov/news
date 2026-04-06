@@ -24,7 +24,6 @@ import org.vestifeed.parser.AtomLinkRel
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.vestifeed.R
@@ -35,6 +34,7 @@ import org.vestifeed.db.table.Conf
 import org.vestifeed.db.table.ConfSchema
 import org.vestifeed.db.table.EntryQueries
 import org.vestifeed.db.table.Feed
+import org.vestifeed.db.Database
 import org.vestifeed.dialog.showErrorDialog
 import org.vestifeed.entry.EntryFragment
 import org.vestifeed.navigation.AppFragment
@@ -199,7 +199,7 @@ class EntriesFragment : AppFragment() {
                 }
 
                 val listItems = withContext(Dispatchers.IO) {
-                    entries.map { it.toItem(conf) }
+                    entries.map { it.toItem(conf, db()) }
                 }
 
                 adapter.submitList(listItems)
@@ -300,7 +300,7 @@ class EntriesFragment : AppFragment() {
         // todo
     }
 
-    private fun EntryQueries.EntriesAdapterRow.toItem(conf: Conf): EntriesAdapter.Item {
+    private fun EntryQueries.EntriesAdapterRow.toItem(conf: Conf, database: Database): EntriesAdapter.Item {
         return EntriesAdapter.Item(
             id = id,
             showImage = extShowPreviewImages || conf.showPreviewImages,
@@ -314,7 +314,7 @@ class EntriesFragment : AppFragment() {
             read = extRead,
             openInBrowser = extOpenEntriesInBrowser,
             useBuiltInBrowser = conf.useBuiltInBrowser,
-            links = links,
+            links = database.link.selectByEntryId(id),
         )
     }
 

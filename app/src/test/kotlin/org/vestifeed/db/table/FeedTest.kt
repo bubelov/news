@@ -1,14 +1,12 @@
 package org.vestifeed.db.table
 
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.vestifeed.db.Database
-import org.vestifeed.parser.AtomLinkRel
 import java.time.OffsetDateTime
 import java.util.UUID
 
@@ -26,7 +24,6 @@ class FeedTest {
         val statement = FEED_SCHEMA
         assertTrue(statement.contains("CREATE TABLE feed"))
         assertTrue(statement.contains("id TEXT PRIMARY KEY NOT NULL"))
-        assertTrue(statement.contains("links TEXT"))
         assertTrue(statement.contains("title TEXT NOT NULL"))
         assertTrue(statement.contains("ext_open_entries_in_browser INTEGER"))
         assertTrue(statement.contains("ext_blocked_words TEXT"))
@@ -123,64 +120,9 @@ class FeedTest {
     }
 
     @Test
-    fun feedQueries_linksSerialization_roundTrip() {
-        val link1 = Link(
-            feedId = "feed1",
-            entryId = "entry1",
-            href = "https://example.com/self".toHttpUrl(),
-            rel = AtomLinkRel.Self,
-            type = "application/rss+xml",
-            hreflang = "en",
-            title = "Self Link",
-            length = 1000L,
-            extEnclosureDownloadProgress = 0.5,
-            extCacheUri = "cache://uri",
-        )
-        val link2 = Link(
-            feedId = "feed1",
-            entryId = null,
-            href = "https://example.com/alternate".toHttpUrl(),
-            rel = AtomLinkRel.Alternate,
-            type = "text/html",
-            hreflang = null,
-            title = "Alternate Link",
-            length = null,
-            extEnclosureDownloadProgress = null,
-            extCacheUri = null,
-        )
-        val feed = createFeed(links = listOf(link1, link2))
-        db.feed.insertOrReplace(feed)
-
-        val result = db.feed.selectById(feed.id)
-        assertEquals(2, result!!.links.size)
-
-        val selfLink = result.links.find { it.rel is AtomLinkRel.Self }!!
-        assertEquals("feed1", selfLink.feedId)
-        assertEquals("entry1", selfLink.entryId)
-        assertEquals("https://example.com/self", selfLink.href.toString())
-        assertEquals("application/rss+xml", selfLink.type)
-        assertEquals("en", selfLink.hreflang)
-        assertEquals("Self Link", selfLink.title)
-        assertEquals(1000L, selfLink.length)
-        assertEquals(0.5, selfLink.extEnclosureDownloadProgress)
-        assertEquals("cache://uri", selfLink.extCacheUri)
-
-        val altLink = result.links.find { it.rel is AtomLinkRel.Alternate }!!
-        assertEquals("feed1", altLink.feedId)
-        assertNull(altLink.entryId)
-        assertEquals("https://example.com/alternate", altLink.href.toString())
-        assertEquals("text/html", altLink.type)
-        assertNull(altLink.hreflang)
-        assertNull(altLink.length)
-        assertNull(altLink.extEnclosureDownloadProgress)
-        assertNull(altLink.extCacheUri)
-    }
-
-    @Test
     fun feedQueries_nullBooleanFields_nullValues() {
         val feed = Feed(
             id = UUID.randomUUID().toString(),
-            links = emptyList(),
             title = "Test",
             extOpenEntriesInBrowser = null,
             extBlockedWords = "",
@@ -197,7 +139,6 @@ class FeedTest {
     fun feedQueries_nullBooleanFields_trueValues() {
         val feed = Feed(
             id = UUID.randomUUID().toString(),
-            links = emptyList(),
             title = "Test",
             extOpenEntriesInBrowser = true,
             extBlockedWords = "",
@@ -214,7 +155,6 @@ class FeedTest {
     fun feedQueries_nullBooleanFields_falseValues() {
         val feed = Feed(
             id = UUID.randomUUID().toString(),
-            links = emptyList(),
             title = "Test",
             extOpenEntriesInBrowser = false,
             extBlockedWords = "",
@@ -229,14 +169,12 @@ class FeedTest {
 
     private fun createFeed(
         id: String = UUID.randomUUID().toString(),
-        links: List<Link> = emptyList(),
         title: String = "Test Feed",
         extOpenEntriesInBrowser: Boolean? = null,
         extBlockedWords: String = "",
         extShowPreviewImages: Boolean? = null,
     ) = Feed(
         id = id,
-        links = links,
         title = title,
         extOpenEntriesInBrowser = extOpenEntriesInBrowser,
         extBlockedWords = extBlockedWords,
@@ -251,7 +189,6 @@ class FeedTest {
         contentType = "",
         contentSrc = "",
         contentText = "",
-        links = emptyList(),
         summary = "",
         id = UUID.randomUUID().toString(),
         feedId = feedId,

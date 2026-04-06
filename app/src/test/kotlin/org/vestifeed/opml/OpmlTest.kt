@@ -1,7 +1,6 @@
 package org.vestifeed.opml
 
 import org.vestifeed.parser.AtomLinkRel
-import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.junit.Assert.*
 import java.io.InputStream
 import java.nio.charset.Charset
@@ -54,9 +53,10 @@ class OpmlTest {
             val feedId = UUID.randomUUID().toString()
 
             val selfLink = Link(
+                id = null,
                 feedId = feedId,
                 entryId = null,
-                href = it.xmlUrl!!.toHttpUrl(),
+                href = it.xmlUrl!!,
                 rel = AtomLinkRel.Self,
                 type = null,
                 hreflang = null,
@@ -67,9 +67,10 @@ class OpmlTest {
             )
 
             val alternateLink = Link(
+                id = null,
                 feedId = feedId,
                 entryId = null,
-                href = it.htmlUrl!!.toHttpUrl(),
+                href = it.htmlUrl!!,
                 rel = AtomLinkRel.Alternate,
                 type = "text/html",
                 hreflang = null,
@@ -81,22 +82,21 @@ class OpmlTest {
 
             val feed = Feed(
                 id = UUID.randomUUID().toString(),
-                links = listOf(selfLink, alternateLink),
                 title = it.text,
                 extOpenEntriesInBrowser = it.extOpenEntriesInBrowser!!,
                 extBlockedWords = it.extBlockedWords!!,
                 extShowPreviewImages = it.extShowPreviewImages,
             )
 
-            feed
+            Triple(feed, selfLink, alternateLink)
         }
 
-        val outlines = feeds.map { feed ->
+        val outlines = feeds.map { (feed, selfLink, alternateLink) ->
             OpmlOutline(
                 text = feed.title,
                 outlines = emptyList(),
-                xmlUrl = feed.links.first { it.rel is AtomLinkRel.Self }.href.toString(),
-                htmlUrl = feed.links.first { it.rel is AtomLinkRel.Alternate }.href.toString(),
+                xmlUrl = selfLink.href.toString(),
+                htmlUrl = alternateLink.href.toString(),
                 extOpenEntriesInBrowser = feed.extOpenEntriesInBrowser,
                 extBlockedWords = feed.extBlockedWords,
                 extShowPreviewImages = feed.extShowPreviewImages,

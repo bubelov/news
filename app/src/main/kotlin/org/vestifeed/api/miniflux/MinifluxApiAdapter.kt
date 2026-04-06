@@ -1,13 +1,11 @@
 package org.vestifeed.api.miniflux
 
-import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import org.vestifeed.api.Api
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl
-import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.vestifeed.db.table.Entry
 import org.vestifeed.db.table.EntryQueries
 import org.vestifeed.db.table.Feed
@@ -18,7 +16,7 @@ import java.time.OffsetDateTime
 class MinifluxApiAdapter(
     private val api: MinifluxApi,
 ) : Api {
-    override suspend fun addFeed(url: HttpUrl): Pair<Feed, List<Entry>> {
+    override suspend fun addFeed(url: HttpUrl): Api.AddFeedResult {
         val categories = api.getCategories()
 
         if (categories.isEmpty()) {
@@ -35,12 +33,18 @@ class MinifluxApiAdapter(
             )
         )
 
-        return Pair(api.getFeed(response.feed_id).toFeed()!!, emptyList())
+        val (feed, feedLinks) = api.getFeed(response.feed_id).toFeed()
+
+        return Api.AddFeedResult(
+            feed = feed,
+            feedLinks = feedLinks,
+            entries = emptyList()
+        )
     }
 
     override suspend fun getFeeds(): List<Feed> {
         return withContext(Dispatchers.IO) {
-            api.getFeeds().map { it.toFeed()!! }
+            api.getFeeds().map { it.toFeed().first }
         }
     }
 
@@ -133,13 +137,14 @@ class MinifluxApiAdapter(
         }
     }
 
-    private fun FeedJson.toFeed(): Feed? {
-        val feedId = id?.toString() ?: return null
+    private fun FeedJson.toFeed(): Pair<Feed, List<Link>> {
+        val feedId = id!!.toString()
 
         val selfLink = Link(
+            id = null,
             feedId = feedId,
             entryId = null,
-            href = feed_url.toHttpUrl(),
+            href = feed_url,
             rel = AtomLinkRel.Self,
             type = null,
             hreflang = null,
@@ -149,70 +154,36 @@ class MinifluxApiAdapter(
             extCacheUri = null,
         )
 
-        val alternateLink = try {
-            Link(
-                feedId = feedId,
-                entryId = null,
-                href = site_url.toHttpUrl(),
-                rel = AtomLinkRel.Alternate,
-                type = "text/html",
-                hreflang = null,
-                title = null,
-                length = null,
-                extEnclosureDownloadProgress = null,
-                extCacheUri = null,
-            )
-        } catch (e: Exception) {
-            Log.d("MinifluxApiAdapter", "Failed to parse alternate link for feed $feed_url", e)
-            null
-        }
-
-        return Feed(
-            id = feedId,
-            links = listOfNotNull(selfLink, alternateLink),
-            title = title,
-            extOpenEntriesInBrowser = false,
-            extBlockedWords = "",
-            extShowPreviewImages = null,
-        )
-    }
-
-    private fun EntryJson.toEntry(): Entry {
-        val links = mutableListOf<Link>()
-
-        links += Link(
-            feedId = null,
-            entryId = id.toString(),
-            href = url.toHttpUrl(),
+        val alternateLink = Link(
+            id = null,
+            feedId = feedId,
+            entryId = null,
+            href = site_url,
             rel = AtomLinkRel.Alternate,
             type = "text/html",
-            hreflang = "",
-            title = "",
+            hreflang = null,
+            title = null,
             length = null,
             extEnclosureDownloadProgress = null,
             extCacheUri = null,
         )
 
-        enclosures?.forEach {
-            links += Link(
-                feedId = null,
-                entryId = id.toString(),
-                href = it.url.toHttpUrl(),
-                rel = AtomLinkRel.Enclosure,
-                type = it.mime_type,
-                hreflang = "",
-                title = "",
-                length = it.size,
-                extEnclosureDownloadProgress = null,
-                extCacheUri = null,
-            )
-        }
+        val feed = Feed(
+            id = feedId,
+            title = title,
+            extOpenEntriesInBrowser = false,
+            extBlockedWords = "",
+            extShowPreviewImages = null,
+        )
 
+        return Pair(feed, listOf(selfLink, alternateLink))
+    }
+
+    private fun EntryJson.toEntry(): Entry {
         return Entry(
             contentType = "html",
             contentSrc = "",
             contentText = content,
-            links = links,
             summary = null,
             id = id.toString(),
             feedId = feed_id.toString(),

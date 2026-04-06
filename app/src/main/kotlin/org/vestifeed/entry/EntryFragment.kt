@@ -151,7 +151,8 @@ class EntryFragment : AppFragment() {
                     return@launch
                 }
 
-                showEntry(feed.title, entry, entry.links)
+                val links = db().link.selectByEntryId(entryId)
+                showEntry(feed.title, entry, links)
             }.onFailure {
                 showError(it.message ?: "") { popBackStack() }
             }
@@ -306,9 +307,10 @@ class EntryFragment : AppFragment() {
 
     private fun refreshEnclosures() {
         val entry = db().entry.selectById(entryId) ?: return
+        val links = db().link.selectByEntryId(entryId)
 
         enclosuresAdapter.submitList(
-            entry.links
+            links
                 .filter { it.rel is AtomLinkRel.Enclosure }
                 .filter { it.type?.startsWith("audio") ?: false }
                 .mapIndexed { index, enclosure ->
@@ -316,7 +318,7 @@ class EntryFragment : AppFragment() {
                         entryId = entry.id,
                         enclosure = enclosure,
                         primaryText = getString(R.string.audio_n, index + 1),
-                        secondaryText = enclosure.href.toString()
+                        secondaryText = enclosure.href
                     )
                 }
         )

@@ -8,7 +8,6 @@ import org.junit.Before
 import org.vestifeed.db.table.Entry
 import org.vestifeed.db.table.EntryQueries
 import org.vestifeed.db.table.Feed
-import org.vestifeed.db.table.Link
 import kotlin.collections.sortedByDescending
 
 class EntryQueriesTest {
@@ -115,7 +114,6 @@ fun entry() = Entry(
     contentType = "",
     contentSrc = "",
     contentText = "",
-    links = emptyList(),
     summary = "",
     id = UUID.randomUUID().toString(),
     feedId = "",
@@ -135,7 +133,6 @@ fun entry() = Entry(
 )
 
 fun entryWithoutContent() = EntryQueries.EntryWithoutContent(
-    links = emptyList(),
     summary = "",
     id = UUID.randomUUID().toString(),
     feedId = "",
@@ -155,8 +152,7 @@ fun entryWithoutContent() = EntryQueries.EntryWithoutContent(
 )
 
 fun Entry.withoutContent() = EntryQueries.EntryWithoutContent(
-    links = links,
-    summary = "",
+    summary = summary,
     id = id,
     feedId = feedId,
     title = title,
@@ -168,10 +164,10 @@ fun Entry.withoutContent() = EntryQueries.EntryWithoutContent(
     extBookmarked = extBookmarked,
     extBookmarkedSynced = extBookmarkedSynced,
     extCommentsUrl = extCommentsUrl,
-    extOpenGraphImageChecked = true,
-    extOpenGraphImageUrl = "",
-    extOpenGraphImageWidth = 0,
-    extOpenGraphImageHeight = 0,
+    extOpenGraphImageChecked = extOpenGraphImageChecked,
+    extOpenGraphImageUrl = extOpenGraphImageUrl,
+    extOpenGraphImageWidth = extOpenGraphImageWidth,
+    extOpenGraphImageHeight = extOpenGraphImageHeight,
 )
 
 fun EntryQueries.EntryWithoutContent.toEntry(): Entry {
@@ -179,7 +175,6 @@ fun EntryQueries.EntryWithoutContent.toEntry(): Entry {
         contentType = "",
         contentSrc = "",
         contentText = "",
-        links = links,
         summary = summary,
         id = id,
         feedId = feedId,
@@ -201,14 +196,12 @@ fun EntryQueries.EntryWithoutContent.toEntry(): Entry {
 
 private fun createFeed(
     id: String = UUID.randomUUID().toString(),
-    links: List<Link> = emptyList(),
     title: String = "Test Feed",
     extOpenEntriesInBrowser: Boolean? = null,
     extBlockedWords: String = "",
     extShowPreviewImages: Boolean? = null,
 ) = Feed(
     id = id,
-    links = links,
     title = title,
     extOpenEntriesInBrowser = extOpenEntriesInBrowser,
     extBlockedWords = extBlockedWords,

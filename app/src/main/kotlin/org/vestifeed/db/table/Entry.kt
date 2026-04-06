@@ -3,11 +3,8 @@ package org.vestifeed.db.table
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.SQLiteStatement
 import androidx.sqlite.execSQL
-import okhttp3.HttpUrl
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.vestifeed.db.bindTextOrNull
 import org.vestifeed.db.getTextOrNull
-import org.vestifeed.parser.AtomLinkRel
 import java.time.OffsetDateTime
 
 object EntrySchema {
@@ -19,7 +16,6 @@ object EntrySchema {
                 ${Columns.ContentType} TEXT,
                 ${Columns.ContentSrc} TEXT,
                 ${Columns.ContentText} TEXT,
-                ${Columns.Links} TEXT,
                 ${Columns.Summary} TEXT,
                 ${Columns.Id} TEXT PRIMARY KEY NOT NULL,
                 ${Columns.FeedId} TEXT NOT NULL,
@@ -44,7 +40,6 @@ object EntrySchema {
         ContentType("content_type"),
         ContentSrc("content_src"),
         ContentText("content_text"),
-        Links("links"),
         Summary("summary"),
         Id("id"),
         FeedId("feed_id"),
@@ -72,7 +67,6 @@ data class EntryProjection(
     val contentType: String?,
     val contentSrc: String?,
     val contentText: String?,
-    val links: List<Link>,
     val summary: String?,
     val id: String,
     val feedId: String,
@@ -101,44 +95,29 @@ data class EntryProjection(
                 contentType = stmt.getTextOrNull(0),
                 contentSrc = stmt.getTextOrNull(1),
                 contentText = stmt.getTextOrNull(2),
-                links = jsonToLinks(stmt.getTextOrNull(3)),
-                summary = stmt.getTextOrNull(4),
-                id = stmt.getText(5),
-                feedId = stmt.getText(6),
-                title = stmt.getText(7),
-                published = OffsetDateTime.parse(stmt.getText(8)),
-                updated = OffsetDateTime.parse(stmt.getText(9)),
-                authorName = stmt.getText(10),
-                extRead = stmt.getInt(11) == 1,
-                extReadSynced = stmt.getInt(12) == 1,
-                extBookmarked = stmt.getInt(13) == 1,
-                extBookmarkedSynced = stmt.getInt(14) == 1,
-                extCommentsUrl = stmt.getText(15),
-                extOpenGraphImageChecked = stmt.getInt(16) == 1,
-                extOpenGraphImageUrl = stmt.getText(17),
-                extOpenGraphImageWidth = stmt.getInt(18),
-                extOpenGraphImageHeight = stmt.getInt(19)
+                summary = stmt.getTextOrNull(3),
+                id = stmt.getText(4),
+                feedId = stmt.getText(5),
+                title = stmt.getText(6),
+                published = OffsetDateTime.parse(stmt.getText(7)),
+                updated = OffsetDateTime.parse(stmt.getText(8)),
+                authorName = stmt.getText(9),
+                extRead = stmt.getInt(10) == 1,
+                extReadSynced = stmt.getInt(11) == 1,
+                extBookmarked = stmt.getInt(12) == 1,
+                extBookmarkedSynced = stmt.getInt(13) == 1,
+                extCommentsUrl = stmt.getText(14),
+                extOpenGraphImageChecked = stmt.getInt(15) == 1,
+                extOpenGraphImageUrl = stmt.getText(16),
+                extOpenGraphImageWidth = stmt.getInt(17),
+                extOpenGraphImageHeight = stmt.getInt(18)
             )
         }
     }
 }
 
-data class Link(
-    val feedId: String?,
-    val entryId: String?,
-    val href: HttpUrl,
-    val rel: AtomLinkRel?,
-    val type: String?,
-    val hreflang: String?,
-    val title: String?,
-    val length: Long?,
-    val extEnclosureDownloadProgress: Double?,
-    val extCacheUri: String?,
-)
-
 fun Entry.withoutContent(): EntryQueries.EntryWithoutContent {
     return EntryQueries.EntryWithoutContent(
-        links = links,
         summary = summary,
         id = id,
         feedId = feedId,
@@ -164,30 +143,29 @@ class EntryQueries(private val conn: SQLiteConnection) {
             """
             INSERT OR REPLACE INTO
             ${EntrySchema.TABLE_NAME} (${EntryProjection.columns})
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """
         ).use { stmt ->
             entries.forEach { entry ->
                 stmt.bindTextOrNull(1, entry.contentType)
                 stmt.bindTextOrNull(2, entry.contentSrc)
                 stmt.bindTextOrNull(3, entry.contentText)
-                stmt.bindText(4, linksToJson(entry.links))
-                stmt.bindTextOrNull(5, entry.summary)
-                stmt.bindText(6, entry.id)
-                stmt.bindText(7, entry.feedId)
-                stmt.bindText(8, entry.title)
-                stmt.bindText(9, entry.published.toString())
-                stmt.bindText(10, entry.updated.toString())
-                stmt.bindText(11, entry.authorName)
-                stmt.bindInt(12, if (entry.extRead) 1 else 0)
-                stmt.bindInt(13, if (entry.extReadSynced) 1 else 0)
-                stmt.bindInt(14, if (entry.extBookmarked) 1 else 0)
-                stmt.bindInt(15, if (entry.extBookmarkedSynced) 1 else 0)
-                stmt.bindText(16, entry.extCommentsUrl)
-                stmt.bindInt(17, if (entry.extOpenGraphImageChecked) 1 else 0)
-                stmt.bindText(18, entry.extOpenGraphImageUrl)
-                stmt.bindInt(19, entry.extOpenGraphImageWidth)
-                stmt.bindInt(20, entry.extOpenGraphImageHeight)
+                stmt.bindTextOrNull(4, entry.summary)
+                stmt.bindText(5, entry.id)
+                stmt.bindText(6, entry.feedId)
+                stmt.bindText(7, entry.title)
+                stmt.bindText(8, entry.published.toString())
+                stmt.bindText(9, entry.updated.toString())
+                stmt.bindText(10, entry.authorName)
+                stmt.bindInt(11, if (entry.extRead) 1 else 0)
+                stmt.bindInt(12, if (entry.extReadSynced) 1 else 0)
+                stmt.bindInt(13, if (entry.extBookmarked) 1 else 0)
+                stmt.bindInt(14, if (entry.extBookmarkedSynced) 1 else 0)
+                stmt.bindText(15, entry.extCommentsUrl)
+                stmt.bindInt(16, if (entry.extOpenGraphImageChecked) 1 else 0)
+                stmt.bindText(17, entry.extOpenGraphImageUrl)
+                stmt.bindInt(18, entry.extOpenGraphImageWidth)
+                stmt.bindInt(19, entry.extOpenGraphImageHeight)
                 stmt.step()
                 stmt.reset()
             }
@@ -195,15 +173,14 @@ class EntryQueries(private val conn: SQLiteConnection) {
     }
 
     data class ShortEntry(
-        val links: List<Link>,
         val published: OffsetDateTime,
         val title: String,
     )
 
-    fun selectAllLinksPublishedAndTitle(): List<ShortEntry> {
+    fun selectAllPublishedAndTitle(): List<ShortEntry> {
         conn.prepare(
             """
-            SELECT ${EntrySchema.Columns.Links}, ${EntrySchema.Columns.Published}, ${EntrySchema.Columns.Title} 
+            SELECT ${EntrySchema.Columns.Published}, ${EntrySchema.Columns.Title} 
             FROM ${EntrySchema.TABLE_NAME} 
             ORDER BY ${EntrySchema.Columns.Published} DESC;
             """
@@ -212,9 +189,8 @@ class EntryQueries(private val conn: SQLiteConnection) {
                 while (stmt.step()) {
                     add(
                         ShortEntry(
-                            links = jsonToLinks(stmt.getText(0)),
-                            published = OffsetDateTime.parse(stmt.getText(1)),
-                            title = stmt.getText(2),
+                            published = OffsetDateTime.parse(stmt.getText(0)),
+                            title = stmt.getText(1),
                         )
                     )
                 }
@@ -271,7 +247,6 @@ class EntryQueries(private val conn: SQLiteConnection) {
         val summary: String,
         val extRead: Boolean,
         val extOpenEntriesInBrowser: Boolean,
-        val links: List<Link>,
     )
 
     fun selectByFeedId(feedId: String): List<EntriesAdapterRow> {
@@ -374,7 +349,6 @@ class EntryQueries(private val conn: SQLiteConnection) {
     }
 
     data class EntryWithoutContent(
-        val links: List<Link>,
         val summary: String?,
         val id: String,
         val feedId: String,
@@ -397,7 +371,6 @@ class EntryQueries(private val conn: SQLiteConnection) {
         conn.prepare(
             """
             SELECT 
-                links,
                 summary,
                 id,
                 feed_id, 
@@ -432,7 +405,6 @@ class EntryQueries(private val conn: SQLiteConnection) {
         conn.prepare(
             """
             SELECT
-                links,
                 summary,
                 id,
                 feed_id,
@@ -460,29 +432,6 @@ class EntryQueries(private val conn: SQLiteConnection) {
                     add(statementToEntryWithoutContent(stmt))
                 }
             }
-        }
-    }
-
-    fun selectLinksById(id: String): List<Link>? {
-        conn.prepare("SELECT links FROM entry WHERE id = ?;").use { stmt ->
-            stmt.bindText(1, id)
-            return if (stmt.step()) jsonToLinks(stmt.getText(0)) else null
-        }
-    }
-
-    fun selectAllLinks(): List<List<Link>> {
-        conn.prepare("SELECT links FROM entry;").use { stmt ->
-            return buildList {
-                add(jsonToLinks(stmt.getText(0)))
-            }
-        }
-    }
-
-    fun updateLinks(id: String, links: List<Link>) {
-        conn.prepare("UPDATE entry SET links = ? WHERE id = ?;").use { stmt ->
-            stmt.bindText(1, linksToJson(links))
-            stmt.bindText(2, id)
-            stmt.step()
         }
     }
 
@@ -541,7 +490,7 @@ class EntryQueries(private val conn: SQLiteConnection) {
         val res = mutableListOf<EntryWithoutContent>()
         conn.prepare(
             """
-            SELECT links, summary, id, feed_id, title, published, updated, author_name,
+            SELECT summary, id, feed_id, title, published, updated, author_name,
                    ext_read, ext_read_synced, ext_bookmarked, ext_bookmarked_synced,
                    ext_comments_url, ext_og_image_checked, ext_og_image_url,
                    ext_og_image_width, ext_og_image_height
@@ -601,7 +550,6 @@ class EntryQueries(private val conn: SQLiteConnection) {
                     "ext_open_entries_in_browser"
                 )
             ) == 1,
-            links = jsonToLinks(stmt.getTextOrNull(getColumnIndex(stmt, "links")))
         )
     }
 
@@ -620,33 +568,31 @@ class EntryQueries(private val conn: SQLiteConnection) {
             summary = stmt.getTextOrNull(8) ?: "",
             extRead = stmt.getInt(9) == 1,
             extOpenEntriesInBrowser = stmt.getInt(10) == 1,
-            links = jsonToLinks(stmt.getTextOrNull(11))
         )
     }
 
     private fun statementToEntryWithoutContent(stmt: SQLiteStatement): EntryWithoutContent {
         return EntryWithoutContent(
-            links = jsonToLinks(stmt.getTextOrNull(0)),
-            summary = stmt.getTextOrNull(1),
-            id = stmt.getTextOrNull(2) ?: "",
-            feedId = stmt.getTextOrNull(3) ?: "",
-            title = stmt.getTextOrNull(4) ?: "",
-            published = runCatching { OffsetDateTime.parse(stmt.getTextOrNull(5)) }.getOrDefault(
+            summary = stmt.getTextOrNull(0),
+            id = stmt.getTextOrNull(1) ?: "",
+            feedId = stmt.getTextOrNull(2) ?: "",
+            title = stmt.getTextOrNull(3) ?: "",
+            published = runCatching { OffsetDateTime.parse(stmt.getTextOrNull(4)) }.getOrDefault(
                 OffsetDateTime.now()
             ),
-            updated = runCatching { OffsetDateTime.parse(stmt.getTextOrNull(6)) }.getOrDefault(
+            updated = runCatching { OffsetDateTime.parse(stmt.getTextOrNull(5)) }.getOrDefault(
                 OffsetDateTime.now()
             ),
-            authorName = stmt.getTextOrNull(7) ?: "",
-            extRead = stmt.getInt(8) == 1,
-            extReadSynced = stmt.getInt(9) == 1,
-            extBookmarked = stmt.getInt(10) == 1,
-            extBookmarkedSynced = stmt.getInt(11) == 1,
-            extCommentsUrl = stmt.getTextOrNull(12) ?: "",
-            extOpenGraphImageChecked = stmt.getInt(13) == 1,
-            extOpenGraphImageUrl = stmt.getTextOrNull(14) ?: "",
-            extOpenGraphImageWidth = stmt.getInt(15),
-            extOpenGraphImageHeight = stmt.getInt(16)
+            authorName = stmt.getTextOrNull(6) ?: "",
+            extRead = stmt.getInt(7) == 1,
+            extReadSynced = stmt.getInt(8) == 1,
+            extBookmarked = stmt.getInt(9) == 1,
+            extBookmarkedSynced = stmt.getInt(10) == 1,
+            extCommentsUrl = stmt.getTextOrNull(11) ?: "",
+            extOpenGraphImageChecked = stmt.getInt(12) == 1,
+            extOpenGraphImageUrl = stmt.getTextOrNull(13) ?: "",
+            extOpenGraphImageWidth = stmt.getInt(14),
+            extOpenGraphImageHeight = stmt.getInt(15)
         )
     }
 
@@ -662,7 +608,6 @@ class EntryQueries(private val conn: SQLiteConnection) {
         val summary: String?,
         val extRead: Boolean,
         val extOpenEntriesInBrowser: Boolean,
-        val links: List<Link>
     )
 
     fun selectByQuery(query: String): List<SelectByQuery> {
@@ -670,7 +615,7 @@ class EntryQueries(private val conn: SQLiteConnection) {
         val sql = """
             SELECT e.id, f.ext_show_preview_images, e.ext_og_image_url, e.ext_og_image_width,
                    e.ext_og_image_height, e.title, f.title as feed_title, e.published,
-                   e.summary, e.ext_read, f.ext_open_entries_in_browser, e.links
+                   e.summary, e.ext_read, f.ext_open_entries_in_browser
             FROM entry e
             JOIN feed f ON f.id = e.feed_id
             WHERE e.title LIKE ? OR e.summary LIKE ? OR e.content_text LIKE ?
@@ -696,58 +641,10 @@ class EntryQueries(private val conn: SQLiteConnection) {
                     summary = stmt.getText(8),
                     extRead = stmt.getInt(9) == 1,
                     extOpenEntriesInBrowser = stmt.getInt(10) == 1,
-                    links = jsonToLinks(stmt.getText(11))
                 )
             )
         }
         stmt.close()
         return res
-    }
-}
-
-private fun linksToJson(links: List<Link>): String {
-    val array = links.map { link ->
-        val length = link.length?.toString() ?: "null"
-        val extEnclosureDownloadProgress = link.extEnclosureDownloadProgress?.toString() ?: "null"
-        val relName = when (link.rel) {
-            is AtomLinkRel.Alternate -> "Alternate"
-            is AtomLinkRel.Enclosure -> "Enclosure"
-            is AtomLinkRel.Self -> "Self"
-            is AtomLinkRel.Related -> "Related"
-            else -> ""
-        }
-        """{"feedId":"${link.feedId ?: ""}","entryId":"${link.entryId ?: ""}","href":"${link.href}","rel":"$relName","type":"${link.type ?: ""}","hreflang":"${link.hreflang ?: ""}","title":"${link.title ?: ""}","length":$length,"extEnclosureDownloadProgress":$extEnclosureDownloadProgress,"extCacheUri":"${link.extCacheUri ?: ""}"}"""
-    }
-    return "[${array.joinToString(",")}]"
-}
-
-private fun jsonToLinks(json: String?): List<Link> {
-    if (json.isNullOrBlank()) return emptyList()
-    val array = com.google.gson.JsonParser.parseString(json).asJsonArray
-    return array.mapNotNull { element ->
-        val obj = element.asJsonObject
-        val relStr = obj.get("rel")?.asString ?: return@mapNotNull null
-        val href = obj.get("href")?.asString ?: return@mapNotNull null
-        val parsedRel: AtomLinkRel = when (relStr) {
-            "Alternate" -> AtomLinkRel.Alternate
-            "Enclosure" -> AtomLinkRel.Enclosure
-            "Self" -> AtomLinkRel.Self
-            "Related" -> AtomLinkRel.Related
-            else -> AtomLinkRel.Alternate
-        }
-        val parsedUrl = href.toHttpUrlOrNull() ?: return@mapNotNull null
-        Link(
-            feedId = obj.get("feedId")?.asString?.ifEmpty { null },
-            entryId = obj.get("entryId")?.asString?.ifEmpty { null },
-            href = parsedUrl,
-            rel = parsedRel,
-            type = obj.get("type")?.asString?.ifEmpty { null },
-            hreflang = obj.get("hreflang")?.asString?.ifEmpty { null },
-            title = obj.get("title")?.asString?.ifEmpty { null },
-            length = obj.get("length")?.let { if (it.isJsonNull) null else it.asLong },
-            extEnclosureDownloadProgress = obj.get("extEnclosureDownloadProgress")
-                ?.let { if (it.isJsonNull) null else it.asDouble },
-            extCacheUri = obj.get("extCacheUri")?.asString?.ifEmpty { null }
-        )
     }
 }

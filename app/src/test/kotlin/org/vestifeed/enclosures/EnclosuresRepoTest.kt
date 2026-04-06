@@ -3,7 +3,6 @@ package org.vestifeed.enclosures
 import org.vestifeed.parser.AtomLinkRel
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.junit.Test
 import org.junit.Assert.assertTrue
 import org.vestifeed.db.db
@@ -24,9 +23,10 @@ class EnclosuresRepoTest {
         val entry = entryWithoutContent()
 
         val link = Link(
+            id = null,
             feedId = null,
             entryId = entry.id,
-            href = "https://localhost".toHttpUrl(),
+            href = "https://localhost",
             rel = AtomLinkRel.Alternate,
             type = null,
             hreflang = null,

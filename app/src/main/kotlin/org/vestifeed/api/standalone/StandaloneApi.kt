@@ -20,7 +20,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.jsoup.Jsoup
@@ -43,7 +42,7 @@ class StandaloneNewsApi(
 
     private val httpClient = OkHttpClient()
 
-    override suspend fun addFeed(url: HttpUrl): Pair<Feed, List<Entry>> {
+    override suspend fun addFeed(url: HttpUrl): Api.AddFeedResult {
         val request = Request.Builder().url(url).build()
 
         runCatching {
@@ -94,8 +93,12 @@ class StandaloneNewsApi(
 
                 return when (result) {
                     is FeedResult.Success -> {
-                        val feed = result.feed.toFeed(url)
-                        Pair(feed, result.feed.getEntries(feed.id))
+                        val (feed, feedLinks) = result.feed.toFeed(url)
+                        Api.AddFeedResult(
+                            feed = feed,
+                            feedLinks = feedLinks,
+                            entries = result.feed.getEntries(feed.id)
+                        )
                     }
 
                     is FeedResult.UnsupportedMediaType -> {
@@ -160,8 +163,9 @@ class StandaloneNewsApi(
     }
 
     private suspend fun fetchEntries(feed: Feed): List<Entry> {
-        val url = feed.links.firstOrNull { it.rel == AtomLinkRel.Self }?.href
-            ?: feed.links.firstOrNull()?.href
+        val links = withContext(Dispatchers.IO) { db.link.selectByFeedId(feed.id) }
+        val url = links.firstOrNull { it.rel is AtomLinkRel.Self }?.href
+            ?: links.firstOrNull()?.href
             ?: throw Exception("No links found for feed")
         val request = Request.Builder().url(url).build()
 
@@ -243,29 +247,28 @@ class StandaloneNewsApi(
 
     }
 
-    private fun ParsedFeed.toFeed(feedUrl: HttpUrl): Feed {
+    private fun ParsedFeed.toFeed(feedUrl: HttpUrl): Pair<Feed, List<Link>> {
         return when (this) {
             is AtomFeed -> {
                 val selfLink = links.single { it.rel == AtomLinkRel.Self }
                 val links = links.map { it.toLink(feedId = selfLink.href, entryId = null) }
 
-                val feed = Feed(
-                    id = selfLink.href,
-                    links = links,
-                    title = title,
-                    extOpenEntriesInBrowser = false,
-                    extBlockedWords = "",
-                    extShowPreviewImages = null,
+                Pair(
+                    Feed(
+                        id = selfLink.href,
+                        title = title,
+                        extOpenEntriesInBrowser = false,
+                        extBlockedWords = "",
+                        extShowPreviewImages = null,
+                    ), links
                 )
-
-                feed
             }
 
             is RssFeed -> {
                 val selfLink = Link(
                     feedId = channel.link,
                     entryId = null,
-                    href = feedUrl,
+                    href = feedUrl.toString(),
                     rel = AtomLinkRel.Self,
                     type = null,
                     hreflang = null,
@@ -273,12 +276,13 @@ class StandaloneNewsApi(
                     length = null,
                     extEnclosureDownloadProgress = null,
                     extCacheUri = null,
+                    id = null,
                 )
 
                 val alternateLink = Link(
                     feedId = channel.link,
                     entryId = null,
-                    href = channel.link.toHttpUrl(),
+                    href = channel.link,
                     rel = AtomLinkRel.Alternate,
                     type = null,
                     hreflang = null,
@@ -286,15 +290,17 @@ class StandaloneNewsApi(
                     length = null,
                     extEnclosureDownloadProgress = null,
                     extCacheUri = null,
+                    id = null,
                 )
 
-                Feed(
-                    id = channel.link,
-                    links = listOf(selfLink, alternateLink),
-                    title = channel.title,
-                    extOpenEntriesInBrowser = false,
-                    extBlockedWords = "",
-                    extShowPreviewImages = null,
+                Pair(
+                    Feed(
+                        id = channel.link,
+                        title = channel.title,
+                        extOpenEntriesInBrowser = false,
+                        extBlockedWords = "",
+                        extShowPreviewImages = null,
+                    ), listOf(selfLink, alternateLink)
                 )
             }
         }
@@ -305,9 +311,10 @@ class StandaloneNewsApi(
         entryId: String?,
     ): Link {
         return Link(
+            id = null,
             feedId = feedId,
             entryId = entryId,
-            href = href.toHttpUrl(),
+            href = href,
             rel = rel,
             type = type,
             hreflang = hreflang,
@@ -319,13 +326,10 @@ class StandaloneNewsApi(
     }
 
     private fun AtomEntry.toEntry(feedId: String): Entry {
-        val links = links.map { it.toLink(feedId = null, entryId = id) }
-
         return Entry(
             contentType = content.type.toString(),
             contentSrc = content.src,
             contentText = content.text,
-            links = links,
             summary = summary?.text ?: "",
             id = id,
             feedId = feedId,
@@ -357,38 +361,6 @@ class StandaloneNewsApi(
             }
         }
 
-        val links = mutableListOf<Link>()
-
-        if (!link.isNullOrBlank()) {
-            links += Link(
-                feedId = null,
-                entryId = id,
-                href = link!!.toHttpUrl(),
-                rel = AtomLinkRel.Alternate,
-                type = "text/html",
-                hreflang = "",
-                title = "",
-                length = null,
-                extEnclosureDownloadProgress = null,
-                extCacheUri = null,
-            )
-        }
-
-        if (enclosure != null) {
-            links += Link(
-                feedId = null,
-                entryId = id,
-                href = enclosure!!.url.toHttpUrlOrNull()!!,
-                rel = AtomLinkRel.Enclosure,
-                type = enclosure!!.type,
-                hreflang = "",
-                title = "",
-                length = enclosure!!.length,
-                extEnclosureDownloadProgress = null,
-                extCacheUri = null,
-            )
-        }
-
         // https://practicaltypography.com/line-length.html
         // 45–90 characters per line x 3 lines
         val maxSummaryLength = 180
@@ -397,7 +369,6 @@ class StandaloneNewsApi(
             contentType = "html",
             contentSrc = "",
             contentText = description ?: "",
-            links = links,
             summary = if ((description?.length ?: 0) < maxSummaryLength) description else "",
             id = id,
             feedId = feedId,

@@ -83,15 +83,13 @@ abstract class AppFragment : Fragment() {
         httpClient: OkHttpClient,
         entry: EntryQueries.EntryWithoutContent,
     ): Boolean {
-        Log.d("opengraph", "trying to fetch opengraph image for post ${entry.title}")
-        Log.d("opengraph", "links: ${entry.links}")
-
+        val links = withContext(Dispatchers.IO) {
+            db().link.selectByEntryId(entry.id)
+        }
         val htmlLink =
-            entry.links.firstOrNull { it.rel is AtomLinkRel.Alternate && it.type == "text/html" }
-                ?: entry.links.firstOrNull { it.rel is AtomLinkRel.Alternate }
-
+            links.firstOrNull { it.rel is AtomLinkRel.Alternate && it.type == "text/html" }
+                ?: links.firstOrNull { it.rel is AtomLinkRel.Alternate }
         if (htmlLink == null) {
-            Log.e("opengraph", "html link not found")
             withContext(Dispatchers.IO) {
                 db().entry.updateOgImageChecked(true, entry.id)
             }

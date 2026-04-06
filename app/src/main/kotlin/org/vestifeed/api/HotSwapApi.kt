@@ -43,7 +43,7 @@ class HotSwapApi(private val db: Database) : Api {
         }
     }
 
-    override suspend fun addFeed(url: HttpUrl): Pair<Feed, List<Entry>> {
+    override suspend fun addFeed(url: HttpUrl): Api.AddFeedResult {
         updateApi()
         return api.addFeed(url)
     }

@@ -5,10 +5,17 @@ import okhttp3.HttpUrl
 import org.vestifeed.db.table.Entry
 import org.vestifeed.db.table.EntryQueries
 import org.vestifeed.db.table.Feed
+import org.vestifeed.db.table.Link
 import java.time.OffsetDateTime
 
 interface Api {
-    suspend fun addFeed(url: HttpUrl): Pair<Feed, List<Entry>>
+    data class AddFeedResult(
+        val feed: Feed,
+        val feedLinks: List<Link>,
+        val entries: List<Entry>,
+    )
+
+    suspend fun addFeed(url: HttpUrl): AddFeedResult
 
     suspend fun getFeeds(): List<Feed>
 

@@ -79,19 +79,20 @@ class EnclosuresFragment : AppFragment() {
             enclosuresRepo.deletePartialDownloads()
 
             flowOf(db().entry.selectCount()).collect {
-                val entries = db().entry.selectAllLinksPublishedAndTitle()
+                val allLinks = db().link.selectAll()
                 val enclosures = mutableListOf<EnclosuresAdapter.Item>()
 
-                entries.forEach { entry ->
-                    val entryEnclosures = entry.links.filter { it.rel is AtomLinkRel.Enclosure }
-
-                    enclosures += entryEnclosures.map {
-                        EnclosuresAdapter.Item(
-                            entryId = it.entryId!!,
-                            enclosure = it,
-                            primaryText = entry.title,
-                            secondaryText = DATE_TIME_FORMAT.format(entry.published),
-                        )
+                allLinks.forEach { link ->
+                    if (link.rel is AtomLinkRel.Enclosure && link.entryId != null) {
+                        val entry = db().entry.selectById(link.entryId)
+                        if (entry != null) {
+                            enclosures += EnclosuresAdapter.Item(
+                                entryId = link.entryId,
+                                enclosure = link,
+                                primaryText = entry.title,
+                                secondaryText = DATE_TIME_FORMAT.format(entry.published),
+                            )
+                        }
                     }
                 }
 

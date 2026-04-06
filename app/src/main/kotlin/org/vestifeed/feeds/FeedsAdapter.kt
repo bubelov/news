@@ -7,7 +7,6 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import okhttp3.HttpUrl
 import org.vestifeed.R
 import org.vestifeed.databinding.ListItemFeedBinding
 
@@ -20,8 +19,8 @@ class FeedsAdapter(
     data class Item(
         val id: String,
         val title: String,
-        val selfLink: HttpUrl,
-        val alternateLink: HttpUrl?,
+        val selfLink: String,
+        val alternateLink: String?,
         val unreadCount: Long,
         val confUseBuiltInBrowser: Boolean,
     )
