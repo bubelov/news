@@ -212,27 +212,6 @@ class EntryQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectByIds(ids: List<String>): List<Entry> {
-        if (ids.isEmpty()) return emptyList()
-        val placeholders = ids.joinToString(",") { "?" }
-        conn.prepare(
-            """
-            SELECT ${EntryProjection.columns}
-            FROM ${EntrySchema.TABLE_NAME}
-            WHERE ${EntrySchema.Columns.Id} IN ($placeholders);
-            """
-        ).use { stmt ->
-            ids.forEachIndexed { index, id ->
-                stmt.bindText(index + 1, id)
-            }
-            return buildList {
-                while (stmt.step()) {
-                    add(EntryProjection.fromStatement(stmt))
-                }
-            }
-        }
-    }
-
     data class EntriesAdapterRow(
         val id: String,
         val feedId: String,

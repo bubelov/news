@@ -10,6 +10,7 @@ import org.vestifeed.db.table.ConfSchema
 import org.vestifeed.db.table.Entry
 import org.vestifeed.db.table.EntryQueries
 import org.vestifeed.db.table.Feed
+import org.vestifeed.db.table.Link
 import java.time.OffsetDateTime
 
 class HotSwapApi(private val db: Database) : Api {
@@ -63,7 +64,7 @@ class HotSwapApi(private val db: Database) : Api {
         return api.deleteFeed(feedId)
     }
 
-    override suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Entry>> {
+    override suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Pair<Entry, List<Link>>>> {
         updateApi()
         return api.getEntries(includeReadEntries)
     }
@@ -72,7 +73,7 @@ class HotSwapApi(private val db: Database) : Api {
         maxEntryId: String?,
         maxEntryUpdated: OffsetDateTime?,
         lastSync: OffsetDateTime?,
-    ): List<Entry> {
+    ): List<Pair<Entry, List<Link>>> {
         updateApi()
         return api.getNewAndUpdatedEntries(maxEntryId, maxEntryUpdated, lastSync)
     }

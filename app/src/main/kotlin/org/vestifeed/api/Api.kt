@@ -12,7 +12,7 @@ interface Api {
     data class AddFeedResult(
         val feed: Feed,
         val feedLinks: List<Link>,
-        val entries: List<Entry>,
+        val entries: List<Pair<Entry, List<Link>>>,
     )
 
     suspend fun addFeed(url: HttpUrl): AddFeedResult
@@ -26,13 +26,13 @@ interface Api {
 
     suspend fun deleteFeed(feedId: String): Result<Unit>
 
-    suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Entry>>
+    suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Pair<Entry, List<Link>>>>
 
     suspend fun getNewAndUpdatedEntries(
         maxEntryId: String?,
         maxEntryUpdated: OffsetDateTime?,
         lastSync: OffsetDateTime?,
-    ): List<Entry>
+    ): List<Pair<Entry, List<Link>>>
 
     suspend fun markEntriesAsRead(
         entriesIds: List<String>,

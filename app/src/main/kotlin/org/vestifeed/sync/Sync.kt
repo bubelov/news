@@ -102,10 +102,12 @@ class Sync(
                 api.getEntries(includeReadEntries = false).collect { batch ->
                     entriesFetched += batch.size
                     _state.update { State.InitialSync(InitialSyncStage.SyncingEntries(entriesFetched)) }
-
                     withContext(Dispatchers.IO) {
                         db.transaction {
-                            db.entry.insertOrReplace(batch)
+                            batch.forEach { (entry, links) ->
+                                db.entry.insertOrReplace(listOf(entry))
+                                db.link.insertForEntry(entry.id, links)
+                            }
                         }
                     }
                 }
@@ -269,7 +271,10 @@ class Sync(
 
                 withContext(Dispatchers.IO) {
                     db.transaction {
-                        db.entry.insertOrReplace(entries)
+                        entries.forEach { (entry, links) ->
+                            db.entry.insertOrReplace(listOf(entry))
+                            db.link.insertForEntry(entry.id, links)
+                        }
                     }
                 }
 

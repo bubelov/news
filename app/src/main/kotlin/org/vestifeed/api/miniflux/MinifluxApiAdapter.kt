@@ -58,7 +58,7 @@ class MinifluxApiAdapter(
 
     override suspend fun getEntries(
         includeReadEntries: Boolean,
-    ): Flow<List<Entry>> {
+    ): Flow<List<Pair<Entry, List<Link>>>> {
         return flow {
             var totalFetched = 0L
             val currentBatch = mutableSetOf<EntryJson>()
@@ -104,7 +104,7 @@ class MinifluxApiAdapter(
         maxEntryId: String?,
         maxEntryUpdated: OffsetDateTime?,
         lastSync: OffsetDateTime?,
-    ): List<Entry> {
+    ): List<Pair<Entry, List<Link>>> {
         val changedAfter = lastSync?.toEpochSecond() ?: 0L
         val res = withContext(Dispatchers.IO) {
             api.getEntriesChangedAfter(
@@ -179,27 +179,29 @@ class MinifluxApiAdapter(
         return Pair(feed, listOf(selfLink, alternateLink))
     }
 
-    private fun EntryJson.toEntry(): Entry {
-        return Entry(
-            contentType = "html",
-            contentSrc = "",
-            contentText = content,
-            summary = null,
-            id = id.toString(),
-            feedId = feed_id.toString(),
-            title = title,
-            published = OffsetDateTime.parse(published_at),
-            updated = OffsetDateTime.parse(changed_at),
-            authorName = author,
-            extRead = status == "read",
-            extReadSynced = true,
-            extBookmarked = starred,
-            extBookmarkedSynced = true,
-            extCommentsUrl = comments_url,
-            extOpenGraphImageChecked = false,
-            extOpenGraphImageUrl = "",
-            extOpenGraphImageWidth = 0,
-            extOpenGraphImageHeight = 0,
+    private fun EntryJson.toEntry(): Pair<Entry, List<Link>> {
+        return Pair(
+            Entry(
+                contentType = "html",
+                contentSrc = "",
+                contentText = content,
+                summary = null,
+                id = id.toString(),
+                feedId = feed_id.toString(),
+                title = title,
+                published = OffsetDateTime.parse(published_at),
+                updated = OffsetDateTime.parse(changed_at),
+                authorName = author,
+                extRead = status == "read",
+                extReadSynced = true,
+                extBookmarked = starred,
+                extBookmarkedSynced = true,
+                extCommentsUrl = comments_url,
+                extOpenGraphImageChecked = false,
+                extOpenGraphImageUrl = "",
+                extOpenGraphImageWidth = 0,
+                extOpenGraphImageHeight = 0,
+            ), emptyList()
         )
     }
 }

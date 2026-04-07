@@ -225,7 +225,10 @@ class FeedsFragment : AppFragment() {
                         db().transaction {
                             db().feed.insertOrReplace(res.feed)
                             db().link.insertForFeed(res.feed.id, res.feedLinks)
-                            db().entry.insertOrReplace(res.entries)
+                            res.entries.forEach { (entry, links) ->
+                                db().entry.insertOrReplace(listOf(entry))
+                                db().link.insertForEntry(entry.id, links)
+                            }
                         }
                     }
                     feedsImported++
@@ -322,7 +325,10 @@ class FeedsFragment : AppFragment() {
                     db().transaction {
                         db().feed.insertOrReplace(res.feed)
                         db().link.insertForFeed(res.feed.id, res.feedLinks)
-                        db().entry.insertOrReplace(res.entries)
+                        res.entries.forEach { (entry, links) ->
+                            db().entry.insertOrReplace(listOf(entry))
+                            db().link.insertForEntry(entry.id, links)
+                        }
                     }
                 }
                 val feeds = withContext(Dispatchers.IO) {

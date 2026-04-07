@@ -78,7 +78,7 @@ class LinkQueries(private val conn: SQLiteConnection) {
     fun insertForEntry(entryId: String, links: List<Link>) {
         conn.prepare(
             """
-            INSERT INTO feed (
+            INSERT INTO link (
                 entry_id,
                 href,
                 rel,

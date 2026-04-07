@@ -1,7 +1,6 @@
 package org.vestifeed.api.standalone
 
 import android.util.Base64
-import android.util.Log
 import org.vestifeed.api.Api
 import org.vestifeed.parser.AtomEntry
 import org.vestifeed.parser.AtomFeed
@@ -30,7 +29,6 @@ import org.vestifeed.db.table.Link
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.time.OffsetDateTime
-import java.util.Collections
 import java.util.Date
 import java.util.Locale
 
@@ -133,7 +131,7 @@ class StandaloneNewsApi(
         return Result.success(Unit)
     }
 
-    override suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Entry>> {
+    override suspend fun getEntries(includeReadEntries: Boolean): Flow<List<Pair<Entry, List<Link>>>> {
         return flowOf(emptyList())
     }
 
@@ -141,96 +139,52 @@ class StandaloneNewsApi(
         maxEntryId: String?,
         maxEntryUpdated: OffsetDateTime?,
         lastSync: OffsetDateTime?,
-    ): List<Entry> {
-        val entries = Collections.synchronizedList(mutableListOf<Entry>())
-
-        withContext(Dispatchers.IO) {
-            val feeds = db.feed.selectAll()
-
-            feeds.forEach { feed ->
-                runCatching {
-                    entries += fetchEntries(feed)
-                }.onFailure {
-                    Log.e(TAG, "Failed to fetch org.vestifeed.entries for feed: $feed", it)
-                }
-            }
-
-            val prevCachedEntryIds = db.entry.selectByIds(entries.map { it.id }).map { it.id }
-            entries.removeAll { prevCachedEntryIds.contains(it.id) }
-        }
-
-        return entries
+    ): List<Pair<Entry, List<Link>>> {
+        val fetchedEntries = mutableListOf<Pair<Entry, List<Link>>>()
+        val feeds = withContext(Dispatchers.IO) { db.feed.selectAll() }
+        feeds.forEach { fetchedEntries += fetchEntries(it) }
+        return fetchedEntries
     }
 
-    private suspend fun fetchEntries(feed: Feed): List<Entry> {
-        val links = withContext(Dispatchers.IO) { db.link.selectByFeedId(feed.id) }
-        val url = links.firstOrNull { it.rel is AtomLinkRel.Self }?.href
-            ?: links.firstOrNull()?.href
-            ?: throw Exception("No links found for feed")
-        val request = Request.Builder().url(url).build()
-
-        val response = runCatching {
-            httpClient.newCall(request).await()
-        }.getOrElse {
-            throw it
-        }
-
+    private suspend fun fetchEntries(feed: Feed): List<Pair<Entry, List<Link>>> {
+        val feedLinks = withContext(Dispatchers.IO) { db.link.selectByFeedId(feed.id) }
+        val feedSelfLink = feedLinks.firstOrNull { it.rel is AtomLinkRel.Self }
+            ?: throw Exception("self link is missing")
+        val request = Request.Builder().url(feedSelfLink.href).build()
+        val response = httpClient.newCall(request).await()
         response.use {
-            if (!response.isSuccessful) return emptyList()
-
-            val feedResult = runCatching {
-                feed(response.body!!.byteStream(), response.header("content-type") ?: "")
-            }.getOrElse {
-                throw it
-            }
-
+            if (!response.isSuccessful) throw Exception("feed request failed")
+            val feedResult = feed(response.body.byteStream(), response.header("content-type") ?: "")
             return when (feedResult) {
                 is FeedResult.Success -> {
                     when (val parsedFeed = feedResult.feed) {
                         is AtomFeed -> {
-                            parsedFeed.entries
-                                .mapNotNull { atomEntry ->
-                                    runCatching {
-                                        atomEntry.toEntry(feed.id)
-                                    }.onFailure {
-                                        Log.e(
-                                            TAG,
-                                            "Failed to parse Atom org.vestifeed.entry: $atomEntry",
-                                            it
-                                        )
-                                    }.getOrNull()
-                                }
+                            parsedFeed.entries.map { atomEntry -> atomEntry.toEntry(feed.id) }
                         }
 
                         is RssFeed -> {
                             parsedFeed.channel.items
                                 .getOrElse { return emptyList() }
                                 .mapNotNull { it.getOrNull() }
-                                .mapNotNull { rssItem ->
-                                    runCatching {
-                                        rssItem.toEntry(feed.id)
-                                    }.onFailure {
-                                        Log.e(TAG, "Failed to parse RSS item: $rssItem", it)
-                                    }.getOrNull()
-                                }
+                                .map { rssItem -> rssItem.toEntry(feed.id) }
                         }
                     }
                 }
 
                 is FeedResult.UnsupportedMediaType -> {
-                    emptyList()
+                    throw Exception("unsupported media type")
                 }
 
                 is FeedResult.UnsupportedFeedType -> {
-                    emptyList()
+                    throw Exception("unsupported feed type")
                 }
 
                 is FeedResult.IOError -> {
-                    emptyList()
+                    throw feedResult.cause
                 }
 
                 is FeedResult.ParserError -> {
-                    emptyList()
+                    throw feedResult.cause
                 }
             }
         }
@@ -325,31 +279,47 @@ class StandaloneNewsApi(
         )
     }
 
-    private fun AtomEntry.toEntry(feedId: String): Entry {
-        return Entry(
-            contentType = content.type.toString(),
-            contentSrc = content.src,
-            contentText = content.text,
-            summary = summary?.text ?: "",
-            id = id,
-            feedId = feedId,
-            title = title,
-            published = OffsetDateTime.parse(published),
-            updated = OffsetDateTime.parse(updated),
-            authorName = authorName,
-            extRead = false,
-            extReadSynced = true,
-            extBookmarked = false,
-            extBookmarkedSynced = true,
-            extCommentsUrl = "",
-            extOpenGraphImageChecked = false,
-            extOpenGraphImageUrl = "",
-            extOpenGraphImageWidth = 0,
-            extOpenGraphImageHeight = 0,
+    private fun AtomEntry.toEntry(feedId: String): Pair<Entry, List<Link>> {
+        return Pair(
+            Entry(
+                contentType = content.type.toString(),
+                contentSrc = content.src,
+                contentText = content.text,
+                summary = summary?.text ?: "",
+                id = id,
+                feedId = feedId,
+                title = title,
+                published = OffsetDateTime.parse(published),
+                updated = OffsetDateTime.parse(updated),
+                authorName = authorName,
+                extRead = false,
+                extReadSynced = true,
+                extBookmarked = false,
+                extBookmarkedSynced = true,
+                extCommentsUrl = "",
+                extOpenGraphImageChecked = false,
+                extOpenGraphImageUrl = "",
+                extOpenGraphImageWidth = 0,
+                extOpenGraphImageHeight = 0,
+            ), links.map {
+                Link(
+                    id = null,
+                    feedId = null,
+                    entryId = id,
+                    href = it.href,
+                    rel = it.rel,
+                    type = it.type,
+                    hreflang = it.hreflang,
+                    title = it.title,
+                    length = it.length,
+                    extEnclosureDownloadProgress = null,
+                    extCacheUri = null,
+                )
+            }
         )
     }
 
-    private fun RssItem.toEntry(feedId: String): Entry {
+    private fun RssItem.toEntry(feedId: String): Pair<Entry, List<Link>> {
         val id = when (val guid = guid) {
             is RssItemGuid.StringGuid -> "guid:${guid.value}"
             is RssItemGuid.UrlGuid -> "guid:${guid.value}"
@@ -361,30 +331,62 @@ class StandaloneNewsApi(
             }
         }
 
-        // https://practicaltypography.com/line-length.html
-        // 45–90 characters per line x 3 lines
-        val maxSummaryLength = 180
+        val links = mutableListOf<Link>()
 
-        return Entry(
-            contentType = "html",
-            contentSrc = "",
-            contentText = description ?: "",
-            summary = if ((description?.length ?: 0) < maxSummaryLength) description else "",
-            id = id,
-            feedId = feedId,
-            title = title ?: "",
-            published = OffsetDateTime.parse((pubDate ?: Date()).toIsoString()),
-            updated = OffsetDateTime.parse((pubDate ?: Date()).toIsoString()),
-            authorName = author ?: "",
-            extRead = false,
-            extReadSynced = true,
-            extBookmarked = false,
-            extBookmarkedSynced = true,
-            extCommentsUrl = "",
-            extOpenGraphImageChecked = false,
-            extOpenGraphImageUrl = "",
-            extOpenGraphImageWidth = 0,
-            extOpenGraphImageHeight = 0,
+        if (!link.isNullOrBlank()) {
+            links += Link(
+                id = null,
+                feedId = null,
+                entryId = id,
+                href = link,
+                rel = AtomLinkRel.Alternate,
+                type = "text/html",
+                hreflang = "",
+                title = "",
+                length = null,
+                extEnclosureDownloadProgress = null,
+                extCacheUri = null,
+            )
+        }
+
+        if (enclosure != null) {
+            links += Link(
+                id = null,
+                feedId = null,
+                entryId = id,
+                href = enclosure.url.toString(),
+                rel = AtomLinkRel.Enclosure,
+                type = enclosure.type,
+                hreflang = "",
+                title = "",
+                length = enclosure.length,
+                extEnclosureDownloadProgress = null,
+                extCacheUri = null,
+            )
+        }
+
+        return Pair(
+            Entry(
+                contentType = "html",
+                contentSrc = "",
+                contentText = description ?: "",
+                summary = description,
+                id = id,
+                feedId = feedId,
+                title = title ?: "",
+                published = OffsetDateTime.parse((pubDate ?: Date()).toIsoString()),
+                updated = OffsetDateTime.parse((pubDate ?: Date()).toIsoString()),
+                authorName = author ?: "",
+                extRead = false,
+                extReadSynced = true,
+                extBookmarked = false,
+                extBookmarkedSynced = true,
+                extCommentsUrl = "",
+                extOpenGraphImageChecked = false,
+                extOpenGraphImageUrl = "",
+                extOpenGraphImageWidth = 0,
+                extOpenGraphImageHeight = 0,
+            ), emptyList()
         )
     }
 
@@ -396,7 +398,7 @@ class StandaloneNewsApi(
 
     private fun Date.toIsoString(): String = ISO.format(this)
 
-    private fun ParsedFeed.getEntries(feedId: String): List<Entry> {
+    private fun ParsedFeed.getEntries(feedId: String): List<Pair<Entry, List<Link>>> {
         return when (this) {
             is RssFeed -> {
                 this.channel.items
@@ -412,8 +414,6 @@ class StandaloneNewsApi(
     }
 
     companion object {
-        private val TAG = "api"
-
         private val ISO = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.US)
     }
 }
