@@ -180,6 +180,40 @@ class MinifluxApiAdapter(
     }
 
     private fun EntryJson.toEntry(): Pair<Entry, List<Link>> {
+        val links = mutableListOf<Link>()
+
+        if (url.isNotBlank()) {
+            links += Link(
+                id = null,
+                feedId = null,
+                entryId = id.toString(),
+                href = url,
+                rel = AtomLinkRel.Alternate,
+                type = "text/html",
+                hreflang = null,
+                title = null,
+                length = null,
+                extEnclosureDownloadProgress = null,
+                extCacheUri = null,
+            )
+        }
+
+        enclosures?.forEach { enclosure ->
+            links += Link(
+                id = null,
+                feedId = null,
+                entryId = id.toString(),
+                href = enclosure.url,
+                rel = AtomLinkRel.Enclosure,
+                type = enclosure.mime_type,
+                hreflang = null,
+                title = null,
+                length = enclosure.size,
+                extEnclosureDownloadProgress = null,
+                extCacheUri = null,
+            )
+        }
+
         return Pair(
             Entry(
                 contentType = "html",
@@ -201,7 +235,7 @@ class MinifluxApiAdapter(
                 extOpenGraphImageUrl = "",
                 extOpenGraphImageWidth = 0,
                 extOpenGraphImageHeight = 0,
-            ), emptyList()
+            ), links
         )
     }
 }
