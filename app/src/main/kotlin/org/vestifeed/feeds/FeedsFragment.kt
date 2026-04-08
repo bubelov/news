@@ -368,16 +368,32 @@ class FeedsFragment : AppFragment() {
     }
 
     private fun deleteFeed(feedId: String) {
+        val prevState = state.value
+        state.update { State.Loading }
         viewLifecycleOwner.lifecycleScope.launch {
-            runCatching {
+            try {
                 api().deleteFeed(feedId)
-
-                db().transaction {
-                    db().link.deleteByFeedId(feedId)
-                    db().entry.deleteByFeedId(feedId)
-                    db().feed.deleteById(feedId)
+                withContext(Dispatchers.IO) {
+                    db().transaction {
+                        db().entry.selectByFeedId(feedId).forEach {
+                            db().link.deleteByEntryId(it.id)
+                        }
+                        db().entry.deleteByFeedId(feedId)
+                        db().link.deleteByFeedId(feedId)
+                        db().feed.deleteById(feedId)
+                    }
                 }
-            }.onFailure { e -> showErrorDialog(e) }
+                val feeds = withContext(Dispatchers.IO) {
+                    db().feed.selectAll()
+                }
+                val items = withContext(Dispatchers.IO) {
+                    feeds.map { it.toItem(db()) }
+                }
+                state.update { State.ShowingFeeds(items) }
+            } catch (e: Throwable) {
+                state.update { prevState }
+                showErrorDialog(e)
+            }
         }
     }
 
