@@ -365,12 +365,15 @@ class StandaloneNewsApi(
             )
         }
 
+        val rawDescription = description ?: ""
+        val summary = rawDescription.stripHtml().take(400)
+
         return Pair(
             Entry(
                 contentType = "html",
                 contentSrc = "",
-                contentText = description ?: "",
-                summary = description,
+                contentText = rawDescription,
+                summary = summary,
                 id = id,
                 feedId = feedId,
                 title = title ?: "",
@@ -386,8 +389,15 @@ class StandaloneNewsApi(
                 extOpenGraphImageUrl = "",
                 extOpenGraphImageWidth = 0,
                 extOpenGraphImageHeight = 0,
-            ), emptyList()
+            ), links
         )
+    }
+
+    private fun String.stripHtml(): String {
+        return this
+            .replace(Regex("<[^>]*>"), " ")
+            .replace(Regex("\\s+"), " ")
+            .trim()
     }
 
     private fun sha256(string: String): String {
