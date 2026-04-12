@@ -64,7 +64,9 @@ abstract class AppFragment : Fragment() {
             )
         }
 
-        Log.d("opengraph", "fetched ${entries.size} entries with unchecked opengraph images")
+        if (entries.isEmpty()) {
+            return emptyList()
+        }
 
         val successfulEntries = mutableListOf<EntryQueries.EntryWithoutContent>()
 

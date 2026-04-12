@@ -1,14 +1,13 @@
 package org.vestifeed.api.miniflux
 
 import com.google.gson.Gson
-import com.google.gson.JsonObject
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.logging.HttpLoggingInterceptor
+import org.vestifeed.BuildConfig
 import org.vestifeed.http.tokenAuthInterceptor
 import org.vestifeed.http.trustSelfSignedCerts
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import okio.IOException
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 class MinifluxApiBuilder {
@@ -25,34 +24,42 @@ class MinifluxApiBuilder {
             .readTimeout(20, TimeUnit.SECONDS)
             .writeTimeout(20, TimeUnit.SECONDS)
 
+        if (BuildConfig.DEBUG) {
+            val loggingInterceptor = HttpLoggingInterceptor().apply {
+                level = HttpLoggingInterceptor.Level.BODY
+            }
+            builder.addInterceptor(loggingInterceptor)
+        }
+
         if (trustSelfSignedCerts) {
             builder.trustSelfSignedCerts()
         }
 
-        return Retrofit.Builder()
-            .baseUrl("$url/v1/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(builder.build())
-            .build()
-            .create(MinifluxApi::class.java)
+        return MinifluxApi(
+            client = builder.build(),
+            baseUrl = "$url/v1/".toHttpUrl(),
+        )
     }
 
     private fun errorInterceptor(): Interceptor {
-        return Interceptor {
-            val response = it.proceed(it.request())
+        return Interceptor { chain ->
+            val request = chain.request()
+            val response = chain.proceed(request)
 
-            if (!response.isSuccessful && response.body != null) {
-                val json = runCatching {
-                    Gson().fromJson(response.body!!.string(), JsonObject::class.java)
-                }.getOrNull()
-
-                val errorMessage = if (json != null && json.has("error_message")) {
-                    json["error_message"].asString
-                } else {
-                    "Endpoint ${it.request().url} failed with response code ${response.code}"
+            if (!response.isSuccessful) {
+                val bodyString = response.body.string()
+                val errorMessage = runCatching {
+                    val json = Gson().fromJson(bodyString, com.google.gson.JsonObject::class.java)
+                    if (json != null && json.has("error_message")) {
+                        json["error_message"].asString
+                    } else {
+                        "Endpoint ${request.url} failed with response code ${response.code}"
+                    }
+                }.getOrElse {
+                    "Endpoint ${request.url} failed with response code ${response.code}"
                 }
 
-                throw IOException(errorMessage)
+                throw java.io.IOException(errorMessage)
             }
 
             response

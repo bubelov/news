@@ -31,11 +31,11 @@ recyclerview = "1.4.0"
 # https://developer.android.com/jetpack/androidx/releases/swiperefreshlayout
 swiperefreshlayout = "1.2.0"
 # Networking
-# https://github.com/square/retrofit/blob/trunk/CHANGELOG.md
-retrofit = "3.0.0"
-# Networking
 # https://github.com/square/okhttp/blob/master/CHANGELOG.md
 okhttp = "5.3.2"
+# JSON serialization
+# https://github.com/google/gson/blob/master/CHANGELOG.md
+gson = "2.13.2"
 # Image manipulation
 # https://github.com/coil-kt/coil/blob/main/CHANGELOG.md
 coil = "3.4.0"
@@ -70,11 +70,11 @@ androidx-lifecycle-viewmodel = { group = "androidx.lifecycle", name = "lifecycle
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
 androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swiperefreshlayout" }
-retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
-retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
 okhttp-bom = { group = "com.squareup.okhttp3", name = "okhttp-bom", version.ref = "okhttp" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 okhttp-mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
+okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 coil = { group = "io.coil-kt.coil3", name = "coil", version.ref = "coil" }
 coil-network = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }

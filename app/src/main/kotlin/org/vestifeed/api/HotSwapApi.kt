@@ -1,6 +1,5 @@
 package org.vestifeed.api
 
-import org.vestifeed.api.miniflux.MinifluxApiAdapter
 import org.vestifeed.api.miniflux.MinifluxApiBuilder
 import org.vestifeed.api.standalone.StandaloneNewsApi
 import org.vestifeed.db.Database
@@ -29,12 +28,10 @@ class HotSwapApi(private val db: Database) : Api {
             }
 
             ConfSchema.BACKEND_MINIFLUX -> {
-                MinifluxApiAdapter(
-                    MinifluxApiBuilder().build(
-                        url = conf.minifluxServerUrl,
-                        token = conf.minifluxServerToken,
-                        trustSelfSignedCerts = conf.minifluxServerTrustSelfSignedCerts,
-                    )
+                MinifluxApiBuilder().build(
+                    url = conf.minifluxServerUrl,
+                    token = conf.minifluxServerToken,
+                    trustSelfSignedCerts = conf.minifluxServerTrustSelfSignedCerts,
                 )
             }
 

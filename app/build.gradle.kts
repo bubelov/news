@@ -35,8 +35,7 @@ android {
             isShrinkResources = true
 
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
+                getDefaultProguardFile("proguard-android-optimize.txt")
             )
         }
     }
@@ -68,11 +67,13 @@ dependencies {
     implementation(libs.androidx.swiperefreshlayout)
 
     // Networking
-    implementation(libs.retrofit)
-    implementation(libs.retrofit.converter.gson)
     implementation(platform(libs.okhttp.bom))
     implementation(libs.okhttp)
+    implementation(libs.okhttp.logging)
     testImplementation(libs.okhttp.mockwebserver)
+
+    // JSON
+    implementation(libs.gson)
 
     // UI
     implementation(libs.material)
