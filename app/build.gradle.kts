@@ -82,7 +82,6 @@ dependencies {
 
     // Parsing
     implementation(libs.jsoup)
-    implementation(libs.re2j)
 
     // Testing
     testImplementation(libs.junit)
