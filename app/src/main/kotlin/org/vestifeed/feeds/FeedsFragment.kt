@@ -36,6 +36,7 @@ import org.vestifeed.anim.animateVisibilityChanges
 import org.vestifeed.anim.showSmooth
 import org.vestifeed.app.api
 import org.vestifeed.app.db
+import org.vestifeed.app.sync
 import org.vestifeed.databinding.FragmentFeedsBinding
 import org.vestifeed.db.table.Feed
 import org.vestifeed.db.Database
@@ -53,6 +54,7 @@ import org.vestifeed.opml.leafOutlines
 import org.vestifeed.opml.toOpml
 import org.vestifeed.opml.toPrettyString
 import org.vestifeed.opml.toXmlDocument
+import org.vestifeed.sync.Sync
 import java.io.InputStream
 import java.io.OutputStream
 import javax.xml.parsers.DocumentBuilderFactory
@@ -341,6 +343,14 @@ class FeedsFragment : AppFragment() {
                         }
                     }
                 }
+                // force og download
+                sync().runInBackground(
+                    Sync.Args(
+                        syncFeeds = false,
+                        syncFlags = false,
+                        syncEntries = false,
+                    )
+                )
                 val feeds = withContext(Dispatchers.IO) {
                     db().feed.selectAll()
                 }

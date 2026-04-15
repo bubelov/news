@@ -8,9 +8,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import org.vestifeed.api.Api
 import org.vestifeed.api.HotSwapApi
 import org.vestifeed.db.Database
+import org.vestifeed.og.OpenGraphImageFetcher
 import org.vestifeed.sync.Sync
 import java.io.File
 
@@ -19,6 +21,8 @@ class App : Application() {
 
     val sync by lazy { Sync(scope, api, db) }
 
+    val ogFetcher by lazy { OpenGraphImageFetcher(this) }
+
     val api by lazy { HotSwapApi(db) }
 
     val db by lazy {
@@ -26,6 +30,11 @@ class App : Application() {
             driver = AndroidSQLiteDriver(),
             path = databaseFile().absolutePath,
         )
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        scope.launch { ogFetcher.fetchAndWatch() }
     }
 
     override fun onTerminate() {
@@ -41,6 +50,10 @@ class App : Application() {
 fun Fragment.sync() = requireContext().sync()
 
 fun Context.sync(): Sync = (applicationContext as App).sync
+
+fun Fragment.ogFetcher() = requireContext().ogFetcher()
+
+fun Context.ogFetcher(): OpenGraphImageFetcher = (applicationContext as App).ogFetcher
 
 fun Fragment.api() = requireContext().api()
 
