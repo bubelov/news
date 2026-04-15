@@ -82,13 +82,13 @@ dependencies {
 
     // Parsing
     implementation(libs.jsoup)
+    implementation(libs.re2j)
 
-    // Testing
+    // Unit tests
     testImplementation(libs.junit)
-    testImplementation(libs.mockk)
+
+    // Instrumented tests
     androidTestImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.ext.junit)
-    //androidTestImplementation(libs.androidx.test.espresso.core)
-    //debugImplementation(libs.androidx.test.monitor)
 }

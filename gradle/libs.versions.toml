@@ -1,8 +1,7 @@
 [versions]
+# Android extensions for Gradle
 # https://developer.android.com/build/releases/gradle-plugin
 agp = "9.1.1"
-# https://github.com/JetBrains/kotlin/releases
-kotlin = "2.3.20"
 # Enables suspending functions
 # https://github.com/Kotlin/kotlinx.coroutines/releases
 coroutines = "1.10.2"
@@ -42,18 +41,19 @@ coil = "3.4.0"
 # XML parser
 # https://github.com/jhy/jsoup/blob/master/CHANGES.md
 jsoup = "1.22.1"
+# Regular expression engige for jsoup
+re2j = "1.7"
 # Database
 # https://developer.android.com/jetpack/androidx/releases/sqlite
 sqlite = "2.6.2"
-# Testing
+
+# Unit tests
 # https://junit.org/junit4/
 junit = "4.13.2"
-mockk = "1.13.10"
+
 # Instrumented tests
-# https://developer.android.com/jetpack/androidx/releases/test
-test = "1.3.0"
 testrunner = "1.7.0"
-extjunit = "1.2.1"
+extjunit = "1.3.0"
 
 [libraries]
 androidx-sqlite = { module = "androidx.sqlite:sqlite", version.ref = "sqlite" }
@@ -80,8 +80,8 @@ material = { group = "com.google.android.material", name = "material", version.r
 coil = { group = "io.coil-kt.coil3", name = "coil", version.ref = "coil" }
 coil-network = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
+re2j = { group = "com.google.re2j", name = "re2j", version.ref = "re2j" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
-mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "testrunner" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "extjunit" }
 
